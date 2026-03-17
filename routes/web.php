@@ -12,6 +12,8 @@ use App\Http\Controllers\WalletController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AIAssistantController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\CurrencyController;
 
 Route::get('/', function () {
     return Auth::check()
@@ -44,6 +46,12 @@ Route::middleware('auth')->group(function () {
 
     // Dashboard 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Search toàn hệ thống
+    Route::get('/search', [SearchController::class, 'index'])->name('search');
+
+    // Quy đổi tỷ giá tiền tệ 
+    Route::get('/currency', [CurrencyController::class, 'index'])->name('currency.index');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');

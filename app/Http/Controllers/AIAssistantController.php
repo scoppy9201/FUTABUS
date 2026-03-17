@@ -7,10 +7,9 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Transaction;
 use App\Models\Category;
 use App\Models\Wallet;
-use App\Models\AiChatHistory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Services\GeminiService; // Dịch vụ gọi API Gemini
+use App\Services\GeminiService;
 
 class AIAssistantController extends Controller
 {
@@ -18,112 +17,96 @@ class AIAssistantController extends Controller
 
     public function __construct(GeminiService $gemini)
     {
-        // Inject GeminiService từ container Laravel
         $this->gemini = $gemini;
     }
 
-    /**
-     * Hiển thị trang giao diện 
-     */
     public function index()
     {
         return view('ai-assistant.index');
     }
 
-    /**
-     * Xử lý tin nhắn người dùng gửi lên từ frontend 
-     */
-     public function chat(Request $request)
+    public function chat(Request $request)
     {
         $request->validate([
-            'message' => 'required|string|max:1000'
+            'message' => 'required|string|max:2000'
         ]);
 
-        $userMessage = $request->input('message');
-        $userId = Auth::id();
+        $userMessage = trim($request->input('message'));
+        $userId      = Auth::id();
+        $userName    = Auth::user()->name;
 
         try {
-            // 1. Lấy dữ liệu tài chính
+            // 1. Lấy dữ liệu tài chính realtime
             $financialData = $this->getUserFinancialData($userId);
 
-            // 2. Lấy lịch sử chat 
-            $history = DB::table('ai_chat_history')
+            // 2. Lấy lịch sử chat gần nhất (10 lượt = 20 message)
+            $rawHistory = DB::table('ai_chat_history')
                 ->where('user_id', $userId)
                 ->orderBy('created_at', 'desc')
-                ->limit(5)
+                ->limit(10)
                 ->get()
                 ->reverse()
-                ->map(function ($item) {
-                    return [
-                        ['role' => 'user', 'parts' => [['text' => $item->user_message]]],
-                        ['role' => 'model', 'parts' => [['text' => $item->ai_response]]]
-                    ];
-                })
-                ->flatten(1)
-                ->toArray();
+                ->values();
 
-            // 3. Tạo system prompt
-            $systemPrompt = $this->buildSystemPrompt($financialData);
+            $history = [];
+            foreach ($rawHistory as $item) {
+                $history[] = ['role' => 'user',  'parts' => [['text' => $item->user_message]]];
+                $history[] = ['role' => 'model', 'parts' => [['text' => $item->ai_response]]];
+            }
 
-            // 4. GỘP system prompt VÀO user message
-            $combinedMessage = $systemPrompt . "\n\nCâu hỏi của người dùng: " . $userMessage;
+            // 3. Build system prompt
+            $systemPrompt = $this->buildSystemPrompt($financialData, $userName);
 
-            // 5. Build contents (chỉ có 1 user message cuối)
-           $contents = array_merge(
-            [
-                ['role' => 'user', 'parts' => [['text' => $systemPrompt]]],
-                ['role' => 'model', 'parts' => [['text' => 'Tôi đã hiểu thông tin tài chính của bạn. Hãy hỏi tôi bất cứ điều gì!']]]
-            ],
-            $history,
-            [['role' => 'user', 'parts' => [['text' => $userMessage]]]]
-        );
+            // 4. Build contents — system prompt chỉ gửi 1 lần ở đầu
+            $contents = array_merge(
+                [
+                    ['role' => 'user',  'parts' => [['text' => $systemPrompt]]],
+                    ['role' => 'model', 'parts' => [['text' => 'Đã nắm rõ thông tin tài chính của ' . $userName . '. Sẵn sàng tư vấn!']]],
+                ],
+                $history,
+                [
+                    ['role' => 'user', 'parts' => [['text' => $userMessage]]]
+                ]
+            );
 
-            // 6. Gọi Gemini API
+            // 5. Gọi Gemini
             $response = $this->gemini->generateContent([
-                'model' => 'models/gemini-2.5-flash',
+                'model'    => 'models/gemini-2.5-flash',
                 'contents' => $contents,
                 'generationConfig' => [
-                    'maxOutputTokens' => 500,
-                    'temperature' => 0.7,
-                    'topP' => 0.9,
-                    'topK' => 40,
+                    'maxOutputTokens' => 700,
+                    'temperature'     => 0.75,
+                    'topP'            => 0.9,
+                    'topK'            => 40,
                 ],
                 'safetySettings' => [
-                    [
-                'category' => 'HARM_CATEGORY_HARASSMENT',
-                        'threshold' => 'BLOCK_NONE'
-                    ],
-                    [
-                        'category' => 'HARM_CATEGORY_HATE_SPEECH',
-                        'threshold' => 'BLOCK_NONE'
-                    ],
-                ]
+                    ['category' => 'HARM_CATEGORY_HARASSMENT',  'threshold' => 'BLOCK_NONE'],
+                    ['category' => 'HARM_CATEGORY_HATE_SPEECH', 'threshold' => 'BLOCK_NONE'],
+                ],
             ]);
 
-            // 7. Extract response
-            $aiResponse = $response['candidates'][0]['content']['parts'][0]['text'] 
-                ?? 'Xin lỗi, tôi không thể tạo phản hồi lúc này.';
+            $aiResponse = $response['candidates'][0]['content']['parts'][0]['text']
+                ?? 'Xin lỗi, tôi không thể trả lời lúc này. Vui lòng thử lại.';
 
-            // 8. Lưu lịch sử chat (chỉ lưu user message gốc, không lưu system prompt)
+            // 6. Format response đẹp
+            $aiResponse = $this->formatResponse($aiResponse);
+
+            // 7. Lưu lịch sử
             DB::table('ai_chat_history')->insert([
-                'user_id' => $userId,
-                'user_message' => $userMessage, // Chỉ lưu message gốc
-                'ai_response' => $aiResponse,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'user_id'      => $userId,
+                'user_message' => $userMessage,
+                'ai_response'  => $aiResponse,
+                'created_at'   => now(),
+                'updated_at'   => now(),
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => $aiResponse
-            ]);
+            return response()->json(['success' => true, 'message' => $aiResponse]);
 
         } catch (\Exception $e) {
             Log::error('AI Chat Error', [
                 'user_id' => $userId,
                 'message' => $userMessage,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'error'   => $e->getMessage(),
             ]);
 
             return response()->json([
@@ -134,50 +117,31 @@ class AIAssistantController extends Controller
         }
     }
 
-    /**
-     * Xóa toàn bộ lịch sử chat của user hiện tại
-     */
     public function clearHistory()
     {
-        $userId = Auth::id();
-        DB::table('ai_chat_history')->where('user_id', $userId)->delete();
+        DB::table('ai_chat_history')->where('user_id', Auth::id())->delete();
         return response()->json(['success' => true]);
     }
-
-    /**
-     * Lấy toàn bộ dữ liệu tài chính để đưa vào prompt
-     */
-    private function getUserFinancialData($userId)
+    
+    // FINANCIAL DATA
+    private function getUserFinancialData($userId): array
     {
-        $totalIncome = Transaction::where('user_id', $userId)
-            ->where('loai_giao_dich', 'THU')
+        // Tổng toàn thời gian
+        $totalIncome  = Transaction::where('user_id', $userId)->where('loai_giao_dich', 'THU')->sum('so_tien');
+        $totalExpense = Transaction::where('user_id', $userId)->where('loai_giao_dich', 'CHI')->sum('so_tien');
+
+        // Tháng này
+        $monthIncome  = Transaction::where('user_id', $userId)->where('loai_giao_dich', 'THU')
+            ->whereBetween('ngay_giao_dich', [now()->startOfMonth(), now()])->sum('so_tien');
+        $monthExpense = Transaction::where('user_id', $userId)->where('loai_giao_dich', 'CHI')
+            ->whereBetween('ngay_giao_dich', [now()->startOfMonth(), now()])->sum('so_tien');
+
+        // Tháng trước
+        $lastMonthExpense = Transaction::where('user_id', $userId)->where('loai_giao_dich', 'CHI')
+            ->whereBetween('ngay_giao_dich', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()])
             ->sum('so_tien');
 
-        $totalExpense = Transaction::where('user_id', $userId)
-            ->where('loai_giao_dich', 'CHI')
-            ->sum('so_tien');
-
-        $balance = $totalIncome - $totalExpense;
-
-        $categories = Category::where('user_id', $userId)
-            ->select('id', 'ten_danh_muc', 'bieu_tuong', 'loai_danh_muc')
-            ->get();
-
-        $wallets = Wallet::where('user_id', $userId)
-            ->select('id', 'ten_ngan_sach', 'so_du', 'ngan_sach_goc', 'category_id')
-            ->get()
-            ->map(function ($wallet) use ($userId) {
-                $spent = Transaction::where('user_id', $userId)
-                    ->where('loai_giao_dich', 'CHI')
-                    ->where('category_id', $wallet->category_id)
-                    ->sum('so_tien');
-$wallet->spent_percentage = $wallet->ngan_sach_goc > 0 
-                    ? round(($spent / $wallet->ngan_sach_goc) * 100, 1) 
-                    : 0;
-
-                return $wallet;
-            });
-
+        // Chi theo danh mục
         $categoryExpenses = DB::table('transactions')
             ->join('categories', 'transactions.category_id', '=', 'categories.id')
             ->where('transactions.user_id', $userId)
@@ -187,265 +151,223 @@ $wallet->spent_percentage = $wallet->ngan_sach_goc > 0
             ->orderByDesc('total')
             ->get();
 
-        $transactions = Transaction::where('user_id', $userId)
+        // Ngân sách
+        $wallets = Wallet::where('user_id', $userId)->get()->map(function ($w) use ($userId) {
+            $spent = Transaction::where('user_id', $userId)
+                ->where('loai_giao_dich', 'CHI')
+                ->where('category_id', $w->category_id)
+                ->sum('so_tien');
+            $w->da_chi          = $spent;
+            $w->spent_percentage = $w->ngan_sach_goc > 0 ? round(($spent / $w->ngan_sach_goc) * 100, 1) : 0;
+            return $w;
+        });
+
+        // 10 giao dịch gần nhất
+        $recentTransactions = Transaction::where('user_id', $userId)
             ->with('category')
             ->orderByDesc('ngay_giao_dich')
             ->limit(10)
             ->get();
 
-        $paymentMethods = DB::table('transactions')
-            ->where('user_id', $userId)
-            ->where('loai_giao_dich', 'CHI')
-            ->selectRaw('phuong_thuc_thanh_toan, SUM(so_tien) as total')
-            ->groupBy('phuong_thuc_thanh_toan')
-            ->get();
-
-        return [
-            'total_income'      => $totalIncome,
-            'total_expense'     => $totalExpense,
-            'balance'           => $balance,
-            'categories'        => $categories,
-            'wallets'           => $wallets,
-            'category_expenses' => $categoryExpenses,
-            'transactions'      => $transactions,
-            'payment_methods'   => $paymentMethods
-        ];
+        return compact(
+            'totalIncome', 'totalExpense',
+            'monthIncome', 'monthExpense', 'lastMonthExpense',
+            'categoryExpenses', 'wallets', 'recentTransactions'
+        );
     }
 
-    /**
-     * Tạo system prompt chi tiết gửi cho Gemini
-     */
-    private function buildSystemPrompt($data)
+    // SYSTEM PROMPT
+    private function buildSystemPrompt(array $d, string $userName): string
     {
-        $prompt = "Bạn là trợ lý tài chính thông minh của ứng dụng Monexa, chuyên tư vấn về quản lý chi tiêu cá nhân. ";
-        $prompt .= "Hãy trả lời bằng tiếng Việt một cách thân thiện, súc tích và chuyên nghiệp. Chỉ trả lời các câu hỏi liên quan đến quản lý tài chính cá nhân dựa trên dữ liệu dưới đây. Nếu câu hỏi không liên quan, trả lời ngắn gọn: 'Xin lỗi, tôi chỉ hỗ trợ tư vấn về tài chính cá nhân trong ứng dụng Monexa.'\n\n";
-
-        $prompt .= "THÔNG TIN TÀI CHÍNH NGƯỜI DÙNG:\n";
-        $prompt .= "- Tổng thu nhập: " . number_format($data['total_income']) . " VNĐ\n";
-        $prompt .= "- Tổng chi tiêu: " . number_format($data['total_expense']) . " VNĐ\n";
-        $prompt .= "- Số dư hiện tại: " . number_format($data['balance']) . " VNĐ\n";
-
-        $savingRate = $data['total_income'] > 0 
-            ? (($data['total_income'] - $data['total_expense']) / $data['total_income'] * 100) 
+        $balance      = $d['totalIncome'] - $d['totalExpense'];
+        $savingRate   = $d['monthIncome'] > 0
+            ? round(($d['monthIncome'] - $d['monthExpense']) / $d['monthIncome'] * 100, 1)
             : 0;
-        $prompt .= "- Tỷ lệ tiết kiệm: " . number_format($savingRate, 1) . "%\n\n";
+        $monthTrend   = $d['lastMonthExpense'] > 0
+            ? round(($d['monthExpense'] - $d['lastMonthExpense']) / $d['lastMonthExpense'] * 100, 1)
+            : 0;
+        $trendText    = $monthTrend > 0 ? "tăng {$monthTrend}%" : "giảm " . abs($monthTrend) . "%";
 
-        if ($data['categories']->count() > 0) {
-            $prompt .= "DANH MỤC:\n";
-            foreach ($data['categories'] as $cat) {
-                $prompt .= "- {$cat->ten_danh_muc} ({$cat->loai_danh_muc})\n";
-}
-            $prompt .= "\n";
-        }
+        $prompt  = "=== VAI TRÒ ===\n";
+        $prompt .= "Bạn là Monexa AI — trợ lý tài chính cá nhân thông minh của ứng dụng Monexa.\n";
+        $prompt .= "Người dùng: {$userName}. Hãy gọi họ là '{$userName}' hoặc 'bạn'.\n";
+        $prompt .= "Ngôn ngữ: Tiếng Việt. Giọng điệu: thân thiện, chuyên nghiệp, thực tế.\n\n";
 
-        if ($data['wallets']->count() > 0) {
-            $prompt .= "NGÂN SÁCH:\n";
-            foreach ($data['wallets'] as $wallet) {
-                $prompt .= "- {$wallet->ten_ngan_sach}: Số dư " . number_format($wallet->so_du) . " VNĐ, Ngân sách gốc " . number_format($wallet->ngan_sach_goc) . " VNĐ, Đã chi {$wallet->spent_percentage}%\n";
+        $prompt .= "=== QUY TẮC TRẢ LỜI ===\n";
+        $prompt .= "1. Dùng số liệu thực tế từ dữ liệu bên dưới khi trả lời.\n";
+        $prompt .= "2. Trả lời ngắn gọn, súc tích. Tối đa 5-7 dòng trừ khi được yêu cầu phân tích sâu.\n";
+        $prompt .= "3. Dùng dấu gạch đầu dòng (-) để liệt kê, KHÔNG dùng markdown (**, ##).\n";
+        $prompt .= "4. Nếu câu hỏi không liên quan tài chính, trả lời: 'Mình chỉ hỗ trợ tư vấn tài chính cá nhân thôi nhé {$userName}! Bạn có muốn hỏi gì về chi tiêu không?'\n";
+        $prompt .= "5. Luôn kết thúc bằng 1 gợi ý hành động cụ thể nếu phù hợp.\n\n";
+
+        $prompt .= "=== DỮ LIỆU TÀI CHÍNH ===\n";
+        $prompt .= "Tổng quan:\n";
+        $prompt .= "- Thu nhập toàn bộ: " . number_format($d['totalIncome']) . " VND\n";
+        $prompt .= "- Chi tiêu toàn bộ: " . number_format($d['totalExpense']) . " VND\n";
+        $prompt .= "- Số dư hiện tại: " . number_format($balance) . " VND\n";
+        $prompt .= "- Thu nhập tháng này: " . number_format($d['monthIncome']) . " VND\n";
+        $prompt .= "- Chi tiêu tháng này: " . number_format($d['monthExpense']) . " VND (so tháng trước: {$trendText})\n";
+        $prompt .= "- Tỷ lệ tiết kiệm tháng này: {$savingRate}%";
+
+        if ($savingRate >= 20) $prompt .= " (Tốt - đạt chuẩn 50/30/20)\n";
+        elseif ($savingRate >= 10) $prompt .= " (Trung bình - cần cải thiện)\n";
+        elseif ($savingRate > 0) $prompt .= " (Thấp - cần chú ý)\n";
+        else $prompt .= " (Cảnh báo: chi vượt thu!)\n";
+
+        if ($d['categoryExpenses']->count() > 0) {
+            $prompt .= "\nChi tiêu theo danh mục (toàn bộ):\n";
+            foreach ($d['categoryExpenses'] as $cat) {
+                $pct = $d['totalExpense'] > 0 ? round($cat->total / $d['totalExpense'] * 100, 1) : 0;
+                $prompt .= "- {$cat->ten_danh_muc}: " . number_format($cat->total) . " VND ({$pct}%)\n";
             }
-            $prompt .= "\n";
         }
 
-        if ($data['category_expenses']->count() > 0) {
-            $prompt .= "CHI TIÊU THEO DANH MỤC:\n";
-            foreach ($data['category_expenses'] as $cat) {
-                $percentage = $data['total_expense'] > 0 ? ($cat->total / $data['total_expense'] * 100) : 0;
-                $prompt .= "- {$cat->ten_danh_muc}: " . number_format($cat->total) . " VNĐ (" . number_format($percentage, 1) . "%)\n";
+        if ($d['wallets']->count() > 0) {
+            $prompt .= "\nNgân sách:\n";
+            foreach ($d['wallets'] as $w) {
+                $status = $w->spent_percentage >= 90 ? '[NGUY HIỂM]'
+                    : ($w->spent_percentage >= 70 ? '[CẢNH BÁO]' : '[ỔN ĐỊNH]');
+                $prompt .= "- {$w->ten_ngan_sach}: đã dùng {$w->spent_percentage}% "
+                    . "(" . number_format($w->da_chi) . "/" . number_format($w->ngan_sach_goc) . " VND) {$status}\n";
             }
-            $prompt .= "\n";
         }
 
-        if ($data['payment_methods']->count() > 0) {
-            $prompt .= "PHƯƠNG THỨC THANH TOÁN:\n";
-            foreach ($data['payment_methods'] as $method) {
-                $prompt .= "- {$method->phuong_thuc_thanh_toan}: " . number_format($method->total) . " VNĐ\n";
+        if ($d['recentTransactions']->count() > 0) {
+            $prompt .= "\n10 giao dịch gần nhất:\n";
+            foreach ($d['recentTransactions'] as $t) {
+                $type    = $t->loai_giao_dich == 'THU' ? 'Thu' : 'Chi';
+                $date    = \Carbon\Carbon::parse($t->ngay_giao_dich)->format('d/m/Y');
+                $cat     = $t->category ? $t->category->ten_danh_muc : 'Không rõ';
+                $note    = $t->ghi_chu ? " - {$t->ghi_chu}" : '';
+                $prompt .= "- {$date} | {$type} | " . number_format($t->so_tien) . " VND | {$cat}{$note}\n";
             }
-            $prompt .= "\n";
         }
 
-        if ($data['transactions']->count() > 0) {
-            $prompt .= "GIAO DỊCH GẦN ĐÂY:\n";
-            foreach ($data['transactions'] as $trans) {
-                $type = $trans->loai_giao_dich == 'THU' ? 'Thu' : 'Chi';
-                $date = \Carbon\Carbon::parse($trans->ngay_giao_dich)->format('d/m/Y');
-                $category = $trans->category ? $trans->category->ten_danh_muc : 'Không rõ';
-                $prompt .= "- {$date} | {$type} | " . number_format($trans->so_tien) . " VNĐ | {$category}";
-                if ($trans->ghi_chu) $prompt .= " ({$trans->ghi_chu})";
-                $prompt .= "\n";
-            }
-            $prompt .= "\n";
-        }
-
-        $prompt .= "NHIỆM VỤ: Phân tích dữ liệu, đưa lời khuyên cụ thể, trả lời chính xác, so sánh với quy tắc 50/30/20 nếu phù hợp.\n";
-        $prompt .= "LƯU Ý: Trả lời ngắn gọn, dùng số liệu, không emoji, không markdown.";
+        $prompt .= "\n=== QUY TẮC 50/30/20 ===\n";
+        $prompt .= "Nhu cầu thiết yếu: 50% thu nhập | Giải trí/cá nhân: 30% | Tiết kiệm/đầu tư: 20%\n";
+        $prompt .= "Dùng quy tắc này để đánh giá và so sánh khi người dùng hỏi về tiết kiệm hoặc phân bổ chi tiêu.\n";
 
         return $prompt;
     }
 
-    
-    public function analyze(Request $request)
-{
-    $userId = Auth::id();
-    $period = $request->input('period', 30);
+    // FORMAT RESPONSE
+    private function formatResponse(string $text): string
+    {
+        // Xóa markdown bold/italic/heading
+        $text = preg_replace('/\*\*(.*?)\*\*/', '$1', $text);
+        $text = preg_replace('/\*(.*?)\*/',     '$1', $text);
+        $text = preg_replace('/#{1,6}\s/',      '',   $text);
 
-    try {
-        $financialData = $this->getUserFinancialData($userId);
-        $systemPrompt = $this->buildSystemPrompt($financialData);
+        // Chuẩn hóa xuống dòng
+        $text = preg_replace('/\n{3,}/', "\n\n", $text);
 
-        $analysisPrompt = "Hãy phân tích tình hình tài chính của tôi trong {$period} ngày qua và đưa ra 3 lời khuyên cụ thể.";
-
-        $response = $this->gemini->generateContent([
-            'model' => 'models/gemini-2.5-flash',
-            'contents' => [
-                [
-                    'role' => 'user',
-                    'parts' => [
-                        ['text' => $systemPrompt . "\n\n" . $analysisPrompt]
-                    ]
-                ]
-            ],
-            'generationConfig' => [
-                'maxOutputTokens' => 800,
-                'temperature' => 0.7,
-            ],
-        ]);
-
-        $analysis = $response['candidates'][0]['content']['parts'][0]['text']
-            ?? 'Không nhận được phân tích từ Gemini.';
-
-        return response()->json([
-            'success' => true,
-            'analysis' => $analysis,
-        ]);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Không thể phân tích dữ liệu. (' . $e->getMessage() . ')'
-        ], 500);
+        return trim($text);
     }
-}
 
+    public function analyze(Request $request)
+    {
+        $userId = Auth::id();
+        $period = $request->input('period', 30);
+
+        try {
+            $data         = $this->getUserFinancialData($userId);
+            $systemPrompt = $this->buildSystemPrompt($data, Auth::user()->name);
+
+            $response = $this->gemini->generateContent([
+                'model'    => 'models/gemini-2.5-flash',
+                'contents' => [
+                    ['role' => 'user',  'parts' => [['text' => $systemPrompt]]],
+                    ['role' => 'model', 'parts' => [['text' => 'Đã nắm dữ liệu. Sẵn sàng phân tích!']]],
+                    ['role' => 'user',  'parts' => [['text' => "Phân tích chi tiêu {$period} ngày qua và đưa ra 3 lời khuyên cụ thể có số liệu."]]],
+                ],
+                'generationConfig' => ['maxOutputTokens' => 800, 'temperature' => 0.7],
+            ]);
+
+            $analysis = $response['candidates'][0]['content']['parts'][0]['text']
+                ?? 'Không nhận được phân tích.';
+
+            return response()->json(['success' => true, 'analysis' => $this->formatResponse($analysis)]);
+
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
 
     public function suggestions()
     {
-        $suggestions = [
-            'Phân tích chi tiêu của tôi tháng này',
-            'Tôi nên tiết kiệm như thế nào?',
-            'Danh mục nào tôi chi nhiều nhất?',
-            'Đưa ra kế hoạch tiết kiệm cho tôi',
-        ];
-
         return response()->json([
-            'suggestions' => $suggestions
+            'suggestions' => [
+                'Phân tích chi tiêu của tôi tháng này',
+                'Tôi nên tiết kiệm như thế nào?',
+                'Danh mục nào tôi chi nhiều nhất?',
+                'So sánh chi tiêu tháng này với tháng trước',
+                'Ngân sách nào đang cảnh báo?',
+            ]
         ]);
     }
 
     public function insights()
     {
         $userId = Auth::id();
-
         try {
-            $insights = [
-                'spending_trend' => $this->getSpendingTrend($userId),
-                'top_categories' => $this->getTopCategories($userId),
-                'unusual_spending' => $this->getUnusualSpending($userId),
-                'saving_rate' => $this->getSavingRate($userId)
-            ];
-
             return response()->json([
-                'success' => true,
-                'insights' => $insights
+                'success'  => true,
+                'insights' => [
+                    'spending_trend'    => $this->getSpendingTrend($userId),
+                    'top_categories'    => $this->getTopCategories($userId),
+                    'unusual_spending'  => $this->getUnusualSpending($userId),
+                    'saving_rate'       => $this->getSavingRate($userId),
+                ]
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Không thể lấy insights.'
-            ], 500);
+            return response()->json(['success' => false, 'message' => 'Không thể lấy insights.'], 500);
         }
     }
 
-    private function getSpendingTrend($userId)
+    private function getSpendingTrend($userId): array
     {
-        $currentMonth = Transaction::where('user_id', $userId)
-            ->where('loai_giao_dich', 'CHI')
-            ->whereBetween('ngay_giao_dich', [now()->startOfMonth(), now()])
-            ->sum('so_tien');
-
-        $lastMonth = Transaction::where('user_id', $userId)
-            ->where('loai_giao_dich', 'CHI')
+        $current  = Transaction::where('user_id', $userId)->where('loai_giao_dich', 'CHI')
+            ->whereBetween('ngay_giao_dich', [now()->startOfMonth(), now()])->sum('so_tien');
+        $last     = Transaction::where('user_id', $userId)->where('loai_giao_dich', 'CHI')
             ->whereBetween('ngay_giao_dich', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()])
             ->sum('so_tien');
+        $change   = $last > 0 ? round(($current - $last) / $last * 100, 1) : 0;
 
-        $change = $lastMonth > 0 ? (($currentMonth - $lastMonth) / $lastMonth * 100) : 0;
-
-        return [
-            'current_month' => $currentMonth,
-            'last_month' => $lastMonth,
-            'change_percentage' => round($change, 1),
-            'trend' => $change > 0 ? 'increase' : 'decrease'
-        ];
+        return ['current_month' => $current, 'last_month' => $last, 'change_percentage' => $change, 'trend' => $change > 0 ? 'increase' : 'decrease'];
     }
 
     private function getTopCategories($userId)
     {
-        // Sửa join để tránh ambiguous
         return DB::table('transactions')
             ->join('categories', 'transactions.category_id', '=', 'categories.id')
             ->where('transactions.user_id', $userId)
             ->where('transactions.loai_giao_dich', 'CHI')
             ->whereBetween('transactions.ngay_giao_dich', [now()->subDays(30), now()])
-->select(
-                'categories.ten_danh_muc',
-                'categories.bieu_tuong',
-                DB::raw('SUM(transactions.so_tien) as total'),
-                DB::raw('COUNT(*) as count')
-            )
+            ->select('categories.ten_danh_muc', 'categories.bieu_tuong', DB::raw('SUM(transactions.so_tien) as total'), DB::raw('COUNT(*) as count'))
             ->groupBy('categories.id', 'categories.ten_danh_muc', 'categories.bieu_tuong')
-            ->orderByDesc('total')
-            ->limit(3)
-            ->get();
+            ->orderByDesc('total')->limit(3)->get();
     }
 
     private function getUnusualSpending($userId)
     {
-        $avgSpending = Transaction::where('user_id', $userId)
-            ->where('loai_giao_dich', 'CHI')
-            ->whereBetween('ngay_giao_dich', [now()->subMonths(3), now()->subMonth()])
-            ->avg('so_tien');
+        $avg       = Transaction::where('user_id', $userId)->where('loai_giao_dich', 'CHI')
+            ->whereBetween('ngay_giao_dich', [now()->subMonths(3), now()->subMonth()])->avg('so_tien');
+        $threshold = ($avg ?? 0) * 1.5;
 
-        $threshold = $avgSpending * 1.5;
-
-        return Transaction::where('user_id', $userId)
-            ->where('loai_giao_dich', 'CHI')
+        return Transaction::where('user_id', $userId)->where('loai_giao_dich', 'CHI')
             ->whereBetween('ngay_giao_dich', [now()->startOfMonth(), now()])
-            ->where('so_tien', '>', $threshold)
-            ->with('category')
-            ->orderByDesc('so_tien')
-            ->limit(3)
-            ->get();
+            ->where('so_tien', '>', $threshold)->with('category')->orderByDesc('so_tien')->limit(3)->get();
     }
 
-    private function getSavingRate($userId)
+    private function getSavingRate($userId): array
     {
-        $income = Transaction::where('user_id', $userId)
-            ->where('loai_giao_dich', 'THU')
-            ->whereBetween('ngay_giao_dich', [now()->startOfMonth(), now()])
-            ->sum('so_tien');
+        $income  = Transaction::where('user_id', $userId)->where('loai_giao_dich', 'THU')
+            ->whereBetween('ngay_giao_dich', [now()->startOfMonth(), now()])->sum('so_tien');
+        $expense = Transaction::where('user_id', $userId)->where('loai_giao_dich', 'CHI')
+            ->whereBetween('ngay_giao_dich', [now()->startOfMonth(), now()])->sum('so_tien');
+        $rate    = $income > 0 ? round(($income - $expense) / $income * 100, 1) : 0;
 
-        $expense = Transaction::where('user_id', $userId)
-            ->where('loai_giao_dich', 'CHI')
-            ->whereBetween('ngay_giao_dich', [now()->startOfMonth(), now()])
-            ->sum('so_tien');
-
-        $savingRate = $income > 0 ? (($income - $expense) / $income * 100) : 0;
-
-        return [
-            'income' => $income,
-            'expense' => $expense,
-            'saved' => $income - $expense,
-            'saving_rate' => round($savingRate, 1),
-            'status' => $savingRate >= 20 ? 'good' : ($savingRate >= 10 ? 'fair' : 'poor')
-        ];
+        return ['income' => $income, 'expense' => $expense, 'saved' => $income - $expense, 'saving_rate' => $rate,
+            'status' => $rate >= 20 ? 'good' : ($rate >= 10 ? 'fair' : 'poor')];
     }
 }

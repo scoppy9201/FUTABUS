@@ -163,7 +163,6 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
-            filter: brightness(0) invert(1);
         }
 
         .brand-name {
@@ -789,6 +788,532 @@ content: '';
                 grid-template-columns: 1fr;
             }
         }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .sr-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            text-decoration: none;
+            color: #1f2937;
+            transition: background .15s;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .sr-item:last-child { border-bottom: none; }
+        .sr-item:hover { background: #f8f9fd; }
+
+        .sr-dot {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; flex-shrink: 0;
+        }
+        .sr-dot.income  { background: #d1fae5; }
+        .sr-dot.expense { background: #fee2e2; }
+        .sr-dot.category{ background: #ede9fe; }
+        .sr-dot.wallet  { background: #dbeafe; }
+
+        .sr-label { font-size: 14px; font-weight: 600; line-height: 1.3; }
+        .sr-sub   { font-size: 12px; color: #9ca3af; margin-top: 1px; }
+
+        .sr-empty {
+            padding: 24px;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .sr-header {
+            padding: 8px 16px 6px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #9ca3af;
+            background: #fafafa;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        body.dark #searchDropdown {
+            background: #1a1f29;
+            border-color: rgba(255,255,255,0.08);
+        }
+        body.dark .sr-item { color: #e5e7eb; border-color: rgba(255,255,255,0.05); }
+        body.dark .sr-item:hover { background: #212736; }
+        body.dark .sr-header { background: #151920; color: #6b7280; border-color: rgba(255,255,255,0.05); }
+
+        .ai-bubble {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 9999;
+        }
+
+        .ai-bubble-btn {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 28px rgba(74,144,226,0.45);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .ai-bubble-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 36px rgba(74,144,226,0.55);
+        }
+
+        .ai-bubble-btn img {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+            transition: all 0.3s ease;
+        }
+
+        .ai-bubble-btn .close-icon { display: none; }
+        .ai-bubble-btn.open .chat-icon { display: none; }
+        .ai-bubble-btn.open .close-icon { display: block; }
+
+        .ai-bubble-badge {
+            position: absolute;
+            top: -3px;
+            right: -3px;
+            width: 18px;
+            height: 18px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid white;
+            display: none;
+        }
+
+        .ai-bubble-badge.show { display: block; }
+
+        .ai-chat-box {
+            position: absolute;
+            bottom: 72px;
+            right: 0;
+            width: 420px;
+            height: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.06);
+            transform: scale(0.85) translateY(20px);
+            transform-origin: bottom right;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .ai-chat-box.open {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        body.dark .ai-chat-box {
+            background: #1a1f29;
+            border-color: rgba(255,255,255,0.08);
+        }
+
+        /* Chat Header */
+        .acb-header {
+            padding: 16px 20px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .acb-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: rgba(255,255,255,1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .acb-avatar img {
+            width: 22px;
+            height: 22px;
+            object-fit: contain;
+        }
+
+        .acb-info { flex: 1; }
+
+        .acb-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: white;
+            line-height: 1.3;
+        }
+
+        .acb-status {
+            font-size: 12px;
+            color: rgba(255,255,255,0.8);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 1px;
+        }
+
+        .acb-status::before {
+            content: '';
+            width: 7px;
+            height: 7px;
+            background: #4ade80;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        .acb-clear {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            border-radius: 8px;
+            padding: 6px 10px;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .acb-clear:hover { background: rgba(255,255,255,0.25); }
+
+        /* Messages */
+        .acb-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #f8fafc;
+        }
+
+        body.dark .acb-messages { background: #0f1217; }
+
+        .acb-messages::-webkit-scrollbar { width: 4px; }
+        .acb-messages::-webkit-scrollbar-track { background: transparent; }
+        .acb-messages::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+
+        .acb-msg {
+            display: flex;
+            gap: 8px;
+            animation: msgIn 0.25s ease;
+        }
+
+        @keyframes msgIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .acb-msg.user { flex-direction: row-reverse; }
+
+        .acb-msg-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
+            margin-top: 2px;
+        }
+
+        .acb-msg.ai   .acb-msg-avatar { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+        .acb-msg.user .acb-msg-avatar { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); }
+
+        .acb-msg-bubble {
+            max-width: 75%;
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 13.5px;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .acb-msg.ai   .acb-msg-bubble {
+            background: white;
+            color: #1f2937;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+        }
+
+        .acb-msg.user .acb-msg-bubble {
+            background: var(--primary);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        body.dark .acb-msg.ai .acb-msg-bubble {
+            background: #242938;
+            color: #e5e7eb;
+        }
+
+        .acb-typing {
+            display: flex;
+            gap: 5px;
+            padding: 4px 2px;
+            align-items: center;
+        }
+
+        .acb-typing span {
+            width: 7px;
+            height: 7px;
+            background: #9ca3af;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .acb-typing span:nth-child(2) { animation-delay: 0.2s; }
+        .acb-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 100% { transform: translateY(0); }
+            50%       { transform: translateY(-5px); }
+        }
+
+        /* Suggestions */
+        .acb-suggestions {
+            padding: 10px 16px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            flex-shrink: 0;
+            background: #f8fafc;
+        }
+
+        body.dark .acb-suggestions { background: #0f1217; }
+
+        .acb-chip {
+            padding: 6px 12px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .acb-chip:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        body.dark .acb-chip {
+            background: #242938;
+            border-color: rgba(255,255,255,0.1);
+            color: #9ca3af;
+        }
+
+        /* Input */
+        .acb-input-wrap {
+            padding: 12px 16px;
+            border-top: 1px solid #f0f0f0;
+            background: white;
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            flex-shrink: 0;
+        }
+
+        body.dark .acb-input-wrap {
+            background: #1a1f29;
+            border-color: rgba(255,255,255,0.08);
+        }
+
+        .acb-input {
+            flex: 1;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 13.5px;
+            font-family: inherit;
+            resize: none;
+            min-height: 42px;
+            max-height: 100px;
+            line-height: 1.5;
+            outline: none;
+            transition: border-color 0.2s;
+            background: #f8fafc;
+            color: #1f2937;
+            font-weight: 500;
+        }
+
+        .acb-input:focus {
+            border-color: var(--primary);
+            background: white;
+        }
+
+        body.dark .acb-input {
+            background: #242938;
+            border-color: rgba(255,255,255,0.1);
+            color: #e5e7eb;
+        }
+
+        body.dark .acb-input:focus {
+            border-color: var(--primary);
+            background: #1a1f29;
+        }
+
+        .acb-send {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .acb-send:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(74,144,226,0.35);
+        }
+
+        .acb-send:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+        .acb-send img {
+            width: 18px;
+            height: 18px;
+            object-fit: contain;
+        }
+
+        /* Welcome state inside bubble */
+        .acb-welcome {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 20px;
+            text-align: center;
+            gap: 8px;
+        }
+
+        .acb-welcome-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: white; /* đổi từ gradient xanh */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            box-shadow: 0 8px 24px rgba(74,144,226,0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .acb-welcome-icon img {
+            width: 38px;
+            height: 38px;
+            object-fit: contain;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50%       { transform: translateY(-8px); }
+        }
+
+        .acb-welcome h3 {
+            font-size: 17px;
+            font-weight: 800;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        body.dark .acb-welcome h3 { color: #e5e7eb; }
+
+        .acb-welcome p {
+            font-size: 13px;
+            color: #6b7280;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .acb-quick-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .acb-quick-card {
+            padding: 12px;
+            background: white;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        body.dark .acb-quick-card {
+            background: #242938;
+            border-color: rgba(255,255,255,0.1);
+            color: #e5e7eb;
+        }
+
+        .acb-quick-card:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74,144,226,0.15);
+        }
+
+        .acb-quick-card-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            background: rgba(74,144,226,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 6px;
+        }
+
+        .acb-quick-card-icon img {
+            width: 16px;
+            height: 16px;
+            object-fit: contain;
+        }
+
+        @media (max-width: 480px) {
+            .ai-chat-box { width: calc(100vw - 32px); right: -14px; }
+        }
     </style>
 </head>
 <body class="{{ cookie('theme', 'light') === 'dark' ? 'dark' : '' }}">
@@ -802,9 +1327,25 @@ content: '';
                 <span class="brand-name">Monexa</span>
             </div>
             
-            <div class="search-bar">
-                <img src="/images/search.png" alt="Search">
-                <input type="text" placeholder="Tìm kiếm giao dịch, danh mục...">
+            <div style="position:relative; flex:1; max-width:500px; margin:0 auto;">
+                <div class="search-bar" id="searchBar">
+                    <img src="/images/search.png" alt="Search">
+                    <input type="text" id="searchInput" placeholder="Tìm kiếm giao dịch, danh mục, ngân sách..." autocomplete="off">
+                    <span id="searchSpinner" style="display:none; width:16px; height:16px; border:2px solid #e5e7eb; border-top-color:var(--primary); border-radius:50%; animation:spin .6s linear infinite; flex-shrink:0;"></span>
+                </div>
+                <div id="searchDropdown" style="
+                    position:absolute;
+                    top:calc(100% + 8px);
+                    left:0;
+                    right:0;
+                    background:white;
+                    border-radius:16px;
+                    box-shadow:0 12px 40px rgba(0,0,0,0.15);
+                    border:1px solid rgba(0,0,0,0.06);
+                    overflow:hidden;
+                    z-index:9999;
+                    display:none;
+                "></div>
             </div>
         </div>
 
@@ -884,7 +1425,7 @@ content: '';
             <li class="nav-item">
                 <a href="{{ route('wallets.index') }}" class="nav-link {{ request()->routeIs('wallets.*') ? 'active' : '' }}">
                     <span class="nav-icon">
-                        <img src="{{ asset('images/wallet.png') }}" alt="Budget">
+                        <img src="{{ asset('images/asset-allocation.png') }}" alt="Budget">
                     </span>
                     <span class="nav-text">Ngân sách</span>
                 </a>
@@ -896,23 +1437,122 @@ content: '';
                     </span>
                     <span class="nav-text">Danh mục</span>
                 </a>
-            </li>     
+            </li> 
             <li class="nav-item">
-            <a href="{{ route('ai-assistant.index') }}" class="nav-link {{ request()->routeIs('ai-assistant.*') ? 'active' : '' }}">
-                <span class="nav-icon">
-                    <img src="/images/AI assistant.png" alt="AI Assistant">
+                <a href="#" class="nav-link">
+                    <span class="nav-icon">
+                        <img src="{{ asset('images/wallet.png') }}" alt="Ví">
                     </span>
-                    <span class="nav-text">Trợ lý AI</span>
-            </a>
+                    <span class="nav-text">Ví</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('currency.index') }}" class="nav-link {{ request()->routeIs('currency.*') ? 'active' : '' }}">
+                    <span class="nav-icon">
+                        <img src="{{ asset('images/exchange.png') }}" alt="Quy đổi tiền">
+                    </span>
+                    <span class="nav-text">Quy đổi tiền</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <span class="nav-icon">
+                        <img src="{{ asset('images/coworking.png') }}" alt="Hội nhóm">
+                    </span>
+                    <span class="nav-text">Hội nhóm</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <span class="nav-icon">
+                        <img src="{{ asset('images/settings.png') }}" alt="Cài đặt">
+                    </span>
+                    <span class="nav-text">Cài đặt</span>
+                </a>
+            </li>
         </li>
         </ul>
     </aside>
+
+    <!-- Bubble Button -->
+    <div class="ai-bubble" id="aiBubble">
+        <div class="ai-chat-box" id="aiChatBox">
+            <!-- Header -->
+            <div class="acb-header">
+                <div class="acb-avatar">
+                    <img src="{{ asset('images/AI assistant.png') }}" alt="AI">
+                </div>
+                <div class="acb-info">
+                    <div class="acb-name">Trợ lý AI Tài chính</div>
+                    <div class="acb-status">Đang hoạt động</div>
+                </div>
+                <button class="acb-clear" id="acbClear" onclick="clearAIChat()">Xóa chat</button>
+            </div>
+
+            <!-- Welcome (hiện khi chưa chat) -->
+            <div class="acb-welcome" id="acbWelcome">
+                <div class="acb-welcome-icon">
+                    <img src="{{ asset('images/AI assistant.png') }}" alt="AI">
+                </div>
+                <h3>Xin chào, {{ Auth::user()->name }}!</h3>
+                <p>Hỏi tôi bất cứ điều gì về tài chính</p>
+                <div class="acb-quick-grid">
+                    <div class="acb-quick-card" onclick="acbSend('Phân tích chi tiêu tháng này')">
+                        <div class="acb-quick-card-icon"><img src="{{ asset('images/chart.png') }}" alt=""></div>
+                        Phân tích chi tiêu
+                    </div>
+                    <div class="acb-quick-card" onclick="acbSend('Tôi nên tiết kiệm như thế nào?')">
+                        <div class="acb-quick-card-icon"><img src="{{ asset('images/saving.png') }}" alt=""></div>
+                        Gợi ý tiết kiệm
+                    </div>
+                    <div class="acb-quick-card" onclick="acbSend('Dự báo số dư cuối năm')">
+                        <div class="acb-quick-card-icon"><img src="{{ asset('images/target.png') }}" alt=""></div>
+                        Dự báo tài chính
+                    </div>
+                    <div class="acb-quick-card" onclick="acbSend('Danh mục nào tôi chi nhiều nhất?')">
+                        <div class="acb-quick-card-icon"><img src="{{ asset('images/statistics.png') }}" alt=""></div>
+                        Thống kê chi tiêu
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div class="acb-messages" id="acbMessages" style="display:none;"></div>
+
+            <!-- Chips -->
+            <div class="acb-suggestions" id="acbChips" style="display:none;">
+                <div class="acb-chip" onclick="acbSend('Phân tích chi tiêu tháng này')">Phân tích chi tiêu</div>
+                <div class="acb-chip" onclick="acbSend('Gợi ý tiết kiệm')">Tiết kiệm</div>
+                <div class="acb-chip" onclick="acbSend('Dự báo tài chính')">Dự báo</div>
+            </div>
+
+            <!-- Input -->
+            <div class="acb-input-wrap">
+                <textarea class="acb-input" id="acbInput" placeholder="Nhập tin nhắn..." rows="1"></textarea>
+                <button class="acb-send" id="acbSendBtn" disabled>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22 2L11 13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Bubble Toggle Button -->
+        <button class="ai-bubble-btn" id="aiBubbleBtn" onclick="toggleAIChat()">
+            <div class="ai-bubble-badge" id="aiBadge"></div>
+            <img src="{{ asset('images/AI assistant.png') }}" alt="AI" class="chat-icon">
+            <img src="{{ asset('images/close.png') }}" alt="Đóng" class="close-icon">
+        </button>
+    </div>
 
     <div class="main-content">
         <div class="content">
             @yield('content')
         </div>
     </div>
+
+    
 
     <script>
         const savedTheme = localStorage.getItem('theme');
@@ -933,6 +1573,206 @@ content: '';
         
         document.addEventListener('click', () => dropdown.classList.remove('show'));
         dropdown?.addEventListener('click', e => e.stopPropagation());
+
+        (function() {
+            const input    = document.getElementById('searchInput');
+            const dropdown = document.getElementById('searchDropdown');
+            const spinner  = document.getElementById('searchSpinner');
+            if (!input) return;
+
+            const icons = {
+                income:   '<img src="/images/profits.png" style="width:18px;height:18px;object-fit:contain;">',
+                expense:  '<img src="/images/budget.png" style="width:18px;height:18px;object-fit:contain;">',
+                category: '<img src="/images/category.png" style="width:18px;height:18px;object-fit:contain;">',
+                wallet:   '<img src="/images/wallet.png" style="width:18px;height:18px;object-fit:contain;">',
+            };
+
+            let timer;
+
+            function closeDropdown() {
+                dropdown.style.display = 'none';
+                dropdown.innerHTML = '';
+            }
+
+            input.addEventListener('input', function() {
+                clearTimeout(timer);
+                const q = this.value.trim();
+                if (q.length < 2) { closeDropdown(); spinner.style.display = 'none'; return; }
+
+                spinner.style.display = 'block';
+                timer = setTimeout(() => {
+                    fetch(`/search?q=${encodeURIComponent(q)}`, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        spinner.style.display = 'none';
+                        const results = data.results || [];
+                        if (results.length === 0) {
+                            dropdown.innerHTML = `<div class="sr-empty">Không tìm thấy kết quả nào cho "<strong>${q}</strong>"</div>`;
+                            dropdown.style.display = 'block';
+                            return;
+                        }
+
+                        const groups = {};
+                        results.forEach(r => {
+                            const g = r.type === 'transaction' ? 'Giao dịch' : r.type === 'category' ? 'Danh mục' : 'Ngân sách';
+                            if (!groups[g]) groups[g] = [];
+                            groups[g].push(r);
+                        });
+
+                        let html = '';
+                        for (const [group, items] of Object.entries(groups)) {
+                            html += `<div class="sr-header">${group}</div>`;
+                            items.forEach(item => {
+                                html += `<a href="${item.url}" class="sr-item">
+                                    <div class="sr-dot ${item.badge}">${icons[item.badge] || '•'}</div>
+                                    <div>
+                                        <div class="sr-label">${item.label}</div>
+                                        <div class="sr-sub">${item.sub}</div>
+                                    </div>
+                                </a>`;
+                            });
+                        }
+                        dropdown.innerHTML = html;
+                        dropdown.style.display = 'block';
+                    })
+                    .catch(() => { spinner.style.display = 'none'; });
+                }, 280);
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('#searchBar') && !e.target.closest('#searchDropdown')) {
+                    closeDropdown();
+                }
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeDropdown();
+            });
+        })();
+
+        (function() {
+            const btn       = document.getElementById('aiBubbleBtn');
+            const box       = document.getElementById('aiChatBox');
+            const welcome   = document.getElementById('acbWelcome');
+            const messages  = document.getElementById('acbMessages');
+            const chips     = document.getElementById('acbChips');
+            const input     = document.getElementById('acbInput');
+            const sendBtn   = document.getElementById('acbSendBtn');
+            const badge     = document.getElementById('aiBadge');
+
+            let isOpen      = false;
+            let chatStarted = false;
+            let hasUnread   = false;
+
+            window.toggleAIChat = function() {
+                isOpen = !isOpen;
+                box.classList.toggle('open', isOpen);
+                btn.classList.toggle('open', isOpen);
+                if (isOpen && hasUnread) {
+                    hasUnread = false;
+                    badge.classList.remove('show');
+                }
+            };
+
+            // Close when click outside
+            document.addEventListener('click', function(e) {
+                if (isOpen && !document.getElementById('aiBubble').contains(e.target)) {
+                    isOpen = false;
+                    box.classList.remove('open');
+                    btn.classList.remove('open');
+                }
+            });
+
+            input.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = this.scrollHeight + 'px';
+                sendBtn.disabled = !this.value.trim();
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (!sendBtn.disabled) doSend();
+                }
+            });
+
+            sendBtn.addEventListener('click', doSend);
+
+            function doSend() {
+                const text = input.value.trim();
+                if (!text) return;
+                input.value = '';
+                input.style.height = 'auto';
+                sendBtn.disabled = true;
+                window.acbSend(text);
+            }
+
+            window.acbSend = function(text) {
+                if (!chatStarted) {
+                    chatStarted = true;
+                    welcome.style.display = 'none';
+                    messages.style.display = 'flex';
+                    chips.style.display = 'flex';
+                }
+
+                appendMsg('user', text);
+
+                const thinkId = 'think-' + Date.now();
+                appendMsg('ai', '<div class="acb-typing"><span></span><span></span><span></span></div>', thinkId);
+
+                fetch('{{ route("ai-assistant.chat") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ message: text })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById(thinkId)?.remove();
+                    const reply = data.success ? data.message : 'Xin lỗi, có lỗi xảy ra. Thử lại nhé!';
+                    appendMsg('ai', reply);
+
+                    if (!isOpen) {
+                        hasUnread = true;
+                        badge.classList.add('show');
+                    }
+                })
+                .catch(() => {
+                    document.getElementById(thinkId)?.remove();
+                    appendMsg('ai', 'Không thể kết nối. Vui lòng thử lại sau.');
+                });
+            };
+
+            function appendMsg(sender, content, id = null) {
+                const div = document.createElement('div');
+                div.className = 'acb-msg ' + sender;
+                if (id) div.id = id;
+
+                const initials = sender === 'user'
+                    ? '{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}'
+                    : 'AI';
+
+                div.innerHTML = `
+                    <div class="acb-msg-avatar">${initials}</div>
+                    <div class="acb-msg-bubble">${content.replace(/\n/g, '<br>')}</div>
+                `;
+                messages.appendChild(div);
+                messages.scrollTop = messages.scrollHeight;
+            }
+
+            window.clearAIChat = function() {
+                chatStarted = false;
+                messages.innerHTML = '';
+                messages.style.display = 'none';
+                chips.style.display = 'none';
+                welcome.style.display = 'flex';
+            };
+        })();
 
     </script>
 </body>
