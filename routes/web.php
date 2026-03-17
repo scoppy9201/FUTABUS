@@ -11,11 +11,13 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AIAssistantController;
+use Illuminate\Support\Facades\Auth;
 
-// Trang chủ (chưa đăng nhập)
 Route::get('/', function () {
-    return view('welcome');
-})->name('welcome');
+    return Auth::check()
+        ? redirect()->route('dashboard')
+        : redirect()->route('login');
+});
 
 // Guest routes
 Route::middleware('guest')->group(function () {
