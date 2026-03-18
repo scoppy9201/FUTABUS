@@ -977,7 +977,7 @@
     <div class="page-header">
         <div class="page-title">
             <div class="page-icon">
-                <img src="{{ asset('images/wallet.png') }}" alt="Wallet">
+                <img src="{{ asset('images/asset-allocation.png') }}" alt="Wallet">
             </div>
             <span>Quản lý ngân sách</span>
         </div>

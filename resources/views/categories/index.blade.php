@@ -1635,7 +1635,7 @@
     <div class="page-header">
         <div class="page-title">
             <div class="page-icon">
-                <img src="{{ asset('images/folder.png') }}" alt="Folder">
+                <img src="{{ asset('images/category.png') }}" alt="Folder">
             </div>
             <span>Quản lý danh mục</span>
         </div>
