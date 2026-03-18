@@ -21,6 +21,10 @@ class AIAssistantController extends Controller
     const INTENT_DELETE_TRANSACTION = 'DELETE_TRANSACTION';
     const INTENT_CREATE_CATEGORY    = 'CREATE_CATEGORY';
     const INTENT_UPDATE_WALLET      = 'UPDATE_WALLET';
+    const INTENT_UPDATE_TRANSACTION  = 'UPDATE_TRANSACTION';
+    const INTENT_DELETE_CATEGORY     = 'DELETE_CATEGORY';
+    const INTENT_CREATE_WALLET       = 'CREATE_WALLET';
+    const INTENT_DELETE_WALLET       = 'DELETE_WALLET';
 
     public function __construct(GeminiService $gemini)
     {
@@ -88,6 +92,10 @@ class AIAssistantController extends Controller
                 self::INTENT_DELETE_TRANSACTION => $this->handleDeleteTransaction($parsed, $userId, $userName),
                 self::INTENT_CREATE_CATEGORY    => $this->handleCreateCategory($parsed, $userId, $userName),
                 self::INTENT_UPDATE_WALLET      => $this->handleUpdateWallet($parsed, $userId, $userName),
+                self::INTENT_UPDATE_TRANSACTION  => $this->handleUpdateTransaction($parsed, $userId, $userName),
+                self::INTENT_DELETE_CATEGORY     => $this->handleDeleteCategory($parsed, $userId, $userName),
+                self::INTENT_CREATE_WALLET       => $this->handleCreateWallet($parsed, $userId, $userName),
+                self::INTENT_DELETE_WALLET       => $this->handleDeleteWallet($parsed, $userId, $userName),
                 default                         => $this->handleChat($parsed),
             };
 
@@ -146,6 +154,10 @@ class AIAssistantController extends Controller
             'DELETE_TRANSACTION' => $this->executeDeleteTransaction($data, $userId, $userName),
             'CREATE_CATEGORY'    => $this->executeCreateCategory($data, $userId, $userName),
             'UPDATE_WALLET'      => $this->executeUpdateWallet($data, $userId, $userName),
+            'UPDATE_TRANSACTION' => $this->executeUpdateTransaction($data, $userId, $userName),
+            'DELETE_CATEGORY'    => $this->executeDeleteCategory($data, $userId, $userName),
+            'CREATE_WALLET'      => $this->executeCreateWallet($data, $userId, $userName),
+            'DELETE_WALLET'      => $this->executeDeleteWallet($data, $userId, $userName),
             default              => ['success' => false, 'message' => 'Hành động không hợp lệ.'],
         };
 
@@ -549,58 +561,81 @@ class AIAssistantController extends Controller
         $today   = now()->format('Y-m-d');
 
         return <<<PROMPT
-=== VAI TRÒ ===
-Bạn là Monexa AI — trợ lý tài chính cá nhân của ứng dụng Monexa.
-Người dùng: {$userName}. Ngôn ngữ: Tiếng Việt. Thân thiện, chuyên nghiệp.
+    === VAI TRÒ ===
+    Bạn là Monexa AI — trợ lý tài chính cá nhân của ứng dụng Monexa.
+    Người dùng: {$userName}. Ngôn ngữ: Tiếng Việt. Thân thiện, chuyên nghiệp.
 
-=== NHIỆM VỤ QUAN TRỌNG ===
-Phân tích tin nhắn và trả về JSON theo đúng format bên dưới.
-KHÔNG trả về text thuần. CHỈ trả về JSON hợp lệ.
+    === NHIỆM VỤ QUAN TRỌNG ===
+    Phân tích tin nhắn và trả về JSON theo đúng format bên dưới.
+    KHÔNG trả về text thuần. CHỈ trả về JSON hợp lệ.
 
-=== CÁC INTENT ===
-1. CHAT — hội thoại thường, hỏi về tài chính, phân tích chi tiêu
-2. ADD_TRANSACTION — user muốn ghi thêm thu nhập hoặc chi tiêu
-   Dấu hiệu: "tôi vừa chi", "ghi giúp tôi", "thêm khoản", "hôm nay tôi mua", "tôi được nhận"
-3. DELETE_TRANSACTION — user muốn xoá giao dịch
-   Dấu hiệu: "xoá giao dịch", "huỷ khoản", "xoá cái vừa thêm"
-4. CREATE_CATEGORY — user muốn tạo danh mục mới
-   Dấu hiệu: "tạo danh mục", "thêm danh mục", "tôi muốn có mục mới"
-5. UPDATE_WALLET — user muốn sửa ngân sách
-   Dấu hiệu: "đổi ngân sách", "cập nhật hạn mức", "sửa budget"
+    === CÁC INTENT ===
+    1. CHAT — hội thoại thường, hỏi về tài chính, phân tích chi tiêu
+    2. ADD_TRANSACTION — user muốn ghi thêm thu nhập hoặc chi tiêu
+    Dấu hiệu: "tôi vừa chi", "ghi giúp tôi", "thêm khoản", "hôm nay tôi mua", "tôi được nhận"
+    3. DELETE_TRANSACTION — user muốn xoá giao dịch
+    Dấu hiệu: "xoá giao dịch", "huỷ khoản", "xoá cái vừa thêm"
+    4. CREATE_CATEGORY — user muốn tạo danh mục mới
+    Dấu hiệu: "tạo danh mục", "thêm danh mục", "tôi muốn có mục mới"
+    5. UPDATE_WALLET — user muốn sửa ngân sách
+    Dấu hiệu: "đổi ngân sách", "cập nhật hạn mức", "sửa budget"
+    6. UPDATE_TRANSACTION — user muốn sửa giao dịch
+    Dấu hiệu: "sửa giao dịch", "đổi số tiền", "cập nhật khoản", "sửa khoản vừa thêm"
+    7. DELETE_CATEGORY — user muốn xóa danh mục
+    Dấu hiệu: "xóa danh mục", "bỏ danh mục", "xóa mục"
+    8. CREATE_WALLET — user muốn tạo ngân sách mới
+    Dấu hiệu: "tạo ngân sách", "thêm ví", "tạo budget mới", "tạo quỹ"
+    9. DELETE_WALLET — user muốn xóa ngân sách
+    Dấu hiệu: "xóa ngân sách", "bỏ ví", "xóa budget", "xóa quỹ"
 
-=== FORMAT JSON ===
+    === FORMAT JSON ===
 
-CHAT:
-{"intent":"CHAT","message":"Nội dung trả lời"}
+    CHAT:
+    {"intent":"CHAT","message":"Nội dung trả lời"}
 
-ADD_TRANSACTION:
-{"intent":"ADD_TRANSACTION","data":{"so_tien":150000,"loai_giao_dich":"CHI","category_id":3,"ten_danh_muc":"Ăn uống","ngay_giao_dich":"{$today}","ghi_chu":"ăn trưa"}}
-Lưu ý: loai_giao_dich là "THU" hoặc "CHI", so_tien là số nguyên, category_id lấy từ danh sách bên dưới
+    ADD_TRANSACTION:
+    {"intent":"ADD_TRANSACTION","data":{"so_tien":150000,"loai_giao_dich":"CHI","category_id":3,"ten_danh_muc":"Ăn uống","ngay_giao_dich":"{$today}","ghi_chu":"ăn trưa"}}
+    Lưu ý: loai_giao_dich là "THU" hoặc "CHI", so_tien là số nguyên, category_id lấy từ danh sách bên dưới
 
-DELETE_TRANSACTION:
-{"intent":"DELETE_TRANSACTION","data":{"so_tien":150000,"category_name":"Ăn uống","ngay_giao_dich":"{$today}"}}
+    DELETE_TRANSACTION:
+    {"intent":"DELETE_TRANSACTION","data":{"so_tien":150000,"category_name":"Ăn uống","ngay_giao_dich":"{$today}"}}
 
-CREATE_CATEGORY:
-{"intent":"CREATE_CATEGORY","data":{"ten_danh_muc":"Thú cưng","loai_danh_muc":"CHI","bieu_tuong":"🐾","mo_ta":"Chi phí cho thú cưng"}}
-Lưu ý: loai_danh_muc là "THU" hoặc "CHI", bieu_tuong là emoji phù hợp
+    CREATE_CATEGORY:
+    {"intent":"CREATE_CATEGORY","data":{"ten_danh_muc":"Thú cưng","loai_danh_muc":"CHI","bieu_tuong":"🐾","mo_ta":"Chi phí cho thú cưng"}}
+    Lưu ý: loai_danh_muc là "THU" hoặc "CHI", bieu_tuong là emoji phù hợp
 
-UPDATE_WALLET:
-{"intent":"UPDATE_WALLET","data":{"ten_ngan_sach":"Ăn uống","ngan_sach_goc":3000000}}
+    UPDATE_WALLET:
+    {"intent":"UPDATE_WALLET","data":{"ten_ngan_sach":"Ăn uống","ngan_sach_goc":3000000}}
 
-=== DANH MỤC HIỆN CÓ ===
-{$catList}
+    UPDATE_TRANSACTION:
+    {"intent":"UPDATE_TRANSACTION","data":{"so_tien_cu":150000,"category_name":"Ăn uống","ngay_giao_dich":"{$today}","so_tien_moi":200000,"ghi_chu_moi":"ăn tối","category_name_moi":""}}
+    Lưu ý: so_tien_cu + category_name + ngay_giao_dich để tìm giao dịch, các trường _moi là giá trị muốn cập nhật, để trống nếu không sửa
 
-=== DỮ LIỆU TÀI CHÍNH ===
-- Số dư: {$balance} VND
-- Thu tháng này: {$d['monthIncome']} VND
-- Chi tháng này: {$d['monthExpense']} VND
-- Tỷ lệ tiết kiệm: {$savingRate}%
+    DELETE_CATEGORY:
+    {"intent":"DELETE_CATEGORY","data":{"ten_danh_muc":"Thú cưng"}}
+    Lưu ý: chỉ xóa được danh mục do user tạo, không xóa danh mục hệ thống
 
-=== QUY TẮC ===
-- intent CHAT: trả lời ngắn gọn, dùng dấu (-) để liệt kê, không dùng markdown (**, ##)
-- Không liên quan tài chính: {"intent":"CHAT","message":"Mình chỉ hỗ trợ tư vấn tài chính thôi nhé {$userName}!"}
-- Ngày hôm nay: {$today}
-PROMPT;
+    CREATE_WALLET:
+    {"intent":"CREATE_WALLET","data":{"ten_ngan_sach":"Du lịch","ngan_sach_goc":5000000,"ten_danh_muc":"Du lịch","mo_ta":"Quỹ đi chơi"}}
+    Lưu ý: ten_danh_muc để liên kết với danh mục có sẵn (không bắt buộc)
+
+    DELETE_WALLET:
+    {"intent":"DELETE_WALLET","data":{"ten_ngan_sach":"Du lịch"}}
+
+    === DANH MỤC HIỆN CÓ ===
+    {$catList}
+
+    === DỮ LIỆU TÀI CHÍNH ===
+    - Số dư: {$balance} VND
+    - Thu tháng này: {$d['monthIncome']} VND
+    - Chi tháng này: {$d['monthExpense']} VND
+    - Tỷ lệ tiết kiệm: {$savingRate}%
+
+    === QUY TẮC ===
+    - intent CHAT: trả lời ngắn gọn, dùng dấu (-) để liệt kê, không dùng markdown (**, ##)
+    - Không liên quan tài chính: {"intent":"CHAT","message":"Mình chỉ hỗ trợ tư vấn tài chính thôi nhé {$userName}!"}
+    - Ngày hôm nay: {$today}
+    PROMPT;
     }
 
     private function getUserFinancialData(int $userId): array
@@ -745,5 +780,308 @@ PROMPT;
             'saving_rate'  => $rate,
             'status'       => $rate >= 20 ? 'good' : ($rate >= 10 ? 'fair' : 'poor'),
         ];
+    }
+
+    // Cập nhật giao dịch 
+    private function handleUpdateTransaction(array $parsed, int $userId, string $userName): array
+    {
+        $data = $parsed['data'] ?? [];
+
+        // Tìm giao dịch cần sửa
+        $query = Transaction::where('user_id', $userId);
+        if (!empty($data['so_tien_cu']))      $query->where('so_tien', $data['so_tien_cu']);
+        if (!empty($data['category_name'])) {
+            $cat = Category::where('ten_danh_muc', 'like', '%' . $data['category_name'] . '%')->first();
+            if ($cat) $query->where('category_id', $cat->id);
+        }
+        if (!empty($data['ngay_giao_dich'])) $query->whereDate('ngay_giao_dich', $data['ngay_giao_dich']);
+
+        $transaction = $query->orderByDesc('ngay_giao_dich')->first();
+
+        if (!$transaction) {
+            return [
+                'success' => true,
+                'message' => "Mình không tìm thấy giao dịch phù hợp {$userName}. Bạn mô tả rõ hơn được không?",
+            ];
+        }
+
+        // Kiểm tra có thứ gì để sửa không
+        $missing = [];
+        if (empty($data['so_tien_moi']) && empty($data['ghi_chu_moi']) && empty($data['category_name_moi'])) {
+            $missing[] = 'thông tin muốn sửa (số tiền mới / ghi chú mới / danh mục mới)';
+        }
+        if (!empty($missing)) {
+            return [
+                'success'    => true,
+                'message'    => "Bạn muốn sửa giao dịch này thành gì {$userName}?\n- " . implode("\n- ", $missing),
+                'needs_info' => true,
+            ];
+        }
+
+        $cat  = $transaction->category?->ten_danh_muc ?? 'Không rõ';
+        $loai = $transaction->loai_giao_dich === 'THU' ? 'Thu' : 'Chi';
+        $ngay = Carbon::parse($transaction->ngay_giao_dich)->format('d/m/Y');
+
+        $confirmMsg = "Mình sẽ sửa giao dịch:\n"
+            . "- Hiện tại: {$loai} | " . number_format($transaction->so_tien) . " VND | {$cat} | {$ngay}\n"
+            . "- Thành: "
+            . (!empty($data['so_tien_moi'])      ? number_format($data['so_tien_moi']) . " VND " : number_format($transaction->so_tien) . " VND ")
+            . (!empty($data['category_name_moi']) ? "| {$data['category_name_moi']} "            : "| {$cat} ")
+            . (!empty($data['ghi_chu_moi'])       ? "| {$data['ghi_chu_moi']}"                   : '')
+            . "\n\nXác nhận sửa không {$userName}? (có/không)";
+
+        $this->savePendingAction($userId, 'UPDATE_TRANSACTION', [
+            'transaction_id'   => $transaction->id,
+            'so_tien_moi'      => $data['so_tien_moi']      ?? null,
+            'ghi_chu_moi'      => $data['ghi_chu_moi']      ?? null,
+            'category_name_moi'=> $data['category_name_moi'] ?? null,
+        ]);
+
+        return ['success' => true, 'message' => $confirmMsg, 'pending' => true];
+    }
+
+    private function executeUpdateTransaction(array $data, int $userId, string $userName): array
+    {
+        try {
+            $transaction = Transaction::where('user_id', $userId)->findOrFail($data['transaction_id']);
+
+            $updateFields = [];
+            if (!empty($data['so_tien_moi']))       $updateFields['so_tien'] = $data['so_tien_moi'];
+            if (!empty($data['ghi_chu_moi']))        $updateFields['ghi_chu'] = $data['ghi_chu_moi'];
+            if (!empty($data['category_name_moi'])) {
+                $cat = Category::where(function ($q) use ($userId) {
+                    $q->where('user_id', $userId)->orWhereNull('user_id');
+                })->where('ten_danh_muc', 'like', '%' . $data['category_name_moi'] . '%')->first();
+                if ($cat) $updateFields['category_id'] = $cat->id;
+            }
+
+            $transaction->update($updateFields);
+
+            // Recalculate wallet nếu có
+            $wallet = Wallet::where('user_id', $userId)
+                ->where('category_id', $transaction->category_id)
+                ->where('trang_thai', true)->first();
+            if ($wallet) $wallet->recalculateBalance();
+
+            return [
+                'success'     => true,
+                'message'     => "Đã sửa giao dịch thành công {$userName}! Bạn cần mình giúp gì thêm không?",
+                'action_done' => 'UPDATE_TRANSACTION',
+                'data'        => $transaction->fresh()->toArray(),
+            ];
+        } catch (\Exception $e) {
+            Log::error('executeUpdateTransaction error', ['error' => $e->getMessage()]);
+            return ['success' => false, 'message' => 'Không thể sửa giao dịch. Vui lòng thử lại.'];
+        }
+    }
+
+    // Xóa danh mục hệ thống 
+    private function handleDeleteCategory(array $parsed, int $userId, string $userName): array
+    {
+        $data = $parsed['data'] ?? [];
+
+        if (empty($data['ten_danh_muc']) && empty($data['category_id'])) {
+            return [
+                'success'    => true,
+                'message'    => "Bạn muốn xóa danh mục nào {$userName}? Cho mình biết tên danh mục nhé.",
+                'needs_info' => true,
+            ];
+        }
+
+        // Tìm category — chỉ cho xóa category do user tạo (user_id không null)
+        $query = Category::where('user_id', $userId);
+        if (!empty($data['category_id']))   $query->where('id', $data['category_id']);
+        if (!empty($data['ten_danh_muc']))  $query->where('ten_danh_muc', 'like', '%' . $data['ten_danh_muc'] . '%');
+
+        $category = $query->first();
+
+        if (!$category) {
+            return [
+                'success' => true,
+                'message' => "Mình không tìm thấy danh mục \"{$data['ten_danh_muc']}\" do bạn tạo {$userName}. "
+                        . "Lưu ý: danh mục mặc định của hệ thống không thể xóa nhé.",
+            ];
+        }
+
+        // Kiểm tra có giao dịch đang dùng không
+        $txCount = Transaction::where('user_id', $userId)->where('category_id', $category->id)->count();
+        $warning = $txCount > 0
+            ? "\n⚠️ Danh mục này đang có {$txCount} giao dịch liên quan. Giao dịch sẽ mất liên kết danh mục sau khi xóa."
+            : '';
+
+        $loai = $category->loai_danh_muc === 'THU' ? 'Thu nhập' : 'Chi tiêu';
+
+        $confirmMsg = "Mình sẽ xóa danh mục:\n"
+            . "- Tên: {$category->ten_danh_muc} {$category->bieu_tuong}\n"
+            . "- Loại: {$loai}\n"
+            . $warning
+            . "\n\nXác nhận XÓA không {$userName}? (có/không)";
+
+        $this->savePendingAction($userId, 'DELETE_CATEGORY', ['category_id' => $category->id]);
+
+        return ['success' => true, 'message' => $confirmMsg, 'pending' => true];
+    }
+
+    private function executeDeleteCategory(array $data, int $userId, string $userName): array
+    {
+        try {
+            $category = Category::where('user_id', $userId)->findOrFail($data['category_id']);
+            $name     = $category->ten_danh_muc;
+            $icon     = $category->bieu_tuong;
+
+            // Null out category_id trên các giao dịch liên quan
+            Transaction::where('user_id', $userId)
+                ->where('category_id', $category->id)
+                ->update(['category_id' => null]);
+
+            $category->delete();
+
+            return [
+                'success'     => true,
+                'message'     => "Đã xóa danh mục \"{$name}\" {$icon} thành công {$userName}!",
+                'action_done' => 'DELETE_CATEGORY',
+            ];
+        } catch (\Exception $e) {
+            Log::error('executeDeleteCategory error', ['error' => $e->getMessage()]);
+            return ['success' => false, 'message' => 'Không thể xóa danh mục. Vui lòng thử lại.'];
+        }
+    }
+
+    // Tạo ngân sách 
+    private function handleCreateWallet(array $parsed, int $userId, string $userName): array
+    {
+        $data = $parsed['data'] ?? [];
+
+        $missing = [];
+        if (empty($data['ten_ngan_sach']))                         $missing[] = 'tên ngân sách';
+        if (empty($data['ngan_sach_goc']) || $data['ngan_sach_goc'] <= 0) $missing[] = 'số tiền ngân sách';
+
+        if (!empty($missing)) {
+            return [
+                'success'    => true,
+                'message'    => "Để tạo ngân sách mới, mình cần:\n- " . implode("\n- ", $missing) . "\nBạn bổ sung được không?",
+                'needs_info' => true,
+            ];
+        }
+
+        // Kiểm tra trùng tên
+        $exists = Wallet::where('user_id', $userId)
+            ->where('ten_ngan_sach', $data['ten_ngan_sach'])->exists();
+
+        if ($exists) {
+            return [
+                'success' => true,
+                'message' => "Ngân sách \"{$data['ten_ngan_sach']}\" đã tồn tại rồi {$userName}! Bạn muốn cập nhật số tiền của nó không?",
+            ];
+        }
+
+        // Resolve category nếu có
+        $categoryName = 'Không liên kết';
+        if (!empty($data['ten_danh_muc'])) {
+            $cat = Category::where(function ($q) use ($userId) {
+                $q->where('user_id', $userId)->orWhereNull('user_id');
+            })->where('ten_danh_muc', 'like', '%' . $data['ten_danh_muc'] . '%')->first();
+            if ($cat) {
+                $data['category_id'] = $cat->id;
+                $categoryName        = $cat->ten_danh_muc;
+            }
+        }
+
+        $confirmMsg = "Mình sẽ tạo ngân sách mới:\n"
+            . "- Tên: {$data['ten_ngan_sach']}\n"
+            . "- Hạn mức: " . number_format($data['ngan_sach_goc']) . " VND\n"
+            . "- Danh mục liên kết: {$categoryName}\n"
+            . (!empty($data['mo_ta']) ? "- Mô tả: {$data['mo_ta']}\n" : '')
+            . "\nXác nhận tạo không {$userName}? (có/không)";
+
+        $this->savePendingAction($userId, 'CREATE_WALLET', $data);
+
+        return ['success' => true, 'message' => $confirmMsg, 'pending' => true];
+    }
+
+    private function executeCreateWallet(array $data, int $userId, string $userName): array
+    {
+        try {
+            $wallet = Wallet::create([
+                'user_id'       => $userId,
+                'ten_ngan_sach' => $data['ten_ngan_sach'],
+                'ngan_sach_goc' => $data['ngan_sach_goc'],
+                'so_du'         => $data['ngan_sach_goc'], // ban đầu bằng ngân sách gốc
+                'category_id'   => $data['category_id'] ?? null,
+                'mo_ta'         => $data['mo_ta']        ?? null,
+                'trang_thai'    => true,
+            ]);
+
+            return [
+                'success'     => true,
+                'message'     => "Đã tạo ngân sách \"{$wallet->ten_ngan_sach}\" "
+                            . number_format($wallet->ngan_sach_goc) . " VND thành công {$userName}! "
+                            . "Bạn có thể dùng ngay rồi nhé.",
+                'action_done' => 'CREATE_WALLET',
+                'data'        => $wallet->toArray(),
+            ];
+        } catch (\Exception $e) {
+            Log::error('executeCreateWallet error', ['error' => $e->getMessage()]);
+            return ['success' => false, 'message' => 'Không thể tạo ngân sách. Vui lòng thử lại.'];
+        }
+    }
+
+    // Xóa ngân sách 
+    private function handleDeleteWallet(array $parsed, int $userId, string $userName): array
+    {
+        $data = $parsed['data'] ?? [];
+
+        if (empty($data['ten_ngan_sach']) && empty($data['wallet_id'])) {
+            return [
+                'success'    => true,
+                'message'    => "Bạn muốn xóa ngân sách nào {$userName}? Cho mình biết tên nhé.",
+                'needs_info' => true,
+            ];
+        }
+
+        $wallet = null;
+        if (!empty($data['wallet_id'])) {
+            $wallet = Wallet::where('user_id', $userId)->find($data['wallet_id']);
+        } elseif (!empty($data['ten_ngan_sach'])) {
+            $wallet = Wallet::where('user_id', $userId)
+                ->where('ten_ngan_sach', 'like', '%' . $data['ten_ngan_sach'] . '%')->first();
+        }
+
+        if (!$wallet) {
+            return [
+                'success' => true,
+                'message' => "Mình không tìm thấy ngân sách \"{$data['ten_ngan_sach']}\" {$userName}. Bạn kiểm tra lại tên không?",
+            ];
+        }
+
+        $confirmMsg = "Mình sẽ xóa ngân sách:\n"
+            . "- Tên: {$wallet->ten_ngan_sach}\n"
+            . "- Hạn mức: " . number_format($wallet->ngan_sach_goc) . " VND\n"
+            . "- Số dư hiện tại: " . number_format($wallet->so_du) . " VND\n"
+            . "\n⚠️ Hành động này không thể hoàn tác!\n"
+            . "\nXác nhận XÓA không {$userName}? (có/không)";
+
+        $this->savePendingAction($userId, 'DELETE_WALLET', ['wallet_id' => $wallet->id]);
+
+        return ['success' => true, 'message' => $confirmMsg, 'pending' => true];
+    }
+
+    private function executeDeleteWallet(array $data, int $userId, string $userName): array
+    {
+        try {
+            $wallet = Wallet::where('user_id', $userId)->findOrFail($data['wallet_id']);
+            $name   = $wallet->ten_ngan_sach;
+
+            $wallet->delete();
+
+            return [
+                'success'     => true,
+                'message'     => "Đã xóa ngân sách \"{$name}\" thành công {$userName}!",
+                'action_done' => 'DELETE_WALLET',
+            ];
+        } catch (\Exception $e) {
+            Log::error('executeDeleteWallet error', ['error' => $e->getMessage()]);
+            return ['success' => false, 'message' => 'Không thể xóa ngân sách. Vui lòng thử lại.'];
+        }
     }
 }
