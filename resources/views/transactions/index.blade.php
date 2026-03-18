@@ -838,7 +838,7 @@
     <div class="page-header">
         <div class="page-title">
             <div class="page-icon">
-                <img src="{{ asset('images/chart.png') }}" alt="Transaction">
+                <img src="{{ asset('images/transaction.png') }}" alt="Transaction">
             </div>
             <span>Quản lý giao dịch</span>
         </div>

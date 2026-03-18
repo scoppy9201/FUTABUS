@@ -254,6 +254,21 @@ body.dark .cx-pair-name { color: #e2e8f0; }
 .cx-pair-rate { font-size: 11px; color: #94a3b8; font-weight: 500; }
 .cx-pair-rate span { color: #4a90e2; font-weight: 700; }
 
+body.dark .cx-select {
+    color: #f1f5f9;
+    background-color: #141820;
+}
+
+body.dark .cx-select option {
+    background-color: #1e2433;
+    color: #f1f5f9;
+}
+
+body.dark .cx-select:focus option:checked {
+    background-color: #4a90e2;
+    color: white;
+}
+
 @media (max-width: 768px) {
     .cx-top { grid-template-columns: 1fr; padding: 20px 20px 0; }
     .cx-swap { transform: rotate(90deg); margin: 0 auto; }
