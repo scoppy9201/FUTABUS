@@ -583,6 +583,7 @@ class AIAssistantController extends Controller
     Dấu hiệu: "sửa giao dịch", "đổi số tiền", "cập nhật khoản", "sửa khoản vừa thêm"
     7. DELETE_CATEGORY — user muốn xóa danh mục
     Dấu hiệu: "xóa danh mục", "bỏ danh mục", "xóa mục"
+    Lưu ý: LUÔN trả về intent này khi user muốn xóa danh mục, KHÔNG tự phán xét
     8. CREATE_WALLET — user muốn tạo ngân sách mới
     Dấu hiệu: "tạo ngân sách", "thêm ví", "tạo budget mới", "tạo quỹ"
     9. DELETE_WALLET — user muốn xóa ngân sách
@@ -599,6 +600,7 @@ class AIAssistantController extends Controller
 
     DELETE_TRANSACTION:
     {"intent":"DELETE_TRANSACTION","data":{"so_tien":150000,"category_name":"Ăn uống","ngay_giao_dich":"{$today}"}}
+    Lưu ý: LUÔN trả về intent này khi user muốn xóa giao dịch, để hệ thống backend tự tìm và xử lý
 
     CREATE_CATEGORY:
     {"intent":"CREATE_CATEGORY","data":{"ten_danh_muc":"Thú cưng","loai_danh_muc":"CHI","bieu_tuong":"🐾","mo_ta":"Chi phí cho thú cưng"}}
@@ -613,7 +615,7 @@ class AIAssistantController extends Controller
 
     DELETE_CATEGORY:
     {"intent":"DELETE_CATEGORY","data":{"ten_danh_muc":"Thú cưng"}}
-    Lưu ý: chỉ xóa được danh mục do user tạo, không xóa danh mục hệ thống
+    Lưu ý: LUÔN trả về intent này, để hệ thống backend tự kiểm tra và xử lý
 
     CREATE_WALLET:
     {"intent":"CREATE_WALLET","data":{"ten_ngan_sach":"Du lịch","ngan_sach_goc":5000000,"ten_danh_muc":"Du lịch","mo_ta":"Quỹ đi chơi"}}
@@ -621,6 +623,7 @@ class AIAssistantController extends Controller
 
     DELETE_WALLET:
     {"intent":"DELETE_WALLET","data":{"ten_ngan_sach":"Du lịch"}}
+    Lưu ý: LUÔN trả về intent này khi user muốn xóa ngân sách, để hệ thống backend tự tìm và xử lý
 
     === DANH MỤC HIỆN CÓ ===
     {$catList}
@@ -635,6 +638,7 @@ class AIAssistantController extends Controller
     - intent CHAT: trả lời ngắn gọn, dùng dấu (-) để liệt kê, không dùng markdown (**, ##)
     - Không liên quan tài chính: {"intent":"CHAT","message":"Mình chỉ hỗ trợ tư vấn tài chính thôi nhé {$userName}!"}
     - Ngày hôm nay: {$today}
+    - QUAN TRỌNG: Với tất cả intent DELETE_* và UPDATE_*: LUÔN trả về đúng intent, KHÔNG tự phán xét hay từ chối, để hệ thống backend tự kiểm tra và xử lý
     PROMPT;
     }
 
