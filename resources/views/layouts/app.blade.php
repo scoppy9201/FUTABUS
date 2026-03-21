@@ -1326,7 +1326,7 @@ content: '';
                 </div>
                 <span class="brand-name">Monexa</span>
             </div>
-            
+
             <div style="position:relative; flex:1; max-width:500px; margin:0 auto;">
                 <div class="search-bar" id="searchBar">
                     <img src="/images/search.png" alt="Search">
@@ -1385,7 +1385,7 @@ content: '';
                         @else
                             {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
                         @endif
-                    </div>  
+                    </div>
                     <div class="dropdown-name">{{ Auth::user()->name }}</div>
                     <div class="dropdown-email">{{ Auth::user()->email }}</div>
                 </div>
@@ -1399,7 +1399,7 @@ content: '';
                         <button type="submit" class="dropdown-item logout">Đăng xuất</button>
                     </form>
                 </div>
-            </div>         
+            </div>
         </div>
     </div>
 
@@ -1437,7 +1437,7 @@ content: '';
                     </span>
                     <span class="nav-text">Danh mục</span>
                 </a>
-            </li> 
+            </li>
             <li class="nav-item">
                 <a href="#" class="nav-link">
                     <span class="nav-icon">
@@ -1455,7 +1455,7 @@ content: '';
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{{ route('groups.index') }}" class="nav-link {{ request()->routeIs('groups.*') ? 'active' : '' }}">
                     <span class="nav-icon">
                         <img src="{{ asset('images/coworking.png') }}" alt="Hội nhóm">
                     </span>
@@ -1552,7 +1552,7 @@ content: '';
         </div>
     </div>
 
-    
+
 
     <script>
         const savedTheme = localStorage.getItem('theme');
@@ -1565,12 +1565,12 @@ content: '';
 
         const userProfile = document.getElementById('userProfile');
         const dropdown = document.getElementById('profileDropdown');
-        
+
         userProfile?.addEventListener('click', e => {
             e.stopPropagation();
             dropdown.classList.toggle('show');
         });
-        
+
         document.addEventListener('click', () => dropdown.classList.remove('show'));
         dropdown?.addEventListener('click', e => e.stopPropagation());
 
