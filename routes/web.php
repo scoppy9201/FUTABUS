@@ -15,6 +15,11 @@ use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CurrencyController;
+use App\Http\Controllers\SplitGroupController;
+use App\Http\Controllers\GroupMemberController;
+use App\Http\Controllers\GroupBalanceController;
+use App\Http\Controllers\GroupExpenseController;
+use App\Http\Controllers\GroupDebtController;
 
 
 Route::get('/', function () {
@@ -46,13 +51,13 @@ Route::middleware('guest')->group(function () {
 // Authenticated routes
 Route::middleware('auth')->group(function () {
 
-    // Dashboard 
+    // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Search toàn hệ thống
     Route::get('/search', [SearchController::class, 'index'])->name('search');
 
-    // Quy đổi tỷ giá tiền tệ 
+    // Quy đổi tỷ giá tiền tệ
     Route::get('/currency', [CurrencyController::class, 'index'])->name('currency.index');
 
     // Profile
@@ -76,11 +81,6 @@ Route::middleware('auth')->group(function () {
 
     // Quản lý giao dịch
     Route::resource('transactions', TransactionController::class)->parameters(['transactions' => 'transaction']);
-
-    // Setting
-    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
-
-    // Logout
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
 
