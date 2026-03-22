@@ -153,6 +153,7 @@ class DashboardController extends Controller
             });
         
         return view('dashboard', compact(
+            'period',
             'totalIncome',
             'totalExpense',
             'balance',
