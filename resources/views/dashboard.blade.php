@@ -558,6 +558,90 @@
             gap: 12px;
         }
     }
+
+        body.dark .page-header {
+        background: var(--dark-card);
+    }
+
+        body.dark .page-title,
+        body.dark .card-title,
+        body.dark .transaction-name,
+        body.dark .category-name,
+        body.dark .budget-warning-name,
+        body.dark .stat-value {
+            color: #e5e7eb;
+        }
+
+        body.dark .stat-label,
+        body.dark .transaction-date,
+        body.dark .category-percent {
+            color: #9ca3af;
+        }
+
+        body.dark .transaction-item,
+        body.dark .category-item {
+            background: #212736;
+        }
+
+        body.dark .transaction-item:hover,
+        body.dark .category-item:hover {
+            background: #2a3147;
+        }
+
+        body.dark .date-filter select {
+            background-color: #1c212a !important;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239ca3af' d='M6 8L1 3h10z'/%3E%3C/svg%3E") !important;
+            background-repeat: no-repeat !important;
+            background-position: right 12px center !important;
+            background-size: 12px !important;
+            border-color: rgba(255,255,255,0.08) !important;
+            color: #e5e7eb !important;
+        }
+
+        body.dark .date-filter select:focus {
+            background-color: #1c212a !important;
+            border-color: var(--primary) !important;
+        }
+
+        body.dark .date-filter select option {
+        background-color: #1c212a;
+        color: #e5e7eb;
+
+        body.dark .card-menu {
+            background: #212736;
+        }
+
+        body.dark .card-menu:hover {
+            background: #2a3147;
+        }
+
+        body.dark .category-bar {
+            background: rgba(255,255,255,0.08);
+        }
+
+        body.dark .budget-warning-item.danger {
+            background: rgba(239, 68, 68, 0.12);
+        }
+
+        body.dark .budget-warning-item.warning {
+            background: rgba(245, 158, 11, 0.12);
+        }
+
+        body.dark .progress-bar-mini {
+            background: rgba(255,255,255,0.08);
+        }
+
+        body.dark .empty-state-mini p {
+            color: #6b7280;
+        }
+
+        /* Fix inline style color cứng trong Wallet Summary */
+        body.dark .category-amount[style*="color: #1f2937"],
+        body.dark .category-amount[style*="color:#1f2937"] {
+            color: #e5e7eb !important;
+    }
+
+    
 </style>
 
 <div class="dashboard-container">
@@ -571,11 +655,11 @@
         </div>
         <div class="date-filter">
             <select id="month-filter" onchange="filterByMonth(this.value)">
-                <option value="all">Tất cả thời gian</option>
-                <option value="this_month" selected>Tháng này</option>
-                <option value="last_month">Tháng trước</option>
-                <option value="this_year">Năm nay</option>
-            </select>
+            <option value="all"        {{ $period == 'all'        ? 'selected' : '' }}>Tất cả thời gian</option>
+            <option value="this_month" {{ $period == 'this_month' ? 'selected' : '' }}>Tháng này</option>
+            <option value="last_month" {{ $period == 'last_month' ? 'selected' : '' }}>Tháng trước</option>
+            <option value="this_year"  {{ $period == 'this_year'  ? 'selected' : '' }}>Năm nay</option>
+</select>
         </div>
     </div>
 

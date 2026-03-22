@@ -11,6 +11,7 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AIAssistantController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CurrencyController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\GroupMemberController;
 use App\Http\Controllers\GroupBalanceController;
 use App\Http\Controllers\GroupExpenseController;
 use App\Http\Controllers\GroupDebtController;
+
 use App\Http\Controllers\NotificationController;
 
 Route::get('/', function () {
