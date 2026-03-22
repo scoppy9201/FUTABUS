@@ -11,9 +11,11 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AIAssistantController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CurrencyController;
+
 
 Route::get('/', function () {
     return Auth::check()
@@ -74,6 +76,9 @@ Route::middleware('auth')->group(function () {
 
     // Quản lý giao dịch
     Route::resource('transactions', TransactionController::class)->parameters(['transactions' => 'transaction']);
+
+    // Setting
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
 
     // Logout
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');

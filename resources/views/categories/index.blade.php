@@ -2247,7 +2247,7 @@ setTimeout(() => {
 
 const searchInput = document.querySelector('input[name="search"]');
 const searchForm = searchInput?.closest('form'); // Lấy form chứa input
-let searchTimeout;
+
 
 if (searchInput && searchForm) {
     searchInput.addEventListener('input', function() {
