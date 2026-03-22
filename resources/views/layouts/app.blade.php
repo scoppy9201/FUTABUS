@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Monexa') - Quản lý chi tiêu</title>
     <link rel="icon" type="images/png" href="{{ asset('favicon.png') }}">
     <style>
@@ -1351,7 +1352,7 @@ content: '';
 
         <div class="topbar-right">
             <div class="icon-btn">
-                <img src="/images/bell.png" alt="Notifications">
+                @include('notifications._dropdown')
             </div>
             <div id="themeToggle" class="icon-btn">
                 <img src="/images/dark-mode.png" alt="Theme">

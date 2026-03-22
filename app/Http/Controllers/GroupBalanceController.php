@@ -10,6 +10,7 @@ use App\Models\SplitGroupMember;
 use App\Models\GroupBalanceProposal;
 use App\Models\GroupBalanceSplit;
 use App\Models\GroupApproval;
+use App\Observers\GroupNotifier;
 use App\Models\Transaction;
 use App\Models\Category;
 
@@ -169,6 +170,7 @@ class GroupBalanceController extends Controller
 
             // Nếu chỉ có 1 thành viên (chính admin) thì thực hiện luôn
             $this->tryExecuteProposal($proposal);
+            GroupNotifier::balanceProposed($proposal->fresh());
 
             DB::commit();
 
@@ -201,6 +203,7 @@ class GroupBalanceController extends Controller
             ]);
 
             // Thử thực thi nếu tất cả đã approve
+            GroupNotifier::balanceApproved($proposal, $userId);
             $this->tryExecuteProposal($proposal->fresh());
 
             DB::commit();
@@ -240,6 +243,8 @@ class GroupBalanceController extends Controller
 
             // Khi có 1 người reject → đề xuất bị từ chối ngay
             $proposal->update(['trang_thai' => 'rejected']);
+
+            GroupNotifier::balanceRejected($proposal, $userId);
 
             DB::commit();
 
@@ -321,6 +326,8 @@ class GroupBalanceController extends Controller
             'trang_thai'  => 'approved',
             'executed_at' => now(),
         ]);
+
+        GroupNotifier::balanceExecuted($proposal->fresh());
     }
 
     // ── Tìm hoặc tạo category "Điều chỉnh số dư nhóm" ────
@@ -374,7 +381,7 @@ class GroupBalanceController extends Controller
             'mo_ta'          => $proposal->mo_ta,
             'tong_so_du'     => $proposal->tong_so_du,
             'trang_thai'     => $proposal->trang_thai,
-            'proposed_by'    => $proposal->proposer->name,
+            'proposed_by'    => $proposal->proposer?->name ?? 'Không rõ',
             'created_at'     => $proposal->created_at,
             'executed_at'    => $proposal->executed_at,
             'my_approval'    => $myApproval?->quyet_dinh,
@@ -382,7 +389,7 @@ class GroupBalanceController extends Controller
             'total_members'  => $totalMembers,
             'splits'         => $proposal->splits->map(fn($s) => [
                 'user_id'    => $s->user_id,
-                'name'       => $s->user->name,
+                'name'       => $s->user?->name ?? 'Không rõ',
                 'so_du_cu'   => $s->so_du_cu,
                 'so_du_moi'  => $s->so_du_moi,
                 'chenh_lech' => $s->chenh_lech,

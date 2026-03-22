@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\SplitGroup;
 use App\Models\SplitGroupMember;
 use App\Models\GroupExpenseDebt;
+use App\Observers\GroupNotifier;
 use App\Models\Transaction;
 use App\Models\Category;
 
@@ -59,6 +60,8 @@ class GroupDebtController extends Controller
             ]);
 
             DB::commit();
+
+            GroupNotifier::debtRecorded($debt->fresh());
 
             return redirect()->route('groups.debt.summary', $group)
                 ->with('success', 'Đã ghi nhận khoản nợ.');
@@ -121,13 +124,16 @@ class GroupDebtController extends Controller
         // ── Tổng hợp để hiển thị ──────────────────────────
         // Nợ gốc (raw) để hiển thị lịch sử
         $rawList = $debts->map(fn($d) => [
-            'id'          => $d->id,
-            'nguoi_no'    => $members[$d->nguoi_no_id]->user->name ?? '?',
-            'chu_no'      => $members[$d->chu_no_id]->user->name ?? '?',
-            'so_tien'     => $d->so_tien,
-            'ghi_chu'     => $d->ghi_chu,
-            'trang_thai'  => $d->trang_thai,
-            'created_at'  => $d->created_at,
+            'id'               => $d->id,
+            'nguoi_no'         => $members[$d->nguoi_no_id]?->user?->name ?? 'Không rõ',
+            'chu_no'           => $members[$d->chu_no_id]?->user?->name ?? 'Không rõ',
+            // Thêm avatar để view render đồng bộ với profile
+            'nguoi_no_avatar'  => $members[$d->nguoi_no_id]?->user?->avatar ?? null,
+            'chu_no_avatar'    => $members[$d->chu_no_id]?->user?->avatar ?? null,
+            'so_tien'          => $d->so_tien,
+            'ghi_chu'          => $d->ghi_chu,
+            'trang_thai'       => $d->trang_thai,
+            'created_at'       => $d->created_at,
         ]);
 
         return view('groups.debt.summary', compact(
@@ -201,6 +207,8 @@ class GroupDebtController extends Controller
             ]);
 
             DB::commit();
+
+            GroupNotifier::debtSettled($debt->fresh());
 
             return redirect()->route('groups.debt.summary', $group)
                 ->with('success', 'Đã đánh dấu khoản nợ là đã thanh toán.');

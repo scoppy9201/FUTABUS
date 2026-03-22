@@ -19,6 +19,7 @@ use App\Http\Controllers\GroupMemberController;
 use App\Http\Controllers\GroupBalanceController;
 use App\Http\Controllers\GroupExpenseController;
 use App\Http\Controllers\GroupDebtController;
+use App\Http\Controllers\NotificationController;
 
 Route::get('/', function () {
     return Auth::check()
@@ -128,6 +129,16 @@ Route::middleware('auth')->group(function () {
             Route::post('/{debt}/settle',[GroupDebtController::class, 'settle']) ->name('settle');
         });
     });
+
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/',           [NotificationController::class, 'index'])      ->name('index');
+        Route::get('/dropdown',   [NotificationController::class, 'dropdown'])   ->name('dropdown');
+        Route::get('/by-date',    [NotificationController::class, 'byDate'])     ->name('by-date');
+        Route::post('/mark-read/{notification}', [NotificationController::class, 'markRead'])->name('mark-read');
+        Route::post('/mark-all-read',            [NotificationController::class, 'markAllRead'])->name('mark-all-read');
+        Route::get('/badge',      [NotificationController::class, 'badge'])      ->name('badge');
+    });
+
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
