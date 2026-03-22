@@ -11,6 +11,7 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AIAssistantController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CurrencyController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\GroupMemberController;
 use App\Http\Controllers\GroupBalanceController;
 use App\Http\Controllers\GroupExpenseController;
 use App\Http\Controllers\GroupDebtController;
+
 
 Route::get('/', function () {
     return Auth::check()
@@ -79,56 +81,6 @@ Route::middleware('auth')->group(function () {
 
     // Quản lý giao dịch
     Route::resource('transactions', TransactionController::class)->parameters(['transactions' => 'transaction']);
-
-    Route::prefix('groups')->name('groups.')->group(function () {
-
-        // ── STATIC routes: PHẢI đặt trước /{group} ──────────────
-        Route::get('/',  [SplitGroupController::class, 'index'])->name('index');
-        Route::post('/', [SplitGroupController::class, 'store'])->name('store');
-
-        // Tìm kiếm user để mời (AJAX) — đặt trước /{group}
-        Route::get('/search-users', [SplitGroupController::class, 'searchUsers'])->name('search-users');
-
-        // Token invitation — đặt trước /{group}
-        Route::get('/invitations/{token}/accept',  [GroupMemberController::class, 'accept'])->name('invite.accept');
-        Route::get('/invitations/{token}/decline', [GroupMemberController::class, 'decline'])->name('invite.decline');
-
-        // ── DYNAMIC routes /{group} ──────────────────────────────
-        Route::get('/{group}',    [SplitGroupController::class, 'show'])   ->name('show');
-        Route::put('/{group}',    [SplitGroupController::class, 'update']) ->name('update');
-        Route::delete('/{group}', [SplitGroupController::class, 'destroy'])->name('destroy');
-
-        Route::post('/{group}/toggle-balance-visibility', [SplitGroupController::class, 'toggleBalanceVisibility'])->name('toggle-visibility');
-
-        Route::post('/{group}/invite',                   [GroupMemberController::class, 'invite'])  ->name('invite');
-        Route::post('/{group}/leave',                    [GroupMemberController::class, 'leave'])   ->name('leave');
-        Route::delete('/{group}/members/{member}',       [GroupMemberController::class, 'remove'])  ->name('members.remove');
-        Route::post('/{group}/members/{member}/promote', [GroupMemberController::class, 'promote']) ->name('members.promote');
-        Route::post('/{group}/members/{member}/demote',  [GroupMemberController::class, 'demote'])  ->name('members.demote');
-
-        Route::prefix('/{group}/balance')->name('balance.')->group(function () {
-            Route::get('/',                              [GroupBalanceController::class, 'index'])  ->name('index');
-            Route::post('/proposals',                    [GroupBalanceController::class, 'propose'])->name('propose');
-            Route::post('/proposals/{proposal}/approve', [GroupBalanceController::class, 'approve'])->name('approve');
-            Route::post('/proposals/{proposal}/reject',  [GroupBalanceController::class, 'reject']) ->name('reject');
-            Route::post('/proposals/{proposal}/cancel',  [GroupBalanceController::class, 'cancel']) ->name('cancel');
-        });
-
-        Route::prefix('/{group}/expenses')->name('expense.')->group(function () {
-            Route::get('/',                              [GroupExpenseController::class, 'index'])  ->name('index');
-            Route::post('/',                             [GroupExpenseController::class, 'store'])  ->name('store');
-            Route::post('/proposals/{proposal}/approve', [GroupExpenseController::class, 'approve'])->name('approve');
-            Route::post('/proposals/{proposal}/reject',  [GroupExpenseController::class, 'reject']) ->name('reject');
-            Route::post('/proposals/{proposal}/cancel',  [GroupExpenseController::class, 'cancel']) ->name('cancel');
-        });
-
-        Route::prefix('/{group}/debts')->name('debt.')->group(function () {
-            Route::post('/',             [GroupDebtController::class, 'store'])  ->name('store');
-            Route::get('/summary',       [GroupDebtController::class, 'summary'])->name('summary');
-            Route::post('/{debt}/settle',[GroupDebtController::class, 'settle']) ->name('settle');
-        });
-    });
-
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
 
