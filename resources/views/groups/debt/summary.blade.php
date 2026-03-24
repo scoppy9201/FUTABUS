@@ -116,15 +116,15 @@ body.dark .debt-table tbody tr:hover { background:rgba(255,255,255,0.02); }
 </div>
 
 <div class="top-bar">
-    <div class="top-bar-title">📊 Tổng kết nợ · {{ $group->ten_nhom }}</div>
+    <div class="top-bar-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><rect x="3" y="11" width="3" height="6" rx="0.5"/><rect x="8.5" y="7" width="3" height="10" rx="0.5"/><rect x="14" y="4" width="3" height="13" rx="0.5"/><path d="M2 18h16"/></svg> Tổng kết nợ · {{ $group->ten_nhom }}</div>
     <div style="display:flex;gap:8px">
-        <a href="{{ route('groups.expense.index', $group) }}" class="btn-ghost">← Chia khoản chi</a>
+        <a href="{{ route('groups.expense.index', $group) }}" class="btn-ghost"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M12 4L6 10l6 6"/></svg> Chia khoản chi</a>
         <a href="{{ route('groups.show', $group) }}" class="btn-ghost">Nhóm</a>
     </div>
 </div>
 
-@if(session('success'))<div class="alert alert-success">✓ {{ session('success') }}</div>@endif
-@if(session('error'))<div class="alert alert-error">⚠ {{ session('error') }}</div>@endif
+@if(session('success'))<div class="alert alert-success"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M4 10l4.5 4.5L16 6"/></svg> {{ session('success') }}</div>@endif
+@if(session('error'))<div class="alert alert-error"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 2L2 17h16z"/><path d="M10 8v4M10 14.5v.5"/></svg> {{ session('error') }}</div>@endif
 
 {{-- Balance overview --}}
 <div class="balance-row">
@@ -154,7 +154,7 @@ body.dark .debt-table tbody tr:hover { background:rgba(255,255,255,0.02); }
         <div class="bal-val zero">Không nợ</div>
         @else
         <div class="bal-val {{ $cls }}">{{ $prefix }}{{ number_format(abs($balance)) }}đ</div>
-        <div class="bal-label">{{ $balance > 1 ? '← Đang được nợ' : '→ Đang nợ người khác' }}</div>
+        <div class="bal-label">{!! $balance > 1 ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M12 4L6 10l6 6"/></svg> Đang được nợ' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M8 4l6 6-6 6"/></svg> Đang nợ người khác' !!}</div>
         @endif
     </div>
     @endforeach
@@ -163,13 +163,13 @@ body.dark .debt-table tbody tr:hover { background:rgba(255,255,255,0.02); }
 {{-- Simplified debts --}}
 <div class="section-card">
     <div class="sc-hdr" style="background:rgba(239,68,68,0.04)">
-        <div class="sc-title">🔢 Giao dịch tối giản cần thực hiện</div>
+        <div class="sc-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M5 8h10M5 12h10M8 4l-2 12M12 4l-2 12"/></svg> Giao dịch tối giản cần thực hiện</div>
         <div style="font-size:12px;color:#9ca3af">Thuật toán rút gọn số giao dịch xuống mức tối thiểu</div>
     </div>
 
     @if(count($simplified) === 0)
     <div class="cleared-box">
-        <div class="cleared-icon">🎉</div>
+        <div class="cleared-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M4 16L9 4l7 7z"/><path d="M9 4l2 2M14 8l2 2"/><circle cx="15" cy="5" r="1" fill="currentColor" stroke="none"/><circle cx="5" cy="4" r="0.8" fill="currentColor" stroke="none"/></svg></div>
         <div class="cleared-title">Không có ai nợ ai!</div>
         <div class="cleared-sub">Tất cả các khoản nợ đã được cân bằng hoặc thanh toán</div>
     </div>
@@ -200,7 +200,7 @@ body.dark .debt-table tbody tr:hover { background:rgba(255,255,255,0.02); }
                 <div style="font-size:11px;color:var(--danger);font-weight:600">nợ</div>
             </div>
             <div class="fc-mid">
-                <div class="fc-arrow">→</div>
+                <div class="fc-arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M8 4l6 6-6 6"/></svg></div>
                 <div class="fc-amount">{{ number_format($flow['amount']) }}đ</div>
             </div>
             <div class="fc-person">
@@ -227,7 +227,7 @@ body.dark .debt-table tbody tr:hover { background:rgba(255,255,255,0.02); }
 {{-- Raw list --}}
 <div class="section-card">
     <div class="sc-hdr">
-        <div class="sc-title">📝 Danh sách nợ gốc</div>
+        <div class="sc-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M6 2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M7 7h6M7 10h6M7 13h4"/></svg> Danh sách nợ gốc</div>
     </div>
     @if($rawList->count() > 0)
     <div style="overflow-x:auto">
@@ -235,7 +235,7 @@ body.dark .debt-table tbody tr:hover { background:rgba(255,255,255,0.02); }
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Người nợ → Chủ nợ</th>
+                    <th>Người nợ <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M8 4l6 6-6 6"/></svg> Chủ nợ</th>
                     <th>Số tiền</th>
                     <th>Ghi chú</th>
                     <th>Trạng thái</th>
@@ -263,7 +263,7 @@ body.dark .debt-table tbody tr:hover { background:rgba(255,255,255,0.02); }
                                 </div>
                             @endif
                             <strong style="font-size:13px;color:#1f2937">{{ $d['nguoi_no'] }}</strong>
-                            <span class="debt-arrow-sm">→</span>
+                            <span class="debt-arrow-sm"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M8 4l6 6-6 6"/></svg></span>
                             @if($d['chu_no_avatar'] ?? null)
                                 @if(str_starts_with($d['chu_no_avatar'], 'http'))
                                     <img src="{{ $d['chu_no_avatar'] }}" class="debt-av-sm" style="object-fit:cover;" alt="">
@@ -280,7 +280,7 @@ body.dark .debt-table tbody tr:hover { background:rgba(255,255,255,0.02); }
                     </td>
                     <td><strong style="color:var(--danger)">{{ number_format($d['so_tien']) }}đ</strong></td>
                     <td style="color:#6b7280">{{ $d['ghi_chu'] ?? '—' }}</td>
-                    <td><span class="st-badge st-{{ $d['trang_thai'] }}">{{ $d['trang_thai']==='settled'?'✓ Đã trả':'⏳ Chờ trả' }}</span></td>
+                    <td><span class="st-badge st-{{ $d['trang_thai'] }}">{!! $d['trang_thai']==='settled'?'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M4 10l4.5 4.5L16 6"/></svg> Đã trả':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4.5l3 1.5"/></svg> Chờ trả' !!}</span></td>
                     <td>
                         @if($d['trang_thai'] !== 'settled')
                         <form action="{{ route('groups.debt.settle', [$group, $d['id']]) }}" method="POST" style="display:inline">
@@ -288,7 +288,7 @@ body.dark .debt-table tbody tr:hover { background:rgba(255,255,255,0.02); }
                             <input type="hidden" name="ghi_vao_so" value="1">
                             <button type="submit" class="btn-primary btn-success btn-sm"
                                 onclick="return confirm('Đánh dấu đã thanh toán và ghi vào sổ?')">
-                                ✓ Đã trả
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M4 10l4.5 4.5L16 6"/></svg> Đã trả
                             </button>
                         </form>
                         @else
@@ -302,7 +302,7 @@ body.dark .debt-table tbody tr:hover { background:rgba(255,255,255,0.02); }
     </div>
     @else
     <div style="text-align:center;padding:50px;color:#9ca3af">
-        <div style="font-size:40px;margin-bottom:12px">📝</div>
+        <div style="font-size:40px;margin-bottom:12px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M6 2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M7 7h6M7 10h6M7 13h4"/></svg></div>
         <div style="font-weight:600">Chưa có khoản nợ nào</div>
     </div>
     @endif

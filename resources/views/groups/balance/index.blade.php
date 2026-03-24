@@ -222,20 +222,20 @@ body.dark .pi-progress { background:rgba(255,255,255,0.1); }
 </div>
 
 <div class="top-bar">
-    <div class="top-bar-title">⚖️ Phân phối số dư · {{ $group->ten_nhom }}</div>
-    <a href="{{ route('groups.show', $group) }}" class="btn-ghost">← Quay lại</a>
+    <div class="top-bar-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 3v14M4 17h12"/><path d="M4 7 2 12h4zM16 7l-2 5h4z"/><path d="M4 7h12"/></svg> Phân phối số dư · {{ $group->ten_nhom }}</div>
+    <a href="{{ route('groups.show', $group) }}" class="btn-ghost"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M12 4L6 10l6 6"/></svg> Quay lại</a>
 </div>
 
 @if(session('success'))
-<div class="alert alert-success">✓ {{ session('success') }}</div>
+<div class="alert alert-success"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M4 10l4.5 4.5L16 6"/></svg> {{ session('success') }}</div>
 @endif
 @if(session('error'))
-<div class="alert alert-error">⚠ {{ session('error') }}</div>
+<div class="alert alert-error"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 2L2 17h16z"/><path d="M10 8v4M10 14.5v.5"/></svg> {{ session('error') }}</div>
 @endif
 
 @if(!$group->hien_so_du)
 <div class="alert alert-warn">
-    ⚠️ Số dư đang bị ẩn. Admin cần bật <strong>"Hiển thị số dư"</strong> trong trang nhóm để sử dụng chức năng này.
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 2L2 17h16z"/><path d="M10 8v4M10 14.5v.5"/></svg> Số dư đang bị ẩn. Admin cần bật <strong>"Hiển thị số dư"</strong> trong trang nhóm để sử dụng chức năng này.
 </div>
 @endif
 
@@ -285,7 +285,7 @@ body.dark .pi-progress { background:rgba(255,255,255,0.1); }
         @if($myPending->count() > 0)
         <div class="propose-card" style="margin-bottom:20px">
             <div class="propose-hdr" style="background:rgba(245,158,11,0.06)">
-                <div class="propose-hdr-title">⏳ Chờ bạn xác nhận ({{ $myPending->count() }})</div>
+                <div class="propose-hdr-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4.5l3 1.5"/></svg> Chờ bạn xác nhận ({{ $myPending->count() }})</div>
             </div>
             @foreach($myPending as $p)
             <div class="proposal-item">
@@ -294,7 +294,7 @@ body.dark .pi-progress { background:rgba(255,255,255,0.1); }
                         <div class="pi-desc">{{ $p['mo_ta'] ?? 'Phân phối số dư' }}</div>
                         <div class="pi-meta">Đề xuất bởi {{ $p['proposed_by'] }} · {{ \Carbon\Carbon::parse($p['created_at'])->diffForHumans() }}</div>
                     </div>
-                    <span class="pi-status st-pending">⏳ Chờ duyệt</span>
+                    <span class="pi-status st-pending"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4.5l3 1.5"/></svg> Chờ duyệt</span>
                 </div>
                 <div class="pi-splits">
                     @foreach($p['splits'] as $s)
@@ -302,7 +302,7 @@ body.dark .pi-progress { background:rgba(255,255,255,0.1); }
                     <div class="pi-split-chip">
                         {{ $s['name'] }}
                         <span class="{{ $arrow }}">
-                            {{ $s['chenh_lech'] > 0 ? '↑' : '↓' }}{{ number_format(abs($s['chenh_lech'])) }}đ
+                            {!! $s['chenh_lech'] > 0 ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 14V6M6 10l4-4 4 4"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 6v8M6 10l4 4 4-4"/></svg>' !!}{{ number_format(abs($s['chenh_lech'])) }}đ
                         </span>
                     </div>
                     @endforeach
@@ -314,11 +314,11 @@ body.dark .pi-progress { background:rgba(255,255,255,0.1); }
                 <div class="pi-actions">
                     <form action="{{ route('groups.balance.approve', [$group, $p['id']]) }}" method="POST">
                         @csrf
-                        <button type="submit" class="btn-primary btn-success btn-sm">✓ Đồng ý</button>
+                        <button type="submit" class="btn-primary btn-success btn-sm"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M4 10l4.5 4.5L16 6"/></svg> Đồng ý</button>
                     </form>
                     <form action="{{ route('groups.balance.reject',  [$group, $p['id']]) }}" method="POST" style="display:inline">
                         @csrf
-                        <button type="submit" class="btn-primary btn-danger btn-sm">✕ Từ chối</button>
+                        <button type="submit" class="btn-primary btn-danger btn-sm"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M5 5l10 10M15 5L5 15"/></svg> Từ chối</button>
                     </form>
                 </div>
             </div>
@@ -329,7 +329,7 @@ body.dark .pi-progress { background:rgba(255,255,255,0.1); }
         {{-- History --}}
         <div class="proposal-card">
             <div class="phdr">
-                <div class="phdr-title">📋 Lịch sử đề xuất</div>
+                <div class="phdr-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><rect x="5" y="4" width="10" height="14" rx="1.5"/><path d="M8 4V3a1 1 0 011-1h2a1 1 0 011 1v1"/><path d="M8 9h4M8 12h4M8 15h2"/></svg> Lịch sử đề xuất</div>
             </div>
             @forelse($proposals as $p)
             <div class="proposal-item">
@@ -344,9 +344,9 @@ body.dark .pi-progress { background:rgba(255,255,255,0.1); }
                     </div>
                     <span class="pi-status st-{{ $p['trang_thai'] }}">
                         {{ match($p['trang_thai']) {
-                            'pending'  => '⏳ Chờ duyệt',
-                            'approved' => '✓ Đã thực hiện',
-                            'rejected' => '✕ Từ chối',
+                            'pending'  => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4.5l3 1.5"/></svg> Chờ duyệt',
+                            'approved' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M4 10l4.5 4.5L16 6"/></svg> Đã thực hiện',
+                            'rejected' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M5 5l10 10M15 5L5 15"/></svg> Từ chối',
                             default    => '— Đã hủy',
                         } }}
                     </span>
@@ -359,10 +359,10 @@ body.dark .pi-progress { background:rgba(255,255,255,0.1); }
                 @if($p['my_approval'] === null)
                 <div class="pi-actions">
                     <form action="{{ route('groups.balance.approve', [$group, $p['id']]) }}" method="POST">
-                        @csrf <button type="submit" class="btn-primary btn-success btn-sm">✓ Đồng ý</button>
+                        @csrf <button type="submit" class="btn-primary btn-success btn-sm"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M4 10l4.5 4.5L16 6"/></svg> Đồng ý</button>
                     </form>
                     <form action="{{ route('groups.balance.reject',  [$group, $p['id']]) }}" method="POST" style="display:inline">
-                        @csrf <button type="submit" class="btn-primary btn-danger btn-sm">✕ Từ chối</button>
+                        @csrf <button type="submit" class="btn-primary btn-danger btn-sm"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M5 5l10 10M15 5L5 15"/></svg> Từ chối</button>
                     </form>
                     @if($laAdmin ?? false)
                     <form action="{{ route('groups.balance.cancel',  [$group, $p['id']]) }}" method="POST" style="display:inline">
@@ -372,20 +372,20 @@ body.dark .pi-progress { background:rgba(255,255,255,0.1); }
                 </div>
                 @else
                 <div style="font-size:12px;color:#9ca3af;margin-top:8px">
-                    Bạn đã {{ $p['my_approval'] === 'approved' ? '✓ đồng ý' : '✕ từ chối' }}
+                    Bạn đã {!! $p['my_approval'] === 'approved' ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M4 10l4.5 4.5L16 6"/></svg> đồng ý' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M5 5l10 10M15 5L5 15"/></svg> từ chối' !!}
                 </div>
                 @endif
                 @endif
 
                 @if($p['trang_thai'] === 'approved')
                 <div style="font-size:12px;color:var(--success);margin-top:6px">
-                    ✓ Thực hiện lúc {{ \Carbon\Carbon::parse($p['executed_at'])->format('d/m/Y H:i') }}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M4 10l4.5 4.5L16 6"/></svg> Thực hiện lúc {{ \Carbon\Carbon::parse($p['executed_at'])->format('d/m/Y H:i') }}
                 </div>
                 @endif
             </div>
             @empty
             <div style="text-align:center;padding:50px 20px;color:#9ca3af">
-                <div style="font-size:40px;margin-bottom:12px">📋</div>
+                <div style="font-size:40px;margin-bottom:12px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><rect x="5" y="4" width="10" height="14" rx="1.5"/><path d="M8 4V3a1 1 0 011-1h2a1 1 0 011 1v1"/><path d="M8 9h4M8 12h4M8 15h2"/></svg></div>
                 <div style="font-weight:600">Chưa có đề xuất nào</div>
                 @if($group->hien_so_du)
                 <div style="font-size:13px;margin-top:4px">Tạo đề xuất đầu tiên để phân phối số dư</div>
@@ -401,14 +401,14 @@ body.dark .pi-progress { background:rgba(255,255,255,0.1); }
         <div class="propose-card">
             <div class="propose-hdr" style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
-                    <div class="propose-hdr-title">⚖️ Tạo đề xuất phân phối mới</div>
+                    <div class="propose-hdr-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 3v14M4 17h12"/><path d="M4 7 2 12h4zM16 7l-2 5h4z"/><path d="M4 7h12"/></svg> Tạo đề xuất phân phối mới</div>
                     <div style="font-size:12px;color:#9ca3af;margin-top:4px">Toàn bộ thành viên phải đồng ý thì mới thực hiện</div>
                 </div>
             </div>
             <div class="propose-body">
                 @if(!$group->hien_so_du)
                 <div class="alert alert-warn" style="margin-bottom:0">
-                    ⚠️ Bật hiển thị số dư để tạo đề xuất phân phối
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 2L2 17h16z"/><path d="M10 8v4M10 14.5v.5"/></svg> Bật hiển thị số dư để tạo đề xuất phân phối
                 </div>
                 @else
                 <form action="{{ route('groups.balance.propose', $group) }}" method="POST">
@@ -426,10 +426,10 @@ body.dark .pi-progress { background:rgba(255,255,255,0.1); }
                                 <span id="totalAllocated">0đ / {{ number_format($tongSoDu ?? 0) }}đ</span>
                             </div>
                             <div style="background:rgba(74,144,226,0.06);border-radius:10px;padding:12px;font-size:12px;color:#4b5563;margin-bottom:16px;">
-                                💡 Tổng số dư mới phải bằng đúng tổng số dư hiện tại (<strong>{{ number_format($tongSoDu ?? 0) }}đ</strong>)
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 2.5a5.5 5.5 0 014 9.3V14H6v-2.2A5.5 5.5 0 0110 2.5z"/><path d="M8 14v1.5a2 2 0 004 0V14"/></svg> Tổng số dư mới phải bằng đúng tổng số dư hiện tại (<strong>{{ number_format($tongSoDu ?? 0) }}đ</strong>)
                             </div>
                             <button type="submit" class="btn-primary" style="width:100%;justify-content:center;padding:13px">
-                                ⚖️ Gửi đề xuất
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 3v14M4 17h12"/><path d="M4 7 2 12h4zM16 7l-2 5h4z"/><path d="M4 7h12"/></svg> Gửi đề xuất
                             </button>
                         </div>
                         {{-- Cột phải: bảng phân bổ từng người --}}

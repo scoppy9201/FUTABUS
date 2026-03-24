@@ -290,22 +290,22 @@ body.dark .modal-foot { border-color: rgba(255,255,255,0.06); background: #191d2
 
 <div class="pg-hdr">
     <div class="pg-title">
-        <div class="pg-icon">👥</div>
+        <div class="pg-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><circle cx="7.5" cy="6.5" r="2.5"/><path d="M2 17c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="14" cy="6" r="2"/><path d="M18 17c0-2.5-1.8-4.2-4-4.7"/></svg></div>
         <div>
             <div>Chia tiền nhóm</div>
             <div style="font-size:13px;font-weight:500;color:#6b7280;margin-top:2px;">Quản lý chi tiêu cùng gia đình & bạn bè</div>
         </div>
     </div>
     <button class="btn-primary" onclick="openCreate()">
-        <span style="font-size:18px;line-height:1;">＋</span> Tạo nhóm mới
+        <span style="font-size:18px;line-height:1;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M10 4v12M4 10h12"/></svg></span> Tạo nhóm mới
     </button>
 </div>
 
 @if(session('success'))
-<div class="alert alert-success">✓ {{ session('success') }}</div>
+<div class="alert alert-success"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M4 10l4.5 4.5L16 6"/></svg> {{ session('success') }}</div>
 @endif
 @if(session('error'))
-<div class="alert alert-error">⚠ {{ session('error') }}</div>
+<div class="alert alert-error"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 2L2 17h16z"/><path d="M10 8v4M10 14.5v.5"/></svg> {{ session('error') }}</div>
 @endif
 
 {{-- Stats strip --}}
@@ -316,21 +316,21 @@ body.dark .modal-foot { border-color: rgba(255,255,255,0.06); background: #191d2
 @endphp
 <div class="stats-strip">
     <div class="ss-card">
-        <div class="ss-icon blue">👥</div>
+        <div class="ss-icon blue"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><circle cx="7.5" cy="6.5" r="2.5"/><path d="M2 17c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="14" cy="6" r="2"/><path d="M18 17c0-2.5-1.8-4.2-4-4.7"/></svg></div>
         <div>
             <div class="ss-label">Tổng nhóm</div>
             <div class="ss-value">{{ $total }}</div>
         </div>
     </div>
     <div class="ss-card">
-        <div class="ss-icon green">👑</div>
+        <div class="ss-icon green"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M3 14L6 7l4 4 4-4 3 7H3z"/><path d="M3 14h14"/><circle cx="10" cy="3.5" r="1" fill="currentColor" stroke="none"/></svg></div>
         <div>
             <div class="ss-label">Tôi quản lý</div>
             <div class="ss-value">{{ $adminOf }}</div>
         </div>
     </div>
     <div class="ss-card">
-        <div class="ss-icon amber">🤝</div>
+        <div class="ss-icon amber"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M2 10.5l2.5-3.5 3.5 1.5L11 6h3l2 3.5-5.5 5L8 12l-3 1.5z"/><path d="M9 14.5l2 2.5"/></svg></div>
         <div>
             <div class="ss-label">Tham gia</div>
             <div class="ss-value">{{ $memberOf }}</div>
@@ -348,9 +348,9 @@ body.dark .modal-foot { border-color: rgba(255,255,255,0.06); background: #191d2
             default   => 'mode-both',
         };
         $modeIcon = match($group['che_do']) {
-            'balance' => '⚖️',
-            'expense' => '🧾',
-            default   => '🔀',
+            'balance' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 3v14M4 17h12"/><path d="M4 7 2 12h4zM16 7l-2 5h4z"/><path d="M4 7h12"/></svg>',
+            'expense' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M5 2h10a1 1 0 011 1v14l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5V3a1 1 0 011-1z"/><path d="M7.5 7h5M7.5 10h5M7.5 13h3"/></svg>',
+            default   => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M3 6h9l3-3 3 3-3 3"/><path d="M3 14h9l3-3 3 3-3 3"/><path d="M6 9l-3 3M6 11l-3-3"/></svg>',
         };
         $modeName = match($group['che_do']) {
             'balance' => 'Phân phối số dư',
@@ -366,10 +366,15 @@ body.dark .modal-foot { border-color: rgba(255,255,255,0.06); background: #191d2
     <a href="{{ route('groups.show', $group['id']) }}" class="group-card">
         <div class="gc-body">
             <div class="gc-top">
-                <div class="gc-icon {{ $modeClass }}">{{ $modeIcon }}</div>
+                <div class="gc-icon {{ $modeClass }}">{!! $modeIcon !!}</div>
                 <div class="gc-badges">
                     <span class="gc-badge {{ $group['la_admin'] ? 'admin' : 'member' }}">
-                        {{ $group['la_admin'] ? '👑 Admin' : '👤 Thành viên' }}
+
+                        @if($group['la_admin'])
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M3 14L6 7l4 4 4-4 3 7H3z"/><path d="M3 14h14"/><circle cx="10" cy="3.5" r="1" fill="currentColor" stroke="none"/></svg> Admin
+                        @else
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><circle cx="10" cy="6.5" r="3"/><path d="M3.5 18c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6"/></svg> Thành viên
+                        @endif
                     </span>
                     <span class="gc-badge {{ $modeBadgeClass }}">{{ $modeName }}</span>
                 </div>
@@ -378,11 +383,19 @@ body.dark .modal-foot { border-color: rgba(255,255,255,0.06); background: #191d2
             <div class="gc-desc">{{ $group['mo_ta'] ?? 'Chưa có mô tả' }}</div>
             <div class="gc-members">
                 <div class="gc-avatars">
-                    @for($i = 0; $i < min($group['so_thanh_vien'], 4); $i++)
-                    <div class="gc-av" style="background: hsl({{ $i * 60 + 200 }},65%,50%)">
-                        {{ chr(65 + $i) }}
-                    </div>
-                    @endfor
+                    @foreach($group['members'] as $mv)
+                    @if($mv['avatar'])
+                        @if(str_starts_with($mv['avatar'], 'http'))
+                            <img src="{{ $mv['avatar'] }}" class="gc-av" style="object-fit:cover;" alt="">
+                        @else
+                            <img src="{{ asset('storage/' . $mv['avatar']) }}" class="gc-av" style="object-fit:cover;" alt="">
+                        @endif
+                    @else
+                        <div class="gc-av" style="background:{{ $mv['color'] }}">
+                            {{ strtoupper(substr($mv['name'], 0, 2)) }}
+                        </div>
+                    @endif
+                    @endforeach
                     @if($group['so_thanh_vien'] > 4)
                     <div class="gc-av extra">+{{ $group['so_thanh_vien'] - 4 }}</div>
                     @endif
@@ -391,17 +404,17 @@ body.dark .modal-foot { border-color: rgba(255,255,255,0.06); background: #191d2
             </div>
         </div>
         <div class="gc-footer">
-            <span class="gc-date">📅 {{ \Carbon\Carbon::parse($group['created_at'])->format('d/m/Y') }}</span>
-            <div class="gc-arrow">→</div>
+            <span class="gc-date"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><rect x="3" y="4" width="14" height="14" rx="2"/><path d="M3 9h14M7 2v4M13 2v4"/><circle cx="7" cy="13" r="0.8" fill="currentColor" stroke="none"/><circle cx="10" cy="13" r="0.8" fill="currentColor" stroke="none"/><circle cx="13" cy="13" r="0.8" fill="currentColor" stroke="none"/></svg> {{ \Carbon\Carbon::parse($group['created_at'])->format('d/m/Y') }}</span>
+            <div class="gc-arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M8 4l6 6-6 6"/></svg></div>
         </div>
     </a>
     @empty
     <div class="empty-wrap">
-        <div class="empty-icon-big">👥</div>
+        <div class="empty-icon-big"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><circle cx="7.5" cy="6.5" r="2.5"/><path d="M2 17c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="14" cy="6" r="2"/><path d="M18 17c0-2.5-1.8-4.2-4-4.7"/></svg></div>
         <h3>Chưa có nhóm nào</h3>
         <p>Tạo nhóm đầu tiên để bắt đầu chia sẻ chi tiêu cùng gia đình hoặc bạn bè</p>
         <button class="btn-primary" onclick="openCreate()">
-            <span>＋</span> Tạo nhóm đầu tiên
+            <span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M10 4v12M4 10h12"/></svg></span> Tạo nhóm đầu tiên
         </button>
     </div>
     @endforelse
@@ -411,8 +424,8 @@ body.dark .modal-foot { border-color: rgba(255,255,255,0.06); background: #191d2
 <div class="modal-overlay" id="createModal">
     <div class="modal-box">
         <div class="modal-hdr">
-            <div class="modal-hdr-title">👥 Tạo nhóm mới</div>
-            <button class="modal-close" onclick="closeCreate()">✕</button>
+            <div class="modal-hdr-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><circle cx="7.5" cy="6.5" r="2.5"/><path d="M2 17c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="14" cy="6" r="2"/><path d="M18 17c0-2.5-1.8-4.2-4-4.7"/></svg> Tạo nhóm mới</div>
+            <button class="modal-close" onclick="closeCreate()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
         </div>
         <form action="{{ route('groups.store') }}" method="POST">
             @csrf
@@ -430,19 +443,19 @@ body.dark .modal-foot { border-color: rgba(255,255,255,0.06); background: #191d2
                     <div class="mode-grid">
                         <label class="mode-card {{ old('che_do','both') == 'balance' ? 'selected' : '' }}" onclick="selectMode(this)">
                             <input type="radio" name="che_do" value="balance" {{ old('che_do') == 'balance' ? 'checked' : '' }}>
-                            <div class="mode-emoji">⚖️</div>
+                            <div class="mode-emoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 3v14M4 17h12"/><path d="M4 7 2 12h4zM16 7l-2 5h4z"/><path d="M4 7h12"/></svg></div>
                             <div class="mode-name">Phân phối<br>số dư</div>
                             <div class="mode-desc">Chia lại tiền trong nhóm</div>
                         </label>
                         <label class="mode-card {{ old('che_do','both') == 'expense' ? 'selected' : '' }}" onclick="selectMode(this)">
                             <input type="radio" name="che_do" value="expense" {{ old('che_do') == 'expense' ? 'checked' : '' }}>
-                            <div class="mode-emoji">🧾</div>
+                            <div class="mode-emoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M5 2h10a1 1 0 011 1v14l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5V3a1 1 0 011-1z"/><path d="M7.5 7h5M7.5 10h5M7.5 13h3"/></svg></div>
                             <div class="mode-name">Chia khoản<br>chi</div>
                             <div class="mode-desc">Chia tiền khi thanh toán</div>
                         </label>
                         <label class="mode-card selected" onclick="selectMode(this)">
                             <input type="radio" name="che_do" value="both" checked>
-                            <div class="mode-emoji">🔀</div>
+                            <div class="mode-emoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M3 6h9l3-3 3 3-3 3"/><path d="M3 14h9l3-3 3 3-3 3"/><path d="M6 9l-3 3M6 11l-3-3"/></svg></div>
                             <div class="mode-name">Cả hai<br>chế độ</div>
                             <div class="mode-desc">Linh hoạt nhất</div>
                         </label>
