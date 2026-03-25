@@ -9,6 +9,7 @@ use App\Models\SplitGroup;
 use App\Models\SplitGroupMember;
 use App\Models\GroupExpenseProposal;
 use App\Models\GroupExpenseSplit;
+use App\Observers\GroupNotifier;
 use App\Models\GroupApproval;
 use App\Models\Transaction;
 use App\Models\Category;
@@ -156,6 +157,8 @@ class GroupExpenseController extends Controller
 
             DB::commit();
 
+            GroupNotifier::expenseProposed($proposal->fresh());
+
             return redirect()->route('groups.expense.index', $group)
                 ->with('success', 'Đã tạo đề xuất chia chi. Chờ các thành viên xác nhận.');
 
@@ -184,6 +187,7 @@ class GroupExpenseController extends Controller
                 'created_at'      => now(),
             ]);
 
+            GroupNotifier::expenseApproved($proposal, $userId);
             $this->tryExecuteProposal($proposal->fresh());
 
             DB::commit();
@@ -220,6 +224,8 @@ class GroupExpenseController extends Controller
             ]);
 
             $proposal->update(['trang_thai' => 'rejected']);
+
+            GroupNotifier::expenseRejected($proposal, $userId);
 
             DB::commit();
 
@@ -359,6 +365,8 @@ class GroupExpenseController extends Controller
             'trang_thai'  => 'approved',
             'executed_at' => now(),
         ]);
+
+        GroupNotifier::expenseExecuted($proposal->fresh());
     }
 
     // ── Lấy category CHI cho user ─────────────────────────
@@ -401,11 +409,11 @@ class GroupExpenseController extends Controller
             'id'             => $proposal->id,
             'mo_ta'          => $proposal->mo_ta,
             'tong_tien'      => $proposal->tong_tien,
-            'ngay_chi'       => $proposal->ngay_chi,
+            'ngay_chi'       => $proposal->ngay_chi ? \Carbon\Carbon::parse($proposal->ngay_chi) : now(),
             'kieu_chia'      => $proposal->kieu_chia,
             'trang_thai'     => $proposal->trang_thai,
             'category'       => $proposal->category?->ten_danh_muc,
-            'proposed_by'    => $proposal->proposer->name,
+            'proposed_by'    => $proposal->proposer?->name ?? 'Không rõ',
             'created_at'     => $proposal->created_at,
             'executed_at'    => $proposal->executed_at,
             'my_approval'    => $myApproval?->quyet_dinh,
@@ -413,7 +421,7 @@ class GroupExpenseController extends Controller
             'total_members'  => $totalMembers,
             'splits'         => $proposal->splits->map(fn($s) => [
                 'user_id' => $s->user_id,
-                'name'    => $s->user->name,
+                'name'    => $s->user?->name ?? 'Không rõ',
                 'so_tien' => $s->so_tien,
                 'ty_le'   => $s->ty_le,
             ]),

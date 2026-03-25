@@ -220,16 +220,16 @@ body.dark .vis-label { color: #9ca3af; }
 
 {{-- Breadcrumb --}}
 <div class="breadcrumb">
-    <a href="{{ route('groups.index') }}">← Nhóm của tôi</a>
+    <a href="{{ route('groups.index') }}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M12 4L6 10l6 6"/></svg> Nhóm của tôi</a>
     <span>/</span>
     <span>{{ $group->ten_nhom }}</span>
 </div>
 
 @if(session('success'))
-<div class="alert alert-success">✓ {{ session('success') }}</div>
+<div class="alert alert-success"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M4 10l4.5 4.5L16 6"/></svg> {{ session('success') }}</div>
 @endif
 @if(session('error'))
-<div class="alert alert-error">⚠ {{ session('error') }}</div>
+<div class="alert alert-error"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 2L2 17h16z"/><path d="M10 8v4M10 14.5v.5"/></svg> {{ session('error') }}</div>
 @endif
 
 {{-- Hero --}}
@@ -240,22 +240,29 @@ body.dark .vis-label { color: #9ca3af; }
             <div class="hero-desc">{{ $group->mo_ta ?? 'Chưa có mô tả' }}</div>
             <div class="hero-meta">
                 <span class="hero-tag">
-                    {{ match($group->che_do) { 'balance'=>'⚖️ Phân phối số dư','expense'=>'🧾 Chia khoản chi',default=>'🔀 Cả hai chế độ' } }}
+
+                    @if($group->che_do=="balance")
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M10 3v14M4 17h12"/><path d="M4 7 2 12h4zM16 7l-2 5h4z"/><path d="M4 7h12"/></svg> Phân phối số dư
+                    @elseif($group->che_do=="expense")
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M5 2h10a1 1 0 011 1v14l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5V3a1 1 0 011-1z"/><path d="M7.5 7h5M7.5 10h5M7.5 13h3"/></svg> Chia khoản chi
+                    @else
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M3 6h9l3-3 3 3-3 3"/><path d="M3 14h9l3-3 3 3-3 3"/><path d="M6 9l-3 3M6 11l-3-3"/></svg> Cả hai chế độ
+                    @endif
                 </span>
-                <span class="hero-tag">👥 {{ count($members) }} thành viên</span>
-                <span class="hero-tag">📅 {{ $group->created_at->format('d/m/Y') }}</span>
+                <span class="hero-tag"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><circle cx="7.5" cy="6.5" r="2.5"/><path d="M2 17c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="14" cy="6" r="2"/><path d="M18 17c0-2.5-1.8-4.2-4-4.7"/></svg> {{ count($members) }} thành viên</span>
+                <span class="hero-tag"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><rect x="3" y="4" width="14" height="14" rx="2"/><path d="M3 9h14M7 2v4M13 2v4"/><circle cx="7" cy="13" r="0.8" fill="currentColor" stroke="none"/><circle cx="10" cy="13" r="0.8" fill="currentColor" stroke="none"/><circle cx="13" cy="13" r="0.8" fill="currentColor" stroke="none"/></svg> {{ $group->created_at->format('d/m/Y') }}</span>
                 @if($group->hien_so_du)
-                <span class="hero-tag">👁 Hiển thị số dư</span>
+                <span class="hero-tag"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M2 10S5 4.5 10 4.5 18 10 18 10s-3 5.5-8 5.5S2 10 2 10z"/><circle cx="10" cy="10" r="2.5"/></svg> Hiển thị số dư</span>
                 @endif
             </div>
         </div>
         <div class="hero-actions">
             @if($laAdmin)
-            <button class="btn-hero" onclick="openEdit()">✏️ Sửa</button>
+            <button class="btn-hero" onclick="openEdit()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M13.5 3.5L16.5 6.5 7 16H4v-3z"/><path d="M11.5 5.5l3 3"/></svg> Sửa</button>
             @endif
             <form action="{{ route('groups.leave', $group) }}" method="POST" onsubmit="return confirm('Bạn chắc chắn muốn rời nhóm?')">
                 @csrf
-                <button type="submit" class="btn-hero danger">🚪 Rời nhóm</button>
+                <button type="submit" class="btn-hero danger"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M5 2h10a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M3 18h14"/><circle cx="13" cy="10.5" r="1" fill="currentColor" stroke="none"/></svg> Rời nhóm</button>
             </form>
         </div>
     </div>
@@ -267,7 +274,7 @@ body.dark .vis-label { color: #9ca3af; }
         {{-- Pending proposals alert --}}
         @if($pendingBalance > 0)
         <div class="proposal-alert">
-            <div class="proposal-alert-icon">⏳</div>
+            <div class="proposal-alert-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4.5l3 1.5"/></svg></div>
             <div class="proposal-alert-text">Có {{ $pendingBalance }} đề xuất phân phối số dư đang chờ bạn xác nhận</div>
             <a href="{{ route('groups.balance.index', $group) }}" class="btn-primary btn-sm">Xem ngay</a>
         </div>
@@ -275,7 +282,7 @@ body.dark .vis-label { color: #9ca3af; }
 
         @if($pendingExpense > 0)
         <div class="proposal-alert">
-            <div class="proposal-alert-icon">⏳</div>
+            <div class="proposal-alert-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4.5l3 1.5"/></svg></div>
             <div class="proposal-alert-text">Có {{ $pendingExpense }} đề xuất chia chi đang chờ bạn xác nhận</div>
             <a href="{{ route('groups.expense.index', $group) }}" class="btn-primary btn-sm">Xem ngay</a>
         </div>
@@ -284,12 +291,12 @@ body.dark .vis-label { color: #9ca3af; }
         {{-- Mode navigation --}}
         <div class="section-card">
             <div class="section-hdr">
-                <div class="section-title">⚡ Chức năng nhóm</div>
+                <div class="section-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M11 2L5 11h5.5L9 18l7-9h-5.5z"/></svg> Chức năng nhóm</div>
             </div>
             <div class="mode-nav">
                 @if(in_array($group->che_do, ['balance','both']))
                 <a href="{{ route('groups.balance.index', $group) }}" class="mode-btn {{ $pendingBalance > 0 ? 'active' : '' }}">
-                    <div class="mode-btn-icon">⚖️</div>
+                    <div class="mode-btn-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 3v14M4 17h12"/><path d="M4 7 2 12h4zM16 7l-2 5h4z"/><path d="M4 7h12"/></svg></div>
                     <div class="mode-btn-name">
                         Phân phối số dư
                         @if($pendingBalance > 0)
@@ -302,7 +309,7 @@ body.dark .vis-label { color: #9ca3af; }
 
                 @if(in_array($group->che_do, ['expense','both']))
                 <a href="{{ route('groups.expense.index', $group) }}" class="mode-btn {{ $pendingExpense > 0 ? 'active' : '' }}">
-                    <div class="mode-btn-icon">🧾</div>
+                    <div class="mode-btn-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M5 2h10a1 1 0 011 1v14l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5V3a1 1 0 011-1z"/><path d="M7.5 7h5M7.5 10h5M7.5 13h3"/></svg></div>
                     <div class="mode-btn-name">
                         Chia khoản chi
                         @if($pendingExpense > 0)
@@ -313,7 +320,7 @@ body.dark .vis-label { color: #9ca3af; }
                 </a>
 
                 <a href="{{ route('groups.debt.summary', $group) }}" class="mode-btn">
-                    <div class="mode-btn-icon">📊</div>
+                    <div class="mode-btn-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><rect x="3" y="11" width="3" height="6" rx="0.5"/><rect x="8.5" y="7" width="3" height="10" rx="0.5"/><rect x="14" y="4" width="3" height="13" rx="0.5"/><path d="M2 18h16"/></svg></div>
                     <div class="mode-btn-name">Tổng kết nợ</div>
                     <div class="mode-btn-desc">Xem ai nợ ai bao nhiêu</div>
                 </a>
@@ -326,7 +333,7 @@ body.dark .vis-label { color: #9ca3af; }
     <div>
         <div class="section-card">
             <div class="section-hdr">
-                <div class="section-title">👥 Thành viên ({{ count($members) }})</div>
+                <div class="section-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><circle cx="7.5" cy="6.5" r="2.5"/><path d="M2 17c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="14" cy="6" r="2"/><path d="M18 17c0-2.5-1.8-4.2-4-4.7"/></svg> Thành viên ({{ count($members) }})</div>
                 @if($laAdmin)
                 <button class="btn-primary btn-sm" onclick="openInvite()">+ Mời</button>
                 @endif
@@ -336,7 +343,7 @@ body.dark .vis-label { color: #9ca3af; }
             @if($laAdmin && in_array($group->che_do, ['balance','both']))
             <div class="vis-toggle">
                 <div class="vis-label">
-                    👁 Hiển thị số dư cho thành viên
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M2 10S5 4.5 10 4.5 18 10 18 10s-3 5.5-8 5.5S2 10 2 10z"/><circle cx="10" cy="10" r="2.5"/></svg> Hiển thị số dư cho thành viên
                     <span style="font-size:11px;font-weight:600;margin-left:6px;
                         color:{{ $group->hien_so_du ? '#10b981' : '#9ca3af' }}">
                         {{ $group->hien_so_du ? '(Đang bật)' : '(Đang tắt)' }}
@@ -379,7 +386,12 @@ body.dark .vis-label { color: #9ca3af; }
                 </div>
                 <div class="member-meta">
                     <span class="member-role {{ $m['vai_tro'] === 'admin' ? 'role-admin' : 'role-member' }}">
-                        {{ $m['vai_tro'] === 'admin' ? '👑 Admin' : '👤 Member' }}
+
+                        @if($m['vai_tro']==="admin")
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M3 14L6 7l4 4 4-4 3 7H3z"/><path d="M3 14h14"/><circle cx="10" cy="3.5" r="1" fill="currentColor" stroke="none"/></svg> Admin
+                        @else
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><circle cx="10" cy="6.5" r="3"/><path d="M3.5 18c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6"/></svg> Member
+                        @endif
                     </span>
                     @if($hienSoDu && isset($m['so_du']))
                     @php
@@ -402,7 +414,7 @@ body.dark .vis-label { color: #9ca3af; }
                                 background:rgba(74,144,226,0.08);border:1px solid rgba(74,144,226,0.3);
                                 color:#4a90e2;font-size:11px;font-weight:700;padding:3px 9px;
                                 border-radius:8px;cursor:pointer;transition:all .2s;white-space:nowrap;">
-                                ↑ Đặt Admin
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 14V6M6 10l4-4 4 4"/></svg> Đặt Admin
                             </button>
                         </form>
                         @else
@@ -413,7 +425,7 @@ body.dark .vis-label { color: #9ca3af; }
                                 background:rgba(107,114,128,0.08);border:1px solid rgba(107,114,128,0.2);
                                 color:#6b7280;font-size:11px;font-weight:700;padding:3px 9px;
                                 border-radius:8px;cursor:pointer;transition:all .2s;white-space:nowrap;">
-                                ↓ Hạ quyền
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 6v8M6 10l4 4 4-4"/></svg> Hạ quyền
                             </button>
                         </form>
                         @endif
@@ -428,7 +440,7 @@ body.dark .vis-label { color: #9ca3af; }
                             background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);
                             color:#ef4444;font-size:11px;font-weight:700;padding:3px 9px;
                             border-radius:8px;cursor:pointer;transition:all .2s;white-space:nowrap;">
-                            ✕ Xóa
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M5 5l10 10M15 5L5 15"/></svg> Xóa
                         </button>
                     </form>
                     @endif
@@ -477,14 +489,14 @@ body.dark .vis-label { color: #9ca3af; }
         @if($laAdmin)
         <div class="section-card">
             <div class="section-hdr">
-                <div class="section-title" style="color:#ef4444;">⚠️ Khu vực nguy hiểm</div>
+                <div class="section-title" style="color:#ef4444;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 2L2 17h16z"/><path d="M10 8v4M10 14.5v.5"/></svg> Khu vực nguy hiểm</div>
             </div>
             <div style="padding:18px 22px;">
                 <form action="{{ route('groups.destroy', $group) }}" method="POST"
                       onsubmit="return confirm('Lưu trữ nhóm {{ addslashes($group->ten_nhom) }}? Dữ liệu sẽ không bị xóa.')">
                     @csrf @method('DELETE')
                     <button type="submit" class="btn-primary btn-danger" style="width:100%;justify-content:center">
-                        🗄️ Lưu trữ nhóm
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><rect x="2" y="4" width="16" height="4" rx="1"/><path d="M3 8v8a1 1 0 001 1h12a1 1 0 001-1V8"/><path d="M8 12h4"/></svg> Lưu trữ nhóm
                     </button>
                 </form>
                 <div style="font-size:12px;color:#9ca3af;margin-top:8px;text-align:center">
@@ -501,8 +513,8 @@ body.dark .vis-label { color: #9ca3af; }
 <div class="modal-overlay" id="editModal" style="opacity:0;visibility:hidden;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;transition:opacity .22s,visibility .22s">
     <div style="background:white;border-radius:20px;width:100%;max-width:500px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.18)">
         <div style="padding:22px 26px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));display:flex;justify-content:space-between;align-items:center">
-            <div style="font-size:17px;font-weight:800;color:white">✏️ Sửa thông tin nhóm</div>
-            <button onclick="closeEdit()" style="background:rgba(255,255,255,0.2);border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;color:white;font-size:16px">✕</button>
+            <div style="font-size:17px;font-weight:800;color:white"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M13.5 3.5L16.5 6.5 7 16H4v-3z"/><path d="M11.5 5.5l3 3"/></svg> Sửa thông tin nhóm</div>
+            <button onclick="closeEdit()" style="background:rgba(255,255,255,0.2);border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;color:white;font-size:16px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
         </div>
         <form action="{{ route('groups.update', $group) }}" method="POST" style="padding:24px 26px">
             @csrf @method('PUT')
@@ -519,9 +531,9 @@ body.dark .vis-label { color: #9ca3af; }
             <div style="margin-bottom:20px">
                 <label style="font-size:13px;font-weight:700;color:#374151;display:block;margin-bottom:6px">Chế độ</label>
                 <select name="che_do" style="width:100%;padding:10px 14px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;background:#f9fafb;outline:none">
-                    <option value="balance" {{ $group->che_do=='balance'?'selected':'' }}>⚖️ Phân phối số dư</option>
-                    <option value="expense" {{ $group->che_do=='expense'?'selected':'' }}>🧾 Chia khoản chi</option>
-                    <option value="both"    {{ $group->che_do=='both'?'selected':'' }}>🔀 Cả hai chế độ</option>
+                    <option value="balance" {{ $group->che_do=='balance'?'selected':'' }}>Phân phối số dư</option>
+                    <option value="expense" {{ $group->che_do=='expense'?'selected':'' }}>Chia khoản chi</option>
+                    <option value="both"    {{ $group->che_do=='both'?'selected':'' }}>Cả hai chế độ</option>
                 </select>
             </div>
             <div style="display:flex;gap:10px">

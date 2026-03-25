@@ -23,6 +23,13 @@ class SplitGroupController extends Controller
                     ->orderByDesc('created_at')
                     ->get()
                     ->map(function ($group) use ($userId) {
+                        $colors = ['#4a90e2','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
+                        $members = $group->activeMembers->take(4)->map(fn($m, $i) => [
+                            'name'   => $m->user->name,
+                            'avatar' => $m->user->avatar,
+                            'color'  => $colors[$i % count($colors)],
+                        ])->values();
+
                         return [
                             'id'            => $group->id,
                             'ten_nhom'      => $group->ten_nhom,
@@ -33,6 +40,7 @@ class SplitGroupController extends Controller
                             'la_admin'      => $group->isAdmin($userId),
                             'nguoi_tao'     => $group->creator->name,
                             'created_at'    => $group->created_at,
+                            'members'       => $members,
                         ];
                     });
 
@@ -174,38 +182,6 @@ class SplitGroupController extends Controller
             : 'Đã tắt hiển thị số dư.';
 
         return back()->with('success', $msg);
-    }
-
-    // ── Tìm kiếm user để mời vào nhóm (AJAX) ─────────────
-    public function searchUsers(Request $request)
-    {
-        $q       = trim($request->get('q', ''));
-        $exclude = array_filter(explode(',', $request->get('exclude', '')));
-
-        if (strlen($q) < 1) {
-            return response()->json(['users' => []]);
-        }
-
-        // Escape ký tự đặc biệt trong LIKE
-        $qEsc = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $q);
-
-        $users = \App\Models\User::where(function ($query) use ($qEsc) {
-                $query->where('name',  'like', '%' . $qEsc . '%')
-                      ->orWhere('email', 'like', '%' . $qEsc . '%');
-            })
-            ->when(!empty($exclude), fn($q) => $q->whereNotIn('id', $exclude))
-            ->where('id', '!=', Auth::id()) // không hiện chính mình
-            ->select('id', 'name', 'email', 'avatar')
-            ->limit(8)
-            ->get()
-            ->map(fn($u) => [
-                'id'     => $u->id,
-                'name'   => $u->name,
-                'email'  => $u->email,
-                'avatar' => $u->avatar,
-            ]);
-
-        return response()->json(['users' => $users]);
     }
 
     // ── Helpers ────────────────────────────────────────────

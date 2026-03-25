@@ -209,8 +209,8 @@ body.dark .di-desc { color:#e5e7eb; }
 </div>
 
 <div class="top-bar">
-    <div class="top-bar-title">🧾 Chia khoản chi · {{ $group->ten_nhom }}</div>
-    <a href="{{ route('groups.show', $group) }}" class="btn-ghost">← Quay lại</a>
+    <div class="top-bar-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M5 2h10a1 1 0 011 1v14l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5V3a1 1 0 011-1z"/><path d="M7.5 7h5M7.5 10h5M7.5 13h3"/></svg> Chia khoản chi · {{ $group->ten_nhom }}</div>
+    <a href="{{ route('groups.show', $group) }}" class="btn-ghost"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M12 4L6 10l6 6"/></svg> Quay lại</a>
 </div>
 
 @if(session('success'))<div class="alert alert-success">✓ {{ session('success') }}</div>@endif
@@ -219,13 +219,13 @@ body.dark .di-desc { color:#e5e7eb; }
 {{-- Tabs --}}
 <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('expense',this)">
-        🧾 Chia khoản chi
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M5 2h10a1 1 0 011 1v14l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5V3a1 1 0 011-1z"/><path d="M7.5 7h5M7.5 10h5M7.5 13h3"/></svg> Chia khoản chi
         @if($myPending->count() > 0)
         <span class="tab-badge">{{ $myPending->count() }}</span>
         @endif
     </button>
     <button class="tab-btn" onclick="switchTab('debt',this)">
-        📊 Ghi nợ thẳng
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><rect x="3" y="11" width="3" height="6" rx="0.5"/><rect x="8.5" y="7" width="3" height="10" rx="0.5"/><rect x="14" y="4" width="3" height="13" rx="0.5"/><path d="M2 18h16"/></svg> Ghi nợ thẳng
     </button>
 </div>
 
@@ -238,7 +238,7 @@ body.dark .di-desc { color:#e5e7eb; }
             @if($myPending->count() > 0)
             <div class="section-card" style="margin-bottom:20px;border:2px solid rgba(245,158,11,0.3)">
                 <div class="sc-hdr" style="background:rgba(245,158,11,0.05)">
-                    <div class="sc-title">⏳ Chờ bạn xác nhận ({{ $myPending->count() }})</div>
+                    <div class="sc-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4.5l3 1.5"/></svg> Chờ bạn xác nhận ({{ $myPending->count() }})</div>
                 </div>
                 @foreach($myPending as $p)
                 <div class="proposal-item">
@@ -265,10 +265,10 @@ body.dark .di-desc { color:#e5e7eb; }
                     <div class="pi-progress-label">{{ $p['approved_count'] }}/{{ $p['total_members'] }} người đồng ý</div>
                     <div class="pi-actions">
                         <form action="{{ route('groups.expense.approve', [$group, $p['id']]) }}" method="POST">
-                            @csrf <button type="submit" class="btn-primary btn-success btn-sm">✓ Đồng ý</button>
+                            @csrf <button type="submit" class="btn-primary btn-success btn-sm"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M4 10l4.5 4.5L16 6"/></svg> Đồng ý</button>
                         </form>
                         <form action="{{ route('groups.expense.reject',  [$group, $p['id']]) }}" method="POST" style="display:inline">
-                            @csrf <button type="submit" class="btn-primary btn-danger btn-sm">✕ Từ chối</button>
+                            @csrf <button type="submit" class="btn-primary btn-danger btn-sm"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M5 5l10 10M15 5L5 15"/></svg> Từ chối</button>
                         </form>
                     </div>
                 </div>
@@ -278,7 +278,7 @@ body.dark .di-desc { color:#e5e7eb; }
 
             {{-- History --}}
             <div class="section-card">
-                <div class="sc-hdr"><div class="sc-title">📋 Lịch sử khoản chi</div></div>
+                <div class="sc-hdr"><div class="sc-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><rect x="5" y="4" width="10" height="14" rx="1.5"/><path d="M8 4V3a1 1 0 011-1h2a1 1 0 011 1v1"/><path d="M8 9h4M8 12h4M8 15h2"/></svg> Lịch sử khoản chi</div></div>
                 @forelse($proposals as $p)
                 <div class="proposal-item">
                     <div class="pi-top">
@@ -293,7 +293,7 @@ body.dark .di-desc { color:#e5e7eb; }
                         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
                             <div class="pi-amount">-{{ number_format($p['tong_tien']) }}đ</div>
                             <span class="pi-status st-{{ $p['trang_thai'] }}">
-                                {{ match($p['trang_thai']){'pending'=>'⏳ Chờ duyệt','approved'=>'✓ Thực hiện','rejected'=>'✕ Từ chối',default=>'— Đã hủy'} }}
+                                {{ match($p['trang_thai']){'pending'=>'Chờ duyệt','approved'=>'Thực hiện','rejected'=>'Từ chối',default=>'Đã hủy'} }}
                             </span>
                         </div>
                     </div>
@@ -308,26 +308,26 @@ body.dark .di-desc { color:#e5e7eb; }
                     @if($p['my_approval']===null)
                     <div class="pi-actions">
                         <form action="{{ route('groups.expense.approve', [$group, $p['id']]) }}" method="POST">
-                            @csrf <button type="submit" class="btn-primary btn-success btn-sm">✓ Đồng ý</button>
+                            @csrf <button type="submit" class="btn-primary btn-success btn-sm"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M4 10l4.5 4.5L16 6"/></svg> Đồng ý</button>
                         </form>
                         <form action="{{ route('groups.expense.reject',  [$group, $p['id']]) }}" method="POST" style="display:inline">
-                            @csrf <button type="submit" class="btn-primary btn-danger btn-sm">✕ Từ chối</button>
+                            @csrf <button type="submit" class="btn-primary btn-danger btn-sm"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M5 5l10 10M15 5L5 15"/></svg> Từ chối</button>
                         </form>
                         <form action="{{ route('groups.expense.cancel',  [$group, $p['id']]) }}" method="POST" style="display:inline">
                             @csrf <button type="submit" class="btn-ghost btn-sm">Hủy</button>
                         </form>
                     </div>
                     @else
-                    <div style="font-size:12px;color:#9ca3af;margin-top:6px">Bạn đã {{ $p['my_approval']==='approved'?'✓ đồng ý':'✕ từ chối' }}</div>
+                    <div style="font-size:12px;color:#9ca3af;margin-top:6px">Bạn đã {!! $p['my_approval']==='approved'?'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M4 10l4.5 4.5L16 6"/></svg> đồng ý':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M5 5l10 10M15 5L5 15"/></svg> từ chối' !!}</div>
                     @endif
                     @endif
                     @if($p['trang_thai']==='approved')
-                    <div style="font-size:12px;color:var(--success);margin-top:6px">✓ Thực hiện {{ \Carbon\Carbon::parse($p['executed_at'])->format('d/m/Y H:i') }}</div>
+                    <div style="font-size:12px;color:var(--success);margin-top:6px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M4 10l4.5 4.5L16 6"/></svg> Thực hiện {{ \Carbon\Carbon::parse($p['executed_at'])->format('d/m/Y H:i') }}</div>
                     @endif
                 </div>
                 @empty
                 <div class="empty-msg">
-                    <div class="empty-msg-icon">🧾</div>
+                    <div class="empty-msg-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M5 2h10a1 1 0 011 1v14l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5V3a1 1 0 011-1z"/><path d="M7.5 7h5M7.5 10h5M7.5 13h3"/></svg></div>
                     <div class="empty-msg-text">Chưa có khoản chi nào</div>
                     <div style="font-size:13px;margin-top:4px">Tạo đề xuất để chia tiền cùng nhau</div>
                 </div>
@@ -338,7 +338,7 @@ body.dark .di-desc { color:#e5e7eb; }
         {{-- RIGHT: Create form --}}
         <div>
             <div class="section-card">
-                <div class="sc-hdr"><div class="sc-title">➕ Tạo khoản chi chung</div></div>
+                <div class="sc-hdr"><div class="sc-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M10 4v12M4 10h12"/></svg> Tạo khoản chi chung</div></div>
                 <form action="{{ route('groups.expense.store', $group) }}" method="POST" style="padding:20px">
                     @csrf
                     <div class="form-group">
@@ -369,17 +369,17 @@ body.dark .di-desc { color:#e5e7eb; }
                         <div class="kieu-grid">
                             <label class="kieu-card selected" onclick="selectKieu(this,'equal')">
                                 <input type="radio" name="kieu_chia" value="equal" checked>
-                                <div class="kieu-icon">➗</div>
+                                <div class="kieu-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M4 10h12"/><circle cx="10" cy="6" r="1.3" fill="currentColor" stroke="none"/><circle cx="10" cy="14" r="1.3" fill="currentColor" stroke="none"/></svg></div>
                                 <div class="kieu-name">Chia đều</div>
                             </label>
                             <label class="kieu-card" onclick="selectKieu(this,'custom')">
                                 <input type="radio" name="kieu_chia" value="custom">
-                                <div class="kieu-icon">✏️</div>
+                                <div class="kieu-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M13.5 3.5L16.5 6.5 7 16H4v-3z"/><path d="M11.5 5.5l3 3"/></svg></div>
                                 <div class="kieu-name">Tùy chỉnh</div>
                             </label>
                             <label class="kieu-card" onclick="selectKieu(this,'percentage')">
                                 <input type="radio" name="kieu_chia" value="percentage">
-                                <div class="kieu-icon">%</div>
+                                <div class="kieu-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M5 15L15 5"/><circle cx="6.5" cy="6.5" r="2"/><circle cx="13.5" cy="13.5" r="2"/></svg></div>
                                 <div class="kieu-name">Theo %</div>
                             </label>
                         </div>
@@ -419,18 +419,18 @@ body.dark .di-desc { color:#e5e7eb; }
                                         class="mem-input mem-ty-le" data-idx="{{ $i }}"
                                         placeholder="%" min="0" max="100" step="1"
                                         style="display:none">
-                                    <span class="mem-equal-label" style="font-size:12px;color:#10b981;font-weight:600;">✓ Chia đều</span>
+                                    <span class="mem-equal-label" style="font-size:12px;color:#10b981;font-weight:600;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M4 10l4.5 4.5L16 6"/></svg> Chia đều</span>
                                 </td>
                             </tr>
                             @endforeach
                         </table>
                         <div id="kieu-hint" style="font-size:12px;color:#9ca3af;margin-top:8px">
-                            ➗ Chia đều — hệ thống tự tính, không cần nhập
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M4 10h12"/><circle cx="10" cy="6" r="1.3" fill="currentColor" stroke="none"/><circle cx="10" cy="14" r="1.3" fill="currentColor" stroke="none"/></svg> Chia đều — hệ thống tự tính, không cần nhập
                         </div>
                     </div>
 
                     <button type="submit" class="btn-primary" style="width:100%;justify-content:center;padding:13px">
-                        🧾 Gửi đề xuất chia chi
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M5 2h10a1 1 0 011 1v14l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5V3a1 1 0 011-1z"/><path d="M7.5 7h5M7.5 10h5M7.5 13h3"/></svg> Gửi đề xuất chia chi
                     </button>
                 </form>
             </div>
@@ -446,25 +446,25 @@ body.dark .di-desc { color:#e5e7eb; }
             {{-- Simplified view --}}
             <div class="section-card" style="margin-bottom:20px">
                 <div class="sc-hdr simplified-hdr">
-                    <div class="sc-title">🔢 Sau khi rút gọn</div>
+                    <div class="sc-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M5 8h10M5 12h10M8 4l-2 12M12 4l-2 12"/></svg> Sau khi rút gọn</div>
                     <a href="{{ route('groups.debt.summary', $group) }}" class="btn-ghost btn-sm">Xem chi tiết</a>
                 </div>
                 <div style="padding:16px">
                     <div class="debt-grid" id="debtFlowGrid">
-                        <div class="empty-msg"><div class="empty-msg-icon">🎉</div><div class="empty-msg-text">Không có ai nợ ai</div></div>
+                        <div class="empty-msg"><div class="empty-msg-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M4 16L9 4l7 7z"/><path d="M9 4l2 2M14 8l2 2"/><circle cx="15" cy="5" r="1" fill="currentColor" stroke="none"/><circle cx="5" cy="4" r="0.8" fill="currentColor" stroke="none"/></svg></div><div class="empty-msg-text">Không có ai nợ ai</div></div>
                     </div>
                 </div>
             </div>
 
             {{-- Raw debt list --}}
             <div class="section-card">
-                <div class="sc-hdr"><div class="sc-title">📝 Danh sách nợ</div></div>
+                <div class="sc-hdr"><div class="sc-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M6 2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M7 7h6M7 10h6M7 13h4"/></svg> Danh sách nợ</div></div>
                 @php
                     // Load raw debts for display via AJAX ideally, but show link for now
                 @endphp
                 <div style="padding:20px;text-align:center">
                     <a href="{{ route('groups.debt.summary', $group) }}" class="btn-primary">
-                        📊 Xem tổng kết nợ đầy đủ
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><rect x="3" y="11" width="3" height="6" rx="0.5"/><rect x="8.5" y="7" width="3" height="10" rx="0.5"/><rect x="14" y="4" width="3" height="13" rx="0.5"/><path d="M2 18h16"/></svg> Xem tổng kết nợ đầy đủ
                     </a>
                 </div>
             </div>
@@ -473,7 +473,7 @@ body.dark .di-desc { color:#e5e7eb; }
         {{-- RIGHT: Add debt form --}}
         <div>
             <div class="section-card">
-                <div class="sc-hdr"><div class="sc-title">📝 Ghi nợ thẳng</div></div>
+                <div class="sc-hdr"><div class="sc-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M6 2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M7 7h6M7 10h6M7 13h4"/></svg> Ghi nợ thẳng</div></div>
                 <form action="{{ route('groups.debt.store', $group) }}" method="POST" style="padding:20px">
                     @csrf
                     <div class="form-group">
@@ -485,7 +485,7 @@ body.dark .di-desc { color:#e5e7eb; }
                             @endforeach
                         </select>
                     </div>
-                    <div style="text-align:center;font-size:20px;color:#9ca3af;margin:4px 0">↓ nợ</div>
+                    <div style="text-align:center;font-size:20px;color:#9ca3af;margin:4px 0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 6v8M6 10l4 4 4-4"/></svg> nợ</div>
                     <div class="form-group">
                         <label class="form-label">Chủ nợ <span class="required">*</span></label>
                         <select name="chu_no_id" class="form-ctrl" required>
@@ -504,11 +504,11 @@ body.dark .di-desc { color:#e5e7eb; }
                         <input name="ghi_chu" class="form-ctrl" placeholder="VD: Tiền điện tháng 3..." maxlength="255">
                     </div>
                     <div style="background:rgba(74,144,226,0.06);border-radius:10px;padding:12px;font-size:12px;color:#4b5563;margin-bottom:16px">
-                        💡 Ghi nợ thẳng sẽ được xác nhận ngay (không cần toàn bộ đồng ý).
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 2.5a5.5 5.5 0 014 9.3V14H6v-2.2A5.5 5.5 0 0110 2.5z"/><path d="M8 14v1.5a2 2 0 004 0V14"/></svg> Ghi nợ thẳng sẽ được xác nhận ngay (không cần toàn bộ đồng ý).
                         Dùng khi bạn chắc chắn về khoản nợ.
                     </div>
                     <button type="submit" class="btn-primary btn-danger" style="width:100%;justify-content:center;padding:13px">
-                        📝 Ghi nhận nợ
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M6 2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M7 7h6M7 10h6M7 13h4"/></svg> Ghi nhận nợ
                     </button>
                 </form>
             </div>
@@ -549,8 +549,8 @@ function selectKieu(el, kieu) {
     }
 
     hint.textContent = {
-        equal:      '➗ Chia đều — hệ thống tự tính, không cần nhập',
-        custom:     '✏️ Nhập số tiền cho từng người (tổng phải bằng tổng tiền)',
+        equal:      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M4 10h12"/><circle cx="10" cy="6" r="1.3" fill="currentColor" stroke="none"/><circle cx="10" cy="14" r="1.3" fill="currentColor" stroke="none"/></svg> Chia đều — hệ thống tự tính, không cần nhập',
+        custom:     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M13.5 3.5L16.5 6.5 7 16H4v-3z"/><path d="M11.5 5.5l3 3"/></svg> Nhập số tiền cho từng người (tổng phải bằng tổng tiền)',
         percentage: '% Nhập tỷ lệ % cho từng người (tổng phải bằng 100%)',
     }[kieu];
 }

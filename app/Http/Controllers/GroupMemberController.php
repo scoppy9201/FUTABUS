@@ -11,6 +11,7 @@ use App\Models\SplitGroup;
 use App\Models\SplitGroupMember;
 use App\Models\GroupInvitation;
 use App\Models\User;
+use App\Observers\GroupNotifier;
 
 class GroupMemberController extends Controller
 {
@@ -87,6 +88,8 @@ class GroupMemberController extends Controller
 
             DB::commit();
 
+            GroupNotifier::invited($group, $email, Auth::user()->name);
+
             return back()->with('success', "Đã gửi lời mời đến {$email}. Hết hạn sau 48 giờ.");
 
         } catch (\Exception $e) {
@@ -146,6 +149,10 @@ class GroupMemberController extends Controller
 
             DB::commit();
 
+             $newMem = $existingMember ?? SplitGroupMember::where('group_id', $group->id)
+                ->where('user_id', Auth::id())->first();
+            if ($newMem) GroupNotifier::memberJoined($group, $newMem);
+
             return redirect()->route('groups.show', $group)
                 ->with('success', "Chào mừng bạn đã gia nhập nhóm \"{$group->ten_nhom}\"!");
 
@@ -200,6 +207,8 @@ class GroupMemberController extends Controller
             'left_at'    => now(),
         ]);
 
+        GroupNotifier::memberRemoved($group, $member);
+
         return back()->with('success', "Đã xóa {$member->user->name} khỏi nhóm.");
     }
 
@@ -227,6 +236,8 @@ class GroupMemberController extends Controller
             'left_at'    => now(),
         ]);
 
+        GroupNotifier::memberLeft($group, $member);
+
         return redirect()->route('groups.index')
             ->with('success', "Bạn đã rời nhóm \"{$group->ten_nhom}\".");
     }
@@ -239,6 +250,8 @@ class GroupMemberController extends Controller
         abort_if($member->trang_thai !== 'active', 422, 'Thành viên không còn trong nhóm.');
 
         $member->update(['vai_tro' => 'admin']);
+
+        GroupNotifier::promoted($group, $member);
 
         return back()->with('success', "{$member->user->name} đã được chỉ định làm Admin.");
     }
@@ -265,6 +278,8 @@ class GroupMemberController extends Controller
         }
 
         $member->update(['vai_tro' => 'member']);
+
+        GroupNotifier::demoted($group, $member);
 
         return back()->with('success', "Đã hạ quyền {$member->user->name} xuống Member.");
     }
