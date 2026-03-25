@@ -184,6 +184,37 @@ class SplitGroupController extends Controller
         return back()->with('success', $msg);
     }
 
+    public function searchUsers(Request $request)
+    {
+        $q       = trim($request->get('q', ''));
+        $exclude = array_filter(explode(',', $request->get('exclude', '')));
+
+        if (strlen($q) < 1) {
+            return response()->json(['users' => []]);
+        }
+
+        // Escape ký tự đặc biệt trong LIKE
+        $qEsc = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $q);
+
+        $users = \App\Models\User::where(function ($query) use ($qEsc) {
+                $query->where('name',  'like', '%' . $qEsc . '%')
+                      ->orWhere('email', 'like', '%' . $qEsc . '%');
+            })
+            ->when(!empty($exclude), fn($q) => $q->whereNotIn('id', $exclude))
+            ->where('id', '!=', Auth::id())
+            ->select('id', 'name', 'email', 'avatar')
+            ->limit(8)
+            ->get()
+            ->map(fn($u) => [
+                'id'     => $u->id,
+                'name'   => $u->name,
+                'email'  => $u->email,
+                'avatar' => $u->avatar,
+            ]);
+
+        return response()->json(['users' => $users]);
+    }
+
     // ── Helpers ────────────────────────────────────────────
 
     private function getUserBalance(int $userId): float
