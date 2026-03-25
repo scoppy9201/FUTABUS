@@ -335,6 +335,8 @@ class GroupExpenseController extends Controller
 
         foreach ($splits as $split) {
             if ($split->so_tien <= 0) continue;
+            if (!$split->user) continue;
+
 
             // Lấy category CHI phù hợp cho từng user
             $category = $this->getOrCreateExpenseCategory(
