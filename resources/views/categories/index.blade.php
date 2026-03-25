@@ -1804,7 +1804,11 @@
                                     <img src="{{ asset('images/edit.png') }}" alt="Edit">
                                 </button>
 
-                                <form action="{{ route('categories.destroy', $category) }}" method="POST" style="display: inline;" onsubmit="return confirm('Bạn có chắc muốn xóa danh mục này?')">
+                                <form action="{{ route('categories.destroy', $category) }}" 
+                                method="POST" 
+                                style="display: inline;" 
+                                class="form-delete"
+                                data-id="{{ $category->id }}">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn-action btn-delete" title="Xóa">
@@ -2202,6 +2206,7 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 const CATEGORY_ICONS = [
     { file: 'money.png', name: 'Tiền mặt', tags: 'tien mat cash money' },
@@ -2554,5 +2559,27 @@ document.addEventListener('DOMContentLoaded', function() {
 @if($errors->any() && !$errors->has('id'))
     document.getElementById('create-modal')?.classList.add('active');
 @endif
+    // Xác nhận xóa 
+    document.querySelectorAll('.form-delete').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // chặn submit mặc định
+
+            Swal.fire({
+                title: 'Bạn chắc chưa?',
+                text: 'Xóa rồi không khôi phục được đâu!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy',
+                background: '#1E2937',
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b6c80'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit(); // submit lại nếu đồng ý
+                }
+            });
+        });
+    });
 </script>
 @endsection
