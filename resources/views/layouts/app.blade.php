@@ -117,7 +117,7 @@
         }
 
         /* Topbar */
-.topbar {
+        .topbar {
             position: fixed;
             top: 0;
             left: 0;
@@ -229,7 +229,7 @@
         .icon-btn {
             width: 42px;
             height: 42px;
-border-radius: 12px;
+            border-radius: 12px;
             background: #f8f9fd;
             display: flex;
             align-items: center;
@@ -341,7 +341,7 @@ border-radius: 12px;
             overflow: hidden;
             z-index: 10000;
             opacity: 0;
-visibility: hidden;
+            visibility: hidden;
             transform: translateY(-10px);
             transition: var(--transition);
             border: 1px solid rgba(0, 0, 0, 0.05);
@@ -454,10 +454,12 @@ visibility: hidden;
             width: 80px;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
-z-index: 100;
+            z-index: 100;
             box-shadow: 2px 0 20px rgba(0, 0, 0, 0.08);
             border-right: 1px solid rgba(226, 232, 240, 0.8);
             transition: var(--transition);
+            
+            overflow: visible; 
         }
 
         .nav-menu {
@@ -563,7 +565,7 @@ z-index: 100;
         }
 
         .nav-link.active .nav-text::before {
-border-color: transparent var(--primary) transparent transparent;
+            border-color: transparent var(--primary) transparent transparent;
         }
 
         /* Main Content */
@@ -674,7 +676,7 @@ border-color: transparent var(--primary) transparent transparent;
         }
 
         .stat-card::before {
-content: '';
+            content: '';
             position: absolute;
             top: 0;
             left: 0;
@@ -850,7 +852,7 @@ content: '';
             color: #e5e7eb;
             border-color: rgba(255,255,255,0.05);
             background: #1a1f29;
-    }
+        }
         body.dark .sr-item:hover { background: #212736; }
         body.dark .sr-empty {
             background: #1a1f29;
@@ -1036,6 +1038,27 @@ content: '';
             display: flex;
             gap: 8px;
             animation: msgIn 0.25s ease;
+        }
+
+        .nav-item.has-sub {
+            position: relative;
+        }
+
+        .sub-menu {
+            position: absolute;
+            left: 80px;
+            top: 0;
+            background: #fff;
+            min-width: 180px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: none;
+            padding: 8px 0;
+            z-index: 9999; 
+        }
+
+        .nav-item.has-sub:hover .sub-menu {
+            display: block;
         }
 
         @keyframes msgIn {
@@ -1421,77 +1444,7 @@ content: '';
         </div>
     </div>
 
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <ul class="nav-menu">
-            <li class="nav-item">
-                <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                    <span class="nav-icon">
-                        <img src="{{ asset('images/home.png') }}" alt="Home">
-                    </span>
-                    <span class="nav-text">Trang chủ</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('transactions.index') }}" class="nav-link {{ request()->routeIs('transactions.*') ? 'active' : '' }}">
-                    <span class="nav-icon">
-                        <img src="{{ asset('images/transaction.png') }}" alt="Transaction">
-                    </span>
-                    <span class="nav-text">Giao dịch</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('wallets.index') }}" class="nav-link {{ request()->routeIs('wallets.*') ? 'active' : '' }}">
-                    <span class="nav-icon">
-                        <img src="{{ asset('images/asset-allocation.png') }}" alt="Budget">
-                    </span>
-                    <span class="nav-text">Ngân sách</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('categories.index') }}" class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}">
-                    <span class="nav-icon">
-                        <img src="{{ asset('images/category.png') }}" alt="Category">
-                    </span>
-                    <span class="nav-text">Danh mục</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link">
-                    <span class="nav-icon">
-                        <img src="{{ asset('images/wallet.png') }}" alt="Ví">
-                    </span>
-                    <span class="nav-text">Ví</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('currency.index') }}" class="nav-link {{ request()->routeIs('currency.*') ? 'active' : '' }}">
-                    <span class="nav-icon">
-                        <img src="{{ asset('images/exchange.png') }}" alt="Quy đổi tiền">
-                    </span>
-                    <span class="nav-text">Quy đổi tiền</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('groups.index') }}" class="nav-link {{ request()->routeIs('groups.*') ? 'active' : '' }}">
-                    <span class="nav-icon">
-                        <img src="{{ asset('images/coworking.png') }}" alt="Hội nhóm">
-                    </span>
-                    <span class="nav-text">Hội nhóm</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('settings.index') }}" 
-                  class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">
-                    <span class="nav-icon">
-                        <img src="{{ asset('images/settings.png') }}" alt="Cài đặt">
-                    </span>
-                    <span class="nav-text">Cài đặt</span>
-                </a>
-            </li>
-        </li>
-        </ul>
-    </aside>
+    @include('layouts.partials.sidebar')
 
     <!-- Bubble Button -->
     <div class="ai-bubble" id="aiBubble">
@@ -1571,8 +1524,6 @@ content: '';
         </div>
     </div>
 
-
-
     <script>
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') document.body.classList.add('dark');
@@ -1580,15 +1531,13 @@ content: '';
         document.getElementById('themeToggle')?.addEventListener('click', () => {
         document.body.classList.toggle('dark');
         const isDark = document.body.classList.contains('dark');
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-
-    // Đồng bộ vào setting
-        try {
-            const s = JSON.parse(localStorage.getItem('monexa_settings') || '{}');
-            s.darkMode = isDark;
-            localStorage.setItem('monexa_settings', JSON.stringify(s));
-        } catch {}
-    });
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            try {
+                const s = JSON.parse(localStorage.getItem('monexa_settings') || '{}');
+                s.darkMode = isDark;
+                localStorage.setItem('monexa_settings', JSON.stringify(s));
+            } catch {}
+        });
 
         const userProfile = document.getElementById('userProfile');
         const dropdown = document.getElementById('profileDropdown');
@@ -1803,7 +1752,6 @@ content: '';
     </script>
     
 </body>
-<!-- ===== GLOBAL TOAST SYSTEM ===== -->
     <div id="toastContainer" style="
         position: fixed;
         top: 84px;
