@@ -831,6 +831,17 @@
             width: 100%;
         }
     }
+    body.dark .transaction-category {
+    color: #e5e7eb; 
+    }
+
+    body.dark .transaction-desc {
+        color: #9ca3af; 
+    }
+
+    body.dark td {
+        color: #e5e7eb;
+    }
 </style>
 
 <div class="transaction-container">
@@ -1028,7 +1039,11 @@
                                     <img src="{{ asset('images/edit.png') }}" alt="Edit">
                                 </button>
 
-                                <form action="{{ route('transactions.destroy', $transaction) }}" method="POST" style="display: inline;" onsubmit="return confirm('Bạn có chắc muốn xóa giao dịch này?')">
+                                <form action="{{ route('transactions.destroy', $transaction) }}" 
+                                method="POST" 
+                                style="display: inline;"
+                                class="form-delete"
+                                data-id="{{ $category->id }}">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn-action btn-delete" title="Xóa">
@@ -1286,6 +1301,7 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 const closeModal = modalId => document.getElementById(modalId)?.classList.remove('active');
 
@@ -1501,6 +1517,28 @@ document.addEventListener('DOMContentLoaded', () => {
     @if($errors->any() && !$errors->has('id'))
         document.getElementById('create-modal')?.classList.add('active');
     @endif
+});
+// Xác nhận xóa 
+document.querySelectorAll('.form-delete').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault(); // chặn submit mặc định
+
+        Swal.fire({
+            title: 'Bạn chắc chưa?',
+            text: 'Xóa rồi không khôi phục được đâu!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xóa',
+            cancelButtonText: 'Hủy',
+            background: '#1E2937',
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit(); // submit lại nếu đồng ý
+            }
+        });
+    });
 });
 </script>
 @endsection
