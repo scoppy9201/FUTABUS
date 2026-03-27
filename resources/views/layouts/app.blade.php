@@ -6,7 +6,7 @@
     <title>@yield('title', 'Monexa') - Quản lý chi tiêu</title>
     <link rel="icon" type="images/png" href="{{ asset('favicon.png') }}">
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
-   <script src="{{ asset('js/main.js') }}" defer></script>
+    <script src="{{ asset('js/main.js') }}" defer></script>
 </head>
 <body class="{{ cookie('theme', 'light') === 'dark' ? 'dark' : '' }}">
     <!-- Topbar -->
