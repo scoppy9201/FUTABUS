@@ -2,18 +2,24 @@
         if (savedTheme === 'dark') document.body.classList.add('dark');
 
         document.getElementById('themeToggle')?.addEventListener('click', () => {
-            document.body.classList.toggle('dark');
-            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        document.body.classList.toggle('dark');
+        const isDark = document.body.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            try {
+                const s = JSON.parse(localStorage.getItem('monexa_settings') || '{}');
+                s.darkMode = isDark;
+                localStorage.setItem('monexa_settings', JSON.stringify(s));
+            } catch {}
         });
 
         const userProfile = document.getElementById('userProfile');
         const dropdown = document.getElementById('profileDropdown');
-        
+
         userProfile?.addEventListener('click', e => {
             e.stopPropagation();
             dropdown.classList.toggle('show');
         });
-        
+
         document.addEventListener('click', () => dropdown.classList.remove('show'));
         dropdown?.addEventListener('click', e => e.stopPropagation());
 
@@ -216,3 +222,78 @@
                 welcome.style.display = 'flex';
             };
         })();
+        // Đọc settings từ localStorage
+        function _getToastSettings() {
+            try { return { toastEnabled: true, toastPosition: 'top-right', toastDuration: 5, toastSound: false, ...JSON.parse(localStorage.getItem('monexa_settings') || '{}') }; }
+            catch { return { toastEnabled: true, toastPosition: 'top-right', toastDuration: 5, toastSound: false }; }
+        }
+
+        function _applyToastPosition(pos) {
+            const c = document.getElementById('toastContainer');
+            if (!c) return;
+            c.style.top    = pos.includes('bottom') ? 'auto' : '84px';
+            c.style.bottom = pos.includes('bottom') ? '20px' : 'auto';
+            c.style.left   = pos.includes('left')   ? '20px' : 'auto';
+            c.style.right  = pos.includes('left')   ? 'auto' : '20px';
+        }
+
+        // Áp dụng vị trí ngay khi load
+        _applyToastPosition(_getToastSettings().toastPosition);
+
+        window.showToast = function({ type = 'info', title, message = '', action = null, id = null, duration = null }) {
+            const s = _getToastSettings();
+            if (s.toastEnabled === false) return;
+
+            const ms = duration ?? (s.toastDuration * 1000);
+            if (id && document.querySelector(`[data-toast-id="${id}"]`)) return;
+            if (id && sessionStorage.getItem('tdismiss_' + id)) return;
+
+            _applyToastPosition(s.toastPosition);
+
+            const icons = {
+            success: '<img src="/images/check.png"   style="width:20px;height:20px;object-fit:contain;">',
+            error:   '<img src="/images/warning.png" style="width:20px;height:20px;object-fit:contain;">',
+            warning: '<img src="/images/alert.png"   style="width:20px;height:20px;object-fit:contain;">',
+            info:    '<img src="/images/info.png"    style="width:20px;height:20px;object-fit:contain;">',
+        };
+            const el = document.createElement('div');
+            el.className = `g-toast ${type}`;
+            if (id) el.dataset.toastId = id;
+
+            el.innerHTML = `
+                <div class="g-toast-icon">${icons[type] || 'ℹ️'}</div>
+                <div class="g-toast-body">
+                    <div class="g-toast-title">${title}</div>
+                    ${message ? `<div class="g-toast-msg">${message}</div>` : ''}
+                    ${action ? `<a href="${action.url}" class="g-toast-action">${action.label}</a>` : ''}
+                </div>
+                <button class="g-toast-close" onclick="dismissToast(this,'${id}')">&times;</button>
+                <div class="g-toast-progress" style="animation-duration:${ms}ms"></div>
+            `;
+
+            document.getElementById('toastContainer')?.appendChild(el);
+
+            // Sound
+            if (s.toastSound) {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.frequency.value = type === 'error' ? 300 : 600;
+                    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                    osc.start(); osc.stop(ctx.currentTime + 0.3);
+                } catch {}
+            }
+
+            if (ms > 0) setTimeout(() => dismissToast(el.querySelector('.g-toast-close'), id), ms);
+        };
+
+        window.dismissToast = function(btn, id = null) {
+            const toast = btn?.closest?.('.g-toast');
+            if (!toast) return;
+            toast.classList.add('hiding');
+            if (id && id !== 'null') sessionStorage.setItem('tdismiss_' + id, '1');
+            setTimeout(() => toast.remove(), 320);
+        };
