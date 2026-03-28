@@ -20,6 +20,7 @@ use App\Http\Controllers\GroupBalanceController;
 use App\Http\Controllers\GroupExpenseController;
 use App\Http\Controllers\GroupDebtController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\EmailSettingController;
 
 use App\Http\Controllers\NotificationController;
 
@@ -181,8 +182,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/mark-read/{notification}', [NotificationController::class, 'markRead'])->name('mark-read');
         Route::post('/mark-all-read',            [NotificationController::class, 'markAllRead'])->name('mark-all-read');
         Route::get('/badge',      [NotificationController::class, 'badge'])      ->name('badge');
+        Route::post('/notifications/invite-action/{token}', [NotificationController::class, 'handleInviteAction'])
+            ->name('notifications.invite-action');
     });
-
+    Route::prefix('settings/email')->name('settings.email.')->group(function () {
+        Route::post('/save', [EmailSettingController::class, 'update'])->name('save');
+        Route::post('/test', [EmailSettingController::class, 'testMail'])->name('test');
+    });
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });

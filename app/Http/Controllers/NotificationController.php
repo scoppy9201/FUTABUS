@@ -41,18 +41,20 @@ class NotificationController extends Controller
 
         return response()->json([
             'notifications' => $notifications->map(fn($n) => [
-                'id'        => $n->id,
-                'icon'      => $n->icon,
-                'color'     => $n->color,
-                'tieu_de'   => $n->tieu_de,
-                'noi_dung'  => $n->noi_dung,
-                'url'       => $n->url,
-                'da_doc'    => $n->da_doc,
-                'time_ago'  => $n->time_ago,
-                'date'      => $n->created_at->format('Y-m-d'),
-                'actor_avatar' => $n->actor?->avatar,
-                'actor_name'   => $n->actor?->name,
-            ]),
+            'id'        => $n->id,
+            'icon'      => $n->icon,
+            'color'     => $n->color,
+            'tieu_de'   => $n->tieu_de,
+            'noi_dung'  => $n->noi_dung,
+            'url'       => $n->url,
+            'da_doc'    => $n->da_doc,
+            'time_ago'  => $n->time_ago,
+            'created_at_unix' => $n->created_at->timestamp, // ← THÊM DÒNG NÀY
+            'date'      => $n->created_at->format('Y-m-d'),
+            'actor_avatar' => $n->actor?->avatar,
+            'actor_name'   => $n->actor?->name,
+            'loai'      => $n->loai, // ← THÊM để dùng cho invite buttons
+        ]),
             'unread_count' => $unreadCount,
             'has_older'    => SystemNotification::where('user_id', $userId)
                 ->where('created_at', '<', now()->subDays(30))
@@ -105,7 +107,14 @@ class NotificationController extends Controller
     public function markAllRead()
     {
         NotificationService::markAllRead(Auth::id());
-        return response()->json(['ok' => true]);
+
+        // Nếu là AJAX request thì trả JSON, còn không thì redirect
+        if (request()->expectsJson() || request()->ajax()) {
+            return response()->json(['ok' => true]);
+        }
+
+        return redirect()->route('notifications.index')
+            ->with('success', 'Đã đánh dấu tất cả thông báo là đã đọc');
     }
 
     // AJAX: lấy số badge (polling)
@@ -114,4 +123,62 @@ class NotificationController extends Controller
         $count = NotificationService::unreadCount(Auth::id());
         return response()->json(['count' => $count]);
     }
+
+    public function handleInviteAction(Request $request, string $token)
+    {
+        $action = $request->input('action'); // 'accept' hoặc 'decline'
+
+        $invitation = \App\Models\GroupInvitation::where('token', $token)->first();
+
+        if (!$invitation || !$invitation->isUsable()) {
+            return response()->json(['ok' => false, 'message' => 'Lời mời không còn hiệu lực'], 422);
+        }
+
+        if ($invitation->email !== Auth::user()->email) {
+            return response()->json(['ok' => false, 'message' => 'Lời mời này không dành cho bạn'], 403);
+        }
+
+        if ($action === 'accept') {
+            \DB::beginTransaction();
+            try {
+                $group = $invitation->group;
+                $existing = \App\Models\SplitGroupMember::where('group_id', $group->id)
+                    ->where('user_id', Auth::id())->first();
+
+                if ($existing) {
+                    $existing->update(['vai_tro' => 'member', 'trang_thai' => 'active',
+                        'joined_at' => now(), 'left_at' => null]);
+                } else {
+                    \App\Models\SplitGroupMember::create([
+                        'group_id' => $group->id, 'user_id' => Auth::id(),
+                        'vai_tro' => 'member', 'trang_thai' => 'active', 'joined_at' => now(),
+                    ]);
+                }
+
+                // Dùng updateOrInsert thay vì update để tránh duplicate
+                $invitation->update(['trang_thai' => 'accepted', 'responded_at' => now()]);
+
+                \DB::commit();
+                return response()->json(['ok' => true,
+                    'message' => "Đã tham gia nhóm \"{$group->ten_nhom}\"!",
+                    'redirect' => route('groups.show', $group)]);
+            } catch (\Exception $e) {
+                \DB::rollBack();
+                // Nếu là duplicate entry thì coi như đã accept rồi
+                if (str_contains($e->getMessage(), '1062')) {
+                    return response()->json(['ok' => true,
+                        'message' => 'Bạn đã tham gia nhóm này rồi!']);
+                }
+                return response()->json(['ok' => false, 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
+            }
+        }
+
+        if ($action === 'decline') {
+            $invitation->update(['trang_thai' => 'declined', 'responded_at' => now()]);
+            return response()->json(['ok' => true, 'message' => 'Đã từ chối lời mời']);
+        }
+
+        return response()->json(['ok' => false, 'message' => 'Action không hợp lệ'], 400);
+    }
+
 }

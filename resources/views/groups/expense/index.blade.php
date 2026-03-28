@@ -172,6 +172,7 @@ $iconHash   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
 </div>
 
 @if(session('success'))<div class="alert alert-success">{!! $iconCheck !!} {{ session('success') }}</div>@endif
+@if(session('error'))<div class="alert alert-error">⚠ {{ session('error') }}</div>@endif
 
 {{-- Tabs --}}
 <div class="tab-nav">

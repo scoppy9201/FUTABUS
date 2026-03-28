@@ -20,16 +20,27 @@ class GroupNotifier
     // ── Mời thành viên ─────────────────────────────────────
     public static function invited(SplitGroup $group, string $email, string $inviterName): void
     {
-        // Tìm user theo email để gửi in-app notification
         $user = \App\Models\User::where('email', $email)->first();
         if (!$user) return;
+
+        // Lấy token của invitation mới nhất
+        $invitation = \App\Models\GroupInvitation::where('group_id', $group->id)
+            ->where('email', $email)
+            ->where('trang_thai', 'pending')
+            ->latest()
+            ->first();
+
+        // URL dạng accept để frontend lấy token
+        $acceptUrl = $invitation
+            ? route('groups.invite.accept', $invitation->token)
+            : route('groups.index');
 
         NotificationService::send(
             userId:     $user->id,
             loai:       'group_invited',
             tieuDe:     $inviterName,
             noiDung:    "đã mời bạn tham gia nhóm \"{$group->ten_nhom}\"",
-            url:        null, // URL sẽ đến từ email
+            url:        $acceptUrl,  // ← lưu URL accept (có token)
             actorId:    Auth::id(),
             entityType: SplitGroup::class,
             entityId:   $group->id,
@@ -124,7 +135,7 @@ class GroupNotifier
     public static function balanceProposed(GroupBalanceProposal $proposal): void
     {
         $group     = $proposal->group;
-        $proposer  = $proposal->proposedBy;
+        $proposer  = $proposal->proposer;
         $memberIds = $group->activeMembers()
             ->where('user_id', '!=', Auth::id())
             ->pluck('user_id')->toArray();
@@ -201,7 +212,7 @@ class GroupNotifier
     public static function expenseProposed(GroupExpenseProposal $proposal): void
     {
         $group     = $proposal->group;
-        $proposer  = $proposal->proposedBy;
+        $proposer  = $proposal->proposer;
         $memberIds = $group->activeMembers()
             ->where('user_id', '!=', Auth::id())
             ->pluck('user_id')->toArray();

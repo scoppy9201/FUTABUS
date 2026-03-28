@@ -298,12 +298,12 @@
                     <div class="setting-desc">Nhấn nút để xem trước các loại thông báo</div>
                 </div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <button class="btn-preview" onclick="previewToast('success')" 
+                <button class="btn-preview" onclick="previewToast('success')"
                     style="display:flex;align-items:center;gap:6px;">
                     <img src="{{ asset('images/check.png') }}" style="width:16px;height:16px;object-fit:contain;">
                     Success
                 </button>
-                <button class="btn-preview" onclick="previewToast('error')" 
+                <button class="btn-preview" onclick="previewToast('error')"
                     style="border-color:#ef4444;color:#ef4444;display:flex;align-items:center;gap:6px;"
                     onmouseover="this.style.background='#ef4444';this.style.color='white'"
                     onmouseout="this.style.background='';this.style.color='#ef4444'">
@@ -348,6 +348,169 @@
                 </label>
             </div>
         </div>
+
+        <div class="settings-section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <img src="{{ asset('images/envelope.png') }}" alt="Email">
+                </div>
+                <span class="section-title">Cấu hình Email (SMTP)</span>
+            </div>
+
+            @php $emailSetting = \App\Models\EmailSetting::first(); @endphp
+
+            @if(session('email_success'))
+            <div style="margin:12px 24px;padding:12px 16px;background:#d1fae5;color:#065f46;border-left:4px solid #10b981;border-radius:10px;font-size:14px;">
+                ✓ {{ session('email_success') }}
+            </div>
+            @endif
+
+            @if(session('email_error'))
+            <div style="margin:12px 24px;padding:12px 16px;background:#fee2e2;color:#991b1b;border-left:4px solid #ef4444;border-radius:10px;font-size:14px;">
+                ✗ {{ session('email_error') }}
+            </div>
+            @endif
+
+            <!-- Toggle bật/tắt email từ DB -->
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-label">Dùng cấu hình email từ hệ thống</div>
+                    <div class="setting-desc">Bật để dùng SMTP bên dưới thay cho .env</div>
+                </div>
+                <form action="{{ route('settings.email.save') }}" method="POST" id="toggleEmailForm">
+                    @csrf
+                    @if($emailSetting)
+                        <input type="hidden" name="mail_host"         value="{{ $emailSetting->mail_host }}">
+                        <input type="hidden" name="mail_port"         value="{{ $emailSetting->mail_port }}">
+                        <input type="hidden" name="mail_username"     value="{{ $emailSetting->mail_username }}">
+                        <input type="hidden" name="mail_encryption"   value="{{ $emailSetting->mail_encryption }}">
+                        <input type="hidden" name="mail_from_address" value="{{ $emailSetting->mail_from_address }}">
+                        <input type="hidden" name="mail_from_name"    value="{{ $emailSetting->mail_from_name }}">
+                    @else
+                        <input type="hidden" name="mail_host"         value="smtp.gmail.com">
+                        <input type="hidden" name="mail_port"         value="587">
+                        <input type="hidden" name="mail_username"     value="">
+                        <input type="hidden" name="mail_encryption"   value="tls">
+                        <input type="hidden" name="mail_from_address" value="">
+                        <input type="hidden" name="mail_from_name"    value="Monexa">
+                    @endif
+                    <input type="hidden" name="is_active" id="toggleIsActive" value="{{ $emailSetting?->is_active ? '0' : '1' }}">
+                    <label class="toggle-switch" onclick="document.getElementById('toggleEmailForm').submit(); return false;" style="cursor:pointer;">
+                        <input type="checkbox" {{ $emailSetting?->is_active ? 'checked' : '' }} style="display:none;">
+                        <div class="toggle-track" style="{{ $emailSetting?->is_active ? 'background:#4a90e2' : '' }}"></div>
+                        <div class="toggle-thumb" style="{{ $emailSetting?->is_active ? 'transform:translateX(22px)' : '' }}"></div>
+                    </label>
+                </form>
+            </div>
+
+            <!-- Form cấu hình SMTP -->
+            <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:16px;">
+                <form action="{{ route('settings.email.save') }}" method="POST" style="width:100%;">
+                    @csrf
+                    <input type="hidden" name="is_active" value="{{ $emailSetting?->is_active ? '1' : '0' }}">
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+                        <div>
+                            <label class="form-label" style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">
+                                SMTP Host <span style="color:#ef4444">*</span>
+                            </label>
+                            <input type="text" name="mail_host" class="setting-select"
+                                style="width:100%;padding:9px 12px;"
+                                value="{{ $emailSetting?->mail_host ?? 'smtp.gmail.com' }}"
+                                placeholder="smtp.gmail.com">
+                        </div>
+                        <div>
+                            <label class="form-label" style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">
+                                Port <span style="color:#ef4444">*</span>
+                            </label>
+                            <select name="mail_port" class="setting-select" style="width:100%;padding:9px 12px;">
+                                <option value="587" {{ ($emailSetting?->mail_port ?? 587) == 587 ? 'selected' : '' }}>587 (TLS)</option>
+                                <option value="465" {{ ($emailSetting?->mail_port) == 465 ? 'selected' : '' }}>465 (SSL)</option>
+                                <option value="25"  {{ ($emailSetting?->mail_port) == 25 ? 'selected' : '' }}>25</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label" style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">
+                                Email / Username <span style="color:#ef4444">*</span>
+                            </label>
+                            <input type="email" name="mail_username" class="setting-select"
+                                style="width:100%;padding:9px 12px;"
+                                value="{{ $emailSetting?->mail_username }}"
+                                placeholder="your@gmail.com">
+                        </div>
+                        <div>
+                            <label class="form-label" style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">
+                                Password / App Password
+                            </label>
+                            <input type="password" name="mail_password" class="setting-select"
+                                style="width:100%;padding:9px 12px;"
+                                placeholder="{{ $emailSetting?->mail_username ? '••••••• (giữ nguyên nếu không đổi)' : 'Nhập mật khẩu ứng dụng' }}">
+                        </div>
+                        <div>
+                            <label class="form-label" style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">
+                                Mã hóa <span style="color:#ef4444">*</span>
+                            </label>
+                            <select name="mail_encryption" class="setting-select" style="width:100%;padding:9px 12px;">
+                                <option value="tls"      {{ ($emailSetting?->mail_encryption ?? 'tls') == 'tls' ? 'selected' : '' }}>TLS</option>
+                                <option value="ssl"      {{ ($emailSetting?->mail_encryption) == 'ssl' ? 'selected' : '' }}>SSL</option>
+                                <option value="starttls" {{ ($emailSetting?->mail_encryption) == 'starttls' ? 'selected' : '' }}>STARTTLS</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label" style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">
+                                Tên hiển thị <span style="color:#ef4444">*</span>
+                            </label>
+                            <input type="text" name="mail_from_name" class="setting-select"
+                                style="width:100%;padding:9px 12px;"
+                                value="{{ $emailSetting?->mail_from_name ?? 'Monexa' }}"
+                                placeholder="Monexa">
+                        </div>
+                        <div style="grid-column:1/-1;">
+                            <label class="form-label" style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">
+                                Email gửi đi (From Address) <span style="color:#ef4444">*</span>
+                            </label>
+                            <input type="email" name="mail_from_address" class="setting-select"
+                                style="width:100%;padding:9px 12px;"
+                                value="{{ $emailSetting?->mail_from_address }}"
+                                placeholder="noreply@yourdomain.com">
+                        </div>
+                    </div>
+
+                    <div style="display:flex;gap:10px;justify-content:flex-end;">
+                        <button type="submit" class="btn-save" style="padding:10px 24px;">
+                            💾 Lưu cấu hình
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Form test email -->
+                <form action="{{ route('settings.email.test') }}" method="POST"
+                    style="width:100%;padding-top:14px;border-top:1px solid #f3f4f6;display:flex;gap:10px;align-items:flex-end;">
+                    @csrf
+                    <div style="flex:1;">
+                        <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">
+                            Gửi email test đến
+                        </label>
+                        <input type="email" name="test_email" class="setting-select"
+                            style="width:100%;padding:9px 12px;"
+                            placeholder="test@example.com"
+                            value="{{ Auth::user()->email }}">
+                    </div>
+                    <button type="submit" class="btn-preview" style="white-space:nowrap;height:40px;">
+                        ✉️ Gửi thử
+                    </button>
+                </form>
+
+                <!-- Hướng dẫn Gmail App Password -->
+                <div style="width:100%;padding:14px;background:rgba(74,144,226,0.06);border-radius:10px;font-size:12px;color:#4b5563;line-height:1.7;">
+                    <strong>💡 Hướng dẫn Gmail:</strong><br>
+                    Bật 2FA → <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:#4a90e2;">myaccount.google.com/apppasswords</a>
+                    → Tạo App Password → Dùng thay cho mật khẩu Google thường.<br>
+                    <strong>Host:</strong> smtp.gmail.com &nbsp;|&nbsp; <strong>Port:</strong> 587 &nbsp;|&nbsp; <strong>Mã hóa:</strong> TLS
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Save Bar -->
