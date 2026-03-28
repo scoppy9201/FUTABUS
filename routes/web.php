@@ -21,7 +21,8 @@ use App\Http\Controllers\GroupExpenseController;
 use App\Http\Controllers\GroupDebtController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\EmailSettingController;
-
+use App\Http\Controllers\MoneyWalletController;
+use App\Http\Controllers\WalletTransferController;
 use App\Http\Controllers\NotificationController;
 
 Route::get('/', function () {
@@ -189,6 +190,23 @@ Route::middleware('auth')->group(function () {
         Route::post('/save', [EmailSettingController::class, 'update'])->name('save');
         Route::post('/test', [EmailSettingController::class, 'testMail'])->name('test');
     });
+
+    Route::prefix('money-wallets')->name('money-wallets.')->group(function () {
+        Route::get('/',                           [MoneyWalletController::class, 'index'])  ->name('index');
+        Route::post('/',                          [MoneyWalletController::class, 'store'])  ->name('store');
+        Route::get('/{moneyWallet}',              [MoneyWalletController::class, 'show'])   ->name('show');
+        Route::put('/{moneyWallet}',              [MoneyWalletController::class, 'update']) ->name('update');
+        Route::delete('/{moneyWallet}',           [MoneyWalletController::class, 'destroy'])->name('destroy');
+        Route::post('/{moneyWallet}/restore',     [MoneyWalletController::class, 'restore'])->name('restore');
+        Route::post('/{moneyWallet}/adjust',      [MoneyWalletController::class, 'adjust']) ->name('adjust');
+    });
+
+    Route::prefix('wallet-transfers')->name('wallet-transfers.')->group(function () {
+        Route::get('/',                          [WalletTransferController::class, 'index'])  ->name('index');
+        Route::post('/',                         [WalletTransferController::class, 'store'])  ->name('store');
+        Route::delete('/{walletTransfer}',       [WalletTransferController::class, 'destroy'])->name('destroy');
+    });
+
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });

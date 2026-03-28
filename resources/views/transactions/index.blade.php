@@ -876,10 +876,10 @@
         <form action="{{ route('transactions.index') }}" method="GET" class="filter-form">
             <div class="form-group">
                 <label class="form-label">Tìm kiếm</label>
-                <input 
-                    type="text" 
-                    name="search" 
-                    class="form-control" 
+                <input
+                    type="text"
+                    name="search"
+                    class="form-control"
                     placeholder="Nhập tên hoặc loại giao dịch..."
                     value="{{ request('search') }}"
                 >
@@ -889,12 +889,12 @@
                 <label class="form-label">Danh mục</label>
                 <select name="danh_muc_id" class="form-select">
                     <option value="">Tất cả danh mục</option>
-                    
+
                     @php
                         $thuCategories = $categories->where('loai_danh_muc', 'THU');
                         $chiCategories = $categories->where('loai_danh_muc', 'CHI');
                     @endphp
-                    
+
                     @if($thuCategories->count() > 0)
                         <optgroup label="Thu nhập">
                             @foreach($thuCategories as $category)
@@ -904,7 +904,7 @@
                             @endforeach
                         </optgroup>
                     @endif
-                    
+
                     @if($chiCategories->count() > 0)
                         <optgroup label="Chi tiếu">
                             @foreach($chiCategories as $category)
@@ -928,9 +928,9 @@
 
             <div class="form-group">
                 <label class="form-label">Từ ngày</label>
-                <input 
-                    type="date" 
-                    name="tu_ngay" 
+                <input
+                    type="date"
+                    name="tu_ngay"
                     class="form-control"
                     value="{{ request('tu_ngay') }}"
                 >
@@ -938,9 +938,9 @@
 
             <div class="form-group">
                 <label class="form-label">Đến ngày</label>
-                <input 
-                    type="date" 
-                    name="den_ngay" 
+                <input
+                    type="date"
+                    name="den_ngay"
                     class="form-control"
                     value="{{ request('den_ngay') }}"
                 >
@@ -966,7 +966,7 @@
                 <img src="{{ asset('images/list.png') }}" alt="List">
                 Danh sách giao dịch
             </h3>
-            
+
             <div class="table-stats">
                 <span class="stat-badge income">
                     <img src="{{ asset('images/arrows.png') }}" alt="Income">
@@ -1083,7 +1083,7 @@
 
             <form action="{{ route('transactions.store') }}" method="POST" id="create-form">
                 @csrf
-                
+
                 <div class="modal-body">
                     <div class="form-group">
                         <label class="form-label">
@@ -1129,10 +1129,10 @@
                         <label class="form-label">
                             <strong>Số tiền</strong> <span class="required">*</span>
                         </label>
-                        <input 
-                            type="number" 
-                            name="so_tien" 
-                            class="form-control @error('so_tien') is-invalid @enderror" 
+                        <input
+                            type="number"
+                            name="so_tien"
+                            class="form-control @error('so_tien') is-invalid @enderror"
                             placeholder="Nhập số tiền..."
                             value="{{ old('so_tien') }}"
                             min="0"
@@ -1148,10 +1148,10 @@
                         <label class="form-label">
                             <strong>Ngày giao dịch</strong> <span class="required">*</span>
                         </label>
-                        <input 
-                            type="date" 
-                            name="ngay_giao_dich" 
-                            class="form-control @error('ngay_giao_dich') is-invalid @enderror" 
+                        <input
+                            type="date"
+                            name="ngay_giao_dich"
+                            class="form-control @error('ngay_giao_dich') is-invalid @enderror"
                             value="{{ old('ngay_giao_dich', date('Y-m-d')) }}"
                             required
                         >
@@ -1162,14 +1162,24 @@
 
                     <div class="form-group">
                         <label class="form-label"><strong>Ghi chú</strong></label>
-                        <textarea 
-                            name="ghi_chu" 
-                            class="form-control form-textarea" 
+                        <textarea
+                            name="ghi_chu"
+                            class="form-control form-textarea"
                             placeholder="Ghi chú về giao dịch này..."
                         >{{ old('ghi_chu') }}</textarea>
                     </div>
+
+                    <div class="form-group">
+                        <label class="form-label"><strong>Ví thanh toán</strong></label>
+                        <select name="money_wallet_id" class="form-select">
+                            <option value="">-- Không chọn ví (tùy chọn) --</option>
+                            @foreach(\App\Models\MoneyWallet::forUser(Auth::id())->active()->get() as $w)
+                            <option value="{{ $w->id }}">{{ $w->bieu_tuong }} {{ $w->ten_vi }} ({{ number_format($w->so_du) }}đ)</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
-                
+
                 <div class="modal-actions">
                     <button type="button" class="btn-secondary" onclick="closeModal('create-modal')">
                         Hủy bỏ
@@ -1200,7 +1210,7 @@
             <form id="edit-form" method="POST">
                 @csrf
                 @method('PUT')
-                
+
                 <div class="modal-body">
                     <div class="form-group">
                         <label class="form-label">
@@ -1237,11 +1247,11 @@
                         <label class="form-label">
                             <strong>Số tiền</strong> <span class="required">*</span>
                         </label>
-                        <input 
-                            type="number" 
-                            name="so_tien" 
+                        <input
+                            type="number"
+                            name="so_tien"
                             id="edit-amount"
-                            class="form-control" 
+                            class="form-control"
                             placeholder="Nhập số tiền..."
                             min="0"
                             step="1000"
@@ -1253,26 +1263,36 @@
                         <label class="form-label">
                             <strong>Ngày giao dịch</strong> <span class="required">*</span>
                         </label>
-                        <input 
-                            type="date" 
-                            name="ngay_giao_dich" 
+                        <input
+                            type="date"
+                            name="ngay_giao_dich"
                             id="edit-date"
-                            class="form-control" 
+                            class="form-control"
                             required
                         >
                     </div>
 
                     <div class="form-group">
                         <label class="form-label"><strong>Ghi chú</strong></label>
-                        <textarea 
-                            name="ghi_chu" 
+                        <textarea
+                            name="ghi_chu"
                             id="edit-desc"
-                            class="form-control form-textarea" 
+                            class="form-control form-textarea"
                             placeholder="Ghi chú về giao dịch này..."
                         ></textarea>
                     </div>
+
+                    <div class="form-group">
+                        <label class="form-label"><strong>Ví thanh toán</strong></label>
+                        <select name="money_wallet_id" id="edit-wallet" class="form-select">
+                            <option value="">-- Không chọn ví (tùy chọn) --</option>
+                            @foreach(\App\Models\MoneyWallet::forUser(Auth::id())->active()->get() as $w)
+                            <option value="{{ $w->id }}">{{ $w->bieu_tuong }} {{ $w->ten_vi }} ({{ number_format($w->so_du) }}đ)</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
-                
+
                 <div class="modal-actions">
                     <button type="button" class="btn-secondary" onclick="closeModal('edit-modal')">
                         Hủy bỏ
@@ -1314,7 +1334,7 @@ const clearError = input => {
 const formatCurrencyOnBlur = input => {
     let value = input.value.replace(/\D/g, '');
     const num = parseInt(value) || 0;
-    
+
     if (num > 100000000) {
         value = '100000000';
         showError(input, 'Số tiền không được vượt quá 100,000,000 VNĐ');
@@ -1323,9 +1343,9 @@ const formatCurrencyOnBlur = input => {
     } else {
         clearError(input);
     }
-    
+
     input.value = value ? parseInt(value).toLocaleString('vi-VN') : '';
-    
+
     const hiddenInput = input.parentElement.querySelector('.real-value');
     if (hiddenInput) hiddenInput.value = value;
 };
@@ -1340,13 +1360,13 @@ const validateTransactionForm = form => {
     const amountInput = form.querySelector('[name="so_tien"]');
     const displayInput = amountInput.previousElementSibling;
     const value = amountInput.value.replace(/\D/g, '');
-    
+
     if (!value) {
         showError(displayInput, 'Vui lòng nhập số tiền');
         displayInput.focus();
         return false;
     }
-    
+
     const num = parseInt(value);
     if (num < 1000) {
         showError(displayInput, 'Số tiền phải từ 1,000 VNĐ trở lên');
@@ -1358,7 +1378,7 @@ const validateTransactionForm = form => {
         displayInput.focus();
         return false;
     }
-    
+
     amountInput.value = value;
     return true;
 };
@@ -1366,16 +1386,16 @@ const validateTransactionForm = form => {
 const setupCurrencyInput = input => {
     const wrapper = document.createElement('div');
     wrapper.style.position = 'relative';
-    
+
     const displayInput = document.createElement('input');
     displayInput.type = 'text';
     displayInput.className = input.className;
     displayInput.placeholder = 'Ví dụ: 10,000,000';
     displayInput.value = input.value ? parseInt(input.value).toLocaleString('vi-VN') : '';
-    
+
     input.type = 'hidden';
     input.className = 'real-value';
-    
+
     displayInput.addEventListener('focus', () => removeFormatOnFocus(displayInput));
     displayInput.addEventListener('blur', () => formatCurrencyOnBlur(displayInput));
     displayInput.addEventListener('keypress', e => {
@@ -1387,7 +1407,7 @@ const setupCurrencyInput = input => {
         const numbers = pastedText.replace(/\D/g, '');
         if (numbers) displayInput.value = numbers;
     });
-    
+
     input.parentNode.insertBefore(wrapper, input);
     wrapper.appendChild(displayInput);
     wrapper.appendChild(input);
@@ -1398,12 +1418,12 @@ const categories = @json($categories);
 function filterCategoriesByType() {
     const loaiGiaoDich = document.getElementById('loai-giao-dich').value;
     const categorySelect = document.getElementById('category-select');
-    
+
     categorySelect.innerHTML = '<option value="">-- Chọn danh mục --</option>';
-    
+
     if (loaiGiaoDich) {
         const filteredCategories = categories.filter(cat => cat.loai_danh_muc === loaiGiaoDich);
-        
+
         filteredCategories.forEach(cat => {
             const option = document.createElement('option');
             option.value = cat.id;
@@ -1416,13 +1436,13 @@ function filterCategoriesByType() {
 function filterEditCategoriesByType() {
     const loaiGiaoDich = document.getElementById('edit-loai-giao-dich').value;
     const categorySelect = document.getElementById('edit-category');
-    
+
     const currentValue = categorySelect.value;
     categorySelect.innerHTML = '<option value="">-- Chọn danh mục --</option>';
-    
+
     if (loaiGiaoDich) {
         const filteredCategories = categories.filter(cat => cat.loai_danh_muc === loaiGiaoDich);
-        
+
         filteredCategories.forEach(cat => {
             const option = document.createElement('option');
             option.value = cat.id;
@@ -1436,12 +1456,13 @@ function filterEditCategoriesByType() {
 function openEditModal(transaction) {
     const form = document.getElementById('edit-form');
     form.action = `/transactions/${transaction.id}`;
-    
+
     document.getElementById('edit-loai-giao-dich').value = transaction.loai_giao_dich;
     document.getElementById('edit-payment-method').value = transaction.phuong_thuc_thanh_toan;
     document.getElementById('edit-date').value = transaction.ngay_giao_dich;
     document.getElementById('edit-desc').value = transaction.ghi_chu || '';
-    
+    document.getElementById('edit-wallet').value = transaction.money_wallet_id || '';
+
     // Setup amount with format
     const amountInput = document.getElementById('edit-amount');
     const displayInput = amountInput.previousElementSibling;
@@ -1449,20 +1470,20 @@ function openEditModal(transaction) {
         displayInput.value = parseInt(transaction.so_tien).toLocaleString('vi-VN');
         amountInput.value = transaction.so_tien;
     }
-    
+
     // Filter and set category
     filterEditCategoriesByType();
     setTimeout(() => {
         document.getElementById('edit-category').value = transaction.category_id;
     }, 100);
-    
+
     document.getElementById('edit-modal').classList.add('active');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     // Setup currency inputs
     document.querySelectorAll('input[name="so_tien"]').forEach(setupCurrencyInput);
-    
+
     // Form validation
     document.getElementById('create-form')?.addEventListener('submit', e => {
         if (!validateTransactionForm(e.target)) e.preventDefault();
@@ -1470,25 +1491,25 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('edit-form')?.addEventListener('submit', e => {
         if (!validateTransactionForm(e.target)) e.preventDefault();
     });
-    
+
     // Modal controls
     document.getElementById('open-create-modal')?.addEventListener('click', () => {
         document.getElementById('create-modal').classList.add('active');
     });
-    
+
     document.querySelectorAll('.modal-overlay').forEach(overlay => {
         overlay.addEventListener('click', e => {
             if (e.target === overlay) overlay.classList.remove('active');
         });
     });
-    
+
     // Close on ESC
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape') {
             document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
         }
     });
-    
+
     // Auto hide alerts
     setTimeout(() => {
         document.querySelectorAll('.alert').forEach(alert => {

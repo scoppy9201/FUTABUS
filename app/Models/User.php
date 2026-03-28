@@ -31,4 +31,9 @@ class User extends Authenticatable
         'password' => 'hashed',
         'ngay_sinh' => 'date',
     ];
+
+    public function moneyWallets()
+    {
+        return $this->hasMany(\App\Models\MoneyWallet::class);
+    }
 }

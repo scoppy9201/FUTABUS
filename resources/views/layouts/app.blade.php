@@ -1457,11 +1457,12 @@ content: '';
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{{ route('money-wallets.index') }}"
+                class="nav-link {{ request()->routeIs('money-wallets.*','wallet-transfers.*') ? 'active' : '' }}">
                     <span class="nav-icon">
-                        <img src="{{ asset('images/wallet.png') }}" alt="Ví">
+                        <img src="{{ asset('images/wallet.png') }}" alt="Ví tiền">
                     </span>
-                    <span class="nav-text">Ví</span>
+                    <span class="nav-text">Ví tiền</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -1481,7 +1482,7 @@ content: '';
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('settings.index') }}" 
+                <a href="{{ route('settings.index') }}"
                   class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">
                     <span class="nav-icon">
                         <img src="{{ asset('images/settings.png') }}" alt="Cài đặt">
@@ -1801,7 +1802,7 @@ content: '';
             };
         })();
     </script>
-    
+
 </body>
 <!-- ===== GLOBAL TOAST SYSTEM ===== -->
     <div id="toastContainer" style="
