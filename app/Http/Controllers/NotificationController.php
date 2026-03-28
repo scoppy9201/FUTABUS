@@ -114,4 +114,51 @@ class NotificationController extends Controller
         $count = NotificationService::unreadCount(Auth::id());
         return response()->json(['count' => $count]);
     }
+
+    public function handleInviteAction(Request $request, string $token)
+    {
+        $action = $request->input('action'); // 'accept' hoặc 'decline'
+
+        $invitation = \App\Models\GroupInvitation::where('token', $token)->first();
+
+        if (!$invitation || !$invitation->isUsable()) {
+            return response()->json(['ok' => false, 'message' => 'Lời mời không còn hiệu lực'], 422);
+        }
+
+        if ($invitation->email !== Auth::user()->email) {
+            return response()->json(['ok' => false, 'message' => 'Lời mời này không dành cho bạn'], 403);
+        }
+
+        if ($action === 'accept') {
+            \DB::beginTransaction();
+            try {
+                $group = $invitation->group;
+                $existing = \App\Models\SplitGroupMember::where('group_id', $group->id)
+                    ->where('user_id', Auth::id())->first();
+
+                if ($existing) {
+                    $existing->update(['vai_tro' => 'member', 'trang_thai' => 'active', 'joined_at' => now(), 'left_at' => null]);
+                } else {
+                    \App\Models\SplitGroupMember::create([
+                        'group_id' => $group->id, 'user_id' => Auth::id(),
+                        'vai_tro' => 'member', 'trang_thai' => 'active', 'joined_at' => now(),
+                    ]);
+                }
+                $invitation->update(['trang_thai' => 'accepted', 'responded_at' => now()]);
+                \DB::commit();
+                return response()->json(['ok' => true, 'message' => "Đã tham gia nhóm \"{$group->ten_nhom}\"!", 'redirect' => route('groups.show', $group)]);
+            } catch (\Exception $e) {
+                \DB::rollBack();
+                return response()->json(['ok' => false, 'message' => 'Có lỗi xảy ra'], 500);
+            }
+        }
+
+        if ($action === 'decline') {
+            $invitation->update(['trang_thai' => 'declined', 'responded_at' => now()]);
+            return response()->json(['ok' => true, 'message' => 'Đã từ chối lời mời']);
+        }
+
+        return response()->json(['ok' => false, 'message' => 'Action không hợp lệ'], 400);
+    }
+
 }

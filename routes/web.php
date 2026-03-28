@@ -181,6 +181,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/mark-read/{notification}', [NotificationController::class, 'markRead'])->name('mark-read');
         Route::post('/mark-all-read',            [NotificationController::class, 'markAllRead'])->name('mark-all-read');
         Route::get('/badge',      [NotificationController::class, 'badge'])      ->name('badge');
+        Route::post('/notifications/invite-action/{token}', [NotificationController::class, 'handleInviteAction'])
+            ->name('notifications.invite-action');
     });
 
 

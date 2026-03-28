@@ -425,34 +425,60 @@ function renderItem(n) {
         avHtml = `<img src="${src}" alt="" onerror="this.parentElement.innerHTML='<span>${escHtml(n.actor_name||'?').substring(0,2).toUpperCase()}</span>'">`;
     } else if (n.actor_name) {
         const initials = n.actor_name.substring(0, 2).toUpperCase();
-        const colors   = ['#4a90e2','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
-        const color    = colors[n.id % colors.length];
         avHtml = `<span style="font-size:14px;font-weight:800;">${initials}</span>`;
     } else {
         avHtml = `<span style="font-size:20px;">🔔</span>`;
     }
 
-    const avBg = n.actor_name ? (() => {
-        const colors = ['#4a90e2','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
-        return n.actor_avatar ? 'transparent' : colors[n.id % colors.length];
-    })() : '#f3f4f6';
+    const avBg = n.actor_name
+        ? (n.actor_avatar ? 'transparent' : (() => {
+            const colors = ['#4a90e2','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
+            return colors[n.id % colors.length];
+          })())
+        : '#f3f4f6';
 
     const href = n.url || '#';
 
-    return `<a href="${escHtml(href)}" class="np-item ${unreadCls}"
+    // Nút invite action (nếu là group_invited và chưa đọc/xử lý)
+    let inviteButtons = '';
+    if (n.loai === 'group_invited' && !n.da_doc) {
+        // Lấy token từ url (url dạng /groups/invitations/{token}/accept)
+        const tokenMatch = n.url ? n.url.match(/invitations\/([^/]+)\/accept/) : null;
+        if (tokenMatch) {
+            const token = tokenMatch[1];
+            inviteButtons = `
+                <div style="display:flex;gap:6px;margin-top:8px;" onclick="event.preventDefault();event.stopPropagation();">
+                    <button onclick="handleInvite('${token}','accept',${n.id},this)"
+                        style="flex:1;padding:6px 10px;border-radius:8px;border:none;
+                               background:linear-gradient(135deg,#10b981,#059669);
+                               color:white;font-size:12px;font-weight:700;cursor:pointer;">
+                        ✓ Chấp nhận
+                    </button>
+                    <button onclick="handleInvite('${token}','decline',${n.id},this)"
+                        style="flex:1;padding:6px 10px;border-radius:8px;
+                               border:2px solid #e5e7eb;background:white;
+                               color:#6b7280;font-size:12px;font-weight:700;cursor:pointer;">
+                        ✗ Từ chối
+                    </button>
+                </div>`;
+        }
+    }
+
+    return `<div class="np-item ${unreadCls}"
         onclick="onItemClick(event, ${n.id}, '${escHtml(href)}')"
-        style="text-decoration:none;">
+        style="cursor:pointer;">
         <div class="np-av" style="background:${avBg}">
             ${avHtml}
             <div class="np-av-icon" style="background:${n.color};">${n.icon}</div>
         </div>
-        <div class="np-content">
+        <div class="np-content" style="flex:1;min-width:0;">
             <div class="np-text">
                 <strong>${escHtml(n.tieu_de)}</strong> ${escHtml(n.noi_dung)}
             </div>
             <div class="np-time ${isFresh ? 'fresh' : ''}">${n.time_ago}</div>
+            ${inviteButtons}
         </div>
-    </a>`;
+    </div>`;
 }
 
 // ── Click item: đánh dấu đã đọc rồi navigate ──────────────
@@ -481,6 +507,45 @@ async function onItemClick(e, id, url) {
     }
 
     if (url && url !== '#') window.location.href = url;
+}
+
+async function handleInvite(token, action, notifId, btn) {
+    const wrap = btn.closest('div[style*="display:flex"]');
+    wrap.innerHTML = '<span style="font-size:12px;color:#9ca3af;padding:4px 0;">Đang xử lý...</span>';
+
+    try {
+        const csrf = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+        const res  = await fetch(`/notifications/invite-action/${token}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrf,
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ action })
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+            wrap.innerHTML = `<span style="font-size:12px;color:${action==='accept'?'#10b981':'#6b7280'};padding:4px 0;font-weight:700;">
+                ${action === 'accept' ? '✓ Đã tham gia nhóm' : '✗ Đã từ chối'}
+            </span>`;
+
+            // Đánh dấu đã đọc
+            const n = notifData.find(n => n.id === notifId);
+            if (n) n.da_doc = true;
+
+            // Reload trang nếu chấp nhận
+            if (action === 'accept' && data.redirect) {
+                setTimeout(() => window.location.href = data.redirect, 1200);
+            }
+        } else {
+            wrap.innerHTML = `<span style="font-size:12px;color:#ef4444;">${data.message}</span>`;
+        }
+    } catch(e) {
+        wrap.innerHTML = '<span style="font-size:12px;color:#ef4444;">Lỗi kết nối</span>';
+    }
 }
 
 // ── Tabs ───────────────────────────────────────────────────
