@@ -226,10 +226,19 @@ class TransactionController extends Controller
                     ->first();
 
                 if ($mWallet) {
-                    if ($validated['loai_giao_dich'] == 'THU') {
-                        $mWallet->increment('so_du', $validated['so_tien']);
-                    } else {
+                    // Validate số dư trước khi trừ
+                    if ($validated['loai_giao_dich'] == 'CHI') {
+                        if ($mWallet->so_du < $validated['so_tien']) {
+                            DB::rollBack();
+                            return back()->withInput()->with('error',
+                                "Ví \"{$mWallet->ten_vi}\" không đủ số dư! " .
+                                "Cần: " . number_format($validated['so_tien']) . "đ | " .
+                                "Hiện có: " . number_format($mWallet->so_du) . "đ"
+                            );
+                        }
                         $mWallet->decrement('so_du', $validated['so_tien']);
+                    } else {
+                        $mWallet->increment('so_du', $validated['so_tien']);
                     }
                 }
             }

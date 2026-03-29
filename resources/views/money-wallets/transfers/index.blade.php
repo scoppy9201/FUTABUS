@@ -117,7 +117,7 @@ body.dark .tf-route { color:#e5e7eb; }
 </style>
 
 <div class="page-hdr">
-    <div class="page-title">↔️ Chuyển tiền giữa ví</div>
+    <div class="page-title">Chuyển tiền giữa ví</div>
     <a href="{{ route('money-wallets.index') }}" class="btn-outline">← Quay lại ví</a>
 </div>
 
@@ -128,7 +128,7 @@ body.dark .tf-route { color:#e5e7eb; }
     {{-- LEFT: Form chuyển tiền --}}
     <div>
         <div class="form-card">
-            <div class="fc-hdr"><div class="fc-title">↔️ Tạo giao dịch chuyển tiền</div></div>
+            <div class="fc-hdr"><div class="fc-title">Tạo giao dịch chuyển tiền</div></div>
             <div class="fc-body">
                 @if($wallets->count() < 2)
                 <div style="text-align:center;padding:40px;color:#9ca3af;">
@@ -146,7 +146,7 @@ body.dark .tf-route { color:#e5e7eb; }
                         <label class="form-label">Từ ví <span class="required">*</span></label>
                         <div class="wallet-select-grid" id="fromGrid">
                             @foreach($wallets as $w)
-                            <label class="ws-card" onclick="selectWallet('from', {{ $w->id }}, this)" data-wallet-id="{{ $w->id }}">
+                            <label class="ws-card" data-wallet-id="{{ $w->id }}" data-grid="from">
                                 <input type="radio" name="from_wallet_id" value="{{ $w->id }}" {{ old('from_wallet_id')==$w->id?'checked':'' }}>
                                 <div class="ws-icon">{{ $w->bieu_tuong }}</div>
                                 <div class="ws-info">
@@ -163,7 +163,7 @@ body.dark .tf-route { color:#e5e7eb; }
                         <label class="form-label">Đến ví <span class="required">*</span></label>
                         <div class="wallet-select-grid" id="toGrid">
                             @foreach($wallets as $w)
-                            <label class="ws-card" onclick="selectWallet('to', {{ $w->id }}, this)" data-wallet-id="{{ $w->id }}">
+                            <label class="ws-card" data-wallet-id="{{ $w->id }}" data-grid="to">
                                 <input type="radio" name="to_wallet_id" value="{{ $w->id }}" {{ old('to_wallet_id')==$w->id?'checked':'' }}>
                                 <div class="ws-icon">{{ $w->bieu_tuong }}</div>
                                 <div class="ws-info">
@@ -227,7 +227,7 @@ body.dark .tf-route { color:#e5e7eb; }
                     </div>
 
                     <button type="submit" class="btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:4px;">
-                        ↔️ Chuyển tiền
+                        Chuyển tiền
                     </button>
                 </form>
                 @endif
@@ -266,7 +266,7 @@ body.dark .tf-route { color:#e5e7eb; }
                 </div>
             </div>
             @empty
-            <div class="empty-msg">↔️ Chưa có giao dịch chuyển tiền nào</div>
+            <div class="empty-msg">Chưa có giao dịch chuyển tiền nào</div>
             @endforelse
             @if($transfers->hasPages())
             <div style="padding:14px 20px;border-top:1px solid #f3f4f6;">{{ $transfers->links() }}</div>
@@ -280,24 +280,68 @@ body.dark .tf-route { color:#e5e7eb; }
 const wallets = @json($walletsJson);
 let selectedFrom = null, selectedTo = null, previewAmount = 0;
 
-function selectWallet(type, walletId, el) {
-    const gridId = type === 'from' ? 'fromGrid' : 'toGrid';
-    document.querySelectorAll(`#${gridId} .ws-card`).forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
-    el.querySelector('input').checked = true;
+// Gắn event click cho từng card — KHÔNG dùng onclick inline để tránh conflict
+document.querySelectorAll('#fromGrid .ws-card').forEach(card => {
+    card.addEventListener('click', function () {
+        const walletId = parseInt(this.dataset.walletId);
 
-    if (type === 'from') selectedFrom = walletId;
-    else selectedTo = walletId;
+        // Bỏ chọn ví đích nếu trùng
+        if (selectedTo === walletId) {
+            selectedTo = null;
+            document.querySelectorAll('#toGrid .ws-card').forEach(c => {
+                c.classList.remove('selected', 'disabled-card');
+                c.querySelector('input').checked = false;
+            });
+        }
 
-    // Disable ví đã chọn ở grid kia
-    const otherGrid = type === 'from' ? 'toGrid' : 'fromGrid';
-    document.querySelectorAll(`#${otherGrid} .ws-card`).forEach(c => {
-        const same = parseInt(c.dataset.walletId) === walletId;
-        c.classList.toggle('disabled-card', same);
-        if (same) { c.classList.remove('selected'); c.querySelector('input').checked = false; if(type==='from') selectedTo=null; else selectedFrom=null; }
+        // Chọn ví nguồn
+        document.querySelectorAll('#fromGrid .ws-card').forEach(c => c.classList.remove('selected'));
+        this.classList.add('selected');
+        this.querySelector('input').checked = true;
+        selectedFrom = walletId;
+
+        // Disable card trùng ví đang chọn ở grid đích
+        syncDisabled('toGrid', walletId);
+        updatePreview();
     });
+});
 
-    updatePreview();
+document.querySelectorAll('#toGrid .ws-card').forEach(card => {
+    card.addEventListener('click', function () {
+        const walletId = parseInt(this.dataset.walletId);
+
+        // Bỏ chọn ví nguồn nếu trùng
+        if (selectedFrom === walletId) {
+            selectedFrom = null;
+            document.querySelectorAll('#fromGrid .ws-card').forEach(c => {
+                c.classList.remove('selected', 'disabled-card');
+                c.querySelector('input').checked = false;
+            });
+        }
+
+        // Chọn ví đích
+        document.querySelectorAll('#toGrid .ws-card').forEach(c => c.classList.remove('selected'));
+        this.classList.add('selected');
+        this.querySelector('input').checked = true;
+        selectedTo = walletId;
+
+        // Disable card trùng ví đang chọn ở grid nguồn
+        syncDisabled('fromGrid', walletId);
+        updatePreview();
+    });
+});
+
+// Disable đúng 1 card trong grid (card trùng với ví vừa chọn ở grid kia)
+// Giữ nguyên selection của các card còn lại
+function syncDisabled(gridId, disableWalletId) {
+    document.querySelectorAll(`#${gridId} .ws-card`).forEach(c => {
+        const id = parseInt(c.dataset.walletId);
+        if (id === disableWalletId) {
+            c.classList.add('disabled-card');
+        } else {
+            c.classList.remove('disabled-card');
+        }
+    });
 }
 
 function updatePreviewAmount(val) {
@@ -316,19 +360,47 @@ function updatePreview() {
     }
 
     const fromHtml = from
-        ? `<div class="preview-from"><div style="font-size:28px;">${from.bieu_tuong}</div><div class="preview-wallet-name">${from.ten_vi}</div><div class="preview-wallet-bal">${from.so_du.toLocaleString('vi-VN')}đ</div></div>`
-        : `<div class="preview-from" style="opacity:.4;">Chọn ví nguồn</div>`;
+        ? `<div class="preview-from">
+               <div style="font-size:28px;">${from.bieu_tuong}</div>
+               <div class="preview-wallet-name">${from.ten_vi}</div>
+               <div class="preview-wallet-bal">${from.so_du.toLocaleString('vi-VN')}đ</div>
+           </div>`
+        : `<div class="preview-from" style="opacity:.4;text-align:center;font-size:13px;color:#9ca3af;">Chọn ví nguồn</div>`;
 
     const toHtml = to
-        ? `<div class="preview-to"><div style="font-size:28px;">${to.bieu_tuong}</div><div class="preview-wallet-name">${to.ten_vi}</div><div class="preview-wallet-bal">${to.so_du.toLocaleString('vi-VN')}đ</div></div>`
-        : `<div class="preview-to" style="opacity:.4;">Chọn ví đích</div>`;
+        ? `<div class="preview-to">
+               <div style="font-size:28px;">${to.bieu_tuong}</div>
+               <div class="preview-wallet-name">${to.ten_vi}</div>
+               <div class="preview-wallet-bal">${to.so_du.toLocaleString('vi-VN')}đ</div>
+           </div>`
+        : `<div class="preview-to" style="opacity:.4;text-align:center;font-size:13px;color:#9ca3af;">Chọn ví đích</div>`;
 
     const amountHtml = previewAmount > 0
-        ? `<div><div class="preview-arrow">→</div><div class="preview-amount">${previewAmount.toLocaleString('vi-VN')}đ</div></div>`
-        : `<div class="preview-arrow">→</div>`;
+        ? `<div style="text-align:center;flex-shrink:0;">
+               <div class="preview-arrow">→</div>
+               <div class="preview-amount">${previewAmount.toLocaleString('vi-VN')}đ</div>
+           </div>`
+        : `<div class="preview-arrow" style="flex-shrink:0;">→</div>`;
 
     preview.innerHTML = fromHtml + amountHtml + toHtml;
 }
+
+// Khởi tạo lại state nếu có old() value từ Laravel (sau khi submit lỗi)
+(function initOldValues() {
+    const oldFrom = document.querySelector('#fromGrid input[checked]');
+    const oldTo   = document.querySelector('#toGrid input[checked]');
+    if (oldFrom) {
+        selectedFrom = parseInt(oldFrom.value);
+        oldFrom.closest('.ws-card').classList.add('selected');
+        syncDisabled('toGrid', selectedFrom);
+    }
+    if (oldTo) {
+        selectedTo = parseInt(oldTo.value);
+        oldTo.closest('.ws-card').classList.add('selected');
+        syncDisabled('fromGrid', selectedTo);
+    }
+    if (oldFrom || oldTo) updatePreview();
+})();
 
 setTimeout(() => {
     document.querySelectorAll('.alert').forEach(a => {

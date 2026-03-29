@@ -301,6 +301,11 @@ body.dark .modal-foot { border-color: rgba(255,255,255,0.06); background: #191d2
         <a href="{{ route('wallet-transfers.index') }}" class="btn-outline">
             ↔ Chuyển tiền
         </a>
+
+        <a href="{{ route('money-wallets.qr.index') }}" class="btn-outline">
+            QR Transfer
+        </a>
+
         <button class="btn-primary" onclick="openCreate()">
             + Thêm ví
         </button>
@@ -319,33 +324,29 @@ body.dark .modal-foot { border-color: rgba(255,255,255,0.06); background: #191d2
 
 {{-- Tổng số dư --}}
 <div class="total-card">
-    <div class="total-label">TỔNG TÀI SẢN</div>
-    <div class="total-amount">
-        {{ number_format($stats['tong_so_du'], 0, ',', '.') }}
+    <div class="total-label">TỔNG TÀI SẢN (THU - CHI)</div>
+    <div class="total-amount" style="color:{{ $tongTaiSan >= 0 ? 'white' : '#fca5a5' }}">
+        {{ $tongTaiSan >= 0 ? '+' : '' }}{{ number_format($tongTaiSan, 0, ',', '.') }}
         <span style="font-size:20px;font-weight:600;opacity:.7;">VND</span>
     </div>
     <div class="total-breakdown">
-        @if($stats['vi_tien_mat'] > 0)
         <div class="breakdown-item">
-            <div class="breakdown-label">💵 Tiền mặt</div>
-            <div class="breakdown-val">{{ number_format($stats['vi_tien_mat']) }}đ</div>
+            <div class="breakdown-label">📈 Tổng thu</div>
+            <div class="breakdown-val" style="color:#4ade80;">+{{ number_format($tongThu) }}đ</div>
         </div>
-        @endif
-        @if($stats['vi_ngan_hang'] > 0)
         <div class="breakdown-item">
-            <div class="breakdown-label">🏦 Ngân hàng</div>
-            <div class="breakdown-val">{{ number_format($stats['vi_ngan_hang']) }}đ</div>
+            <div class="breakdown-label">📉 Tổng chi</div>
+            <div class="breakdown-val" style="color:#fca5a5;">-{{ number_format($tongChi) }}đ</div>
         </div>
-        @endif
-        @if($stats['vi_dien_tu'] > 0)
         <div class="breakdown-item">
-            <div class="breakdown-label">📱 Ví điện tử</div>
-            <div class="breakdown-val">{{ number_format($stats['vi_dien_tu']) }}đ</div>
-        </div>
-        @endif
-        <div class="breakdown-item">
-            <div class="breakdown-label">📊 Số ví</div>
+            <div class="breakdown-label">💳 Số ví</div>
             <div class="breakdown-val">{{ $stats['tong_vi'] }} ví</div>
+        </div>
+        <div class="breakdown-item">
+            <div class="breakdown-label">🏦 Phân bổ vào ví</div>
+            <div class="breakdown-val" style="color:{{ $tongSoDuVi > $tongTaiSan ? '#fca5a5' : '#93c5fd' }}">
+                {{ number_format($tongSoDuVi) }}đ
+            </div>
         </div>
     </div>
 </div>
@@ -459,7 +460,14 @@ body.dark .modal-foot { border-color: rgba(255,255,255,0.06); background: #191d2
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                     <div class="form-group" style="margin-bottom:0">
                         <label class="form-label">Số dư ban đầu <span class="required">*</span></label>
-                        <input name="so_du_ban_dau" type="number" class="form-ctrl" placeholder="0" min="0" step="1000" value="{{ old('so_du_ban_dau', 0) }}" required>
+                        <input name="so_du_ban_dau" type="number" class="form-ctrl"
+                               placeholder="0" min="0" step="1000"
+                               value="{{ old('so_du_ban_dau', 0) }}" required
+                               id="inputSoDuBanDau"
+                               oninput="checkSoDu(this.value)">
+                        <div id="soDuHint" style="font-size:11px;margin-top:5px;color:#9ca3af;">
+                            Còn có thể phân bổ: <strong id="conLai">{{ number_format($tongTaiSan - $tongSoDuVi) }}đ</strong>
+                        </div>
                     </div>
                     <div class="form-group" style="margin-bottom:0">
                         <label class="form-label">Đơn vị tiền tệ <span class="required">*</span></label>
@@ -649,6 +657,30 @@ setTimeout(() => {
         setTimeout(() => a.remove(), 320);
     });
 }, 4500);
+
+// ── Kiểm tra số dư ban đầu realtime ──────────────────
+const tongTaiSan  = {{ $tongTaiSan }};
+const tongSoDuVi  = {{ $tongSoDuVi }};
+const conLaiMax   = tongTaiSan - tongSoDuVi;
+
+function checkSoDu(val) {
+    const v    = parseFloat(val) || 0;
+    const hint = document.getElementById('soDuHint');
+    const conLaiEl = document.getElementById('conLai');
+    if (!hint) return;
+
+    const conLai = conLaiMax - v;
+    conLaiEl.textContent = (conLai >= 0 ? '' : '-') +
+        Math.abs(conLai).toLocaleString('vi-VN') + 'đ';
+
+    if (v > conLaiMax) {
+        hint.style.color = '#ef4444';
+        conLaiEl.style.color = '#ef4444';
+    } else {
+        hint.style.color = '#9ca3af';
+        conLaiEl.style.color = '#10b981';
+    }
+}
 
 @if($errors->any())
 openCreate();

@@ -22,27 +22,39 @@ class MoneyWalletController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        $totalBalance = $wallets->sum('so_du');
-
-        // Ví theo loại để hiển thị nhóm
         $walletsByType = $wallets->groupBy('loai_vi');
 
-        // Thống kê nhanh
+        // Tổng tài sản = THU - CHI (bỏ tổng số dư ví)
+        $tongThu = Transaction::where('user_id', $userId)
+            ->where('loai_giao_dich', 'THU')
+            ->where('la_chuyen_vi', false)
+            ->sum('so_tien');
+
+        $tongChi = Transaction::where('user_id', $userId)
+            ->where('loai_giao_dich', 'CHI')
+            ->where('la_chuyen_vi', false)
+            ->sum('so_tien');
+
+        $tongTaiSan = $tongThu - $tongChi;
+
         $stats = [
-            'tong_vi'       => $wallets->count(),
-            'tong_so_du'    => $totalBalance,
-            'vi_tien_mat'   => $wallets->where('loai_vi', 'tien_mat')->sum('so_du'),
-            'vi_ngan_hang'  => $wallets->where('loai_vi', 'ngan_hang')->sum('so_du'),
-            'vi_dien_tu'    => $wallets->where('loai_vi', 'vi_dien_tu')->sum('so_du'),
+            'tong_vi'      => $wallets->count(),
+            'tong_so_du'   => $tongTaiSan, // giữ key cũ để không break view khác
+            'vi_tien_mat'  => $wallets->where('loai_vi', 'tien_mat')->sum('so_du'),
+            'vi_ngan_hang' => $wallets->where('loai_vi', 'ngan_hang')->sum('so_du'),
+            'vi_dien_tu'   => $wallets->where('loai_vi', 'vi_dien_tu')->sum('so_du'),
         ];
 
-        // Ví không hoạt động (để hiện nút khôi phục)
         $inactiveWallets = MoneyWallet::forUser($userId)
             ->where('trang_thai', 'inactive')
             ->get();
 
+        // Tổng so_du_ban_dau hiện tại của tất cả ví active (để validate khi tạo ví mới)
+        $tongSoDuVi = $wallets->sum('so_du_ban_dau');
+
         return view('money-wallets.index', compact(
-            'wallets', 'walletsByType', 'stats', 'inactiveWallets'
+            'wallets', 'walletsByType', 'stats', 'inactiveWallets',
+            'tongTaiSan', 'tongThu', 'tongChi', 'tongSoDuVi'
         ));
     }
 
@@ -108,6 +120,30 @@ class MoneyWalletController extends Controller
 
         DB::beginTransaction();
         try {
+             // Validate: tổng so_du_ban_dau các ví không được > tổng tài sản
+            $tongThu = Transaction::where('user_id', Auth::id())
+                ->where('loai_giao_dich', 'THU')
+                ->where('la_chuyen_vi', false)
+                ->sum('so_tien');
+            $tongChi = Transaction::where('user_id', Auth::id())
+                ->where('loai_giao_dich', 'CHI')
+                ->where('la_chuyen_vi', false)
+                ->sum('so_tien');
+            $tongTaiSan = $tongThu - $tongChi;
+
+            $tongSoDuHienTai = MoneyWallet::forUser(Auth::id())
+                ->active()
+                ->sum('so_du_ban_dau');
+
+            if (($tongSoDuHienTai + $validated['so_du_ban_dau']) > $tongTaiSan) {
+                DB::rollBack();
+                return back()->withInput()->with('error',
+                    'Không thể tạo ví! Tổng số dư ban đầu các ví (' .
+                    number_format($tongSoDuHienTai + $validated['so_du_ban_dau']) .
+                    'đ) vượt quá tổng tài sản (' .
+                    number_format($tongTaiSan) . 'đ).'
+                );
+            }
             $wallet = MoneyWallet::create([
                 'user_id'        => Auth::id(),
                 'ten_vi'         => trim($validated['ten_vi']),

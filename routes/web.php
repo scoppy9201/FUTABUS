@@ -191,6 +191,14 @@ Route::middleware('auth')->group(function () {
         Route::post('/test', [EmailSettingController::class, 'testMail'])->name('test');
     });
 
+    Route::prefix('money-wallets/qr')->name('money-wallets.qr.')->group(function () {
+        Route::get('/',                      [App\Http\Controllers\QrTransferController::class, 'index'])   ->name('index');
+        Route::post('/generate',             [App\Http\Controllers\QrTransferController::class, 'generate'])->name('generate');
+        Route::post('/cancel/{qrTransfer}',  [App\Http\Controllers\QrTransferController::class, 'cancel'])  ->name('cancel');
+        Route::get('/scan/{token}',          [App\Http\Controllers\QrTransferController::class, 'scanPage'])->name('scan-page');
+        Route::post('/scan/{token}/confirm', [App\Http\Controllers\QrTransferController::class, 'confirm']) ->name('confirm');
+    });
+
     Route::prefix('money-wallets')->name('money-wallets.')->group(function () {
         Route::get('/',                           [MoneyWalletController::class, 'index'])  ->name('index');
         Route::post('/',                          [MoneyWalletController::class, 'store'])  ->name('store');
