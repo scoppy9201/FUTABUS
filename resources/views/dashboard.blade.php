@@ -740,7 +740,7 @@
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">
-                    <img src="{{ asset('images/category.png') }}" alt="Category">
+                    <img src="{{ asset('images/transaction.png') }}" alt="Category">
                     Phân bổ chi tiêu
                 </h3>
                 <div class="card-menu">
@@ -871,7 +871,7 @@
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">
-                    <img src="{{ asset('images/wallet.png') }}" alt="Wallet">
+                    <img src="{{ asset('images/asset-allocation.png') }}" alt="Wallet">
                     Tổng quan ngân sách
                 </h3>
                 <a href="{{ route('wallets.index') }}" class="card-menu">
