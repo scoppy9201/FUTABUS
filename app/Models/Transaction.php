@@ -19,6 +19,7 @@ class Transaction extends Model
         'phuong_thuc_thanh_toan',
         'ngay_giao_dich',
         'ghi_chu',
+        'money_wallet_id',
     ];
 
     protected $casts = [
@@ -32,6 +33,11 @@ class Transaction extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function moneyWallet()
+    {
+        return $this->belongsTo(\App\Models\MoneyWallet::class, 'money_wallet_id');
     }
 
     /**
@@ -50,10 +56,10 @@ class Transaction extends Model
         return $this->hasOneThrough(
             Wallet::class,
             Category::class,
-            'id', 
-            'category_id', 
-            'category_id', 
-            'id' 
+            'id',
+            'category_id',
+            'category_id',
+            'id'
         )->where('wallets.user_id', $this->user_id);
     }
 

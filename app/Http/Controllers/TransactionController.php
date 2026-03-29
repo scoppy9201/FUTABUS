@@ -12,28 +12,28 @@ use Illuminate\Validation\Rule;
 
 class TransactionController extends Controller
 {
-    // Danh sách giao dịch 
+    // Danh sách giao dịch
     public function index(Request $request)
     {
         $userId = Auth::id();
-        
+
         $query = Transaction::with('category')->where('user_id', $userId);
 
         // Tìm kiếm đa trường
         if ($request->filled('search')) {
             $search = trim($request->search);
-            
+
             // Escape các ký tự đặc biệt trong LIKE
             $searchEscaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search);
-            
+
             $query->where(function($q) use ($searchEscaped, $userId) {
                 $q->where('ghi_chu', 'like', '%' . $searchEscaped . '%');
-                
+
                 // Tìm theo số tiền chỉ khi là số
                 if (is_numeric(str_replace(',', '', $searchEscaped))) {
                     $q->orWhere('so_tien', 'like', '%' . str_replace(',', '', $searchEscaped) . '%');
                 }
-                
+
                 $q->orWhereHas('category', function($categoryQuery) use ($searchEscaped, $userId) {
                     $categoryQuery->where('ten_danh_muc', 'like', '%' . $searchEscaped . '%')
                                 ->where('user_id', $userId);
@@ -41,12 +41,12 @@ class TransactionController extends Controller
             });
         }
 
-        // Lọc theo danh mục 
+        // Lọc theo danh mục
         if ($request->filled('danh_muc_id')) {
             $query->where('category_id', $request->danh_muc_id);
         }
 
-        // Lọc theo loại giao dịch 
+        // Lọc theo loại giao dịch
         if ($request->filled('loai')) {
             $query->where('loai_giao_dich', $request->loai);
         }
@@ -56,7 +56,7 @@ class TransactionController extends Controller
             $query->where('phuong_thuc_thanh_toan', $request->phuong_thuc);
         }
 
-        // Lọc theo ngày giao dịch 
+        // Lọc theo ngày giao dịch
         if ($request->filled('tu_ngay')) {
             $query->where('ngay_giao_dich', '>=', $request->tu_ngay);
         }
@@ -73,15 +73,15 @@ class TransactionController extends Controller
 
         // Lấy wallets
         $wallets = Wallet::where('user_id', $userId)->where('trang_thai', true)->with('category')->orderBy('category_id')->orderBy('ten_ngan_sach')->get();
-                        
-        // Thống kê tổng thu / chi 
+
+        // Thống kê tổng thu / chi
         $totalIncome = Transaction::where('user_id', $userId)->where('loai_giao_dich', 'THU')->sum('so_tien');
         $totalExpense = Transaction::where('user_id', $userId)->where('loai_giao_dich', 'CHI')->sum('so_tien');
 
         return view('transactions.index', compact('transactions','categories','wallets','totalIncome','totalExpense'));
     }
 
-    // Thêm giao dịch mới 
+    // Thêm giao dịch mới
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -96,12 +96,12 @@ class TransactionController extends Controller
                     if (!$category->danh_muc_cha_id) {
                         $fail('Chỉ có thể chọn danh mục con!');
                     }
-                    
+
                     // Kiểm tra loại
                     $loaiGiaoDich = $request->input('loai_giao_dich');
                     if ($category->loai_danh_muc !== $loaiGiaoDich) {
-                        $fail('Danh mục "' . $category->ten_danh_muc . '" là loại ' . 
-                            $category->loai_danh_muc . ', không khớp với giao dịch ' . 
+                        $fail('Danh mục "' . $category->ten_danh_muc . '" là loại ' .
+                            $category->loai_danh_muc . ', không khớp với giao dịch ' .
                             $loaiGiaoDich . '!');
                     }
                 }
@@ -121,6 +121,18 @@ class TransactionController extends Controller
                 'string',
                 'max:500',
                 'regex:/^[\p{L}\p{N}\s\.,!?@#\-\(\)]*$/u',
+            ],
+
+            'money_wallet_id' => [
+                'nullable',
+                'exists:money_wallets,id',
+                function ($attr, $value, $fail) {
+                    if ($value && !\App\Models\MoneyWallet::where('id', $value)
+                        ->where('user_id', Auth::id())
+                        ->exists()) {
+                        $fail('Ví không hợp lệ!');
+                    }
+                }
             ],
         ], [
             'category_id.required' => 'Vui lòng chọn danh mục',
@@ -167,7 +179,7 @@ class TransactionController extends Controller
                     ->with('error', 'Loại giao dịch không khớp với loại danh mục!')
                     ->withInput();
             }
-                               
+
             // Tìm ngân sách của danh mục này (nếu có)
             $wallet = Wallet::where('category_id', $validated['category_id'])
                            ->where('user_id', Auth::id())
@@ -194,6 +206,7 @@ class TransactionController extends Controller
                 'so_tien' => $validated['so_tien'],
                 'ngay_giao_dich' => $validated['ngay_giao_dich'],
                 'ghi_chu' => $validated['ghi_chu'],
+                'money_wallet_id' => $validated['money_wallet_id'] ?? null,
             ]);
 
             // Cập nhật số dư ngân sách (nếu có)
@@ -205,11 +218,36 @@ class TransactionController extends Controller
                 }
             }
 
+            if (!empty($validated['money_wallet_id'])) {
+
+                $mWallet = \App\Models\MoneyWallet::where('id', $validated['money_wallet_id'])
+                    ->where('user_id', Auth::id())
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($mWallet) {
+                    // Validate số dư trước khi trừ
+                    if ($validated['loai_giao_dich'] == 'CHI') {
+                        if ($mWallet->so_du < $validated['so_tien']) {
+                            DB::rollBack();
+                            return back()->withInput()->with('error',
+                                "Ví \"{$mWallet->ten_vi}\" không đủ số dư! " .
+                                "Cần: " . number_format($validated['so_tien']) . "đ | " .
+                                "Hiện có: " . number_format($mWallet->so_du) . "đ"
+                            );
+                        }
+                        $mWallet->decrement('so_du', $validated['so_tien']);
+                    } else {
+                        $mWallet->increment('so_du', $validated['so_tien']);
+                    }
+                }
+            }
+
             DB::commit();
 
             return redirect()->route('transactions.index')
                 ->with('success', 'Thêm giao dịch thành công!');
-                
+
         } catch (\Exception $e) {
             DB::rollBack();
             return back()
@@ -218,7 +256,7 @@ class TransactionController extends Controller
         }
     }
 
-    // Cập nhật giao dịch 
+    // Cập nhật giao dịch
     public function update(Request $request, Transaction $transaction)
     {
         // Kiểm tra quyền sở hữu
@@ -238,12 +276,12 @@ class TransactionController extends Controller
                     if (!$category->danh_muc_cha_id) {
                         $fail('Chỉ có thể chọn danh mục con!');
                     }
-                    
+
                     // Kiểm tra loại danh mục khớp với loại giao dịch
                     $loaiGiaoDich = $request->input('loai_giao_dich');
                     if ($category->loai_danh_muc !== $loaiGiaoDich) {
-                        $fail('Danh mục "' . $category->ten_danh_muc . '" là loại ' . 
-                            $category->loai_danh_muc . ', không khớp với giao dịch ' . 
+                        $fail('Danh mục "' . $category->ten_danh_muc . '" là loại ' .
+                            $category->loai_danh_muc . ', không khớp với giao dịch ' .
                             $loaiGiaoDich . '!');
                     }
                 }
@@ -306,6 +344,7 @@ class TransactionController extends Controller
             $oldCategoryId = $transaction->category_id;
             $oldAmount = $transaction->so_tien;
             $oldType = $transaction->loai_giao_dich;
+            $oldMoneyWalletId = $transaction->money_wallet_id;
 
             // Trường hợp 1: Cùng danh mục
             if ($oldCategoryId == $validated['category_id']) {
@@ -405,13 +444,50 @@ class TransactionController extends Controller
                 'so_tien' => $validated['so_tien'],
                 'ngay_giao_dich' => $validated['ngay_giao_dich'],
                 'ghi_chu' => $validated['ghi_chu'],
+                'money_wallet_id' => $validated['money_wallet_id'] ?? null,
             ]);
+
+            // ====== REVERT OLD MONEY WALLET ======
+            if ($oldMoneyWalletId) {
+
+                $oldW = \App\Models\MoneyWallet::where('id', $oldMoneyWalletId)
+                    ->where('user_id', Auth::id())
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($oldW) {
+                    if ($oldType == 'THU') {
+                        $oldW->decrement('so_du', $oldAmount);
+                    } else {
+                        $oldW->increment('so_du', $oldAmount);
+                    }
+                }
+            }
+
+            // ====== APPLY NEW MONEY WALLET ======
+            $newMoneyWalletId = $validated['money_wallet_id'] ?? null;
+
+            if ($newMoneyWalletId) {
+
+                $newW = \App\Models\MoneyWallet::where('id', $newMoneyWalletId)
+                    ->where('user_id', Auth::id())
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($newW) {
+                    if ($validated['loai_giao_dich'] == 'THU') {
+                        $newW->increment('so_du', $validated['so_tien']);
+                    } else {
+                        $newW->decrement('so_du', $validated['so_tien']);
+                    }
+                }
+            }
 
             DB::commit();
 
             return redirect()->route('transactions.index')
                 ->with('success', 'Cập nhật giao dịch thành công!');
-                
+
         } catch (\Exception $e) {
             DB::rollBack();
             return back()
@@ -420,7 +496,7 @@ class TransactionController extends Controller
         }
     }
 
-    // Xóa giao dịch 
+    // Xóa giao dịch
     public function destroy(Transaction $transaction)
     {
         // Kiểm tra quyền sở hữu
@@ -439,10 +515,10 @@ class TransactionController extends Controller
 
             if ($wallet) {
                 if ($transaction->loai_giao_dich == 'THU') {
-                    // Kiểm tra trước khi trừ 
+                    // Kiểm tra trước khi trừ
                     if ($wallet->so_du < $transaction->so_tien) {
                         DB::rollBack();
-                        return back()->with('error', 
+                        return back()->with('error',
                             'Không thể xóa giao dịch này vì sẽ làm số dư âm! ' .
                             'Số dư hiện tại: ' . number_format($wallet->so_du, 0, ',', '.') . 'đ'
                         );
@@ -453,13 +529,30 @@ class TransactionController extends Controller
                 }
             }
 
+            // ====== MONEY WALLET ======
+            if ($transaction->money_wallet_id) {
+
+                $mWallet = \App\Models\MoneyWallet::where('id', $transaction->money_wallet_id)
+                    ->where('user_id', Auth::id())
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($mWallet) {
+                    if ($transaction->loai_giao_dich == 'THU') {
+                        $mWallet->decrement('so_du', $transaction->so_tien);
+                    } else {
+                        $mWallet->increment('so_du', $transaction->so_tien);
+                    }
+                }
+            }
+
             $transaction->delete();
-            
+
             DB::commit();
 
             return redirect()->route('transactions.index')
                 ->with('success', 'Xóa giao dịch thành công!');
-                
+
         } catch (\Exception $e) {
             DB::rollBack();
             return back()
