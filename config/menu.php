@@ -23,7 +23,7 @@ return [
     ],
     [
         'title' => 'Ví',
-        'route' => 'wallets.index', 
+        'route' => 'money-wallets.index', 
         'icon'  => 'wallet.png',
     ],
     [
