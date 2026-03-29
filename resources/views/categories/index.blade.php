@@ -1628,6 +1628,91 @@
             width: 100%;
         }
     }
+
+        /* ── Fix Laravel Pagination ── */
+    .pagination-wrapper nav {
+        display: flex;
+        align-items: center;
+    }
+
+    .pagination-wrapper nav > div:first-child {
+        display: none; /* ẩn "Showing X to Y of Z results" của Laravel vì mình đã có rồi */
+    }
+
+    .pagination-wrapper nav svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .pagination-wrapper nav span[aria-current="page"] span,
+    .pagination-wrapper nav button,
+    .pagination-wrapper nav a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+        height: 36px;
+        padding: 0 12px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background 0.2s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .pagination-wrapper nav a {
+        background: #f9fafb;
+        color: #6b7280;
+    }
+
+    .pagination-wrapper nav a:hover {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .pagination-wrapper nav span[aria-current="page"] span {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+    }
+
+    .pagination-wrapper nav span:not([aria-current="page"]) span {
+        background: #f9fafb;
+        color: #d1d5db;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+        height: 36px;
+        padding: 0 12px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    /* Dark mode */
+    body.dark .pagination-wrapper nav a {
+        background: var(--dark-bg);
+        color: #e5e7eb;
+    }
+
+    body.dark .pagination-wrapper nav a:hover {
+        background: var(--dark-card);
+    }
+
+    body.dark .pagination-wrapper nav span:not([aria-current="page"]) span {
+        background: var(--dark-bg);
+        color: #4b5563;
+    }
+
+    .pagination-wrapper nav ul,
+    .pagination-wrapper nav > div:last-child {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
 </style>
 
 <div class="category-container">

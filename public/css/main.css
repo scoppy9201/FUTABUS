@@ -1423,3 +1423,87 @@
         body.dark .g-toast.error   .g-toast-icon { background: rgba(239,68,68,0.15); }
         body.dark .g-toast.warning .g-toast-icon { background: rgba(245,158,11,0.15); }
         body.dark .g-toast.info    .g-toast-icon { background: rgba(74,144,226,0.15); }
+
+            /* ── Sub Menu ── */
+    .sub-menu {
+        position: absolute;
+        left: 80px;
+        top: 0;
+        background: white;
+        min-width: 200px;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        display: none;
+        padding: 8px 0;
+        z-index: 9999;
+        border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .nav-item.has-sub:hover .sub-menu {
+        display: block;
+    }
+
+    .sub-menu li {
+        list-style: none;
+    }
+
+    .sub-menu li a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        text-decoration: none;
+        color: #374151;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+
+    .sub-menu li a:hover {
+        background: rgba(74,144,226,0.08);
+        color: var(--primary);
+        padding-left: 20px;
+    }
+
+    .sub-menu li.active a {
+        color: var(--primary);
+        background: rgba(74,144,226,0.08);
+    }
+
+    .sub-icon {
+        width: 18px;
+        height: 18px;
+        object-fit: contain;
+        opacity: 0.6;
+        flex-shrink: 0;
+    }
+
+    .sub-menu li a:hover .sub-icon { opacity: 1; }
+
+    .sub-text {
+        white-space: nowrap;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    /* Mũi tên */
+    .sub-menu::before {
+        content: '';
+        position: absolute;
+        left: -6px;
+        top: 18px;
+        border-style: solid;
+        border-width: 6px 6px 6px 0;
+        border-color: transparent white transparent transparent;
+    }
+
+    /* Dark mode */
+    body.dark .sub-menu {
+        background: #1a1f29;
+        border-color: rgba(255,255,255,0.08);
+    }
+
+    body.dark .sub-menu li a { color: #e5e7eb; }
+    body.dark .sub-menu li a:hover { background: rgba(255,255,255,0.05); }
+    body.dark .sub-menu::before { border-color: transparent #1a1f29 transparent transparent; }

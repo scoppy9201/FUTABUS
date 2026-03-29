@@ -842,6 +842,73 @@
     body.dark td {
         color: #e5e7eb;
     }
+
+        /* ── Fix Laravel Pagination ── */
+    .pagination-wrapper nav > div:first-child { display: none; }
+
+    .pagination-wrapper nav ul {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        list-style: none;
+        padding: 0; margin: 0;
+    }
+
+    .pagination-wrapper nav svg {
+        width: 16px; height: 16px;
+    }
+
+    .pagination-wrapper nav button,
+    .pagination-wrapper nav a {
+        display: inline-flex;
+        align-items: center; justify-content: center;
+        min-width: 36px; height: 36px;
+        padding: 0 12px; border-radius: 8px;
+        font-size: 14px; font-weight: 600;
+        text-decoration: none;
+        transition: background 0.2s ease;
+        border: none; cursor: pointer;
+        background: #f9fafb; color: #6b7280;
+    }
+
+    .pagination-wrapper nav a:hover,
+    .pagination-wrapper nav button:hover {
+        background: #f3f4f6; color: #374151;
+    }
+
+    .pagination-wrapper nav span[aria-current="page"] span {
+        display: inline-flex;
+        align-items: center; justify-content: center;
+        min-width: 36px; height: 36px;
+        padding: 0 12px; border-radius: 8px;
+        font-size: 14px; font-weight: 600;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+    }
+
+    .pagination-wrapper nav span:not([aria-current="page"]) > span {
+        display: inline-flex;
+        align-items: center; justify-content: center;
+        min-width: 36px; height: 36px;
+        padding: 0 12px; border-radius: 8px;
+        font-size: 14px; font-weight: 600;
+        background: #f9fafb; color: #d1d5db;
+    }
+
+    /* Dark mode */
+    body.dark .pagination-wrapper nav a,
+    body.dark .pagination-wrapper nav button {
+        background: var(--dark-bg); color: #e5e7eb;
+    }
+
+    body.dark .pagination-wrapper nav a:hover,
+    body.dark .pagination-wrapper nav button:hover {
+        background: var(--dark-card);
+    }
+
+    body.dark .pagination-wrapper nav span:not([aria-current="page"]) > span {
+        background: var(--dark-bg); color: #4b5563;
+    }
 </style>
 
 <div class="transaction-container">
