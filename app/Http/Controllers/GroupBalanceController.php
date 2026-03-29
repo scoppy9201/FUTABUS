@@ -66,8 +66,10 @@ class GroupBalanceController extends Controller
             ->get()
             ->map(fn($p) => $this->formatProposal($p, $userId));
 
+        $laAdmin = $group->isAdmin(Auth::id());
+
         return view('groups.balance.index', compact(
-            'group', 'members', 'tongSoDu', 'proposals', 'myPending'
+            'group', 'members', 'tongSoDu', 'proposals', 'myPending', 'laAdmin'
         ));
     }
 

@@ -441,7 +441,7 @@ $iconDown   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
                 @csrf
                 <button type="submit" class="btn-primary btn-danger btn-sm">{!! $iconX !!} Từ chối</button>
             </form>
-            @if($laAdmin ?? false)
+            @if($laAdmin)
             <form action="{{ route('groups.balance.cancel', [$group, $p['id']]) }}" method="POST" style="display:inline">
                 @csrf
                 <button type="submit" class="btn-ghost btn-sm">Hủy</button>
