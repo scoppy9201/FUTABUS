@@ -1,625 +1,285 @@
+@php
+    $isRegister = request()->routeIs('register');
+    $initialMode = old('auth_mode', $isRegister ? 'register' : 'login');
+@endphp
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý chi tiêu</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e94c5 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 40px 20px;
-        }
-
-        .container {
-            background: white;
-            border-radius: 25px;
-            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.35);
-            position: relative;
-            overflow: hidden;
-            width: 100%;
-            max-width: 900px;
-            height: 580px;
-        }
-
-        .form-container {
-            position: absolute;
-            top: 0;
-            height: 100%;
-            transition: all 0.6s ease-in-out;
-        }
-
-        .sign-in-container {
-            left: 0;
-            width: 50%;
-            z-index: 2;
-        }
-
-        .sign-up-container {
-            left: 0;
-            width: 50%;
-            opacity: 0;
-            z-index: 1;
-        }
-
-        .container.right-panel-active .sign-in-container {
-            transform: translateX(100%);
-        }
-
-        .container.right-panel-active .sign-up-container {
-            transform: translateX(100%);
-            opacity: 1;
-            z-index: 5;
-            animation: show 0.6s;
-        }
-
-        @keyframes show {
-            0%, 49.99% {
-                opacity: 0;
-                z-index: 1;
-            }
-            50%, 100% {
-                opacity: 1;
-                z-index: 5;
-            }
-        }
-
-        form {
-            background: #fff;
-            display: flex;
-            flex-direction: column;
-            padding: 40px 50px;
-            height: 100%;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-
-        h2 {
-            color: #2a5298;
-            font-size: 30px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .subtitle {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 25px;
-        }
-
-        .form-group {
-            width: 100%;
-            margin-bottom: 12px;
-            text-align: left;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #333;
-            font-weight: 500;
-            font-size: 13px;
-        }
-
-        .input-wrapper {
-            position: relative;
-            width: 100%;
-        }
-
-        .input-wrapper input {
-            width: 100%;
-            padding: 11px 45px 11px 45px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            outline: none;
-            background: #f8f9fa;
-        }
-
-        .input-wrapper input:focus {
-            border-color: #4a90e2;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 20px;
-            height: 20px;
-            object-fit: contain;
-        }
-
-        .toggle-password {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            opacity: 0.6;
-            transition: opacity 0.3s;
-        }
-
-        .toggle-password:hover {
-            opacity: 1;
-        }
-
-        .toggle-password img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .form-options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            margin-bottom: 20px;
-            font-size: 13px;
-        }
-
-        .remember-me {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #666;
-            cursor: pointer;
-        }
-
-        .remember-me input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-            accent-color: #4a90e2;
-        }
-
-        .forgot-link {
-            color: #4a90e2;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-
-        .forgot-link:hover {
-            color: #2a5298;
-            text-decoration: underline;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #4a90e2 0%, #2a5298 100%);
-            color: white;
-            border: none;
-            border-radius: 30px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            margin-top: 8px;
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 30px rgba(42, 82, 152, 0.4);
-        }
-
-        .submit-btn:active {
-            transform: translateY(-1px);
-        }
-
-        .social-login {
-            margin-top: 18px;
-            width: 100%;
-        }
-
-        .social-login p {
-            color: #999;
-            font-size: 12px;
-            margin-bottom: 10px;
-        }
-
-        .social-icons {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .social-icon {
-            width: 40px;
-            height: 40px;
-            border: 2px solid #e0e0e0;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: white;
-            text-decoration: none;
-            padding: 7px;
-        }
-
-        .social-icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .social-icon:hover {
-            border-color: #4a90e2;
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Overlay */
-        .overlay-container {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 50%;
-            height: 100%;
-            overflow: hidden;
-            transition: transform 0.6s ease-in-out;
-            z-index: 100;
-        }
-
-        .container.right-panel-active .overlay-container {
-            transform: translateX(-100%);
-        }
-
-        .overlay {
-            background: linear-gradient(135deg, #4a90e2 0%, #2a5298 50%, #1e3c72 100%);
-            background-size: cover;
-            color: #fff;
-            position: relative;
-            left: -100%;
-            height: 100%;
-            width: 200%;
-            transform: translateX(0);
-            transition: transform 0.6s ease-in-out;
-        }
-
-        .container.right-panel-active .overlay {
-            transform: translateX(50%);
-        }
-
-        .overlay-panel {
-            position: absolute;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 0 50px;
-            text-align: center;
-            top: 0;
-            height: 100%;
-            width: 50%;
-            transform: translateX(0);
-            transition: transform 0.6s ease-in-out;
-        }
-
-        .overlay-left {
-            transform: translateX(-20%);
-        }
-
-        .container.right-panel-active .overlay-left {
-            transform: translateX(0);
-        }
-
-        .overlay-right {
-            right: 0;
-            transform: translateX(0);
-        }
-
-        .container.right-panel-active .overlay-right {
-            transform: translateX(20%);
-        }
-
-        .overlay-panel h1 {
-            font-size: 28px;
-            font-weight: 700;
-            white-space: nowrap;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .overlay-panel p {
-            font-size: 16px;
-            font-weight: 400;
-            line-height: 1.7;
-            margin-bottom: 35px;
-            opacity: 0.95;
-        }
-
-        .ghost-btn {
-            background: transparent;
-            border: 2.5px solid white;
-            color: white;
-            padding: 14px 55px;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-
-        .ghost-btn:hover {
-            background: white;
-            color: #2a5298;
-            transform: scale(1.08);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                max-width: 400px;
-                min-height: auto;
-            }
-
-            .form-container {
-                position: relative;
-                width: 100% !important;
-                left: 0 !important;
-                transform: none !important;
-            }
-
-            .sign-in-container,
-            .sign-up-container {
-                width: 100%;
-                position: relative;
-            }
-
-            .container.right-panel-active .sign-in-container {
-                display: none;
-            }
-
-            .container.right-panel-active .sign-up-container {
-                display: block;
-                transform: none;
-            }
-
-            .overlay-container {
-                display: none;
-            }
-
-            form {
-                padding: 40px 30px;
-            }
-
-            h2 {
-                font-size: 28px;
-            }
-
-            .mobile-switch {
-                display: block;
-                margin-top: 20px;
-                text-align: center;
-                color: #666;
-                font-size: 14px;
-            }
-
-            .mobile-switch button {
-                background: none;
-                border: none;
-                color: #4a90e2;
-                font-weight: 600;
-                cursor: pointer;
-                font-size: 14px;
-                text-decoration: underline;
-            }
-        }
-
-        @media (min-width: 769px) {
-            .mobile-switch {
-                display: none;
-            }
-        }
-    </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ $isRegister ? 'Tạo tài khoản Monexa' : 'Đăng nhập Monexa' }}</title>
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=be-vietnam-pro:300,400,500,600,700,800" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ asset('css/welcome-system.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/monebot.css') }}">
 </head>
-<body>
-    <div class="container" id="container">
-        <div class="form-container sign-up-container">
-            <form action="/register" method="POST">
-                @csrf
-                <h2>Đăng ký</h2>
-                <p class="subtitle">Tạo tài khoản mới</p>
-                
-                <div class="form-group">
-                    <label>Họ và tên</label>
-                    <div class="input-wrapper">
-                        <img src="/images/user.png" class="input-icon" alt="User Icon">
-                        <input type="text" name="name" placeholder="Nhập họ và tên của bạn" required>
-                    </div>
-                </div>
+<body class="auth-page">
+    <div class="auth-shell">
+        <div class="auth-backdrop auth-backdrop--one"></div>
+        <div class="auth-backdrop auth-backdrop--two"></div>
+        <div class="auth-grid-lines"></div>
 
-                <div class="form-group">
-                    <label>Email</label>
-                    <div class="input-wrapper">
-                        <img src="/images/envelope.png" class="input-icon" alt="Email Icon">
-                        <input type="email" name="email" placeholder="example@email.com" required>
-                    </div>
+        <header class="auth-topbar">
+            <a href="{{ url('/') }}" class="footer-logo">
+                <div class="footer-logo-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L2 12l10 10 10-10L12 2z"></path>
+                        <path d="M8 12l3-3 5 5"></path>
+                    </svg>
                 </div>
+                <span class="logo-wordmark">Mon<em>exa</em></span>
+            </a>
 
-                <div class="form-group">
-                    <label>Mật khẩu</label>
-                    <div class="input-wrapper">
-                        <img src="/images/pass.png" class="input-icon" alt="Password Icon">
-                        <input type="password" id="register-password" name="password" placeholder="Nhập mật khẩu" required>
-                        <span class="toggle-password" onclick="togglePassword('register-password', this)">
-                            <img src="/images/eye.png" alt="Toggle Password">
-                        </span>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Xác nhận mật khẩu</label>
-                    <div class="input-wrapper">
-                        <img src="/images/password.png" class="input-icon" alt="Confirm Password Icon">
-                        <input type="password" id="register-password-confirm" name="password_confirmation" placeholder="Nhập lại mật khẩu" required>
-                        <span class="toggle-password" onclick="togglePassword('register-password-confirm', this)">
-                            <img src="/images/eye.png" alt="Toggle Password">
-                        </span>
-                    </div>
-                </div>
-
-                <button type="submit" class="submit-btn">Đăng ký</button>
-
-                <div class="social-login">
-                    <p>hoặc đăng ký bằng</p>
-                    <div class="social-icons">
-                        <a href="/auth/google" class="social-icon" title="Google">
-                             <img src="/images/google.png" alt="Google">
-                        </a>
-                        <a href="#" class="social-icon" title="Facebook">
-                            <img src="/images/facebook.png" alt="Facebook">
-                        </a>
-                        <a href="#" class="social-icon" title="GitHub">
-                            <img src="/images/github.png" alt="GitHub">
-                        </a>
-                        <a href="#" class="social-icon" title="LinkedIn">
-                            <img src="/images/linkedin.png" alt="LinkedIn">
-                        </a>
-                    </div>
-                </div>
-
-                <div class="mobile-switch">
-                    Đã có tài khoản? <button type="button" onclick="switchToSignIn()">Đăng nhập</button>
-                </div>
-            </form>
-        </div>
-
-        <div class="form-container sign-in-container">
-            <form action="/login" method="POST">
-                @csrf
-                <h2>Đăng nhập</h2>
-                <p class="subtitle">Đăng nhập vào tài khoản của bạn</p>
-                
-                <div class="form-group">
-                    <label>Email</label>
-                    <div class="input-wrapper">
-                        <img src="/images/envelope.png" class="input-icon" alt="Email Icon">
-                        <input type="email" name="email" placeholder="example@email.com" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Mật khẩu</label>
-                    <div class="input-wrapper">
-                        <img src="/images/pass.png" class="input-icon" alt="Password Icon">
-                        <input type="password" id="login-password" name="password" placeholder="Nhập mật khẩu" required>
-                        <span class="toggle-password" onclick="togglePassword('login-password', this)">
-                            <img src="/images/eye.png" alt="Toggle Password">
-                        </span>
-                    </div>
-                </div>
-
-                <div class="form-options">
-                    <label class="remember-me">
-                        <input type="checkbox" name="remember">
-                        <span>Ghi nhớ đăng nhập</span>
-                    </label>
-                    <a href="{{ route('password.request') }}" class="forgot-link">Quên mật khẩu?</a>
-                </div>
-
-                <button type="submit" class="submit-btn">Đăng nhập</button>
-
-                <div class="social-login">
-                    <p>hoặc đăng nhập bằng</p>
-                    <div class="social-icons">
-                        <a href="/auth/google" class="social-icon" title="Google">
-                            <img src="/images/google.png" alt="Google">
-                        </a>
-                        <a href="#" class="social-icon" title="Facebook">
-                            <img src="/images/facebook.png" alt="Facebook">
-                        </a>
-                        <a href="#" class="social-icon" title="GitHub">
-                            <img src="/images/github.png" alt="GitHub">
-                        </a>
-                        <a href="#" class="social-icon" title="LinkedIn">
-                            <img src="/images/linkedin.png" alt="LinkedIn">
-                        </a>
-                    </div>
-                </div>
-
-                <div class="mobile-switch">
-                    Chưa có tài khoản? <button type="button" onclick="switchToSignUp()">Đăng ký ngay</button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Overlay -->
-        <div class="overlay-container">
-            <div class="overlay">
-                <div class="overlay-panel overlay-left">
-                    <h1>Xin chào, Chào mừng!</h1>
-                    <p>Đã có tài khoản rồi?<br>Đăng nhập ngay để tiếp tục</p>
-                    <button class="ghost-btn" id="signIn">Đăng nhập</button>
-                </div>
-                <div class="overlay-panel overlay-right">
-                    <h1>Xin chào, Chào mừng!</h1>
-                    <p>Chưa có tài khoản?<br>Đăng ký ngay để bắt đầu</p>
-                    <button class="ghost-btn" id="signUp">Đăng ký</button>
-                </div>
+            <div class="auth-topbar-actions">
+                <a href="{{ url('/') }}" class="auth-top-link">Về trang chủ</a>
+                <a href="{{ route('password.request') }}" class="auth-top-link">Quên mật khẩu</a>
             </div>
-        </div>
+        </header>
+
+        <main class="auth-stage">
+            @if (session('success'))
+                <div class="auth-notice auth-notice--success">{{ session('success') }}</div>
+            @endif
+
+            @if (session('error'))
+                <div class="auth-notice auth-notice--error">{{ session('error') }}</div>
+            @endif
+
+            <div class="auth-mobile-tabs" role="tablist" aria-label="Chuyển đổi biểu mẫu">
+                <button type="button" class="auth-tab {{ $initialMode === 'login' ? 'is-active' : '' }}" data-mode="login">Đăng nhập</button>
+                <button type="button" class="auth-tab {{ $initialMode === 'register' ? 'is-active' : '' }}" data-mode="register">Đăng ký</button>
+            </div>
+
+            <section class="auth-frame {{ $initialMode === 'register' ? 'is-register' : '' }}" id="authFrame">
+                <div class="auth-pane auth-pane--signin">
+                    <form action="{{ route('login') }}" method="POST" class="auth-form auth-form--pane" novalidate>
+                        @csrf
+                        <input type="hidden" name="auth_mode" value="login">
+                        <div class="auth-form-head">
+                            <p class="auth-kicker">Tài khoản Monexa</p>
+                            <h1 class="auth-card-title">Đăng nhập</h1>
+                            <p class="auth-pane-subtitle">Tiếp tục quản lý tài chính cá nhân trên cùng một hệ giao diện với landing page.</p>
+                        </div>
+
+                        <div class="auth-field">
+                            <label for="login-email">Email</label>
+                            <div class="auth-input-wrap">
+                                <span class="auth-input-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+                                        <path d="m3 7 9 6 9-6"></path>
+                                    </svg>
+                                </span>
+                                <input id="login-email" type="email" name="email" value="{{ old('email', !$isRegister ? request('email') : '') }}" placeholder="example@gmail.com" autocomplete="email" @if(!$isRegister) autofocus @endif required>
+                            </div>
+                            @if (!$isRegister)
+                                @error('email')
+                                    <p class="auth-error">{{ $message }}</p>
+                                @enderror
+                            @endif
+                        </div>
+
+                        <div class="auth-field">
+                            <label for="login-password">Mật khẩu</label>
+                            <div class="auth-input-wrap">
+                                <span class="auth-input-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+                                        <path d="M7 11V8a5 5 0 0 1 10 0v3"></path>
+                                    </svg>
+                                </span>
+                                <input id="login-password" type="password" name="password" placeholder="Nhập mật khẩu" autocomplete="current-password" required>
+                                <button type="button" class="auth-password-toggle" data-password-toggle="login-password" aria-label="Hiện hoặc ẩn mật khẩu">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                </button>
+                            </div>
+                            @if (!$isRegister)
+                                @error('password')
+                                    <p class="auth-error">{{ $message }}</p>
+                                @enderror
+                            @endif
+                        </div>
+
+                        <div class="auth-row">
+                            <label class="auth-check">
+                                <input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}>
+                                <span>Ghi nhớ đăng nhập</span>
+                            </label>
+                            <a href="{{ route('password.request') }}" class="auth-link">Quên mật khẩu?</a>
+                        </div>
+
+                        <button type="submit" class="auth-submit">Đăng nhập</button>
+
+                        <div class="auth-divider"><span>hoặc</span></div>
+
+                        <a href="{{ route('google.redirect') }}" class="auth-social">
+                            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                                <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.5 3.9-5.5 3.9-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.1.8 3.8 1.4l2.6-2.5C16.8 3.4 14.6 2.5 12 2.5 6.8 2.5 2.5 6.8 2.5 12s4.3 9.5 9.5 9.5c5.5 0 9.1-3.9 9.1-9.3 0-.6-.1-1.1-.2-1.6H12Z"/>
+                            </svg>
+                            <span>Tiếp tục với Google</span>
+                        </a>
+
+                        <p class="auth-mobile-switch">Chưa có tài khoản? <button type="button" class="auth-inline-button" data-mode="register">Đăng ký ngay</button></p>
+                    </form>
+                </div>
+
+                <div class="auth-pane auth-pane--signup">
+                    <form action="{{ route('register') }}" method="POST" class="auth-form auth-form--pane" novalidate>
+                        @csrf
+                        <input type="hidden" name="auth_mode" value="register">
+                        <div class="auth-form-head">
+                            <p class="auth-kicker">Khởi tạo tài khoản</p>
+                            <h1 class="auth-card-title">Đăng ký</h1>
+                            <p class="auth-pane-subtitle">Thiết lập tài khoản mới để bắt đầu theo dõi thu chi, ngân sách và báo cáo thông minh.</p>
+                        </div>
+
+                        <div class="auth-field">
+                            <label for="register-name">Họ và tên</label>
+                            <div class="auth-input-wrap">
+                                <span class="auth-input-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 21a8 8 0 0 0-16 0"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                </span>
+                                <input id="register-name" type="text" name="name" value="{{ old('name') }}" placeholder="Nhập họ và tên của bạn" autocomplete="name" @if($isRegister) autofocus @endif required>
+                            </div>
+                            @if ($isRegister)
+                                @error('name')
+                                    <p class="auth-error">{{ $message }}</p>
+                                @enderror
+                            @endif
+                        </div>
+
+                        <div class="auth-field">
+                            <label for="register-email">Email Gmail</label>
+                            <div class="auth-input-wrap">
+                                <span class="auth-input-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+                                        <path d="m3 7 9 6 9-6"></path>
+                                    </svg>
+                                </span>
+                                <input id="register-email" type="email" name="email" value="{{ old('email', $isRegister ? request('email') : '') }}" placeholder="example@gmail.com" autocomplete="email" required>
+                            </div>
+                            @if ($isRegister)
+                                @error('email')
+                                    <p class="auth-error">{{ $message }}</p>
+                                @enderror
+                            @endif
+                        </div>
+
+                        <div class="auth-field">
+                            <label for="register-password">Mật khẩu</label>
+                            <div class="auth-input-wrap">
+                                <span class="auth-input-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+                                        <path d="M7 11V8a5 5 0 0 1 10 0v3"></path>
+                                    </svg>
+                                </span>
+                                <input id="register-password" type="password" name="password" placeholder="Tối thiểu 8 ký tự, có chữ hoa, số và ký tự đặc biệt" autocomplete="new-password" required>
+                                <button type="button" class="auth-password-toggle" data-password-toggle="register-password" aria-label="Hiện hoặc ẩn mật khẩu">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                </button>
+                            </div>
+                            @if ($isRegister)
+                                @error('password')
+                                    <p class="auth-error">{{ $message }}</p>
+                                @enderror
+                            @endif
+                        </div>
+
+                        <div class="auth-field">
+                            <label for="register-password-confirmation">Xác nhận mật khẩu</label>
+                            <div class="auth-input-wrap">
+                                <span class="auth-input-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m9 12 2 2 4-4"></path>
+                                        <path d="M21 12c0 5-4 9-9 9a9 9 0 1 1 9-9Z"></path>
+                                    </svg>
+                                </span>
+                                <input id="register-password-confirmation" type="password" name="password_confirmation" placeholder="Nhập lại mật khẩu" autocomplete="new-password" required>
+                                <button type="button" class="auth-password-toggle" data-password-toggle="register-password-confirmation" aria-label="Hiện hoặc ẩn xác nhận mật khẩu">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="auth-submit">Tạo tài khoản</button>
+
+                        <div class="auth-divider"><span>hoặc</span></div>
+
+                        <a href="{{ route('google.redirect') }}" class="auth-social">
+                            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                                <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.5 3.9-5.5 3.9-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.1.8 3.8 1.4l2.6-2.5C16.8 3.4 14.6 2.5 12 2.5 6.8 2.5 2.5 6.8 2.5 12s4.3 9.5 9.5 9.5c5.5 0 9.1-3.9 9.1-9.3 0-.6-.1-1.1-.2-1.6H12Z"/>
+                            </svg>
+                            <span>Đăng ký nhanh với Google</span>
+                        </a>
+
+                        <p class="auth-mobile-switch">Đã có tài khoản? <button type="button" class="auth-inline-button" data-mode="login">Đăng nhập</button></p>
+                    </form>
+                </div>
+
+                <div class="auth-overlay-shell">
+                    <div class="auth-overlay">
+                        <div class="auth-overlay-panel auth-overlay-panel--left">
+                            <p class="auth-overlay-kicker">Chào mừng quay lại</p>
+                            <h2>Đã có tài khoản Monexa?</h2>
+                            <p>Đăng nhập để tiếp tục xem dashboard, ngân sách và các gợi ý AI dành riêng cho bạn.</p>
+                            <button type="button" class="auth-ghost-btn" data-mode="login">Đăng nhập</button>
+                        </div>
+
+                        <div class="auth-overlay-panel auth-overlay-panel--right">
+                            <p class="auth-overlay-kicker">Bắt đầu miễn phí</p>
+                            <h2>Chưa có tài khoản?</h2>
+                            <p>Tạo tài khoản mới để lưu giao dịch, theo dõi ví tiền và làm chủ tài chính cá nhân mỗi ngày.</p>
+                            <button type="button" class="auth-ghost-btn" data-mode="register">Đăng ký</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
 
     <script>
-        const signUpButton = document.getElementById('signUp');
-        const signInButton = document.getElementById('signIn');
-        const container = document.getElementById('container');
+        const authFrame = document.getElementById('authFrame');
+        const modeSwitchers = document.querySelectorAll('[data-mode]');
+        const passwordToggles = document.querySelectorAll('[data-password-toggle]');
 
-        signUpButton.addEventListener('click', () => {
-            container.classList.add('right-panel-active');
+        function setAuthMode(mode) {
+            authFrame.classList.toggle('is-register', mode === 'register');
+            document.querySelectorAll('.auth-tab').forEach(tab => {
+                tab.classList.toggle('is-active', tab.dataset.mode === mode);
+            });
+        }
+
+        modeSwitchers.forEach(control => {
+            control.addEventListener('click', () => {
+                setAuthMode(control.dataset.mode);
+            });
         });
 
-        signInButton.addEventListener('click', () => {
-            container.classList.remove('right-panel-active');
+        passwordToggles.forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const input = document.getElementById(toggle.dataset.passwordToggle);
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                toggle.classList.toggle('is-visible', isPassword);
+            });
         });
 
-        function switchToSignUp() {
-            container.classList.add('right-panel-active');
-        }
-
-        function switchToSignIn() {
-            container.classList.remove('right-panel-active');
-        }
-
-        function togglePassword(inputId, toggleIcon) {
-            const input = document.getElementById(inputId);
-            const img = toggleIcon.querySelector('img');
-            
-            if (input.type === 'password') {
-                input.type = 'text';
-                img.src = '/images/eye.png'
-            } else {
-                input.type = 'password';
-                img.src = '/images/eye_off.png'; 
-            }
-        }
+        setAuthMode(authFrame.classList.contains('is-register') ? 'register' : 'login');
     </script>
+    @include('layouts.partials.monebot')
 </body>
 </html>

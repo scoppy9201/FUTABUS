@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=be-vietnam-pro:300,400,500,600,700,800" rel="stylesheet" />
     <link rel="stylesheet" href="{{ asset('css/welcome-system.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/monebot.css') }}">
 </head>
 <body>
 
@@ -311,8 +312,8 @@
                     <path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/>
                 </svg>
             </div>
-            <div class="feat-title">AI phân tích thông minh</div>
-            <div class="feat-desc">Trợ lý AI phân tích thói quen chi tiêu, đưa ra gợi ý tiết kiệm và dự đoán chi phí tháng tiếp theo.</div>
+            <div class="feat-title">MoneBot phân tích thông minh</div>
+            <div class="feat-desc">MoneBot phân tích thói quen chi tiêu, đưa ra gợi ý tiết kiệm và dự đoán chi phí tháng tiếp theo.</div>
         </div>
 
         <div class="feat-card reveal d2">
@@ -370,7 +371,7 @@
                     <div class="step-body">
                         <div class="step-label">Bước 3</div>
                         <div class="step-title">Xem phân tích & Tối ưu chi tiêu</div>
-                        <div class="step-desc">Dashboard thời gian thực và AI assistant sẽ giúp bạn hiểu rõ thói quen và đưa ra quyết định tài chính tốt hơn.</div>
+                        <div class="step-desc">Dashboard thời gian thực và MoneBot sẽ giúp bạn hiểu rõ thói quen và đưa ra quyết định tài chính tốt hơn.</div>
                     </div>
                 </div>
             </div>
@@ -390,7 +391,7 @@
                         </svg>
                     </div>
                     <div>
-                        <div class="ai-name">AI Assistant</div>
+                        <div class="ai-name">MoneBot</div>
                         <div class="ai-status">● Đang hoạt động</div>
                     </div>
                 </div>
@@ -445,9 +446,9 @@
             </div>
             <div class="testi-card reveal d2">
                 <div class="testi-stars">★★★★★</div>
-                <div class="testi-text">"AI assistant phân tích chi tiêu rất hay, giúp tôi tiết kiệm được gần 2 triệu mỗi tháng chỉ bằng cách thay đổi vài thói quen nhỏ."</div>
+                <div class="testi-text">"MoneBot phân tích chi tiêu rất hay, giúp tôi tiết kiệm được gần 2 triệu mỗi tháng chỉ bằng cách thay đổi vài thói quen nhỏ."</div>
                 <div class="testi-author">
-                    <div class="testi-avatar">L</div>
+                    <div class="testi-avatar">X</div>
                     <div><div class="testi-name">Xuân Huyèn</div><div class="testi-role">Giáo viên, TP. Hà Nội</div></div>
                 </div>
             </div>
@@ -494,7 +495,7 @@
                     <li><a href="#features">Theo dõi thu chi theo danh mục</a></li>
                     <li><a href="#features">Quản lý ngân sách theo tháng</a></li>
                     <li><a href="#features">Phân tích thói quen chi tiêu</a></li>
-                    <li><a href="#how">Trợ lý AI gợi ý tối ưu chi tiêu</a></li>
+                    <li><a href="#how">MoneBot gợi ý tối ưu chi tiêu</a></li>
                     <li><a href="#reviews">Báo cáo trực quan dễ theo dõi</a></li>
                     <li><a href="#cta">Bắt đầu miễn phí ngay hôm nay</a></li>
                 </ul>
@@ -567,6 +568,8 @@
     </div>
 </footer>
 
+@include('layouts.partials.monebot')
+
 <script>
     // Navbar scroll
     const navbar = document.getElementById('navbar');
@@ -575,16 +578,42 @@
     });
 
     // Scroll reveal
-    const reveals = document.querySelectorAll('.reveal');
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                observer.unobserve(entry.target);
+    const reveals = [...document.querySelectorAll('.reveal')];
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const revealGroups = document.querySelectorAll(
+        '.stats-strip, .features-grid, .steps, .testi-grid, .footer-columns, .hero-btns, .cta-btns'
+    );
+
+    revealGroups.forEach(group => {
+        const items = [...group.querySelectorAll(':scope > .reveal')];
+        items.forEach((item, index) => {
+            if (!item.style.getPropertyValue('--reveal-delay')) {
+                item.style.setProperty('--reveal-delay', `${Math.min(index * 90, 360)}ms`);
             }
         });
-    }, { threshold: 0.1 });
-    reveals.forEach(el => observer.observe(el));
+    });
+
+    if (reduceMotion) {
+        reveals.forEach(el => el.classList.add('visible'));
+    } else {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    requestAnimationFrame(() => {
+                        entry.target.classList.add('visible');
+                    });
+                } else {
+                    entry.target.classList.remove('visible');
+                }
+            });
+        }, {
+            threshold: 0.14,
+            rootMargin: '0px 0px -8% 0px',
+        });
+
+        reveals.forEach(el => observer.observe(el));
+    }
 
     // Animate bars on load
     setTimeout(() => {

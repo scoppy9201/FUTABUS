@@ -1,357 +1,129 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quên mật khẩu</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e94c5 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 40px 20px;
-        }
-
-        .container {
-            background: white;
-            border-radius: 25px;
-            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.35);
-            position: relative;
-            overflow: hidden;
-            width: 100%;
-            max-width: 900px;
-            height: 580px;
-            display: flex;
-        }
-
-        .form-section {
-            width: 50%;
-            padding: 50px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: #4a90e2;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 20px;
-            transition: all 0.3s;
-        }
-
-        .back-link:hover {
-            color: #2a5298;
-            gap: 12px;
-        }
-
-        .back-link img {
-            width: 16px;
-            height: 16px;
-            object-fit: contain;
-        }
-
-        h2 {
-            color: #2a5298;
-            font-size: 30px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .subtitle {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 25px;
-            line-height: 1.6;
-        }
-
-        .alert {
-            padding: 12px 16px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .form-group {
-            width: 100%;
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #333;
-            font-weight: 500;
-            font-size: 13px;
-        }
-
-        .input-wrapper {
-            position: relative;
-            width: 100%;
-        }
-
-        .input-wrapper input {
-            width: 100%;
-            padding: 11px 45px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            outline: none;
-            background: #f8f9fa;
-        }
-
-        .input-wrapper input:focus {
-            border-color: #4a90e2;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
-        }
-
-        .input-wrapper.error input {
-            border-color: #dc3545;
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 20px;
-            height: 20px;
-            object-fit: contain;
-        }
-
-        .error-message {
-            color: #dc3545;
-            font-size: 13px;
-            margin-top: 6px;
-            display: block;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #4a90e2 0%, #2a5298 100%);
-            color: white;
-            border: none;
-            border-radius: 30px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            margin-top: 8px;
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 30px rgba(42, 82, 152, 0.4);
-        }
-
-        .info-box {
-            background: #e7f3ff;
-            border-left: 4px solid #4a90e2;
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-
-        .info-box img {
-            width: 20px;
-            height: 20px;
-            object-fit: contain;
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-
-        .info-box p {
-            color: #1e3c72;
-            font-size: 12px;
-            line-height: 1.6;
-            margin: 0;
-            flex: 1;
-        }
-
-        /* Overlay Panel */
-        .overlay-panel {
-            width: 50%;
-            background: linear-gradient(135deg, #4a90e2 0%, #2a5298 50%, #1e3c72 100%);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 50px;
-            text-align: center;
-        }
-
-        .overlay-panel h1 {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .overlay-panel p {
-            font-size: 16px;
-            line-height: 1.7;
-            margin-bottom: 35px;
-            opacity: 0.95;
-        }
-
-        .ghost-btn {
-            background: transparent;
-            border: 2.5px solid white;
-            color: white;
-            padding: 14px 55px;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .ghost-btn:hover {
-            background: white;
-            color: #2a5298;
-            transform: scale(1.08);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .icon-wrapper {
-            width: 120px;
-            height: 120px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 30px;
-            backdrop-filter: blur(10px);
-            padding: 30px;
-        }
-
-        .icon-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                max-width: 400px;
-                height: auto;
-                flex-direction: column;
-            }
-
-            .form-section {
-                width: 100%;
-                padding: 40px 30px;
-            }
-
-            .overlay-panel {
-                display: none;
-            }
-        }
-    </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quên mật khẩu Monexa</title>
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=be-vietnam-pro:300,400,500,600,700,800" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ asset('css/welcome-system.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/monebot.css') }}">
 </head>
-<body>
-    <div class="container">
-        <div class="form-section">
-            <a href="{{ route('login') }}" class="back-link">
-                <img src="/images/arrow.png" alt="Quay lại">
-                <span>Quay lại đăng nhập</span>
+<body class="auth-page">
+    <div class="auth-shell">
+        <div class="auth-backdrop auth-backdrop--one"></div>
+        <div class="auth-backdrop auth-backdrop--two"></div>
+        <div class="auth-grid-lines"></div>
+
+        <header class="auth-topbar">
+            <a href="{{ url('/') }}" class="footer-logo">
+                <div class="footer-logo-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L2 12l10 10 10-10L12 2z"></path>
+                        <path d="M8 12l3-3 5 5"></path>
+                    </svg>
+                </div>
+                <span class="logo-wordmark">Mon<em>exa</em></span>
             </a>
 
-            <h2>Quên mật khẩu?</h2>
-            <p class="subtitle">Nhập email của bạn và chúng tôi sẽ gửi mã xác thực để đặt lại mật khẩu</p>
+            <div class="auth-topbar-actions">
+                <a href="{{ url('/') }}" class="auth-top-link">Về trang chủ</a>
+                <a href="{{ route('login') }}" class="auth-top-link">Đăng nhập</a>
+            </div>
+        </header>
 
-            @if(session('success'))
-                <div class="alert alert-success">
-                    {{ session('success') }}
-                </div>
+        <main class="recovery-shell">
+            @if (session('success'))
+                <div class="auth-notice auth-notice--success">{{ session('success') }}</div>
             @endif
 
-            @if($errors->any())
-                <div class="alert alert-error">
-                    @foreach($errors->all() as $error)
-                        {{ $error }}
+            @if ($errors->any())
+                <div class="auth-notice auth-notice--error">
+                    @foreach ($errors->all() as $error)
+                        <div>{{ $error }}</div>
                     @endforeach
                 </div>
             @endif
 
-            <form action="{{ route('password.email') }}" method="POST">
-                @csrf
-                
-                <div class="form-group">
-                    <label>Email đã đăng ký</label>
-                    <div class="input-wrapper {{ $errors->has('email') ? 'error' : '' }}">
-                        <img src="/images/mail.png" class="input-icon" alt="Email Icon">
-                        <input 
-                            type="email" 
-                            name="email" 
-                            placeholder="example@email.com" 
-                            value="{{ old('email') }}"
-                            required
-                            autofocus
-                        >
+            <section class="recovery-layout">
+                <aside class="recovery-aside">
+                    <div class="recovery-aside-inner">
+                        <p class="recovery-kicker">Khôi phục tài khoản</p>
+                        <h1 class="recovery-title">Lấy lại quyền truy cập vào Monexa chỉ với email đã đăng ký.</h1>
+                        <div class="recovery-hero-icon" aria-hidden="true">
+                            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="5" width="18" height="14" rx="3"></rect>
+                                <path d="m3 7 9 6 9-6"></path>
+                            </svg>
+                        </div>
+                        <p class="recovery-copy">Nhập email của bạn, hệ thống sẽ gửi mã xác thực 6 số để tiếp tục quá trình đặt lại mật khẩu theo flow bảo mật hiện tại.</p>
+
+                        <div class="recovery-points">
+                            <div class="recovery-point">
+                                <div class="recovery-point-badge">01</div>
+                                <div class="recovery-point-text">
+                                    <strong>Nhập email đăng ký</strong>
+                                    <span>Hệ thống kiểm tra tài khoản và tạo mã xác thực riêng cho bạn.</span>
+                                </div>
+                            </div>
+                            <div class="recovery-point">
+                                <div class="recovery-point-badge">02</div>
+                                <div class="recovery-point-text">
+                                    <strong>Nhận mã 6 số qua email</strong>
+                                    <span>Mã có hiệu lực ngắn để đảm bảo luồng khôi phục an toàn hơn.</span>
+                                </div>
+                            </div>
+                            <div class="recovery-point">
+                                <div class="recovery-point-badge">03</div>
+                                <div class="recovery-point-text">
+                                    <strong>Đặt mật khẩu mới</strong>
+                                    <span>Sau khi xác thực thành công, bạn có thể tạo mật khẩu mới ngay.</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    @error('email')
-                        <span class="error-message">{{ $message }}</span>
-                    @enderror
-                </div>
+                </aside>
 
-                <button type="submit" class="submit-btn">Gửi mã xác thực</button>
-            </form>
+                <section class="recovery-card">
+                    <div class="recovery-card-head">
+                        <p class="auth-kicker">Quên mật khẩu</p>
+                        <h2 class="auth-card-title">Gửi mã xác thực</h2>
+                        <p class="recovery-subtitle">Nhập email của bạn và Monexa sẽ gửi mã xác thực để tiếp tục đặt lại mật khẩu.</p>
+                    </div>
 
-            <div class="info-box">
-                <img src="/images/info.png" alt="Thông tin">
-                <p><strong>Lưu ý:</strong> Mã xác thực sẽ được gửi đến email của bạn và có hiệu lực trong 3 phút.</p>
-            </div>
-        </div>
+                    <form action="{{ route('password.email') }}" method="POST" class="recovery-form" novalidate>
+                        @csrf
 
-        <div class="overlay-panel">
-            <div class="icon-wrapper">
-                <img src="/images/lock.png" alt="Lock Icon">
-            </div>
-            <h1>Đặt lại mật khẩu</h1>
-            <p>Bạn sẽ nhận được mã xác thực 6 số qua email.<br>Sử dụng mã này để tạo mật khẩu mới cho tài khoản của bạn.</p>
-            <a href="{{ route('login') }}" class="ghost-btn">Đăng nhập</a>
-        </div>
+                        <div class="auth-field">
+                            <label for="recovery-email">Email đã đăng ký</label>
+                            <div class="auth-input-wrap">
+                                <span class="auth-input-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+                                        <path d="m3 7 9 6 9-6"></path>
+                                    </svg>
+                                </span>
+                                <input id="recovery-email" type="email" name="email" value="{{ old('email') }}" placeholder="example@gmail.com" autocomplete="email" required autofocus>
+                            </div>
+                            @error('email')
+                                <p class="auth-error">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <button type="submit" class="auth-submit">Gửi mã xác thực</button>
+
+                        <div class="recovery-info">
+                            <strong>Lưu ý:</strong> Mã xác thực sẽ được gửi tới email của bạn và chỉ có hiệu lực trong 3 phút.
+                        </div>
+
+                        <div class="recovery-inline-actions">
+                            <a href="{{ route('login') }}" class="recovery-back-link">Quay lại đăng nhập</a>
+                        </div>
+                    </form>
+                </section>
+            </section>
+        </main>
     </div>
+    @include('layouts.partials.monebot')
 </body>
 </html>

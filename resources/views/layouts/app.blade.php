@@ -7,10 +7,10 @@
     <title>@yield('title', 'Monexa') - Quản lý chi tiêu</title>
     <link rel="icon" type="images/png" href="{{ asset('favicon.png') }}">
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/monebot.css') }}">
     <script src="{{ asset('js/main.js') }}" defer></script>
 </head>
 <body class="{{ cookie('theme', 'light') === 'dark' ? 'dark' : '' }}">
-    <!-- Topbar -->
     <div class="topbar">
         <div class="topbar-left">
             <div class="brand-info">
@@ -66,6 +66,7 @@
                     <div class="user-name">{{ Auth::user()->name }}</div>
                 </div>
             </div>
+
             <div class="profile-dropdown" id="profileDropdown">
                 <div class="dropdown-header">
                     <div class="dropdown-avatar">
@@ -82,6 +83,7 @@
                     <div class="dropdown-name">{{ Auth::user()->name }}</div>
                     <div class="dropdown-email">{{ Auth::user()->email }}</div>
                 </div>
+
                 <div class="dropdown-menu">
                     <a href="/profile" class="dropdown-item">Hồ sơ cá nhân</a>
                     @if(!Auth::user()->google_id)
@@ -97,85 +99,14 @@
     </div>
 
     @include('layouts.partials.sidebar')
-
-    <!-- Bubble Button -->
-    <div class="ai-bubble" id="aiBubble">
-        <div class="ai-chat-box" id="aiChatBox">
-            <!-- Header -->
-            <div class="acb-header">
-                <div class="acb-avatar">
-                    <img src="{{ asset('images/AI assistant.png') }}" alt="AI">
-                </div>
-                <div class="acb-info">
-                    <div class="acb-name">Trợ lý AI Tài chính</div>
-                    <div class="acb-status">Đang hoạt động</div>
-                </div>
-                <button class="acb-clear" id="acbClear" onclick="clearAIChat()">Xóa chat</button>
-            </div>
-
-            <!-- Welcome (hiện khi chưa chat) -->
-            <div class="acb-welcome" id="acbWelcome">
-                <div class="acb-welcome-icon">
-                    <img src="{{ asset('images/AI assistant.png') }}" alt="AI">
-                </div>
-                <h3>Xin chào, {{ Auth::user()->name }}!</h3>
-                <p>Hỏi tôi bất cứ điều gì về tài chính</p>
-                <div class="acb-quick-grid">
-                    <div class="acb-quick-card" onclick="acbSend('Phân tích chi tiêu tháng này')">
-                        <div class="acb-quick-card-icon"><img src="{{ asset('images/chart.png') }}" alt=""></div>
-                        Phân tích chi tiêu
-                    </div>
-                    <div class="acb-quick-card" onclick="acbSend('Tôi nên tiết kiệm như thế nào?')">
-                        <div class="acb-quick-card-icon"><img src="{{ asset('images/saving.png') }}" alt=""></div>
-                        Gợi ý tiết kiệm
-                    </div>
-                    <div class="acb-quick-card" onclick="acbSend('Dự báo số dư cuối năm')">
-                        <div class="acb-quick-card-icon"><img src="{{ asset('images/target.png') }}" alt=""></div>
-                        Dự báo tài chính
-                    </div>
-                    <div class="acb-quick-card" onclick="acbSend('Danh mục nào tôi chi nhiều nhất?')">
-                        <div class="acb-quick-card-icon"><img src="{{ asset('images/statistics.png') }}" alt=""></div>
-                        Thống kê chi tiêu
-                    </div>
-                </div>
-            </div>
-
-            <!-- Messages -->
-            <div class="acb-messages" id="acbMessages" style="display:none;"></div>
-
-            <!-- Chips -->
-            <div class="acb-suggestions" id="acbChips" style="display:none;">
-                <div class="acb-chip" onclick="acbSend('Phân tích chi tiêu tháng này')">Phân tích chi tiêu</div>
-                <div class="acb-chip" onclick="acbSend('Gợi ý tiết kiệm')">Tiết kiệm</div>
-                <div class="acb-chip" onclick="acbSend('Dự báo tài chính')">Dự báo</div>
-            </div>
-
-            <!-- Input -->
-            <div class="acb-input-wrap">
-                <textarea class="acb-input" id="acbInput" placeholder="Nhập tin nhắn..." rows="1"></textarea>
-                <button class="acb-send" id="acbSendBtn" disabled>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M22 2L11 13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </button>
-            </div>
-        </div>
-
-        <!-- Bubble Toggle Button -->
-        <button class="ai-bubble-btn" id="aiBubbleBtn" onclick="toggleAIChat()">
-            <div class="ai-bubble-badge" id="aiBadge"></div>
-            <img src="{{ asset('images/AI assistant.png') }}" alt="AI" class="chat-icon">
-            <img src="{{ asset('images/close.png') }}" alt="Đóng" class="close-icon">
-        </button>
-    </div>
+    @include('layouts.partials.monebot')
 
     <div class="main-content">
         <div class="content">
             @yield('content')
         </div>
     </div>
-</body>
+
     <div id="toastContainer" style="
         position: fixed;
         top: 84px;
@@ -187,8 +118,8 @@
         width: 360px;
         pointer-events: none;
     "></div>
-        <script>
-        // Đọc flash session từ Laravel
+
+    <script>
         @if(session('toast'))
             showToast(@json(session('toast')));
         @endif
@@ -205,4 +136,5 @@
             showToast({ type: 'info', title: 'Thông báo', message: @json(session('info')) });
         @endif
     </script>
+</body>
 </html>
