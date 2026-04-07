@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-<a href="https://laravel.com"><img src="https://img.shields.io/badge/Laravel-12.x-FF2D20?style=flat&logo=laravel" alt="Laravel Version"></a>
+<a href="https://laravel.com"><img src="https://img.shields.io/badge/Laravel-10.x-FF2D20?style=flat&logo=laravel" alt="Laravel Version"></a>
 <a href="https://php.net"><img src="https://img.shields.io/badge/PHP-8.3-777BB4?style=flat&logo=php" alt="PHP Version"></a>
 <a href="https://github.com/yourusername/monexa"><img src="https://img.shields.io/github/license/yourusername/monexa" alt="License"></a>
 <a href="https://github.com/yourusername/monexa/stargazers"><img src="https://img.shields.io/github/stars/yourusername/monexa" alt="Stars"></a>
@@ -175,7 +175,7 @@ Chi tiết schema có thể xem trong `database/migrations/`
 
 Monexa được xây dựng với:
 
-- **[Laravel 12.x](https://laravel.com)** - PHP Framework mạnh mẽ
+- **[Laravel 10.x](https://laravel.com)** - PHP Framework mạnh mẽ
 - **[Chart.js](https://www.chartjs.org/)** - Biểu đồ JavaScript
 - **[Laravel Socialite](https://github.com/laravel/socialite)** - OAuth authentication
 - **[MySQL](https://www.mysql.com/)** - Hệ quản trị cơ sở dữ liệu
