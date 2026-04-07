@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="screenshots/logo.png" width="200" alt="Monexa Logo">
+  <img src="screenshots/logo.png" style="max-width: 80%; height: auto;" alt="Monexa Logo">
 </p>
 
 <p align="center">
