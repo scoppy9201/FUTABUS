@@ -26,9 +26,10 @@ use App\Http\Controllers\WalletTransferController;
 use App\Http\Controllers\NotificationController;
 
 Route::get('/', function () {
-    return Auth::check()
-        ? redirect()->route('dashboard')
-        : redirect()->route('login');
+    if (Auth::check()) {
+        return redirect()->route('dashboard');
+    }
+    return view('welcome');
 });
 
 // Guest routes
@@ -129,18 +130,11 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('groups')->name('groups.')->group(function () {
 
-        // ── STATIC routes: PHẢI đặt trước /{group} ──────────────
         Route::get('/',  [SplitGroupController::class, 'index'])->name('index');
         Route::post('/', [SplitGroupController::class, 'store'])->name('store');
-
-        // Tìm kiếm user để mời (AJAX) — đặt trước /{group}
         Route::get('/search-users', [SplitGroupController::class, 'searchUsers'])->name('search-users');
-
-        // Token invitation — đặt trước /{group}
         Route::get('/invitations/{token}/accept',  [GroupMemberController::class, 'accept'])->name('invite.accept');
         Route::get('/invitations/{token}/decline', [GroupMemberController::class, 'decline'])->name('invite.decline');
-
-        // ── DYNAMIC routes /{group} ──────────────────────────────
         Route::get('/{group}',    [SplitGroupController::class, 'show'])   ->name('show');
         Route::put('/{group}',    [SplitGroupController::class, 'update']) ->name('update');
         Route::delete('/{group}', [SplitGroupController::class, 'destroy'])->name('destroy');
