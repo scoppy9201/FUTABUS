@@ -6,8 +6,7 @@
     <title>Đặt lại mật khẩu Monexa</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=be-vietnam-pro:300,400,500,600,700,800" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ asset('css/welcome-system.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/monebot.css') }}">
+    @vite('resources/js/app.js')
 </head>
 <body class="auth-page">
     <div class="auth-shell">

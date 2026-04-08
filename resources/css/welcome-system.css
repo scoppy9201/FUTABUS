@@ -60,7 +60,6 @@ a {
     text-decoration: none;
 }
 
-.topbar,
 .navbar,
 .hero,
 .stats-strip,
@@ -69,22 +68,6 @@ a {
 .footer {
     position: relative;
     z-index: 1;
-}
-
-.topbar {
-    position: relative;
-    z-index: 10;
-    padding: 10px 2.5rem;
-    background: rgba(255, 255, 255, 0.94);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    color: var(--text-muted);
-    font-family: 'Be Vietnam Pro', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 13px;
 }
 
 .topbar-left,

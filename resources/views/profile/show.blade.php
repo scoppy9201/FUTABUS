@@ -114,14 +114,6 @@
                         </div>
                     </div>
                 </section>
-
-                <section class="card profile-side-note">
-                    <span class="profile-side-note__eyebrow">Gợi ý từ hệ thống</span>
-                    <h3 class="profile-side-note__title">Giữ hồ sơ của bạn luôn rõ ràng và đáng tin cậy</h3>
-                    <p class="profile-side-note__text">
-                        Ảnh đại diện rõ nét, số điện thoại chính xác và ngày sinh đầy đủ sẽ giúp thao tác khôi phục, xác thực và đồng bộ tài khoản thuận tiện hơn.
-                    </p>
-                </section>
             </aside>
 
             <section class="card profile-form-card">

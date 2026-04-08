@@ -22,7 +22,9 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf4 100%);
             overflow-x: hidden;
-            transition: var(--transition);
+            margin: 0;
+            padding: 0;
+            transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* Dark Mode */
@@ -441,17 +443,16 @@
         .sidebar {
             position: fixed;
             left: 0;
-            top: 70px;
+            top: 70px; 
             height: calc(100vh - 70px);
             width: 80px;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
-            z-index: 100;
+            z-index: 999;
             box-shadow: 2px 0 20px rgba(0, 0, 0, 0.08);
             border-right: 1px solid rgba(226, 232, 240, 0.8);
-            transition: var(--transition);
-            
-            overflow: visible; 
+            border-top: none; 
+            overflow: visible;
         }
 
         .nav-menu {
