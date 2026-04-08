@@ -11,7 +11,7 @@
 <body>
 
 {{-- TOPBAR --}}
-<div class="topbar">
+<div class="topbar-welcome">
     <div class="topbar-left">
         <button type="button" class="topbar-select">
             Tiếng Việt
