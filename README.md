@@ -89,7 +89,20 @@ Khởi động development server:
 php artisan serve
 ```
 
-Ứng dụng sẽ chạy tại `http://localhost:8000`
+Khởi động vite server:
+
+```bash
+npm run build 
+```
+
+Khởi chạy vite trên môi trường dev:
+
+```bash
+npm run dev 
+```
+
+Hệ thống sẽ chạy tại `http://localhost:8000`
+Hệ thống chạy vite tại `http://localhost:5173`
 
 ## Cấu hình Google OAuth (Tùy chọn)
 
