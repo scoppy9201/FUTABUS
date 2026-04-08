@@ -11,12 +11,15 @@
 <body class="{{ cookie('theme', 'light') === 'dark' ? 'dark' : '' }}">
     <div class="topbar">
         <div class="topbar-left">
-            <div class="brand-info">
-                <div class="brand-logo">
-                    <img src="/images/logo.png" alt="Logo">
+            <a href="/" class="footer-logo">
+                <div class="footer-logo-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L2 12l10 10 10-10L12 2z"></path>
+                        <path d="M8 12l3-3 5 5"></path>
+                    </svg>
                 </div>
-                <span class="brand-name">Monexa</span>
-            </div>
+                <span class="logo-wordmark">Mon<em>exa</em></span>
+            </a>
 
             <div style="position:relative; flex:1; max-width:500px; margin:0 auto;">
                 <div class="search-bar" id="searchBar">
