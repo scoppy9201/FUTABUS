@@ -23,9 +23,11 @@ Route::get('/reset-password',  fn() => view('auth.reset-password')) ->name('pass
 Route::get('/auth/google',          [\App\Http\Controllers\LoginController::class, 'redirectToGoogle'])    ->name('google.redirect');
 Route::get('/auth/google/callback', [\App\Http\Controllers\LoginController::class, 'handleGoogleCallback'])->name('google.callback');
 
+// Dashboard duoc mo bang token API hoac session web
+Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
+
 // App views 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard',        fn() => view('dashboard'))       ->name('dashboard');
     Route::get('/transactions',     fn() => view('transactions'))    ->name('transactions.index');
     Route::get('/categories',       fn() => view('categories'))      ->name('categories.index');
     Route::get('/budgets',          fn() => view('budgets'))         ->name('wallets.index');

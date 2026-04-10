@@ -1,12 +1,4 @@
-{{--
-    THÊM VÀO layouts/app.blade.php
-    Tìm chỗ có icon notification (hoặc topbar) và thêm đoạn này vào
-
-    CSS cần thêm vào <style> của topbar:
---}}
-
 <style>
-/* ── Notification Bell ─────────────────────────────────── */
 .notif-wrap {
     position: relative;
 }
@@ -44,7 +36,6 @@ body.dark .notif-badge { border-color: #141820; }
 .notif-badge.pop { animation: badge-pop .25s ease; }
 @keyframes badge-pop { 0%{transform:scale(.6)} 60%{transform:scale(1.15)} 100%{transform:scale(1)} }
 
-/* ── Dropdown Panel ─────────────────────────────────────── */
 .notif-panel {
     position: absolute;
     top: calc(100% + 10px);
@@ -265,9 +256,9 @@ body.dark .np-cal-picker input { background: #141820; border-color: rgba(255,255
 <div class="notif-wrap" id="notifWrap">
     {{-- Bell button --}}
     <button class="notif-bell" id="notifBell" onclick="toggleNotifPanel()" aria-label="Thông báo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
         </svg>
         <span class="notif-badge hidden" id="notifBadge"></span>
     </button>
@@ -277,7 +268,13 @@ body.dark .np-cal-picker input { background: #141820; border-color: rgba(255,255
 
         {{-- Header --}}
         <div class="np-header">
-            <div class="np-title">🔔 Thông báo</div>
+            <div class="np-title" style="display: flex; align-items: center; gap: 6px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+                Thông báo
+            </div>
             <button class="np-mark-all" onclick="markAllRead()">Đánh dấu đã đọc</button>
         </div>
 
@@ -295,11 +292,25 @@ body.dark .np-cal-picker input { background: #141820; border-color: rgba(255,255
         {{-- Footer --}}
         <div class="np-footer">
             <div class="np-footer-btns">
-                <a href="{{ route('notifications.index') }}" class="np-footer-btn">
-                    📋 Xem tất cả
+                <a href="{{ route('notifications.index') }}" class="np-footer-btn" style="display: flex; align-items: center; gap: 5px; justify-content: center;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                        <line x1="8" y1="11" x2="8" y2="11"></line>
+                        <line x1="8" y1="16" x2="8" y2="16"></line>
+                        <line x1="12" y1="11" x2="16" y2="11"></line>
+                        <line x1="12" y1="16" x2="16" y2="16"></line>
+                    </svg>
+                    Xem tất cả
                 </a>
-                <button class="np-footer-btn" onclick="openCalendar()">
-                    📅 Theo ngày
+                <button class="np-footer-btn" onclick="openCalendar()" style="display: flex; align-items: center; gap: 5px; justify-content: center;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    Theo ngày
                 </button>
             </div>
         </div>
@@ -307,8 +318,21 @@ body.dark .np-cal-picker input { background: #141820; border-color: rgba(255,255
         {{-- Calendar overlay --}}
         <div class="np-calendar-overlay" id="notifCalendar">
             <div class="np-cal-header">
-                <button class="np-cal-back" onclick="closeCalendar()">←</button>
-                <div class="np-cal-title">📅 Thông báo theo ngày</div>
+                <button class="np-cal-back" onclick="closeCalendar()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </button>
+                <div class="np-cal-title" style="display: flex; align-items: center; gap: 6px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    Thông báo theo ngày
+                </div>
             </div>
             <div class="np-cal-picker">
                 <input type="date" id="calDatePicker"
@@ -324,17 +348,14 @@ body.dark .np-cal-picker input { background: #141820; border-color: rgba(255,255
         </div>
     </div>
 </div>
-
 <script>
-// ── State ──────────────────────────────────────────────────
 let notifData       = [];
 let currentTab      = 'all';
 let notifOpen       = false;
 let notifLoaded     = false;
 let badgePollingTimer = null;
-let timeAgoTimer    = null; // ← THÊM
+let timeAgoTimer    = null; 
 
-// ── Hàm tính time ago realtime bằng JS ────────────────────
 function calcTimeAgo(unixTimestamp) {
     if (!unixTimestamp) return 'Không rõ';
     const now  = Math.floor(Date.now() / 1000);
@@ -370,7 +391,6 @@ function updateAllTimeAgo() {
     });
 }
 
-// ── Toggle panel ───────────────────────────────────────────
 function toggleNotifPanel() {
     notifOpen = !notifOpen;
     document.getElementById('notifPanel').classList.toggle('open', notifOpen);
@@ -387,10 +407,9 @@ document.addEventListener('click', e => {
     }
 });
 
-// ── Load notifications (AJAX) ──────────────────────────────
 async function loadNotifications() {
     try {
-        const res  = await fetch('{{ route("notifications.dropdown") }}', {
+        const res  = await fetch('{{ route("api.notifications.dropdown") }}', {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         });
         const data = await res.json();
@@ -405,12 +424,20 @@ async function loadNotifications() {
         timeAgoTimer = setInterval(updateAllTimeAgo, 30000);
 
     } catch (e) {
-        document.getElementById('notifList').innerHTML =
-            '<div class="np-empty"><div class="np-empty-icon">😕</div><div class="np-empty-text">Không thể tải thông báo</div></div>';
+        document.getElementById('notifList').innerHTML = `
+            <div class="np-empty">
+                <div class="np-empty-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: #9ca3af;">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <div class="np-empty-text">Không thể tải thông báo</div>
+            </div>`;
     }
 }
 
-// ── Render list ────────────────────────────────────────────
 function renderList() {
     const list = document.getElementById('notifList');
     let items = currentTab === 'unread'
@@ -418,10 +445,32 @@ function renderList() {
         : notifData;
 
     if (items.length === 0) {
+        // Định nghĩa icon và văn bản dựa trên tab hiện tại
+        const isEmptyUnread = currentTab === 'unread';
+        
+        const iconSvg = isEmptyUnread 
+            ? `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>` // Icon hoàn thành màu xanh
+            : `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>`; // Icon chuông trống màu xám
+
+        const message = isEmptyUnread 
+            ? 'Không có thông báo chưa đọc' 
+            : 'Chưa có thông báo nào';
+
+        // Đổ dữ liệu vào HTML
         list.innerHTML = `
-            <div class="np-empty">
-                <div class="np-empty-icon">${currentTab === 'unread' ? '✅' : '🔔'}</div>
-                <div class="np-empty-text">${currentTab === 'unread' ? 'Không có thông báo chưa đọc' : 'Chưa có thông báo nào'}</div>
+            <div class="np-empty" style="text-align: center; padding: 40px 20px;">
+                <div class="np-empty-icon" style="margin-bottom: 12px; display: flex; justify-content: center;">
+                    ${iconSvg}
+                </div>
+                <div class="np-empty-text" style="color: #6b7280; font-size: 14px;">
+                    ${message}
+                </div>
             </div>`;
         return;
     }
@@ -470,7 +519,11 @@ function renderItem(n) {
         const initials = n.actor_name.substring(0, 2).toUpperCase();
         avHtml = `<span style="font-size:14px;font-weight:800;">${initials}</span>`;
     } else {
-        avHtml = `<span style="font-size:20px;">🔔</span>`;
+        avHtml = `
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #6b7280;">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>`;
     }
 
     const avBg = n.actor_name
@@ -523,15 +576,12 @@ function renderItem(n) {
     </div>`;
 }
 
-// ── Click item ─────────────────────────────────────────────
 async function onItemClick(e, id, url) {
     e.preventDefault();
     try {
-        const _csrf = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
-        await fetch(`{{ url('/notifications/mark-read') }}/${id}`, {
-            method: 'POST',
+        await fetch(`{{ url('/api/monaxe/notifications') }}/${id}/read`, {
+            method: 'PATCH',
             headers: {
-                'X-CSRF-TOKEN': _csrf,
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json',
             }
@@ -554,12 +604,10 @@ async function handleInvite(token, action, notifId, btn) {
     wrap.innerHTML = '<span style="font-size:12px;color:#9ca3af;padding:4px 0;">Đang xử lý...</span>';
 
     try {
-        const csrf = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
-        const res  = await fetch(`/notifications/invite-action/${token}`, {
+        const res  = await fetch(`/api/monaxe/notifications/invite-action/${token}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrf,
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json',
             },
@@ -584,7 +632,6 @@ async function handleInvite(token, action, notifId, btn) {
     }
 }
 
-// ── Tabs ───────────────────────────────────────────────────
 function switchTab(tab, el) {
     currentTab = tab;
     document.querySelectorAll('.np-tab').forEach(t => t.classList.remove('active'));
@@ -592,14 +639,11 @@ function switchTab(tab, el) {
     renderList();
 }
 
-// ── Mark all read ──────────────────────────────────────────
 async function markAllRead() {
     try {
-        const _csrfAll = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
-        await fetch('{{ route("notifications.mark-all-read") }}', {
-            method: 'POST',
+        await fetch('{{ route("api.notifications.mark-all-read") }}', {
+            method: 'PATCH',
             headers: {
-                'X-CSRF-TOKEN': _csrfAll,
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json',
             }
@@ -610,15 +654,16 @@ async function markAllRead() {
     } catch(_) {}
 }
 
-// ── Badge ──────────────────────────────────────────────────
 function updateBadge(count) {
     const badge = document.getElementById('notifBadge');
-    if (count <= 0) {
+    const safeCount = Number(count);
+    if (!Number.isFinite(safeCount) || safeCount <= 0) {
         badge.classList.add('hidden');
+        badge.textContent = '';
         return;
     }
     badge.classList.remove('hidden');
-    badge.textContent = count > 9 ? '9+' : String(count);
+    badge.textContent = safeCount > 9 ? '9+' : String(safeCount);
     badge.classList.remove('pop');
     void badge.offsetWidth;
     badge.classList.add('pop');
@@ -627,11 +672,11 @@ function updateBadge(count) {
 // ── Badge polling mỗi 30s (thay vì 60s) ───────────────────
 async function pollBadge() {
     try {
-        const res  = await fetch('{{ route("notifications.badge") }}', {
+        const res  = await fetch('{{ route("api.notifications.badge") }}', {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         });
         const data = await res.json();
-        updateBadge(data.count);
+        updateBadge(data.count ?? data.unread_count ?? 0);
         if (notifOpen && notifLoaded) {
             notifLoaded = false;
             loadNotifications();
@@ -642,7 +687,6 @@ async function pollBadge() {
 pollBadge();
 badgePollingTimer = setInterval(pollBadge, 30000); // 30s thay vì 60s
 
-// ── Calendar ───────────────────────────────────────────────
 function openCalendar() {
     document.getElementById('notifCalendar').classList.add('open');
     loadByDate(document.getElementById('calDatePicker').value);
@@ -657,7 +701,7 @@ async function loadByDate(date) {
     result.innerHTML = '<div class="np-loading"><div class="np-spinner"></div></div>';
 
     try {
-        const res  = await fetch(`{{ route('notifications.by-date') }}?date=${date}`, {
+        const res  = await fetch(`{{ route('api.notifications.by-date') }}?date=${date}`, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         });
         const data = await res.json();
@@ -671,7 +715,16 @@ async function loadByDate(date) {
             return;
         }
 
-        result.innerHTML = `<div class="np-cal-date-label">📅 ${data.date} — ${items.length} thông báo</div>`
+        result.innerHTML = `
+            <div class="np-cal-date-label" style="display: flex; align-items: center; gap: 8px; font-weight: 500; color: #374151;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>${data.date} — ${items.length} thông báo</span>
+            </div>`;
             + items.map(n => `
                 <a href="${escHtml(n.url || '#')}" class="np-item ${n.da_doc ? '' : 'unread'}" style="text-decoration:none;">
                     <div class="np-av" style="background:#f3f4f6;font-size:20px;display:flex;align-items:center;justify-content:center;">
@@ -687,7 +740,6 @@ async function loadByDate(date) {
     }
 }
 
-// ── Helpers ────────────────────────────────────────────────
 function escHtml(str) {
     return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }

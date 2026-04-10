@@ -11,7 +11,7 @@
     class="monebot"
     id="monebot"
     data-mode="{{ $monebotMode }}"
-    data-chat-url="{{ $monebotUser ? route('ai-assistant.chat') : '' }}"
+    data-chat-url="{{ $monebotUser ? route('api.ai.chat') : '' }}"
     data-login-url="{{ route('login') }}"
     data-register-url="{{ route('register') }}"
     data-demo-url="{{ url('/#cta') }}"

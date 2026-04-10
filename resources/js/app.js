@@ -1,4 +1,5 @@
 import '../css/main.css';
+import '../css/dashboard.css';
 import '../css/monebot.css';
 import '../css/welcome-system.css';
 import './bootstrap';

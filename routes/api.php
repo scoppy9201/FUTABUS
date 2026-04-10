@@ -41,7 +41,7 @@ use App\Http\Controllers\LoginController as AuthController;
 | VD: /api/monaxe/auth/login, /api/monaxe/transactions ...
 */
 
-Route::prefix('monaxe')->group(function () {
+Route::prefix('monaxe')->name('api.')->group(function () {
 
     /*
     AUTH ROUTES (public - không cần token)
@@ -78,6 +78,7 @@ Route::prefix('monaxe')->group(function () {
         | DASHBOARD
         */
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/export', [DashboardController::class, 'export'])->name('dashboard.export');
 
         /*
         | SEARCH
