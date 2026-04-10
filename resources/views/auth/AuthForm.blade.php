@@ -255,6 +255,124 @@
         const modeSwitchers = document.querySelectorAll('[data-mode]');
         const passwordToggles = document.querySelectorAll('[data-password-toggle]');
 
+        // HELPER: gọi API
+        async function callApi(url, body) {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify(body),
+            });
+            return res.json();
+        }
+
+        // HELPER: hiển thị lỗi
+        function showError(formEl, field, message) {
+            // Xóa lỗi cũ
+            formEl.querySelectorAll('.auth-error').forEach(el => el.remove());
+
+            const input = formEl.querySelector(`[name="${field}"]`);
+            if (input) {
+                const err = document.createElement('p');
+                err.className = 'auth-error';
+                err.textContent = message;
+                input.closest('.auth-field').appendChild(err);
+            }
+        }
+
+        function clearErrors(formEl) {
+            formEl.querySelectorAll('.auth-error').forEach(el => el.remove());
+        }
+
+        // ĐĂNG NHẬP
+        const loginForm = document.querySelector('.auth-form--pane[action*="login"], .auth-pane--signin .auth-form');
+        loginForm.addEventListener('submit', async function (e) {
+            e.preventDefault(); // Chặn submit thông thường
+            clearErrors(this);
+
+            const email    = this.querySelector('[name="email"]').value;
+            const password = this.querySelector('[name="password"]').value;
+            const btn      = this.querySelector('.auth-submit');
+
+            btn.disabled    = true;
+            btn.textContent = 'Đang đăng nhập...';
+
+            try {
+                const data = await callApi('/api/monaxe/auth/login', { email, password });
+
+                if (data.access_token) {
+                    // Lưu token vào localStorage
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = '/dashboard';
+                } else {
+                    // Hiển thị lỗi từ API
+                    if (data.errors) {
+                        Object.entries(data.errors).forEach(([field, messages]) => {
+                            showError(this, field, messages[0]);
+                        });
+                    } else {
+                        showError(this, 'email', data.message || 'Đăng nhập thất bại!');
+                    }
+                    btn.disabled    = false;
+                    btn.textContent = 'Đăng nhập';
+                }
+            } catch (err) {
+                showError(this, 'email', 'Lỗi kết nối, vui lòng thử lại!');
+                btn.disabled    = false;
+                btn.textContent = 'Đăng nhập';
+            }
+        });
+
+        // ĐĂNG KÝ
+        const registerForm = document.querySelector('.auth-pane--signup .auth-form');
+        registerForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            clearErrors(this);
+
+            const name                  = this.querySelector('[name="name"]').value;
+            const email                 = this.querySelector('[name="email"]').value;
+            const password              = this.querySelector('[name="password"]').value;
+            const password_confirmation = this.querySelector('[name="password_confirmation"]').value;
+            const btn                   = this.querySelector('.auth-submit');
+
+            btn.disabled    = true;
+            btn.textContent = 'Đang tạo tài khoản...';
+
+            try {
+                const data = await callApi('/api/monaxe/auth/register', {
+                    name,
+                    email,
+                    password,
+                    password_confirmation,
+                });
+
+                if (data.access_token) {
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = '/dashboard';
+                } else {
+                    if (data.errors) {
+                        Object.entries(data.errors).forEach(([field, messages]) => {
+                            showError(this, field, messages[0]);
+                        });
+                    } else {
+                        showError(this, 'email', data.message || 'Đăng ký thất bại!');
+                    }
+                    btn.disabled    = false;
+                    btn.textContent = 'Tạo tài khoản';
+                }
+            } catch (err) {
+                showError(this, 'email', 'Lỗi kết nối, vui lòng thử lại!');
+                btn.disabled    = false;
+                btn.textContent = 'Tạo tài khoản';
+            }
+        });
+
+        // MODE SWITCHER & PASSWORD TOGGLE 
         function setAuthMode(mode) {
             authFrame.classList.toggle('is-register', mode === 'register');
             document.querySelectorAll('.auth-tab').forEach(tab => {
@@ -263,9 +381,7 @@
         }
 
         modeSwitchers.forEach(control => {
-            control.addEventListener('click', () => {
-                setAuthMode(control.dataset.mode);
-            });
+            control.addEventListener('click', () => setAuthMode(control.dataset.mode));
         });
 
         passwordToggles.forEach(toggle => {

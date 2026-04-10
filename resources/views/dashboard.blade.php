@@ -911,8 +911,16 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
+    const params = new URLSearchParams(window.location.search);
+    const token  = params.get('token');
+    if (token) {
+        localStorage.setItem('token', token);
+        window.history.replaceState({}, '', '/dashboard');
+    }
+</script>
+<script>
 function filterByMonth(period) {
-    window.location.href = `{{ route('dashboard') }}?period=${period}`;
+    loadDashboard(period); 
 }
 
 // Chart.js Configuration

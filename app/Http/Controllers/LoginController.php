@@ -14,99 +14,104 @@ use App\Models\User;
 
 class LoginController extends Controller
 {
-    // Hiển thị form đăng nhập
-    public function showLoginForm()
+    public function __construct()
     {
-        return view('auth.AuthForm');
+        parent::__construct();
     }
 
     /**
      * Đăng nhập bằng email + password
+     * POST /api/monaxe/auth/login
      */
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'email'    => 'required|email',
             'password' => 'required|string',
         ]);
 
-        // Check brute force
+        // Chống brute force
         $this->checkTooManyFailedAttempts($request);
 
         $credentials = $request->only('email', 'password');
-        $remember = $request->filled('remember');
 
-        if (Auth::attempt($credentials, $remember)) {
-            $request->session()->regenerate();
-            RateLimiter::clear($this->throttleKey($request));
+        if (!Auth::attempt($credentials)) {
+            RateLimiter::hit($this->throttleKey($request), 60);
 
-            return redirect()->route('dashboard')
-                ->with('success', 'Đăng nhập thành công!');
+            return response()->json([
+                'message' => 'Email hoặc mật khẩu không đúng.',
+            ], 401);
         }
 
-        RateLimiter::hit($this->throttleKey($request), 60);
+        RateLimiter::clear($this->throttleKey($request));
 
-        throw ValidationException::withMessages([
-            'email' => 'Email hoặc mật khẩu không đúng.',
-        ]);
+        $user  = Auth::user();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message'      => 'Đăng nhập thành công!',
+            'access_token' => $token,
+            'token_type'   => 'Bearer',
+            'user'         => $user,
+        ], 200);
     }
 
     /**
-     * B1: Redirect sang Google login
+     * Redirect sang Google login
+     * GET /api/monaxe/auth/google
      */
     public function redirectToGoogle()
     {
-        return Socialite::driver('google')->redirect();
+        // Redirect thẳng - chấp nhận được với OAuth2
+        return Socialite::driver('google')->stateless()->redirect();
     }
 
     /**
-     * B2: Nhận callback và xử lý
+     * Nhận callback từ Google
+     * GET /api/monaxe/auth/google/callback
      */
     public function handleGoogleCallback()
     {
         try {
-            $googleUser = Socialite::driver('google')->user();
+            $googleUser = Socialite::driver('google')->stateless()->user();
         } catch (\Exception $e) {
-            return redirect('/login')
-                ->with('error', 'Không thể đăng nhập Google, vui lòng thử lại!');
+            return redirect('/login?error=google_failed');
         }
 
         $user = User::where('email', $googleUser->getEmail())->first();
 
         if (!$user) {
-            // Tạo mới user
             $user = User::create([
-                'name' => $googleUser->getName(),
-                'email' => $googleUser->getEmail(),
+                'name'      => $googleUser->getName(),
+                'email'     => $googleUser->getEmail(),
                 'google_id' => $googleUser->getId(),
-                'avatar' => $googleUser->getAvatar(),
-                'password' => Hash::make(Str::random(16)),
+                'avatar'    => $googleUser->getAvatar(),
+                'password'  => Hash::make(Str::random(16)),
             ]);
         } else {
-            // Update user cũ
-            $user->google_id = $googleUser->getId();
-            $user->avatar = $googleUser->getAvatar();
-            $user->save(); // <- Quan trọng!!!
+            $user->update([
+                'google_id' => $googleUser->getId(),
+                'avatar'    => $googleUser->getAvatar(),
+            ]);
         }
 
-        Auth::login($user, true);
-        request()->session()->regenerate();
+        $token = $user->createToken('auth_token')->plainTextToken;
 
-        return redirect()->route('dashboard')
-                ->with('success', 'Đăng nhập thành công!');
+        // Redirect về dashboard kèm token
+        return redirect('/dashboard?token=' . $token);
     }
-
     /**
      * Đăng xuất
+     * POST /api/monaxe/auth/logout
      */
     public function logout(Request $request)
     {
-        Auth::logout();
+        // Xóa token hiện tại
+        $request->user()->currentAccessToken()->delete();
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect('/login')->with('success', 'Đã đăng xuất thành công!');
+        return response()->json([
+            'message' => 'Đã đăng xuất thành công!',
+        ], 200);
     }
 
     /**
@@ -120,9 +125,9 @@ class LoginController extends Controller
 
         $seconds = RateLimiter::availableIn($this->throttleKey($request));
 
-        throw ValidationException::withMessages([
-            'email' => "Quá nhiều lần đăng nhập sai. Vui lòng thử lại sau {$seconds} giây.",
-        ]);
+        return response()->json([
+            'message' => "Quá nhiều lần đăng nhập sai. Vui lòng thử lại sau {$seconds} giây.",
+        ], 429);
     }
 
     protected function throttleKey(Request $request)
@@ -130,13 +135,6 @@ class LoginController extends Controller
         return Str::transliterate(
             Str::lower($request->input('email')).'|'.$request->ip()
         );
-    }
-
-    public function __construct()
-    {
-        parent::__construct();
-        $this->middleware('guest')->except(['logout', 'handleGoogleCallback']);
-        $this->middleware('auth')->only('logout');
     }
 }
 
