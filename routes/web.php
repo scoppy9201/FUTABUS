@@ -41,7 +41,7 @@ Route::post('/auth/sync-session', function (Request $request) {
 })->name('auth.sync-session');
 
 // Dashboard
-Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
+Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard')->middleware('auth');
 
 // App views 
 Route::middleware('auth')->group(function () {

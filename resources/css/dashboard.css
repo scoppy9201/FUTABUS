@@ -573,6 +573,14 @@ body.dark .dashboard-container .export-btn {
     box-shadow: 0 4px 12px rgba(74, 144, 226, 0.15);
 }
 
+.dashboard-container .transaction-icon img,
+.dashboard-container .category-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
 @media (max-width: 1200px) {
     .dashboard-container .dashboard-grid,
     .dashboard-container .bottom-section {

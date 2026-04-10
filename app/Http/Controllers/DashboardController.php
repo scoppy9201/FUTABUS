@@ -21,16 +21,26 @@ class DashboardController extends Controller
             $period = 'this_month';
         }
 
+        $data = $this->getDashboardData($userId, $period);
+
+        return response()->json($data);
+    }
+
+    /**
+     * Tách data ra hàm riêng để tái sử dụng cho cả index() và export()
+     */
+    protected function getDashboardData(int $userId, string $period): array
+    {
         $query = Transaction::where('user_id', $userId);
         $this->applyPeriodFilter($query, $period);
 
-        $totalIncome = (clone $query)->where('loai_giao_dich', 'THU')->sum('so_tien');
+        $totalIncome  = (clone $query)->where('loai_giao_dich', 'THU')->sum('so_tien');
         $totalExpense = (clone $query)->where('loai_giao_dich', 'CHI')->sum('so_tien');
-        $balance = $totalIncome - $totalExpense;
+        $balance      = $totalIncome - $totalExpense;
 
         $totalTransactions = (clone $query)->count();
-        $incomeCount = (clone $query)->where('loai_giao_dich', 'THU')->count();
-        $expenseCount = (clone $query)->where('loai_giao_dich', 'CHI')->count();
+        $incomeCount       = (clone $query)->where('loai_giao_dich', 'THU')->count();
+        $expenseCount      = (clone $query)->where('loai_giao_dich', 'CHI')->count();
 
         $recentTransactions = Transaction::where('user_id', $userId)
             ->with('category')
@@ -40,13 +50,13 @@ class DashboardController extends Controller
             ->get()
             ->map(function ($transaction) {
                 return [
-                    'id' => $transaction->id,
-                    'so_tien' => (float) $transaction->so_tien,
+                    'id'             => $transaction->id,
+                    'so_tien'        => (float) $transaction->so_tien,
                     'loai_giao_dich' => $transaction->loai_giao_dich,
                     'ngay_giao_dich' => optional($transaction->ngay_giao_dich)->format('Y-m-d'),
-                    'category' => [
-                        'ten_danh_muc' => $transaction->category->ten_danh_muc ?? 'Khong ro',
-                        'bieu_tuong' => $transaction->category->bieu_tuong ?? 'money.png',
+                    'category'       => [
+                        'ten_danh_muc' => $transaction->category->ten_danh_muc ?? 'Không rõ',
+                        'bieu_tuong'   => $transaction->category->bieu_tuong ?? 'money.png',
                     ],
                 ];
             })
@@ -55,15 +65,13 @@ class DashboardController extends Controller
         $warningWallets = Wallet::where('user_id', $userId)
             ->where('trang_thai', true)
             ->get()
-            ->filter(function ($wallet) {
-                return $wallet->spent_percentage >= 50;
-            })
+            ->filter(fn($wallet) => $wallet->spent_percentage >= 50)
             ->sortByDesc('spent_percentage')
             ->take(5)
             ->map(function ($wallet) {
                 return [
-                    'id' => $wallet->id,
-                    'ten_ngan_sach' => $wallet->ten_ngan_sach,
+                    'id'               => $wallet->id,
+                    'ten_ngan_sach'    => $wallet->ten_ngan_sach,
                     'spent_percentage' => (float) $wallet->spent_percentage,
                 ];
             })
@@ -81,9 +89,9 @@ class DashboardController extends Controller
             ->get()
             ->map(function ($category) {
                 return [
-                    'id' => $category->id,
-                    'ten_danh_muc' => $category->ten_danh_muc,
-                    'bieu_tuong' => $category->bieu_tuong ?? 'money.png',
+                    'id'            => $category->id,
+                    'ten_danh_muc'  => $category->ten_danh_muc,
+                    'bieu_tuong'    => $category->bieu_tuong ?? 'money.png',
                     'total_expense' => (float) $category->total_expense,
                 ];
             })
@@ -96,11 +104,11 @@ class DashboardController extends Controller
             ->get()
             ->map(function ($wallet) {
                 return [
-                    'id' => $wallet->id,
-                    'ten_ngan_sach' => $wallet->ten_ngan_sach,
-                    'so_du' => (float) $wallet->so_du,
+                    'id'               => $wallet->id,
+                    'ten_ngan_sach'    => $wallet->ten_ngan_sach,
+                    'so_du'            => (float) $wallet->so_du,
                     'spent_percentage' => (float) $wallet->spent_percentage,
-                    'category' => [
+                    'category'         => [
                         'bieu_tuong' => $wallet->category->bieu_tuong ?? 'money.png',
                     ],
                 ];
@@ -111,22 +119,18 @@ class DashboardController extends Controller
         for ($i = 5; $i >= 0; $i--) {
             $date = now()->subMonths($i);
 
-            $income = Transaction::where('user_id', $userId)
-                ->where('loai_giao_dich', 'THU')
-                ->whereMonth('ngay_giao_dich', $date->month)
-                ->whereYear('ngay_giao_dich', $date->year)
-                ->sum('so_tien');
-
-            $expense = Transaction::where('user_id', $userId)
-                ->where('loai_giao_dich', 'CHI')
-                ->whereMonth('ngay_giao_dich', $date->month)
-                ->whereYear('ngay_giao_dich', $date->year)
-                ->sum('so_tien');
-
             $monthlyData[] = [
-                'month' => $date->format('n'),
-                'income' => (float) $income,
-                'expense' => (float) $expense,
+                'month'   => $date->format('n'),
+                'income'  => (float) Transaction::where('user_id', $userId)
+                    ->where('loai_giao_dich', 'THU')
+                    ->whereMonth('ngay_giao_dich', $date->month)
+                    ->whereYear('ngay_giao_dich', $date->year)
+                    ->sum('so_tien'),
+                'expense' => (float) Transaction::where('user_id', $userId)
+                    ->where('loai_giao_dich', 'CHI')
+                    ->whereMonth('ngay_giao_dich', $date->month)
+                    ->whereYear('ngay_giao_dich', $date->year)
+                    ->sum('so_tien'),
             ];
         }
 
@@ -140,54 +144,41 @@ class DashboardController extends Controller
             ->orderByDesc('total')
             ->limit(8)
             ->get()
-            ->map(function ($category) {
-                return [
-                    'name' => $category->ten_danh_muc,
-                    'total' => (float) $category->total,
-                ];
-            })
+            ->map(fn($category) => [
+                'name'  => $category->ten_danh_muc,
+                'total' => (float) $category->total,
+            ])
             ->values();
 
-        return response()->json([
-            'period' => $period,
-            'totalIncome' => (float) $totalIncome,
-            'totalExpense' => (float) $totalExpense,
-            'balance' => (float) $balance,
-            'totalTransactions' => $totalTransactions,
-            'incomeCount' => $incomeCount,
-            'expenseCount' => $expenseCount,
+        return [
+            'period'             => $period,
+            'totalIncome'        => (float) $totalIncome,
+            'totalExpense'       => (float) $totalExpense,
+            'balance'            => (float) $balance,
+            'totalTransactions'  => $totalTransactions,
+            'incomeCount'        => $incomeCount,
+            'expenseCount'       => $expenseCount,
             'recentTransactions' => $recentTransactions,
-            'warningWallets' => $warningWallets,
-            'topCategories' => $topCategories,
-            'activeWallets' => $activeWallets,
-            'monthlyData' => $monthlyData,
-            'categoryExpenses' => $categoryExpenses,
-        ]);
+            'warningWallets'     => $warningWallets,
+            'topCategories'      => $topCategories,
+            'activeWallets'      => $activeWallets,
+            'monthlyData'        => $monthlyData,
+            'categoryExpenses'   => $categoryExpenses,
+        ];
     }
 
     protected function applyPeriodFilter($query, string $period)
     {
-        if ($period === 'all') {
-            return $query;
-        }
-
-        if ($period === 'this_month') {
-            return $query
+        match($period) {
+            'this_month' => $query
                 ->whereMonth('ngay_giao_dich', now()->month)
-                ->whereYear('ngay_giao_dich', now()->year);
-        }
-
-        if ($period === 'last_month') {
-            $lastMonth = now()->subMonth();
-
-            return $query
-                ->whereMonth('ngay_giao_dich', $lastMonth->month)
-                ->whereYear('ngay_giao_dich', $lastMonth->year);
-        }
-
-        if ($period === 'this_year') {
-            return $query->whereYear('ngay_giao_dich', now()->year);
-        }
+                ->whereYear('ngay_giao_dich', now()->year),
+            'last_month' => $query
+                ->whereMonth('ngay_giao_dich', now()->subMonth()->month)
+                ->whereYear('ngay_giao_dich', now()->subMonth()->year),
+            'this_year'  => $query->whereYear('ngay_giao_dich', now()->year),
+            default      => null,
+        };
 
         return $query;
     }
@@ -201,9 +192,7 @@ class DashboardController extends Controller
             $period = 'this_month';
         }
 
-        // Tái sử dụng logic index, decode JSON response
-        $response = $this->index($request);
-        $data = json_decode($response->getContent(), true);
+        $data = $this->getDashboardData($userId, $period);
 
         $periodLabel = match($period) {
             'this_month' => 'Thang_nay',
