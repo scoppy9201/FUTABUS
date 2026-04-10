@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use Laravel\Sanctum\PersonalAccessToken;
 
 // Trang chủ
 Route::get('/', function () {
@@ -23,7 +25,22 @@ Route::get('/reset-password',  fn() => view('auth.reset-password')) ->name('pass
 Route::get('/auth/google',          [\App\Http\Controllers\LoginController::class, 'redirectToGoogle'])    ->name('google.redirect');
 Route::get('/auth/google/callback', [\App\Http\Controllers\LoginController::class, 'handleGoogleCallback'])->name('google.callback');
 
-// Dashboard duoc mo bang token API hoac session web
+// ← THÊM MỚI: Sync session sau khi login bằng API token
+Route::post('/auth/sync-session', function (Request $request) {
+    $token = PersonalAccessToken::findToken($request->input('token'));
+
+    if (!$token) {
+        return response()->json(['message' => 'Token không hợp lệ'], 401);
+    }
+
+    $user = $token->tokenable;
+    Auth::login($user);
+    $request->session()->regenerate();
+
+    return response()->json(['message' => 'Session đã được đồng bộ']);
+})->name('auth.sync-session');
+
+// Dashboard
 Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
 
 // App views 
@@ -40,6 +57,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/currency',         fn() => view('currency'))        ->name('currency.index');
     Route::get('/search',           fn() => view('search'))          ->name('search');
 
-    // Logout vẫn cần web route vì dùng session
+    // change password view
+    Route::get('/change-password',  fn() => view('auth.change-password'))->name('change-password.form');
+
+    // Logout
     Route::post('/logout', [\App\Http\Controllers\LoginController::class, 'logout'])->name('logout');
 });

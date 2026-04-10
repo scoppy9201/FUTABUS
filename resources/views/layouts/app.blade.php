@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Monexa') - Quan ly chi tieu</title>
+    <title>@yield('title', 'Monexa') - Quản lý chi tiêu</title>
     <link rel="icon" type="images/png" href="{{ asset('favicon.png') }}">
     @vite('resources/js/app.js')
 </head>
@@ -87,36 +87,57 @@
             <div class="profile-dropdown" id="profileDropdown">
                 <div class="dropdown-header">
                     <div class="dropdown-avatar">
-                        @if($authUser?->avatar)
-                            @if(str_starts_with($authUser->avatar, 'http'))
-                                <img src="{{ $authUser->avatar }}" alt="Avatar" id="dropdownAvatarImage">
-                            @else
-                                <img src="{{ asset('storage/' . $authUser->avatar) }}" alt="Avatar" id="dropdownAvatarImage">
-                            @endif
-                            <span id="dropdownAvatarFallback" hidden>{{ strtoupper(substr($authUser->name, 0, 2)) }}</span>
+                        @if($authUser && $authUser->avatar)
+                            @php
+                                $avatarUrl = str_starts_with($authUser->avatar, 'http') 
+                                    ? $authUser->avatar 
+                                    : asset('storage/' . $authUser->avatar);
+                            @endphp
+                            <img src="{{ $avatarUrl }}" alt="Avatar" id="dropdownAvatarImage">
                         @else
-                            <img src="" alt="Avatar" id="dropdownAvatarImage" hidden>
-                            <span id="dropdownAvatarFallback">{{ $authUser ? strtoupper(substr($authUser->name, 0, 2)) : 'M' }}</span>
+                            <span id="dropdownAvatarFallback">
+                                {{ $authUser ? strtoupper(substr($authUser->name, 0, 1)) : 'M' }}
+                            </span>
                         @endif
                     </div>
-                    <div class="dropdown-name" id="dropdownName">{{ $authUser->name ?? 'Tai khoan Monexa' }}</div>
-                    <div class="dropdown-email" id="dropdownEmail">{{ $authUser->email ?? 'Dang nhap de tiep tuc' }}</div>
+                    <div class="dropdown-info">
+                        <div class="dropdown-name" id="dropdownName">{{ $authUser->name ?? 'Tài khoản Monexa' }}</div>
+                        <div class="dropdown-email" id="dropdownEmail">{{ $authUser->email ?? 'Đăng nhập để tiếp tục' }}</div>
+                    </div>
                 </div>
 
                 <div class="dropdown-menu">
                     @if($authUser)
-                        <a href="/profile" class="dropdown-item">Ho so ca nhan</a>
+                        {{-- Menu khi đã đăng nhập --}}
+                        <a href="/profile" class="dropdown-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            Hồ sơ cá nhân
+                        </a>
+
                         @if(!$authUser->google_id)
-                            <a href="/change-password" class="dropdown-item">Doi mat khau</a>
+                            <a href="/change-password" class="dropdown-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                Đổi mật khẩu
+                            </a>
                         @endif
+
                         <form action="{{ route('logout') }}" method="POST" style="margin:0">
                             @csrf
-                            <button type="submit" class="dropdown-item logout">Dang xuat</button>
+                            <button type="submit" class="dropdown-item logout">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                                Đăng xuất
+                            </button>
                         </form>
                     @else
-                        <a href="{{ route('login') }}" class="dropdown-item">Dang nhap</a>
-                        <a href="{{ route('register') }}" class="dropdown-item">Dang ky</a>
-                        <button type="button" id="clientLogoutButton" class="dropdown-item logout" hidden>Dang xuat</button>
+                        {{-- Menu khi chưa đăng nhập --}}
+                        <a href="{{ route('login') }}" class="dropdown-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                            Đăng nhập
+                        </a>
+                        <a href="{{ route('register') }}" class="dropdown-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="17" y1="11" x2="23" y2="11"></line></svg>
+                            Đăng ký
+                        </a>
                     @endif
                 </div>
             </div>
@@ -149,16 +170,16 @@
             showToast(@json(session('toast')));
         @endif
         @if(session('success'))
-            showToast({ type: 'success', title: 'Thanh cong', message: @json(session('success')) });
+            showToast({ type: 'success', title: 'Thành công', message: @json(session('success')) });
         @endif
         @if(session('error'))
-            showToast({ type: 'error', title: 'Loi', message: @json(session('error')) });
+            showToast({ type: 'error', title: 'Lỗi', message: @json(session('error')) });
         @endif
         @if(session('warning'))
-            showToast({ type: 'warning', title: 'Canh bao', message: @json(session('warning')) });
+            showToast({ type: 'warning', title: 'Cảnh báo', message: @json(session('warning')) });
         @endif
         @if(session('info'))
-            showToast({ type: 'info', title: 'Thong bao', message: @json(session('info')) });
+            showToast({ type: 'info', title: 'Thông báo', message: @json(session('info')) });
         @endif
 
         (() => {
@@ -180,8 +201,8 @@
                 return;
             }
 
-            const userName = storedUser.name || 'Tai khoan Monexa';
-            const userEmail = storedUser.email || 'Dang nhap bang API';
+            const userName = storedUser.name || 'Tài khoản Monexa';
+            const userEmail = storedUser.email || 'Đăng nhập bằng API';
             const initials = userName.slice(0, 2).toUpperCase();
             const avatar = storedUser.avatar
                 ? (String(storedUser.avatar).startsWith('http') ? storedUser.avatar : `/storage/${storedUser.avatar}`)

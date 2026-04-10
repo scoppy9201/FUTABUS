@@ -31,22 +31,23 @@ class LoginController extends Controller
 
         if (!Auth::attempt($credentials)) {
             RateLimiter::hit($this->throttleKey($request), 60);
-
             return response()->json([
-                'message' => 'Email hoac mat khau khong dung.',
+                'message' => 'Email hoặc mật khẩu không đúng.',
             ], 401);
         }
 
         RateLimiter::clear($this->throttleKey($request));
 
-        $user = Auth::user();
+        /** @var \App\Models\User $user */
+        $user  = Auth::user();
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Dang nhap thanh cong!',
+            'message'      => 'Đăng nhập thành công!',
             'access_token' => $token,
-            'token_type' => 'Bearer',
-            'user' => $user,
+            'token_type'   => 'Bearer',
+            'user'         => $user,
         ], 200);
     }
 
@@ -104,7 +105,7 @@ class LoginController extends Controller
 
         if ($request->expectsJson() || $request->is('api/*')) {
             return response()->json([
-                'message' => 'Da dang xuat thanh cong!',
+                'message' => 'Đã đăng xuất thành công!',
             ], 200);
         }
 
@@ -120,7 +121,7 @@ class LoginController extends Controller
         $seconds = RateLimiter::availableIn($this->throttleKey($request));
 
         abort(response()->json([
-            'message' => "Qua nhieu lan dang nhap sai. Vui long thu lai sau {$seconds} giay.",
+            'message' => "Quá nhiều lần đăng nhập thất bại. Vui lòng thử lại sau {$seconds} giây.",
         ], 429));
     }
 

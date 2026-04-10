@@ -248,16 +248,16 @@
             const expenseRate = totalTransactions ? Math.round((expenseCount / totalTransactions) * 100) : 0;
 
             stats.innerHTML = `
-                <div class="stat-card"><div class="stat-icon blue"><img src="${page.dataset.walletIcon}" alt="Balance"></div><div class="stat-info"><div class="stat-label">So du</div><div class="stat-value ${balance < 0 ? 'negative' : ''}">${formatMoney(balance)}</div><div class="stat-change ${balance >= 0 ? 'up' : 'down'}">${balance >= 0 ? '+' : '-'} Thu - Chi</div></div></div>
-                <div class="stat-card"><div class="stat-icon green"><img src="${page.dataset.profitsIcon}" alt="Income"></div><div class="stat-info"><div class="stat-label">Thu nhap</div><div class="stat-value positive">${formatMoney(data.totalIncome)}</div><div class="stat-change up"><img src="${page.dataset.arrowUpIcon}" alt="Up" style="width:14px;height:14px;">${incomeRate}% giao dich</div></div></div>
-                <div class="stat-card"><div class="stat-icon red"><img src="${page.dataset.budgetIcon}" alt="Expense"></div><div class="stat-info"><div class="stat-label">Chi tieu</div><div class="stat-value negative">${formatMoney(data.totalExpense)}</div><div class="stat-change down"><img src="${page.dataset.arrowDownIcon}" alt="Down" style="width:14px;height:14px;">${expenseRate}% giao dich</div></div></div>
-                <div class="stat-card"><div class="stat-icon orange"><img src="${page.dataset.savingIcon}" alt="Transactions"></div><div class="stat-info"><div class="stat-label">Giao dich</div><div class="stat-value">${totalTransactions}</div><div class="stat-change up">${incomeCount} thu / ${expenseCount} chi</div></div></div>
+                <div class="stat-card"><div class="stat-icon blue"><img src="${page.dataset.walletIcon}" alt="Balance"></div><div class="stat-info"><div class="stat-label">Số dư</div><div class="stat-value ${balance < 0 ? 'negative' : ''}">${formatMoney(balance)}</div><div class="stat-change ${balance >= 0 ? 'up' : 'down'}">${balance >= 0 ? '+' : '-'} Thu - Chi</div></div></div>
+                <div class="stat-card"><div class="stat-icon green"><img src="${page.dataset.profitsIcon}" alt="Income"></div><div class="stat-info"><div class="stat-label">Thu nhập</div><div class="stat-value positive">${formatMoney(data.totalIncome)}</div><div class="stat-change up"><img src="${page.dataset.arrowUpIcon}" alt="Up" style="width:14px;height:14px;">${incomeRate}% giao dich</div></div></div>
+                <div class="stat-card"><div class="stat-icon red"><img src="${page.dataset.budgetIcon}" alt="Expense"></div><div class="stat-info"><div class="stat-label">Chi tiêu</div><div class="stat-value negative">${formatMoney(data.totalExpense)}</div><div class="stat-change down"><img src="${page.dataset.arrowDownIcon}" alt="Down" style="width:14px;height:14px;">${expenseRate}% giao dich</div></div></div>
+                <div class="stat-card"><div class="stat-icon orange"><img src="${page.dataset.savingIcon}" alt="Transactions"></div><div class="stat-info"><div class="stat-label">Giao dịch</div><div class="stat-value">${totalTransactions}</div><div class="stat-change up">${incomeCount} thu / ${expenseCount} chi</div></div></div>
             `;
         }
 
         function renderRecentTransactions(list) {
             if (!list?.length) {
-                recent.innerHTML = emptyState(page.dataset.emptyIcon, 'Chua co giao dich nao');
+                recent.innerHTML = emptyState(page.dataset.emptyIcon, 'Chưa có giao dịch nào trong thời gian này');
                 return;
             }
 
@@ -270,7 +270,7 @@
 
         function renderWarnings(list) {
             if (!list?.length) {
-                warnings.innerHTML = emptyState(page.dataset.safeIcon, 'Tat ca ngan sach deu on dinh');
+                warnings.innerHTML = emptyState(page.dataset.safeIcon, 'Tất cả ngân sách đều ổn định');
                 return;
             }
 
@@ -283,7 +283,7 @@
 
         function renderTopCategories(list, totalExpense) {
             if (!list?.length) {
-                categories.innerHTML = emptyState(page.dataset.emptyIcon, 'Chua co du lieu chi tieu');
+                categories.innerHTML = emptyState(page.dataset.emptyIcon, 'Chưa có dữ liệu chi tiêu');
                 return;
             }
 
@@ -298,7 +298,7 @@
 
         function renderWalletSummary(list) {
             if (!list?.length) {
-                wallets.innerHTML = emptyState(page.dataset.emptyIcon, 'Chua co ngan sach nao');
+                wallets.innerHTML = emptyState(page.dataset.emptyIcon, 'Chưa có ngân sách nào');
                 return;
             }
 
@@ -380,7 +380,7 @@
             }
 
             if (!list?.length) {
-                pieShell.innerHTML = emptyState(page.dataset.emptyIcon, 'Chua co du lieu chi tieu');
+                pieShell.innerHTML = emptyState(page.dataset.emptyIcon, 'Chưa có dữ liệu chi tiêu');
                 return;
             }
 
@@ -486,25 +486,25 @@
                 if (response.status === 401) {
                     localStorage.removeItem('token');
                     localStorage.removeItem('user');
-                    throw new Error('Phien dang nhap da het han. Vui long dang nhap lai.');
+                    throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
                 }
 
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.message || 'Khong the tai du lieu dashboard.');
+                    throw new Error(data.message || 'Không thể tải dữ liệu dashboard.');
                 }
 
                 state.currentPeriod = data.period || period;
                 filter.value = state.currentPeriod;
                 renderDashboard(data);
             } catch (error) {
-                setAlert(error.message || 'Khong the tai du lieu dashboard.');
+                setAlert(error.message || 'Không thể tải dữ liệu dashboard.');
                 stats.innerHTML = '';
-                recent.innerHTML = emptyState(page.dataset.emptyIcon, 'Khong the tai giao dich.');
-                warnings.innerHTML = emptyState(page.dataset.emptyIcon, 'Khong the tai canh bao.');
-                categories.innerHTML = emptyState(page.dataset.emptyIcon, 'Khong the tai danh muc.');
-                wallets.innerHTML = emptyState(page.dataset.emptyIcon, 'Khong the tai ngan sach.');
+                recent.innerHTML = emptyState(page.dataset.emptyIcon, 'Chưa có giao dịch nào trong thời gian này.');
+                warnings.innerHTML = emptyState(page.dataset.safeIcon, 'Tất cả ngân sách đều ổn định.');
+                categories.innerHTML = emptyState(page.dataset.emptyIcon, 'Chưa có dữ liệu chi tiêu.');
+                wallets.innerHTML = emptyState(page.dataset.emptyIcon, 'Chưa có ngân sách nào.');
                 renderPieChart([]);
             } finally {
                 setLoading(false);

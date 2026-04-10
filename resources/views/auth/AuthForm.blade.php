@@ -7,6 +7,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}"> 
     <title>{{ $isRegister ? 'Tạo tài khoản Monexa' : 'Đăng nhập Monexa' }}</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=be-vietnam-pro:300,400,500,600,700,800" rel="stylesheet" />
@@ -269,11 +270,21 @@
             return res.json();
         }
 
+        // HELPER: sync session sau khi login API 
+        async function syncSession(token) {
+            await fetch('/auth/sync-session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ token }),
+            });
+        }
+
         // HELPER: hiển thị lỗi
         function showError(formEl, field, message) {
-            // Xóa lỗi cũ
             formEl.querySelectorAll('.auth-error').forEach(el => el.remove());
-
             const input = formEl.querySelector(`[name="${field}"]`);
             if (input) {
                 const err = document.createElement('p');
@@ -290,7 +301,7 @@
         // ĐĂNG NHẬP
         const loginForm = document.querySelector('.auth-form--pane[action*="login"], .auth-pane--signin .auth-form');
         loginForm.addEventListener('submit', async function (e) {
-            e.preventDefault(); // Chặn submit thông thường
+            e.preventDefault();
             clearErrors(this);
 
             const email    = this.querySelector('[name="email"]').value;
@@ -304,12 +315,11 @@
                 const data = await callApi('/api/monaxe/auth/login', { email, password });
 
                 if (data.access_token) {
-                    // Lưu token vào localStorage
                     localStorage.setItem('token', data.access_token);
                     localStorage.setItem('user', JSON.stringify(data.user));
+                    await syncSession(data.access_token); // ← THÊM MỚI
                     window.location.href = '/dashboard';
                 } else {
-                    // Hiển thị lỗi từ API
                     if (data.errors) {
                         Object.entries(data.errors).forEach(([field, messages]) => {
                             showError(this, field, messages[0]);
@@ -353,6 +363,7 @@
                 if (data.access_token) {
                     localStorage.setItem('token', data.access_token);
                     localStorage.setItem('user', JSON.stringify(data.user));
+                    await syncSession(data.access_token); // ← THÊM MỚI
                     window.location.href = '/dashboard';
                 } else {
                     if (data.errors) {
@@ -372,7 +383,7 @@
             }
         });
 
-        // MODE SWITCHER & PASSWORD TOGGLE 
+        // MODE SWITCHER & PASSWORD TOGGLE
         function setAuthMode(mode) {
             authFrame.classList.toggle('is-register', mode === 'register');
             document.querySelectorAll('.auth-tab').forEach(tab => {
