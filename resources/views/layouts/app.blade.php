@@ -73,9 +73,9 @@
                     @else
                         <img src="{{ asset('storage/' . $authUser->avatar) }}" class="user-avatar-img" alt="Avatar" id="userAvatarImage">
                     @endif
-                    <div class="user-avatar" id="userAvatarFallback" hidden>{{ strtoupper(substr($authUser->name, 0, 2)) }}</div>
+                    <div class="user-avatar" id="userAvatarFallback" style="display:none" hidden>{{ strtoupper(substr($authUser->name, 0, 2)) }}</div>
                 @else
-                    <img src="" class="user-avatar-img" alt="Avatar" id="userAvatarImage" hidden>
+                    <img src="" class="user-avatar-img" alt="Avatar" id="userAvatarImage" style="display:none" hidden>
                     <div class="user-avatar" id="userAvatarFallback">{{ $authUser ? strtoupper(substr($authUser->name, 0, 2)) : 'M' }}</div>
                 @endif
 
@@ -94,7 +94,10 @@
                                     : asset('storage/' . $authUser->avatar);
                             @endphp
                             <img src="{{ $avatarUrl }}" alt="Avatar" id="dropdownAvatarImage">
+                            {{-- ← Ẩn fallback --}}
+                            <span id="dropdownAvatarFallback" style="display:none" hidden></span>
                         @else
+                            <img src="" alt="Avatar" id="dropdownAvatarImage" style="display:none" hidden>
                             <span id="dropdownAvatarFallback">
                                 {{ $authUser ? strtoupper(substr($authUser->name, 0, 1)) : 'M' }}
                             </span>
