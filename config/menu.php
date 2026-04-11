@@ -13,7 +13,7 @@ return [
     ],
     [
         'title' => 'Ngân sách',
-        'route' => 'wallets.index',
+        'route' => 'budgets.index',
         'icon'  => 'asset-allocation.png',
     ],
     [

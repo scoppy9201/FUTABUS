@@ -8,7 +8,7 @@ use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TransactionController;
-use App\Http\Controllers\WalletController;
+use App\Http\Controllers\BudgetsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AIAssistantController;
 use App\Http\Controllers\SearchController;
@@ -157,13 +157,13 @@ Route::prefix('v1')->name('api.')->group(function () {
         | POST   /budgets/{id}/sync     → sync balance
         */
         Route::prefix('budgets')->name('budgets.')->group(function () {
-            Route::get('/',                  [WalletController::class, 'index'])       ->name('index');
-            Route::post('/',                 [WalletController::class, 'store'])       ->name('store');
-            Route::get('/{wallet}',          [WalletController::class, 'show'])        ->name('show');
-            Route::patch('/{wallet}',        [WalletController::class, 'update'])      ->name('update');
-            Route::delete('/{wallet}',       [WalletController::class, 'destroy'])     ->name('destroy');
-            Route::patch('/{wallet}/status', [WalletController::class, 'toggleStatus'])->name('toggle-status');
-            Route::post('/{wallet}/sync',    [WalletController::class, 'syncBalance']) ->name('sync-balance');
+            Route::get('/',                  [BudgetsController::class, 'index'])       ->name('index');
+            Route::post('/',                 [BudgetsController::class, 'store'])       ->name('store');
+            Route::get('/{wallet}',          [BudgetsController::class, 'show'])        ->name('show');
+            Route::patch('/{wallet}',        [BudgetsController::class, 'update'])      ->name('update');
+            Route::delete('/{wallet}',       [BudgetsController::class, 'destroy'])     ->name('destroy');
+            Route::patch('/{wallet}/status', [BudgetsController::class, 'toggleStatus'])->name('toggle-status');
+            Route::post('/{wallet}/sync',    [BudgetsController::class, 'syncBalance']) ->name('sync-balance');
         });
 
         /*

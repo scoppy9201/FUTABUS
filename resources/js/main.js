@@ -219,13 +219,21 @@ profileDropdown?.addEventListener('click', (event) => {
 
                 // Chạy lại các <script> inline trong content mới
                 contentEl.querySelectorAll('script').forEach(old => {
-                    const s = document.createElement('script');
+                    // Bỏ qua script external đã load rồi (sweetalert, cdn...)
                     if (old.src) {
-                        s.src = old.src;
-                        s.async = false;
-                    } else {
-                        s.textContent = old.textContent;
+                        if (!document.querySelector(`script[src="${old.src}"]`)) {
+                            const s = document.createElement('script');
+                            s.src = old.src;
+                            s.async = false;
+                            old.replaceWith(s);
+                        } else {
+                            old.remove(); 
+                        }
+                        return;
                     }
+
+                    const s = document.createElement('script');
+                    s.textContent = `(function(){ ${old.textContent} })();`;
                     old.replaceWith(s);
                 });
 

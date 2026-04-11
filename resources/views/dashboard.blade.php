@@ -106,7 +106,7 @@
                         <img src="{{ asset('images/warning.png') }}" alt="Warning">
                         Cảnh báo ngán sách
                     </h3>
-                    <a href="{{ route('wallets.index') }}" class="card-menu">
+                    <a href="{{ route('budgets.index') }}" class="card-menu">
                         <img src="{{ asset('images/plus.png') }}" alt="More">
                     </a>
                 </div>
@@ -134,7 +134,7 @@
                         <img src="{{ asset('images/asset-allocation.png') }}" alt="Wallet">
                         Tỏng quan ngân sách
                     </h3>
-                    <a href="{{ route('wallets.index') }}" class="card-menu">
+                    <a href="{{ route('budgets.index') }}" class="card-menu">
                         <img src="{{ asset('images/plus.png') }}" alt="More">
                     </a>
                 </div>

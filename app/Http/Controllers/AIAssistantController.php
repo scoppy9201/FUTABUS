@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Transaction;
 use App\Models\Category;
-use App\Models\Wallet;
+use App\Models\Budgets;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Services\GeminiService;
@@ -314,9 +314,9 @@ class AIAssistantController extends Controller
 
         $wallet = null;
         if (!empty($data['wallet_id'])) {
-            $wallet = Wallet::where('user_id', $userId)->find($data['wallet_id']);
+            $wallet = Budgets::where('user_id', $userId)->find($data['wallet_id']);
         } elseif (!empty($data['ten_ngan_sach'])) {
-            $wallet = Wallet::where('user_id', $userId)
+            $wallet = Budgets::where('user_id', $userId)
                 ->where('ten_ngan_sach', 'like', '%' . $data['ten_ngan_sach'] . '%')
                 ->first();
         }
@@ -361,7 +361,7 @@ class AIAssistantController extends Controller
             ]);
 
             if (!empty($data['category_id'])) {
-                $wallet = Wallet::where('user_id', $userId)
+                $wallet = Budgets::where('user_id', $userId)
                     ->where('category_id', $data['category_id'])
                     ->where('trang_thai', true)
                     ->first();
@@ -400,7 +400,7 @@ class AIAssistantController extends Controller
             $transaction->delete();
 
             if ($categoryId) {
-                $wallet = Wallet::where('user_id', $userId)
+                $wallet = Budgets::where('user_id', $userId)
                     ->where('category_id', $categoryId)
                     ->where('trang_thai', true)
                     ->first();
@@ -456,7 +456,7 @@ class AIAssistantController extends Controller
     private function executeUpdateWallet(array $data, int $userId, string $userName): array
     {
         try {
-            $wallet    = Wallet::where('user_id', $userId)->findOrFail($data['wallet_id']);
+            $wallet    = Budgets::where('user_id', $userId)->findOrFail($data['wallet_id']);
             $oldBudget = $wallet->ngan_sach_goc;
 
             $wallet->update(['ngan_sach_goc' => $data['ngan_sach_goc']]);
@@ -658,7 +658,7 @@ class AIAssistantController extends Controller
             ->where('transactions.user_id', $userId)->where('transactions.loai_giao_dich', 'CHI')
             ->select('categories.ten_danh_muc', DB::raw('SUM(transactions.so_tien) as total'))
             ->groupBy('categories.id', 'categories.ten_danh_muc')->orderByDesc('total')->get();
-        $wallets = Wallet::where('user_id', $userId)->get()->map(function ($w) use ($userId) {
+        $wallets = Budgets::where('user_id', $userId)->get()->map(function ($w) use ($userId) {
             $w->da_chi = $w->ngan_sach_goc - $w->so_du;
             $w->spent_percentage = $w->spent_percentage; // dùng accessor từ model
             return $w;
@@ -862,7 +862,7 @@ class AIAssistantController extends Controller
             $transaction->update($updateFields);
 
             // Recalculate wallet nếu có
-            $wallet = Wallet::where('user_id', $userId)
+            $wallet = Budgets::where('user_id', $userId)
                 ->where('category_id', $transaction->category_id)
                 ->where('trang_thai', true)->first();
             if ($wallet) $wallet->recalculateBalance();
@@ -969,7 +969,7 @@ class AIAssistantController extends Controller
         }
 
         // Kiểm tra trùng tên
-        $exists = Wallet::where('user_id', $userId)
+        $exists = Budgets::where('user_id', $userId)
             ->where('ten_ngan_sach', $data['ten_ngan_sach'])->exists();
 
         if ($exists) {
@@ -1006,7 +1006,7 @@ class AIAssistantController extends Controller
     private function executeCreateWallet(array $data, int $userId, string $userName): array
     {
         try {
-            $wallet = Wallet::create([
+            $wallet = Budgets::create([
                 'user_id'       => $userId,
                 'ten_ngan_sach' => $data['ten_ngan_sach'],
                 'ngan_sach_goc' => $data['ngan_sach_goc'],
@@ -1045,9 +1045,9 @@ class AIAssistantController extends Controller
 
         $wallet = null;
         if (!empty($data['wallet_id'])) {
-            $wallet = Wallet::where('user_id', $userId)->find($data['wallet_id']);
+            $wallet = Budgets::where('user_id', $userId)->find($data['wallet_id']);
         } elseif (!empty($data['ten_ngan_sach'])) {
-            $wallet = Wallet::where('user_id', $userId)
+            $wallet = Budgets::where('user_id', $userId)
                 ->where('ten_ngan_sach', 'like', '%' . $data['ten_ngan_sach'] . '%')->first();
         }
 
@@ -1073,7 +1073,7 @@ class AIAssistantController extends Controller
     private function executeDeleteWallet(array $data, int $userId, string $userName): array
     {
         try {
-            $wallet = Wallet::where('user_id', $userId)->findOrFail($data['wallet_id']);
+            $wallet = Budgets::where('user_id', $userId)->findOrFail($data['wallet_id']);
             $name   = $wallet->ten_ngan_sach;
 
             $wallet->delete();
