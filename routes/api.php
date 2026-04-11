@@ -141,25 +141,6 @@ Route::prefix('monaxe')->name('api.')->group(function () {
             Route::patch('/{category}/status', [CategoryController::class, 'toggleStatus'])->name('toggle-status');
         });
 
-        /*
-        | BUDGETS (Wallets/Ngân sách)
-        | GET    /budgets           → index
-        | POST   /budgets           → store
-        | GET    /budgets/{id}      → show
-        | PATCH  /budgets/{id}      → update
-        | DELETE /budgets/{id}      → destroy
-        | PATCH  /budgets/{id}/status  → toggle status
-        | POST   /budgets/{id}/sync    → sync balance
-        */
-        Route::prefix('budgets')->name('wallets.')->group(function () {
-            Route::get('/',                  [WalletController::class, 'index'])      ->name('index');
-            Route::post('/',                 [WalletController::class, 'store'])      ->name('store');
-            Route::get('/{wallet}',          [WalletController::class, 'show'])       ->name('show');
-            Route::patch('/{wallet}',        [WalletController::class, 'update'])     ->name('update');
-            Route::delete('/{wallet}',       [WalletController::class, 'destroy'])    ->name('destroy');
-            Route::patch('/{wallet}/status', [WalletController::class, 'toggleStatus'])->name('toggle-status');
-            Route::post('/{wallet}/sync',    [WalletController::class, 'syncBalance'])->name('sync-balance');
-        });
 
         /*
         | TRANSACTIONS

@@ -80,6 +80,22 @@ class TransactionController extends Controller
 
         return view('transactions.index', compact('transactions','categories','wallets','totalIncome','totalExpense'));
     }
+    // Chỉnh sửa phù hợp với rest api
+        public function show(Transaction $transaction)
+    {
+        if ($transaction->user_id !== Auth::id()) {
+            abort(403);
+        }
+        return redirect()->route('transactions.index');
+    }
+
+    public function edit(Transaction $transaction)
+    {
+        if ($transaction->user_id !== Auth::id()) {
+            abort(403);
+        }
+        return redirect()->route('transactions.index');
+    }
 
     // Thêm giao dịch mới
     public function store(Request $request)
@@ -167,17 +183,13 @@ class TransactionController extends Controller
 
             if (!$category) {
                 DB::rollBack();
-                return back()
-                    ->with('error', 'Chỉ có thể tạo giao dịch cho danh mục con!')
-                    ->withInput();
+                return response()->json(['message' => 'Chỉ có thể tạo giao dịch cho danh mục con!'], 422);
             }
 
-            // Kiểm tra loại giao dịch phải khớp với loại danh mục
+            // Kiểm tra loại giao dịch phải khớp với loại danh mục  
             if ($category->loai_danh_muc !== $validated['loai_giao_dich']) {
                 DB::rollBack();
-                return back()
-                    ->with('error', 'Loại giao dịch không khớp với loại danh mục!')
-                    ->withInput();
+                return response()->json(['message' => 'Loại giao dịch không khớp với loại danh mục!'], 422);
             }
 
             // Tìm ngân sách của danh mục này (nếu có)
@@ -191,9 +203,7 @@ class TransactionController extends Controller
             if ($validated['loai_giao_dich'] == 'CHI' && $wallet) {
                 if ($wallet->so_du < $validated['so_tien']) {
                     DB::rollBack();
-                    return back()
-                        ->with('error', 'Ngân sách không đủ! Số dư hiện tại: ' . number_format($wallet->so_du, 0, ',', '.') . 'đ')
-                        ->withInput();
+                    return response()->json(['message' => 'Ngân sách không đủ! Số dư hiện tại: ' . number_format($wallet->so_du, 0, ',', '.') . 'đ'], 422);
                 }
             }
 
@@ -230,11 +240,8 @@ class TransactionController extends Controller
                     if ($validated['loai_giao_dich'] == 'CHI') {
                         if ($mWallet->so_du < $validated['so_tien']) {
                             DB::rollBack();
-                            return back()->withInput()->with('error',
-                                "Ví \"{$mWallet->ten_vi}\" không đủ số dư! " .
-                                "Cần: " . number_format($validated['so_tien']) . "đ | " .
-                                "Hiện có: " . number_format($mWallet->so_du) . "đ"
-                            );
+                            return response()->json(['message' => "Ví \"{$mWallet->ten_vi}\" không đủ số dư! Cần: " 
+                            . number_format($validated['so_tien']) . "đ | Hiện có: " . number_format($mWallet->so_du) . "đ"], 422);
                         }
                         $mWallet->decrement('so_du', $validated['so_tien']);
                     } else {
@@ -245,14 +252,11 @@ class TransactionController extends Controller
 
             DB::commit();
 
-            return redirect()->route('transactions.index')
-                ->with('success', 'Thêm giao dịch thành công!');
+            return response()->json(['message' => 'Thêm giao dịch thành công!'], 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()
-                ->with('error', 'Có lỗi xảy ra: ' . $e->getMessage())
-                ->withInput();
+            return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
     }
 
@@ -335,9 +339,7 @@ class TransactionController extends Controller
 
             if (!$category) {
                 DB::rollBack();
-                return back()
-                    ->with('error', 'Chỉ có thể cập nhật giao dịch cho danh mục con!')
-                    ->withInput();
+                return response()->json(['message' => 'Chỉ có thể cập nhật giao dịch cho danh mục con!'], 422);
             }
 
             // Lưu thông tin giao dịch cũ
@@ -369,9 +371,8 @@ class TransactionController extends Controller
                     if ($validated['loai_giao_dich'] == 'CHI') {
                         if ($wallet->so_du < $validated['so_tien']) {
                             DB::rollBack();
-                            return back()
-                                ->with('error', 'Ngân sách không đủ! Số dư hiện tại: ' . number_format($wallet->so_du, 0, ',', '.') . 'đ')
-                                ->withInput();
+                            return response()->json(['message' => 'Ngân sách không đủ! Số dư hiện tại: ' 
+                            . number_format($wallet->so_du, 0, ',', '.') . 'đ'], 422);
                         }
                     }
 
@@ -398,9 +399,7 @@ class TransactionController extends Controller
                         // Kiểm tra trước khi trừ
                         if ($oldWallet->so_du < $oldAmount) {
                             DB::rollBack();
-                            return back()
-                                ->with('error', 'Không thể cập nhật vì sẽ làm số dư ngân sách cũ âm!')
-                                ->withInput();
+                            return response()->json(['message' => 'Không thể cập nhật vì sẽ làm số dư ngân sách cũ âm!'], 422);
                         }
                         $oldWallet->decrement('so_du', $oldAmount);
                     } else {
@@ -421,9 +420,8 @@ class TransactionController extends Controller
                     if ($validated['loai_giao_dich'] == 'CHI') {
                         if ($newWallet->so_du < $validated['so_tien']) {
                             DB::rollBack();
-                            return back()
-                                ->with('error', 'Ngân sách mới không đủ! Số dư hiện tại: ' . number_format($newWallet->so_du, 0, ',', '.') . 'đ')
-                                ->withInput();
+                            return response()->json(['message' => 'Ngân sách mới không đủ! Số dư hiện tại: ' 
+                            . number_format($newWallet->so_du, 0, ',', '.') . 'đ'], 422);
                         }
                     }
 
@@ -485,14 +483,11 @@ class TransactionController extends Controller
 
             DB::commit();
 
-            return redirect()->route('transactions.index')
-                ->with('success', 'Cập nhật giao dịch thành công!');
+            return response()->json(['message' => 'Cập nhật giao dịch thành công!']);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()
-                ->with('error', 'Có lỗi xảy ra: ' . $e->getMessage())
-                ->withInput();
+            return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
     }
 
@@ -518,10 +513,8 @@ class TransactionController extends Controller
                     // Kiểm tra trước khi trừ
                     if ($wallet->so_du < $transaction->so_tien) {
                         DB::rollBack();
-                        return back()->with('error',
-                            'Không thể xóa giao dịch này vì sẽ làm số dư âm! ' .
-                            'Số dư hiện tại: ' . number_format($wallet->so_du, 0, ',', '.') . 'đ'
-                        );
+                        return response()->json(['message' => 'Không thể xóa giao dịch này vì sẽ làm số dư âm! Số dư hiện tại: ' 
+                        . number_format($wallet->so_du, 0, ',', '.') . 'đ'], 422);
                     }
                     $wallet->decrement('so_du', $transaction->so_tien);
                 } else {
@@ -550,13 +543,11 @@ class TransactionController extends Controller
 
             DB::commit();
 
-            return redirect()->route('transactions.index')
-                ->with('success', 'Xóa giao dịch thành công!');
+           return response()->json(['message' => 'Xóa giao dịch thành công!']);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()
-                ->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
+            return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
     }
 }

@@ -59,7 +59,62 @@ class WalletController extends Controller
             ->orderBy('ten_danh_muc')
             ->get();
 
-        return view('wallets.index', compact('wallets', 'categories'));
+        if ($request->wantsJson() || $request->is('api/*')) {
+        return response()->json([
+            'data' => $wallets->map(fn($w) => [
+                'id'                => $w->id,
+                'ten_ngan_sach'     => $w->ten_ngan_sach,
+                'mo_ta'             => $w->mo_ta,
+                'ngan_sach_goc'     => $w->ngan_sach_goc,
+                'so_du'             => $w->so_du,
+                'spent_amount'      => $w->spent_amount ?? 0,
+                'spent_percentage'  => $w->spent_percentage ?? 0,
+                'is_over_budget'    => $w->is_over_budget ?? false,
+                'trang_thai'        => $w->trang_thai,
+                'category'          => $w->category ? [
+                    'id'            => $w->category->id,
+                    'ten_danh_muc'  => $w->category->ten_danh_muc,
+                    'bieu_tuong'    => $w->category->bieu_tuong,
+                ] : null,
+                'created_at'        => $w->created_at,
+            ]),
+            'meta' => [
+                'current_page' => $wallets->currentPage(),
+                'last_page'    => $wallets->lastPage(),
+                'per_page'     => $wallets->perPage(),
+                'total'        => $wallets->total(),
+                'from'         => $wallets->firstItem(),
+                'to'           => $wallets->lastItem(),
+            ],
+        ]);
+    }
+
+    // Trả về View cho Web (quan trọng)
+    return view('wallets.index', compact('wallets', 'categories'));
+    }
+
+    public function show(Wallet $wallet)
+    {
+        if ($wallet->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        return response()->json([
+            'data' => [
+                'id'               => $wallet->id,
+                'ten_ngan_sach'    => $wallet->ten_ngan_sach,
+                'mo_ta'            => $wallet->mo_ta,
+                'ngan_sach_goc'    => $wallet->ngan_sach_goc,
+                'so_du'            => $wallet->so_du,
+                'spent_amount'     => $wallet->spent_amount,
+                'spent_percentage' => $wallet->spent_percentage,
+                'is_over_budget'   => $wallet->is_over_budget,
+                'trang_thai'       => $wallet->trang_thai,
+                'category'         => $wallet->category,
+                'created_at'       => $wallet->created_at,
+                'updated_at'       => $wallet->updated_at,
+            ]
+        ]);
     }
 
     // Thêm ngân sách mới 
@@ -132,9 +187,7 @@ class WalletController extends Controller
 
             if (!$category) {
                 DB::rollBack();
-                return back()
-                    ->with('error', 'Chỉ có thể tạo ngân sách cho danh mục con loại chi!')
-                    ->withInput();
+                return response()->json(['message' => 'Chỉ có thể tạo ngân sách cho danh mục con loại chi!'], 422);
             }
 
             // Kiểm tra xem đã có ngân sách active cho danh mục này chưa
@@ -145,9 +198,8 @@ class WalletController extends Controller
 
             if ($existingWallet) {
                 DB::rollBack();
-                return back()
-                    ->with('error', 'Danh mục "' . $category->ten_danh_muc . '" đã có ngân sách đang hoạt động!')
-                    ->withInput();
+                return response()->json(['message' => 'Danh mục "' . $category->ten_danh_muc . '" đã có ngân sách đang hoạt động!'], 422);
+
             }
 
             // Tạo ngân sách mới 
@@ -163,14 +215,11 @@ class WalletController extends Controller
 
             DB::commit();
             
-            return redirect()->route('wallets.index')
-                ->with('success', 'Thêm ngân sách thành công!');
+            return response()->json(['message' => 'Thêm ngân sách thành công!'], 201);
                 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()
-                ->with('error', 'Có lỗi xảy ra: ' . $e->getMessage())
-                ->withInput();
+            return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
     }
 
@@ -249,9 +298,7 @@ class WalletController extends Controller
 
             if (!$category) {
                 DB::rollBack();
-                return back()
-                    ->with('error', 'Chỉ có thể cập nhật cho danh mục con loại CHI!')
-                    ->withInput();
+                return response()->json(['message' => 'Chỉ có thể cập nhật cho danh mục con loại CHI!'], 422);
             }
 
             // Nếu đổi danh mục
@@ -259,9 +306,7 @@ class WalletController extends Controller
                 // Không cho đổi category nếu đã có giao dịch
                 if ($wallet->transactions()->exists()) {
                     DB::rollBack();
-                    return back()
-                        ->with('error', 'Không thể đổi danh mục cho ngân sách đã có giao dịch!')
-                        ->withInput();
+                    return response()->json(['message' => 'Không thể đổi danh mục cho ngân sách đã có giao dịch!'], 422);
                 }
                 
                 // Kiểm tra xem danh mục mới đã có ngân sách active chưa
@@ -273,9 +318,7 @@ class WalletController extends Controller
 
                 if ($existingWallet) {
                     DB::rollBack();
-                    return back()
-                        ->with('error', 'Danh mục "' . $category->ten_danh_muc . '" đã có ngân sách đang hoạt động!')
-                        ->withInput();
+                    return response()->json(['message' => 'Danh mục "' . $category->ten_danh_muc . '" đã có ngân sách đang hoạt động!'], 422);
                 }
 
                 // Reset số dư khi đổi danh mục (vì chưa có giao dịch)
@@ -294,9 +337,8 @@ class WalletController extends Controller
                 // Kiểm tra hạn mức mới phải >= số đã chi
                 if ($newBalance < 0) {
                     DB::rollBack();
-                    return back()
-                        ->with('error', 'Hạn mức mới phải lớn hơn hoặc bằng số tiền đã chi (' . number_format($spentAmount, 0, ',', '.') . 'đ)!')
-                        ->withInput();
+                    return response()->json([
+                    'message' => 'Hạn mức mới phải lớn hơn hoặc bằng số tiền đã chi (' . number_format($spentAmount, 0, ',', '.') . 'đ)!'], 422);
                 }
 
                 $wallet->update([
@@ -309,14 +351,11 @@ class WalletController extends Controller
 
             DB::commit();
             
-            return redirect()->route('wallets.index')
-                ->with('success', 'Cập nhật ngân sách thành công!');
+            return response()->json(['message' => 'Cập nhật ngân sách thành công!', 'data' => $wallet->fresh()]);
                 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()
-                ->with('error', 'Có lỗi xảy ra: ' . $e->getMessage())
-                ->withInput();
+            return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
     }
 
@@ -332,7 +371,7 @@ class WalletController extends Controller
         try {
             if (!$wallet->canDelete()) {
                 DB::rollBack();
-                return back()->with('error', 'Không thể xóa ngân sách đã có giao dịch!');
+                return response()->json(['message' => 'Không thể xóa ngân sách đã có giao dịch!'], 422);
             }
 
             $walletName = $wallet->ten_ngan_sach;
@@ -340,12 +379,11 @@ class WalletController extends Controller
 
             DB::commit();
             
-            return redirect()->route('wallets.index')
-                ->with('success', "Xóa ngân sách '{$walletName}' thành công!");
+            return response()->json(['message' => "Xóa ngân sách '{$walletName}' thành công!"]);
                 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
+            return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
     }
 
@@ -371,7 +409,7 @@ class WalletController extends Controller
 
                 if ($existingActiveWallet) {
                     DB::rollBack();
-                    return back()->with('error', 'Danh mục này đã có ngân sách đang hoạt động!');
+                    return response()->json(['message' => 'Danh mục này đã có ngân sách đang hoạt động!'], 422);
                 }
 
                 // Kích hoạt + tính lại số dư 
@@ -380,21 +418,25 @@ class WalletController extends Controller
 
                 DB::commit();
 
-                return redirect()->route('wallets.index')
-                    ->with('success', "Đã kích hoạt ngân sách '{$wallet->ten_ngan_sach}' và cập nhật số dư: " . number_format($newBalance, 0, ',', '.') . 'đ');
+                return response()->json([
+                'message' => "Đã kích hoạt ngân sách '{$wallet->ten_ngan_sach}' và cập nhật số dư: " . number_format($newBalance, 0, ',', '.') . 'đ',
+                'data'    => ['so_du' => $newBalance, 'trang_thai' => true],
+            ]);
             } else {
                 // Vô hiệu hóa
                 $wallet->update(['trang_thai' => false]);
 
                 DB::commit();
 
-                return redirect()->route('wallets.index')
-                    ->with('success', "Đã vô hiệu hóa ngân sách '{$wallet->ten_ngan_sach}' thành công!");
+                return response()->json([
+                'message' => "Đã vô hiệu hóa ngân sách '{$wallet->ten_ngan_sach}' thành công!",
+                'data'    => ['trang_thai' => false],
+            ]);
             }
             
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
+            return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
     }
 
@@ -411,12 +453,14 @@ class WalletController extends Controller
             
             DB::commit();
             
-            return redirect()->route('wallets.index')
-                ->with('success', "Đã đồng bộ số dư ngân sách '{$wallet->ten_ngan_sach}'. Số dư mới: " . number_format($newBalance, 0, ',', '.') . 'đ');
+            return response()->json([
+            'message' => "Đã đồng bộ số dư ngân sách '{$wallet->ten_ngan_sach}'. Số dư mới: " . number_format($newBalance, 0, ',', '.') . 'đ',
+            'data'    => ['so_du' => $newBalance],
+        ]);
                 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
+            return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
     }
 }

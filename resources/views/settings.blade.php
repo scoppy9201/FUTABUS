@@ -359,18 +359,6 @@
 
             @php $emailSetting = \App\Models\EmailSetting::first(); @endphp
 
-            @if(session('email_success'))
-            <div style="margin:12px 24px;padding:12px 16px;background:#d1fae5;color:#065f46;border-left:4px solid #10b981;border-radius:10px;font-size:14px;">
-                ✓ {{ session('email_success') }}
-            </div>
-            @endif
-
-            @if(session('email_error'))
-            <div style="margin:12px 24px;padding:12px 16px;background:#fee2e2;color:#991b1b;border-left:4px solid #ef4444;border-radius:10px;font-size:14px;">
-                ✗ {{ session('email_error') }}
-            </div>
-            @endif
-
             <!-- Toggle bật/tắt email từ DB -->
             <div class="setting-row">
                 <div class="setting-info">

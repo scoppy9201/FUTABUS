@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Laravel\Sanctum\PersonalAccessToken;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\WalletController;
+
 
 // Trang chủ
 Route::get('/', function () {
@@ -45,11 +48,14 @@ Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard')->middlewa
 
 // App views 
 Route::middleware('auth')->group(function () {
-    Route::get('/transactions',     fn() => view('transactions'))    ->name('transactions.index');
+    Route::get('/transactions', [\App\Http\Controllers\TransactionController::class, 'index'])->name('transactions.index');
     Route::get('/categories',       fn() => view('categories'))      ->name('categories.index');
-    Route::get('/budgets',          fn() => view('budgets'))         ->name('wallets.index');
+    Route::get('/budgets',      [\App\Http\Controllers\WalletController::class, 'index'])->name('wallets.index');
     Route::get('/profile',          fn() => view('profile'))         ->name('profile.show');
-    Route::get('/settings',         fn() => view('settings'))        ->name('settings.index');
+    Route::get('/settings',     [\App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
+    Route::get('/settings',     [\App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
+    Route::post('/settings/email',      [\App\Http\Controllers\EmailSettingController::class, 'update'])->name('settings.email.save');
+    Route::post('/settings/email/test', [\App\Http\Controllers\EmailSettingController::class, 'testMail'])->name('settings.email.test');
     Route::get('/groups',           fn() => view('groups'))          ->name('groups.index');
     Route::get('/money-wallets',    fn() => view('money-wallets'))   ->name('money-wallets.index');
     Route::get('/notifications',    fn() => view('notifications'))   ->name('notifications.index');
@@ -63,3 +69,24 @@ Route::middleware('auth')->group(function () {
     // Logout
     Route::post('/logout', [\App\Http\Controllers\LoginController::class, 'logout'])->name('logout');
 });
+
+ /*
+        | BUDGETS (Wallets/Ngân sách)
+        | GET    /budgets           → index
+        | POST   /budgets           → store
+        | GET    /budgets/{id}      → show
+        | PATCH  /budgets/{id}      → update
+        | DELETE /budgets/{id}      → destroy
+        | PATCH  /budgets/{id}/status  → toggle status
+        | POST   /budgets/{id}/sync    → sync balance
+        */
+        Route::prefix('budgets')->name('wallets.')->group(function () {
+            Route::get('/',                  [WalletController::class, 'index'])      ->name('index');
+            Route::post('/',                 [WalletController::class, 'store'])      ->name('store');
+            Route::get('/{wallet}',          [WalletController::class, 'show'])       ->name('show');
+            Route::patch('/{wallet}',        [WalletController::class, 'update'])     ->name('update');
+            Route::delete('/{wallet}',       [WalletController::class, 'destroy'])    ->name('destroy');
+            Route::patch('/{wallet}/status', [WalletController::class, 'toggleStatus'])->name('toggle-status');
+            Route::post('/{wallet}/sync',    [WalletController::class, 'syncBalance'])->name('sync-balance');
+        });
+

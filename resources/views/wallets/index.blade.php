@@ -1250,21 +1250,27 @@
                                 <!-- Button đồng bộ số dư -->
                                 <form action="{{ route('wallets.sync-balance', $wallet) }}" method="POST" style="display: inline;">
                                     @csrf
-                                    <button type="submit" class="btn-action btn-sync" title="Đồng bộ số dư" onclick="return confirm('Tính lại số dư dựa trên tất cả giao dịch?')">
-                                        <img src="{{ asset('images/refresh.png') }}" alt="Sync">
+                                    <button type="button" class="btn-action btn-sync" 
+                                    data-id="{{ $wallet->id }}"
+                                    onclick="syncWallet({{ $wallet->id }})" 
+                                    title="Đồng bộ số dư">
+                                    <img src="{{ asset('images/refresh.png') }}" alt="Sync">
                                     </button>
                                 </form>
 
                                 <!-- Button toggle status -->
                                 <form action="{{ route('wallets.toggle-status', $wallet) }}" method="POST" style="display: inline;">
                                     @csrf
-                                    <button type="submit" class="btn-action btn-toggle" title="{{ $wallet->trang_thai ? 'Vô hiệu hóa' : 'Kích hoạt' }}">
+                                    <button type="button" class="btn-action btn-toggle"
+                                    data-id="{{ $wallet->id }}"
+                                    onclick="toggleWallet({{ $wallet->id }})"
+                                    title="{{ $wallet->trang_thai ? 'Vô hiệu hóa' : 'Kích hoạt' }}">
                                         <img src="{{ asset('images/' . ($wallet->trang_thai ? 'lock' : 'unlock') . '.png') }}" alt="Toggle">
                                     </button>
                                 </form>
 
                                 <!-- Button edit -->
-                                <button type="button" class="btn-action btn-edit" onclick="openEditModal({{ $wallet }})" title="Chỉnh sửa">
+                                <button type="button" class="btn-action btn-edit" onclick="openEditModal({{ json_encode($wallet) }})" title="Chỉnh sửa">
                                     <img src="{{ asset('images/edit.png') }}" alt="Edit">
                                 </button>
 
@@ -1272,11 +1278,13 @@
                                 <form action="{{ route('wallets.destroy', $wallet) }}"
                                  method="POST" style="display: inline;" 
                                  class="form-delete"
-                                 data-id="{{ $category->id }}">
+                                 data-id="{{ $wallet->id }}">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn-action btn-delete" title="Xóa">
-                                        <img src="{{ asset('images/delete.png') }}" alt="Delete">
+                                    <button type="button" class="btn-action btn-delete"
+                                    onclick="deleteWallet({{ $wallet->id }})"
+                                    title="Xóa">
+                                    <img src="{{ asset('images/delete.png') }}" alt="Delete">
                                     </button>
                                 </form>
                             </div>
@@ -1325,7 +1333,7 @@
                 </div>
             </div>
 
-            <form action="{{ route('wallets.store') }}" method="POST" id="create-form">
+            <form id="create-form">
                 @csrf
                 <div class="modal-body">
                     <!-- Tên ngân sách -->
@@ -1424,7 +1432,7 @@
                 </div>
             </div>
 
-            <form id="edit-form" method="POST">
+            <form id="edit-form">
                 @csrf
                 @method('PUT')
                 
@@ -1505,196 +1513,217 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-const closeModal = modalId => document.getElementById(modalId)?.classList.remove('active');
+    const API_BASE = '/budgets';
 
-const showError = (input, message) => {
-    clearError(input);
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'input-error';
-    errorDiv.style.cssText = 'color: #dc2626; font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 6px;';
-    errorDiv.innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="12"></line>
-            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
-        <span>${message}</span>
-    `;
-    input.style.borderColor = '#dc2626';
-    input.parentElement.appendChild(errorDiv);
-};
-
-const clearError = input => {
-    input.parentElement.querySelector('.input-error')?.remove();
-    input.style.borderColor = '';
-};
-
-const formatCurrencyOnBlur = input => {
-    let value = input.value.replace(/\D/g, '');
-    const num = parseInt(value) || 0;
-    
-    if (num > 100000000) {
-        value = '100000000';
-        showError(input, 'Số tiền không được vượt quá 100,000,000 VNĐ');
-    } else if (num > 0 && num < 1000) {
-        showError(input, 'Số tiền phải từ 1,000 VNĐ trở lên');
-    } else {
-        clearError(input);
+    function getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.content ?? '';
     }
-    
-    input.value = value ? parseInt(value).toLocaleString('vi-VN') : '';
-    
-    const hiddenInput = input.parentElement.querySelector('.real-value');
-    if (hiddenInput) hiddenInput.value = value;
-};
 
-const removeFormatOnFocus = input => {
-    const value = input.value.replace(/\D/g, '');
-    input.value = value;
-    clearError(input);
-};
+    async function apiRequest(method, url, data = null) {
+        const options = {
+            method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': getCsrfToken(),
+            },
+            credentials: 'same-origin',
+        };
+        if (data) options.body = JSON.stringify(data);
+        return await fetch(url, options);
+    }
 
-const validateBudgetForm = form => {
-    const budgetInput = form.querySelector('[name="ngan_sach_goc"]');
-    const displayInput = budgetInput.previousElementSibling;
-    const value = budgetInput.value.replace(/\D/g, '');
-    
-    if (!value) {
-        showError(displayInput, 'Vui lòng nhập hạn mức ngân sách');
-        displayInput.focus();
-        return false;
-    }
-    
-    const num = parseInt(value);
-    if (num < 1000) {
-        showError(displayInput, 'Số tiền phải từ 1,000 VNĐ trở lên');
-        displayInput.focus();
-        return false;
-    }
-    if (num > 100000000) {
-        showError(displayInput, 'Số tiền không được vượt quá 100,000,000 VNĐ');
-        displayInput.focus();
-        return false;
-    }
-    
-    budgetInput.value = value;
-    return true;
-};
+    function showSuccess(message) {
+    // Lưu vào sessionStorage để hiển thị sau reload
+    sessionStorage.setItem('pending_toast', JSON.stringify({
+        type: 'success',
+        title: 'Thành công',
+        message: message
+    }));
+    location.reload();
+}
 
-const setupCurrencyInput = input => {
-    const wrapper = document.createElement('div');
-    wrapper.style.position = 'relative';
-    
-    const displayInput = document.createElement('input');
-    displayInput.type = 'text';
-    displayInput.className = input.className;
-    displayInput.placeholder = 'Ví dụ: 10,000,000';
-    displayInput.value = input.value ? parseInt(input.value).toLocaleString('vi-VN') : '';
-    
-    input.type = 'hidden';
-    input.className = 'real-value';
-    
-    // Xóa format khi focus (để nhập dễ hơn)
-    displayInput.addEventListener('focus', () => removeFormatOnFocus(displayInput));
-    
-    // Format lại khi blur
-    displayInput.addEventListener('blur', () => formatCurrencyOnBlur(displayInput));
-    
-    // Chỉ cho phép nhập số
-    displayInput.addEventListener('keypress', e => {
-        if (!/[0-9]/.test(e.key)) e.preventDefault();
-    });
-    
-    // Paste event
-    displayInput.addEventListener('paste', e => {
+function showError(message) {
+    // Lỗi không reload, hiển thị trực tiếp
+    showToast({ type: 'error', title: 'Lỗi', message: message });
+}
+
+    // ── STORE ─────────────────────────────────────────────────────────────────────
+    document.getElementById('create-form')?.addEventListener('submit', async function(e) {
         e.preventDefault();
-        const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-        const numbers = pastedText.replace(/\D/g, '');
-        if (numbers) displayInput.value = numbers;
-    });
-    
-    input.parentNode.insertBefore(wrapper, input);
-    wrapper.appendChild(displayInput);
-    wrapper.appendChild(input);
-};
+        const form = e.target;
+        const payload = {
+            ten_ngan_sach: form.ten_ngan_sach.value,
+            category_id:   form.category_id.value,
+            ngan_sach_goc: form.ngan_sach_goc.value,
+            mo_ta:         form.mo_ta.value || null,
+        };
 
-const openEditModal = wallet => {
-    const form = document.getElementById('edit-form');
-    form.action = `/wallets/${wallet.id}`;
-    
-    document.getElementById('edit-ten').value = wallet.ten_ngan_sach;
-    document.getElementById('edit-category').value = wallet.category_id;
-    document.getElementById('edit-mota').value = wallet.mo_ta || '';
-    
-    const budgetInput = document.getElementById('edit-budget');
-    const displayInput = budgetInput.previousElementSibling;
-    if (displayInput) {
-        displayInput.value = parseInt(wallet.ngan_sach_goc).toLocaleString('vi-VN');
-        budgetInput.value = wallet.ngan_sach_goc;
-    }
-    
-    document.getElementById('edit-modal').classList.add('active');
-};
+        const res  = await apiRequest('POST', API_BASE, payload);
+        const json = await res.json();
 
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('input[name="ngan_sach_goc"]').forEach(setupCurrencyInput);
-    
-    document.getElementById('create-form')?.addEventListener('submit', e => {
-        if (!validateBudgetForm(e.target)) e.preventDefault();
-    });
-    document.getElementById('edit-form')?.addEventListener('submit', e => {
-        if (!validateBudgetForm(e.target)) e.preventDefault();
-    });
-    
-    document.getElementById('open-create-modal')?.addEventListener('click', () => {
-        document.getElementById('create-modal').classList.add('active');
-    });
-    
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-        overlay.addEventListener('click', e => {
-            if (e.target === overlay) overlay.classList.remove('active');
-        });
-    });
-    
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') {
-            document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+        if (res.ok) {
+            showSuccess(json.message);
+        } else {
+            const errors = json.errors
+                ? Object.values(json.errors).flat().join('\n')
+                : json.message ?? 'Có lỗi xảy ra!';
+            showError(errors);
         }
     });
-    
-    setTimeout(() => {
-        document.querySelectorAll('.alert').forEach(alert => {
-            alert.style.opacity = '0';
-            alert.style.transform = 'translateY(-10px)';
-            setTimeout(() => alert.remove(), 300);
-        });
-    }, 5000);
-    
-    @if($errors->any() && !$errors->has('id'))
-        document.getElementById('create-modal')?.classList.add('active');
-    @endif
-});
-// Xác nhận xóa 
-document.querySelectorAll('.form-delete').forEach(form => {
-    form.addEventListener('submit', function(e) {
-        e.preventDefault(); // chặn submit mặc định
 
-        Swal.fire({
+    // ── UPDATE ────────────────────────────────────────────────────────────────────
+    document.getElementById('edit-form')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const id   = form.dataset.id;
+        const payload = {
+            ten_ngan_sach: form.ten_ngan_sach.value,
+            category_id:   form.category_id.value,
+            ngan_sach_goc: form.ngan_sach_goc.value,
+            mo_ta:         form.mo_ta.value || null,
+        };
+
+        const res  = await apiRequest('PATCH', `${API_BASE}/${id}`, payload);
+        const json = await res.json();
+
+        if (res.ok) {
+            showSuccess(json.message);
+        } else {
+            const errors = json.errors
+                ? Object.values(json.errors).flat().join('\n')
+                : json.message ?? 'Có lỗi xảy ra!';
+            showError(errors);
+        }
+    });
+
+    // ── DELETE ────────────────────────────────────────────────────────────────────
+    async function deleteWallet(id) {
+        const result = await Swal.fire({
             title: 'Bạn chắc chưa?',
             text: 'Xóa rồi không khôi phục được đâu!',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Xóa',
             cancelButtonText: 'Hủy',
-            background: '#1E2937',
+            background: '#1E2937', color: '#fff',
             confirmButtonColor: '#ef4444',
-            cancelButtonColor: '#6b7280'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                form.submit(); // submit lại nếu đồng ý
+            cancelButtonColor: '#6b7280',
+        });
+
+        if (result.isConfirmed) {
+            const res  = await apiRequest('DELETE', `${API_BASE}/${id}`);
+            const json = await res.json();
+            res.ok ? showSuccess(json.message) : showError(json.message ?? 'Không thể xóa!');
+        }
+    }
+
+    // ── TOGGLE STATUS ─────────────────────────────────────────────────────────────
+    async function toggleWallet(id) {
+        const res  = await apiRequest('PATCH', `${API_BASE}/${id}/status`);
+        const json = await res.json();
+        res.ok ? showSuccess(json.message) : showError(json.message ?? 'Có lỗi xảy ra!');
+    }
+
+    // ── SYNC BALANCE ──────────────────────────────────────────────────────────────
+    async function syncWallet(id) {
+        const result = await Swal.fire({
+            title: 'Đồng bộ số dư?',
+            text: 'Tính lại số dư dựa trên tất cả giao dịch?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Đồng bộ',
+            cancelButtonText: 'Hủy',
+            background: '#1E2937', color: '#fff',
+            confirmButtonColor: '#4a90e2',
+            cancelButtonColor: '#6b7280',
+        });
+
+        if (result.isConfirmed) {
+            const res  = await apiRequest('POST', `${API_BASE}/${id}/sync`);
+            const json = await res.json();
+            res.ok ? showSuccess(json.message) : showError(json.message ?? 'Có lỗi xảy ra!');
+        }
+    }
+
+    // ── OPEN EDIT MODAL ───────────────────────────────────────────────────────────
+    const openEditModal = wallet => {
+        const form = document.getElementById('edit-form');
+        form.dataset.id = wallet.id;
+
+        document.getElementById('edit-ten').value      = wallet.ten_ngan_sach;
+        document.getElementById('edit-category').value = wallet.category_id;
+        document.getElementById('edit-mota').value     = wallet.mo_ta || '';
+
+        const budgetInput    = document.getElementById('edit-budget');
+        const displayInput   = budgetInput.previousElementSibling;
+        if (displayInput) {
+            displayInput.value = parseInt(wallet.ngan_sach_goc).toLocaleString('vi-VN');
+            budgetInput.value  = wallet.ngan_sach_goc;
+        }
+
+        document.getElementById('edit-modal').classList.add('active');
+    };
+
+    // ── CLOSE MODAL ───────────────────────────────────────────────────────────────
+    const closeModal = modalId => document.getElementById(modalId)?.classList.remove('active');
+
+    // ── CURRENCY INPUT SETUP ──────────────────────────────────────────────────────
+    const removeFormatOnFocus = input => { input.value = input.value.replace(/\D/g, ''); };
+
+    const formatCurrencyOnBlur = input => {
+        const num = parseInt(input.value.replace(/\D/g, '')) || 0;
+        const hiddenInput = input.parentElement.querySelector('.real-value');
+        if (hiddenInput) hiddenInput.value = num || '';
+        input.value = num ? num.toLocaleString('vi-VN') : '';
+    };
+
+    const setupCurrencyInput = input => {
+        const wrapper      = document.createElement('div');
+        wrapper.style.position = 'relative';
+        const displayInput = document.createElement('input');
+        displayInput.type        = 'text';
+        displayInput.className   = input.className;
+        displayInput.placeholder = 'Ví dụ: 10,000,000';
+        displayInput.value       = input.value ? parseInt(input.value).toLocaleString('vi-VN') : '';
+        input.type      = 'hidden';
+        input.className = 'real-value';
+        displayInput.addEventListener('focus', () => removeFormatOnFocus(displayInput));
+        displayInput.addEventListener('blur',  () => formatCurrencyOnBlur(displayInput));
+        displayInput.addEventListener('keypress', e => { if (!/[0-9]/.test(e.key)) e.preventDefault(); });
+        input.parentNode.insertBefore(wrapper, input);
+        wrapper.appendChild(displayInput);
+        wrapper.appendChild(input);
+    };
+
+    // ── DOM READY ─────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('input[name="ngan_sach_goc"]').forEach(setupCurrencyInput);
+
+        document.getElementById('open-create-modal')?.addEventListener('click', () => {
+            document.getElementById('create-modal').classList.add('active');
+        });
+
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', e => {
+                if (e.target === overlay) overlay.classList.remove('active');
+            });
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.active')
+                        .forEach(m => m.classList.remove('active'));
             }
         });
+
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                alert.style.opacity   = '0';
+                alert.style.transform = 'translateY(-10px)';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
     });
-});
 </script>
 @endsection

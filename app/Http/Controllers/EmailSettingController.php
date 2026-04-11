@@ -32,7 +32,7 @@ class EmailSettingController extends Controller
         $validated['is_active'] = $request->boolean('is_active');
         $setting->fill($validated)->save();
 
-        return back()->with('email_success', 'Đã lưu cấu hình email thành công!');
+        return back()->with('success', 'Đã lưu cấu hình email thành công!');
     }
 
     public function testMail(Request $request)
@@ -43,7 +43,7 @@ class EmailSettingController extends Controller
 
         $setting = EmailSetting::first();
         if (!$setting) {
-            return back()->with('email_error', 'Chưa có cấu hình email.');
+            return back()->with('error', 'Chưa có cấu hình email.');
         }
 
         // Override config tạm thời để test
@@ -56,9 +56,9 @@ class EmailSettingController extends Controller
                     ->subject('Test Email - Monexa');
             });
 
-            return back()->with('email_success', "Đã gửi email test đến {$request->test_email}!");
+            return back()->with('success', "Đã gửi email test đến {$request->test_email}!");
         } catch (\Exception $e) {
-            return back()->with('email_error', 'Gửi thất bại: ' . $e->getMessage());
+            return back()->with('error', 'Gửi thất bại: ' . $e->getMessage());
         }
     }
 

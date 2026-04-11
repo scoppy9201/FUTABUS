@@ -318,6 +318,11 @@
                     localStorage.setItem('token', data.access_token);
                     localStorage.setItem('user', JSON.stringify(data.user));
                     await syncSession(data.access_token); // ← THÊM MỚI
+                    sessionStorage.setItem('pending_toast', JSON.stringify({
+                    type: 'success',
+                    title: 'Đăng nhập thành công',
+                    message: 'Chào mừng ' + (data.user?.name ?? '') + ' quay trở lại!'
+                }));
                     window.location.href = '/dashboard';
                 } else {
                     if (data.errors) {
@@ -364,6 +369,11 @@
                     localStorage.setItem('token', data.access_token);
                     localStorage.setItem('user', JSON.stringify(data.user));
                     await syncSession(data.access_token); // ← THÊM MỚI
+                    sessionStorage.setItem('pending_toast', JSON.stringify({
+                    type: 'success',
+                    title: 'Đăng ký thành công',
+                    message: 'Chào mừng ' + (data.user?.name ?? '') + ' đến với Monexa!'
+                }));
                     window.location.href = '/dashboard';
                 } else {
                     if (data.errors) {

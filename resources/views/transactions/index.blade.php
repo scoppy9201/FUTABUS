@@ -1102,18 +1102,14 @@
                         <td>{{ \Carbon\Carbon::parse($transaction->ngay_giao_dich)->format('d/m/Y') }}</td>
                         <td>
                             <div class="action-buttons">
-                                <button type="button" class="btn-action btn-edit" onclick="openEditModal({{ $transaction }})" title="Chỉnh sửa">
+                                <button type="button" class="btn-action btn-edit" onclick="openEditModal({{ json_encode($transaction) }})" title="Chỉnh sửa">
                                     <img src="{{ asset('images/edit.png') }}" alt="Edit">
                                 </button>
 
-                                <form action="{{ route('transactions.destroy', $transaction) }}" 
-                                method="POST" 
-                                style="display: inline;"
+                                <form style="display: inline;"
                                 class="form-delete"
-                                data-id="{{ $category->id }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn-action btn-delete" title="Xóa">
+                                data-id="{{ $transaction->id }}">
+                                <button type="submit" class="btn-action btn-delete" title="Xóa">
                                         <img src="{{ asset('images/delete.png') }}" alt="Delete">
                                     </button>
                                 </form>
@@ -1163,7 +1159,7 @@
                 </div>
             </div>
 
-            <form action="{{ route('transactions.store') }}" method="POST" id="create-form">
+            <form id="create-form" method="POST">
                 @csrf
 
                 <div class="modal-body">
@@ -1389,244 +1385,218 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-const closeModal = modalId => document.getElementById(modalId)?.classList.remove('active');
-
-const showError = (input, message) => {
-    clearError(input);
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'input-error';
-    errorDiv.style.cssText = 'color: #dc2626; font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 6px;';
-    errorDiv.innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="12"></line>
-            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
-        <span>${message}</span>
-    `;
-    input.style.borderColor = '#dc2626';
-    input.parentElement.appendChild(errorDiv);
-};
-
-const clearError = input => {
-    input.parentElement.querySelector('.input-error')?.remove();
-    input.style.borderColor = '';
-};
-
-const formatCurrencyOnBlur = input => {
-    let value = input.value.replace(/\D/g, '');
-    const num = parseInt(value) || 0;
-
-    if (num > 100000000) {
-        value = '100000000';
-        showError(input, 'Số tiền không được vượt quá 100,000,000 VNĐ');
-    } else if (num > 0 && num < 1000) {
-        showError(input, 'Số tiền phải từ 1,000 VNĐ trở lên');
-    } else {
-        clearError(input);
-    }
-
-    input.value = value ? parseInt(value).toLocaleString('vi-VN') : '';
-
-    const hiddenInput = input.parentElement.querySelector('.real-value');
-    if (hiddenInput) hiddenInput.value = value;
-};
-
-const removeFormatOnFocus = input => {
-    const value = input.value.replace(/\D/g, '');
-    input.value = value;
-    clearError(input);
-};
-
-const validateTransactionForm = form => {
-    const amountInput = form.querySelector('[name="so_tien"]');
-    const displayInput = amountInput.previousElementSibling;
-    const value = amountInput.value.replace(/\D/g, '');
-
-    if (!value) {
-        showError(displayInput, 'Vui lòng nhập số tiền');
-        displayInput.focus();
-        return false;
-    }
-
-    const num = parseInt(value);
-    if (num < 1000) {
-        showError(displayInput, 'Số tiền phải từ 1,000 VNĐ trở lên');
-        displayInput.focus();
-        return false;
-    }
-    if (num > 100000000) {
-        showError(displayInput, 'Số tiền không được vượt quá 100,000,000 VNĐ');
-        displayInput.focus();
-        return false;
-    }
-
-    amountInput.value = value;
-    return true;
-};
-
-const setupCurrencyInput = input => {
-    const wrapper = document.createElement('div');
-    wrapper.style.position = 'relative';
-
-    const displayInput = document.createElement('input');
-    displayInput.type = 'text';
-    displayInput.className = input.className;
-    displayInput.placeholder = 'Ví dụ: 10,000,000';
-    displayInput.value = input.value ? parseInt(input.value).toLocaleString('vi-VN') : '';
-
-    input.type = 'hidden';
-    input.className = 'real-value';
-
-    displayInput.addEventListener('focus', () => removeFormatOnFocus(displayInput));
-    displayInput.addEventListener('blur', () => formatCurrencyOnBlur(displayInput));
-    displayInput.addEventListener('keypress', e => {
-        if (!/[0-9]/.test(e.key)) e.preventDefault();
-    });
-    displayInput.addEventListener('paste', e => {
-        e.preventDefault();
-        const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-        const numbers = pastedText.replace(/\D/g, '');
-        if (numbers) displayInput.value = numbers;
-    });
-
-    input.parentNode.insertBefore(wrapper, input);
-    wrapper.appendChild(displayInput);
-    wrapper.appendChild(input);
-};
-
-const categories = @json($categories);
-
-function filterCategoriesByType() {
-    const loaiGiaoDich = document.getElementById('loai-giao-dich').value;
-    const categorySelect = document.getElementById('category-select');
-
-    categorySelect.innerHTML = '<option value="">-- Chọn danh mục --</option>';
-
-    if (loaiGiaoDich) {
-        const filteredCategories = categories.filter(cat => cat.loai_danh_muc === loaiGiaoDich);
-
-        filteredCategories.forEach(cat => {
-            const option = document.createElement('option');
-            option.value = cat.id;
-            option.textContent = cat.ten_danh_muc;
-            categorySelect.appendChild(option);
-        });
-    }
+    <script>
+       function showSuccess(message) {
+    // Lưu vào sessionStorage để hiển thị sau reload
+    sessionStorage.setItem('pending_toast', JSON.stringify({
+        type: 'success',
+        title: 'Thành công',
+        message: message
+    }));
+    location.reload();
 }
 
-function filterEditCategoriesByType() {
-    const loaiGiaoDich = document.getElementById('edit-loai-giao-dich').value;
-    const categorySelect = document.getElementById('edit-category');
-
-    const currentValue = categorySelect.value;
-    categorySelect.innerHTML = '<option value="">-- Chọn danh mục --</option>';
-
-    if (loaiGiaoDich) {
-        const filteredCategories = categories.filter(cat => cat.loai_danh_muc === loaiGiaoDich);
-
-        filteredCategories.forEach(cat => {
-            const option = document.createElement('option');
-            option.value = cat.id;
-            option.textContent = cat.ten_danh_muc;
-            if (cat.id == currentValue) option.selected = true;
-            categorySelect.appendChild(option);
-        });
-    }
+function showError(message) {
+    // Lỗi không reload, hiển thị trực tiếp
+    showToast({ type: 'error', title: 'Lỗi', message: message });
 }
+    // ── Config ────────────────────────────────────────────────────────────────────
+    const API_BASE = '/api/monaxe/transactions';
 
-function openEditModal(transaction) {
-    const form = document.getElementById('edit-form');
-    form.action = `/transactions/${transaction.id}`;
-
-    document.getElementById('edit-loai-giao-dich').value = transaction.loai_giao_dich;
-    document.getElementById('edit-payment-method').value = transaction.phuong_thuc_thanh_toan;
-    document.getElementById('edit-date').value = transaction.ngay_giao_dich;
-    document.getElementById('edit-desc').value = transaction.ghi_chu || '';
-    document.getElementById('edit-wallet').value = transaction.money_wallet_id || '';
-
-    // Setup amount with format
-    const amountInput = document.getElementById('edit-amount');
-    const displayInput = amountInput.previousElementSibling;
-    if (displayInput) {
-        displayInput.value = parseInt(transaction.so_tien).toLocaleString('vi-VN');
-        amountInput.value = transaction.so_tien;
+    // Lấy CSRF token từ cookie để dùng cho Sanctum + session
+    function getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.content ?? '';
     }
 
-    // Filter and set category
-    filterEditCategoriesByType();
-    setTimeout(() => {
-        document.getElementById('edit-category').value = transaction.category_id;
-    }, 100);
+    async function apiRequest(method, url, data = null) {
+        const options = {
+            method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': getCsrfToken(),
+            },
+            credentials: 'same-origin', // gửi session cookie
+        };
+        if (data) options.body = JSON.stringify(data);
 
-    document.getElementById('edit-modal').classList.add('active');
-}
+        const res = await fetch(url, options);
+        return res;
+    }
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Setup currency inputs
-    document.querySelectorAll('input[name="so_tien"]').forEach(setupCurrencyInput);
+    // ── Helpers UI ────────────────────────────────────────────────────────────────
+    const closeModal = modalId => document.getElementById(modalId)?.classList.remove('active');
 
-    // Form validation
-    document.getElementById('create-form')?.addEventListener('submit', e => {
-        if (!validateTransactionForm(e.target)) e.preventDefault();
-    });
-    document.getElementById('edit-form')?.addEventListener('submit', e => {
-        if (!validateTransactionForm(e.target)) e.preventDefault();
-    });
+    // ── Categories data từ Blade ─────────────────────────────────────────────────
+    const categories = @json($categories);
 
-    // Modal controls
-    document.getElementById('open-create-modal')?.addEventListener('click', () => {
-        document.getElementById('create-modal').classList.add('active');
-    });
-
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-        overlay.addEventListener('click', e => {
-            if (e.target === overlay) overlay.classList.remove('active');
-        });
-    });
-
-    // Close on ESC
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') {
-            document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+    function filterCategoriesByType() {
+        const loai = document.getElementById('loai-giao-dich').value;
+        const select = document.getElementById('category-select');
+        select.innerHTML = '<option value="">-- Chọn danh mục --</option>';
+        if (loai) {
+            categories
+                .filter(c => c.loai_danh_muc === loai)
+                .forEach(c => {
+                    const o = document.createElement('option');
+                    o.value = c.id;
+                    o.textContent = c.ten_danh_muc;
+                    select.appendChild(o);
+                });
         }
+    }
+
+    function filterEditCategoriesByType() {
+        const loai = document.getElementById('edit-loai-giao-dich').value;
+        const select = document.getElementById('edit-category');
+        const current = select.value;
+        select.innerHTML = '<option value="">-- Chọn danh mục --</option>';
+        if (loai) {
+            categories
+                .filter(c => c.loai_danh_muc === loai)
+                .forEach(c => {
+                    const o = document.createElement('option');
+                    o.value = c.id;
+                    o.textContent = c.ten_danh_muc;
+                    if (c.id == current) o.selected = true;
+                    select.appendChild(o);
+                });
+        }
+    }
+
+    function openEditModal(transaction) {
+        const form = document.getElementById('edit-form');
+        form.dataset.id = transaction.id;
+
+        document.getElementById('edit-loai-giao-dich').value    = transaction.loai_giao_dich;
+        document.getElementById('edit-payment-method').value    = transaction.phuong_thuc_thanh_toan;
+        document.getElementById('edit-date').value              = transaction.ngay_giao_dich;
+        document.getElementById('edit-desc').value              = transaction.ghi_chu || '';
+        document.getElementById('edit-wallet').value            = transaction.money_wallet_id || '';
+        document.getElementById('edit-amount').value            = transaction.so_tien;
+
+        filterEditCategoriesByType();
+        setTimeout(() => {
+            document.getElementById('edit-category').value = transaction.category_id;
+        }, 100);
+
+        document.getElementById('edit-modal').classList.add('active');
+    }
+
+    // ── STORE ─────────────────────────────────────────────────────────────────────
+    document.getElementById('create-form')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const payload = {
+            category_id:             form.category_id.value,
+            loai_giao_dich:          form.loai_giao_dich.value,
+            phuong_thuc_thanh_toan:  form.phuong_thuc_thanh_toan.value,
+            so_tien:                 form.so_tien.value,
+            ngay_giao_dich:          form.ngay_giao_dich.value,
+            ghi_chu:                 form.ghi_chu.value || null,
+            money_wallet_id:         form.money_wallet_id.value || null,
+        };
+
+        const res = await apiRequest('POST', API_BASE, payload);
+        const json = await res.json();
+
+        if (res.ok) {
+        showSuccess(json.message);
+    }   else {
+        const errors = json.errors
+            ? Object.values(json.errors).flat().join('\n')
+            : json.message ?? 'Có lỗi xảy ra!';
+        showError(errors);
+    }
     });
 
-    // Auto hide alerts
-    setTimeout(() => {
-        document.querySelectorAll('.alert').forEach(alert => {
-            alert.style.opacity = '0';
-            alert.style.transform = 'translateY(-10px)';
-            setTimeout(() => alert.remove(), 300);
+    // ── UPDATE ────────────────────────────────────────────────────────────────────
+    document.getElementById('edit-form')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const id   = form.dataset.id;
+        const payload = {
+            category_id:             form.category_id.value,
+            loai_giao_dich:          form.loai_giao_dich.value,
+            phuong_thuc_thanh_toan:  form.phuong_thuc_thanh_toan.value,
+            so_tien:                 form.so_tien.value,
+            ngay_giao_dich:          form.ngay_giao_dich.value,
+            ghi_chu:                 form.ghi_chu.value || null,
+            money_wallet_id:         form.money_wallet_id.value || null,
+        };
+
+        const res  = await apiRequest('PATCH', `${API_BASE}/${id}`, payload);
+        const json = await res.json();
+
+        if (res.ok) {
+    showSuccess(json.message);
+    } else {
+        const errors = json.errors
+            ? Object.values(json.errors).flat().join('\n')
+            : json.message ?? 'Có lỗi xảy ra!';
+        showError(errors);
+    }
+    });
+
+    // ── DELETE ────────────────────────────────────────────────────────────────────
+    document.querySelectorAll('.form-delete').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = form.dataset.id;
+
+            Swal.fire({
+                title: 'Bạn chắc chưa?',
+                text: 'Xóa rồi không khôi phục được đâu!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy',
+                background: '#1E2937',
+                color: '#fff',
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+            }).then(async result => {
+                if (result.isConfirmed) {
+                    const res  = await apiRequest('DELETE', `${API_BASE}/${id}`);
+                    const json = await res.json();
+                    if (res.ok) {
+                        showSuccess(json.message); // ← dùng showSuccess như store/update
+                    } else {
+                        showError(json.message ?? 'Không thể xóa!');
+                    }
+                }
+            });
         });
-    }, 5000);
+    });
 
-    @if($errors->any() && !$errors->has('id'))
-        document.getElementById('create-modal')?.classList.add('active');
-    @endif
-});
-// Xác nhận xóa 
-document.querySelectorAll('.form-delete').forEach(form => {
-    form.addEventListener('submit', function(e) {
-        e.preventDefault(); // chặn submit mặc định
+    // ── Modal & UI events ─────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('open-create-modal')?.addEventListener('click', () => {
+            document.getElementById('create-modal').classList.add('active');
+        });
 
-        Swal.fire({
-            title: 'Bạn chắc chưa?',
-            text: 'Xóa rồi không khôi phục được đâu!',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Xóa',
-            cancelButtonText: 'Hủy',
-            background: '#1E2937',
-            confirmButtonColor: '#ef4444',
-            cancelButtonColor: '#6b7280'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                form.submit(); // submit lại nếu đồng ý
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', e => {
+                if (e.target === overlay) overlay.classList.remove('active');
+            });
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.active')
+                        .forEach(m => m.classList.remove('active'));
             }
         });
+
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-10px)';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
     });
-});
 </script>
 @endsection

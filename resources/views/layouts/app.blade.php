@@ -169,21 +169,149 @@
     "></div>
 
     <script>
-        @if(session('toast'))
-            showToast(@json(session('toast')));
-        @endif
-        @if(session('success'))
-            showToast({ type: 'success', title: 'Thành công', message: @json(session('success')) });
-        @endif
-        @if(session('error'))
-            showToast({ type: 'error', title: 'Lỗi', message: @json(session('error')) });
-        @endif
-        @if(session('warning'))
-            showToast({ type: 'warning', title: 'Cảnh báo', message: @json(session('warning')) });
-        @endif
-        @if(session('info'))
-            showToast({ type: 'info', title: 'Thông báo', message: @json(session('info')) });
-        @endif
+        function _getToastSettings() {
+    try {
+        return {
+            toastEnabled: true,
+            toastPosition: 'top-right',
+            toastDuration: 5,
+            toastSound: false,
+            ...JSON.parse(localStorage.getItem('monexa_settings') || '{}'),
+        };
+    } catch {
+        return {
+            toastEnabled: true,
+            toastPosition: 'top-right',
+            toastDuration: 5,
+            toastSound: false,
+        };
+    }
+}
+
+    function _applyToastPosition(position) {
+    const container = document.getElementById('toastContainer');
+
+    if (!container) {
+        return;
+    }
+
+    container.style.top = position.includes('bottom') ? 'auto' : '84px';
+    container.style.bottom = position.includes('bottom') ? '20px' : 'auto';
+    container.style.left = position.includes('left') ? '20px' : 'auto';
+    container.style.right = position.includes('left') ? 'auto' : '20px';
+}
+
+    _applyToastPosition(_getToastSettings().toastPosition);
+
+    window.showToast = function ({ type = 'info', title, message = '', action = null, id = null, duration = null }) {
+    const settings = _getToastSettings();
+
+    if (settings.toastEnabled === false) {
+        return;
+    }
+
+    const timeout = duration ?? (settings.toastDuration * 1000);
+
+    if (id && document.querySelector(`[data-toast-id="${id}"]`)) {
+        return;
+    }
+
+    if (id && sessionStorage.getItem('tdismiss_' + id)) {
+        return;
+    }
+
+    _applyToastPosition(settings.toastPosition);
+
+    const icons = {
+        success: '<img src="/images/check.png" style="width:20px;height:20px;object-fit:contain;">',
+        error: '<img src="/images/warning.png" style="width:20px;height:20px;object-fit:contain;">',
+        warning: '<img src="/images/alert.png" style="width:20px;height:20px;object-fit:contain;">',
+        info: '<img src="/images/info.png" style="width:20px;height:20px;object-fit:contain;">',
+    };
+
+    const toast = document.createElement('div');
+    toast.className = `g-toast ${type}`;
+
+    if (id) {
+        toast.dataset.toastId = id;
+    }
+
+    toast.innerHTML = `
+        <div class="g-toast-icon">${icons[type] || 'i'}</div>
+        <div class="g-toast-body">
+            <div class="g-toast-title">${title}</div>
+            ${message ? `<div class="g-toast-msg">${message}</div>` : ''}
+            ${action ? `<a href="${action.url}" class="g-toast-action">${action.label}</a>` : ''}
+        </div>
+        <button class="g-toast-close" onclick="dismissToast(this,'${id}')">&times;</button>
+        <div class="g-toast-progress" style="animation-duration:${timeout}ms"></div>
+    `;
+
+    document.getElementById('toastContainer')?.appendChild(toast);
+
+    if (settings.toastSound) {
+        try {
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = context.createOscillator();
+            const gain = context.createGain();
+
+            oscillator.connect(gain);
+            gain.connect(context.destination);
+            oscillator.frequency.value = type === 'error' ? 300 : 600;
+            gain.gain.setValueAtTime(0.08, context.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.3);
+            oscillator.start();
+            oscillator.stop(context.currentTime + 0.3);
+        } catch {}
+    }
+
+    if (timeout > 0) {
+        setTimeout(() => dismissToast(toast.querySelector('.g-toast-close'), id), timeout);
+    }
+};
+
+window.dismissToast = function (button, id = null) {
+    const toast = button?.closest?.('.g-toast');
+
+    if (!toast) {
+        return;
+    }
+
+    toast.classList.add('hiding');
+
+    if (id && id !== 'null') {
+        sessionStorage.setItem('tdismiss_' + id, '1');
+    }
+
+    setTimeout(() => toast.remove(), 320);
+};
+      document.addEventListener('DOMContentLoaded', function () {
+    // ── Session toasts từ server (redirect) ──
+    @if(session('toast'))
+        showToast(@json(session('toast')));
+    @endif
+    @if(session('success'))
+        showToast({ type: 'success', title: 'Thành công', message: @json(session('success')) });
+    @endif
+    @if(session('error'))
+        showToast({ type: 'error', title: 'Lỗi', message: @json(session('error')) });
+    @endif
+    @if(session('warning'))
+        showToast({ type: 'warning', title: 'Cảnh báo', message: @json(session('warning')) });
+    @endif
+    @if(session('info'))
+        showToast({ type: 'info', title: 'Thông báo', message: @json(session('info')) });
+    @endif
+
+    // ── Pending toast từ AJAX (lưu trước reload) ──
+    const pending = sessionStorage.getItem('pending_toast');
+    if (pending) {
+        sessionStorage.removeItem('pending_toast');
+        try {
+            showToast(JSON.parse(pending));
+        } catch(e) {}
+    }
+});
 
         (() => {
             const serverAuthenticated = document.body.dataset.authenticated === '1';
