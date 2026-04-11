@@ -2,10 +2,16 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
-use Laravel\Sanctum\PersonalAccessToken;
+use App\Http\Controllers\LoginController;
 
-// Trang chủ
+/*
+| Web Routes
+|
+| File này chỉ có nhiệm vụ serve Blade views.
+| Toàn bộ data/logic xử lý qua /api/v1/... trong api.php.
+|
+*/
+
 Route::get('/', function () {
     if (Auth::check()) {
         return redirect('/dashboard');
@@ -13,53 +19,51 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Auth views 
-Route::get('/login',    fn() => view('auth.AuthForm'))->name('login');
-Route::get('/register', fn() => view('auth.AuthForm'))->name('register');
+/*
+| AUTH VIEWS (public — chưa đăng nhập)
+*/
+Route::middleware('guest')->group(function () {
+    Route::get('/login',           fn() => view('auth.AuthForm'))       ->name('login');
+    Route::get('/register',        fn() => view('auth.AuthForm'))       ->name('register');
+    Route::get('/forgot-password', fn() => view('auth.forgot-password'))->name('password.request');
+    Route::get('/verify-code',     fn() => view('auth.verify-code'))    ->name('password.verify.form');
+    Route::get('/reset-password',  fn() => view('auth.reset-password')) ->name('password.reset.form');
+});
 
-Route::get('/forgot-password', fn() => view('auth.forgot-password'))->name('password.request');
-Route::get('/verify-code',     fn() => view('auth.verify-code'))    ->name('password.verify.form');
-Route::get('/reset-password',  fn() => view('auth.reset-password')) ->name('password.reset.form');
+Route::get('/auth/google',          [LoginController::class, 'redirectToGoogle'])    ->name('google.redirect');
+Route::get('/auth/google/callback', [LoginController::class, 'handleGoogleCallback'])->name('google.callback');
 
-// Google OAuth callback 
-Route::get('/auth/google',          [\App\Http\Controllers\LoginController::class, 'redirectToGoogle'])    ->name('google.redirect');
-Route::get('/auth/google/callback', [\App\Http\Controllers\LoginController::class, 'handleGoogleCallback'])->name('google.callback');
-
-// ← THÊM MỚI: Sync session sau khi login bằng API token
-Route::post('/auth/sync-session', function (Request $request) {
-    $token = PersonalAccessToken::findToken($request->input('token'));
-
-    if (!$token) {
-        return response()->json(['message' => 'Token không hợp lệ'], 401);
-    }
-
-    $user = $token->tokenable;
-    Auth::login($user);
-    $request->session()->regenerate();
-
-    return response()->json(['message' => 'Session đã được đồng bộ']);
-})->name('auth.sync-session');
-
-// Dashboard
-Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard')->middleware('auth');
-
-// App views 
+/*
+| AUTHENTICATED VIEWS (cần đăng nhập)
+*/
 Route::middleware('auth')->group(function () {
-    Route::get('/transactions',     fn() => view('transactions'))    ->name('transactions.index');
-    Route::get('/categories',       fn() => view('categories'))      ->name('categories.index');
-    Route::get('/budgets',          fn() => view('budgets'))         ->name('wallets.index');
-    Route::get('/profile',          fn() => view('profile'))         ->name('profile.show');
-    Route::get('/settings',         fn() => view('settings'))        ->name('settings.index');
-    Route::get('/groups',           fn() => view('groups'))          ->name('groups.index');
-    Route::get('/money-wallets',    fn() => view('money-wallets'))   ->name('money-wallets.index');
-    Route::get('/notifications',    fn() => view('notifications'))   ->name('notifications.index');
-    Route::get('/ai-assistant',     fn() => view('ai-assistant'))    ->name('ai-assistant.index');
-    Route::get('/currency',         fn() => view('currency'))        ->name('currency.index');
-    Route::get('/search',           fn() => view('search'))          ->name('search');
 
-    // change password view
-    Route::get('/change-password',  fn() => view('auth.change-password'))->name('change-password.form');
-
+    // Dashboard
+    Route::get('/dashboard', fn() => view('dashboard')) ->name('dashboard');
+    // Transactions
+    Route::get('/transactions', fn() => view('transactions')) ->name('transactions.index');
+    // Categories
+    Route::get('/categories', fn() => view('categories.index'))->name('categories.index');
+    // Budgets
+    Route::get('/wallets', fn() => view('wallets'))->name('wallets.index');
+    // Profile
+    Route::get('/profile', fn() => view('profile.show'))->name('profile.show');
+    // Change password
+    Route::get('/change-password', fn() => view('change-password'))->name('change-password.form');
+    // Settings
+    Route::get('/settings', fn() => view('settings')) ->name('settings.index');
+    // Groups (split bill)
+    Route::get('/groups', fn() => view('groups'))->name('groups.index');
+    // Money wallets
+    Route::get('/money-wallets', fn() => view('money-wallets')) ->name('money-wallets.index');
+    // Notifications
+    Route::get('/notifications', fn() => view('notifications')) ->name('notifications.index');
+    // AI Assistant
+    Route::get('/ai-assistant', fn() => view('ai-assistant')) ->name('ai-assistant.index');
+    // Currency
+    Route::get('/currency', fn() => view('currency.index')) ->name('currency.index');
+    // Search
+    Route::get('/search', fn() => view('search')) ->name('search');
     // Logout
-    Route::post('/logout', [\App\Http\Controllers\LoginController::class, 'logout'])->name('logout');
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });

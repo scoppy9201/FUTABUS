@@ -151,7 +151,7 @@
     @include('layouts.partials.monebot')
 
     <div class="main-content">
-        <div class="content">
+        <div class="content" id="mainContent">
             @yield('content')
         </div>
     </div>

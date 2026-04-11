@@ -252,34 +252,37 @@
     </div>
 
     <script>
-        const authFrame = document.getElementById('authFrame');
-        const modeSwitchers = document.querySelectorAll('[data-mode]');
+        const authFrame   = document.getElementById('authFrame');
+        const modeSwitchers   = document.querySelectorAll('[data-mode]');
         const passwordToggles = document.querySelectorAll('[data-password-toggle]');
 
-        // HELPER: gọi API
+        // HELPER: đọc XSRF-TOKEN cookie (Sanctum stateful dùng cái này)
+        function getXsrfToken() {
+            return decodeURIComponent(
+                document.cookie.match('(^|;)\\s*XSRF-TOKEN\\s*=\\s*([^;]+)')?.pop() || ''
+            );
+        }
+
+        // HELPER: gọi API theo Sanctum stateful
         async function callApi(url, body) {
+            // Bước 1: lấy CSRF cookie trước mỗi lần gọi
+            await fetch('/sanctum/csrf-cookie', {
+                credentials: 'include',
+            });
+
+            // Bước 2: gọi API thực sự với cookie đính kèm
             const res = await fetch(url, {
                 method: 'POST',
+                credentials: 'include', // quan trọng: gửi/nhận cookie session
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept':       'application/json',
+                    'X-XSRF-TOKEN': getXsrfToken(), // dùng XSRF-TOKEN thay vì CSRF-TOKEN meta
                 },
                 body: JSON.stringify(body),
             });
-            return res.json();
-        }
 
-        // HELPER: sync session sau khi login API 
-        async function syncSession(token) {
-            await fetch('/auth/sync-session', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                },
-                body: JSON.stringify({ token }),
-            });
+            return { res, data: await res.json() };
         }
 
         // HELPER: hiển thị lỗi
@@ -288,7 +291,7 @@
             const input = formEl.querySelector(`[name="${field}"]`);
             if (input) {
                 const err = document.createElement('p');
-                err.className = 'auth-error';
+                err.className   = 'auth-error';
                 err.textContent = message;
                 input.closest('.auth-field').appendChild(err);
             }
@@ -298,39 +301,42 @@
             formEl.querySelectorAll('.auth-error').forEach(el => el.remove());
         }
 
+        function handleErrors(formEl, data, fallbackMsg, btnText) {
+            const btn = formEl.querySelector('.auth-submit');
+            if (data.errors) {
+                Object.entries(data.errors).forEach(([field, messages]) => {
+                    showError(formEl, field, messages[0]);
+                });
+            } else {
+                showError(formEl, 'email', data.message || fallbackMsg);
+            }
+            btn.disabled    = false;
+            btn.textContent = btnText;
+        }
+
         // ĐĂNG NHẬP
-        const loginForm = document.querySelector('.auth-form--pane[action*="login"], .auth-pane--signin .auth-form');
+        const loginForm = document.querySelector('.auth-pane--signin .auth-form');
         loginForm.addEventListener('submit', async function (e) {
             e.preventDefault();
             clearErrors(this);
 
-            const email    = this.querySelector('[name="email"]').value;
-            const password = this.querySelector('[name="password"]').value;
-            const btn      = this.querySelector('.auth-submit');
-
+            const btn = this.querySelector('.auth-submit');
             btn.disabled    = true;
             btn.textContent = 'Đang đăng nhập...';
 
             try {
-                const data = await callApi('/api/monaxe/auth/login', { email, password });
+                const { res, data } = await callApi('/api/v1/auth/login', {
+                    email:    this.querySelector('[name="email"]').value,
+                    password: this.querySelector('[name="password"]').value,
+                });
 
-                if (data.access_token) {
-                    localStorage.setItem('token', data.access_token);
-                    localStorage.setItem('user', JSON.stringify(data.user));
-                    await syncSession(data.access_token); // ← THÊM MỚI
+                if (res.ok) {
+                    // Sanctum đã set session cookie → vào dashboard thẳng
                     window.location.href = '/dashboard';
                 } else {
-                    if (data.errors) {
-                        Object.entries(data.errors).forEach(([field, messages]) => {
-                            showError(this, field, messages[0]);
-                        });
-                    } else {
-                        showError(this, 'email', data.message || 'Đăng nhập thất bại!');
-                    }
-                    btn.disabled    = false;
-                    btn.textContent = 'Đăng nhập';
+                    handleErrors(this, data, 'Đăng nhập thất bại!', 'Đăng nhập');
                 }
-            } catch (err) {
+            } catch {
                 showError(this, 'email', 'Lỗi kết nối, vui lòng thử lại!');
                 btn.disabled    = false;
                 btn.textContent = 'Đăng nhập';
@@ -343,47 +349,31 @@
             e.preventDefault();
             clearErrors(this);
 
-            const name                  = this.querySelector('[name="name"]').value;
-            const email                 = this.querySelector('[name="email"]').value;
-            const password              = this.querySelector('[name="password"]').value;
-            const password_confirmation = this.querySelector('[name="password_confirmation"]').value;
-            const btn                   = this.querySelector('.auth-submit');
-
+            const btn = this.querySelector('.auth-submit');
             btn.disabled    = true;
             btn.textContent = 'Đang tạo tài khoản...';
 
             try {
-                const data = await callApi('/api/monaxe/auth/register', {
-                    name,
-                    email,
-                    password,
-                    password_confirmation,
+                const { res, data } = await callApi('/api/v1/auth/register', {
+                    name:                  this.querySelector('[name="name"]').value,
+                    email:                 this.querySelector('[name="email"]').value,
+                    password:              this.querySelector('[name="password"]').value,
+                    password_confirmation: this.querySelector('[name="password_confirmation"]').value,
                 });
 
-                if (data.access_token) {
-                    localStorage.setItem('token', data.access_token);
-                    localStorage.setItem('user', JSON.stringify(data.user));
-                    await syncSession(data.access_token); // ← THÊM MỚI
+                if (res.ok) {
                     window.location.href = '/dashboard';
                 } else {
-                    if (data.errors) {
-                        Object.entries(data.errors).forEach(([field, messages]) => {
-                            showError(this, field, messages[0]);
-                        });
-                    } else {
-                        showError(this, 'email', data.message || 'Đăng ký thất bại!');
-                    }
-                    btn.disabled    = false;
-                    btn.textContent = 'Tạo tài khoản';
+                    handleErrors(this, data, 'Đăng ký thất bại!', 'Tạo tài khoản');
                 }
-            } catch (err) {
+            } catch {
                 showError(this, 'email', 'Lỗi kết nối, vui lòng thử lại!');
                 btn.disabled    = false;
                 btn.textContent = 'Tạo tài khoản';
             }
         });
 
-        // MODE SWITCHER & PASSWORD TOGGLE
+        // MODE SWITCHER
         function setAuthMode(mode) {
             authFrame.classList.toggle('is-register', mode === 'register');
             document.querySelectorAll('.auth-tab').forEach(tab => {
@@ -395,12 +385,13 @@
             control.addEventListener('click', () => setAuthMode(control.dataset.mode));
         });
 
+        // PASSWORD TOGGLE
         passwordToggles.forEach(toggle => {
             toggle.addEventListener('click', () => {
-                const input = document.getElementById(toggle.dataset.passwordToggle);
-                const isPassword = input.type === 'password';
-                input.type = isPassword ? 'text' : 'password';
-                toggle.classList.toggle('is-visible', isPassword);
+                const input    = document.getElementById(toggle.dataset.passwordToggle);
+                const isHidden = input.type === 'password';
+                input.type     = isHidden ? 'text' : 'password';
+                toggle.classList.toggle('is-visible', isHidden);
             });
         });
 

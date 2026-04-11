@@ -290,13 +290,17 @@
                 return;
             }
 
+            const bearerToken = localStorage.getItem('token') ?? '';
+            const authHeaders = bearerToken
+                ? { 'Authorization': 'Bearer ' + bearerToken }
+                : { 'X-CSRF-TOKEN': csrf };
+
             fetch(chatUrl, {
                 method: 'POST',
-                headers: {
+                headers: Object.assign({
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'X-CSRF-TOKEN': csrf,
-                },
+                }, authHeaders),
                 body: JSON.stringify({ message: trimmed }),
             })
                 .then(function (response) {

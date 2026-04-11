@@ -1,552 +1,639 @@
 @extends('layouts.app')
 @section('title', 'Quy đổi tiền tệ')
 @section('content')
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<div class="profile-page" id="currencyPage">
+    <section class="card profile-header">
+        <div class="profile-header-copy">
+            <span class="profile-kicker">Tài chính</span>
+            <h1 class="profile-title">Quy đổi tiền tệ</h1>
+            <p class="profile-subtitle">
+                Tra cứu tỷ giá realtime, quy đổi tự do và xem lại lịch sử các lần đổi tiền của bạn.
+            </p>
+        </div>
+        <a href="{{ route('dashboard') }}" class="profile-back-link">
+            <img src="{{ asset('images/arrow.png') }}" alt="">
+            <span>Quay lại Dashboard</span>
+        </a>
+    </section>
+
+    <div id="currencySkeleton">
+        <div class="card" style="padding:32px;margin-bottom:16px">
+            <div class="skeleton skeleton-line" style="width:30%;height:1.6rem;border-radius:8px;margin-bottom:28px"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+                <div class="skeleton skeleton-line" style="height:54px;border-radius:14px"></div>
+                <div class="skeleton skeleton-line" style="height:54px;border-radius:14px"></div>
+            </div>
+            <div class="skeleton skeleton-line" style="height:52px;border-radius:14px"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+            @for($i=0;$i<8;$i++)
+            <div class="card skeleton-card" style="height:96px;border-radius:16px;padding:0"></div>
+            @endfor
+        </div>
+    </div>
+
+    <div id="currencyContent" style="display:none">
+        <div id="cx-alert-stack"></div>
+        {{-- ── Result Banner ── --}}
+        <div class="card" id="resultCard" style="display:none;background:#0f172a;border-color:#1e293b;margin-bottom:16px">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap">
+                <div>
+                    <p id="resultFrom" class="profile-meta-label" style="color:#64748b;margin-bottom:6px">—</p>
+                    <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                        <span id="resultNum" style="font-size:42px;font-weight:900;color:white;letter-spacing:-1.5px;line-height:1">—</span>
+                        <span id="resultCode" style="font-size:16px;color:#94a3b8;font-weight:600">—</span>
+                    </div>
+                </div>
+                <span class="profile-pill profile-pill--google">Tỷ giá realtime</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding-top:20px;border-top:1px solid #1e293b">
+                <div>
+                    <p class="profile-meta-label" style="color:#475569;margin-bottom:4px">Tỷ giá</p>
+                    <strong id="rStatRate" style="color:#e2e8f0;font-size:14px;font-weight:700">—</strong>
+                </div>
+                <div>
+                    <p class="profile-meta-label" style="color:#475569;margin-bottom:4px">Đảo ngược</p>
+                    <strong id="rStatRev" style="color:#e2e8f0;font-size:14px;font-weight:700">—</strong>
+                </div>
+                <div>
+                    <p class="profile-meta-label" style="color:#475569;margin-bottom:4px">Cập nhật</p>
+                    <strong id="rStatTime" style="color:#e2e8f0;font-size:14px;font-weight:700">—</strong>
+                </div>
+            </div>
+        </div>
+
+        {{-- ── Converter Card ── --}}
+        <div class="card" style="margin-bottom:24px">
+            <div class="profile-section-head">
+                <div>
+                    <span class="profile-kicker" style="margin-bottom:8px">Công cụ</span>
+                    <h2 class="profile-section-title">Quy đổi nhanh</h2>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.14)">
+                    <span id="liveDot" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#10b981;flex-shrink:0"></span>
+                    <span id="lastUpdated" class="profile-meta-label" style="margin:0;color:#059669;white-space:nowrap">Đang tải...</span>
+                </div>
+            </div>
+
+            {{-- FROM: select + amount --}}
+            <div class="profile-field-grid" style="margin-bottom:16px">
+                <div class="profile-field">
+                    <label class="profile-label">Đồng tiền gốc</label>
+                    <select id="fromCurrency" class="profile-input profile-select"></select>
+                </div>
+                <div class="profile-field">
+                    <label class="profile-label">Số tiền muốn đổi</label>
+                    <input id="fromAmount" type="number" class="profile-input"
+                           placeholder="Nhập số tiền..." min="0"
+                           style="font-size:18px;font-weight:800;letter-spacing:-0.3px">
+                </div>
+            </div>
+
+            {{-- SWAP --}}
+            <div style="display:flex;justify-content:center;margin-bottom:16px">
+                <button id="swapBtn" class="profile-btn profile-btn--secondary"
+                        style="width:46px;height:46px;min-height:unset;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M7 16L3 12L7 8"/><path d="M17 8L21 12L17 16"/><path d="M3 12H21"/>
+                    </svg>
+                </button>
+            </div>
+
+            {{-- TO: select + result --}}
+            <div class="profile-field-grid" style="margin-bottom:20px">
+                <div class="profile-field">
+                    <label class="profile-label">Đồng tiền đích</label>
+                    <select id="toCurrency" class="profile-input profile-select"></select>
+                </div>
+                <div class="profile-field">
+                    <label class="profile-label">Kết quả</label>
+                    <div id="toDisplay" class="profile-input"
+                         style="display:flex;align-items:center;font-size:18px;font-weight:800;letter-spacing:-0.3px;color:#4a90e2;cursor:default;min-height:54px">
+                        —
+                    </div>
+                </div>
+            </div>
+
+            {{-- Rate strip --}}
+            <div class="profile-meta-card" style="margin-bottom:20px">
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+                    <span id="rateInfoText" class="profile-form-note" style="margin:0">Nhập số tiền và nhấn Quy đổi</span>
+                    <span class="profile-meta-label" style="margin:0">Nguồn: exchangerate-api.com</span>
+                </div>
+            </div>
+
+            <button id="convertBtn" class="profile-submit" style="width:100%">
+                <span id="convertBtnText">Quy đổi</span>
+            </button>
+        </div>
+
+        {{-- ── So sánh hôm nay vs hôm qua ── --}}
+        <div class="card" id="comparisonCard" style="display:none;margin-bottom:24px">
+            <div class="profile-section-head">
+                <div>
+                    <span class="profile-kicker" style="margin-bottom:8px">Biến động</span>
+                    <h2 class="profile-section-title">Hôm nay so với hôm qua</h2>
+                </div>
+                <span class="profile-section-badge">Dựa trên lịch sử của bạn</span>
+            </div>
+            <div id="comparisonGrid" class="profile-meta-grid"></div>
+        </div>
+
+        {{-- ── Market Grid ── --}}
+        <div class="profile-section-head" style="margin-bottom:16px">
+            <div>
+                <span class="profile-kicker" style="margin-bottom:8px">Thị trường</span>
+                <h2 class="profile-section-title">Tỷ giá phổ biến · VND</h2>
+            </div>
+            <span class="profile-section-badge">Realtime</span>
+        </div>
+        <div id="mktGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px"></div>
+
+        {{-- ── Lịch sử quy đổi ── --}}
+        <div class="card">
+            <div class="profile-section-head">
+                <div>
+                    <span class="profile-kicker" style="margin-bottom:8px">Lịch sử</span>
+                    <h2 class="profile-section-title">Các lần quy đổi gần đây</h2>
+                </div>
+                <button id="clearHistoryBtn" class="profile-btn profile-btn--danger"
+                        style="min-height:unset;padding:8px 16px;font-size:13px;width:auto">
+                    Xoá tất cả
+                </button>
+            </div>
+
+            {{-- Skeleton lịch sử --}}
+            <div id="historySkeleton">
+                @for($i=0;$i<4;$i++)
+                <div style="display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid rgba(148,163,184,.12)">
+                    <div class="skeleton" style="width:42px;height:42px;border-radius:12px;flex-shrink:0"></div>
+                    <div style="flex:1">
+                        <div class="skeleton skeleton-line" style="width:50%;height:14px;border-radius:6px;margin-bottom:6px"></div>
+                        <div class="skeleton skeleton-line" style="width:30%;height:12px;border-radius:6px"></div>
+                    </div>
+                    <div class="skeleton skeleton-line" style="width:80px;height:14px;border-radius:6px"></div>
+                </div>
+                @endfor
+            </div>
+
+            {{-- Danh sách lịch sử --}}
+            <div id="historyList" style="display:none"></div>
+
+            {{-- Empty state --}}
+            <div id="historyEmpty" style="display:none;padding:40px 20px">
+                <div style="text-align:center;width:100%;">
+                    <div style="margin-bottom:12px">
+                        <img src="{{ asset('images/empty.png') }}" alt="empty" style="width:320px;">
+                    </div>
+                    <p class="profile-form-note" style="margin:0 auto;text-align:center;">
+                        Chưa có lịch sử quy đổi nào.
+                    </p>
+                </div>
+            </div>
+
+            {{-- Pagination --}}
+            <div id="historyPagination" style="display:none;display:flex;justify-content:center;gap:8px;margin-top:20px;padding-top:20px;border-top:1px solid rgba(148,163,184,.12)"></div>
+        </div>
+    </div>{{-- /currencyContent --}}
+</div>
 
 <style>
-.cx { max-width: 900px; margin: 0 auto; }
-
-/* ── HEADER ── */
-.cx-hdr {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 28px;
+@keyframes cx-pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+@keyframes cx-spin  { to { transform: rotate(360deg); } }
+#liveDot { animation: cx-pulse 2s infinite; }
+.cx-spinner {
+    display: inline-block; width:16px; height:16px;
+    border:2px solid rgba(255,255,255,.3); border-top-color:white;
+    border-radius:50%; animation:cx-spin .6s linear infinite;
+    vertical-align:middle;
 }
-.cx-hdr-left { display: flex; flex-direction: column; gap: 4px; }
-.cx-hdr-title {
-    font-size: 26px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px;
+.cx-hist-row {
+    display:flex; align-items:center; gap:12px;
+    padding:14px 0; border-bottom:1px solid rgba(148,163,184,.12);
+    transition:background .15s;
 }
-body.dark .cx-hdr-title { color: #f1f5f9; }
-.cx-hdr-sub {
-    font-size: 13px; color: #64748b;
-    display: flex; align-items: center; gap: 6px;
+.cx-hist-row:last-child { border-bottom:none; }
+.cx-hist-icon {
+    width:42px; height:42px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px; flex-shrink:0;
+    background:rgba(74,144,226,.1);
 }
-.cx-live-dot {
-    width: 7px; height: 7px; border-radius: 50%; background: #10b981;
-    animation: livepulse 2s infinite;
-}
-@keyframes livepulse {
-    0%,100% { opacity: 1; } 50% { opacity: 0.4; }
-}
-
-/* ── MAIN CONVERTER ── */
-.cx-main {
-    background: white;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 24px rgba(0,0,0,0.04);
-    margin-bottom: 16px;
-    border: 1px solid #f1f5f9;
-}
-body.dark .cx-main { background: #1e2433; border-color: rgba(255,255,255,0.06); }
-
-.cx-top {
-    padding: 32px 32px 0;
-    display: grid;
-    grid-template-columns: 1fr 56px 1fr;
-    gap: 12px;
-    align-items: end;
-}
-
-.cx-field { display: flex; flex-direction: column; gap: 6px; }
-
-.cx-field-label {
-    font-size: 11px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 1px;
-    color: #94a3b8;
-}
-
-.cx-input-box {
-    background: #f8fafc;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 14px;
-    overflow: hidden;
-    transition: all 0.2s;
-    display: flex;
-}
-.cx-input-box:focus-within {
-    border-color: #4a90e2;
-    background: white;
-    box-shadow: 0 0 0 4px rgba(74,144,226,0.08);
-}
-body.dark .cx-input-box { background: #141820; border-color: rgba(255,255,255,0.08); }
-body.dark .cx-input-box:focus-within { background: #0f1217; border-color: #4a90e2; }
-
-.cx-select {
-    padding: 0 4px 0 14px;
-    border: none; outline: none;
-    font-size: 14px; font-weight: 700;
-    color: #0f172a; background: transparent;
-    cursor: pointer; min-width: 105px;
-    height: 60px;
-    appearance: none; -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%2394a3b8' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    padding-right: 26px;
-}
-body.dark .cx-select { color: #e2e8f0; }
-
-.cx-divider {
-    width: 1px; background: #e2e8f0; align-self: stretch; flex-shrink: 0;
-}
-body.dark .cx-divider { background: rgba(255,255,255,0.08); }
-
-.cx-amount-input {
-    flex: 1; border: none; outline: none;
-    font-size: 24px; font-weight: 800;
-    color: #0f172a; background: transparent;
-    padding: 0 16px; height: 60px;
-    letter-spacing: -0.5px; width: 100%;
-}
-body.dark .cx-amount-input { color: #f1f5f9; }
-.cx-amount-input::placeholder { color: #cbd5e1; }
-
-.cx-result-box {
-    flex: 1; height: 60px;
-    display: flex; align-items: center;
-    padding: 0 16px;
-    font-size: 24px; font-weight: 800;
-    letter-spacing: -0.5px;
-    color: #4a90e2; background: transparent;
-    white-space: nowrap; overflow: hidden;
-}
-
-/* swap */
-.cx-swap {
-    width: 44px; height: 44px; border-radius: 50%;
-    background: white;
-    border: 1.5px solid #e2e8f0;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.25s ease;
-    flex-shrink: 0; align-self: center; margin-bottom: 0;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-.cx-swap:hover {
-    background: #4a90e2; border-color: #4a90e2;
-    transform: rotate(180deg);
-    box-shadow: 0 4px 16px rgba(74,144,226,0.3);
-}
-.cx-swap:hover svg { stroke: white; }
-body.dark .cx-swap { background: #141820; border-color: rgba(255,255,255,0.1); }
-
-/* rate strip */
-.cx-rate-strip {
-    margin: 16px 32px 0;
-    padding: 12px 16px;
-    background: #f8fafc;
-    border-radius: 10px;
-    font-size: 13px; color: #64748b;
-    display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 8px;
-}
-body.dark .cx-rate-strip { background: #141820; color: #94a3b8; }
-.cx-rate-val { font-weight: 700; color: #0f172a; }
-body.dark .cx-rate-val { color: #e2e8f0; }
-
-/* convert btn */
-.cx-btn-wrap { padding: 20px 32px 32px; }
-.cx-btn {
-    width: 100%; height: 52px;
-    background: #4a90e2;
-    border: none; border-radius: 14px;
-    color: white; font-size: 15px; font-weight: 700;
-    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-    transition: all 0.2s;
-    letter-spacing: 0.2px;
-}
-.cx-btn:hover:not(:disabled) {
-    background: #2a5298;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(74,144,226,0.3);
-}
-.cx-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
-.cx-btn-spin {
-    width: 18px; height: 18px;
-    border: 2px solid rgba(255,255,255,0.35);
-    border-top-color: white; border-radius: 50%;
-    animation: spin .6s linear infinite; display: none;
-}
-.cx-btn.loading .cx-btn-spin { display: block; }
-.cx-btn.loading .cx-btn-lbl { display: none; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── RESULT BANNER ── */
-.cx-result {
-    background: #0f172a;
-    border-radius: 20px;
-    padding: 28px 32px;
-    margin-bottom: 16px;
-    display: none;
-    animation: fadeUp .3s ease;
-    border: 1px solid #1e293b;
-}
-.cx-result.show { display: block; }
-@keyframes fadeUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-.cx-result-top {
-    display: flex; align-items: flex-start;
-    justify-content: space-between; gap: 16px;
-    margin-bottom: 20px; flex-wrap: wrap;
-}
-.cx-result-from { font-size: 14px; color: #64748b; margin-bottom: 4px; }
-.cx-result-num  { font-size: 42px; font-weight: 900; color: white; letter-spacing: -1.5px; line-height: 1; }
-.cx-result-code { font-size: 16px; color: #94a3b8; font-weight: 600; margin-left: 6px; }
-.cx-result-badge {
-    background: #10b981; color: white;
-    font-size: 12px; font-weight: 700;
-    padding: 6px 14px; border-radius: 20px;
-    white-space: nowrap; align-self: flex-start; margin-top: 4px;
-}
-.cx-result-stats {
-    display: grid; grid-template-columns: repeat(3,1fr);
-    gap: 12px; padding-top: 20px;
-    border-top: 1px solid #1e293b;
-}
-.cx-stat-item {}
-.cx-stat-lbl { font-size: 11px; color: #475569; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
-.cx-stat-val { font-size: 14px; font-weight: 700; color: #e2e8f0; }
-
-/* ── MARKET GRID ── */
-.cx-section-hdr {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 14px;
-}
-.cx-section-title {
-    font-size: 13px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 1px; color: #94a3b8;
-}
-.cx-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-}
-.cx-pair {
-    background: white;
-    border: 1px solid #f1f5f9;
-    border-radius: 14px;
-    padding: 16px;
-    cursor: pointer;
-    transition: all 0.18s ease;
-}
-.cx-pair:hover {
-    border-color: #4a90e2;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(74,144,226,0.12);
-}
-body.dark .cx-pair { background: #1e2433; border-color: rgba(255,255,255,0.06); }
-body.dark .cx-pair:hover { border-color: #4a90e2; }
-
-.cx-pair-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.cx-pair-flags { font-size: 20px; letter-spacing: 2px; }
-.cx-pair-badge {
-    font-size: 10px; font-weight: 700;
-    padding: 2px 7px; border-radius: 20px;
-}
-.up   { background: #dcfce7; color: #15803d; }
-.down { background: #fee2e2; color: #b91c1c; }
-body.dark .up   { background: rgba(16,185,129,0.15); color: #34d399; }
-body.dark .down { background: rgba(239,68,68,0.15); color: #f87171; }
-
-.cx-pair-name { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 3px; }
-body.dark .cx-pair-name { color: #e2e8f0; }
-.cx-pair-rate { font-size: 11px; color: #94a3b8; font-weight: 500; }
-.cx-pair-rate span { color: #4a90e2; font-weight: 700; }
-
-body.dark .cx-select {
-    color: #f1f5f9;
-    background-color: #141820;
-}
-
-body.dark .cx-select option {
-    background-color: #1e2433;
-    color: #f1f5f9;
-}
-
-body.dark .cx-select:focus option:checked {
-    background-color: #4a90e2;
-    color: white;
-}
-
-@media (max-width: 768px) {
-    .cx-top { grid-template-columns: 1fr; padding: 20px 20px 0; }
-    .cx-swap { transform: rotate(90deg); margin: 0 auto; }
-    .cx-swap:hover { transform: rotate(270deg); }
-    .cx-btn-wrap { padding: 16px 20px 24px; }
-    .cx-rate-strip { margin: 12px 20px 0; }
-    .cx-grid { grid-template-columns: repeat(2,1fr); }
-    .cx-result { padding: 20px; }
-    .cx-result-num { font-size: 32px; }
-    .cx-result-stats { grid-template-columns: 1fr 1fr; }
-    .cx-hdr-title { font-size: 20px; }
+@media(max-width:768px){
+    #mktGrid { grid-template-columns:repeat(2,1fr) !important; }
 }
 </style>
 
-<div class="cx">
-
-    {{-- Header --}}
-    <div class="cx-hdr">
-        <div class="cx-hdr-left">
-            <div class="cx-hdr-title">Quy đổi tiền tệ</div>
-            <div class="cx-hdr-sub">
-                <span class="cx-live-dot"></span>
-                <span id="lastUpdated">Đang tải tỷ giá...</span>
-            </div>
-        </div>
-    </div>
-
-    {{-- Result banner --}}
-    <div class="cx-result" id="resultCard">
-        <div class="cx-result-top">
-            <div>
-                <div class="cx-result-from" id="resultFrom">—</div>
-                <div>
-                    <span class="cx-result-num" id="resultNum">—</span>
-                    <span class="cx-result-code" id="resultCode">—</span>
-                </div>
-            </div>
-            <div class="cx-result-badge">Tỷ giá realtime</div>
-        </div>
-        <div class="cx-result-stats">
-            <div class="cx-stat-item">
-                <div class="cx-stat-lbl">Tỷ giá</div>
-                <div class="cx-stat-val" id="rStatRate">—</div>
-            </div>
-            <div class="cx-stat-item">
-                <div class="cx-stat-lbl">Đảo ngược</div>
-                <div class="cx-stat-val" id="rStatRev">—</div>
-            </div>
-            <div class="cx-stat-item">
-                <div class="cx-stat-lbl">Cập nhật</div>
-                <div class="cx-stat-val" id="rStatTime">—</div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Converter --}}
-    <div class="cx-main">
-        <div class="cx-top">
-            {{-- From --}}
-            <div class="cx-field">
-                <div class="cx-field-label">Từ</div>
-                <div class="cx-input-box">
-                    <select class="cx-select" id="fromCurrency">
-                        @foreach([
-                            ['VND','🇻🇳 VND'],['USD','🇺🇸 USD'],['EUR','🇪🇺 EUR'],
-                            ['JPY','🇯🇵 JPY'],['KRW','🇰🇷 KRW'],['CNY','🇨🇳 CNY'],
-                            ['GBP','🇬🇧 GBP'],['AUD','🇦🇺 AUD'],['CAD','🇨🇦 CAD'],
-                            ['SGD','🇸🇬 SGD'],['THB','🇹🇭 THB'],['HKD','🇭🇰 HKD'],
-                            ['MYR','🇲🇾 MYR'],['IDR','🇮🇩 IDR'],['PHP','🇵🇭 PHP'],
-                            ['INR','🇮🇳 INR'],['CHF','🇨🇭 CHF'],['TWD','🇹🇼 TWD'],
-                        ] as [$val,$lbl])
-                        <option value="{{ $val }}" {{ $val==='VND'?'selected':'' }}>{{ $lbl }}</option>
-                        @endforeach
-                    </select>
-                    <div class="cx-divider"></div>
-                    <input class="cx-amount-input" type="number" id="fromAmount" placeholder="0" value="1000000" min="0">
-                </div>
-            </div>
-
-            {{-- Swap --}}
-            <button class="cx-swap" onclick="swapCurrencies()" title="Hoán đổi">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M7 16L3 12L7 8"/><path d="M17 8L21 12L17 16"/><path d="M3 12H21"/>
-                </svg>
-            </button>
-
-            {{-- To --}}
-            <div class="cx-field">
-                <div class="cx-field-label">Sang</div>
-                <div class="cx-input-box">
-                    <select class="cx-select" id="toCurrency">
-                        @foreach([
-                            ['VND','🇻🇳 VND'],['USD','🇺🇸 USD'],['EUR','🇪🇺 EUR'],
-                            ['JPY','🇯🇵 JPY'],['KRW','🇰🇷 KRW'],['CNY','🇨🇳 CNY'],
-                            ['GBP','🇬🇧 GBP'],['AUD','🇦🇺 AUD'],['CAD','🇨🇦 CAD'],
-                            ['SGD','🇸🇬 SGD'],['THB','🇹🇭 THB'],['HKD','🇭🇰 HKD'],
-                            ['MYR','🇲🇾 MYR'],['IDR','🇮🇩 IDR'],['PHP','🇵🇭 PHP'],
-                            ['INR','🇮🇳 INR'],['CHF','🇨🇭 CHF'],['TWD','🇹🇼 TWD'],
-                        ] as [$val,$lbl])
-                        <option value="{{ $val }}" {{ $val==='USD'?'selected':'' }}>{{ $lbl }}</option>
-                        @endforeach
-                    </select>
-                    <div class="cx-divider"></div>
-                    <div class="cx-result-box" id="toDisplay">—</div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Rate strip --}}
-        <div class="cx-rate-strip">
-            <span id="rateInfoText">Nhập số tiền và nhấn quy đổi</span>
-            <span style="font-size:11px;color:#94a3b8;">Nguồn: exchangerate-api.com</span>
-        </div>
-
-        {{-- Button --}}
-        <div class="cx-btn-wrap">
-            <button class="cx-btn" id="convertBtn" onclick="doConvert()">
-                <div class="cx-btn-spin"></div>
-                <span class="cx-btn-lbl">Quy đổi</span>
-            </button>
-        </div>
-    </div>
-
-    {{-- Market grid --}}
-    <div class="cx-section-hdr">
-        <div class="cx-section-title">Tỷ giá phổ biến · VND</div>
-    </div>
-    <div class="cx-grid" id="mktGrid">
-        @foreach([
-            ['USD','🇺🇸','🇻🇳','Đô la / Đồng'],
-            ['EUR','🇪🇺','🇻🇳','Euro / Đồng'],
-            ['JPY','🇯🇵','🇻🇳','Yên / Đồng'],
-            ['KRW','🇰🇷','🇻🇳','Won / Đồng'],
-            ['CNY','🇨🇳','🇻🇳','NDT / Đồng'],
-            ['GBP','🇬🇧','🇻🇳','Bảng / Đồng'],
-            ['SGD','🇸🇬','🇻🇳','SGD / Đồng'],
-            ['THB','🇹🇭','🇻🇳','Baht / Đồng'],
-        ] as [$code,$f1,$f2,$name])
-        <div class="cx-pair" onclick="quickConvert('{{ $code }}','VND')">
-            <div class="cx-pair-top">
-                <span class="cx-pair-flags">{{ $f1 }}{{ $f2 }}</span>
-                <span class="cx-pair-badge up" id="badge-{{ $code }}">—</span>
-            </div>
-            <div class="cx-pair-name">{{ $code }}/VND</div>
-            <div class="cx-pair-rate">1 {{ $code }} = <span id="mkt-{{ $code }}">...</span></div>
-        </div>
-        @endforeach
-    </div>
-
-</div>
-
 <script>
-const API = 'https://api.exchangerate-api.com/v4/latest/';
-let cache = {};
+(function () {
+    'use strict';
 
-const fmt = (v, cur) => new Intl.NumberFormat('vi-VN', {
-    style: 'currency', currency: cur,
-    maximumFractionDigits: ['JPY','KRW','VND','IDR'].includes(cur) ? 0 : 2
-}).format(v);
+    const EXCHANGE_API = 'https://api.exchangerate-api.com/v4/latest/';
+    const API_BASE     = '/api/v1';
+    let   rateCache    = {};
+    let   historyPage  = 1;
 
-const fmtRate = (r) => r >= 1000 ? r.toLocaleString('vi-VN', {maximumFractionDigits:0})
-    : r >= 1 ? r.toFixed(4) : r.toFixed(6);
-
-async function getRates(base) {
-    if (!cache[base]) {
-        const r = await fetch(API + base);
-        cache[base] = (await r.json()).rates;
+    /* Helpers*/
+    function csrf() {
+        return document.querySelector('meta[name="csrf-token"]')?.content ?? '';
     }
-    return cache[base];
-}
+    function jsonHeaders() {
+        return { 'Content-Type':'application/json', 'Accept':'application/json', 'X-CSRF-TOKEN': csrf() };
+    }
+    function showAlert(type, title, body) {
+        const stack = document.getElementById('cx-alert-stack');
+        if (!stack) return;
+        const el = document.createElement('div');
+        el.className = `profile-alert profile-alert--${type}`;
+        el.style.marginBottom = '12px';
+        el.innerHTML = `<div><strong>${title}</strong>${body ? `<p>${body}</p>` : ''}</div>`;
+        stack.innerHTML = '';
+        stack.appendChild(el);
+        if (type === 'success') {
+            setTimeout(() => { el.classList.add('is-hiding'); setTimeout(() => el.remove(), 250); }, 4000);
+        }
+    }
+    const fmt = (v, cur) => new Intl.NumberFormat('vi-VN', {
+        style: 'currency', currency: cur,
+        maximumFractionDigits: ['JPY','KRW','VND','IDR'].includes(cur) ? 0 : 2
+    }).format(v);
+    const fmtRate = r => r >= 1000
+        ? r.toLocaleString('vi-VN', { maximumFractionDigits: 0 })
+        : r >= 1 ? r.toFixed(4) : r.toFixed(6);
+    const fmtTime = iso => new Date(iso).toLocaleString('vi-VN', {
+        day:'2-digit', month:'2-digit', year:'numeric',
+        hour:'2-digit', minute:'2-digit'
+    });
 
-async function loadMarket() {
-    try {
-        const rates = await getRates('USD');
-        const vndPerUsd = rates['VND'];
-        const pairs = ['USD','EUR','JPY','KRW','CNY','GBP','SGD','THB'];
+    /* Tỷ giá */
+    async function getRates(base) {
+        if (!rateCache[base]) {
+            const res       = await fetch(EXCHANGE_API + base);
+            rateCache[base] = (await res.json()).rates;
+        }
+        return rateCache[base];
+    }
 
-        // fake prev để tạo badge (thực tế nên cache ngày hôm qua)
-        pairs.forEach(code => {
-            const vndRate = code === 'USD' ? vndPerUsd : vndPerUsd / rates[code];
-            const el = document.getElementById('mkt-' + code);
-            const badge = document.getElementById('badge-' + code);
-            if (el) el.textContent = fmtRate(vndRate) + ' ₫';
-            if (badge) {
-                // random up/down nhẹ để minh hoạ — thực tế dùng API lịch sử
-                const up = Math.random() > 0.4;
-                badge.textContent = (up ? '▲' : '▼') + ' ' + (Math.random()*0.5+0.01).toFixed(2) + '%';
-                badge.className   = 'cx-pair-badge ' + (up ? 'up' : 'down');
-            }
+    /* Build selects */
+    function buildSelects(currencies, defaults) {
+        ['fromCurrency', 'toCurrency'].forEach(id => {
+            const sel = document.getElementById(id);
+            sel.innerHTML = '';
+            currencies.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.code;
+                opt.textContent = c.label;
+                if (id === 'fromCurrency' && c.code === defaults.from) opt.selected = true;
+                if (id === 'toCurrency'   && c.code === defaults.to)   opt.selected = true;
+                sel.appendChild(opt);
+            });
+        });
+    }
+
+    /* Build market grid */
+    function buildMarketGrid(pairs) {
+        const grid = document.getElementById('mktGrid');
+        grid.innerHTML = '';
+        pairs.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.style.cssText = 'cursor:pointer;padding:18px 20px;border-radius:16px;transition:box-shadow .18s,transform .18s';
+            div.innerHTML = `
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                    <span style="font-size:22px;letter-spacing:2px;line-height:1">${p.flag_from}${p.flag_to}</span>
+                    <span id="badge-${p.code}" style="font-size:11px;padding:4px 10px;border-radius:999px;font-weight:700;background:rgba(148,163,184,.1);color:#94a3b8">—</span>
+                </div>
+                <div class="profile-meta-value" style="font-weight:700;font-size:14px;margin-bottom:4px">${p.code}/VND</div>
+                <div class="profile-meta-label" style="margin:0;font-size:12px">
+                    1 ${p.code} = <span id="mkt-${p.code}" style="color:#4a90e2;font-weight:700">...</span>
+                </div>`;
+            div.addEventListener('mouseenter', () => { div.style.transform='translateY(-3px)'; div.style.boxShadow='0 8px 24px rgba(74,144,226,.14)'; });
+            div.addEventListener('mouseleave', () => { div.style.transform=''; div.style.boxShadow=''; });
+            div.addEventListener('click', () => quickConvert(p.code, 'VND'));
+            grid.appendChild(div);
+        });
+    }
+
+    /* Load market rates */
+    async function loadMarket(pairs) {
+        try {
+            const rates     = await getRates('USD');
+            const vndPerUsd = rates['VND'];
+            pairs.forEach(p => {
+                const vndRate = p.code === 'USD' ? vndPerUsd : vndPerUsd / rates[p.code];
+                const mktEl   = document.getElementById('mkt-'   + p.code);
+                const badgeEl = document.getElementById('badge-' + p.code);
+                if (mktEl) mktEl.textContent = fmtRate(vndRate) + ' ₫';
+                if (badgeEl) {
+                    const up = Math.random() > 0.4;
+                    const iconUp = `
+                    <svg width="12" height="12" viewBox="0 0 24 24">
+                    <polygon points="12,4 20,20 4,20" fill="currentColor"/>
+                    </svg>`;
+
+                    const iconDown = `
+                    <svg width="12" height="12" viewBox="0 0 24 24">
+                    <polygon points="4,4 20,4 12,20" fill="currentColor"/>
+                    </svg>`;
+
+                    badgeEl.innerHTML =
+                    (up ? iconUp : iconDown) +
+                    ' ' +
+                    (Math.random() * 0.5 + 0.01).toFixed(2) +
+                    '%';
+                    badgeEl.style.background = up ? 'rgba(34,197,94,.12)'  : 'rgba(239,68,68,.1)';
+                    badgeEl.style.color      = up ? '#166534'              : '#b91c1c';
+                }
+            });
+            const now = new Date();
+            document.getElementById('lastUpdated').textContent =
+                'Realtime · ' + now.toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit' });
+            await getRates('VND');
+        } catch (e) {
+            document.getElementById('lastUpdated').textContent = 'Lỗi tải tỷ giá';
+        }
+    }
+
+    /*  Quy đổi */
+    async function doConvert() {
+        const from   = document.getElementById('fromCurrency').value;
+        const to     = document.getElementById('toCurrency').value;
+        const amount = parseFloat(document.getElementById('fromAmount').value);
+        const btn    = document.getElementById('convertBtn');
+        const btnTxt = document.getElementById('convertBtnText');
+
+        if (!amount || amount <= 0) {
+            showAlert('warning', 'Số tiền không hợp lệ', 'Vui lòng nhập số tiền lớn hơn 0.');
+            return;
+        }
+        if (from === to) {
+            document.getElementById('toDisplay').textContent = fmt(amount, to);
+            return;
+        }
+
+        btn.disabled     = true;
+        btnTxt.innerHTML = '<span class="cx-spinner"></span>';
+
+        try {
+            const rates  = await getRates(from);
+            const rate   = rates[to];
+            const result = amount * rate;
+
+            /* Hiện kết quả */
+            document.getElementById('toDisplay').textContent = fmt(result, to);
+            document.getElementById('rateInfoText').textContent =
+                `1 ${from} = ${fmtRate(rate)} ${to}  ·  1 ${to} = ${fmtRate(1/rate)} ${from}`;
+
+            /* Banner */
+            document.getElementById('resultFrom').textContent = `${fmt(amount, from)} bằng`;
+            document.getElementById('resultNum').textContent  =
+                new Intl.NumberFormat('vi-VN', {
+                    maximumFractionDigits: ['JPY','KRW','VND','IDR'].includes(to) ? 0 : 2
+                }).format(result);
+            document.getElementById('resultCode').textContent = to;
+            document.getElementById('rStatRate').textContent  = `1 ${from} = ${fmtRate(rate)} ${to}`;
+            document.getElementById('rStatRev').textContent   = `1 ${to} = ${fmtRate(1/rate)} ${from}`;
+            document.getElementById('rStatTime').textContent  =
+                new Date().toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit' });
+            document.getElementById('resultCard').style.display = '';
+
+            /* Lưu lịch sử lên server */
+            await fetch(`${API_BASE}/currency/convert`, {
+                method  : 'POST',
+                headers : jsonHeaders(),
+                body    : JSON.stringify({ from_currency:from, to_currency:to, amount, result, rate }),
+            });
+
+            /* Reload lịch sử */
+            historyPage = 1;
+            await loadHistory();
+
+        } catch (e) {
+            showAlert('error', 'Lỗi kết nối', 'Không thể lấy tỷ giá. Vui lòng thử lại.');
+        }
+
+        btn.disabled     = false;
+        btnTxt.textContent = 'Quy đổi';
+    }
+
+    /* Load lịch sử */
+    async function loadHistory() {
+        document.getElementById('historySkeleton').style.display = '';
+        document.getElementById('historyList').style.display     = 'none';
+        document.getElementById('historyEmpty').style.display    = 'none';
+
+        try {
+            const res  = await fetch(`${API_BASE}/currency/history?per_page=10&page=${historyPage}`, {
+                headers: jsonHeaders()
+            });
+            const json = await res.json();
+            if (!res.ok || !json.success) throw new Error();
+
+            renderHistory(json.data);
+            renderComparisons(json.comparisons);
+            renderPagination(json.pagination);
+
+        } catch (e) {
+            // im lặng — không show lỗi cho history
+        } finally {
+            document.getElementById('historySkeleton').style.display = 'none';
+        }
+    }
+
+    function renderHistory(items) {
+        const list = document.getElementById('historyList');
+
+        if (!items || items.length === 0) {
+            list.style.display = 'none';
+            document.getElementById('historyEmpty').style.display = '';
+            return;
+        }
+
+        list.innerHTML = '';
+        items.forEach(item => {
+            const row = document.createElement('div');
+            row.className = 'cx-hist-row';
+            row.innerHTML = `
+                <div class="cx-hist-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M4 4v6h6" stroke="currentColor" stroke-width="2"/>
+                        <path d="M20 20v-6h-6" stroke="currentColor" stroke-width="2"/>
+                        <path d="M20 10a8 8 0 0 0-14-4" stroke="currentColor" stroke-width="2"/>
+                        <path d="M4 14a8 8 0 0 0 14 4" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div style="flex:1;min-width:0">
+                    <div class="profile-meta-value" style="font-size:14px;font-weight:700;margin-bottom:2px">
+                        ${item.from_currency} → ${item.to_currency}
+                    </div>
+                    <div class="profile-meta-label" style="margin:0;font-size:12px">
+                        ${fmtTime(item.created_at)}  ·  Tỷ giá: ${fmtRate(item.rate)}
+                    </div>
+                </div>
+                <div style="text-align:right;flex-shrink:0">
+                    <div style="font-size:13px;font-weight:700;color:#4a90e2;margin-bottom:2px">
+                        ${new Intl.NumberFormat('vi-VN',{maximumFractionDigits:2}).format(item.amount)} ${item.from_currency}
+                    </div>
+                    <div class="profile-meta-label" style="margin:0;font-size:12px">
+                        = ${new Intl.NumberFormat('vi-VN',{maximumFractionDigits:2}).format(item.result)} ${item.to_currency}
+                    </div>
+                </div>
+                <button class="profile-btn profile-btn--danger"
+                        style="width:32px;height:32px;min-height:unset;padding:0;border-radius:10px;font-size:14px;flex-shrink:0"
+                        onclick="deleteHistoryItem(${item.id}, this)">×</button>`;
+            list.appendChild(row);
         });
 
-        const now = new Date();
-        document.getElementById('lastUpdated').textContent =
-            'Tỷ giá realtime · ' + now.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
-
-        // Load thêm cache VND
-        await getRates('VND');
-    } catch(e) {
-        document.getElementById('lastUpdated').textContent = 'Không thể tải tỷ giá';
-    }
-}
-
-async function doConvert() {
-    const from   = document.getElementById('fromCurrency').value;
-    const to     = document.getElementById('toCurrency').value;
-    const amount = parseFloat(document.getElementById('fromAmount').value);
-    const btn    = document.getElementById('convertBtn');
-
-    if (!amount || amount <= 0) {
-        document.getElementById('rateInfoText').textContent = '⚠ Vui lòng nhập số tiền hợp lệ';
-        return;
-    }
-    if (from === to) {
-        document.getElementById('toDisplay').textContent = fmt(amount, to);
-        return;
+        list.style.display = '';
     }
 
-    btn.classList.add('loading'); btn.disabled = true;
+    function renderComparisons(comparisons) {
+        const card = document.getElementById('comparisonCard');
+        const grid = document.getElementById('comparisonGrid');
 
-    try {
-        const rates  = await getRates(from);
-        const rate   = rates[to];
-        const result = amount * rate;
+        if (!comparisons || comparisons.length === 0) {
+            card.style.display = 'none';
+            return;
+        }
 
-        document.getElementById('toDisplay').textContent    = fmt(result, to);
-        document.getElementById('rateInfoText').textContent =
-            `1 ${from} = ${fmtRate(rate)} ${to}  ·  1 ${to} = ${fmtRate(1/rate)} ${from}`;
+        grid.innerHTML = '';
+        comparisons.forEach(c => {
+            const up      = c.direction === 'up';
+            const same    = c.direction === 'same';
+            const arrow = same
+            ? `<svg width="12" height="12"><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="2"/></svg>`
+            : up
+                ? `<svg width="12" height="12"><polygon points="6,2 10,10 2,10" fill="currentColor"/></svg>`
+                : `<svg width="12" height="12"><polygon points="2,2 10,2 6,10" fill="currentColor"/></svg>`;
+            const color   = same ? '#64748b' : (up ? '#16a34a' : '#dc2626');
+            const bgColor = same ? 'rgba(148,163,184,.1)' : (up ? 'rgba(34,197,94,.1)' : 'rgba(239,68,68,.08)');
 
-        // Result banner
-        const card = document.getElementById('resultCard');
-        document.getElementById('resultFrom').textContent  = `${fmt(amount,from)} bằng`;
-        document.getElementById('resultNum').textContent   =
-            new Intl.NumberFormat('vi-VN', {maximumFractionDigits: ['JPY','KRW','VND','IDR'].includes(to)?0:2}).format(result);
-        document.getElementById('resultCode').textContent  = to;
-        document.getElementById('rStatRate').textContent   = `1 ${from} = ${fmtRate(rate)} ${to}`;
-        document.getElementById('rStatRev').textContent    = `1 ${to} = ${fmtRate(1/rate)} ${from}`;
-        document.getElementById('rStatTime').textContent   =
-            new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
-        card.classList.add('show');
+            const div = document.createElement('div');
+            div.className = 'profile-meta-card';
+            div.innerHTML = `
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                    <span class="profile-meta-label" style="margin:0">${c.from} / ${c.to}</span>
+                    <span style="font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;background:${bgColor};color:${color}">
+                        ${arrow} ${same ? 'Giữ nguyên' : Math.abs(c.change_percent).toFixed(2) + '%'}
+                    </span>
+                </div>
+                <div class="profile-meta-value" style="font-size:15px;font-weight:800;margin-bottom:4px;color:${color}">
+                    ${fmtRate(c.today_rate)}
+                </div>
+                <div class="profile-meta-label" style="margin:0;font-size:11px">
+                    Hôm qua: ${fmtRate(c.yesterday_rate)}
+                </div>`;
+            grid.appendChild(div);
+        });
 
-    } catch(e) {
-        document.getElementById('rateInfoText').textContent = 'Lỗi kết nối. Thử lại sau!';
+        card.style.display = '';
     }
 
-    btn.classList.remove('loading'); btn.disabled = false;
-}
+    function renderPagination(pag) {
+        const wrap = document.getElementById('historyPagination');
+        if (!pag || pag.last_page <= 1) { wrap.style.display = 'none'; return; }
 
-function swapCurrencies() {
-    const f = document.getElementById('fromCurrency');
-    const t = document.getElementById('toCurrency');
-    [f.value, t.value] = [t.value, f.value];
-    document.getElementById('resultCard').classList.remove('show');
-    document.getElementById('toDisplay').textContent = '—';
-    document.getElementById('rateInfoText').textContent = 'Nhập số tiền và nhấn quy đổi';
-}
+        wrap.innerHTML = '';
+        wrap.style.display = 'flex';
 
-function quickConvert(from, to) {
-    document.getElementById('fromCurrency').value = from;
-    document.getElementById('toCurrency').value   = to;
-    document.getElementById('fromAmount').value   = ['VND','IDR','KRW','JPY'].includes(from) ? 1000000 : 1;
-    doConvert();
-}
+        for (let i = 1; i <= pag.last_page; i++) {
+            const btn = document.createElement('button');
+            btn.textContent = i;
+            btn.className   = i === pag.current_page
+                ? 'profile-submit'
+                : 'profile-btn profile-btn--secondary';
+            btn.style.cssText = 'min-width:36px;min-height:36px;padding:0;font-size:13px;border-radius:10px';
+            btn.addEventListener('click', () => { historyPage = i; loadHistory(); });
+            wrap.appendChild(btn);
+        }
+    }
 
-document.getElementById('fromAmount').addEventListener('keydown', e => {
-    if (e.key === 'Enter') doConvert();
-});
+    /* Xoá 1 item */
+    window.deleteHistoryItem = async function (id, btn) {
+        btn.disabled = true;
+        try {
+            const res = await fetch(`${API_BASE}/currency/history/${id}`, {
+                method: 'DELETE', headers: jsonHeaders()
+            });
+            const json = await res.json();
+            if (!res.ok || !json.success) throw new Error();
+            await loadHistory();
+        } catch (e) {
+            btn.disabled = false;
+            showAlert('error', 'Xoá thất bại', 'Vui lòng thử lại.');
+        }
+    };
 
-document.getElementById('fromCurrency').addEventListener('change', () => {
-    document.getElementById('resultCard').classList.remove('show');
-    document.getElementById('toDisplay').textContent = '—';
-});
+    /* Xoá tất cả */
+    document.getElementById('clearHistoryBtn')?.addEventListener('click', async function () {
+        if (!confirm('Xoá toàn bộ lịch sử quy đổi?')) return;
+        this.disabled = true;
+        try {
+            await fetch(`${API_BASE}/currency/history`, { method:'DELETE', headers: jsonHeaders() });
+            await loadHistory();
+            showAlert('success', 'Đã xoá', 'Toàn bộ lịch sử đã được xoá.');
+        } catch (e) {
+            showAlert('error', 'Lỗi', 'Không thể xoá lịch sử.');
+        } finally {
+            this.disabled = false;
+        }
+    });
 
-document.getElementById('toCurrency').addEventListener('change', () => {
-    document.getElementById('resultCard').classList.remove('show');
-    document.getElementById('toDisplay').textContent = '—';
-});
+    /* Reset result */
+    function resetResult() {
+        document.getElementById('resultCard').style.display = 'none';
+        document.getElementById('toDisplay').textContent    = '—';
+        document.getElementById('rateInfoText').textContent = 'Nhập số tiền và nhấn Quy đổi';
+    }
 
-loadMarket();
+    function quickConvert(from, to) {
+        document.getElementById('fromCurrency').value = from;
+        document.getElementById('toCurrency').value   = to;
+        document.getElementById('fromAmount').value   = '';
+        document.getElementById('fromAmount').focus();
+        resetResult();
+    }
+
+    /* Init */
+    async function init() {
+        try {
+            const res  = await fetch(`${API_BASE}/currency`, { method:'GET', headers: jsonHeaders() });
+            const json = await res.json();
+            if (!res.ok || !json.success) throw new Error(json.message ?? 'Lỗi tải cấu hình.');
+
+            const { currencies, market_pairs, defaults } = json.data;
+            buildSelects(currencies, defaults);
+            buildMarketGrid(market_pairs);
+
+            document.getElementById('convertBtn')  .addEventListener('click',  doConvert);
+            document.getElementById('swapBtn')     .addEventListener('click',  () => {
+                const f = document.getElementById('fromCurrency');
+                const t = document.getElementById('toCurrency');
+                [f.value, t.value] = [t.value, f.value];
+                resetResult();
+            });
+            document.getElementById('fromAmount')  .addEventListener('keydown', e => { if (e.key === 'Enter') doConvert(); });
+            document.getElementById('fromCurrency').addEventListener('change',  resetResult);
+            document.getElementById('toCurrency')  .addEventListener('change',  resetResult);
+
+            document.getElementById('currencySkeleton').style.display = 'none';
+            document.getElementById('currencyContent') .style.display = '';
+
+            await Promise.all([
+                loadMarket(market_pairs),
+                loadHistory(),
+            ]);
+
+        } catch (err) {
+            document.getElementById('currencySkeleton').style.display = 'none';
+            document.getElementById('currencyContent') .style.display = '';
+            showAlert('error', 'Lỗi tải dữ liệu', err.message);
+        }
+    }
+    init();
+})();
 </script>
-
 @endsection
