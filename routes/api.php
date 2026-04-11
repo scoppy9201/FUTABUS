@@ -123,8 +123,10 @@ Route::prefix('v1')->name('api.')->group(function () {
             Route::get('/', [SettingsController::class, 'index'])->name('index');
 
             Route::prefix('email')->name('email.')->group(function () {
-                Route::patch('/',    [EmailSettingController::class, 'update'])  ->name('update');
-                Route::post('/test', [EmailSettingController::class, 'testMail'])->name('test');
+                Route::get('/',         [EmailSettingController::class, 'show'])    ->name('show');
+                Route::patch('/',       [EmailSettingController::class, 'update'])  ->name('update');
+                Route::patch('/toggle', [EmailSettingController::class, 'toggle'])  ->name('toggle');
+                Route::post('/test',    [EmailSettingController::class, 'testMail'])->name('test');
             });
         });
 
