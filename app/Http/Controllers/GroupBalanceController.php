@@ -68,6 +68,17 @@ class GroupBalanceController extends Controller
 
         $laAdmin = $group->isAdmin(Auth::id());
 
+        if (request()->wantsJson()) {
+            return response()->json([
+                'group' => $group,
+                'members' => $members,
+                'tongSoDu' => $tongSoDu,
+                'proposals' => $proposals,
+                'myPending' => $myPending,
+                'laAdmin' => $laAdmin,
+            ]);
+        }
+
         return view('groups.balance.index', compact(
             'group', 'members', 'tongSoDu', 'proposals', 'myPending', 'laAdmin'
         ));
@@ -176,6 +187,10 @@ class GroupBalanceController extends Controller
 
             DB::commit();
 
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Đã tạo đề xuất phân phối. Chờ xác nhận.','proposal_id'=>$proposal->id], 201);
+            }
+
             return redirect()->route('groups.balance.index', $group)
                 ->with('success', 'Đã tạo đề xuất phân phối. Chờ các thành viên xác nhận.');
 
@@ -209,6 +224,10 @@ class GroupBalanceController extends Controller
             $this->tryExecuteProposal($proposal->fresh());
 
             DB::commit();
+
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Đã xác nhận đồng ý phân phối.']);
+            }
 
             return redirect()->route('groups.balance.index', $group)
                 ->with('success', 'Đã xác nhận đồng ý phân phối.');
@@ -250,6 +269,10 @@ class GroupBalanceController extends Controller
 
             DB::commit();
 
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Đã từ chối đề xuất phân phối.']);
+            }
+
             return redirect()->route('groups.balance.index', $group)
                 ->with('success', 'Đã từ chối đề xuất phân phối.');
 
@@ -274,6 +297,10 @@ class GroupBalanceController extends Controller
         );
 
         $proposal->update(['trang_thai' => 'cancelled']);
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Đã huỷ đề xuất phân phối.']);
+        }
 
         return redirect()->route('groups.balance.index', $group)
             ->with('success', 'Đã huỷ đề xuất phân phối.');

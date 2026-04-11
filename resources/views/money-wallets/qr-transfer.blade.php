@@ -9,10 +9,7 @@
     --shadow: 0 2px 12px rgba(0,0,0,0.07);
 }
 .qr-layout { display: grid; grid-template-columns: 420px 1fr; gap: 24px; align-items: start; }
-.section-card {
-    background: white; border-radius: var(--radius);
-    box-shadow: var(--shadow); overflow: hidden;
-}
+.section-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
 body.dark .section-card { background: #191d27; }
 .sc-header {
     padding: 18px 24px;
@@ -40,15 +37,10 @@ body.dark .form-ctrl { background: #141820; border-color: rgba(255,255,255,.1); 
     border: none; cursor: pointer; width: 100%; justify-content: center; transition: opacity .2s;
 }
 .btn-primary:hover { opacity: .88; }
-.alert {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 16px; border-radius: var(--radius-sm);
-    font-size: 14px; font-weight: 500; margin-bottom: 20px;
-}
+.alert { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; margin-bottom: 20px; }
 .alert-success { background: #d1fae5; color: #065f46; border-left: 4px solid var(--success); }
 .alert-error   { background: #fee2e2; color: #991b1b; border-left: 4px solid var(--danger); }
 
-/* Scan via camera */
 .scan-box {
     border: 2px dashed #d1d5db; border-radius: var(--radius);
     padding: 20px; text-align: center; margin-top: 20px; cursor: pointer; transition: all .2s;
@@ -57,7 +49,6 @@ body.dark .form-ctrl { background: #141820; border-color: rgba(255,255,255,.1); 
 body.dark .scan-box { border-color: rgba(255,255,255,.12); }
 #video { width: 100%; border-radius: 10px; display: none; margin-top: 12px; }
 
-/* History */
 .history-list { display: flex; flex-direction: column; gap: 12px; }
 .history-item {
     background: white; border-radius: var(--radius-sm);
@@ -77,24 +68,16 @@ body.dark .history-item { background: #191d27; }
 .history-title { font-size: 14px; font-weight: 700; color: #1f2937; }
 body.dark .history-title { color: #e5e7eb; }
 .history-sub { font-size: 12px; color: #9ca3af; margin-top: 3px; }
-.history-amount { font-size: 17px; font-weight: 900; }
-.badge {
-    display: inline-flex; align-items: center; padding: 3px 10px;
-    border-radius: 20px; font-size: 11px; font-weight: 700;
-}
+.badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
 .badge-pending   { background: #fef3c7; color: #92400e; }
 .badge-completed { background: #d1fae5; color: #065f46; }
 .badge-cancelled { background: #f3f4f6; color: #6b7280; }
 .badge-expired   { background: #fee2e2; color: #991b1b; }
-.cancel-form { display: inline; }
-.btn-cancel-sm {
-    padding: 4px 12px; border-radius: 8px;
-    background: #fee2e2; border: none; color: var(--danger);
-    font-size: 12px; font-weight: 700; cursor: pointer; transition: background .2s;
-}
+.btn-cancel-sm { padding: 4px 12px; border-radius: 8px; background: #fee2e2; border: none; color: var(--danger); font-size: 12px; font-weight: 700; cursor: pointer; transition: background .2s; }
 .btn-cancel-sm:hover { background: #fecaca; }
 .empty-history { text-align: center; padding: 60px 20px; color: #9ca3af; }
-.empty-history .ei { font-size: 48px; margin-bottom: 12px; }
+.skeleton { background: linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 8px; }
+@keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
 @media (max-width: 900px) { .qr-layout { grid-template-columns: 1fr; } }
 </style>
 
@@ -105,55 +88,30 @@ body.dark .history-title { color: #e5e7eb; }
     </div>
 </div>
 
-@if(session('success'))
-<div class="alert alert-success">✓ {{ session('success') }}</div>
-@endif
-@if(session('error'))
-<div class="alert alert-error">⚠ {{ session('error') }}</div>
-@endif
+<div id="alertContainer"></div>
 
 <div class="qr-layout">
-
-    {{-- ── Cột trái: Tạo QR ── --}}
     <div>
         <div class="section-card">
             <div class="sc-header">Tạo mã QR chuyển tiền</div>
             <div class="sc-body">
-                @if($wallets->isEmpty())
-                    <div style="text-align:center;padding:30px;color:#9ca3af;">
-                        Bạn chưa có ví nào. <a href="{{ route('money-wallets.index') }}">Tạo ví ngay</a>
-                    </div>
-                @else
-                <form action="{{ route('money-wallets.qr.generate') }}" method="POST">
-                    @csrf
-                    <div class="form-group">
-                        <label class="form-label">Ví nguồn <span class="required">*</span></label>
-                        <select name="wallet_id" class="form-ctrl" required>
-                            <option value="">-- Chọn ví --</option>
-                            @foreach($wallets as $w)
-                            <option value="{{ $w->id }}" {{ old('wallet_id') == $w->id ? 'selected' : '' }}>
-                                {{ $w->bieu_tuong }} {{ $w->ten_vi }} — {{ number_format($w->so_du) }}đ
-                            </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Số tiền <span class="required">*</span></label>
-                        <input type="number" name="so_tien" class="form-ctrl"
-                               placeholder="Nhập số tiền..." min="1000" step="1000"
-                               value="{{ old('so_tien') }}" required>
-                        <div style="font-size:11px;color:#9ca3af;margin-top:4px;">Tối thiểu 1.000đ</div>
-                    </div>
-                    <div class="form-group" style="margin-bottom:24px;">
-                        <label class="form-label">Ghi chú</label>
-                        <input type="text" name="ghi_chu" class="form-ctrl"
-                               placeholder="Nội dung chuyển tiền..." maxlength="255"
-                               value="{{ old('ghi_chu') }}">
-                    </div>
-                    <button type="submit" class="btn-primary">Tạo mã QR</button>
-                </form>
+                <div class="form-group">
+                    <label class="form-label">Ví nguồn <span class="required">*</span></label>
+                    <select id="walletId" class="form-ctrl">
+                        <option value="">-- Chọn ví --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Số tiền <span class="required">*</span></label>
+                    <input type="number" id="soTien" class="form-ctrl" placeholder="Nhập số tiền..." min="1000" step="1000">
+                    <div style="font-size:11px;color:#9ca3af;margin-top:4px;">Tối thiểu 1.000đ</div>
+                </div>
+                <div class="form-group" style="margin-bottom:24px;">
+                    <label class="form-label">Ghi chú</label>
+                    <input type="text" id="ghiChu" class="form-ctrl" placeholder="Nội dung chuyển tiền..." maxlength="255">
+                </div>
+                <button class="btn-primary" onclick="generateQR()">Tạo mã QR</button>
 
-                {{-- Scan bằng camera --}}
                 <div class="scan-box" id="scanToggle" onclick="toggleCamera()">
                     <div style="font-size:32px;margin-bottom:8px;">📷</div>
                     <div style="font-weight:700;color:#374151;font-size:14px;">Quét mã QR</div>
@@ -162,20 +120,16 @@ body.dark .history-title { color: #e5e7eb; }
                 <video id="video" autoplay playsinline></video>
                 <div id="scanError" style="color:var(--danger);font-size:13px;margin-top:8px;display:none;"></div>
 
-                {{-- Upload ảnh QR --}}
-                <div class="scan-box" id="uploadBox" style="margin-top:12px;"
-                     onclick="document.getElementById('qrFileInput').click()">
+                <div class="scan-box" id="uploadBox" style="margin-top:12px;" onclick="document.getElementById('qrFileInput').click()">
                     <div style="font-size:32px;margin-bottom:8px;">🖼️</div>
                     <div style="font-weight:700;color:#374151;font-size:14px;">Upload ảnh QR</div>
                     <div style="font-size:12px;color:#9ca3af;margin-top:4px;">Nhấn để chọn ảnh chứa mã QR</div>
                 </div>
                 <input type="file" id="qrFileInput" accept="image/*" style="display:none" onchange="handleQrUpload(event)">
                 <div id="uploadResult" style="margin-top:10px;display:none;"></div>
-                @endif
             </div>
         </div>
 
-        {{-- Hướng dẫn --}}
         <div class="section-card" style="margin-top:16px;">
             <div class="sc-header" style="background:linear-gradient(135deg,#059669,#047857);">Hướng dẫn</div>
             <div class="sc-body" style="font-size:13px;color:#374151;line-height:1.8;">
@@ -191,80 +145,129 @@ body.dark .history-title { color: #e5e7eb; }
         </div>
     </div>
 
-    {{-- ── Cột phải: Lịch sử ── --}}
     <div class="section-card">
         <div class="sc-header">Lịch sử QR Transfer</div>
         <div class="sc-body">
-            @if($history->isEmpty())
-            <div class="empty-history">
-                <div class="ei">📭</div>
-                <div style="font-weight:700;font-size:15px;color:#374151;margin-bottom:6px;">Chưa có giao dịch QR</div>
-                <div style="font-size:13px;">Tạo mã QR đầu tiên để chuyển tiền</div>
+            <div id="historyContainer">
+                <div class="skeleton" style="height:80px;border-radius:10px;margin-bottom:12px;"></div>
+                <div class="skeleton" style="height:80px;border-radius:10px;"></div>
             </div>
-            @else
-            <div class="history-list">
-                @foreach($history as $t)
-                @php
-                    $isSender   = $t->sender_id === Auth::id();
-                    $statusClass= $t->trang_thai === 'completed' ? ($isSender ? 'sent' : 'received')
-                                : ($t->trang_thai === 'pending' ? 'pending' : 'sent');
-                    $icon       = $t->trang_thai === 'completed'
-                                ? ($isSender ? '📤' : '📥')
-                                : ($t->trang_thai === 'pending' ? '⏳' : '❌');
-                @endphp
-                <div class="history-item {{ $statusClass }}">
-                    <div class="history-icon {{ $statusClass }}">{{ $icon }}</div>
-                    <div class="history-info">
-                        <div class="history-title">
-                            @if($t->trang_thai === 'pending')
-                                Đang chờ nhận
-                                @if($isSender)
-                                <a href="{{ route('money-wallets.qr.scan-page', $t->qr_token) }}"
-                                   style="font-size:11px;color:var(--primary);margin-left:6px;">
-                                   🔗 Link
-                                </a>
-                                @endif
-                            @elseif($t->trang_thai === 'completed')
-                                {{ $isSender ? '→ ' . $t->receiver->name : '← ' . $t->sender->name }}
-                            @else
-                                {{ ucfirst($t->trang_thai) }}
-                            @endif
-                        </div>
-                        <div class="history-sub">
-                            {{ $t->created_at->format('d/m/Y H:i') }}
-                            @if($t->ghi_chu) · {{ Str::limit($t->ghi_chu, 40) }} @endif
-                        </div>
-                        <div class="history-sub">
-                            {{ $isSender ? $t->senderWallet?->ten_vi : $t->receiverWallet?->ten_vi }}
-                        </div>
-                    </div>
-                    <div style="text-align:right;flex-shrink:0;">
-                        <div class="history-amount" style="color:{{ $t->trang_thai === 'completed' && !$isSender ? '#10b981' : ($t->trang_thai === 'completed' ? '#ef4444' : '#f59e0b') }}">
-                            {{ $isSender ? '-' : '+' }}{{ number_format($t->so_tien) }}đ
-                        </div>
-                        <div style="margin-top:6px;">
-                            <span class="badge badge-{{ $t->trang_thai }}">
-                                {{ ['pending'=>'Chờ','completed'=>'Hoàn thành','cancelled'=>'Đã huỷ','expired'=>'Hết hạn'][$t->trang_thai] ?? $t->trang_thai }}
-                            </span>
-                        </div>
-                        @if($t->trang_thai === 'pending' && $isSender)
-                        <form class="cancel-form" action="{{ route('money-wallets.qr.cancel', $t) }}" method="POST"
-                              onsubmit="return confirm('Huỷ QR này?')">
-                            @csrf
-                            <button type="submit" class="btn-cancel-sm" style="margin-top:6px;">Huỷ</button>
-                        </form>
-                        @endif
-                    </div>
-                </div>
-                @endforeach
-            </div>
-            @endif
         </div>
     </div>
 </div>
 
 <script src="https://unpkg.com/@zxing/library@0.18.6/umd/index.min.js"></script>
 <script>
+const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
+const CURRENT_USER_ID = {{ auth()->id() }};
+
+async function apiFetch(url, options = {}) {
+    const res = await fetch(url, {
+        headers: { 'Content-Type':'application/json', 'X-CSRF-TOKEN':CSRF, 'Accept':'application/json', ...options.headers },
+        ...options,
+    });
+    return res.json();
+}
+
+function showAlert(msg, type = 'success') {
+    const el = document.createElement('div');
+    el.className = `alert alert-${type}`;
+    el.textContent = (type === 'success' ? '✓ ' : '⚠ ') + msg;
+    document.getElementById('alertContainer').appendChild(el);
+    setTimeout(() => { el.style.transition='opacity .3s'; el.style.opacity='0'; setTimeout(()=>el.remove(),320); }, 4500);
+}
+
+function fmt(n) { return Number(n).toLocaleString('vi-VN'); }
+
+async function loadWallets() {
+    const wallets = await apiFetch('/api/money-wallets');
+    const sel = document.getElementById('walletId');
+    const active = wallets.filter ? wallets.filter(w => w.trang_thai !== 'khong_hoat_dong') : wallets;
+    if (!active.length) {
+        sel.innerHTML = '<option value="">Bạn chưa có ví nào. <a href="{{ route("money-wallets.index") }}">Tạo ví ngay</a></option>';
+        return;
+    }
+    sel.innerHTML = '<option value="">-- Chọn ví --</option>' +
+        active.map(w => `<option value="${w.id}">${w.bieu_tuong} ${w.ten_vi} — ${fmt(w.so_du)}đ</option>`).join('');
+}
+
+async function loadHistory() {
+    const data = await apiFetch('/api/money-wallets/qr/history');
+    const el = document.getElementById('historyContainer');
+
+    if (!data.length) {
+        el.innerHTML = `
+        <div class="empty-history">
+            <div style="font-size:48px;margin-bottom:12px;">📭</div>
+            <div style="font-weight:700;font-size:15px;color:#374151;margin-bottom:6px;">Chưa có giao dịch QR</div>
+            <div style="font-size:13px;">Tạo mã QR đầu tiên để chuyển tiền</div>
+        </div>`;
+        return;
+    }
+
+    const STATUS_LABELS = { pending:'Chờ', completed:'Hoàn thành', cancelled:'Đã huỷ', expired:'Hết hạn' };
+
+    el.innerHTML = `<div class="history-list">${data.map(t => {
+        const isSender   = t.sender_id === CURRENT_USER_ID;
+        const statusClass = t.trang_thai === 'completed' ? (isSender ? 'sent' : 'received') : (t.trang_thai === 'pending' ? 'pending' : 'sent');
+        const icon        = t.trang_thai === 'completed' ? (isSender ? '📤' : '📥') : (t.trang_thai === 'pending' ? '⏳' : '❌');
+        const date        = new Date(t.created_at).toLocaleDateString('vi-VN') + ' ' + new Date(t.created_at).toLocaleTimeString('vi-VN', {hour:'2-digit',minute:'2-digit'});
+        const walletName  = isSender ? t.sender_wallet?.ten_vi : t.receiver_wallet?.ten_vi;
+        const amtColor    = t.trang_thai === 'completed' && !isSender ? '#10b981' : (t.trang_thai === 'completed' ? '#ef4444' : '#f59e0b');
+
+        let titleHtml = '';
+        if (t.trang_thai === 'pending') {
+            titleHtml = `Đang chờ nhận${isSender ? ` <a href="/money-wallets/qr/scan/${t.qr_token}" style="font-size:11px;color:var(--primary);margin-left:6px;">🔗 Link</a>` : ''}`;
+        } else if (t.trang_thai === 'completed') {
+            titleHtml = isSender ? `→ ${t.receiver?.name || ''}` : `← ${t.sender?.name || ''}`;
+        } else {
+            titleHtml = t.trang_thai.charAt(0).toUpperCase() + t.trang_thai.slice(1);
+        }
+
+        return `
+        <div class="history-item ${statusClass}">
+            <div class="history-icon ${statusClass}">${icon}</div>
+            <div class="history-info">
+                <div class="history-title">${titleHtml}</div>
+                <div class="history-sub">${date}${t.ghi_chu ? ' · ' + t.ghi_chu.substring(0,40) : ''}</div>
+                ${walletName ? `<div class="history-sub">${walletName}</div>` : ''}
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+                <div style="font-size:17px;font-weight:900;color:${amtColor};">${isSender ? '-' : '+'}${fmt(t.so_tien)}đ</div>
+                <div style="margin-top:6px;"><span class="badge badge-${t.trang_thai}">${STATUS_LABELS[t.trang_thai] || t.trang_thai}</span></div>
+                ${t.trang_thai === 'pending' && isSender ? `<button class="btn-cancel-sm" style="margin-top:6px;" onclick="cancelQR(${t.id})">Huỷ</button>` : ''}
+            </div>
+        </div>`;
+    }).join('')}</div>`;
+}
+
+async function generateQR() {
+    const wallet_id = document.getElementById('walletId').value;
+    const so_tien   = parseFloat(document.getElementById('soTien').value);
+    const ghi_chu   = document.getElementById('ghiChu').value.trim();
+
+    if (!wallet_id) { showAlert('Vui lòng chọn ví nguồn', 'error'); return; }
+    if (!so_tien || so_tien < 1000) { showAlert('Số tiền tối thiểu là 1.000đ', 'error'); return; }
+
+    const res = await apiFetch('/api/money-wallets/qr/generate', {
+        method: 'POST',
+        body: JSON.stringify({ wallet_id, so_tien, ghi_chu }),
+    });
+
+    if (res.qr_token) {
+        window.location.href = `/money-wallets/qr/result/${res.qr_token}`;
+    } else {
+        showAlert(res.message || 'Có lỗi xảy ra', 'error');
+    }
+}
+
+async function cancelQR(id) {
+    if (!confirm('Huỷ mã QR này?')) return;
+    const res = await apiFetch(`/api/money-wallets/qr/${id}/cancel`, { method: 'POST' });
+    if (res.success) { showAlert('Đã huỷ mã QR'); loadHistory(); }
+    else showAlert(res.message || 'Có lỗi xảy ra', 'error');
+}
+
 let cameraOn = false;
 let codeReader = null;
 
@@ -308,7 +311,6 @@ function stopCamera() {
     box.onclick = toggleCamera;
 }
 
-// ── Upload ảnh QR và decode ──────────────────────────
 function handleQrUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -316,11 +318,9 @@ function handleQrUpload(event) {
     const resultEl  = document.getElementById('uploadResult');
     const uploadBox = document.getElementById('uploadBox');
 
-    // Hiện loading
     uploadBox.innerHTML = `<div style="font-size:20px;">⏳</div><div style="font-size:13px;color:#9ca3af;margin-top:6px;">Đang đọc mã QR...</div>`;
     resultEl.style.display = 'none';
 
-    // FIX: Dùng FileReader → DataURL thay vì blob URL (ổn định hơn)
     const fileReader = new FileReader();
 
     fileReader.onerror = function() {
@@ -339,54 +339,41 @@ function handleQrUpload(event) {
         };
 
         img.onload = function() {
-            // FIX: Resize ảnh xuống max 800px trước khi decode
-            // → ZXing đọc ảnh lớn rất dễ fail
             const canvas = document.createElement('canvas');
             const ctx    = canvas.getContext('2d');
-
             const maxSize = 800;
-            let w = img.naturalWidth;
-            let h = img.naturalHeight;
-
+            let w = img.naturalWidth, h = img.naturalHeight;
             if (w > maxSize || h > maxSize) {
                 const scale = Math.min(maxSize / w, maxSize / h);
                 w = Math.floor(w * scale);
                 h = Math.floor(h * scale);
             }
-
-            canvas.width  = w;
-            canvas.height = h;
+            canvas.width = w; canvas.height = h;
             ctx.drawImage(img, 0, 0, w, h);
 
-            // FIX: Dùng decodeFromImage (API chuẩn của ZXing) thay vì
-            // tự build RGBLuminanceSource + BinaryBitmap thủ công (rất dễ lỗi)
             const qrReader = new ZXing.BrowserQRCodeReader();
-
-            // Tạo image element từ canvas để truyền vào decodeFromImage
             const resizedImg = new Image();
             resizedImg.onload = function() {
                 qrReader.decodeFromImage(resizedImg)
                     .then(function(result) {
                         const qrUrl = result.getText();
-
                         resetUploadBox();
-
                         if (qrUrl.includes('/money-wallets/qr/scan/') || qrUrl.includes('/qr/')) {
                             resultEl.style.display = 'block';
                             resultEl.innerHTML = `
-                                <div style="background:#d1fae5;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;">
-                                    <span style="font-size:20px;">✅</span>
-                                    <div>
-                                        <div style="font-size:13px;font-weight:700;color:#065f46;">Đọc QR thành công!</div>
-                                        <div style="font-size:12px;color:#047857;margin-top:2px;">Đang chuyển hướng...</div>
-                                    </div>
-                                </div>`;
+                            <div style="background:#d1fae5;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;">
+                                <span style="font-size:20px;">✅</span>
+                                <div>
+                                    <div style="font-size:13px;font-weight:700;color:#065f46;">Đọc QR thành công!</div>
+                                    <div style="font-size:12px;color:#047857;margin-top:2px;">Đang chuyển hướng...</div>
+                                </div>
+                            </div>`;
                             setTimeout(() => window.location.href = qrUrl, 800);
                         } else {
-                            showUploadError('QR code không phải của hệ thống Monexa.');
+                            showUploadError('QR code không phải của hệ thống này.');
                         }
                     })
-                    .catch(function(err) {
+                    .catch(function() {
                         resetUploadBox();
                         showUploadError('Không tìm thấy mã QR trong ảnh. Hãy thử ảnh rõ hơn hoặc dùng camera.');
                     });
@@ -405,17 +392,20 @@ function showUploadError(msg) {
     const resultEl = document.getElementById('uploadResult');
     resultEl.style.display = 'block';
     resultEl.innerHTML = `
-        <div style="background:#fee2e2;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;">
-            <span style="font-size:20px;">❌</span>
-            <div style="font-size:13px;font-weight:600;color:#991b1b;">${msg}</div>
-        </div>`;
+    <div style="background:#fee2e2;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:20px;">❌</span>
+        <div style="font-size:13px;font-weight:600;color:#991b1b;">${msg}</div>
+    </div>`;
 }
 
 function resetUploadBox() {
     document.getElementById('uploadBox').innerHTML = `
-        <div style="font-size:32px;margin-bottom:8px;">🖼️</div>
-        <div style="font-weight:700;color:#374151;font-size:14px;">Upload ảnh QR</div>
-        <div style="font-size:12px;color:#9ca3af;margin-top:4px;">Nhấn để chọn ảnh chứa mã QR</div>`;
+    <div style="font-size:32px;margin-bottom:8px;">🖼️</div>
+    <div style="font-weight:700;color:#374151;font-size:14px;">Upload ảnh QR</div>
+    <div style="font-size:12px;color:#9ca3af;margin-top:4px;">Nhấn để chọn ảnh chứa mã QR</div>`;
 }
+
+loadWallets();
+loadHistory();
 </script>
 @endsection

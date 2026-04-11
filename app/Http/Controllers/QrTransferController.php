@@ -1,23 +1,23 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\MoneyWallet;
 use App\Models\QrTransfer;
 use App\Models\Transaction;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class QrTransferController extends Controller
 {
-    // Trang chính: tạo QR + lịch sử
-    public function index()
+    public function history(): JsonResponse
     {
-        $userId  = Auth::id();
-        $wallets = MoneyWallet::forUser($userId)->active()->orderBy('ten_vi')->get();
+        $userId = Auth::id();
 
         $history = QrTransfer::where('sender_id', $userId)
             ->orWhere('receiver_id', $userId)
@@ -26,19 +26,28 @@ class QrTransferController extends Controller
             ->limit(30)
             ->get();
 
-        return view('money-wallets.qr-transfer', compact('wallets', 'history'));
+        return response()->json($history);
     }
 
-    // Tạo QR code mới
-    public function generate(Request $request)
+    public function show(string $token): JsonResponse
+    {
+        $qrTransfer = QrTransfer::where('qr_token', $token)
+            ->with(['sender', 'senderWallet'])
+            ->first();
+
+        if (!$qrTransfer) {
+            return response()->json(['message' => 'QR không tồn tại.'], 404);
+        }
+
+        return response()->json($qrTransfer);
+    }
+
+    public function generate(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'wallet_id' => 'required|exists:money_wallets,id',
             'so_tien'   => 'required|numeric|min:1000|max:999999999',
             'ghi_chu'   => 'nullable|string|max:255',
-        ], [
-            'so_tien.min' => 'Số tiền tối thiểu 1.000đ',
-            'so_tien.max' => 'Số tiền quá lớn',
         ]);
 
         $wallet = MoneyWallet::where('id', $validated['wallet_id'])
@@ -47,18 +56,18 @@ class QrTransferController extends Controller
             ->firstOrFail();
 
         if ($wallet->so_du < $validated['so_tien']) {
-            return back()->withInput()->with('error',
-                "Ví \"{$wallet->ten_vi}\" không đủ số dư! " .
-                "Cần: " . number_format($validated['so_tien']) . "đ | " .
-                "Hiện có: " . number_format($wallet->so_du) . "đ"
-            );
+            return response()->json([
+                'message' => "Ví \"{$wallet->ten_vi}\" không đủ số dư! " .
+                    "Cần: " . number_format($validated['so_tien']) . "đ | " .
+                    "Hiện có: " . number_format($wallet->so_du) . "đ",
+            ], 422);
         }
 
         $token = Str::random(32);
 
         $qrTransfer = QrTransfer::create([
             'sender_id'        => Auth::id(),
-            'receiver_id'      => Auth::id(), // placeholder, cập nhật khi confirm
+            'receiver_id'      => Auth::id(),
             'sender_wallet_id' => $wallet->id,
             'so_tien'          => $validated['so_tien'],
             'ghi_chu'          => $validated['ghi_chu'] ?? null,
@@ -67,44 +76,13 @@ class QrTransferController extends Controller
             'expires_at'       => now()->addMinutes(15),
         ]);
 
-        // URL nhúng vào QR
-        $qrUrl = route('money-wallets.qr.scan-page', $token);
-
-        // Tạo QR bằng Google Charts API (không cần cài package)
-        $qrApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&ecc=H&data=' . urlencode($qrUrl);
-
-        return view('money-wallets.qr-result', compact('qrTransfer', 'qrApiUrl', 'wallet', 'qrUrl'));
+        return response()->json([
+            'id'        => $qrTransfer->id,
+            'qr_token'  => $token,
+        ], 201);
     }
 
-    // Trang scan (người nhận mở link này)
-    public function scanPage(string $token)
-    {
-        $qrTransfer = QrTransfer::where('qr_token', $token)
-            ->with(['sender', 'senderWallet'])
-            ->firstOrFail();
-
-        if (!$qrTransfer->isUsable()) {
-            $msg = $qrTransfer->trang_thai === 'completed'
-                ? 'QR code này đã được sử dụng.'
-                : ($qrTransfer->trang_thai === 'cancelled'
-                    ? 'QR code này đã bị huỷ.'
-                    : 'QR code đã hết hạn (15 phút). Yêu cầu người gửi tạo mã mới.');
-            return view('money-wallets.qr-invalid', compact('msg'));
-        }
-
-        if ($qrTransfer->sender_id === Auth::id()) {
-            return view('money-wallets.qr-invalid', [
-                'msg' => 'Bạn không thể nhận tiền từ chính mình.'
-            ]);
-        }
-
-        $myWallets = MoneyWallet::forUser(Auth::id())->active()->orderBy('ten_vi')->get();
-
-        return view('money-wallets.qr-scan', compact('qrTransfer', 'myWallets', 'token'));
-    }
-
-    // Xác nhận nhận tiền
-    public function confirm(Request $request, string $token)
+    public function confirm(Request $request, string $token): JsonResponse
     {
         $validated = $request->validate([
             'receiver_wallet_id' => 'required|exists:money_wallets,id',
@@ -112,14 +90,18 @@ class QrTransferController extends Controller
 
         $qrTransfer = QrTransfer::where('qr_token', $token)
             ->with(['sender', 'senderWallet'])
-            ->firstOrFail();
+            ->first();
+
+        if (!$qrTransfer) {
+            return response()->json(['message' => 'QR không tồn tại.'], 404);
+        }
 
         if (!$qrTransfer->isUsable()) {
-            return back()->with('error', 'QR code không còn hiệu lực.');
+            return response()->json(['message' => 'QR code không còn hiệu lực.'], 422);
         }
 
         if ($qrTransfer->sender_id === Auth::id()) {
-            return back()->with('error', 'Bạn không thể tự chuyển cho mình.');
+            return response()->json(['message' => 'Bạn không thể tự chuyển cho mình.'], 422);
         }
 
         $receiverWallet = MoneyWallet::where('id', $validated['receiver_wallet_id'])
@@ -134,14 +116,12 @@ class QrTransferController extends Controller
 
             if ($senderWallet->so_du < $qrTransfer->so_tien) {
                 DB::rollBack();
-                return back()->with('error', 'Người gửi không còn đủ số dư để thực hiện giao dịch.');
+                return response()->json(['message' => 'Người gửi không còn đủ số dư để thực hiện giao dịch.'], 422);
             }
 
-            // Lấy/tạo category
             $catChi = $this->getOrCreateQrCategory($qrTransfer->sender_id, 'CHI');
             $catThu = $this->getOrCreateQrCategory(Auth::id(), 'THU');
 
-            // Giao dịch CHI cho người gửi
             Transaction::create([
                 'user_id'                => $qrTransfer->sender_id,
                 'money_wallet_id'        => $senderWallet->id,
@@ -155,7 +135,6 @@ class QrTransferController extends Controller
                 'la_chuyen_vi'           => false,
             ]);
 
-            // Giao dịch THU cho người nhận
             Transaction::create([
                 'user_id'                => Auth::id(),
                 'money_wallet_id'        => $receiverWallet->id,
@@ -169,11 +148,9 @@ class QrTransferController extends Controller
                 'la_chuyen_vi'           => false,
             ]);
 
-            // Cập nhật số dư ví
             $senderWallet->decrement('so_du', $qrTransfer->so_tien);
             $receiverWallet->increment('so_du', $qrTransfer->so_tien);
 
-            // Hoàn tất QR
             $qrTransfer->update([
                 'receiver_id'        => Auth::id(),
                 'receiver_wallet_id' => $receiverWallet->id,
@@ -183,37 +160,32 @@ class QrTransferController extends Controller
 
             DB::commit();
 
-            return redirect()->route('money-wallets.qr.index')
-                ->with('success',
-                    '✅ Đã nhận ' . number_format($qrTransfer->so_tien) . 'đ từ ' . $qrTransfer->sender->name . '!'
-                );
+            return response()->json(['success' => true]);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
+            return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
     }
 
-    // Huỷ QR (chỉ người tạo)
-    public function cancel(QrTransfer $qrTransfer)
+    public function cancel(QrTransfer $qrTransfer): JsonResponse
     {
         abort_if($qrTransfer->sender_id !== Auth::id(), 403);
         abort_if(!$qrTransfer->isPending(), 422, 'QR không ở trạng thái chờ.');
 
         $qrTransfer->update(['trang_thai' => 'cancelled']);
 
-        return back()->with('success', 'Đã huỷ QR code.');
+        return response()->json(['success' => true]);
     }
 
-    // Helper: lấy hoặc tạo category QR
     private function getOrCreateQrCategory(int $userId, string $loai): Category
     {
         $parent = Category::firstOrCreate(
             [
-                'user_id'        => $userId,
-                'ten_danh_muc'   => 'Chuyển khoản QR',
-                'danh_muc_cha_id'=> null,
-                'loai_danh_muc'  => $loai,
+                'user_id'         => $userId,
+                'ten_danh_muc'    => 'Chuyển khoản QR',
+                'danh_muc_cha_id' => null,
+                'loai_danh_muc'   => $loai,
             ],
             [
                 'bieu_tuong' => '📱',
@@ -223,10 +195,10 @@ class QrTransferController extends Controller
 
         return Category::firstOrCreate(
             [
-                'user_id'        => $userId,
-                'ten_danh_muc'   => ($loai === 'CHI' ? 'Gửi QR' : 'Nhận QR'),
-                'danh_muc_cha_id'=> $parent->id,
-                'loai_danh_muc'  => $loai,
+                'user_id'         => $userId,
+                'ten_danh_muc'    => ($loai === 'CHI' ? 'Gửi QR' : 'Nhận QR'),
+                'danh_muc_cha_id' => $parent->id,
+                'loai_danh_muc'   => $loai,
             ],
             [
                 'bieu_tuong' => ($loai === 'CHI' ? '📤' : '📥'),

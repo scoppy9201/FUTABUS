@@ -90,6 +90,10 @@ class GroupMemberController extends Controller
 
             GroupNotifier::invited($group, $email, Auth::user()->name);
 
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Đã gửi lời mời.', 'email' => $email], 201);
+            }
+
             return back()->with('success', "Đã gửi lời mời đến {$email}. Hết hạn sau 48 giờ.");
 
         } catch (\Exception $e) {
@@ -153,6 +157,10 @@ class GroupMemberController extends Controller
                 ->where('user_id', Auth::id())->first();
             if ($newMem) GroupNotifier::memberJoined($group, $newMem);
 
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Đã gia nhập nhóm.', 'group_id' => $group->id]);
+            }
+
             return redirect()->route('groups.show', $group)
                 ->with('success', "Chào mừng bạn đã gia nhập nhóm \"{$group->ten_nhom}\"!");
 
@@ -183,6 +191,10 @@ class GroupMemberController extends Controller
             'responded_at' => now(),
         ]);
 
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Đã từ chối lời mời.']);
+        }
+
         return redirect()->route('groups.index')
             ->with('success', 'Đã từ chối lời mời tham gia nhóm.');
     }
@@ -208,6 +220,10 @@ class GroupMemberController extends Controller
         ]);
 
         GroupNotifier::memberRemoved($group, $member);
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Đã xóa thành viên.', 'user_id' => $member->user_id]);
+        }
 
         return back()->with('success', "Đã xóa {$member->user->name} khỏi nhóm.");
     }
@@ -238,6 +254,10 @@ class GroupMemberController extends Controller
 
         GroupNotifier::memberLeft($group, $member);
 
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Đã rời nhóm.', 'group_id' => $group->id]);
+        }
+
         return redirect()->route('groups.index')
             ->with('success', "Bạn đã rời nhóm \"{$group->ten_nhom}\".");
     }
@@ -252,6 +272,10 @@ class GroupMemberController extends Controller
         $member->update(['vai_tro' => 'admin']);
 
         GroupNotifier::promoted($group, $member);
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Đã chỉ định Admin.', 'user_id' => $member->user_id]);
+        }
 
         return back()->with('success', "{$member->user->name} đã được chỉ định làm Admin.");
     }
@@ -280,6 +304,10 @@ class GroupMemberController extends Controller
         $member->update(['vai_tro' => 'member']);
 
         GroupNotifier::demoted($group, $member);
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Đã hạ quyền.', 'user_id' => $member->user_id]);
+        }
 
         return back()->with('success', "Đã hạ quyền {$member->user->name} xuống Member.");
     }

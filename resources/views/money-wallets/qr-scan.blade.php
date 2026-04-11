@@ -1,3 +1,4 @@
+{{-- ═══ qr/scan-confirm.blade.php ═══ --}}
 @extends('layouts.app')
 @section('title', 'Xác nhận nhận tiền')
 @section('content')
@@ -41,11 +42,12 @@ body.dark .form-ctrl { background: #141820; border-color: rgba(255,255,255,.1); 
     border: none; cursor: pointer; transition: opacity .2s;
 }
 .btn-confirm:hover { opacity: .9; }
-.btn-back-link {
-    display: block; text-align: center; margin-top: 16px;
-    color: #9ca3af; font-size: 13px; text-decoration: none;
-}
+.btn-back-link { display: block; text-align: center; margin-top: 16px; color: #9ca3af; font-size: 13px; text-decoration: none; }
 .btn-back-link:hover { color: var(--primary); }
+.skeleton { background: linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 8px; }
+@keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+.alert { display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:10px;font-size:14px;font-weight:500;margin-bottom:20px; }
+.alert-error { background:#fee2e2;color:#991b1b;border-left:4px solid #ef4444; }
 </style>
 
 <div style="max-width:460px;margin:0 auto;">
@@ -54,57 +56,101 @@ body.dark .form-ctrl { background: #141820; border-color: rgba(255,255,255,.1); 
     </h1>
 </div>
 
-<div class="scan-confirm-wrap">
-    <div class="sc-hdr">
-        <div style="font-size:13px;opacity:.85;">Bạn được chuyển</div>
-        <div class="amount">+{{ number_format($qrTransfer->so_tien) }}đ</div>
-        <div class="from">từ {{ $qrTransfer->sender->name }}</div>
-    </div>
-    <div class="sc-body">
-        <div class="info-box">
-            <div class="info-row">
-                <span class="lbl">Người gửi</span>
-                <span class="val">{{ $qrTransfer->sender->name }}</span>
-            </div>
-            <div class="info-row">
-                <span class="lbl">Ví gửi</span>
-                <span class="val">{{ $qrTransfer->senderWallet->bieu_tuong }} {{ $qrTransfer->senderWallet->ten_vi }}</span>
-            </div>
-            @if($qrTransfer->ghi_chu)
-            <div class="info-row">
-                <span class="lbl">Ghi chú</span>
-                <span class="val">{{ $qrTransfer->ghi_chu }}</span>
-            </div>
-            @endif
-            <div class="info-row">
-                <span class="lbl">Hết hạn lúc</span>
-                <span class="val">{{ $qrTransfer->expires_at->format('H:i d/m/Y') }}</span>
-            </div>
-        </div>
+<div id="alertContainer" style="max-width:460px;margin:0 auto;"></div>
 
-        @if($myWallets->isEmpty())
-            <div style="text-align:center;color:#9ca3af;padding:20px;">
-                Bạn chưa có ví nào để nhận tiền. <a href="{{ route('money-wallets.index') }}">Tạo ví ngay</a>
-            </div>
-        @else
-        <form action="{{ route('money-wallets.qr.confirm', $token) }}" method="POST">
-            @csrf
-            <div class="form-group">
-                <label class="form-label">Chọn ví nhận <span style="color:#ef4444;">*</span></label>
-                <select name="receiver_wallet_id" class="form-ctrl" required>
-                    <option value="">-- Chọn ví --</option>
-                    @foreach($myWallets as $w)
-                    <option value="{{ $w->id }}">
-                        {{ $w->bieu_tuong }} {{ $w->ten_vi }} — {{ number_format($w->so_du) }}đ
-                    </option>
-                    @endforeach
-                </select>
-            </div>
-            <button type="submit" class="btn-confirm">✅ Xác nhận nhận tiền</button>
-        </form>
-        @endif
-
-        <a href="{{ route('money-wallets.qr.index') }}" class="btn-back-link">← Quay lại</a>
-    </div>
+<div id="confirmWrap" style="max-width:460px;margin:0 auto;">
+    <div class="skeleton" style="height:420px;border-radius:20px;"></div>
 </div>
+
+<script>
+const QR_TOKEN = '{{ request()->route("token") }}';
+const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+async function apiFetch(url, options = {}) {
+    const res = await fetch(url, {
+        headers: { 'Content-Type':'application/json', 'X-CSRF-TOKEN':CSRF, 'Accept':'application/json', ...options.headers },
+        ...options,
+    });
+    return res.json();
+}
+
+function showAlert(msg, type = 'error') {
+    const el = document.createElement('div');
+    el.className = `alert alert-${type}`;
+    el.textContent = '⚠ ' + msg;
+    document.getElementById('alertContainer').appendChild(el);
+}
+
+function fmt(n) { return Number(n).toLocaleString('vi-VN'); }
+
+async function loadConfirm() {
+    const [qrData, walletData] = await Promise.all([
+        apiFetch(`/api/money-wallets/qr/${QR_TOKEN}`),
+        apiFetch('/api/money-wallets'),
+    ]);
+
+    if (!qrData.qr_token || qrData.trang_thai !== 'pending') {
+        document.getElementById('confirmWrap').innerHTML = `
+        <div class="scan-confirm-wrap">
+            <div style="text-align:center;padding:48px 32px;color:#ef4444;">
+                <div style="font-size:48px;margin-bottom:12px;">❌</div>
+                <div style="font-weight:700;font-size:16px;">${qrData.message || 'QR không hợp lệ hoặc đã hết hạn'}</div>
+                <a href="{{ route('money-wallets.qr.index') }}" class="btn-back-link" style="margin-top:16px;display:inline-block;">← Quay lại</a>
+            </div>
+        </div>`;
+        return;
+    }
+
+    const myWallets = (walletData.filter ? walletData : []).filter(w => w.trang_thai !== 'khong_hoat_dong');
+    const expiresAt = new Date(qrData.expires_at).toLocaleString('vi-VN');
+
+    const walletOptions = myWallets.length
+        ? '<option value="">-- Chọn ví --</option>' + myWallets.map(w => `<option value="${w.id}">${w.bieu_tuong} ${w.ten_vi} — ${fmt(w.so_du)}đ</option>`).join('')
+        : '<option value="">Bạn chưa có ví nào</option>';
+
+    document.getElementById('confirmWrap').innerHTML = `
+    <div class="scan-confirm-wrap">
+        <div class="sc-hdr">
+            <div style="font-size:13px;opacity:.85;">Bạn được chuyển</div>
+            <div class="amount">+${fmt(qrData.so_tien)}đ</div>
+            <div class="from">từ ${qrData.sender?.name || ''}</div>
+        </div>
+        <div class="sc-body">
+            <div class="info-box">
+                <div class="info-row"><span class="lbl">Người gửi</span><span class="val">${qrData.sender?.name || ''}</span></div>
+                <div class="info-row"><span class="lbl">Ví gửi</span><span class="val">${qrData.sender_wallet?.bieu_tuong || ''} ${qrData.sender_wallet?.ten_vi || ''}</span></div>
+                ${qrData.ghi_chu ? `<div class="info-row"><span class="lbl">Ghi chú</span><span class="val">${qrData.ghi_chu}</span></div>` : ''}
+                <div class="info-row"><span class="lbl">Hết hạn lúc</span><span class="val">${expiresAt}</span></div>
+            </div>
+            ${!myWallets.length
+                ? `<div style="text-align:center;color:#9ca3af;padding:20px;">Bạn chưa có ví nào để nhận tiền. <a href="{{ route('money-wallets.index') }}">Tạo ví ngay</a></div>`
+                : `<div class="form-group">
+                    <label class="form-label">Chọn ví nhận <span style="color:#ef4444;">*</span></label>
+                    <select id="receiverWalletId" class="form-ctrl">${walletOptions}</select>
+                </div>
+                <button class="btn-confirm" onclick="confirmReceive()">✅ Xác nhận nhận tiền</button>`
+            }
+            <a href="{{ route('money-wallets.qr.index') }}" class="btn-back-link">← Quay lại</a>
+        </div>
+    </div>`;
+}
+
+async function confirmReceive() {
+    const receiver_wallet_id = document.getElementById('receiverWalletId')?.value;
+    if (!receiver_wallet_id) { showAlert('Vui lòng chọn ví nhận'); return; }
+
+    const res = await apiFetch(`/api/money-wallets/qr/${QR_TOKEN}/confirm`, {
+        method: 'POST',
+        body: JSON.stringify({ receiver_wallet_id }),
+    });
+
+    if (res.success) {
+        window.location.href = '{{ route("money-wallets.index") }}';
+    } else {
+        showAlert(res.message || 'Có lỗi xảy ra');
+    }
+}
+
+loadConfirm();
+</script>
 @endsection

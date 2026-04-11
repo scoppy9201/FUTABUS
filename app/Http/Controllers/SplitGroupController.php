@@ -44,6 +44,10 @@ class SplitGroupController extends Controller
                         ];
                     });
 
+        if (request()->wantsJson()) {
+            return response()->json(['groups' => $groups]);
+        }
+
         return view('groups.index', compact('groups'));
     }
 
@@ -82,6 +86,17 @@ class SplitGroupController extends Controller
             ->where('trang_thai', 'pending')->count();
         $pendingExpense = $group->expenseProposals()
             ->where('trang_thai', 'pending')->count();
+
+        if (request()->wantsJson()) {
+            return response()->json([
+                'group' => $group,
+                'members' => $members,
+                'laAdmin' => $laAdmin,
+                'hienSoDu' => $hienSoDu,
+                'pendingBalance' => $pendingBalance,
+                'pendingExpense' => $pendingExpense,
+            ]);
+        }
 
         return view('groups.show', compact(
             'group', 'members', 'laAdmin', 'hienSoDu',

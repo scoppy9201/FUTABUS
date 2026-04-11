@@ -76,7 +76,13 @@ body.dark .fc-name { color:#e5e7eb; }
 
 /* Cleared state */
 .cleared-box {
-    text-align:center;padding:60px 20px;
+    text-align: center;
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 }
 .cleared-icon { font-size:56px;margin-bottom:16px; }
 .cleared-title { font-size:20px;font-weight:800;color:#1f2937;margin-bottom:8px; }
@@ -174,7 +180,7 @@ body.dark .debt-table tbody tr:hover { background:rgba(255,255,255,0.02); }
         <div class="cleared-sub">Tất cả các khoản nợ đã được cân bằng hoặc thanh toán</div>
     </div>
     @else
-    <div class="flows-grid">
+    <div class="flows-grid" style="justify-content:center;align-items:center;">
         @foreach($simplified as $flow)
         @php
             $colors=['#4a90e2','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
@@ -315,5 +321,83 @@ setTimeout(() => {
         setTimeout(()=>a.remove(),300);
     });
 }, 4500);
+</script>
+<script>
+async function refreshDebtSummary() {
+    try {
+        const GROUP_ID = {{ $group->id }};
+        const res = await fetch(`/api/monaxe/groups/${GROUP_ID}/debts/summary`, { credentials: 'same-origin' });
+        if (!res.ok) return;
+        const j = await res.json();
+        if (!j) return;
+
+        // update balances
+        if (j.balances) {
+            const balRow = document.querySelector('.balance-row');
+            if (balRow) {
+                balRow.innerHTML = Object.entries(j.balances).map(([uid, bal], i) => {
+                    const member = (j.members || []).find(m => m.user_id == uid) || {};
+                    const initials = (member.name||'').substr(0,2).toUpperCase();
+                    const cls = bal > 1 ? 'pos' : (bal < -1 ? 'neg' : 'zero');
+                    const prefix = bal > 1 ? '+' : '';
+                    const avatar = member.avatar ? (member.avatar.startsWith('http') ? member.avatar : '/storage/' + member.avatar) : null;
+                    return `
+                        <div class="bal-card ${cls}">
+                            ${avatar ? `<img src="${avatar}" class="bal-av" style="object-fit:cover;" alt="">` : `<div class="bal-av" style="background:linear-gradient(135deg,#4a90e2,#4a90e2cc)">${initials}</div>`}
+                            <div class="bal-name">${escapeHtml(member.name || '—')}</div>
+                            ${Math.abs(bal) <= 1 ? `<div class="bal-val zero">Không nợ</div>` : `<div class="bal-val ${cls}">${prefix}${Number(Math.abs(bal)).toLocaleString('vi-VN')}đ</div>`}
+                        </div>`;
+                }).join('');
+            }
+        }
+
+        // simplified flows
+        if (j.simplified) {
+            const grid = document.querySelector('.flows-grid');
+            if (grid) {
+                if (j.simplified.length === 0) {
+                    grid.innerHTML = '<div class="cleared-box"><div class="cleared-icon">✔</div><div class="cleared-title">Không có ai nợ ai!</div><div class="cleared-sub">Tất cả các khoản nợ đã được cân bằng hoặc thanh toán</div></div>';
+                } else {
+                    grid.innerHTML = j.simplified.map(flow => `
+                        <div class="flow-card">
+                            <div class="fc-person"><div class="fc-av" style="background:linear-gradient(135deg,#4a90e2,#4a90e2cc)">${(flow.from_name||'').substr(0,2).toUpperCase()}</div><div class="fc-name">${escapeHtml(flow.from_name)}</div><div style="font-size:11px;color:var(--danger);font-weight:600">nợ</div></div>
+                            <div class="fc-mid"><div class="fc-arrow">→</div><div class="fc-amount">${Number(flow.amount).toLocaleString('vi-VN')}đ</div></div>
+                            <div class="fc-person"><div class="fc-av" style="background:linear-gradient(135deg,#10b981,#10b981cc)">${(flow.to_name||'').substr(0,2).toUpperCase()}</div><div class="fc-name">${escapeHtml(flow.to_name)}</div><div style="font-size:11px;color:var(--success);font-weight:600">nhận</div></div>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        // rawList table
+        if (j.rawList) {
+            const tbody = document.querySelector('.debt-table tbody');
+            if (tbody) {
+                tbody.innerHTML = j.rawList.map((d, i) => `
+                    <tr>
+                        <td>${i+1}</td>
+                        <td>
+                            <div class="debt-persons">
+                                ${d.nguoi_no_avatar ? `<img src="${(d.nguoi_no_avatar.startsWith('http')?d.nguoi_no_avatar:'/storage/'+d.nguoi_no_avatar)}" class="debt-av-sm" style="object-fit:cover;">` : `<div class="debt-av-sm" style="background:#4a90e2">${(d.nguoi_no||'').substr(0,2).toUpperCase()}</div>`}
+                                <strong style="font-size:13px;color:#1f2937">${escapeHtml(d.nguoi_no)}</strong>
+                                <span class="debt-arrow-sm">→</span>
+                                ${d.chu_no_avatar ? `<img src="${(d.chu_no_avatar.startsWith('http')?d.chu_no_avatar:'/storage/'+d.chu_no_avatar)}" class="debt-av-sm" style="object-fit:cover;">` : `<div class="debt-av-sm" style="background:#10b981">${(d.chu_no||'').substr(0,2).toUpperCase()}</div>`}
+                                <strong style="font-size:13px;color:#1f2937">${escapeHtml(d.chu_no)}</strong>
+                            </div>
+                        </td>
+                        <td><strong style="color:var(--danger)">${Number(d.so_tien).toLocaleString('vi-VN')}đ</strong></td>
+                        <td style="color:#6b7280">${escapeHtml(d.ghi_chu || '—')}</td>
+                        <td><span class="st-badge st-${d.trang_thai}">${escapeHtml(d.trang_thai)}</span></td>
+                        <td>${d.trang_thai !== 'settled' ? `<button class="btn-primary btn-success btn-sm">Đã trả</button>` : '<span style="font-size:12px;color:#9ca3af">Hoàn tất</span>'}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+    } catch (e) {}
+}
+
+function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+
+document.addEventListener('DOMContentLoaded', () => refreshDebtSummary());
 </script>
 @endsection

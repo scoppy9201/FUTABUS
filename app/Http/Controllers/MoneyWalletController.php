@@ -1,30 +1,34 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\MoneyWallet;
 use App\Models\WalletAdjustment;
 use App\Models\Transaction;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class MoneyWalletController extends Controller
 {
-    // ── Danh sách ví ──────────────────────────────────────
-    public function index()
+    public function index(): JsonResponse
     {
-        $userId = Auth::id();
-
-        $wallets = MoneyWallet::forUser($userId)
-            ->active()
+        $wallets = MoneyWallet::forUser(Auth::id())
             ->orderByDesc('created_at')
             ->get();
 
-        $walletsByType = $wallets->groupBy('loai_vi');
+        return response()->json($wallets);
+    }
 
-        // Tổng tài sản = THU - CHI (bỏ tổng số dư ví)
+    public function summary(): JsonResponse
+    {
+        $userId = Auth::id();
+
+        $wallets = MoneyWallet::forUser($userId)->active()->get();
+
         $tongThu = Transaction::where('user_id', $userId)
             ->where('loai_giao_dich', 'THU')
             ->where('la_chuyen_vi', false)
@@ -35,37 +39,37 @@ class MoneyWalletController extends Controller
             ->where('la_chuyen_vi', false)
             ->sum('so_tien');
 
-        $tongTaiSan = $tongThu - $tongChi;
+        $tongTaiSan  = $tongThu - $tongChi;
+        $tongSoDuVi  = $wallets->sum('so_du_ban_dau');
 
-        $stats = [
-            'tong_vi'      => $wallets->count(),
-            'tong_so_du'   => $tongTaiSan, // giữ key cũ để không break view khác
-            'vi_tien_mat'  => $wallets->where('loai_vi', 'tien_mat')->sum('so_du'),
-            'vi_ngan_hang' => $wallets->where('loai_vi', 'ngan_hang')->sum('so_du'),
-            'vi_dien_tu'   => $wallets->where('loai_vi', 'vi_dien_tu')->sum('so_du'),
-        ];
-
-        $inactiveWallets = MoneyWallet::forUser($userId)
-            ->where('trang_thai', 'inactive')
-            ->get();
-
-        // Tổng so_du_ban_dau hiện tại của tất cả ví active (để validate khi tạo ví mới)
-        $tongSoDuVi = $wallets->sum('so_du_ban_dau');
-
-        return view('money-wallets.index', compact(
-            'wallets', 'walletsByType', 'stats', 'inactiveWallets',
-            'tongTaiSan', 'tongThu', 'tongChi', 'tongSoDuVi'
-        ));
+        return response()->json([
+            'tong_tai_san'  => $tongTaiSan,
+            'tong_thu'      => $tongThu,
+            'tong_chi'      => $tongChi,
+            'tong_vi'       => $wallets->count(),
+            'tong_so_du_vi' => $tongSoDuVi,
+            'con_lai'       => $tongTaiSan - $tongSoDuVi,
+        ]);
     }
 
-    // ── Chi tiết ví + lịch sử ────────────────────────────
-    public function show(MoneyWallet $moneyWallet)
+    public function show(MoneyWallet $moneyWallet): JsonResponse
     {
         $this->checkOwnership($moneyWallet);
 
         $moneyWallet->load('transactions.category');
 
-        // Giao dịch thực (loại bỏ chuyển ví)
+        $moneyWallet->stats = [
+            'tong_thu' => $moneyWallet->getTotalIncome(),
+            'tong_chi' => $moneyWallet->getTotalExpense(),
+        ];
+
+        return response()->json($moneyWallet);
+    }
+
+    public function transactions(MoneyWallet $moneyWallet): JsonResponse
+    {
+        $this->checkOwnership($moneyWallet);
+
         $transactions = $moneyWallet->transactions()
             ->where('la_chuyen_vi', false)
             ->with('category')
@@ -73,7 +77,13 @@ class MoneyWalletController extends Controller
             ->orderByDesc('created_at')
             ->paginate(15);
 
-        // Lịch sử chuyển ví
+        return response()->json($transactions->items());
+    }
+
+    public function transfers(MoneyWallet $moneyWallet): JsonResponse
+    {
+        $this->checkOwnership($moneyWallet);
+
         $transfers = \App\Models\WalletTransfer::where(function ($q) use ($moneyWallet) {
                 $q->where('from_wallet_id', $moneyWallet->id)
                   ->orWhere('to_wallet_id', $moneyWallet->id);
@@ -84,25 +94,22 @@ class MoneyWalletController extends Controller
             ->limit(20)
             ->get();
 
-        // Lịch sử điều chỉnh
+        return response()->json($transfers);
+    }
+
+    public function adjustments(MoneyWallet $moneyWallet): JsonResponse
+    {
+        $this->checkOwnership($moneyWallet);
+
         $adjustments = $moneyWallet->adjustments()
             ->orderByDesc('created_at')
             ->limit(10)
             ->get();
 
-        // Thống kê ví
-        $stats = [
-            'tong_thu'  => $moneyWallet->getTotalIncome(),
-            'tong_chi'  => $moneyWallet->getTotalExpense(),
-        ];
-
-        return view('money-wallets.show', compact(
-            'moneyWallet', 'transactions', 'transfers', 'adjustments', 'stats'
-        ));
+        return response()->json($adjustments);
     }
 
-    // ── Thêm ví mới ──────────────────────────────────────
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'ten_vi'         => 'required|string|max:100',
@@ -111,24 +118,20 @@ class MoneyWalletController extends Controller
             'don_vi_tien_te' => 'required|string|max:10',
             'bieu_tuong'     => 'nullable|string|max:50',
             'mo_ta'          => 'nullable|string|max:500',
-        ], [
-            'ten_vi.required'        => 'Vui lòng nhập tên ví',
-            'loai_vi.required'       => 'Vui lòng chọn loại ví',
-            'so_du_ban_dau.required' => 'Vui lòng nhập số dư ban đầu',
-            'so_du_ban_dau.min'      => 'Số dư không được âm',
         ]);
 
         DB::beginTransaction();
         try {
-             // Validate: tổng so_du_ban_dau các ví không được > tổng tài sản
             $tongThu = Transaction::where('user_id', Auth::id())
                 ->where('loai_giao_dich', 'THU')
                 ->where('la_chuyen_vi', false)
                 ->sum('so_tien');
+
             $tongChi = Transaction::where('user_id', Auth::id())
                 ->where('loai_giao_dich', 'CHI')
                 ->where('la_chuyen_vi', false)
                 ->sum('so_tien');
+
             $tongTaiSan = $tongThu - $tongChi;
 
             $tongSoDuHienTai = MoneyWallet::forUser(Auth::id())
@@ -137,13 +140,13 @@ class MoneyWalletController extends Controller
 
             if (($tongSoDuHienTai + $validated['so_du_ban_dau']) > $tongTaiSan) {
                 DB::rollBack();
-                return back()->withInput()->with('error',
-                    'Không thể tạo ví! Tổng số dư ban đầu các ví (' .
-                    number_format($tongSoDuHienTai + $validated['so_du_ban_dau']) .
-                    'đ) vượt quá tổng tài sản (' .
-                    number_format($tongTaiSan) . 'đ).'
-                );
+                return response()->json([
+                    'message' => 'Không thể tạo ví! Tổng số dư ban đầu các ví (' .
+                        number_format($tongSoDuHienTai + $validated['so_du_ban_dau']) .
+                        'đ) vượt quá tổng tài sản (' . number_format($tongTaiSan) . 'đ).',
+                ], 422);
             }
+
             $wallet = MoneyWallet::create([
                 'user_id'        => Auth::id(),
                 'ten_vi'         => trim($validated['ten_vi']),
@@ -158,17 +161,15 @@ class MoneyWalletController extends Controller
 
             DB::commit();
 
-            return redirect()->route('money-wallets.index')
-                ->with('success', "Đã tạo ví \"{$wallet->ten_vi}\" thành công!");
+            return response()->json($wallet, 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage())->withInput();
+            return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
     }
 
-    // ── Cập nhật thông tin ví ────────────────────────────
-    public function update(Request $request, MoneyWallet $moneyWallet)
+    public function update(Request $request, MoneyWallet $moneyWallet): JsonResponse
     {
         $this->checkOwnership($moneyWallet);
 
@@ -180,7 +181,6 @@ class MoneyWalletController extends Controller
             'mo_ta'          => 'nullable|string|max:500',
         ]);
 
-        // KHÔNG cho sửa so_du trực tiếp → phải qua điều chỉnh số dư
         $moneyWallet->update([
             'ten_vi'         => trim($validated['ten_vi']),
             'loai_vi'        => $validated['loai_vi'],
@@ -189,45 +189,39 @@ class MoneyWalletController extends Controller
             'mo_ta'          => $validated['mo_ta'] ?? null,
         ]);
 
-        return redirect()->route('money-wallets.index')
-            ->with('success', "Đã cập nhật ví \"{$moneyWallet->ten_vi}\"!");
+        return response()->json($moneyWallet->fresh());
     }
 
-    // ── Xóa / Vô hiệu hóa ví ────────────────────────────
-    public function destroy(MoneyWallet $moneyWallet)
+    public function destroy(MoneyWallet $moneyWallet): JsonResponse
     {
         $this->checkOwnership($moneyWallet);
 
-        // Kiểm tra: nếu là ví duy nhất thì không cho xóa
         $activeCount = MoneyWallet::forUser(Auth::id())->active()->count();
         if ($activeCount <= 1) {
-            return back()->with('error', 'Không thể xóa ví duy nhất. Bạn cần ít nhất 1 ví đang hoạt động.');
+            return response()->json([
+                'message' => 'Không thể xóa ví duy nhất. Bạn cần ít nhất 1 ví đang hoạt động.',
+            ], 422);
         }
 
         if ($moneyWallet->canDelete()) {
-            // Chưa có giao dịch → xóa cứng
-            $name = $moneyWallet->ten_vi;
             $moneyWallet->delete();
-            return redirect()->route('money-wallets.index')
-                ->with('success', "Đã xóa ví \"{$name}\".");
+            return response()->json(['success' => true, 'deleted' => true]);
         }
 
-        // Đã có giao dịch → chuyển sang inactive
         $moneyWallet->update(['trang_thai' => 'inactive']);
-        return redirect()->route('money-wallets.index')
-            ->with('success', "Đã ẩn ví \"{$moneyWallet->ten_vi}\". Lịch sử giao dịch vẫn được giữ lại.");
+        return response()->json(['success' => true, 'deleted' => false, 'message' => 'Đã ẩn ví. Lịch sử giao dịch vẫn được giữ lại.']);
     }
 
-    // ── Khôi phục ví inactive ────────────────────────────
-    public function restore(MoneyWallet $moneyWallet)
+    public function restore(MoneyWallet $moneyWallet): JsonResponse
     {
         $this->checkOwnership($moneyWallet);
+
         $moneyWallet->update(['trang_thai' => 'active']);
-        return back()->with('success', "Đã khôi phục ví \"{$moneyWallet->ten_vi}\".");
+
+        return response()->json(['success' => true]);
     }
 
-    // ── Điều chỉnh số dư (UC09.4) ────────────────────────
-    public function adjust(Request $request, MoneyWallet $moneyWallet)
+    public function adjust(Request $request, MoneyWallet $moneyWallet): JsonResponse
     {
         $this->checkOwnership($moneyWallet);
 
@@ -235,10 +229,6 @@ class MoneyWalletController extends Controller
             'so_du_thuc_te' => 'required|numeric|min:0|max:999999999999',
             'ly_do'         => 'nullable|string|max:255',
             'category_id'   => 'required|exists:categories,id',
-        ], [
-            'so_du_thuc_te.required' => 'Vui lòng nhập số dư thực tế',
-            'so_du_thuc_te.min'      => 'Số dư không được âm',
-            'category_id.required'   => 'Vui lòng chọn danh mục cho giao dịch điều chỉnh',
         ]);
 
         $soDuHienTai = (float) $moneyWallet->so_du;
@@ -246,12 +236,11 @@ class MoneyWalletController extends Controller
         $chenhLech   = $soDuMoi - $soDuHienTai;
 
         if (abs($chenhLech) < 0.01) {
-            return back()->with('info', 'Số dư không thay đổi.');
+            return response()->json(['success' => true, 'message' => 'Số dư không thay đổi.']);
         }
 
         DB::beginTransaction();
         try {
-            // Tạo giao dịch đặc biệt để ghi lịch sử
             $loaiGiaoDich = $chenhLech > 0 ? 'THU' : 'CHI';
 
             $transaction = Transaction::create([
@@ -266,7 +255,6 @@ class MoneyWalletController extends Controller
                 'la_chuyen_vi'           => false,
             ]);
 
-            // Ghi lịch sử điều chỉnh
             WalletAdjustment::create([
                 'user_id'        => Auth::id(),
                 'wallet_id'      => $moneyWallet->id,
@@ -277,27 +265,20 @@ class MoneyWalletController extends Controller
                 'ly_do'          => $validated['ly_do'] ?? null,
             ]);
 
-            // Cập nhật số dư ví
             $moneyWallet->update(['so_du' => $soDuMoi]);
 
             DB::commit();
 
-            $msg = $chenhLech > 0
-                ? "Đã tăng số dư +" . number_format(abs($chenhLech)) . " {$moneyWallet->don_vi_tien_te}"
-                : "Đã giảm số dư -" . number_format(abs($chenhLech)) . " {$moneyWallet->don_vi_tien_te}";
-
-            return redirect()->route('money-wallets.show', $moneyWallet)
-                ->with('success', $msg);
+            return response()->json(['success' => true, 'so_du' => $soDuMoi]);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
+            return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
     }
 
-    // ── Helper: kiểm tra quyền sở hữu ────────────────────
     private function checkOwnership(MoneyWallet $wallet): void
     {
-        abort_if($wallet->user_id !== Auth::id(), 403, 'Bạn không có quyền thực hiện.');
+        abort_if($wallet->user_id !== Auth::id(), 403);
     }
 }

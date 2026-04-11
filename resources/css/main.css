@@ -1,4 +1,4 @@
- 
+
         /* Giá trị biến toàn cục */
         :root {
             --primary: #4a90e2;
@@ -443,7 +443,7 @@
         .sidebar {
             position: fixed;
             left: 0;
-            top: 70px; 
+            top: 70px;
             height: calc(100vh - 70px);
             width: 80px;
             background: rgba(255, 255, 255, 0.95);
@@ -451,7 +451,7 @@
             z-index: 999;
             box-shadow: 2px 0 20px rgba(0, 0, 0, 0.08);
             border-right: 1px solid rgba(226, 232, 240, 0.8);
-            border-top: none; 
+            border-top: none;
             overflow: visible;
         }
 
@@ -1047,7 +1047,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             display: none;
             padding: 8px 0;
-            z-index: 9999; 
+            z-index: 9999;
         }
 
         .nav-item.has-sub:hover .sub-menu {
@@ -1348,7 +1348,7 @@
         @media (max-width: 480px) {
             .ai-chat-box { width: calc(100vw - 32px); right: -14px; }
         }
-        
+
         .g-toast {
             background: white;
             border-radius: 14px;

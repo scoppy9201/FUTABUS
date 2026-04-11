@@ -50,18 +50,22 @@ class GroupDebtController extends Controller
 
         DB::beginTransaction();
         try {
-            GroupExpenseDebt::create([
+            $debt = GroupExpenseDebt::create([
                 'group_id'    => $group->id,
                 'chu_no_id'   => $validated['chu_no_id'],
                 'nguoi_no_id' => $validated['nguoi_no_id'],
                 'so_tien'     => $validated['so_tien'],
                 'ghi_chu'     => $validated['ghi_chu'] ? trim($validated['ghi_chu']) : null,
-                'trang_thai'  => 'confirmed', // ghi thẳng = không cần confirm
+                'trang_thai'  => 'confirmed',
             ]);
 
             DB::commit();
 
             GroupNotifier::debtRecorded($debt->fresh());
+
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Đã ghi nhận khoản nợ.', 'debt_id' => $debt->id], 201);
+            }
 
             return redirect()->route('groups.debt.summary', $group)
                 ->with('success', 'Đã ghi nhận khoản nợ.');
@@ -136,6 +140,20 @@ class GroupDebtController extends Controller
             'created_at'       => $d->created_at,
         ]);
 
+        if (request()->wantsJson()) {
+            return response()->json([
+                'group' => $group,
+                'members' => $members->map(fn($m) => [
+                    'user_id' => $m->user_id,
+                    'name' => $m->user?->name ?? null,
+                    'avatar' => $m->user?->avatar ?? null,
+                ]),
+                'simplified' => $simplified,
+                'rawList' => $rawList,
+                'balances' => $balances,
+            ]);
+        }
+
         return view('groups.debt.summary', compact(
             'group', 'members', 'simplified', 'rawList', 'balances'
         ));
@@ -209,6 +227,10 @@ class GroupDebtController extends Controller
             DB::commit();
 
             GroupNotifier::debtSettled($debt->fresh());
+
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Đã đánh dấu khoản nợ là đã thanh toán.']);
+            }
 
             return redirect()->route('groups.debt.summary', $group)
                 ->with('success', 'Đã đánh dấu khoản nợ là đã thanh toán.');

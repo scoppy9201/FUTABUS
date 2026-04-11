@@ -15,51 +15,98 @@
     --transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
 }
 
+/* ── Page wrapper ── */
+.page-wrap {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding: 20px;
+    background: #f3f4f6;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
 /* ── Page header ── */
 .pg-hdr {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 28px; padding: 22px 28px;
-    background: white; border-radius: var(--radius);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    padding: 22px 28px;
+    background: white;
+    border-radius: var(--radius);
     box-shadow: var(--shadow);
 }
 body.dark .pg-hdr { background: #191d27; }
 .pg-title {
-    display: flex; align-items: center; gap: 14px;
-    font-size: 22px; font-weight: 800; color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 22px;
+    font-weight: 800;
+    color: #1f2937;
 }
 body.dark .pg-title { color: #e5e7eb; }
 .pg-icon {
-    width: 44px; height: 44px; border-radius: 12px;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px; box-shadow: 0 4px 14px rgba(74,144,226,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 4px 14px rgba(74,144,226,0.35);
 }
 
 /* ── Alerts ── */
 .alert {
-    display: flex; align-items: center; gap: 12px;
-    padding: 14px 18px; border-radius: var(--radius-sm);
-    font-size: 14px; font-weight: 500; margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 20px;
 }
 .alert-success { background:#d1fae5; color:#065f46; border-left:4px solid var(--success); }
 .alert-error   { background:#fee2e2; color:#991b1b; border-left:4px solid var(--danger); }
 
 /* ── Stats strip ── */
 .stats-strip {
-    display: grid; grid-template-columns: repeat(3,1fr);
-    gap: 16px; margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+    width: 100%;
+    box-sizing: border-box;
 }
 .ss-card {
-    background: white; border-radius: var(--radius); padding: 20px 24px;
-    box-shadow: var(--shadow); display: flex; align-items: center; gap: 16px;
+    background: white;
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 16px;
     border: 1px solid rgba(255,255,255,0.8);
     transition: var(--transition);
+    min-width: 0;
 }
 .ss-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
 body.dark .ss-card { background: #191d27; border-color: rgba(255,255,255,0.06); }
 .ss-icon {
-    width: 52px; height: 52px; border-radius: 14px;
-    display: flex; align-items: center; justify-content: center; font-size: 24px;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
 }
 .ss-icon.blue { background: rgba(74,144,226,0.12); }
 .ss-icon.green{ background: rgba(16,185,129,0.12); }
@@ -70,16 +117,25 @@ body.dark .ss-value { color: #e5e7eb; }
 
 /* ── Group cards grid ── */
 .groups-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(320px,1fr));
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
     gap: 20px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .group-card {
-    background: white; border-radius: var(--radius);
-    box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,0.8);
-    transition: var(--transition); overflow: hidden;
-    text-decoration: none; display: flex; flex-direction: column;
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255,255,255,0.8);
+    transition: var(--transition);
+    overflow: hidden;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
     position: relative;
+    min-width: 0; /* critical: prevent grid blowout */
 }
 .group-card:hover {
     transform: translateY(-5px);
@@ -90,14 +146,18 @@ body.dark .group-card { background: #191d27; border-color: rgba(255,255,255,0.06
 
 /* Gradient top accent */
 .group-card::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
     background: linear-gradient(90deg, var(--primary), var(--primary-dark));
-    transform: scaleX(0); transform-origin: left;
+    transform: scaleX(0);
+    transform-origin: left;
     transition: transform 0.3s ease;
 }
 .group-card:hover::before { transform: scaleX(1); }
 
-.gc-body { padding: 22px 22px 18px; flex: 1; }
+.gc-body { padding: 22px 22px 18px; flex: 1; min-width: 0; }
 
 .gc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
 
@@ -111,7 +171,7 @@ body.dark .group-card { background: #191d27; border-color: rgba(255,255,255,0.06
 .gc-icon.mode-expense { background: linear-gradient(135deg,#f59e0b,#d97706); }
 .gc-icon.mode-both    { background: linear-gradient(135deg,var(--primary),var(--primary-dark)); }
 
-.gc-badges { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+.gc-badges { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; flex-shrink: 0; margin-left: 8px; }
 
 .gc-badge {
     padding: 4px 10px; border-radius: 20px;
@@ -123,10 +183,17 @@ body.dark .group-card { background: #191d27; border-color: rgba(255,255,255,0.06
 .gc-badge.mode-e { background: rgba(245,158,11,0.1); color: #d97706; }
 .gc-badge.mode-m { background: rgba(74,144,226,0.1); color: var(--primary); }
 
-.gc-name { font-size: 17px; font-weight: 800; color: #1f2937; margin-bottom: 4px; line-height: 1.3; }
+.gc-name {
+    font-size: 17px; font-weight: 800; color: #1f2937;
+    margin-bottom: 4px; line-height: 1.3;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 body.dark .gc-name { color: #e5e7eb; }
-.gc-desc { font-size: 13px; color: #6b7280; line-height: 1.5;
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.gc-desc {
+    font-size: 13px; color: #6b7280; line-height: 1.5;
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
+}
 
 /* Member avatars strip */
 .gc-members {
@@ -244,10 +311,10 @@ body.dark .form-label { color: #9ca3af; }
     border: 2px solid #e5e7eb; border-radius: var(--radius-sm);
     font-size: 14px; background: #f9fafb; color: #1f2937;
     transition: border-color 0.2s, background 0.2s; outline: none;
+    box-sizing: border-box;
 }
 .form-ctrl:focus { border-color: var(--primary); background: white; }
 body.dark .form-ctrl { background: #141820; border-color: rgba(255,255,255,0.1); color: #e5e7eb; }
-body.dark .form-ctrl:focus { background: #0f1217; border-color: var(--primary); }
 
 /* Mode selector */
 .mode-grid {
@@ -263,7 +330,7 @@ body.dark .form-ctrl:focus { background: #0f1217; border-color: var(--primary); 
 body.dark .mode-card { border-color: rgba(255,255,255,0.1); }
 body.dark .mode-card.selected { background: rgba(74,144,226,0.1); }
 .mode-card input { position: absolute; opacity: 0; pointer-events: none; }
-.mode-emoji { font-size: 26px; margin-bottom: 6px; }
+.mode-emoji { font-size: 26px; margin-bottom: 6px; display: flex; justify-content: center; }
 .mode-name { font-size: 12px; font-weight: 700; color: #374151; }
 body.dark .mode-name { color: #e5e7eb; }
 .mode-desc { font-size: 11px; color: #9ca3af; margin-top: 2px; }
@@ -282,30 +349,33 @@ body.dark .modal-foot { border-color: rgba(255,255,255,0.06); background: #191d2
 .btn-cancel:hover { background: #e5e7eb; }
 .modal-foot .btn-primary { flex: 2; justify-content: center; padding: 11px; }
 
-@media (max-width:768px) {
-    .stats-strip { grid-template-columns:1fr; }
-    .groups-grid { grid-template-columns:1fr; }
+@media (max-width: 768px) {
+    .stats-strip { grid-template-columns: 1fr; }
+    .groups-grid { grid-template-columns: 1fr; }
+    .mode-grid { grid-template-columns: 1fr; }
 }
 </style>
 
+<div class="page-wrap">
+
 <div class="pg-hdr">
     <div class="pg-title">
-        <div class="pg-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><circle cx="7.5" cy="6.5" r="2.5"/><path d="M2 17c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="14" cy="6" r="2"/><path d="M18 17c0-2.5-1.8-4.2-4-4.7"/></svg></div>
+        <div class="pg-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><circle cx="7.5" cy="6.5" r="2.5"/><path d="M2 17c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="14" cy="6" r="2"/><path d="M18 17c0-2.5-1.8-4.2-4-4.7"/></svg></div>
         <div>
             <div>Chia tiền nhóm</div>
             <div style="font-size:13px;font-weight:500;color:#6b7280;margin-top:2px;">Quản lý chi tiêu cùng gia đình & bạn bè</div>
         </div>
     </div>
     <button class="btn-primary" onclick="openCreate()">
-        <span style="font-size:18px;line-height:1;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M10 4v12M4 10h12"/></svg></span> Tạo nhóm mới
+        <span style="font-size:18px;line-height:1;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M10 4v12M4 10h12"/></svg></span> Tạo nhóm mới
     </button>
 </div>
 
 @if(session('success'))
-<div class="alert alert-success"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M4 10l4.5 4.5L16 6"/></svg> {{ session('success') }}</div>
+<div class="alert alert-success"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M4 10l4.5 4.5L16 6"/></svg> {{ session('success') }}</div>
 @endif
 @if(session('error'))
-<div class="alert alert-error"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 2L2 17h16z"/><path d="M10 8v4M10 14.5v.5"/></svg> {{ session('error') }}</div>
+<div class="alert alert-error"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M10 2L2 17h16z"/><path d="M10 8v4M10 14.5v.5"/></svg> {{ session('error') }}</div>
 @endif
 
 {{-- Stats strip --}}
@@ -314,29 +384,6 @@ body.dark .modal-foot { border-color: rgba(255,255,255,0.06); background: #191d2
     $adminOf = collect($groups)->filter(fn($g) => $g['la_admin'])->count();
     $memberOf= $total - $adminOf;
 @endphp
-<div class="stats-strip">
-    <div class="ss-card">
-        <div class="ss-icon blue"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><circle cx="7.5" cy="6.5" r="2.5"/><path d="M2 17c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="14" cy="6" r="2"/><path d="M18 17c0-2.5-1.8-4.2-4-4.7"/></svg></div>
-        <div>
-            <div class="ss-label">Tổng nhóm</div>
-            <div class="ss-value">{{ $total }}</div>
-        </div>
-    </div>
-    <div class="ss-card">
-        <div class="ss-icon green"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M3 14L6 7l4 4 4-4 3 7H3z"/><path d="M3 14h14"/><circle cx="10" cy="3.5" r="1" fill="currentColor" stroke="none"/></svg></div>
-        <div>
-            <div class="ss-label">Tôi quản lý</div>
-            <div class="ss-value">{{ $adminOf }}</div>
-        </div>
-    </div>
-    <div class="ss-card">
-        <div class="ss-icon amber"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M2 10.5l2.5-3.5 3.5 1.5L11 6h3l2 3.5-5.5 5L8 12l-3 1.5z"/><path d="M9 14.5l2 2.5"/></svg></div>
-        <div>
-            <div class="ss-label">Tham gia</div>
-            <div class="ss-value">{{ $memberOf }}</div>
-        </div>
-    </div>
-</div>
 
 {{-- Groups grid --}}
 <div class="groups-grid">
@@ -348,9 +395,9 @@ body.dark .modal-foot { border-color: rgba(255,255,255,0.06); background: #191d2
             default   => 'mode-both',
         };
         $modeIcon = match($group['che_do']) {
-            'balance' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 3v14M4 17h12"/><path d="M4 7 2 12h4zM16 7l-2 5h4z"/><path d="M4 7h12"/></svg>',
-            'expense' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M5 2h10a1 1 0 011 1v14l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5V3a1 1 0 011-1z"/><path d="M7.5 7h5M7.5 10h5M7.5 13h3"/></svg>',
-            default   => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M3 6h9l3-3 3 3-3 3"/><path d="M3 14h9l3-3 3 3-3 3"/><path d="M6 9l-3 3M6 11l-3-3"/></svg>',
+            'balance' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M10 3v14M4 17h12"/><path d="M4 7 2 12h4zM16 7l-2 5h4z"/><path d="M4 7h12"/></svg>',
+            'expense' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M5 2h10a1 1 0 011 1v14l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5V3a1 1 0 011-1z"/><path d="M7.5 7h5M7.5 10h5M7.5 13h3"/></svg>',
+            default   => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M3 6h9l3-3 3 3-3 3"/><path d="M3 14h9l3-3 3 3-3 3"/><path d="M6 9l-3 3M6 11l-3-3"/></svg>',
         };
         $modeName = match($group['che_do']) {
             'balance' => 'Phân phối số dư',
@@ -369,7 +416,6 @@ body.dark .modal-foot { border-color: rgba(255,255,255,0.06); background: #191d2
                 <div class="gc-icon {{ $modeClass }}">{!! $modeIcon !!}</div>
                 <div class="gc-badges">
                     <span class="gc-badge {{ $group['la_admin'] ? 'admin' : 'member' }}">
-
                         @if($group['la_admin'])
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M3 14L6 7l4 4 4-4 3 7H3z"/><path d="M3 14h14"/><circle cx="10" cy="3.5" r="1" fill="currentColor" stroke="none"/></svg> Admin
                         @else
@@ -404,28 +450,30 @@ body.dark .modal-foot { border-color: rgba(255,255,255,0.06); background: #191d2
             </div>
         </div>
         <div class="gc-footer">
-            <span class="gc-date"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><rect x="3" y="4" width="14" height="14" rx="2"/><path d="M3 9h14M7 2v4M13 2v4"/><circle cx="7" cy="13" r="0.8" fill="currentColor" stroke="none"/><circle cx="10" cy="13" r="0.8" fill="currentColor" stroke="none"/><circle cx="13" cy="13" r="0.8" fill="currentColor" stroke="none"/></svg> {{ \Carbon\Carbon::parse($group['created_at'])->format('d/m/Y') }}</span>
-            <div class="gc-arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M8 4l6 6-6 6"/></svg></div>
+            <span class="gc-date"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><rect x="3" y="4" width="14" height="14" rx="2"/><path d="M3 9h14M7 2v4M13 2v4"/><circle cx="7" cy="13" r="0.8" fill="currentColor" stroke="none"/><circle cx="10" cy="13" r="0.8" fill="currentColor" stroke="none"/><circle cx="13" cy="13" r="0.8" fill="currentColor" stroke="none"/></svg> {{ \Carbon\Carbon::parse($group['created_at'])->format('d/m/Y') }}</span>
+            <div class="gc-arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M8 4l6 6-6 6"/></svg></div>
         </div>
     </a>
     @empty
     <div class="empty-wrap">
-        <div class="empty-icon-big"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><circle cx="7.5" cy="6.5" r="2.5"/><path d="M2 17c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="14" cy="6" r="2"/><path d="M18 17c0-2.5-1.8-4.2-4-4.7"/></svg></div>
+        <div class="empty-icon-big"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><circle cx="7.5" cy="6.5" r="2.5"/><path d="M2 17c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="14" cy="6" r="2"/><path d="M18 17c0-2.5-1.8-4.2-4-4.7"/></svg></div>
         <h3>Chưa có nhóm nào</h3>
         <p>Tạo nhóm đầu tiên để bắt đầu chia sẻ chi tiêu cùng gia đình hoặc bạn bè</p>
         <button class="btn-primary" onclick="openCreate()">
-            <span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M10 4v12M4 10h12"/></svg></span> Tạo nhóm đầu tiên
+            <span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M10 4v12M4 10h12"/></svg></span> Tạo nhóm đầu tiên
         </button>
     </div>
     @endforelse
 </div>
 
+</div>{{-- end .page-wrap --}}
+
 {{-- Modal tạo nhóm --}}
 <div class="modal-overlay" id="createModal">
     <div class="modal-box">
         <div class="modal-hdr">
-            <div class="modal-hdr-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><circle cx="7.5" cy="6.5" r="2.5"/><path d="M2 17c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="14" cy="6" r="2"/><path d="M18 17c0-2.5-1.8-4.2-4-4.7"/></svg> Tạo nhóm mới</div>
-            <button class="modal-close" onclick="closeCreate()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+            <div class="modal-hdr-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><circle cx="7.5" cy="6.5" r="2.5"/><path d="M2 17c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="14" cy="6" r="2"/><path d="M18 17c0-2.5-1.8-4.2-4-4.7"/></svg> Tạo nhóm mới</div>
+            <button class="modal-close" onclick="closeCreate()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
         </div>
         <form action="{{ route('groups.store') }}" method="POST">
             @csrf
@@ -443,19 +491,19 @@ body.dark .modal-foot { border-color: rgba(255,255,255,0.06); background: #191d2
                     <div class="mode-grid">
                         <label class="mode-card {{ old('che_do','both') == 'balance' ? 'selected' : '' }}" onclick="selectMode(this)">
                             <input type="radio" name="che_do" value="balance" {{ old('che_do') == 'balance' ? 'checked' : '' }}>
-                            <div class="mode-emoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 3v14M4 17h12"/><path d="M4 7 2 12h4zM16 7l-2 5h4z"/><path d="M4 7h12"/></svg></div>
+                            <div class="mode-emoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M10 3v14M4 17h12"/><path d="M4 7 2 12h4zM16 7l-2 5h4z"/><path d="M4 7h12"/></svg></div>
                             <div class="mode-name">Phân phối<br>số dư</div>
                             <div class="mode-desc">Chia lại tiền trong nhóm</div>
                         </label>
                         <label class="mode-card {{ old('che_do','both') == 'expense' ? 'selected' : '' }}" onclick="selectMode(this)">
                             <input type="radio" name="che_do" value="expense" {{ old('che_do') == 'expense' ? 'checked' : '' }}>
-                            <div class="mode-emoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M5 2h10a1 1 0 011 1v14l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5V3a1 1 0 011-1z"/><path d="M7.5 7h5M7.5 10h5M7.5 13h3"/></svg></div>
+                            <div class="mode-emoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M5 2h10a1 1 0 011 1v14l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5V3a1 1 0 011-1z"/><path d="M7.5 7h5M7.5 10h5M7.5 13h3"/></svg></div>
                             <div class="mode-name">Chia khoản<br>chi</div>
                             <div class="mode-desc">Chia tiền khi thanh toán</div>
                         </label>
                         <label class="mode-card selected" onclick="selectMode(this)">
                             <input type="radio" name="che_do" value="both" checked>
-                            <div class="mode-emoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M3 6h9l3-3 3 3-3 3"/><path d="M3 14h9l3-3 3 3-3 3"/><path d="M6 9l-3 3M6 11l-3-3"/></svg></div>
+                            <div class="mode-emoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M3 6h9l3-3 3 3-3 3"/><path d="M3 14h9l3-3 3 3-3 3"/><path d="M6 9l-3 3M6 11l-3-3"/></svg></div>
                             <div class="mode-name">Cả hai<br>chế độ</div>
                             <div class="mode-desc">Linh hoạt nhất</div>
                         </label>
@@ -500,5 +548,58 @@ setTimeout(() => {
         setTimeout(()=>a.remove(),300);
     });
 }, 4500);
+</script>
+
+<script>
+// Fetch groups from API and render into .groups-grid (if API returns data)
+async function fetchAndRenderGroups() {
+    try {
+        const res = await fetch('/api/monaxe/groups', { credentials: 'same-origin' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.groups) return;
+        const grid = document.querySelector('.groups-grid');
+        if (!grid) return;
+        grid.innerHTML = data.groups.map(g => {
+            const modeClass = g.che_do === 'balance' ? 'mode-balance' : (g.che_do === 'expense' ? 'mode-expense' : 'mode-both');
+            const modeName = g.che_do === 'balance' ? 'Phân phối số dư' : (g.che_do === 'expense' ? 'Chia khoản chi' : 'Cả hai chế độ');
+            const modeBadgeClass = g.che_do === 'balance' ? 'mode-b' : (g.che_do === 'expense' ? 'mode-e' : 'mode-m');
+            const created = new Date(g.created_at).toLocaleDateString('vi-VN');
+            const membersHtml = (g.members || []).slice(0,4).map(m => {
+                if (m.avatar) {
+                    const src = m.avatar.startsWith('http') ? m.avatar : '/storage/' + m.avatar;
+                    return `<img src="${src}" class="gc-av" style="object-fit:cover;" alt="">`;
+                }
+                const initials = (m.name||'').substr(0,2).toUpperCase();
+                return `<div class="gc-av" style="background:${m.color}">${initials}</div>`;
+            }).join('');
+            const extra = (g.so_thanh_vien || 0) > 4 ? `<div class="gc-av extra">+${(g.so_thanh_vien||0)-4}</div>` : '';
+            return `
+                <a href="/groups/${g.id}" class="group-card">
+                    <div class="gc-body">
+                        <div class="gc-top">
+                            <div class="gc-icon ${modeClass}"></div>
+                            <div class="gc-badges">
+                                <span class="gc-badge ${g.la_admin ? 'admin' : 'member'}">${g.la_admin ? 'Admin' : 'Thành viên'}</span>
+                                <span class="gc-badge ${modeBadgeClass}">${modeName}</span>
+                            </div>
+                        </div>
+                        <div class="gc-name">${escapeHtml(g.ten_nhom)}</div>
+                        <div class="gc-desc">${escapeHtml(g.mo_ta || 'Chưa có mô tả')}</div>
+                        <div class="gc-members"><div class="gc-avatars">${membersHtml}${extra}</div>
+                        <span class="gc-member-count">${g.so_thanh_vien||0} thành viên</span></div>
+                    </div>
+                    <div class="gc-footer"><span class="gc-date">${created}</span>
+                    <div class="gc-arrow"></div></div>
+                </a>`;
+        }).join('');
+    } catch (e) {
+        // silent
+    }
+}
+
+function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+
+document.addEventListener('DOMContentLoaded', () => fetchAndRenderGroups());
 </script>
 @endsection

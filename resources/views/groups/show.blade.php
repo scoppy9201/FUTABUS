@@ -716,4 +716,70 @@ const observer = new MutationObserver(() => {
 });
 observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 </script>
+<script>
+async function refreshGroupData() {
+    try {
+        const GROUP_ID = {{ $group->id }};
+        const res = await fetch(`/api/monaxe/groups/${GROUP_ID}`, { credentials: 'same-origin' });
+        if (!res.ok) return;
+        const j = await res.json();
+        const g = j.group;
+        if (!g) return;
+
+        document.querySelectorAll('.hero-name').forEach(el => el.textContent = g.ten_nhom);
+        document.querySelectorAll('.hero-desc').forEach(el => el.textContent = g.mo_ta || 'Chưa có mô tả');
+
+        const meta = document.querySelector('.hero-meta');
+        if (meta) {
+            meta.innerHTML = '';
+            const mode = document.createElement('span');
+            mode.className = 'hero-tag';
+            mode.textContent = g.che_do === 'balance' ? 'Phân phối số dư' : (g.che_do === 'expense' ? 'Chia khoản chi' : 'Cả hai chế độ');
+            meta.appendChild(mode);
+            const membersTag = document.createElement('span');
+            membersTag.className = 'hero-tag';
+            membersTag.textContent = (g.members||[]).length + ' thành viên';
+            meta.appendChild(membersTag);
+            const createdTag = document.createElement('span');
+            createdTag.className = 'hero-tag';
+            createdTag.textContent = new Date(g.created_at).toLocaleDateString('vi-VN');
+            meta.appendChild(createdTag);
+        }
+
+        // Update members list
+        const membersContainer = document.querySelectorAll('.section-card .member-item');
+        const membersListWrap = document.querySelector('.section-card');
+        if (membersListWrap && j.members) {
+            const listHtml = j.members.map(m => {
+                const initials = (m.name||'').substr(0,2).toUpperCase();
+                const avatar = m.avatar ? (m.avatar.startsWith('http') ? m.avatar : '/storage/' + m.avatar) : null;
+                return `
+                    <div class="member-item">
+                        ${avatar ? `<img src="${avatar}" class="member-av" style="object-fit:cover;" alt="">`:
+                        `<div class="member-av" style="background:linear-gradient(135deg,#4a90e2,#4a90e2cc)">${initials}</div>`}
+                        <div class="member-info"><div class="member-name">${escapeHtml(m.name)}</div><div class="member-email">${escapeHtml(m.email||'')}</div></div>
+                        <div class="member-meta"><span class="member-role ${m.vai_tro==='admin'?'role-admin':'role-member'}">${m.vai_tro==='admin'?'Admin':'Member'}</span></div>
+                    </div>`;
+            }).join('');
+            const memberSection = document.querySelectorAll('#inviteBox')[0];
+            // find parent where members are listed (first column)
+            const col = document.querySelector('.show-grid > div');
+            if (col) {
+                const section = col.querySelector('.section-card');
+                if (section) {
+                    // replace inner member list area by finding existing member-item parent
+                    const items = section.querySelectorAll('.member-item');
+                    if (items.length) {
+                        items[0].parentElement.innerHTML = listHtml; // best effort
+                    }
+                }
+            }
+        }
+    } catch (e) {}
+}
+
+function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+
+document.addEventListener('DOMContentLoaded', () => refreshGroupData());
+</script>
 @endsection

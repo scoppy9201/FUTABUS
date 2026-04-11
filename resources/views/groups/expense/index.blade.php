@@ -10,6 +10,13 @@
     --transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
 }
 
+/* ── Page wrapper ── */
+.page-wrap {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
 .breadcrumb { display:flex;align-items:center;gap:8px;font-size:13px;color:#9ca3af;margin-bottom:20px; }
 .breadcrumb a { color:var(--primary);text-decoration:none;font-weight:600; }
 
@@ -36,7 +43,14 @@ body.dark .tab-btn.active { background:#191d27;color:var(--primary); }
 .tab-content { display:none; }
 .tab-content.active { display:block; }
 
-.main-grid { display:grid;grid-template-columns:1fr 380px;gap:22px;align-items:start; }
+/* ── Main grid: left + right sidebar ── */
+.main-grid {
+    display:grid;
+    grid-template-columns:1fr 380px;
+    gap:22px;
+    align-items:start;
+    width:100%;
+}
 
 .section-card { background:white;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:20px; }
 body.dark .section-card { background:#191d27; }
@@ -105,7 +119,14 @@ body.dark .mem-name { color:#e5e7eb; }
 .mem-input:focus { border-color:var(--primary);background:white; }
 body.dark .mem-input { background:#141820;border-color:rgba(255,255,255,0.1);color:#e5e7eb; }
 
-.debt-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:22px; }
+/* ── Debt flow grid ── */
+.debt-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    gap:14px;
+    margin-bottom:0;
+    width:100%;
+}
 .debt-flow-card { background:white;border-radius:14px;padding:20px;box-shadow:var(--shadow);border:2px solid transparent;transition:var(--transition);display:flex;align-items:center;gap:14px; }
 .debt-flow-card:hover { border-color:var(--danger);transform:translateY(-2px);box-shadow:0 6px 20px rgba(239,68,68,0.1); }
 body.dark .debt-flow-card { background:#191d27; }
@@ -119,6 +140,32 @@ body.dark .dfc-name { color:#e5e7eb; }
 .simplified-hdr { padding:16px 22px;border-bottom:1px solid #f3f4f6;background:rgba(239,68,68,0.04); }
 body.dark .simplified-hdr { border-color:rgba(255,255,255,0.06); }
 
+/* ── Empty message ── */
+.empty-msg {
+    text-align:center;
+    padding:40px 20px;
+    color:#9ca3af;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:100%;
+}
+.empty-msg-icon {
+    font-size:36px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:64px;
+    height:64px;
+    border-radius:16px;
+    background:rgba(16,185,129,0.08);
+    margin:0 auto 4px;
+}
+.empty-msg-text { font-weight:700;font-size:14px;color:#374151; }
+body.dark .empty-msg-text { color:#9ca3af; }
+
 .btn-primary { display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;font-size:13px;font-weight:700;border:none;cursor:pointer;text-decoration:none;transition:opacity .2s; }
 .btn-primary:hover { opacity:.88; }
 .btn-sm { padding:6px 12px;font-size:12px; }
@@ -127,13 +174,8 @@ body.dark .simplified-hdr { border-color:rgba(255,255,255,0.06); }
 .btn-ghost { display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;background:#f3f4f6;border:2px solid #e5e7eb;color:#6b7280;font-size:12px;font-weight:600;cursor:pointer;transition:background .2s;text-decoration:none; }
 .btn-ghost:hover { background:#e5e7eb; }
 
-.empty-msg { text-align:center;padding:50px 20px;color:#9ca3af; }
-.empty-msg-icon { font-size:40px;margin-bottom:12px; }
-.empty-msg-text { font-weight:600; }
-
 /* Kieu hint box */
 #kieu-hint { display:flex;align-items:center;gap:6px;font-size:12px;color:#9ca3af;margin-top:8px; }
-#kieu-hint svg { flex-shrink:0; }
 
 .icon { width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0; }
 
@@ -157,6 +199,8 @@ $iconDown   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
 $iconInfo   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5a5.5 5.5 0 014 9.3V14H6v-2.2A5.5 5.5 0 0110 2.5z"/><path d="M8 14v1.5a2 2 0 004 0V14"/></svg>';
 $iconHash   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h10M5 12h10M8 4l-2 12M12 4l-2 12"/></svg>';
 @endphp
+
+<div class="page-wrap">
 
 <div class="breadcrumb">
     <a href="{{ route('groups.index') }}">Nhóm</a>
@@ -250,7 +294,6 @@ $iconHash   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
                         </div>
                         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
                             <div class="pi-amount">-{{ number_format($p['tong_tien']) }}đ</div>
-                            {{-- FIX: dùng @if thay match() để tránh SVG bị escape --}}
                             @if($p['trang_thai']==='pending')
                                 <span class="pi-status st-pending">{!! $iconClock !!} Chờ duyệt</span>
                             @elseif($p['trang_thai']==='approved')
@@ -285,11 +328,8 @@ $iconHash   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
                     @else
                     <div style="font-size:12px;color:#9ca3af;margin-top:6px;display:flex;align-items:center;gap:4px;">
                         Bạn đã
-                        @if($p['my_approval']==='approved')
-                            {!! $iconCheck !!} đồng ý
-                        @else
-                            {!! $iconX !!} từ chối
-                        @endif
+                        @if($p['my_approval']==='approved') {!! $iconCheck !!} đồng ý
+                        @else {!! $iconX !!} từ chối @endif
                     </div>
                     @endif
                     @endif
@@ -303,7 +343,7 @@ $iconHash   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
                 <div class="empty-msg">
                     <div class="empty-msg-icon">{!! $iconReceipt !!}</div>
                     <div class="empty-msg-text">Chưa có khoản chi nào</div>
-                    <div style="font-size:13px;margin-top:4px">Tạo đề xuất để chia tiền cùng nhau</div>
+                    <div style="font-size:13px;">Tạo đề xuất để chia tiền cùng nhau</div>
                 </div>
                 @endforelse
             </div>
@@ -394,7 +434,6 @@ $iconHash   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
                             </tr>
                             @endforeach
                         </table>
-                        {{-- FIX: dùng innerHTML trong JS, không dùng textContent --}}
                         <div id="kieu-hint">
                             {!! $iconEqual !!} <span id="kieu-hint-text">Chia đều — hệ thống tự tính, không cần nhập</span>
                         </div>
@@ -415,13 +454,17 @@ $iconHash   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
         {{-- LEFT --}}
         <div>
             <div class="section-card" style="margin-bottom:20px">
-                <div class="sc-hdr simplified-hdr">
+                <div class="sc-hdr" style="background:rgba(239,68,68,0.04);border-bottom:1px solid #f3f4f6;">
                     <div class="sc-title">{!! $iconHash !!} Sau khi rút gọn</div>
                     <a href="{{ route('groups.debt.summary', $group) }}" class="btn-ghost btn-sm">Xem chi tiết</a>
                 </div>
                 <div style="padding:16px">
                     <div class="debt-grid" id="debtFlowGrid">
-                        <div class="empty-msg"><div class="empty-msg-icon">✓</div><div class="empty-msg-text">Không có ai nợ ai</div></div>
+                        {{-- Trạng thái mặc định khi chưa có nợ --}}
+                        <div class="empty-msg" style="grid-column:1/-1">
+                            <div class="empty-msg-icon">✓</div>
+                            <div class="empty-msg-text">Không có ai nợ ai</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -481,6 +524,8 @@ $iconHash   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
     </div>
 </div>
 
+</div>{{-- end .page-wrap --}}
+
 <script>
 function switchTab(tab, btn) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -489,8 +534,6 @@ function switchTab(tab, btn) {
     btn.classList.add('active');
 }
 
-// FIX: chỉ cập nhật text, icon đã có sẵn trong #kieu-hint qua Blade
-// Dùng innerHTML để tránh SVG bị render thành text
 const hintMap = {
     equal:      'Chia đều — hệ thống tự tính, không cần nhập',
     custom:     'Tùy chỉnh — nhập số tiền cho từng người (tổng phải bằng tổng tiền)',
@@ -518,7 +561,6 @@ function selectKieu(el, kieu) {
         tyLeInputs.forEach(i => { i.style.display='block'; i.required=true; });
     }
 
-    // Chỉ cập nhật text, không gán innerHTML có SVG (tránh lỗi XSS)
     document.getElementById('kieu-hint-text').textContent = hintMap[kieu] || '';
 }
 
@@ -528,5 +570,38 @@ setTimeout(() => {
         setTimeout(()=>a.remove(),300);
     });
 }, 4500);
+</script>
+<script>
+async function refreshExpenseData() {
+    try {
+        const GROUP_ID = {{ $group->id }};
+        const res = await fetch(`/api/monaxe/groups/${GROUP_ID}/expenses`, { credentials: 'same-origin' });
+        if (!res.ok) return;
+        const j = await res.json();
+        if (!j) return;
+
+        if (j.proposals && Array.isArray(j.proposals)) {
+            document.querySelectorAll('.proposal-item').forEach(n => n.remove());
+            const container = document.querySelector('.section-card .sc-hdr')?.parentElement;
+            if (container) {
+                container.insertAdjacentHTML('beforeend', j.proposals.map(p => `
+                    <div class="proposal-item">
+                        <div class="pi-top">
+                            <div class="pi-info">
+                                <div class="pi-desc">${escapeHtml(p.mo_ta || 'Chi nhóm')}</div>
+                                <div class="pi-meta">Bởi ${escapeHtml(p.proposed_by)} · ${new Date(p.created_at).toLocaleDateString('vi-VN')}</div>
+                            </div>
+                            <span class="pi-status st-${p.trang_thai}">${escapeHtml(p.trang_thai)}</span>
+                        </div>
+                    </div>
+                `).join(''));
+            }
+        }
+    } catch (e) {}
+}
+
+function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+
+document.addEventListener('DOMContentLoaded', () => refreshExpenseData());
 </script>
 @endsection
