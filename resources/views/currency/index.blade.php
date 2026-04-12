@@ -366,7 +366,7 @@
         const btnTxt = document.getElementById('convertBtnText');
 
         if (!amount || amount <= 0) {
-            showAlert('warning', 'Số tiền không hợp lệ', 'Vui lòng nhập số tiền lớn hơn 0.');
+            window.showToast({ type: 'warning', title: 'Số tiền không hợp lệ', message: 'Vui lòng nhập số tiền lớn hơn 0.' });
             return;
         }
         if (from === to) {
@@ -399,6 +399,7 @@
             document.getElementById('rStatTime').textContent  =
                 new Date().toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit' });
             document.getElementById('resultCard').style.display = '';
+            window.showToast({ type: 'success', title: 'Quy đổi thành công', message: `${fmt(amount, from)} = ${fmt(result, to)}` });
 
             /* Lưu lịch sử lên server */
             await fetch(`${API_BASE}/currency/convert`, {
@@ -412,7 +413,7 @@
             await loadHistory();
 
         } catch (e) {
-            showAlert('error', 'Lỗi kết nối', 'Không thể lấy tỷ giá. Vui lòng thử lại.');
+            window.showToast({ type: 'error', title: 'Lỗi kết nối', message: 'Không thể lấy tỷ giá. Vui lòng thử lại.' });
         }
 
         btn.disabled     = false;
@@ -563,7 +564,7 @@
             await loadHistory();
         } catch (e) {
             btn.disabled = false;
-            showAlert('error', 'Xoá thất bại', 'Vui lòng thử lại.');
+            window.showToast({ type: 'error', title: 'Xoá thất bại', message: 'Vui lòng thử lại.' });
         }
     };
 
@@ -574,9 +575,9 @@
         try {
             await fetch(`${API_BASE}/currency/history`, { method:'DELETE', headers: jsonHeaders() });
             await loadHistory();
-            showAlert('success', 'Đã xoá', 'Toàn bộ lịch sử đã được xoá.');
+            window.showToast({ type: 'success', title: 'Đã xoá', message: 'Toàn bộ lịch sử đã được xoá.' });
         } catch (e) {
-            showAlert('error', 'Lỗi', 'Không thể xoá lịch sử.');
+            window.showToast({ type: 'error', title: 'Lỗi', message: 'Không thể xoá lịch sử.' });
         } finally {
             this.disabled = false;
         }
@@ -630,7 +631,7 @@
         } catch (err) {
             document.getElementById('currencySkeleton').style.display = 'none';
             document.getElementById('currencyContent') .style.display = '';
-            showAlert('error', 'Lỗi tải dữ liệu', err.message);
+            window.showToast({ type: 'error', title: 'Lỗi tải dữ liệu', message: err.message });
         }
     }
     init();

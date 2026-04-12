@@ -332,12 +332,14 @@
 
                 if (res.ok) {
                     // Sanctum đã set session cookie → vào dashboard thẳng
+                    sessionStorage.setItem('pending_toast', JSON.stringify({ type: 'success', title: 'Thành công', message: 'Đăng nhập thành công!' }));
                     window.location.href = '/dashboard';
                 } else {
                     handleErrors(this, data, 'Đăng nhập thất bại!', 'Đăng nhập');
+                    window.showToast({ type: 'error', title: 'Lỗi', message: data.message ?? 'Email hoặc mật khẩu không đúng.' });
                 }
             } catch {
-                showError(this, 'email', 'Lỗi kết nối, vui lòng thử lại!');
+                window.showToast({ type: 'error', title: 'Lỗi kết nối', message: 'Vui lòng thử lại sau.' });
                 btn.disabled    = false;
                 btn.textContent = 'Đăng nhập';
             }
@@ -362,12 +364,14 @@
                 });
 
                 if (res.ok) {
-                    window.location.href = '/dashboard';
+                     sessionStorage.setItem('pending_toast', JSON.stringify({ type: 'success', title: 'Thành công', message: 'Tạo tài khoản thành công!' }));
+                     window.location.href = '/dashboard';
                 } else {
                     handleErrors(this, data, 'Đăng ký thất bại!', 'Tạo tài khoản');
+                    window.showToast({ type: 'error', title: 'Lỗi', message: data.message ?? 'Vui lòng kiểm tra lại thông tin.' });
                 }
             } catch {
-                showError(this, 'email', 'Lỗi kết nối, vui lòng thử lại!');
+                window.showToast({ type: 'error', title: 'Lỗi kết nối', message: 'Vui lòng thử lại sau.' });
                 btn.disabled    = false;
                 btn.textContent = 'Tạo tài khoản';
             }

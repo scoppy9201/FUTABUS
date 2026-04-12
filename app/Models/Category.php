@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Budgets;
 
 class Category extends Model
 {
@@ -60,7 +61,7 @@ class Category extends Model
      */
     public function wallets()
     {
-        return $this->hasMany(Wallet::class, 'category_id');
+        return $this->hasMany(Budgets::class, 'category_id');
     }
 
     /**

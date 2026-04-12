@@ -170,103 +170,115 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        @if(session('toast'))
-            showToast(@json(session('toast')));
-        @endif
-        @if(session('success'))
-            showToast({ type: 'success', title: 'Thành công', message: @json(session('success')) });
-        @endif
-        @if(session('error'))
-            showToast({ type: 'error', title: 'Lỗi', message: @json(session('error')) });
-        @endif
-        @if(session('warning'))
-            showToast({ type: 'warning', title: 'Cảnh báo', message: @json(session('warning')) });
-        @endif
-        @if(session('info'))
-            showToast({ type: 'info', title: 'Thông báo', message: @json(session('info')) });
-        @endif
+      window.__pendingToast = null;
 
-        (() => {
-            const serverAuthenticated = document.body.dataset.authenticated === '1';
+    try {
+        const raw = sessionStorage.getItem('pending_toast');
+        if (raw) {
+            sessionStorage.removeItem('pending_toast');
+            window.__pendingToast = JSON.parse(raw);
+        }
+    } catch(e) {}
 
-            if (serverAuthenticated) {
-                return;
+    // ── Session toasts từ server ────────────────────────────────────────────
+    window.__serverToasts = [];
+    @if(session('toast'))
+        window.__serverToasts.push(@json(session('toast')));
+    @endif
+    @if(session('success'))
+        window.__serverToasts.push({ type: 'success', title: 'Thành công', message: @json(session('success')) });
+    @endif
+    @if(session('error'))
+        window.__serverToasts.push({ type: 'error', title: 'Lỗi', message: @json(session('error')) });
+    @endif
+    @if(session('warning'))
+        window.__serverToasts.push({ type: 'warning', title: 'Cảnh báo', message: @json(session('warning')) });
+    @endif
+    @if(session('info'))
+        window.__serverToasts.push({ type: 'info', title: 'Thông báo', message: @json(session('info')) });
+    @endif
+
+    // ── Hiển thị tất cả toasts sau khi DOM + Vite JS load xong ─────────────
+    document.addEventListener('DOMContentLoaded', function () {
+        // Đợi thêm 1 tick để đảm bảo showToast từ Vite đã được mount
+        setTimeout(function () {
+            if (typeof showToast !== 'function') return;
+
+            // Server toasts
+            window.__serverToasts.forEach(t => showToast(t));
+
+            // Pending toast từ AJAX/redirect
+            if (window.__pendingToast) {
+                showToast(window.__pendingToast);
+                window.__pendingToast = null;
             }
+        }, 100);
+    });
 
-            let storedUser = null;
+    // ── User info từ localStorage (khi chưa login qua session) ─────────────
+    (() => {
+        const serverAuthenticated = document.body.dataset.authenticated === '1';
+        if (serverAuthenticated) return;
 
-            try {
-                storedUser = JSON.parse(localStorage.getItem('user') || 'null');
-            } catch (error) {
-                storedUser = null;
-            }
+        let storedUser = null;
+        try {
+            storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+        } catch (error) {
+            storedUser = null;
+        }
+        if (!storedUser) return;
 
-            if (!storedUser) {
-                return;
-            }
+        const userName = storedUser.name || 'Tài khoản Monexa';
+        const userEmail = storedUser.email || 'Đăng nhập bằng API';
+        const initials = userName.slice(0, 2).toUpperCase();
+        const avatar = storedUser.avatar
+            ? (String(storedUser.avatar).startsWith('http') ? storedUser.avatar : `/storage/${storedUser.avatar}`)
+            : '';
 
-            const userName = storedUser.name || 'Tài khoản Monexa';
-            const userEmail = storedUser.email || 'Đăng nhập bằng API';
-            const initials = userName.slice(0, 2).toUpperCase();
-            const avatar = storedUser.avatar
-                ? (String(storedUser.avatar).startsWith('http') ? storedUser.avatar : `/storage/${storedUser.avatar}`)
-                : '';
+        const els = {
+            userName:              document.getElementById('userName'),
+            dropdownName:          document.getElementById('dropdownName'),
+            dropdownEmail:         document.getElementById('dropdownEmail'),
+            userAvatarFallback:    document.getElementById('userAvatarFallback'),
+            dropdownAvatarFallback:document.getElementById('dropdownAvatarFallback'),
+            userAvatarImage:       document.getElementById('userAvatarImage'),
+            dropdownAvatarImage:   document.getElementById('dropdownAvatarImage'),
+            clientLogoutButton:    document.getElementById('clientLogoutButton'),
+        };
 
-            const userNameEl = document.getElementById('userName');
-            const dropdownNameEl = document.getElementById('dropdownName');
-            const dropdownEmailEl = document.getElementById('dropdownEmail');
-            const userAvatarFallbackEl = document.getElementById('userAvatarFallback');
-            const dropdownAvatarFallbackEl = document.getElementById('dropdownAvatarFallback');
-            const userAvatarImageEl = document.getElementById('userAvatarImage');
-            const dropdownAvatarImageEl = document.getElementById('dropdownAvatarImage');
-            const clientLogoutButton = document.getElementById('clientLogoutButton');
+        if (els.userName)              els.userName.textContent = userName;
+        if (els.dropdownName)          els.dropdownName.textContent = userName;
+        if (els.dropdownEmail)         els.dropdownEmail.textContent = userEmail;
+        if (els.userAvatarFallback)    els.userAvatarFallback.textContent = initials;
+        if (els.dropdownAvatarFallback)els.dropdownAvatarFallback.textContent = initials;
 
-            if (userNameEl) userNameEl.textContent = userName;
-            if (dropdownNameEl) dropdownNameEl.textContent = userName;
-            if (dropdownEmailEl) dropdownEmailEl.textContent = userEmail;
-            if (userAvatarFallbackEl) userAvatarFallbackEl.textContent = initials;
-            if (dropdownAvatarFallbackEl) dropdownAvatarFallbackEl.textContent = initials;
+        if (avatar) {
+            if (els.userAvatarImage)    { els.userAvatarImage.src = avatar; els.userAvatarImage.hidden = false; }
+            if (els.dropdownAvatarImage){ els.dropdownAvatarImage.src = avatar; els.dropdownAvatarImage.hidden = false; }
+            if (els.userAvatarFallback)     els.userAvatarFallback.hidden = true;
+            if (els.dropdownAvatarFallback) els.dropdownAvatarFallback.hidden = true;
+        }
 
-            if (avatar) {
-                if (userAvatarImageEl) {
-                    userAvatarImageEl.src = avatar;
-                    userAvatarImageEl.hidden = false;
-                }
-
-                if (dropdownAvatarImageEl) {
-                    dropdownAvatarImageEl.src = avatar;
-                    dropdownAvatarImageEl.hidden = false;
-                }
-
-                if (userAvatarFallbackEl) userAvatarFallbackEl.hidden = true;
-                if (dropdownAvatarFallbackEl) dropdownAvatarFallbackEl.hidden = true;
-            }
-
-            if (clientLogoutButton) {
-                clientLogoutButton.hidden = false;
-                clientLogoutButton.addEventListener('click', async () => {
-                    const token = localStorage.getItem('token');
-
-                    try {
-                        if (token) {
-                            await fetch(document.body.dataset.apiLogoutUrl, {
-                                method: 'POST',
-                                headers: {
-                                    'Accept': 'application/json',
-                                    'Authorization': `Bearer ${token}`,
-                                },
-                            });
-                        }
-                    } catch (error) {
-                        console.warn('Client logout failed', error);
+        if (els.clientLogoutButton) {
+            els.clientLogoutButton.hidden = false;
+            els.clientLogoutButton.addEventListener('click', async () => {
+                const token = localStorage.getItem('token');
+                try {
+                    if (token) {
+                        await fetch(document.body.dataset.apiLogoutUrl, {
+                            method: 'POST',
+                            headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` },
+                        });
                     }
-
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    window.location.href = document.body.dataset.loginUrl;
-                });
-            }
-        })();
+                } catch (error) {
+                    console.warn('Client logout failed', error);
+                }
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = document.body.dataset.loginUrl;
+            });
+        }
+    })();
     </script>
 </body>
 </html>

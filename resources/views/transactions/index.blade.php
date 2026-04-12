@@ -926,9 +926,6 @@
         </button>
     </div>
 
-    <!-- Toast -->
-    <div id="toast" class="alert" style="display:none;"></div>
-
     <!-- Stats -->
     <div class="stats-grid" id="stats-grid" style="display:none;"></div>
 
@@ -1044,20 +1041,6 @@ function escHtml(s) {
         ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])
     );
 }
-
-function showToast(msg, type = 'success') {
-    const el = document.getElementById('toast');
-    el.className = `alert alert-${type === 'success' ? 'success' : 'error'}`;
-    el.textContent = msg;
-    el.style.display = 'flex';
-    el.style.opacity = '1';
-    clearTimeout(el._t);
-    el._t = setTimeout(() => {
-        el.style.opacity = '0';
-        setTimeout(() => { el.style.display = 'none'; }, 300);
-    }, 4000);
-}
-
 function formatMoney(n) {
     return parseInt(n).toLocaleString('vi-VN') + 'đ';
 }
@@ -1114,7 +1097,7 @@ async function loadTransactions(page = 1) {
         renderStats(data.totalIncome, data.totalExpense, data.transactions.total);
         renderCategoryFilter(allCategories);
     } catch {
-        showToast('Không thể tải danh sách giao dịch.', 'error');
+        window.showToast({ type: 'error', title: 'Lỗi', message: 'Không thể tải danh sách giao dịch.' });
     } finally {
         document.getElementById('table-loading').style.display = 'none';
     }
@@ -1246,7 +1229,7 @@ async function handleCreate(e) {
 
     try {
         await api('POST', API_BASE, body);
-        showToast('Thêm giao dịch thành công!');
+        window.showToast({ type: 'success', title: 'Thành công', message: 'Thêm giao dịch thành công!' });
         document.getElementById('create-modal').classList.remove('active');
         form.reset();
         loadTransactions(currentPage);
@@ -1277,31 +1260,35 @@ async function handleUpdate(e) {
 
     try {
         await api('PATCH', `${API_BASE}/${id}`, body);
-        showToast('Cập nhật giao dịch thành công!');
+        window.showToast({ type: 'success', title: 'Thành công', message: 'Cập nhật giao dịch thành công!' });
         document.getElementById('edit-modal').classList.remove('active');
         loadTransactions(currentPage);
-    } catch (err) {
-        if (err.errors) showFormErrors(err.errors, 'edit');
-        if (err.message) showToast(err.message, 'error');
-    }
+        } catch (err) {
+            if (err.errors) showFormErrors(err.errors, 'edit');
+            if (err.message) window.showToast({ type: 'error', title: 'Lỗi', message: err.message });
+        }
 }
 
 /* DELETE */
 function handleDelete(id) {
+    const isDark = document.body.classList.contains('dark');
     Swal.fire({
         title: 'Bạn chắc chưa?', text: 'Xóa rồi không khôi phục được đâu!',
         icon: 'warning', showCancelButton: true,
         confirmButtonText: 'Xóa', cancelButtonText: 'Hủy',
-        background: '#1E2937', confirmButtonColor: '#ef4444', cancelButtonColor: '#6b6c80',
+        background: isDark ? '#1E2937' : '#ffffff',
+        color: isDark ? '#e5e7eb' : '#1f2937',
+        confirmButtonColor: '#ef4444', cancelButtonColor: '#6b6c80',
     }).then(async r => {
         if (!r.isConfirmed) return;
         try {
             await api('DELETE', `${API_BASE}/${id}`);
-            showToast('Xóa giao dịch thành công!');
+            window.showToast({ type: 'success', title: 'Thành công', message: 'Xóa giao dịch thành công!' });
             loadTransactions(currentPage);
         } catch (err) {
-            showToast(err.message ?? 'Không thể xóa giao dịch.', 'error');
-        }
+            // Đã đúng rồi, giữ nguyên:
+            window.showToast({ type: 'error', title: 'Lỗi', message: err.message ?? 'Không thể xóa.' });
+}
     });
 }
 

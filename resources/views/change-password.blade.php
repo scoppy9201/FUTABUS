@@ -569,9 +569,7 @@
                 const data = await res.json();
 
                 if (res.ok) {
-                    const alertSuccess = document.getElementById('alertSuccess');
-                    alertSuccess.textContent = data.message;
-                    alertSuccess.style.display = 'block';
+                    showToast({ type: 'success', title: 'Thành công', message: data.message });
                     this.reset();
                     document.getElementById('passwordStrength').style.display = 'none';
                 } else {
@@ -579,16 +577,13 @@
                         Object.entries(data.errors).forEach(([field, messages]) => {
                             showFieldError(field, messages[0]);
                         });
+                        showToast({ type: 'error', title: 'Vui lòng kiểm tra lại', message: 'Thông tin chưa hợp lệ.' });
                     } else {
-                        const alertError = document.getElementById('alertError');
-                        alertError.textContent = data.message || 'Đã có lỗi xảy ra!';
-                        alertError.style.display = 'block';
+                        showToast({ type: 'error', title: 'Lỗi', message: data.message || 'Đã có lỗi xảy ra!' });
                     }
                 }
             } catch {
-                const alertError = document.getElementById('alertError');
-                alertError.textContent = 'Lỗi kết nối, vui lòng thử lại!';
-                alertError.style.display = 'block';
+                showToast({ type: 'error', title: 'Lỗi kết nối', message: 'Vui lòng thử lại sau.' });
             } finally {
                 btn.disabled    = false;
                 btn.textContent = 'Cập nhật mật khẩu';
@@ -628,5 +623,43 @@
             else                    bar.classList.add('strength-strong');
         }
     </script>
+    <div id="toast-container" style="
+    position:fixed;top:24px;right:24px;z-index:99999;
+    display:flex;flex-direction:column;gap:10px;width:360px;pointer-events:none;
+"></div>
+<script>
+    function showToast({ type = 'success', title = '', message = '' }) {
+    const colors = {
+        success: { bg:'#d1fae5', border:'#059669', icon:'/images/check.png',   tc:'#065f46' },
+        error:   { bg:'#fee2e2', border:'#dc2626', icon:'/images/warning.png',  tc:'#991b1b' },
+        warning: { bg:'#fef3c7', border:'#d97706', icon:'/images/caution.png',  tc:'#92400e' },
+    };
+    const c = colors[type] ?? colors.success;
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        background:${c.bg};border-left:4px solid ${c.border};border-radius:12px;
+        padding:14px 16px;display:flex;align-items:flex-start;gap:12px;
+        box-shadow:0 8px 24px rgba(0,0,0,0.12);pointer-events:all;
+        opacity:0;transform:translateX(20px);
+        transition:opacity .3s ease,transform .3s ease;
+        font-family:'Segoe UI',sans-serif;
+    `;
+    toast.innerHTML = `
+        <img src="${c.icon}" style="width:20px;height:20px;object-fit:contain;flex-shrink:0;margin-top:2px">
+        <div style="flex:1">
+            ${title ? `<div style="font-weight:700;font-size:14px;color:${c.tc};margin-bottom:2px">${title}</div>` : ''}
+            ${message ? `<div style="font-size:13px;color:#374151">${message}</div>` : ''}
+        </div>
+        <button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#9ca3af;line-height:1;padding:0">×</button>
+    `;
+    container.appendChild(toast);
+    requestAnimationFrame(() => { toast.style.opacity='1'; toast.style.transform='translateX(0)'; });
+    setTimeout(() => {
+        toast.style.opacity='0'; toast.style.transform='translateX(20px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+</script>
 </body>
 </html>
