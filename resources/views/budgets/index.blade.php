@@ -1514,24 +1514,73 @@ async function handleToggle(id) {
     }
 }
 
-/* SYNC BALANCE */
 async function handleSync(id) {
-    const confirmed = await Swal.fire({
-        title: 'Đồng bộ số dư?',
-        text: 'Tính lại số dư dựa trên tất cả giao dịch?',
-        icon: 'question', showCancelButton: true,
-        confirmButtonText: 'Đồng bộ', cancelButtonText: 'Hủy',
-        background: '#1E2937', confirmButtonColor: '#4a90e2', cancelButtonColor: '#6b6c80',
-    });
-    if (!confirmed.isConfirmed) return;
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed; inset: 0; z-index: 9999;
+        background: rgba(0,0,0,0.45);
+        display: flex; align-items: center; justify-content: center;
+    `;
 
-    try {
-        const data = await api('POST', `${API_BASE}/${id}/sync`);
-        window.showToast({ type: 'success', title: 'Thành công', message: data.message ?? 'Đồng bộ thành công!' });
-        loadWallets(currentPage);
-    } catch (err) {
-        window.showToast({ type: 'error', title: 'Lỗi', message: err.message ?? 'Có lỗi xảy ra.' });
-    }
+    const isDark = document.body.classList.contains('dark');
+
+    overlay.innerHTML = `
+        <div style="
+            background: ${isDark ? '#1E2937' : '#ffffff'};
+            color: ${isDark ? '#e5e7eb' : '#1f2937'};
+            border-radius: 16px;
+            padding: 2rem 2rem 1.5rem;
+            max-width: 380px; width: 90%;
+            box-sizing: border-box;
+        ">
+            <div style="
+                width: 48px; height: 48px; border-radius: 50%;
+                background: #EFF6FF;
+                display: flex; align-items: center; justify-content: center;
+                margin-bottom: 1.25rem;
+            ">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M10 3a7 7 0 100 14A7 7 0 0010 3zm0 3v4m0 2h.01"
+                        stroke="#4a90e2" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <p style="font-size: 17px; font-weight: 500; margin: 0 0 10px;">
+                Đồng bộ số dư?
+            </p>
+            <p style="font-size: 14px; opacity: 0.7; margin: 0 0 1.75rem; line-height: 1.6;">
+                Tính lại số dư dựa trên tất cả giao dịch của ví này.
+            </p>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button id="btn-cancel" style="
+                    padding: 8px 20px; border-radius: 8px;
+                    border: 1px solid #d1d5db;
+                    background: transparent;
+                    color: inherit; font-size: 14px; cursor: pointer;
+                ">Hủy</button>
+                <button id="btn-confirm" style="
+                    padding: 8px 20px; border-radius: 8px;
+                    border: none; background: #4a90e2;
+                    color: #fff; font-size: 14px; font-weight: 500; cursor: pointer;
+                ">Đồng bộ</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+    const close = () => document.body.removeChild(overlay);
+    overlay.querySelector('#btn-cancel').onclick = close;
+    overlay.onclick = (e) => { if (e.target === overlay) close(); };
+
+    overlay.querySelector('#btn-confirm').onclick = async () => {
+        close();
+        try {
+            const data = await api('POST', `${API_BASE}/${id}/sync`);
+            window.showToast({ type: 'success', title: 'Thành công', message: data.message ?? 'Đồng bộ thành công!' });
+            loadWallets(currentPage);
+        } catch (err) {
+            window.showToast({ type: 'error', title: 'Lỗi', message: err.message ?? 'Có lỗi xảy ra.' });
+        }
+    };
 }
 
 /* EDIT MODAL */
