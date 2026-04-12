@@ -21,15 +21,13 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'email'    => 'required|email',
             'password' => 'required|string',
         ]);
 
         $this->checkTooManyFailedAttempts($request);
 
-        $credentials = $request->only('email', 'password');
-
-        if (!Auth::attempt($credentials)) {
+        if (!Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey($request), 60);
             return response()->json([
                 'message' => 'Email hoặc mật khẩu không đúng.',
@@ -38,16 +36,11 @@ class LoginController extends Controller
 
         RateLimiter::clear($this->throttleKey($request));
 
-        /** @var \App\Models\User $user */
-        $user  = Auth::user();
-
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $request->session()->regenerate(); // bảo mật: tránh session fixation
 
         return response()->json([
-            'message'      => 'Đăng nhập thành công!',
-            'access_token' => $token,
-            'token_type'   => 'Bearer',
-            'user'         => $user,
+            'message' => 'Đăng nhập thành công!',
+            'user'    => Auth::user(),
         ], 200);
     }
 

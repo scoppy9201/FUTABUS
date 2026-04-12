@@ -271,7 +271,7 @@ body.dark .modal-foot { border-color:rgba(255,255,255,0.06);background:#191d27; 
 </div>
 
 <script>
-const WALLET_ID = {{ request()->route('money_wallet') }};
+const WALLET_ID = {{ request()->route('moneyWallet') }};
 const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
 const WALLET_COLORS = {
@@ -305,7 +305,7 @@ function fmt(n) { return Number(n).toLocaleString('vi-VN'); }
 function fmtDate(d) { return new Date(d).toLocaleDateString('vi-VN'); }
 
 async function loadWallet() {
-    const data = await apiFetch(`/api/money-wallets/${WALLET_ID}`);
+    const data = await apiFetch(`/api/v1/money-wallets/${WALLET_ID}`);
     walletData = data;
 
     const color = WALLET_COLORS[data.loai_vi] || '#6b7280';
@@ -364,7 +364,7 @@ async function loadWallet() {
 }
 
 async function loadTransactions() {
-    const data = await apiFetch(`/api/money-wallets/${WALLET_ID}/transactions`);
+    const data = await apiFetch(`/api/v1/money-wallets/${WALLET_ID}/transactions`);
     const el = document.getElementById('txList');
     if (!data.length) { el.innerHTML = '<div class="empty-msg">📭 Chưa có giao dịch nào trong ví này</div>'; return; }
     el.innerHTML = data.map(tx => {
@@ -385,7 +385,7 @@ async function loadTransactions() {
 }
 
 async function loadTransfers() {
-    const data = await apiFetch(`/api/money-wallets/${WALLET_ID}/transfers`);
+    const data = await apiFetch(`/api/v1/money-wallets/${WALLET_ID}/transfers`);
     const el = document.getElementById('tfList');
     if (!data.length) { el.innerHTML = '<div class="empty-msg">↔️ Chưa có giao dịch chuyển tiền nào</div>'; return; }
     el.innerHTML = data.map(tf => {
@@ -403,7 +403,7 @@ async function loadTransfers() {
 }
 
 async function loadAdjustments() {
-    const data = await apiFetch(`/api/money-wallets/${WALLET_ID}/adjustments`);
+    const data = await apiFetch(`/api/v1/money-wallets/${WALLET_ID}/adjustments`);
     const el = document.getElementById('adjList');
     if (!data.length) { el.innerHTML = '<div class="empty-msg">⚖️ Chưa có điều chỉnh nào</div>'; return; }
     el.innerHTML = data.map(adj => {
@@ -427,7 +427,7 @@ async function loadAdjustments() {
 }
 
 async function loadCategories() {
-    const data = await apiFetch('/api/categories');
+    const data = await apiFetch('/api/v1/categories');
     const sel = document.getElementById('adjCategory');
     const groups = {};
     data.filter(c => c.danh_muc_cha_id).forEach(c => {
@@ -456,7 +456,7 @@ async function submitAdjust() {
     };
     if (!body.category_id) { showAlert('Vui lòng chọn danh mục', 'error'); return; }
 
-    const res = await apiFetch(`/api/money-wallets/${WALLET_ID}/adjust`, { method: 'POST', body: JSON.stringify(body) });
+    const res = await apiFetch(`/api/v1/money-wallets/${WALLET_ID}/adjust`, { method: 'POST', body: JSON.stringify(body) });
     if (res.success || res.id) {
         closeModal('adjustModal');
         showAlert('Điều chỉnh số dư thành công');
@@ -478,7 +478,7 @@ async function submitEdit() {
     };
     if (!body.ten_vi) { showAlert('Vui lòng nhập tên ví', 'error'); return; }
 
-    const res = await apiFetch(`/api/money-wallets/${WALLET_ID}`, { method: 'PUT', body: JSON.stringify(body) });
+    const res = await apiFetch(`/api/v1/money-wallets/${WALLET_ID}`, { method: 'PUT', body: JSON.stringify(body) });
     if (res.id) {
         closeModal('editShowModal');
         showAlert('Cập nhật ví thành công');
@@ -490,7 +490,7 @@ async function submitEdit() {
 
 async function deleteWallet() {
     if (!confirm('Xóa/ẩn ví này?')) return;
-    const res = await apiFetch(`/api/money-wallets/${WALLET_ID}`, { method: 'DELETE' });
+    const res = await apiFetch(`/api/v1/money-wallets/${WALLET_ID}`, { method: 'DELETE' });
     if (res.success) { window.location.href = '{{ route("money-wallets.index") }}'; }
     else showAlert(res.message || 'Có lỗi xảy ra', 'error');
 }

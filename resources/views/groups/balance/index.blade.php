@@ -276,7 +276,7 @@ $iconDown   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
             {!! $iconWarn !!} Bật hiển thị số dư để tạo đề xuất phân phối
         </div>
         @else
-        <form action="{{ route('groups.balance.propose', $group) }}" method="POST">
+        <form action="{{ route('groups.balance.propose', $group) }}" method="POST" class="js-rest">
             @csrf
             <div style="display:grid;grid-template-columns:1fr 2fr;gap:24px;align-items:start;">
                 {{-- Cột trái --}}
@@ -415,11 +415,11 @@ $iconDown   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
         </div>
         <div class="pi-progress-label">{{ $p['approved_count'] }}/{{ $p['total_members'] }} người đồng ý</div>
         <div class="pi-actions">
-            <form action="{{ route('groups.balance.approve', [$group, $p['id']]) }}" method="POST">
+            <form action="{{ route('groups.balance.approve', [$group, $p['id']]) }}" method="POST" class="js-rest">
                 @csrf
                 <button type="submit" class="btn-primary btn-success btn-sm">{!! $iconCheck !!} Đồng ý</button>
             </form>
-            <form action="{{ route('groups.balance.reject', [$group, $p['id']]) }}" method="POST" style="display:inline">
+            <form action="{{ route('groups.balance.reject', [$group, $p['id']]) }}" method="POST" style="display:inline" class="js-rest">
                 @csrf
                 <button type="submit" class="btn-primary btn-danger btn-sm">{!! $iconX !!} Từ chối</button>
             </form>
@@ -464,16 +464,16 @@ $iconDown   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
 
         @if($p['my_approval'] === null)
         <div class="pi-actions">
-            <form action="{{ route('groups.balance.approve', [$group, $p['id']]) }}" method="POST">
+            <form action="{{ route('groups.balance.approve', [$group, $p['id']]) }}" method="POST" class="js-rest">
                 @csrf
                 <button type="submit" class="btn-primary btn-success btn-sm">{!! $iconCheck !!} Đồng ý</button>
             </form>
-            <form action="{{ route('groups.balance.reject', [$group, $p['id']]) }}" method="POST" style="display:inline">
+            <form action="{{ route('groups.balance.reject', [$group, $p['id']]) }}" method="POST" style="display:inline" class="js-rest">
                 @csrf
                 <button type="submit" class="btn-primary btn-danger btn-sm">{!! $iconX !!} Từ chối</button>
             </form>
             @if($laAdmin)
-            <form action="{{ route('groups.balance.cancel', [$group, $p['id']]) }}" method="POST" style="display:inline">
+            <form action="{{ route('groups.balance.cancel', [$group, $p['id']]) }}" method="POST" style="display:inline" class="js-rest">
                 @csrf
                 <button type="submit" class="btn-ghost btn-sm">Hủy</button>
             </form>
@@ -621,7 +621,7 @@ setTimeout(() => {
 async function refreshBalanceData() {
     try {
         const GROUP_ID = {{ $group->id }};
-        const res = await fetch(`/api/monaxe/groups/${GROUP_ID}/balance`, { credentials: 'same-origin' });
+        const res = await fetch(`/groups/${GROUP_ID}/balance`, { credentials: 'same-origin' });
         if (!res.ok) return;
         const j = await res.json();
         if (!j) return;

@@ -85,8 +85,8 @@ function fmt(n) { return Number(n).toLocaleString('vi-VN'); }
 
 async function loadConfirm() {
     const [qrData, walletData] = await Promise.all([
-        apiFetch(`/api/money-wallets/qr/${QR_TOKEN}`),
-        apiFetch('/api/money-wallets'),
+        apiFetch(`/api/v1/money-wallets/qr/${QR_TOKEN}`),
+        apiFetch('/api/v1/money-wallets'),
     ]);
 
     if (!qrData.qr_token || qrData.trang_thai !== 'pending') {
@@ -139,7 +139,7 @@ async function confirmReceive() {
     const receiver_wallet_id = document.getElementById('receiverWalletId')?.value;
     if (!receiver_wallet_id) { showAlert('Vui lòng chọn ví nhận'); return; }
 
-    const res = await apiFetch(`/api/money-wallets/qr/${QR_TOKEN}/confirm`, {
+    const res = await apiFetch(`/api/v1/money-wallets/qr/${QR_TOKEN}/confirm`, {
         method: 'POST',
         body: JSON.stringify({ receiver_wallet_id }),
     });

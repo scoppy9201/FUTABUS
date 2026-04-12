@@ -266,10 +266,10 @@ $iconHash   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
                     <div class="pi-progress"><div class="pi-progress-fill" style="width:{{ $p['total_members']>0 ? round($p['approved_count']/$p['total_members']*100) : 0 }}%"></div></div>
                     <div class="pi-progress-label">{{ $p['approved_count'] }}/{{ $p['total_members'] }} người đồng ý</div>
                     <div class="pi-actions">
-                        <form action="{{ route('groups.expense.approve', [$group, $p['id']]) }}" method="POST">
+                        <form action="{{ route('groups.expense.approve', [$group, $p['id']]) }}" method="POST" class="js-rest">
                             @csrf <button type="submit" class="btn-primary btn-success btn-sm">{!! $iconCheck !!} Đồng ý</button>
                         </form>
-                        <form action="{{ route('groups.expense.reject', [$group, $p['id']]) }}" method="POST" style="display:inline">
+                        <form action="{{ route('groups.expense.reject', [$group, $p['id']]) }}" method="POST" style="display:inline" class="js-rest">
                             @csrf <button type="submit" class="btn-primary btn-danger btn-sm">{!! $iconX !!} Từ chối</button>
                         </form>
                     </div>
@@ -315,13 +315,13 @@ $iconHash   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
                     <div class="pi-progress-label">{{ $p['approved_count'] }}/{{ $p['total_members'] }} người đồng ý</div>
                     @if($p['my_approval']===null)
                     <div class="pi-actions">
-                        <form action="{{ route('groups.expense.approve', [$group, $p['id']]) }}" method="POST">
+                        <form action="{{ route('groups.expense.approve', [$group, $p['id']]) }}" method="POST" class="js-rest">
                             @csrf <button type="submit" class="btn-primary btn-success btn-sm">{!! $iconCheck !!} Đồng ý</button>
                         </form>
-                        <form action="{{ route('groups.expense.reject', [$group, $p['id']]) }}" method="POST" style="display:inline">
+                        <form action="{{ route('groups.expense.reject', [$group, $p['id']]) }}" method="POST" style="display:inline" class="js-rest">
                             @csrf <button type="submit" class="btn-primary btn-danger btn-sm">{!! $iconX !!} Từ chối</button>
                         </form>
-                        <form action="{{ route('groups.expense.cancel', [$group, $p['id']]) }}" method="POST" style="display:inline">
+                        <form action="{{ route('groups.expense.cancel', [$group, $p['id']]) }}" method="POST" style="display:inline" class="js-rest">
                             @csrf <button type="submit" class="btn-ghost btn-sm">Hủy</button>
                         </form>
                     </div>
@@ -353,7 +353,7 @@ $iconHash   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
         <div>
             <div class="section-card">
                 <div class="sc-hdr"><div class="sc-title">{!! $iconPlus !!} Tạo khoản chi chung</div></div>
-                <form action="{{ route('groups.expense.store', $group) }}" method="POST" style="padding:20px">
+                <form action="{{ route('groups.expense.store', $group) }}" method="POST" style="padding:20px" class="js-rest">
                     @csrf
                     <div class="form-group">
                         <label class="form-label">Mô tả <span class="required">*</span></label>
@@ -483,7 +483,7 @@ $iconHash   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
         <div>
             <div class="section-card">
                 <div class="sc-hdr"><div class="sc-title">{!! $iconDoc !!} Ghi nợ thẳng</div></div>
-                <form action="{{ route('groups.debt.store', $group) }}" method="POST" style="padding:20px">
+                <form action="{{ route('groups.debt.store', $group) }}" method="POST" style="padding:20px" class="js-rest">
                     @csrf
                     <div class="form-group">
                         <label class="form-label">Người nợ <span class="required">*</span></label>
@@ -575,7 +575,7 @@ setTimeout(() => {
 async function refreshExpenseData() {
     try {
         const GROUP_ID = {{ $group->id }};
-        const res = await fetch(`/api/monaxe/groups/${GROUP_ID}/expenses`, { credentials: 'same-origin' });
+        const res = await fetch(`/api/v1/groups/${GROUP_ID}/expenses`, { credentials: 'same-origin' });
         if (!res.ok) return;
         const j = await res.json();
         if (!j) return;

@@ -412,33 +412,30 @@
                 </div>
             @endif
 
-            <form action="{{ route('change-password.update') }}" method="POST" id="changePasswordForm">
+            <form id="changePasswordForm">
                 @csrf
 
                 <div class="form-group">
                     <label>Mật khẩu hiện tại</label>
-                    <div class="input-wrapper {{ $errors->has('current_password') ? 'error' : '' }}">
+                    <div class="input-wrapper" id="wrap-current_password">
                         <img src="{{ asset('images/lock.png') }}" class="input-icon" alt="Lock">
                         <input 
                             type="password" 
                             id="current_password" 
                             name="current_password" 
                             placeholder="Nhập mật khẩu hiện tại"
-                            required
-                            autofocus
+                            required autofocus
                         >
                         <span class="toggle-password" onclick="togglePassword('current_password', this)">
                             <img src="{{ asset('images/eye.png') }}" class="eye-icon" alt="Toggle">
                         </span>
                     </div>
-                    @error('current_password')
-                        <span class="error-message">{{ $message }}</span>
-                    @enderror
+                    <span class="error-message" id="err-current_password"></span>
                 </div>
 
                 <div class="form-group">
                     <label>Mật khẩu mới</label>
-                    <div class="input-wrapper {{ $errors->has('password') ? 'error' : '' }}">
+                    <div class="input-wrapper" id="wrap-password">
                         <img src="{{ asset('images/password.png') }}" class="input-icon" alt="Password">
                         <input 
                             type="password" 
@@ -455,14 +452,12 @@
                     <div class="password-strength" id="passwordStrength">
                         <div class="password-strength-bar" id="strengthBar"></div>
                     </div>
-                    @error('password')
-                        <span class="error-message">{{ $message }}</span>
-                    @enderror
+                    <span class="error-message" id="err-password"></span>
                 </div>
 
                 <div class="form-group">
                     <label>Xác nhận mật khẩu mới</label>
-                    <div class="input-wrapper {{ $errors->has('password_confirmation') ? 'error' : '' }}">
+                    <div class="input-wrapper" id="wrap-password_confirmation">
                         <img src="{{ asset('images/check.png') }}" class="input-icon" alt="Confirm">
                         <input 
                             type="password" 
@@ -475,12 +470,13 @@
                             <img src="{{ asset('images/eye.png') }}" class="eye-icon" alt="Toggle">
                         </span>
                     </div>
-                    @error('password_confirmation')
-                        <span class="error-message">{{ $message }}</span>
-                    @enderror
+                    <span class="error-message" id="err-password_confirmation"></span>
                 </div>
 
-                <button type="submit" class="submit-btn">Cập nhật mật khẩu</button>
+                <div class="alert alert-success" id="alertSuccess" style="display:none;"></div>
+                <div class="alert alert-error"   id="alertError"   style="display:none;"></div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">Cập nhật mật khẩu</button>
             </form>
 
             <div class="back-link">
@@ -522,45 +518,114 @@
     </div>
 
     <script>
-        function togglePassword(fieldId, toggleIcon) {
-            const passwordField = document.getElementById(fieldId);
-            const iconImg = toggleIcon.querySelector('img');
-            
-            if (passwordField.type === "password") {
-                passwordField.type = "text";
-                iconImg.src = "{{ asset('images/eye_off.png') }}";
-            } else {
-                passwordField.type = "password";
-                iconImg.src = "{{ asset('images/eye.png') }}";
+        // Đọc XSRF-TOKEN cookie (Sanctum stateful)
+        function getXsrfToken() {
+            return decodeURIComponent(
+                document.cookie.match('(^|;)\\s*XSRF-TOKEN\\s*=\\s*([^;]+)')?.pop() || ''
+            );
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+            document.querySelectorAll('.input-wrapper').forEach(el => el.classList.remove('error'));
+            document.getElementById('alertSuccess').style.display = 'none';
+            document.getElementById('alertError').style.display   = 'none';
+        }
+
+        function showFieldError(field, message) {
+            const err  = document.getElementById(`err-${field}`);
+            const wrap = document.getElementById(`wrap-${field}`);
+            if (err)  err.textContent = message;
+            if (wrap) wrap.classList.add('error');
+        }
+
+        document.getElementById('changePasswordForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            clearErrors();
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled    = true;
+            btn.textContent = 'Đang cập nhật...';
+
+            try {
+                // Sanctum stateful: lấy CSRF cookie trước
+                await fetch('/sanctum/csrf-cookie', { credentials: 'include' });
+
+                const res = await fetch('/api/v1/password/change', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept':       'application/json',
+                        'X-XSRF-TOKEN': getXsrfToken(),
+                    },
+                    body: JSON.stringify({
+                        current_password:      document.getElementById('current_password').value,
+                        password:              document.getElementById('password').value,
+                        password_confirmation: document.getElementById('password_confirmation').value,
+                    }),
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    const alertSuccess = document.getElementById('alertSuccess');
+                    alertSuccess.textContent = data.message;
+                    alertSuccess.style.display = 'block';
+                    this.reset();
+                    document.getElementById('passwordStrength').style.display = 'none';
+                } else {
+                    if (data.errors) {
+                        Object.entries(data.errors).forEach(([field, messages]) => {
+                            showFieldError(field, messages[0]);
+                        });
+                    } else {
+                        const alertError = document.getElementById('alertError');
+                        alertError.textContent = data.message || 'Đã có lỗi xảy ra!';
+                        alertError.style.display = 'block';
+                    }
+                }
+            } catch {
+                const alertError = document.getElementById('alertError');
+                alertError.textContent = 'Lỗi kết nối, vui lòng thử lại!';
+                alertError.style.display = 'block';
+            } finally {
+                btn.disabled    = false;
+                btn.textContent = 'Cập nhật mật khẩu';
             }
+        });
+
+        function togglePassword(fieldId, toggleIcon) {
+            const field   = document.getElementById(fieldId);
+            const iconImg = toggleIcon.querySelector('img');
+            const isHidden = field.type === 'password';
+            field.type    = isHidden ? 'text' : 'password';
+            iconImg.src   = isHidden 
+                ? "{{ asset('images/eye_off.png') }}" 
+                : "{{ asset('images/eye.png') }}";
         }
 
         function checkPasswordStrength(password) {
-            const strengthBar = document.getElementById('strengthBar');
-            const strengthContainer = document.getElementById('passwordStrength');
-            
-            if (password.length === 0) {
-                strengthContainer.style.display = 'none';
+            const bar       = document.getElementById('strengthBar');
+            const container = document.getElementById('passwordStrength');
+
+            if (!password.length) {
+                container.style.display = 'none';
                 return;
             }
-            
-            strengthContainer.style.display = 'block';
-            
+
+            container.style.display = 'block';
+
             let strength = 0;
-            if (password.length >= 8) strength++;
+            if (password.length >= 8)                            strength++;
             if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
-            if (/\d/.test(password)) strength++;
-            if (/[^a-zA-Z\d]/.test(password)) strength++;
-            
-            strengthBar.className = 'password-strength-bar';
-            
-            if (strength <= 1) {
-                strengthBar.classList.add('strength-weak');
-            } else if (strength <= 3) {
-                strengthBar.classList.add('strength-medium');
-            } else {
-                strengthBar.classList.add('strength-strong');
-            }
+            if (/\d/.test(password))                             strength++;
+            if (/[^a-zA-Z\d]/.test(password))                   strength++;
+
+            bar.className = 'password-strength-bar';
+            if (strength <= 1)      bar.classList.add('strength-weak');
+            else if (strength <= 3) bar.classList.add('strength-medium');
+            else                    bar.classList.add('strength-strong');
         }
     </script>
 </body>

@@ -9,13 +9,14 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Monexa') - Quản lý chi tiêu</title>
     <link rel="icon" type="images/png" href="{{ asset('favicon.png') }}">
+    <script>window.qr = window.qr || {};</script>
     @vite('resources/js/app.js')
 </head>
 <body
     class="{{ cookie('theme', 'light') === 'dark' ? 'dark' : '' }}"
     data-authenticated="{{ $authUser ? '1' : '0' }}"
     data-login-url="{{ route('login') }}"
-    data-api-logout-url="{{ url('/api/monaxe/auth/logout') }}"
+    data-api-logout-url="{{ url('/api/monexa/auth/logout') }}"
 >
     <div class="topbar">
         <div class="topbar-left">
@@ -89,8 +90,8 @@
                     <div class="dropdown-avatar">
                         @if($authUser && $authUser->avatar)
                             @php
-                                $avatarUrl = str_starts_with($authUser->avatar, 'http') 
-                                    ? $authUser->avatar 
+                                $avatarUrl = str_starts_with($authUser->avatar, 'http')
+                                    ? $authUser->avatar
                                     : asset('storage/' . $authUser->avatar);
                             @endphp
                             <img src="{{ $avatarUrl }}" alt="Avatar" id="dropdownAvatarImage">
@@ -151,7 +152,7 @@
     @include('layouts.partials.monebot')
 
     <div class="main-content">
-        <div class="content">
+        <div class="content" id="mainContent">
             @yield('content')
         </div>
     </div>
@@ -168,6 +169,102 @@
         pointer-events: none;
     "></div>
 
+        <script>
+            // Small helper for fetch-based REST calls used by legacy Blade views
+            window.apiFetch = async function (url, options = {}) {
+                options = options || {};
+                const headers = Object.assign({}, options.headers || {});
+                // Ensure JSON responses
+                headers['Accept'] = headers['Accept'] || 'application/json';
+
+                // CSRF token for same-origin requests
+                const meta = document.querySelector('meta[name="csrf-token"]');
+                if (meta && !headers['X-CSRF-TOKEN']) {
+                    headers['X-CSRF-TOKEN'] = meta.getAttribute('content');
+                }
+
+                // Default X-Requested-With for frameworks that check it
+                headers['X-Requested-With'] = headers['X-Requested-With'] || 'XMLHttpRequest';
+
+                if (options.body && !(options.body instanceof FormData)) {
+                    headers['Content-Type'] = headers['Content-Type'] || 'application/json';
+                    options.body = typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
+                }
+
+                options.headers = headers;
+
+                const resp = await fetch(url, options);
+                let data = null;
+                try { data = await resp.json(); } catch (e) { data = null; }
+                if (!resp.ok) {
+                    const err = new Error(data?.message || resp.statusText || 'Request failed');
+                    err.status = resp.status;
+                    err.payload = data;
+                    throw err;
+                }
+                return data;
+            };
+
+            // Auto-bind forms having class 'js-rest' to submit via fetch
+            (function attachRestForms() {
+                document.addEventListener('submit', async (ev) => {
+                    // support events from inner elements by finding the closest form.js-rest
+                    const form = ev.target && typeof ev.target.closest === 'function'
+                        ? ev.target.closest('form.js-rest')
+                        : (ev.target instanceof HTMLFormElement ? ev.target : null);
+                    if (!form) return;
+                    ev.preventDefault();
+
+                    const action = form.action || window.location.href;
+                    let method = (form.getAttribute('method') || 'POST').toUpperCase();
+                    // Allow method override
+                    const methodInput = form.querySelector('input[name="_method"]');
+                    if (methodInput && methodInput.value) method = methodInput.value.toUpperCase();
+
+                    const formData = new FormData(form);
+                    // Convert to object unless enctype is multipart/form-data
+                    const isMultipart = (form.enctype || '').indexOf('multipart') !== -1;
+
+                    try {
+                        const options = { method };
+                        if (method === 'GET') {
+                            const params = new URLSearchParams([...formData.entries()]);
+                            const url = action.split('?')[0] + '?' + params.toString();
+                            const data = await window.apiFetch(url, options);
+                            if (data?.message) showToast({ type: 'success', message: data.message });
+                            return;
+                        }
+
+                        // Always send FormData to preserve nested keys like phan_bo[0][user_id]
+                        options.body = formData;
+
+                        const data = await window.apiFetch(action, options);
+                        if (data?.message) {
+                            if (typeof showAlert === 'function') showAlert(data.message, 'success');
+                            else showToast({ type: 'success', message: data.message });
+                        }
+                        // follow redirect url if provided in JSON
+                        if (data?.redirect) {
+                            window.location.href = data.redirect;
+                        }
+                    } catch (err) {
+                        const payload = err.payload || {};
+                        if (err.status === 422 && payload?.errors) {
+                            // show first validation error
+                            const first = Object.values(payload.errors)[0];
+                            const msg = Array.isArray(first) ? first[0] : first;
+                            if (typeof showAlert === 'function') showAlert(msg, 'error');
+                            else showToast({ type: 'error', message: msg });
+                            return;
+                        }
+                        const emsg = payload?.message || err.message || 'Lỗi';
+                        if (typeof showAlert === 'function') showAlert(emsg, 'error');
+                        else showToast({ type: 'error', message: emsg });
+                    }
+                }, false);
+            })();
+
+        </script>
     <script>
         @if(session('toast'))
             showToast(@json(session('toast')));

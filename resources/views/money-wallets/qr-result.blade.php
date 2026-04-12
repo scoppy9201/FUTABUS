@@ -85,7 +85,7 @@ async function apiFetch(url, options = {}) {
 function fmt(n) { return Number(n).toLocaleString('vi-VN'); }
 
 async function loadResult() {
-    const data = await apiFetch(`/api/money-wallets/qr/${QR_TOKEN}`);
+    const data = await apiFetch(`/api/v1/money-wallets/qr/${QR_TOKEN}`);
 
     if (!data.qr_token) {
         document.getElementById('resultBody').innerHTML = `
@@ -152,7 +152,7 @@ async function loadResult() {
 
 async function cancelQR(id) {
     if (!confirm('Huỷ mã QR này?')) return;
-    await apiFetch(`/api/money-wallets/qr/${id}/cancel`, { method: 'POST' });
+    await apiFetch(`/api/v1/money-wallets/qr/${id}/cancel`, { method: 'POST' });
     window.location.href = '{{ route("money-wallets.qr.index") }}';
 }
 

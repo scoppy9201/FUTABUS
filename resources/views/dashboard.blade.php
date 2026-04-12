@@ -8,7 +8,7 @@
 <div
     class="dashboard-container"
     id="dashboardPage"
-    data-api-url="{{ url('/api/monaxe/dashboard') }}"
+    data-api-url="{{ url('/api/v1/dashboard') }}"
     data-login-url="{{ route('login') }}"
     data-wallet-icon="{{ asset('images/wallet.png') }}"
     data-profits-icon="{{ asset('images/profits.png') }}"
@@ -443,7 +443,7 @@
             `;
 
             // Gọi API xuất báo cáo
-            fetch(`/api/monaxe/dashboard/export?period=${period}`, {
+            fetch(`/api/v1/dashboard/export?period=${period}`, {
                 headers: buildHeaders(),
                 credentials: 'same-origin',
             })
@@ -521,8 +521,6 @@
         loadDashboard(filter.value);
 
         document.getElementById('export-report-btn').addEventListener('click', exportReport);
-
-        syncTokenFromUrl();
     })();
 </script>
 @endsection

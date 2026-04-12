@@ -475,7 +475,7 @@ body.dark .modal-foot { border-color: rgba(255,255,255,0.06); background: #191d2
             <div class="modal-hdr-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><circle cx="7.5" cy="6.5" r="2.5"/><path d="M2 17c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="14" cy="6" r="2"/><path d="M18 17c0-2.5-1.8-4.2-4-4.7"/></svg> Tạo nhóm mới</div>
             <button class="modal-close" onclick="closeCreate()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
         </div>
-        <form action="{{ route('groups.store') }}" method="POST">
+        <form action="{{ route('groups.store') }}" method="POST" class="js-rest">
             @csrf
             <div class="modal-body">
                 <div class="form-group">
@@ -554,7 +554,7 @@ setTimeout(() => {
 // Fetch groups from API and render into .groups-grid (if API returns data)
 async function fetchAndRenderGroups() {
     try {
-        const res = await fetch('/api/monaxe/groups', { credentials: 'same-origin' });
+        const res = await fetch('/groups', { credentials: 'same-origin' });
         if (!res.ok) return;
         const data = await res.json();
         if (!data.groups) return;

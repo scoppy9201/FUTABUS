@@ -115,6 +115,10 @@ class GroupExpenseController extends Controller
 
         if (is_string($splits)) {
             // $splits trả về chuỗi lỗi
+            if (request()->wantsJson()) {
+                return response()->json(['message' => $splits], 422);
+            }
+
             return back()->with('error', $splits)->withInput();
         }
 
@@ -126,6 +130,10 @@ class GroupExpenseController extends Controller
                 ->first();
 
             if (!$cat) {
+                if (request()->wantsJson()) {
+                    return response()->json(['message' => 'Danh mục không hợp lệ.'], 422);
+                }
+
                 return back()->with('error', 'Danh mục không hợp lệ.')->withInput();
             }
         }
@@ -170,7 +178,11 @@ class GroupExpenseController extends Controller
             GroupNotifier::expenseProposed($proposal->fresh());
 
             if (request()->wantsJson()) {
-                return response()->json(['message' => 'Đã tạo đề xuất chia chi. Chờ xác nhận.','proposal_id'=>$proposal->id], 201);
+                return response()->json([
+                    'message' => 'Đã tạo đề xuất chia chi. Chờ xác nhận.',
+                    'proposal_id' => $proposal->id,
+                    'redirect' => route('groups.expense.index', $group),
+                ], 201);
             }
 
             return redirect()->route('groups.expense.index', $group)
@@ -178,6 +190,10 @@ class GroupExpenseController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
+            }
+
             return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage())->withInput();
         }
     }
@@ -207,7 +223,10 @@ class GroupExpenseController extends Controller
             DB::commit();
 
             if (request()->wantsJson()) {
-                return response()->json(['message' => 'Đã xác nhận đồng ý khoản chi.']);
+                return response()->json([
+                    'message' => 'Đã xác nhận đồng ý khoản chi.',
+                    'redirect' => route('groups.expense.index', $group),
+                ]);
             }
 
             return redirect()->route('groups.expense.index', $group)
@@ -215,6 +234,10 @@ class GroupExpenseController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
+            }
+
             return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
     }
@@ -248,7 +271,10 @@ class GroupExpenseController extends Controller
             DB::commit();
 
             if (request()->wantsJson()) {
-                return response()->json(['message' => 'Đã từ chối đề xuất khoản chi.']);
+                return response()->json([
+                    'message' => 'Đã từ chối đề xuất khoản chi.',
+                    'redirect' => route('groups.expense.index', $group),
+                ]);
             }
 
             return redirect()->route('groups.expense.index', $group)
@@ -256,6 +282,10 @@ class GroupExpenseController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
+            }
+
             return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
     }
@@ -275,7 +305,7 @@ class GroupExpenseController extends Controller
         $proposal->update(['trang_thai' => 'cancelled']);
 
         if (request()->wantsJson()) {
-            return response()->json(['message' => 'Đã huỷ đề xuất khoản chi.']);
+            return response()->json(['message' => 'Đã huỷ đề xuất khoản chi.', 'redirect' => route('groups.expense.index', $group)]);
         }
 
         return redirect()->route('groups.expense.index', $group)

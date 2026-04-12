@@ -107,6 +107,10 @@ class GroupBalanceController extends Controller
             ->exists();
 
         if ($hasPending) {
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Đang có đề xuất chờ duyệt. Hãy huỷ hoặc chờ đề xuất đó hoàn tất trước.'], 422);
+            }
+
             return back()->with('error',
                 'Đang có đề xuất chờ duyệt. Hãy huỷ hoặc chờ đề xuất đó hoàn tất trước.'
             );
@@ -139,6 +143,10 @@ class GroupBalanceController extends Controller
 
         // Validate: tổng phải bằng tổng hiện tại (sai lệch tối đa 1 VND do làm tròn)
         if (abs($tongSoDuMoi - $tongSoDuHienTai) > 1) {
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Tổng số dư phân bổ (' . number_format($tongSoDuMoi) . ' VND) phải bằng tổng số dư hiện tại (' . number_format($tongSoDuHienTai) . ' VND).'], 422);
+            }
+
             return back()->with('error',
                 'Tổng số dư phân bổ (' . number_format($tongSoDuMoi) .
                 ' VND) phải bằng tổng số dư hiện tại (' .
@@ -188,7 +196,11 @@ class GroupBalanceController extends Controller
             DB::commit();
 
             if (request()->wantsJson()) {
-                return response()->json(['message' => 'Đã tạo đề xuất phân phối. Chờ xác nhận.','proposal_id'=>$proposal->id], 201);
+                return response()->json([
+                    'message' => 'Đã tạo đề xuất phân phối. Chờ xác nhận.',
+                    'proposal_id' => $proposal->id,
+                    'redirect' => route('groups.balance.index', $group),
+                ], 201);
             }
 
             return redirect()->route('groups.balance.index', $group)
@@ -196,6 +208,10 @@ class GroupBalanceController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
+            }
+
             return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage())->withInput();
         }
     }
@@ -226,7 +242,7 @@ class GroupBalanceController extends Controller
             DB::commit();
 
             if (request()->wantsJson()) {
-                return response()->json(['message' => 'Đã xác nhận đồng ý phân phối.']);
+                return response()->json(['message' => 'Đã xác nhận đồng ý phân phối.', 'redirect' => route('groups.balance.index', $group)]);
             }
 
             return redirect()->route('groups.balance.index', $group)
@@ -234,6 +250,10 @@ class GroupBalanceController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
+            }
+
             return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
     }
@@ -270,7 +290,7 @@ class GroupBalanceController extends Controller
             DB::commit();
 
             if (request()->wantsJson()) {
-                return response()->json(['message' => 'Đã từ chối đề xuất phân phối.']);
+                return response()->json(['message' => 'Đã từ chối đề xuất phân phối.', 'redirect' => route('groups.balance.index', $group)]);
             }
 
             return redirect()->route('groups.balance.index', $group)
@@ -278,6 +298,10 @@ class GroupBalanceController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
+            }
+
             return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
     }
@@ -299,7 +323,7 @@ class GroupBalanceController extends Controller
         $proposal->update(['trang_thai' => 'cancelled']);
 
         if (request()->wantsJson()) {
-            return response()->json(['message' => 'Đã huỷ đề xuất phân phối.']);
+            return response()->json(['message' => 'Đã huỷ đề xuất phân phối.', 'redirect' => route('groups.balance.index', $group)]);
         }
 
         return redirect()->route('groups.balance.index', $group)

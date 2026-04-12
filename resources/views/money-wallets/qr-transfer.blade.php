@@ -159,7 +159,7 @@ body.dark .history-title { color: #e5e7eb; }
 <script src="https://unpkg.com/@zxing/library@0.18.6/umd/index.min.js"></script>
 <script>
 const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
-const CURRENT_USER_ID = {{ auth()->id() }};
+const CURRENT_USER_ID = {{ auth()->id() ?? 0 }};
 
 async function apiFetch(url, options = {}) {
     const res = await fetch(url, {
@@ -180,7 +180,7 @@ function showAlert(msg, type = 'success') {
 function fmt(n) { return Number(n).toLocaleString('vi-VN'); }
 
 async function loadWallets() {
-    const wallets = await apiFetch('/api/money-wallets');
+    const wallets = await apiFetch('/api/v1/money-wallets');
     const sel = document.getElementById('walletId');
     const active = wallets.filter ? wallets.filter(w => w.trang_thai !== 'khong_hoat_dong') : wallets;
     if (!active.length) {
@@ -192,7 +192,7 @@ async function loadWallets() {
 }
 
 async function loadHistory() {
-    const data = await apiFetch('/api/money-wallets/qr/history');
+    const data = await apiFetch('/api/v1/money-wallets/qr/history');
     const el = document.getElementById('historyContainer');
 
     if (!data.length) {
@@ -249,7 +249,7 @@ async function generateQR() {
     if (!wallet_id) { showAlert('Vui lòng chọn ví nguồn', 'error'); return; }
     if (!so_tien || so_tien < 1000) { showAlert('Số tiền tối thiểu là 1.000đ', 'error'); return; }
 
-    const res = await apiFetch('/api/money-wallets/qr/generate', {
+    const res = await apiFetch('/api/v1/money-wallets/qr/generate', {
         method: 'POST',
         body: JSON.stringify({ wallet_id, so_tien, ghi_chu }),
     });
@@ -263,7 +263,7 @@ async function generateQR() {
 
 async function cancelQR(id) {
     if (!confirm('Huỷ mã QR này?')) return;
-    const res = await apiFetch(`/api/money-wallets/qr/${id}/cancel`, { method: 'POST' });
+    const res = await apiFetch(`/api/v1/money-wallets/qr/${id}/cancel`, { method: 'POST' });
     if (res.success) { showAlert('Đã huỷ mã QR'); loadHistory(); }
     else showAlert(res.message || 'Có lỗi xảy ra', 'error');
 }

@@ -335,7 +335,7 @@ async function submitTransfer() {
     if (!body.category_id) { showAlert('Vui lòng chọn danh mục', 'error'); return; }
     if (!body.ngay_chuyen) { showAlert('Vui lòng chọn ngày', 'error'); return; }
 
-    const res = await apiFetch('/api/wallet-transfers', { method: 'POST', body: JSON.stringify(body) });
+    const res = await apiFetch('/api/v1/wallet-transfers', { method: 'POST', body: JSON.stringify(body) });
     if (res.id) {
         showAlert('Chuyển tiền thành công');
         selectedFrom = null; selectedTo = null; previewAmount = 0;
@@ -347,13 +347,13 @@ async function submitTransfer() {
 
 async function cancelTransfer(id) {
     if (!confirm('Hoàn tác giao dịch chuyển tiền này?')) return;
-    const res = await apiFetch(`/api/wallet-transfers/${id}`, { method: 'DELETE' });
+    const res = await apiFetch(`/api/v1/wallet-transfers/${id}`, { method: 'DELETE' });
     if (res.success) { showAlert('Đã hoàn tác giao dịch'); loadHistory(); }
     else showAlert(res.message || 'Có lỗi xảy ra', 'error');
 }
 
 async function loadHistory() {
-    const data = await apiFetch('/api/wallet-transfers');
+    const data = await apiFetch('/api/v1/wallet-transfers');
     const el = document.getElementById('historyList');
     if (!data.data?.length && !data.length) {
         el.innerHTML = '<div class="empty-msg">Chưa có giao dịch chuyển tiền nào</div>';
@@ -388,10 +388,11 @@ async function loadHistory() {
 
 async function loadPage() {
     const [walletRes, catRes] = await Promise.all([
-        apiFetch('/api/money-wallets'),
-        apiFetch('/api/categories'),
+        apiFetch('/api/v1/money-wallets'),
+        apiFetch('/api/v1/categories'),
     ]);
-    wallets    = walletRes.filter ? walletRes.filter(w => w.trang_thai !== 'khong_hoat_dong') : walletRes;
+    const _walletList = Array.isArray(walletRes) ? walletRes : (walletRes.data ?? []);
+    wallets    = _walletList.filter(w => w.trang_thai !== 'khong_hoat_dong');
     categories = catRes;
     renderForm();
     loadHistory();

@@ -289,7 +289,7 @@ body.dark .debt-table tbody tr:hover { background:rgba(255,255,255,0.02); }
                     <td><span class="st-badge st-{{ $d['trang_thai'] }}">{!! $d['trang_thai']==='settled'?'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M4 10l4.5 4.5L16 6"/></svg> Đã trả':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4.5l3 1.5"/></svg> Chờ trả' !!}</span></td>
                     <td>
                         @if($d['trang_thai'] !== 'settled')
-                        <form action="{{ route('groups.debt.settle', [$group, $d['id']]) }}" method="POST" style="display:inline">
+                        <form action="{{ route('groups.debt.settle', [$group, $d['id']]) }}" method="POST" style="display:inline" class="js-rest">
                             @csrf
                             <input type="hidden" name="ghi_vao_so" value="1">
                             <button type="submit" class="btn-primary btn-success btn-sm"
@@ -326,7 +326,7 @@ setTimeout(() => {
 async function refreshDebtSummary() {
     try {
         const GROUP_ID = {{ $group->id }};
-        const res = await fetch(`/api/monaxe/groups/${GROUP_ID}/debts/summary`, { credentials: 'same-origin' });
+        const res = await fetch(`/api/v1/groups/${GROUP_ID}/debts/summary`, { credentials: 'same-origin' });
         if (!res.ok) return;
         const j = await res.json();
         if (!j) return;

@@ -377,7 +377,7 @@
                     <div class="setting-label">Dùng cấu hình email từ hệ thống</div>
                     <div class="setting-desc">Bật để dùng SMTP bên dưới thay cho .env</div>
                 </div>
-                <form action="{{ route('settings.email.save') }}" method="POST" id="toggleEmailForm">
+                <form action="{{ route('api.settings.email.update') }}" method="POST" id="toggleEmailForm">
                     @csrf
                     @if($emailSetting)
                         <input type="hidden" name="mail_host"         value="{{ $emailSetting->mail_host }}">
@@ -405,7 +405,7 @@
 
             <!-- Form cấu hình SMTP -->
             <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:16px;">
-                <form action="{{ route('settings.email.save') }}" method="POST" style="width:100%;">
+                <form action="{{ route('api.settings.email.update') }}" method="POST" style="width:100%;">
                     @csrf
                     <input type="hidden" name="is_active" value="{{ $emailSetting?->is_active ? '1' : '0' }}">
 
@@ -484,7 +484,7 @@
                 </form>
 
                 <!-- Form test email -->
-                <form action="{{ route('settings.email.test') }}" method="POST"
+                <form action="{{ route('api.settings.email.test') }}" method="POST"
                     style="width:100%;padding-top:14px;border-top:1px solid #f3f4f6;display:flex;gap:10px;align-items:flex-end;">
                     @csrf
                     <div style="flex:1;">

@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Quên mật khẩu Monexa</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=be-vietnam-pro:300,400,500,600,700,800" rel="stylesheet" />
@@ -90,9 +91,9 @@
                         <p class="recovery-subtitle">Nhập email của bạn và Monexa sẽ gửi mã xác thực để tiếp tục đặt lại mật khẩu.</p>
                     </div>
 
-                    <form action="{{ route('password.email') }}" method="POST" class="recovery-form" novalidate>
-                        @csrf
+                    <div id="fp-alert" class="auth-notice" hidden></div>
 
+                    <div class="recovery-form">
                         <div class="auth-field">
                             <label for="recovery-email">Email đã đăng ký</label>
                             <div class="auth-input-wrap">
@@ -102,14 +103,12 @@
                                         <path d="m3 7 9 6 9-6"></path>
                                     </svg>
                                 </span>
-                                <input id="recovery-email" type="email" name="email" value="{{ old('email') }}" placeholder="example@gmail.com" autocomplete="email" required autofocus>
+                                <input id="recovery-email" type="email" name="email" placeholder="example@gmail.com" autocomplete="email" required autofocus>
                             </div>
-                            @error('email')
-                                <p class="auth-error">{{ $message }}</p>
-                            @enderror
+                            <p id="fp-email-error" class="auth-error" hidden></p>
                         </div>
 
-                        <button type="submit" class="auth-submit">Gửi mã xác thực</button>
+                        <button type="button" id="fp-submit-btn" class="auth-submit">Gửi mã xác thực</button>
 
                         <div class="recovery-info">
                             <strong>Lưu ý:</strong> Mã xác thực sẽ được gửi tới email của bạn và chỉ có hiệu lực trong 3 phút.
@@ -118,7 +117,7 @@
                         <div class="recovery-inline-actions">
                             <a href="{{ route('login') }}" class="recovery-back-link">Quay lại đăng nhập</a>
                         </div>
-                    </form>
+                    </div>
                 </section>
             </section>
         </main>
@@ -126,3 +125,86 @@
     @include('layouts.partials.monebot')
 </body>
 </html>
+
+<script>
+(() => {
+    const API_URL   = '{{ url("/api/v1/auth/password/forgot") }}';
+    const VERIFY_URL = '{{ route("password.verify.form") }}';
+
+    const emailInput  = document.getElementById('recovery-email');
+    const submitBtn   = document.getElementById('fp-submit-btn');
+    const alertBox    = document.getElementById('fp-alert');
+    const emailError  = document.getElementById('fp-email-error');
+
+    function showAlert(message, isError = true) {
+        alertBox.textContent = message;
+        alertBox.className   = `auth-notice ${isError ? 'auth-notice--error' : 'auth-notice--success'}`;
+        alertBox.hidden      = false;
+    }
+
+    function setLoading(isLoading) {
+        submitBtn.disabled   = isLoading;
+        submitBtn.textContent = isLoading ? 'Đang gửi...' : 'Gửi mã xác thực';
+    }
+
+    submitBtn.addEventListener('click', async () => {
+        // Reset errors
+        alertBox.hidden      = true;
+        emailError.hidden    = true;
+
+        const email = emailInput.value.trim();
+
+        if (!email) {
+            emailError.textContent = 'Vui lòng nhập email.';
+            emailError.hidden      = false;
+            emailInput.focus();
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const res  = await fetch(API_URL, {
+                method:  'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept':       'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                // Laravel validation trả lỗi dạng { errors: { email: [...] } }
+                const errors = data.errors ?? {};
+                if (errors.email) {
+                    emailError.textContent = errors.email[0];
+                    emailError.hidden      = false;
+                } else {
+                    showAlert(data.message || 'Gửi mã thất bại. Vui lòng thử lại.');
+                }
+                return;
+            }
+
+            // Lưu email vào sessionStorage để view verify dùng
+            sessionStorage.setItem('reset_email', email);
+            showAlert(data.message, false);
+
+            // Chuyển trang sau 1 giây
+            setTimeout(() => { window.location.href = VERIFY_URL; }, 1000);
+
+        } catch {
+            showAlert('Không thể kết nối máy chủ. Vui lòng thử lại.');
+        } finally {
+            setLoading(false);
+        }
+    });
+
+    // Submit khi nhấn Enter
+    emailInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') submitBtn.click();
+    });
+})();
+</script>

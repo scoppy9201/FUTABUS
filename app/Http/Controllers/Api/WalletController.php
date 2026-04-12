@@ -238,119 +238,17 @@ class WalletController extends Controller
                     'ten_ngan_sach' => $validated['ten_ngan_sach'],
                     'category_id'   => $validated['category_id'],
                     'ngan_sach_goc' => $validated['ngan_sach_goc'],
-                    'so_du'         => $validated['ngan_sach_goc'],
-                    'mo_ta'         => $validated['mo_ta'],
-                ]);
-            } else {
-                $spentAmount = $wallet->spent_amount;
-                $newBalance  = $validated['ngan_sach_goc'] - $spentAmount;
-
-                if ($newBalance < 0) {
-                    DB::rollBack();
-                    return response()->json([
-                        'message' => 'Hạn mức mới phải lớn hơn hoặc bằng số tiền đã chi (' .
-                            number_format($spentAmount, 0, ',', '.') . 'đ)!',
-                    ], 422);
-                }
-
-                $wallet->update([
-                    'ten_ngan_sach' => $validated['ten_ngan_sach'],
-                    'ngan_sach_goc' => $validated['ngan_sach_goc'],
-                    'so_du'         => $newBalance,
-                    'mo_ta'         => $validated['mo_ta'],
                 ]);
             }
+
+            $wallet->update([
+                'ten_ngan_sach' => $validated['ten_ngan_sach'],
+                'mo_ta'         => $validated['mo_ta'] ?? $wallet->mo_ta,
+            ]);
 
             DB::commit();
 
             return response()->json($wallet->fresh()->load('category'));
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
-        }
-    }
-
-    public function destroy(Wallet $wallet): JsonResponse
-    {
-        if ($wallet->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        DB::beginTransaction();
-        try {
-            if (!$wallet->canDelete()) {
-                DB::rollBack();
-                return response()->json(['message' => 'Không thể xóa ngân sách đã có giao dịch!'], 422);
-            }
-
-            $wallet->delete();
-
-            DB::commit();
-
-            return response()->json(['success' => true]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
-        }
-    }
-
-    public function toggleStatus(Wallet $wallet): JsonResponse
-    {
-        if ($wallet->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        DB::beginTransaction();
-        try {
-            $newStatus = !$wallet->trang_thai;
-
-            if ($newStatus) {
-                $existingActiveWallet = Wallet::where('user_id', Auth::id())
-                    ->where('category_id', $wallet->category_id)
-                    ->where('trang_thai', true)
-                    ->where('id', '!=', $wallet->id)
-                    ->exists();
-
-                if ($existingActiveWallet) {
-                    DB::rollBack();
-                    return response()->json(['message' => 'Danh mục này đã có ngân sách đang hoạt động!'], 422);
-                }
-
-                $wallet->update(['trang_thai' => true]);
-                $newBalance = $wallet->recalculateBalance();
-
-                DB::commit();
-
-                return response()->json(['success' => true, 'so_du' => $newBalance, 'trang_thai' => true]);
-            }
-
-            $wallet->update(['trang_thai' => false]);
-
-            DB::commit();
-
-            return response()->json(['success' => true, 'trang_thai' => false]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
-        }
-    }
-
-    public function syncBalance(Wallet $wallet): JsonResponse
-    {
-        if ($wallet->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        DB::beginTransaction();
-        try {
-            $newBalance = $wallet->recalculateBalance();
-
-            DB::commit();
-
-            return response()->json(['success' => true, 'so_du' => $newBalance]);
 
         } catch (\Exception $e) {
             DB::rollBack();

@@ -470,12 +470,12 @@ body.dark .modal-foot { border-color: rgba(255,255,255,0.06); background: #191d2
 <script>
 const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
 const API = {
-    wallets:  '/api/money-wallets',
-    summary:  '/api/money-wallets/summary',
-    restore:  (id) => `/api/money-wallets/${id}/restore`,
-    destroy:  (id) => `/api/money-wallets/${id}`,
-    update:   (id) => `/api/money-wallets/${id}`,
-    store:    '/api/money-wallets',
+    wallets:  '/api/v1/money-wallets',
+    summary:  '/api/v1/money-wallets/summary',
+    restore:  (id) => `/api/v1/money-wallets/${id}/restore`,
+    destroy:  (id) => `/api/v1/money-wallets/${id}`,
+    update:   (id) => `/api/v1/money-wallets/${id}`,
+    store:    '/api/v1/money-wallets',
 };
 
 let summaryData = {};
@@ -579,8 +579,9 @@ async function loadPage() {
 
     document.getElementById('conLai').textContent = fmt(con_lai) + 'đ';
 
-    const active   = walletRes.filter(w => w.trang_thai !== 'khong_hoat_dong');
-    const inactive = walletRes.filter(w => w.trang_thai === 'khong_hoat_dong');
+    const _walletList = Array.isArray(walletRes) ? walletRes : (walletRes.data ?? []);
+    const active   = _walletList.filter(w => w.trang_thai !== 'khong_hoat_dong');
+    const inactive = _walletList.filter(w => w.trang_thai === 'khong_hoat_dong');
 
     const grid = document.getElementById('walletGrid');
     if (active.length === 0) {

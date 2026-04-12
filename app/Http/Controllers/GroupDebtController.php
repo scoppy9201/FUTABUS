@@ -45,6 +45,10 @@ class GroupDebtController extends Controller
         ]);
 
         if ($validated['nguoi_no_id'] == $validated['chu_no_id']) {
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Người nợ và chủ nợ không được là cùng 1 người.'], 422);
+            }
+
             return back()->with('error', 'Người nợ và chủ nợ không được là cùng 1 người.');
         }
 
@@ -64,7 +68,11 @@ class GroupDebtController extends Controller
             GroupNotifier::debtRecorded($debt->fresh());
 
             if (request()->wantsJson()) {
-                return response()->json(['message' => 'Đã ghi nhận khoản nợ.', 'debt_id' => $debt->id], 201);
+                return response()->json([
+                    'message' => 'Đã ghi nhận khoản nợ.',
+                    'debt_id' => $debt->id,
+                    'redirect' => route('groups.debt.summary', $group),
+                ], 201);
             }
 
             return redirect()->route('groups.debt.summary', $group)
@@ -72,6 +80,10 @@ class GroupDebtController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
+            }
+
             return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
     }
@@ -229,7 +241,7 @@ class GroupDebtController extends Controller
             GroupNotifier::debtSettled($debt->fresh());
 
             if (request()->wantsJson()) {
-                return response()->json(['message' => 'Đã đánh dấu khoản nợ là đã thanh toán.']);
+                return response()->json(['message' => 'Đã đánh dấu khoản nợ là đã thanh toán.', 'redirect' => route('groups.debt.summary', $group)]);
             }
 
             return redirect()->route('groups.debt.summary', $group)
@@ -237,6 +249,10 @@ class GroupDebtController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
+            }
+
             return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
     }

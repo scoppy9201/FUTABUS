@@ -40,7 +40,7 @@ class MoneyWalletController extends Controller
             ->sum('so_tien');
 
         $tongTaiSan  = $tongThu - $tongChi;
-        $tongSoDuVi  = $wallets->sum('so_du_ban_dau');
+        $tongSoDuVi = $wallets->sum('so_du');
 
         return response()->json([
             'tong_tai_san'  => $tongTaiSan,
@@ -136,16 +136,7 @@ class MoneyWalletController extends Controller
 
             $tongSoDuHienTai = MoneyWallet::forUser(Auth::id())
                 ->active()
-                ->sum('so_du_ban_dau');
-
-            if (($tongSoDuHienTai + $validated['so_du_ban_dau']) > $tongTaiSan) {
-                DB::rollBack();
-                return response()->json([
-                    'message' => 'Không thể tạo ví! Tổng số dư ban đầu các ví (' .
-                        number_format($tongSoDuHienTai + $validated['so_du_ban_dau']) .
-                        'đ) vượt quá tổng tài sản (' . number_format($tongTaiSan) . 'đ).',
-                ], 422);
-            }
+                 ->sum('so_du');
 
             $wallet = MoneyWallet::create([
                 'user_id'        => Auth::id(),
