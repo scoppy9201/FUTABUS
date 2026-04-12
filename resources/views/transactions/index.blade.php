@@ -262,22 +262,49 @@
         width: 20px;
     }
 
-    /* Filter Form - Compact */
     .filter-form {
         display: grid;
         grid-template-columns: 1.2fr 0.8fr 0.8fr 0.8fr 0.8fr auto;
         gap: 12px;
-        align-items: flex-end;
+        align-items: end; 
     }
 
+    .field-error {
+        display: block;
+        font-size: 12px;
+        color: #dc2626;
+        min-height: 18px;
+        margin-top: 4px;
+        line-height: 1.4;
+        visibility: hidden;
+    }
+    .field-error.show {
+        visibility: visible;
+    }
     .filter-form .form-group {
         margin-bottom: 0;
+    }
+
+    .filter-form .form-group .field-error,
+    .filter-form .form-group span[id*="-error-"] {
+        display: none !important; 
+    }
+
+    @media (max-width: 640px) {
+        .modal-body[style*="grid-template-columns"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    .modal-content {
+        max-width: 720px !important;
     }
 
     .filter-actions {
         display: flex;
         gap: 8px;
         min-width: 180px;
+        padding-bottom: 0; 
     }
 
     .form-group {
@@ -964,7 +991,7 @@
             </div>
             <div class="filter-actions">
                 <button type="button" class="btn-filter btn-search" id="btn-search">
-                    <img src="{{ asset('images/search.png') }}" alt="Search"> Tìm kiếm
+                    <img src="{{ asset('images/search.png') }}" alt="Search"> Áp dụng lọc
                 </button>
                 <button type="button" class="btn-filter btn-reset" id="btn-reset">
                     <img src="{{ asset('images/refresh.png') }}" alt="Reset"> Đặt lại
@@ -1033,7 +1060,8 @@ var API_BASE = '/api/v1/transactions';
 let currentPage    = 1;
 let searchTimeout  = null;
 let allCategories  = [];
-let allWallets     = [];
+let allWallets      = [];
+let allMoneyWallets = []; 
 
 /* HELPERS */
 function escHtml(s) {
@@ -1090,8 +1118,9 @@ async function loadTransactions(page = 1) {
     try {
         const data = await api('GET', `${API_BASE}?${getFilters(page)}`);
 
-        allCategories = data.categories ?? [];
-        allWallets    = data.wallets    ?? [];
+        allCategories   = data.categories   ?? [];
+        allWallets      = data.wallets       ?? [];
+        allMoneyWallets = data.moneyWallets  ?? []; 
 
         renderTable(data.transactions);
         renderStats(data.totalIncome, data.totalExpense, data.transactions.total);
@@ -1213,6 +1242,10 @@ function renderCategoryFilter(categories) {
 async function handleCreate(e) {
     e.preventDefault();
     const form = e.target;
+    if (!validateWalletAmount()) return; // chặn submit nếu số dư không đủ
+    const ngayEl = form.querySelector('[name="ngay_giao_dich"]');
+    if (!validateDate(ngayEl, 'create-error-ngay_giao_dich')) return;
+    if (!validateWalletAmount()) return;
     const amountDisplay = form.querySelector('.amount-display');
     const amountHidden  = form.querySelector('[name="so_tien"]');
     if (amountDisplay) amountHidden.value = amountDisplay.value.replace(/\D/g, '');
@@ -1243,6 +1276,10 @@ async function handleCreate(e) {
 async function handleUpdate(e) {
     e.preventDefault();
     const form = e.target;
+    if (!validateWalletAmountEdit()) return;
+    const ngayEl = form.querySelector('[name="ngay_giao_dich"]');
+    if (!validateDate(ngayEl, 'edit-error-ngay_giao_dich')) return;
+    if (!validateWalletAmountEdit()) return;
     const id   = form.dataset.id;
     const amountDisplay = form.querySelector('.amount-display');
     const amountHidden  = form.querySelector('[name="so_tien"]');
@@ -1351,7 +1388,7 @@ function openEditModal(t) {
 
     form.querySelector('[name="loai_giao_dich"]').value         = t.loai_giao_dich;
     form.querySelector('[name="phuong_thuc_thanh_toan"]').value = t.phuong_thuc_thanh_toan;
-    form.querySelector('[name="ngay_giao_dich"]').value         = t.ngay_giao_dich;
+    form.querySelector('[name="ngay_giao_dich"]').value         = t.ngay_giao_dich?.split('T')[0] ?? t.ngay_giao_dich; 
     form.querySelector('[name="ghi_chu"]').value                = t.ghi_chu ?? '';
     form.querySelector('[name="money_wallet_id"]').value        = t.money_wallet_id ?? '';
 
@@ -1378,8 +1415,20 @@ function openEditModal(t) {
 function renderWalletOptions(selectId, selectedId = null) {
     const el = document.getElementById(selectId);
     if (!el) return;
+
+    const loai = document.getElementById(
+        selectId.includes('edit') ? 'edit-loai-giao-dich' : 'create-loai-giao-dich'
+    )?.value;
+
     el.innerHTML = '<option value="">-- Không chọn ví (tùy chọn) --</option>' +
-        allWallets.map(w => `<option value="${w.id}" ${w.id == selectedId ? 'selected' : ''}>${escHtml(w.ten_ngan_sach ?? w.ten_vi ?? '')}</option>`).join('');
+        allMoneyWallets.map(w => {
+            const soDu = parseInt(w.so_du).toLocaleString('vi-VN');
+            const vuotHanMuc = loai === 'CHI' && w.so_du <= 0;
+            const label = vuotHanMuc
+                ? `${w.ten_vi} — Hết số dư`
+                : `${w.ten_vi} — ${soDu}đ`;
+            return `<option value="${w.id}" ${w.id == selectedId ? 'selected' : ''} ${vuotHanMuc ? 'disabled' : ''}>${escHtml(label)}</option>`;
+        }).join('');
 }
 
 function filterCategoriesByType(prefix = 'create') {
@@ -1417,20 +1466,140 @@ function clearFormErrors(prefix) {
 /* CURRENCY INPUT */
 function setupAmountInput(displayId, hiddenName, form) {
     const display = document.getElementById(displayId);
+    const errorId = displayId.includes('create') ? 'create-error-so_tien' : 'edit-error-so_tien';
     if (!display) return;
+
+    display.addEventListener('keypress', e => {
+        if (!/[0-9]/.test(e.key)) {
+            e.preventDefault();
+            showError(errorId, 'Số tiền chỉ được nhập số.');
+        }
+    });
+
+    display.addEventListener('input', () => {
+        const raw = display.value.replace(/\D/g, '');
+        if (display.value.replace(/,/g, '') !== raw && display.value !== '') {
+            showError(errorId, 'Số tiền chỉ được nhập số.');
+        } else {
+            clearError(errorId);
+        }
+        display.value = raw ? parseInt(raw).toLocaleString('vi-VN') : '';
+    });
 
     display.addEventListener('focus', () => {
         display.value = display.value.replace(/\D/g, '');
+        clearError(errorId);
     });
+
     display.addEventListener('blur', () => {
-        const num = parseInt(display.value.replace(/\D/g, '')) || 0;
+        const num    = parseInt(display.value.replace(/\D/g, '')) || 0;
         const hidden = form.querySelector(`[name="${hiddenName}"]`);
         if (hidden) hidden.value = num;
+
+        if (!num) {
+            showError(errorId, 'Vui lòng nhập số tiền.');
+        } else if (num < 1000) {
+            showError(errorId, 'Số tiền phải từ 1,000đ trở lên.');
+        } else {
+            clearError(errorId);
+        }
+
         display.value = num ? num.toLocaleString('vi-VN') : '';
     });
-    display.addEventListener('keypress', e => {
-        if (!/[0-9]/.test(e.key)) e.preventDefault();
-    });
+}
+
+function validateWalletAmount() {
+    const walletSelect  = document.getElementById('create-wallet');
+    const amountDisplay = document.getElementById('create-amount-display');
+    if (!walletSelect || !amountDisplay) return true;
+
+    const selectedWalletId = walletSelect.value;
+    const amount = parseInt(amountDisplay.value.replace(/\D/g, '')) || 0;
+    const loai   = document.getElementById('create-loai-giao-dich').value;
+
+    if (!selectedWalletId || !amount || loai !== 'CHI') {
+        clearError('create-error-money_wallet_id');
+        return true;
+    }
+
+    const wallet = allMoneyWallets.find(w => w.id == selectedWalletId);
+    if (!wallet) return true;
+
+    if (amount > wallet.so_du) {
+        showError('create-error-money_wallet_id',
+            `Vượt giới hạn ví! Số dư: ${parseInt(wallet.so_du).toLocaleString('vi-VN')}đ — chọn ví khác hoặc giảm số tiền.`
+        );
+        return false;
+    }
+
+    clearError('create-error-money_wallet_id');
+    return true;
+}
+
+function validateWalletAmountEdit() {
+    const walletSelect  = document.getElementById('edit-wallet');
+    const amountDisplay = document.getElementById('edit-amount-display');
+    if (!walletSelect || !amountDisplay) return true;
+
+    const selectedWalletId = walletSelect.value;
+    const amount = parseInt(amountDisplay.value.replace(/\D/g, '')) || 0;
+    const loai   = document.getElementById('edit-loai-giao-dich').value;
+
+    if (!selectedWalletId || !amount || loai !== 'CHI') {
+        clearError('edit-error-money_wallet_id');
+        return true;
+    }
+
+    const wallet = allMoneyWallets.find(w => w.id == selectedWalletId);
+    if (!wallet) return true;
+
+    if (amount > wallet.so_du) {
+        showError('edit-error-money_wallet_id',
+            `Vượt giới hạn ví! Số dư: ${parseInt(wallet.so_du).toLocaleString('vi-VN')}đ — chọn ví khác hoặc giảm số tiền.`
+        );
+        return false;
+    }
+
+    clearError('edit-error-money_wallet_id');
+    return true;
+}
+
+// Validate ngày giao dịch
+function validateDate(inputEl, errorId) {
+    if (!inputEl) return true;
+    const val = inputEl.value;
+
+    if (!val) {
+        showError(errorId, 'Vui lòng chọn ngày giao dịch.');
+        return false;
+    }
+
+    const selected = new Date(val);
+    const today    = new Date();
+    today.setHours(23, 59, 59, 999);
+
+    if (selected > today) {
+        showError(errorId, 'Ngày giao dịch không được là ngày trong tương lai.');
+        return false;
+    }
+
+    clearError(errorId);
+    return true;
+}
+
+// Hàm helper dùng chung
+function showError(errorId, message) {
+    const el = document.getElementById(errorId);
+    if (!el) return;
+    el.textContent = message;
+    el.classList.add('show');
+}
+
+function clearError(errorId) {
+    const el = document.getElementById(errorId);
+    if (!el) return;
+    el.textContent = '';
+    el.classList.remove('show');
 }
 
 /* INIT */
@@ -1452,10 +1621,15 @@ function initPage() {
         searchTimeout = setTimeout(() => loadTransactions(1), 500);
     });
 
-    document.getElementById('open-create-modal').addEventListener('click', () =>
-        document.getElementById('create-modal').classList.add('active'));
-    document.getElementById('empty-add-btn')?.addEventListener('click', () =>
-        document.getElementById('create-modal').classList.add('active'));
+    document.getElementById('open-create-modal').addEventListener('click', () => {
+        renderWalletOptions('create-wallet', null);
+        document.getElementById('create-modal').classList.add('active');
+    });
+
+    document.getElementById('empty-add-btn')?.addEventListener('click', () => {
+        renderWalletOptions('create-wallet', null);
+        document.getElementById('create-modal').classList.add('active');
+    });
 
     document.querySelectorAll('.modal-overlay').forEach(overlay =>
         overlay.addEventListener('click', e => {
@@ -1481,6 +1655,23 @@ function initPage() {
         if (e.key !== 'Escape') return;
         document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
     });
+
+    document.getElementById('create-wallet')?.addEventListener('change', validateWalletAmount);
+    document.getElementById('create-amount-display')?.addEventListener('blur', validateWalletAmount);
+    document.getElementById('create-loai-giao-dich')?.addEventListener('change', validateWalletAmount);
+    document.getElementById('edit-wallet')?.addEventListener('change', validateWalletAmountEdit);
+    document.getElementById('edit-amount-display')?.addEventListener('blur', validateWalletAmountEdit);
+    document.getElementById('edit-loai-giao-dich')?.addEventListener('change', validateWalletAmountEdit);
+
+    document.querySelector('#create-form [name="ngay_giao_dich"]')
+        ?.addEventListener('change', function() {
+            validateDate(this, 'create-error-ngay_giao_dich');
+        });
+
+    document.querySelector('#edit-form [name="ngay_giao_dich"]')
+        ?.addEventListener('change', function() {
+            validateDate(this, 'edit-error-ngay_giao_dich');
+        });
 }
 
 window.openEditModal   = openEditModal;

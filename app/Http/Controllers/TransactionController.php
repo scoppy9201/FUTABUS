@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class TransactionController extends Controller
 {
+    // Danh sách giao dịch 
     public function index(Request $request)
     {
         $userId = Auth::id();
@@ -30,7 +31,7 @@ class TransactionController extends Controller
 
                 $q->orWhereHas('category', function($categoryQuery) use ($searchEscaped, $userId) {
                     $categoryQuery->where('ten_danh_muc', 'like', '%' . $searchEscaped . '%')
-                                  ->where('user_id', $userId);
+                                ->where('user_id', $userId);
                 });
             });
         }
@@ -56,16 +57,16 @@ class TransactionController extends Controller
         }
 
         $transactions = $query->orderBy('ngay_giao_dich', 'desc')
-                              ->orderBy('created_at', 'desc')
-                              ->paginate(10)
-                              ->withQueryString();
+                            ->orderBy('created_at', 'desc')
+                            ->paginate(10)
+                            ->withQueryString();
 
         $categories = Category::where('user_id', $userId)
-                              ->where('trang_thai', true)
-                              ->whereNotNull('danh_muc_cha_id')
-                              ->orderBy('loai_danh_muc')
-                              ->orderBy('ten_danh_muc')
-                              ->get();
+                            ->where('trang_thai', true)
+                            ->whereNotNull('danh_muc_cha_id')
+                            ->orderBy('loai_danh_muc')
+                            ->orderBy('ten_danh_muc')
+                            ->get();
 
         $wallets = Budgets::where('user_id', $userId)
                         ->where('trang_thai', true)
@@ -74,19 +75,25 @@ class TransactionController extends Controller
                         ->orderBy('ten_ngan_sach')
                         ->get();
 
+        $moneyWallets = \App\Models\MoneyWallet::where('user_id', $userId)
+                        ->where('trang_thai', true)
+                        ->orderBy('ten_vi')
+                        ->get();
+
         $totalIncome  = Transaction::where('user_id', $userId)->where('loai_giao_dich', 'THU')->sum('so_tien');
         $totalExpense = Transaction::where('user_id', $userId)->where('loai_giao_dich', 'CHI')->sum('so_tien');
 
-        // Thay bằng:
         return response()->json([
             'transactions' => $transactions,
             'categories'   => $categories,
             'wallets'      => $wallets,
+            'moneyWallets' => $moneyWallets, 
             'totalIncome'  => $totalIncome,
             'totalExpense' => $totalExpense,
         ]);
     }
 
+    // Lưu giao dịch 
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -234,6 +241,7 @@ class TransactionController extends Controller
         }
     }
 
+    // Cập nhật giao dịch 
     public function update(Request $request, Transaction $transaction)
     {
         if ($transaction->user_id !== Auth::id()) {
@@ -433,6 +441,7 @@ class TransactionController extends Controller
         }
     }
 
+    // Xóa giao dịch 
     public function destroy(Transaction $transaction)
     {
         if ($transaction->user_id !== Auth::id()) {

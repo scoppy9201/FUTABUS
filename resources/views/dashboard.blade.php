@@ -47,6 +47,7 @@
     </div>
 
     <div id="dashboard-alert" hidden></div>
+    <div id="toast" class="alert" style="display:none;position:fixed;top:20px;right:20px;z-index:9999;min-width:300px;max-width:400px;"></div>
     <div id="dashboard-loading" class="card dashboard-state">
         <p>Đang tải dữ liệu dashboard...</p>
     </div>
@@ -97,6 +98,14 @@
                         <img src="{{ asset('images/plus.png') }}" alt="More">
                     </a>
                 </div>
+                <div style="padding:10px 0 6px">
+                    <input
+                        type="text"
+                        id="search-transactions"
+                        placeholder="Tìm giao dịch..."
+                        style="width:100%;padding:7px 12px;border-radius:8px;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-size:13px;box-sizing:border-box"
+                    >
+                </div>
                 <div id="recent-transactions"></div>
             </div>
 
@@ -126,6 +135,7 @@
                     </div>
                 </div>
                 <div id="top-categories"></div>
+                <canvas id="categoryBarChart" style="margin-top:12px;max-height:200px;"></canvas>
             </div>
 
             <div class="card">
@@ -140,12 +150,69 @@
                 </div>
                 <div id="wallet-summary"></div>
             </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <img src="{{ asset('images/warning.png') }}" alt="Spike">
+                        Chi tiêu tăng đột biến
+                    </h3>
+                </div>
+                <div id="spiking-categories"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <img src="{{ asset('images/chart.png') }}" alt="Day">
+                        Ngày chi nhiều nhất
+                    </h3>
+                </div>
+                <div id="expense-by-day"></div>
+            </div>
+        </div>
+
+        <div class="card" style="grid-column: 1 / -1">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <img src="{{ asset('images/chart.png') }}" alt="Heatmap">
+                    Heatmap chi tiêu 30 ngày qua
+                </h3>
+            </div>
+            <div id="expense-heatmap" style="padding:12px 0"></div>
         </div>
     </div>
 </div>
 
+@include('export-modal')
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
+    // TOAST GLOBAL
+    window.showToast = function(opts) {
+        let msg, type;
+        if (typeof opts === 'object') {
+            msg  = opts.message ?? opts.title ?? '';
+            type = opts.type ?? 'success';
+        } else {
+            msg  = opts;
+            type = arguments[1] ?? 'success';
+        }
+
+        const el = document.getElementById('toast');
+        if (!el) return;
+        el.className       = `alert alert-${type === 'success' ? 'success' : 'error'}`;
+        el.textContent     = msg;
+        el.style.display   = 'flex';
+        el.style.opacity   = '1';
+        el.style.transform = '';
+        clearTimeout(el._t);
+        el._t = setTimeout(() => {
+            el.style.opacity   = '0';
+            el.style.transform = 'translateY(-10px)';
+            setTimeout(() => { el.style.display = 'none'; }, 300);
+        }, 4000);
+    };
     (() => {
         const page = document.getElementById('dashboardPage');
         const filter = document.getElementById('month-filter');
@@ -160,7 +227,13 @@
         const pieShell = document.getElementById('expense-pie-chart-shell');
         const lineCanvas = document.getElementById('incomeExpenseChart');
         const chartColors = { success: '#10b981', danger: '#ef4444' };
-        const state = { currentPeriod: 'this_month', lineChart: null, pieChart: null };
+        const state = { 
+            currentPeriod: 'this_month', 
+            lineChart: null, 
+            pieChart: null, 
+            barChart: null,
+            recentTransactions: []  
+        };
 
         function escapeHtml(value) {
             return String(value ?? '')
@@ -202,6 +275,86 @@
             return headers;
         }
 
+        // Modal export
+        const exportModal    = document.getElementById('export-modal');
+        const emailInputWrap = document.getElementById('email-input-wrap');
+        const emailInput     = document.getElementById('export-email-input');
+        const xlsxLabel      = document.getElementById('format-xlsx-label');
+        const pdfLabel       = document.getElementById('format-pdf-label');
+        const exportIcon     = document.getElementById('export-modal-root')?.dataset.exportIcon || '';
+
+        // Mở modal
+        document.getElementById('export-report-btn').addEventListener('click', () => {
+            exportModal.style.display = 'flex';
+        });
+
+        // Đóng modal
+        document.getElementById('close-export-modal').addEventListener('click', () => exportModal.style.display = 'none');
+        document.getElementById('cancel-export-btn').addEventListener('click',  () => exportModal.style.display = 'none');
+        exportModal.addEventListener('click', e => { if (e.target === exportModal) exportModal.style.display = 'none'; });
+
+        // Toggle email theo radio
+        document.querySelectorAll('input[name="email-option"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                const show = this.value === 'yes';
+                emailInputWrap.style.display = show ? 'block' : 'none';
+                if (show && !emailInput.value) {
+                    const user = JSON.parse(localStorage.getItem('user') || '{}');
+                    if (user.email) emailInput.value = user.email;
+                }
+            });
+        });
+
+        document.getElementById('confirm-export-btn').addEventListener('click', async () => {
+            const period = document.getElementById('month-filter').value;
+            const format = document.getElementById('export-format-select').value;
+            const user   = JSON.parse(localStorage.getItem('user') || '{}');
+            const email  = user.email || '';
+            const btn    = document.getElementById('confirm-export-btn');
+
+            btn.disabled    = true;
+            btn.textContent = 'Đang xuất...';
+
+            const url = format === 'pdf'
+                ? `/api/v1/dashboard/export-pdf?period=${period}`
+                : `/api/v1/dashboard/export?period=${period}`;
+
+            try {
+                const res = await fetch(url, {
+                    headers: buildHeaders(),
+                    credentials: 'same-origin',
+                });
+
+                if (!res.ok) throw new Error('Xuất thất bại');
+
+                const blob = await res.blob();
+                const link = document.createElement('a');
+                link.href     = URL.createObjectURL(blob);
+                link.download = `baocao_${period}_${new Date().toISOString().slice(0,10)}.${format}`;
+                link.click();
+                URL.revokeObjectURL(link.href);
+                if (email) {
+                    const mailRes = await fetch(`/api/v1/dashboard/send-report`, {
+                        method: 'POST',
+                        headers: {
+                            ...buildHeaders(),
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'same-origin',
+                        body: JSON.stringify({ period, format, email }),
+                    });
+                    if (mailRes.ok) {
+                        window.showToast({ type: 'success', message: `Đã gửi báo cáo đến ${email}` });
+                    }
+                }
+                exportModal.style.display = 'none';
+            } catch (err) {
+                window.showToast({ type: 'error', message: 'Không thể xuất: ' + err.message });
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<img src="${exportIcon}" style="width:14px;height:14px;filter:brightness(10)"> Xuất khẩu`;
+            }
+        });
         function syncTokenFromUrl() {
             const url = new URL(window.location.href);
             const token = url.searchParams.get('token');
@@ -241,32 +394,105 @@
 
         function renderStats(data) {
             const totalTransactions = Number(data.totalTransactions || 0);
-            const incomeCount = Number(data.incomeCount || 0);
+            const incomeCount  = Number(data.incomeCount  || 0);
             const expenseCount = Number(data.expenseCount || 0);
-            const balance = Number(data.balance || 0);
-            const incomeRate = totalTransactions ? Math.round((incomeCount / totalTransactions) * 100) : 0;
-            const expenseRate = totalTransactions ? Math.round((expenseCount / totalTransactions) * 100) : 0;
+            const balance      = Number(data.balance      || 0);
+            const savingRate   = Number(data.savingRate   || 0);
+
+            function changeTag(val, inverse = false) {
+                if (val === null || val === undefined) return '';
+                const isGood = inverse ? val < 0 : val > 0;
+                const color  = isGood ? 'up' : 'down';
+                const arrow  = val > 0 ? '▲' : '▼';
+                return `<div class="stat-change ${color}">${arrow} ${Math.abs(val)}% so kỳ trước</div>`;
+            }
+
+            const forecastHtml = data.forecast
+                ? `<div class="stat-change down">Dự báo: ${formatMoney(data.forecast)}</div>`
+                : '';
+
+            const savingColor = savingRate >= 20 ? 'up' : savingRate >= 0 ? '' : 'down';
 
             stats.innerHTML = `
-                <div class="stat-card"><div class="stat-icon blue"><img src="${page.dataset.walletIcon}" alt="Balance"></div><div class="stat-info"><div class="stat-label">Số dư</div><div class="stat-value ${balance < 0 ? 'negative' : ''}">${formatMoney(balance)}</div><div class="stat-change ${balance >= 0 ? 'up' : 'down'}">${balance >= 0 ? '+' : '-'} Thu - Chi</div></div></div>
-                <div class="stat-card"><div class="stat-icon green"><img src="${page.dataset.profitsIcon}" alt="Income"></div><div class="stat-info"><div class="stat-label">Thu nhập</div><div class="stat-value positive">${formatMoney(data.totalIncome)}</div><div class="stat-change up"><img src="${page.dataset.arrowUpIcon}" alt="Up" style="width:14px;height:14px;">${incomeRate}% giao dich</div></div></div>
-                <div class="stat-card"><div class="stat-icon red"><img src="${page.dataset.budgetIcon}" alt="Expense"></div><div class="stat-info"><div class="stat-label">Chi tiêu</div><div class="stat-value negative">${formatMoney(data.totalExpense)}</div><div class="stat-change down"><img src="${page.dataset.arrowDownIcon}" alt="Down" style="width:14px;height:14px;">${expenseRate}% giao dich</div></div></div>
-                <div class="stat-card"><div class="stat-icon orange"><img src="${page.dataset.savingIcon}" alt="Transactions"></div><div class="stat-info"><div class="stat-label">Giao dịch</div><div class="stat-value">${totalTransactions}</div><div class="stat-change up">${incomeCount} thu / ${expenseCount} chi</div></div></div>
+                <div class="stat-card">
+                    <div class="stat-icon blue"><img src="${page.dataset.walletIcon}" alt="Balance"></div>
+                    <div class="stat-info">
+                        <div class="stat-label">Số dư</div>
+                        <div class="stat-value ${balance < 0 ? 'negative' : ''}">${formatMoney(balance)}</div>
+                        <div class="stat-change ${savingColor}">Tiết kiệm: ${savingRate}%</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green"><img src="${page.dataset.profitsIcon}" alt="Income"></div>
+                    <div class="stat-info">
+                        <div class="stat-label">Thu nhập</div>
+                        <div class="stat-value positive">${formatMoney(data.totalIncome)}</div>
+                        ${changeTag(data.incomeChange)}
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red"><img src="${page.dataset.budgetIcon}" alt="Expense"></div>
+                    <div class="stat-info">
+                        <div class="stat-label">Chi tiêu</div>
+                        <div class="stat-value negative">${formatMoney(data.totalExpense)}</div>
+                        ${changeTag(data.expenseChange, true)}
+                        ${forecastHtml}
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange"><img src="${page.dataset.savingIcon}" alt="Transactions"></div>
+                    <div class="stat-info">
+                        <div class="stat-label">Giao dịch</div>
+                        <div class="stat-value">${totalTransactions}</div>
+                        <div class="stat-change up">${incomeCount} thu / ${expenseCount} chi</div>
+                    </div>
+                </div>
             `;
         }
 
         function renderRecentTransactions(list) {
+            state.recentTransactions = list || [];  
+            renderTransactionList(list);
+        }
+
+        function renderTransactionList(list) {
             if (!list?.length) {
-                recent.innerHTML = emptyState(page.dataset.emptyIcon, 'Chưa có giao dịch nào trong thời gian này');
+                recent.innerHTML = emptyState(page.dataset.emptyIcon, 'Chưa có giao dịch nào');
                 return;
             }
-
             recent.innerHTML = `<div class="transaction-list">${list.map(item => {
                 const isIncome = String(item.loai_giao_dich || '').toUpperCase() === 'THU';
                 const name = item.category?.ten_danh_muc || 'Khong ro';
-                return `<div class="transaction-item"><div class="transaction-icon ${isIncome ? 'income' : 'expense'}"><img src="${iconPath(item.category?.bieu_tuong)}" alt="${escapeHtml(name)}"></div><div class="transaction-details"><div class="transaction-name">${escapeHtml(name)}</div><div class="transaction-date">${formatDate(item.ngay_giao_dich)}</div></div><div class="transaction-amount ${isIncome ? 'income' : 'expense'}">${isIncome ? '+' : '-'}${formatMoney(item.so_tien)}</div></div>`;
+                return `<div class="transaction-item">
+                    <div class="transaction-icon ${isIncome ? 'income' : 'expense'}">
+                        <img src="${iconPath(item.category?.bieu_tuong)}" alt="${escapeHtml(name)}">
+                    </div>
+                    <div class="transaction-details">
+                        <div class="transaction-name">${escapeHtml(name)}</div>
+                        <div class="transaction-date">${formatDate(item.ngay_giao_dich)}</div>
+                    </div>
+                    <div class="transaction-amount ${isIncome ? 'income' : 'expense'}">
+                        ${isIncome ? '+' : '-'}${formatMoney(item.so_tien)}
+                    </div>
+                </div>`;
             }).join('')}</div>`;
         }
+
+        // Xử lý tìm kiếm
+        document.getElementById('search-transactions')?.addEventListener('input', function () {
+            const keyword = this.value.trim().toLowerCase();
+            if (!keyword) {
+                renderTransactionList(state.recentTransactions);
+                return;
+            }
+            const filtered = state.recentTransactions.filter(item => {
+                const name = (item.category?.ten_danh_muc || '').toLowerCase();
+                const date = (item.ngay_giao_dich || '').toLowerCase();
+                return name.includes(keyword) || date.includes(keyword);
+            });
+            renderTransactionList(filtered);
+        });
+
 
         function renderWarnings(list) {
             if (!list?.length) {
@@ -422,6 +648,42 @@
             });
         }
 
+        function renderBarChart(list) {
+            if (!window.Chart || !list?.length) return;
+
+            const canvas = document.getElementById('categoryBarChart');
+            if (!canvas) return;
+
+            if (state.barChart) state.barChart.destroy();
+
+            state.barChart = new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: list.map(i => i.ten_danh_muc),
+                    datasets: [{
+                        label: 'Chi tiêu',
+                        data: list.map(i => Number(i.total_expense || 0)),
+                        backgroundColor: ['#ef4444','#f59e0b','#10b981','#3b82f6','#8b5cf6'],
+                        borderRadius: 6,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',   // bar nằm ngang
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            ticks: {
+                                callback: v => new Intl.NumberFormat('vi-VN', {
+                                    notation: 'compact', compactDisplay: 'short'
+                                }).format(v)
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
         function renderDashboard(data) {
             renderStats(data);
             renderRecentTransactions(data.recentTransactions || []);
@@ -430,45 +692,113 @@
             renderWalletSummary(data.activeWallets || []);
             renderLineChart(data.monthlyData || []);
             renderPieChart(data.categoryExpenses || []);
+            renderBarChart(data.topCategories || []);
+            renderSpikingCategories(data.spikingCategories || []);
+            renderExpenseByDay(data.expenseByDay || []);
+            renderHeatmap(data.heatmap || []);
         }
 
-        function exportReport() {
-            const period = document.getElementById('month-filter').value;
-            const btn = document.getElementById('export-report-btn');
-            
-            btn.disabled = true;
-            btn.innerHTML = `
-                <span style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;"></span>
-                Đang xuất...
-            `;
+        // Cảnh báo tăng đột biến
+        function renderSpikingCategories(list) {
+            const el = document.getElementById('spiking-categories');
+            if (!el) return;
+            if (!list?.length) {
+                el.innerHTML = emptyState(page.dataset.safeIcon, 'Không có danh mục tăng đột biến');
+                return;
+            }
+            el.innerHTML = `<div class="budget-warnings">${list.map(item => {
+                return `
+                    <div class="budget-warning-item danger">
+                        <div class="budget-warning-header">
+                            <span class="budget-warning-name">${escapeHtml(item.ten_danh_muc)}</span>
+                            <span class="budget-warning-percent" style="color:#ef4444">▲ ${item.change_percent}%</span>
+                        </div>
+                        <div style="font-size:11px;color:#6b7280;margin-top:2px">
+                            Kỳ này: ${formatMoney(item.current_expense)}
+                            &nbsp;|&nbsp; Kỳ trước: ${formatMoney(item.prev_expense)}
+                        </div>
+                    </div>`;
+            }).join('')}</div>`;
+        }
 
-            // Gọi API xuất báo cáo
-            fetch(`/api/v1/dashboard/export?period=${period}`, {
-                headers: buildHeaders(),
-                credentials: 'same-origin',
-            })
-            .then(res => {
-                if (!res.ok) throw new Error('Xuất thất bại');
-                return res.blob();
-            })
-            .then(blob => {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `baocao_${period}_${new Date().toISOString().slice(0, 10)}.xlsx`;
-                a.click();
-                URL.revokeObjectURL(url);
-            })
-            .catch(err => {
-                alert('Không thể xuất báo cáo: ' + err.message);
-            })
-            .finally(() => {
-                btn.disabled = false;
-                btn.innerHTML = `
-                    <img src="{{ asset('images/export.png') }}" alt="Export" style="width:16px;height:16px;filter:brightness(10);">
-                    Xuất báo cáo
-                `;
-            });
+        // Ngày chi nhiều nhất
+        function renderExpenseByDay(list) {
+            const el = document.getElementById('expense-by-day');
+            if (!el || !list?.length) return;
+            const max = Math.max(...list.map(d => d.total));
+            el.innerHTML = `<div class="category-list">${list.map(item => {
+                const pct = max > 0 ? Math.round((item.total / max) * 100) : 0;
+                return `
+                    <div class="category-item">
+                        <div class="category-details" style="flex:1">
+                            <div class="category-name">${escapeHtml(item.ten_ngay)}</div>
+                            <div class="category-bar">
+                                <div class="category-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,#f59e0b,#ef4444)"></div>
+                            </div>
+                        </div>
+                        <div class="category-amount" style="min-width:110px;text-align:right">
+                            ${formatMoney(item.total)}
+                        </div>
+                    </div>`;
+            }).join('')}</div>`;
+        }
+
+        function renderHeatmap(list) {
+            const el = document.getElementById('expense-heatmap');
+            if (!el || !list?.length) return;
+
+            const max   = Math.max(...list.map(d => d.total), 1);
+            const today = new Date().toISOString().slice(0, 10);
+
+            function getColor(total) {
+                if (total <= 0) return 'var(--color-background-secondary)';
+                const ratio = total / max;
+                if (ratio >= 0.75) return '#ef4444';
+                if (ratio >= 0.50) return '#f97316';
+                if (ratio >= 0.25) return '#fbbf24';
+                return '#fde68a';
+            }
+
+            const cells = list.map(item => {
+                const d     = new Date(item.date);
+                const label = `${d.getDate()}/${d.getMonth() + 1}`;
+                const isToday = item.date === today;
+                return `
+                    <div title="${item.date}: ${formatMoney(item.total)}"
+                        style="
+                            width: calc((100% - 116px) / 30);
+                            min-width: 18px;
+                            aspect-ratio: 1;
+                            border-radius: 4px;
+                            background: ${getColor(item.total)};
+                            border: ${isToday ? '2px solid var(--color-text-info)' : '1px solid var(--color-border-tertiary)'};
+                            cursor: default;
+                            position: relative;
+                        "
+                    ></div>`;
+            }).join('');
+
+            const labels = list.filter((_, i) => i % 5 === 0).map(item => {
+                const d = new Date(item.date);
+                return `<span style="font-size:10px;color:var(--color-text-secondary)">${d.getDate()}/${d.getMonth()+1}</span>`;
+            }).join('');
+
+            el.innerHTML = `
+                <div style="display:flex;gap:3px;align-items:center;flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px">
+                    ${cells}
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-top:4px;padding:0 1px">
+                    ${labels}
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:11px;color:var(--color-text-secondary)">
+                    <span>Ít</span>
+                    <div style="width:14px;height:14px;border-radius:3px;background:#fde68a"></div>
+                    <div style="width:14px;height:14px;border-radius:3px;background:#fbbf24"></div>
+                    <div style="width:14px;height:14px;border-radius:3px;background:#f97316"></div>
+                    <div style="width:14px;height:14px;border-radius:3px;background:#ef4444"></div>
+                    <span>Nhiều</span>
+                </div>
+            `;
         }
 
         async function loadDashboard(period = state.currentPeriod) {
@@ -519,8 +849,6 @@
 
         filter.addEventListener('change', event => loadDashboard(event.target.value));
         loadDashboard(filter.value);
-
-        document.getElementById('export-report-btn').addEventListener('click', exportReport);
     })();
 </script>
 @endsection

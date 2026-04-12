@@ -16,6 +16,8 @@ class DashboardExport implements WithMultipleSheets
         return [
             new DashboardSummarySheet($this->data, $this->period),
             new DashboardTransactionsSheet($this->data),
+            new DashboardMonthlySheet($this->data),      
+            new DashboardCategorySheet($this->data),     
         ];
     }
 }

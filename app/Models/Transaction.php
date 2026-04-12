@@ -35,6 +35,9 @@ class Transaction extends Model
         return $this->belongsTo(User::class);
     }
 
+    /*
+    * Giao dịch thuộc vè ví nào 
+    */
     public function moneyWallet()
     {
         return $this->belongsTo(\App\Models\MoneyWallet::class, 'money_wallet_id');

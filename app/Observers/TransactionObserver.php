@@ -17,7 +17,7 @@ class TransactionObserver
             loai:       'transaction_created',
             tieuDe:     'Giao dịch mới',
             noiDung:    "Đã ghi nhận {$type} " . number_format($tx->so_tien) . 'đ',
-            url:        route('transactions.index'), // ← sửa thành index
+            url:        route('transactions.index'), 
             actorId:    $tx->user_id,
             entityType: Transaction::class,
             entityId:   $tx->id,
@@ -35,7 +35,7 @@ class TransactionObserver
             loai:       'transaction_updated',
             tieuDe:     'Giao dịch đã cập nhật',
             noiDung:    'Giao dịch ' . number_format($tx->so_tien) . 'đ vừa được chỉnh sửa',
-            url:        route('transactions.index'), // ← sửa thành index
+            url:        route('transactions.index'), 
             actorId:    $tx->user_id,
             entityType: Transaction::class,
             entityId:   $tx->id,
