@@ -334,7 +334,7 @@
             } catch (err) {
                 document.getElementById('profileSkeleton').style.display = 'none';
                 document.getElementById('profileContent').style.display  = '';
-                showAlert('error', 'Lỗi tải dữ liệu', err.message);
+                window.showToast({ type: 'error', title: 'Lỗi tải dữ liệu', message: err.message });
             }
         }
 
@@ -367,7 +367,7 @@
 
                 if (res.status === 422 && json.errors) {
                     showFieldErrors(json.errors);
-                    showAlert('error', 'Vui lòng kiểm tra lại thông tin', '');
+                    window.showToast({ type: 'error', title: 'Vui lòng kiểm tra lại thông tin', message: '' });
                     return;
                 }
 
@@ -377,10 +377,11 @@
 
                 /* Cập nhật lại sidebar với data mới */
                 renderProfile(json.data);
-                showAlert('success', 'Cập nhật thành công', json.message);
+                window.showToast({ type: 'success', title: 'Cập nhật thành công', message: json.message });
+
 
             } catch (err) {
-                showAlert('error', 'Đã xảy ra lỗi', err.message);
+                window.showToast({ type: 'error', title: 'Đã xảy ra lỗi', message: err.message });
             } finally {
                 btn.disabled        = false;
                 btnText.textContent = 'Lưu thay đổi';
@@ -436,10 +437,10 @@
                 const wrap = document.getElementById('avatarPreviewWrap');
                 wrap.innerHTML = `<img id="avatarPreview" class="profile-avatar-image" src="${json.avatar_url}" alt="Avatar">`;
                 document.getElementById('deleteAvatarBtn').style.display = '';
-                showAlert('success', 'Thành công', json.message);
+                window.showToast({ type: 'success', title: 'Thành công', message: json.message });
 
             } catch (err) {
-                showAlert('error', 'Upload thất bại', err.message);
+                window.showToast({ type: 'error', title: 'Upload thất bại', message: err.message });
             } finally {
                 e.target.value = '';
             }
@@ -465,10 +466,10 @@
 
                 /* Reset về initials */
                 await loadProfile();
-                showAlert('success', 'Đã xoá ảnh', json.message);
+                window.showToast({ type: 'success', title: 'Đã xoá ảnh', message: json.message });
 
             } catch (err) {
-                showAlert('error', 'Xoá thất bại', err.message);
+                window.showToast({ type: 'error', title: 'Xoá thất bại', message: err.message });
             } finally {
                 btn.disabled = false;
             }

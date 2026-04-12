@@ -1235,7 +1235,7 @@ async function loadWallets(page = 1) {
         renderCategoryFilter(allCategories);
         renderCategoryOptions(allCategories);
     } catch {
-        showToast('Không thể tải danh sách ngân sách.', 'error');
+        window.showToast({ type: 'error', title: 'Lỗi', message: 'Không thể tải danh sách ngân sách.' });
     } finally {
         document.getElementById('table-loading').style.display = 'none';
     }
@@ -1390,14 +1390,14 @@ async function handleCreate(e) {
 
     try {
         await api('POST', API_BASE, body);
-        showToast('Thêm ngân sách thành công!');
+        window.showToast({ type: 'success', title: 'Thành công', message: 'Thêm ngân sách thành công!' });
         document.getElementById('create-modal').classList.remove('active');
         form.reset();
         form.querySelector('.amount-display').value = '';
         loadWallets(currentPage);
     } catch (err) {
         if (err.errors)  showFormErrors(err.errors, 'create');
-        if (err.message) showToast(err.message, 'error');
+        if (err.message) window.showToast({ type: 'error', title: 'Lỗi', message: err.message });
     }
 }
 
@@ -1419,30 +1419,33 @@ async function handleUpdate(e) {
 
     try {
         await api('PATCH', `${API_BASE}/${id}`, body);
-        showToast('Cập nhật ngân sách thành công!');
+        window.showToast({ type: 'success', title: 'Thành công', message: 'Cập nhật ngân sách thành công!' });
         document.getElementById('edit-modal').classList.remove('active');
         loadWallets(currentPage);
     } catch (err) {
         if (err.errors)  showFormErrors(err.errors, 'edit');
-        if (err.message) showToast(err.message, 'error');
+        if (err.message) window.showToast({ type: 'error', title: 'Lỗi', message: err.message });
     }
 }
 
 /* DELETE */
 function handleDelete(id) {
+   const isDark = document.body.classList.contains('dark');
     Swal.fire({
         title: 'Bạn chắc chưa?', text: 'Xóa rồi không khôi phục được đâu!',
         icon: 'warning', showCancelButton: true,
         confirmButtonText: 'Xóa', cancelButtonText: 'Hủy',
-        background: '#1E2937', confirmButtonColor: '#ef4444', cancelButtonColor: '#6b6c80',
+        background: isDark ? '#1E2937' : '#ffffff',
+        color: isDark ? '#e5e7eb' : '#1f2937',
+        confirmButtonColor: '#ef4444', cancelButtonColor: '#6b6c80',
     }).then(async r => {
         if (!r.isConfirmed) return;
         try {
             await api('DELETE', `${API_BASE}/${id}`);
-            showToast('Xóa ngân sách thành công!');
+            window.showToast({ type: 'success', title: 'Thành công', message: 'Xóa ngân sách thành công!' });
             loadWallets(currentPage);
         } catch (err) {
-            showToast(err.message ?? 'Không thể xóa ngân sách.', 'error');
+            window.showToast({ type: 'error', title: 'Lỗi', message: err.message ?? 'Không thể xóa ngân sách.' });
         }
     });
 }
@@ -1451,10 +1454,10 @@ function handleDelete(id) {
 async function handleToggle(id) {
     try {
         const data = await api('PATCH', `${API_BASE}/${id}/status`);
-        showToast(data.message ?? 'Cập nhật trạng thái thành công!');
+        window.showToast({ type: 'success', title: 'Thành công', message: data.message ?? 'Cập nhật trạng thái thành công!' });
         loadWallets(currentPage);
     } catch (err) {
-        showToast(err.message ?? 'Có lỗi xảy ra.', 'error');
+        window.showToast({ type: 'error', title: 'Lỗi', message: err.message ?? 'Có lỗi xảy ra.' });
     }
 }
 
@@ -1471,10 +1474,10 @@ async function handleSync(id) {
 
     try {
         const data = await api('POST', `${API_BASE}/${id}/sync`);
-        showToast(data.message ?? 'Đồng bộ thành công!');
+        window.showToast({ type: 'success', title: 'Thành công', message: data.message ?? 'Đồng bộ thành công!' });
         loadWallets(currentPage);
     } catch (err) {
-        showToast(err.message ?? 'Có lỗi xảy ra.', 'error');
+        window.showToast({ type: 'error', title: 'Lỗi', message: err.message ?? 'Có lỗi xảy ra.' });
     }
 }
 

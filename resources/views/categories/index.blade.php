@@ -1950,7 +1950,7 @@ async function loadCategories(page = 1) {
         renderStats(data.categories);
         renderParentOptions(data.parentCategories);
     } catch {
-        showToast('Không thể tải danh sách danh mục.', 'error');
+        window.showToast({ type: 'error', title: 'Lỗi', message: 'Không thể tải danh sách danh mục.' });
     } finally {
         document.getElementById('table-loading').style.display = 'none';
     }
@@ -2066,7 +2066,7 @@ async function handleCreate(e) {
     };
     try {
         await api('POST', API_BASE, body);
-        showToast('Thêm danh mục thành công!');
+        window.showToast({ type: 'success', title: 'Thành công', message: 'Thêm danh mục thành công!' });
         closeModal('create-modal');
         e.target.reset();
         document.getElementById('current-icon-preview').src      = '/images/category-icons/money.png';
@@ -2076,7 +2076,7 @@ async function handleCreate(e) {
         loadCategories(currentPage);
     } catch (err) {
         if (err.errors)  showErrors(err.errors, 'create');
-        if (err.message) showToast(err.message, 'error');
+        if (err.message) window.showToast({ type: 'error', title: 'Lỗi', message: err.message });
     }
 }
  
@@ -2094,30 +2094,33 @@ async function handleUpdate(e) {
     };
     try {
         await api('PATCH', `${API_BASE}/${id}`, body);
-        showToast('Cập nhật danh mục thành công!');
+        window.showToast({ type: 'success', title: 'Thành công', message: 'Cập nhật danh mục thành công!' });
         closeModal('edit-modal');
         loadCategories(currentPage);
     } catch (err) {
         if (err.errors)  showErrors(err.errors, 'edit');
-        if (err.message) showToast(err.message, 'error');
+        if (err.message) window.showToast({ type: 'error', title: 'Lỗi', message: err.message });
     }
 }
  
 /* DELETE */
 function handleDelete(id) {
+    const isDark = document.body.classList.contains('dark');
     Swal.fire({
         title: 'Bạn chắc chưa?', text: 'Xóa rồi không khôi phục được đâu!',
         icon: 'warning', showCancelButton: true,
         confirmButtonText: 'Xóa', cancelButtonText: 'Hủy',
-        background: '#1E2937', confirmButtonColor: '#ef4444', cancelButtonColor: '#6b6c80',
+        background: isDark ? '#1E2937' : '#ffffff',
+        color: isDark ? '#e5e7eb' : '#1f2937',
+        confirmButtonColor: '#ef4444', cancelButtonColor: '#6b6c80',
     }).then(async r => {
         if (!r.isConfirmed) return;
         try {
             await api('DELETE', `${API_BASE}/${id}`);
-            showToast('Xóa danh mục thành công!');
+            window.showToast({ type: 'success', title: 'Thành công', message: 'Xóa danh mục thành công!' });
             loadCategories(currentPage);
         } catch (err) {
-            showToast(err.message ?? 'Không thể xóa danh mục.', 'error');
+            window.showToast({ type: 'error', title: 'Lỗi', message: err.message ?? 'Không thể xóa danh mục.' });
         }
     });
 }
@@ -2126,10 +2129,10 @@ function handleDelete(id) {
 async function handleToggleStatus(id) {
     try {
         const data = await api('PATCH', `${API_BASE}/${id}/status`);
-        showToast(data.message);
+        window.showToast({ type: 'success', title: 'Thành công', message: data.message });
         loadCategories(currentPage);
     } catch (err) {
-        showToast(err.message ?? 'Có lỗi xảy ra.', 'error');
+        window.showToast({ type: 'error', title: 'Lỗi', message: err.message ?? 'Có lỗi xảy ra.' });
     }
 }
  

@@ -48,9 +48,6 @@ class ChangePasswordController extends Controller
             ], 422);
         }
 
-        // Đăng xuất các thiết bị khác
-        Auth::logoutOtherDevices($request->current_password);
-
         // Cập nhật mật khẩu
         $user->update([
             'password' => Hash::make($request->password),
