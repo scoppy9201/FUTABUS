@@ -6,201 +6,130 @@ use Illuminate\Http\Request;
 use App\Models\Category;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\JsonResponse;
 
 class CategoryController extends Controller
 {
-    // Hiển thị danh sách danh mục
-    public function index(Request $request)
+    // GET /api/v1/categories
+    public function index(Request $request): JsonResponse
     {
         $userId = Auth::id();
-        $query = Category::query()->with('parent')->where('user_id', $userId);
+        $query  = Category::query()->with('parent')->where('user_id', $userId);
 
-        // Bộ lọc theo loại
-        if ($request->filled('loai')) {
-            $query->loai($request->loai);
-        }
+        if ($request->filled('loai'))       $query->loai($request->loai);
+        if ($request->filled('search'))     $query->search($request->search);
+        if ($request->filled('trang_thai')) $query->trangThai($request->trang_thai);
 
-        // Tìm kiếm theo tên
-        if ($request->filled('search')) {
-            $query->search($request->search);
-        }
-
-        // Lọc theo trạng thái
-        if ($request->filled('trang_thai')) {
-            $query->trangThai($request->trang_thai);
-        }
-
-        // Sắp xếp
-        $sortBy = $request->get('sort_by', 'created_at');
+        $sortBy    = in_array($request->get('sort_by'), ['ten_danh_muc', 'created_at'])
+                        ? $request->get('sort_by') : 'created_at';
         $sortOrder = $request->get('sort_order', 'desc');
 
-        if (in_array($sortBy, ['ten_danh_muc', 'created_at'])) {
-            $query->orderBy($sortBy, $sortOrder);
-        }
-
-        // If client expects JSON (API fetch), return full list as JSON (not paginated)
-        if ($request->wantsJson() || $request->header('Accept') === 'application/json') {
-            $list = $query->orderBy('ten_danh_muc')->get();
-            return response()->json($list);
-        }
-
-        $categories = $query->paginate(15)->withQueryString();
-
-        // Lấy parent categories chỉ của user hiện tại
+        $categories       = $query->orderBy($sortBy, $sortOrder)->paginate(15)->withQueryString();
         $parentCategories = Category::where('user_id', $userId)
-                                   ->whereNull('danh_muc_cha_id')
-                                   ->orderBy('ten_danh_muc')
-                                   ->get();
+                                    ->whereNull('danh_muc_cha_id')
+                                    ->orderBy('ten_danh_muc')
+                                    ->get(['id', 'ten_danh_muc']);
 
-        return view('categories.index', compact('categories', 'parentCategories'));
+        return response()->json([
+            'success'           => true,
+            'categories'        => $categories,
+            'parentCategories'  => $parentCategories,
+        ]);
     }
 
-    // Hiển thị form tạo mới
-    public function create()
-    {
-        $userId = Auth::id();
-        $parentCategories = Category::where('user_id', $userId)
-                                   ->whereNull('danh_muc_cha_id')
-                                   ->orderBy('ten_danh_muc')
-                                   ->get();
-
-        return view('categories.create', compact('parentCategories'));
-    }
-
-    public function store(Request $request)
+    // POST /api/v1/categories
+    public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'ten_danh_muc' => 'required|string|max:255',
-            'loai_danh_muc' => 'required|in:THU,CHI',
+            'ten_danh_muc'    => 'required|string|max:255',
+            'loai_danh_muc'   => 'required|in:THU,CHI',
             'danh_muc_cha_id' => 'nullable|exists:categories,id',
-            'bieu_tuong' => 'required|string|max:100',
-            'mo_ta' => 'nullable|string',
+            'bieu_tuong'      => 'required|string|max:100',
+            'mo_ta'           => 'nullable|string',
         ]);
 
-        // Kiểm tra nếu có danh_muc_cha_id thì phải thuộc về user hiện tại
-        if ($validated['danh_muc_cha_id']) {
-            $parentCategory = Category::where('id', $validated['danh_muc_cha_id'])
-                                     ->where('user_id', Auth::id())
-                                     ->first();
-
-            if (!$parentCategory) {
-                return redirect()->back()
-                               ->with('error', 'Danh mục cha không hợp lệ!')
-                               ->withInput();
-            }
+        if (!empty($validated['danh_muc_cha_id'])) {
+            $parent = Category::where('id', $validated['danh_muc_cha_id'])
+                              ->where('user_id', Auth::id())->first();
+            if (!$parent) return response()->json(['message' => 'Danh mục cha không hợp lệ!'], 422);
         }
 
-        // Tạo danh mục mới
-        Category::create([
-            'user_id' => Auth::id(),
-            'ten_danh_muc' => $validated['ten_danh_muc'],
-            'loai_danh_muc' => $validated['loai_danh_muc'],
-            'danh_muc_cha_id' => $validated['danh_muc_cha_id'],
-            'bieu_tuong' => $validated['bieu_tuong'],
-            'mo_ta' => $validated['mo_ta'],
+        $category = Category::create([
+            ...$validated,
+            'user_id'    => Auth::id(),
             'trang_thai' => true,
         ]);
 
-        return redirect()->route('categories.index')->with('success', 'Thêm danh mục thành công!');
+        return response()->json([
+            'success'  => true,
+            'message'  => 'Thêm danh mục thành công!',
+            'category' => $category->load('parent'),
+        ], 201);
     }
 
-    // Hiển thị form chỉnh sửa
-    public function edit(Category $category)
+    // GET /api/v1/categories/{id}
+    public function show(Category $category): JsonResponse
     {
-        // Kiểm tra danh mục có thuộc về user hiện tại không
-        if ($category->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $userId = Auth::id();
-
-        $parentCategories = Category::where('user_id', $userId)
-                                   ->whereNull('danh_muc_cha_id')
-                                   ->where('id', '!=', $category->id)
-                                   ->orderBy('ten_danh_muc')
-                                   ->get();
-
-        return view('categories.edit', compact('category', 'parentCategories'));
+        if ($category->user_id !== Auth::id()) return response()->json(['message' => 'Unauthorized'], 403);
+        return response()->json(['success' => true, 'category' => $category->load('parent')]);
     }
 
-    // Update
-    public function update(Request $request, Category $category)
+    // PATCH /api/v1/categories/{id}
+    public function update(Request $request, Category $category): JsonResponse
     {
-        // Kiểm tra danh mục có thuộc về user hiện tại không
-        if ($category->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
-        }
+        if ($category->user_id !== Auth::id()) return response()->json(['message' => 'Unauthorized'], 403);
 
         $validated = $request->validate([
-            'ten_danh_muc' => 'required|string|max:255',
-            'loai_danh_muc' => 'required|in:THU,CHI',
+            'ten_danh_muc'    => 'required|string|max:255',
+            'loai_danh_muc'   => 'required|in:THU,CHI',
             'danh_muc_cha_id' => 'nullable|exists:categories,id',
-            'bieu_tuong' => 'required|string|max:100',
-            'mo_ta' => 'nullable|string',
+            'bieu_tuong'      => 'required|string|max:100',
+            'mo_ta'           => 'nullable|string',
         ]);
 
-        // Kiểm tra nếu có danh_muc_cha_id thì phải thuộc về user hiện tại
-        if ($validated['danh_muc_cha_id']) {
-            $parentCategory = Category::where('id', $validated['danh_muc_cha_id'])
-                                     ->where('user_id', Auth::id())
-                                     ->first();
-
-            if (!$parentCategory) {
-                return redirect()->back()
-                               ->with('error', 'Danh mục cha không hợp lệ!')
-                               ->withInput();
-            }
+        if (!empty($validated['danh_muc_cha_id'])) {
+            $parent = Category::where('id', $validated['danh_muc_cha_id'])
+                              ->where('user_id', Auth::id())->first();
+            if (!$parent) return response()->json(['message' => 'Danh mục cha không hợp lệ!'], 422);
         }
 
         $category->update($validated);
-
-        return redirect()->route('categories.index')->with('success', 'Cập nhật danh mục thành công!');
+        return response()->json(['success' => true, 'message' => 'Cập nhật thành công!', 'category' => $category->load('parent')]);
     }
 
-    // Xóa danh mục
-    public function destroy(Category $category)
+    // DELETE /api/v1/categories/{id}
+    public function destroy(Category $category): JsonResponse
     {
-        // Kiểm tra danh mục có thuộc về user hiện tại không
-        if ($category->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
-        }
+        if ($category->user_id !== Auth::id()) return response()->json(['message' => 'Unauthorized'], 403);
+
+        if (!$category->canDelete())
+            return response()->json(['message' => 'Không thể xóa danh mục đã có giao dịch.'], 422);
+        if ($category->children()->count() > 0)
+            return response()->json(['message' => 'Không thể xóa danh mục có danh mục con.'], 422);
 
         DB::beginTransaction();
         try {
-            // Kiểm tra xem danh mục có giao dịch không
-            if (!$category->canDelete()) {
-                return redirect()->route('categories.index')->with('error', 'Không thể xóa danh mục đã có giao dịch. Vui lòng vô hiệu hóa thay vì xóa.');
-            }
-
-            // Kiểm tra có danh mục con không
-            if ($category->children()->count() > 0) {
-                return redirect()->route('categories.index')->with('error', 'Không thể xóa danh mục có danh mục con.');
-            }
-
             $category->delete();
             DB::commit();
-
-            return redirect()->route('categories.index')->with('success', 'Xóa danh mục thành công!');
-
+            return response()->json(['success' => true, 'message' => 'Xóa danh mục thành công!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('categories.index')->with('error', 'Có lỗi xảy ra khi xóa danh mục.');
+            return response()->json(['message' => 'Có lỗi xảy ra khi xóa danh mục.'], 500);
         }
     }
 
-    // Toggle trạng thái danh mục (kích hoạt/vô hiệu hóa)
-    public function toggleStatus(Category $category)
+    // PATCH /api/v1/categories/{id}/status
+    public function toggleStatus(Category $category): JsonResponse
     {
-        // Kiểm tra danh mục có thuộc về user hiện tại không
-        if ($category->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
-        }
+        if ($category->user_id !== Auth::id()) return response()->json(['message' => 'Unauthorized'], 403);
 
-        $category->update([
-            'trang_thai' => !$category->trang_thai
-        ]);
-
+        $category->update(['trang_thai' => !$category->trang_thai]);
         $status = $category->trang_thai ? 'kích hoạt' : 'vô hiệu hóa';
-        return redirect()->route('categories.index')->with('success', "Đã {$status} danh mục thành công!");
+
+        return response()->json([
+            'success'    => true,
+            'message'    => "Đã {$status} danh mục thành công!",
+            'trang_thai' => $category->trang_thai,
+        ]);
     }
 }

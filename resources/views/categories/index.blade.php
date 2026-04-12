@@ -1716,7 +1716,8 @@
 </style>
 
 <div class="category-container">
-    <!-- Page Header -->
+ 
+    {{-- Page Header --}}
     <div class="page-header">
         <div class="page-title">
             <div class="page-icon">
@@ -1729,942 +1730,633 @@
             Thêm danh mục
         </button>
     </div>
-
-    <!-- Alerts -->
-    @if(session('success'))
-        <div class="alert alert-success">
-            <img src="{{ asset('images/check.png') }}" alt="Success">
-            <span>{{ session('success') }}</span>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-error">
-            <img src="{{ asset('images/warning.png') }}" alt="Error">
-            <span>{{ session('error') }}</span>
-        </div>
-    @endif
-
-    <!-- Filter Section -->
+ 
+    {{-- Toast notification --}}
+    <div id="toast" class="alert" style="display:none;"></div>
+ 
+    {{-- Filter --}}
     <div class="filter-card">
         <div class="filter-title">
             <img src="{{ asset('images/filter.png') }}" alt="Filter">
             <span>Bộ lọc & Tìm kiếm</span>
         </div>
-        <form action="{{ route('categories.index') }}" method="GET" class="filter-form">
+        <div class="filter-form">
             <div class="form-group">
                 <label class="form-label">Tìm kiếm</label>
-                <input 
-                    type="text" 
-                    name="search" 
-                    class="form-control" 
-                    placeholder="Nhập tên danh mục..."
-                    value="{{ request('search') }}"
-                >
+                <input type="text" id="filter-search" class="form-control" placeholder="Nhập tên danh mục...">
             </div>
-
             <div class="form-group">
                 <label class="form-label">Loại danh mục</label>
-                <select name="loai" class="form-control">
+                <select id="filter-loai" class="form-control">
                     <option value="">Tất cả</option>
-                    <option value="THU" {{ request('loai') == 'THU' ? 'selected' : '' }}>Thu</option>
-                    <option value="CHI" {{ request('loai') == 'CHI' ? 'selected' : '' }}>Chi</option>
+                    <option value="THU">Thu</option>
+                    <option value="CHI">Chi</option>
                 </select>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Trạng thái</label>
-                <select name="trang_thai" class="form-control">
+                <select id="filter-trang-thai" class="form-control">
                     <option value="">Tất cả</option>
-                    <option value="1" {{ request('trang_thai') === '1' ? 'selected' : '' }}>Kích hoạt</option>
-                    <option value="0" {{ request('trang_thai') === '0' ? 'selected' : '' }}>Vô hiệu hóa</option>
+                    <option value="1">Kích hoạt</option>
+                    <option value="0">Vô hiệu hóa</option>
                 </select>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Sắp xếp</label>
-                <select name="sort_by" class="form-control">
-                    <option value="created_at" {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>Ngày tạo</option>
-                    <option value="ten_danh_muc" {{ request('sort_by') == 'ten_danh_muc' ? 'selected' : '' }}>Tên danh mục</option>
+                <select id="filter-sort-by" class="form-control">
+                    <option value="created_at">Ngày tạo</option>
+                    <option value="ten_danh_muc">Tên danh mục</option>
                 </select>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Thứ tự</label>
-                <select name="sort_order" class="form-control">
-                    <option value="desc" {{ request('sort_order') == 'desc' ? 'selected' : '' }}>Giảm dần</option>
-                    <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>Tăng dần</option>
+                <select id="filter-sort-order" class="form-control">
+                    <option value="desc">Giảm dần</option>
+                    <option value="asc">Tăng dần</option>
                 </select>
             </div>
-
             <div class="filter-actions">
-                <button type="submit" class="btn-filter btn-search">
-                    <img src="{{ asset('images/search.png') }}" alt="Search">
-                    Tìm kiếm
+                <button type="button" class="btn-filter btn-search" id="btn-search">
+                    <img src="{{ asset('images/search.png') }}" alt="Search"> Tìm kiếm
                 </button>
-                <a href="{{ route('categories.index') }}" class="btn-filter btn-reset">
-                    <img src="{{ asset('images/refresh.png') }}" alt="Reset">
-                    Đặt lại
-                </a>
+                <button type="button" class="btn-filter btn-reset" id="btn-reset">
+                    <img src="{{ asset('images/refresh.png') }}" alt="Reset"> Đặt lại
+                </button>
             </div>
-        </form>
+        </div>
     </div>
-
-    <!-- Table Section -->
+ 
+    {{-- Table --}}
     <div class="table-card">
         <div class="table-header">
             <h3 class="table-title">
-                <img src="{{ asset('images/list.png') }}" alt="List">
-                Danh sách danh mục
+                <img src="{{ asset('images/list.png') }}" alt="List"> Danh sách danh mục
             </h3>
-            <div class="table-stats">
-                <span class="stat-badge income">
-                    <img src="{{ asset('images/arrows.png') }}" alt="Income">
-                    Thu: {{ $categories->where('loai_danh_muc', 'THU')->count() }}
-                </span>
-                <span class="stat-badge expense">
-                    <img src="{{ asset('images/down.png') }}" alt="Expense">
-                    Chi: {{ $categories->where('loai_danh_muc', 'CHI')->count() }}
-                </span>
-                <span class="stat-badge total">
-                    <img src="{{ asset('images/chart.png') }}" alt="Total">
-                    Tổng: {{ $categories->total() }}
-                </span>
+            <div class="table-stats" id="table-stats"></div>
+        </div>
+ 
+        {{-- Loading --}}
+        <div id="table-loading" style="text-align:center; padding:40px; color:#9ca3af;">
+            Đang tải...
+        </div>
+ 
+        {{-- Table body (JS render) --}}
+        <div id="table-body" style="display:none;">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:50px;">#</th>
+                            <th>Tên danh mục</th>
+                            <th style="width:100px;">Loại</th>
+                            <th>Danh mục cha</th>
+                            <th>Mô tả</th>
+                            <th style="width:140px;">Trạng thái</th>
+                            <th style="width:130px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categories-tbody"></tbody>
+                </table>
+            </div>
+            <div class="pagination-wrapper">
+                <div id="pagination-info" class="pagination-info"></div>
+                <div id="pagination-links"></div>
             </div>
         </div>
-
-        @if($categories->count() > 0)
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 50px;">#</th>
-                        <th>Tên danh mục</th>
-                        <th style="width: 100px;">Loại</th>
-                        <th>Danh mục cha</th>
-                        <th>Mô tả</th>
-                        <th style="width: 140px;">Trạng thái</th>
-                        <th style="width: 130px;">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($categories as $index => $category)
-                    <tr>
-                        <td>{{ $categories->firstItem() + $index }}</td>
-                        <td>
-                            <div class="category-name">
-                                <div class="category-icon {{ $category->loai_danh_muc == 'THU' ? 'income' : 'expense' }}">
-                                    <img src="{{ asset('images/category-icons/' . ($category->bieu_tuong ?? 'money.png')) }}" alt="Category">
-                                </div>
-                                <strong>{{ $category->ten_danh_muc }}</strong>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="badge badge-{{ $category->loai_danh_muc == 'THU' ? 'income' : 'expense' }}">
-                                {{ $category->loai_danh_muc }}
-                            </span>
-                        </td>
-                        <td>
-                            {{ $category->parent ? $category->parent->ten_danh_muc : '---' }}
-                        </td>
-                        <td>
-                            {{ $category->mo_ta ? Str::limit($category->mo_ta, 50) : 'Không có mô tả' }}
-                        </td>
-                        <td>
-                            <span class="badge badge-{{ $category->trang_thai ? 'active' : 'inactive' }}">
-                                <span class="status-dot {{ $category->trang_thai ? 'active' : 'inactive' }}"></span>
-                                {{ $category->trang_thai ? 'Hoạt động' : 'Vô hiệu hóa' }}
-                            </span>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <form action="{{ route('categories.toggle-status', $category) }}" method="POST" style="display: inline;">
-                                    @csrf
-                                    <button type="submit" class="btn-action btn-toggle" title="{{ $category->trang_thai ? 'Vô hiệu hóa' : 'Kích hoạt' }}">
-                                        <img src="{{ asset('images/' . ($category->trang_thai ? 'lock' : 'unlock') . '.png') }}" alt="Toggle">
-                                    </button>
-                                </form>
-
-                                <button type="button" class="btn-action btn-edit" onclick="openEditModal({{ $category }})" title="Chỉnh sửa">
-                                    <img src="{{ asset('images/edit.png') }}" alt="Edit">
-                                </button>
-
-                                <form action="{{ route('categories.destroy', $category) }}" 
-                                method="POST" 
-                                style="display: inline;" 
-                                class="form-delete"
-                                data-id="{{ $category->id }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn-action btn-delete" title="Xóa">
-                                        <img src="{{ asset('images/delete.png') }}" alt="Delete">
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-
-        <div class="pagination-wrapper">
-            <div class="pagination-info">
-                Hiển thị {{ $categories->firstItem() }} - {{ $categories->lastItem() }} / {{ $categories->total() }} kết quả
-            </div>
-            <div>
-                {{ $categories->links() }}
-            </div>
-        </div>
-        @else
-        <div class="empty-state">
+ 
+        {{-- Empty state --}}
+        <div id="empty-state" style="display:none;" class="empty-state">
             <div class="empty-icon">
                 <img src="{{ asset('images/empty-folder.png') }}" alt="Empty">
             </div>
             <h3>Chưa có danh mục nào</h3>
             <p>Hãy tạo danh mục đầu tiên để bắt đầu quản lý thu chi</p>
-            <button type="button" class="btn-primary" onclick="document.getElementById('create-modal').classList.add('active')">
-                <img src="{{ asset('images/plus.png') }}" alt="Add">
-                Thêm danh mục đầu tiên
+            <button type="button" class="btn-primary" id="empty-add-btn">
+                <img src="{{ asset('images/plus.png') }}" alt="Add"> Thêm danh mục đầu tiên
             </button>
         </div>
-        @endif
     </div>
-
-    <!-- Modal Thêm Mới - Modern 2 Column Layout -->
-    <div class="modal-overlay" id="create-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <div class="page-icon">
-                        <img src="{{ asset('images/add-category.png') }}" style="width:24px">
-                    </div>
-                    Thêm danh mục mới
-                </div>
-                <div class="modal-close" onclick="closeModal('create-modal')">
-                    <img src="{{ asset('images/close.png') }}" style="width:16px">
-                </div>
-            </div>
-
-            <form action="{{ route('categories.store') }}" method="POST" id="create-form" enctype="multipart/form-data">
-                @csrf
-                
-                <div class="modal-body">
-                    <!-- Left side: Form Fields -->
-                    <div class="modal-left">
-                        <!-- Tên danh mục -->
-                        <div class="form-group-compact">
-                            <label class="form-label">
-                                <strong>Tên danh mục</strong> <span class="required">*</span>
-                            </label>
-                            <input 
-                                type="text" 
-                                name="ten_danh_muc" 
-                                class="form-control @error('ten_danh_muc') is-invalid @enderror" 
-                                placeholder="Ví dụ: Lương tháng, Ăn uống, Du lịch..."
-                                value="{{ old('ten_danh_muc') }}"
-                                id="category-name-input"
-                                required
-                            >
-                            @error('ten_danh_muc')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="form-group-compact">
-                            <label class="form-label">
-                                <strong>Loại danh mục</strong> <span class="required">*</span>
-                            </label>
-                            <div class="radio-group-compact">
-                                <div class="radio-item">
-                                    <input type="radio" id="thu-create" name="loai_danh_muc" value="THU" class="radio-input"
-                                        {{ old('loai_danh_muc', 'THU') == 'THU' ? 'checked' : '' }}>
-                                    <label for="thu-create" class="radio-label-compact">
-                                        <img src="{{ asset('images/icome.png') }}" alt="Thu nhập">
-                                        Thu nhập
-                                    </label>
-                                </div>
-                                <div class="radio-item">
-                                    <input type="radio" id="chi-create" name="loai_danh_muc" value="CHI" class="radio-input"
-                                        {{ old('loai_danh_muc') == 'CHI' ? 'checked' : '' }}>
-                                    <label for="chi-create" class="radio-label-compact">
-                                        <img src="{{ asset('images/expense.png') }}" alt="Chi tiêu">
-                                        Chi tiêu
-                                    </label>
-                                </div>
-                            </div>
-                            @error('loai_danh_muc')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Danh mục cha -->
-                        <div class="form-group-compact">
-                            <label class="form-label"><strong>Danh mục cha</strong></label>
-                            <select name="danh_muc_cha_id" class="form-select">
-                                <option value="">-- Không chọn danh mục cha --</option>
-                                @foreach($parentCategories as $parent)
-                                    <option value="{{ $parent->id }}" {{ old('danh_muc_cha_id') == $parent->id ? 'selected' : '' }}>
-                                        {{ $parent->ten_danh_muc }} ({{ $parent->loai_danh_muc == 'THU' ? 'Thu nhập' : 'Chi tiêu' }})
-                                    </option>
-                                @endforeach
-                            </select>
-                            <div class="form-help-compact">Dùng để tạo danh mục con</div>
-                        </div>
-
-                        <!-- Mô tả -->
-                        <div class="form-group-compact">
-                            <label class="form-label"><strong>Mô tả</strong></label>
-                            <textarea name="mo_ta" class="form-textarea" placeholder="Ghi chú thêm về danh mục này..." style="min-height: 90px;">{{ old('mo_ta') }}</textarea>
-                        </div>
-                    </div>
-
-                    <!-- Right side: Upload & Preview -->
-                    <div class="modal-right">
-                        <!-- Upload Section -->
-                        <div class="upload-section">
-                            <div class="upload-section-title">
-                                <img src="{{ asset('images/image.png') }}" alt="Icon">
-                                Biểu tượng danh mục
-                            </div>
-                            <input type="hidden" name="bieu_tuong" id="selected-icon-input" value="money.png">
-                            <button type="button" class="icon-select-btn" onclick="openIconPicker()">
-                                <div class="icon-select-preview">
-                                    <img src="{{ asset('images/category-icons/money.png') }}" alt="Icon" id="current-icon-preview">
-                                </div>
-                                <div class="icon-select-text">
-                                    <div class="icon-select-name" id="current-icon-name">Tiền mặt</div>
-                                    <div class="icon-select-hint">Nhấp để thay đổi biểu tượng</div>
-                                </div>
-                                <img src="{{ asset('images/edit.png') }}" 
-                                    alt="Change" 
-                                    class="icon-select-arrow"
-                                    style="width: 16px; opacity: 0.5;">
-                            </button>
-                        </div>
-
-                        <!-- Live Preview -->
-                        <div class="preview-card">
-                            <div class="preview-title">
-                                <img src="{{ asset('images/eye.png') }}" alt="Preview">
-                                Xem trước
-                            </div>
-
-                            <div class="category-preview">
-                                <div class="category-preview-icon" id="preview-icon">
-                                    <img src="{{ asset('images/category-icons/money.png') }}" alt="Icon" id="preview-icon-img">
-                                </div>
-                                <div class="category-preview-text">
-                                    <div class="category-preview-name" id="preview-name">Tên danh mục</div>
-                                    <div class="category-preview-type">
-                                        <span class="badge badge-income" id="preview-badge">THU NHẬP</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="modal-actions-fixed">
-                    <button type="button" class="btn-secondary" onclick="closeModal('create-modal')">
-                        Hủy bỏ
-                    </button>
-                    <button type="submit" class="btn-primary">
-                        Lưu danh mục
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal Chỉnh Sửa -->
-    <div class="modal-overlay" id="edit-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <div class="page-icon">
-                        <img src="{{ asset('images/edit.png') }}" style="width:24px; filter: brightness(0) invert(1);">
-                    </div>
-                    Chỉnh sửa danh mục
-                </div>
-                <div class="modal-close" onclick="closeModal('edit-modal')">
-                    <img src="{{ asset('images/close.png') }}" style="width:16px">
-                </div>
-            </div>
-
-            <form id="edit-form" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
-                
-                <div class="modal-body">
-                    <!-- Left side: Form Fields -->
-                    <div class="modal-left">
-                        <!-- Tên danh mục -->
-                        <div class="form-group-compact">
-                            <label class="form-label">
-                                <strong>Tên danh mục</strong> <span class="required">*</span>
-                            </label>
-                            <input 
-                                type="text" 
-                                name="ten_danh_muc" 
-                                id="edit-ten"
-                                class="form-control" 
-                                placeholder="Ví dụ: Lương tháng, Ăn uống, Du lịch..."
-                                required
-                            >
-                        </div>
-
-                        <!-- Loại danh mục -->
-                        <div class="form-group-compact">
-                            <label class="form-label">
-                                <strong>Loại danh mục</strong> <span class="required">*</span>
-                            </label>
-                            <div class="radio-group-compact">
-                                <div class="radio-item">
-                                    <input type="radio" id="thu-edit" name="loai_danh_muc" value="THU" class="radio-input">
-                                    <label for="thu-edit" class="radio-label-compact">
-                                        <img src="{{ asset('images/icome.png') }}" alt="Thu nhập">
-                                        Thu nhập
-                                    </label>
-                                </div>
-                                <div class="radio-item">
-                                    <input type="radio" id="chi-edit" name="loai_danh_muc" value="CHI" class="radio-input">
-                                    <label for="chi-edit" class="radio-label-compact">
-                                        <img src="{{ asset('images/expense.png') }}" alt="Chi tiêu">
-                                        Chi tiêu
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Danh mục cha -->
-                        <div class="form-group-compact">
-                            <label class="form-label"><strong>Danh mục cha</strong></label>
-                            <select name="danh_muc_cha_id" id="edit-parent" class="form-select">
-                                <option value="">-- Không chọn danh mục cha --</option>
-                                @foreach($parentCategories as $parent)
-                                    <option value="{{ $parent->id }}">
-                                        {{ $parent->ten_danh_muc }} ({{ $parent->loai_danh_muc == 'THU' ? 'Thu nhập' : 'Chi tiêu' }})
-                                    </option>
-                                @endforeach
-                            </select>
-                            <div class="form-help-compact">Dùng để tạo danh mục con</div>
-                        </div>
-
-                        <!-- Mô tả -->
-                        <div class="form-group-compact">
-                            <label class="form-label"><strong>Mô tả</strong></label>
-                            <textarea name="mo_ta" id="edit-mota" class="form-textarea" placeholder="Ghi chú thêm về danh mục này..." style="min-height: 90px;"></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Right side: Upload & Preview -->
-                    <div class="modal-right">
-                        <!-- Upload Section -->
-                        <div class="upload-section">
-                            <div class="upload-section-title">
-                                <img src="{{ asset('images/image.png') }}" alt="Icon">
-                                Biểu tượng danh mục
-                            </div>
-                            <input type="hidden" name="bieu_tuong" id="edit-selected-icon-input" value="">
-                            <button type="button" class="icon-select-btn" onclick="openEditIconPicker()">
-                                <div class="icon-select-preview">
-                                    <img src="{{ asset('images/category-icons/money.png') }}" alt="Icon" id="edit-current-icon-preview">
-                                </div>
-                                <div class="icon-select-text">
-                                    <div class="icon-select-name" id="edit-current-icon-name">Tiền mặt</div>
-                                    <div class="icon-select-hint">Nhấp để thay đổi biểu tượng</div>
-                                </div>
-                                <img src="{{ asset('images/edit.png') }}" 
-                                    alt="Change" 
-                                    class="icon-select-arrow"
-                                    style="width: 16px; opacity: 0.5;">
-                            </button>
-                        </div>
-
-                        <!-- Live Preview -->
-                        <div class="preview-card">
-                            <div class="preview-title">
-                                <img src="{{ asset('images/eye.png') }}" alt="Preview">
-                                Xem trước
-                            </div>
-
-                            <div class="category-preview">
-                                <div class="category-preview-icon" id="edit-preview-icon">
-                                    <img src="{{ asset('images/category-icons/money.png') }}" alt="Icon" id="edit-preview-icon-img">
-                                </div>
-                                <div class="category-preview-text">
-                                    <div class="category-preview-name" id="edit-preview-name">Tên danh mục</div>
-                                    <div class="category-preview-type">
-                                        <span class="badge badge-income" id="edit-preview-badge">THU NHẬP</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="modal-actions-fixed">
-                    <button type="button" class="btn-secondary" onclick="closeModal('edit-modal')">
-                        Hủy bỏ
-                    </button>
-                    <button type="submit" class="btn-primary">
-                        Cập nhật
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Icon Picker Modal cho Edit -->
-    <div class="icon-picker-modal" id="edit-icon-picker-modal">
-        <div class="icon-picker-overlay" onclick="closeEditIconPicker()"></div>
-        <div class="icon-picker-content">
-            <div class="icon-picker-header">
-                <div class="icon-picker-header-title">
-                    <img src="{{ asset('images/image.png') }}" alt="Icon" style="width: 20px;">
-                    Chọn biểu tượng
-                </div>
-                <button type="button" class="icon-picker-close" onclick="closeEditIconPicker()">
-                    <img src="{{ asset('images/close.png') }}" alt="Close" style="width: 16px;">
-                </button>
-            </div>
-
-            <div class="icon-picker-body">
-                <div class="icon-search">
-                    <img src="{{ asset('images/search.png') }}" class="icon-search-icon" alt="Search">
-                    <input 
-                        type="text" 
-                        id="edit-icon-search-input" 
-                        placeholder="Tìm kiếm biểu tượng đẹp cho danh mục..."
-                        autocomplete="off"
-                    >
-                </div>
-                <div class="icon-grid" id="edit-icon-grid"></div>
-            </div>
-            <div class="icon-picker-footer">
-                <button type="button" class="btn-secondary" onclick="closeEditIconPicker()">
-                    Hủy bỏ
-                </button>
-                <button type="button" class="btn-primary" onclick="confirmEditIconSelection()">
-                    Xác nhận
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Icon Picker Modal -->
-    <div class="icon-picker-modal" id="icon-picker-modal">
-        <div class="icon-picker-overlay" onclick="closeIconPicker()"></div>
-        <div class="icon-picker-content">
-            <div class="icon-picker-header">
-                <div class="icon-picker-header-title">
-                    <img src="{{ asset('images/image.png') }}" alt="Icon" style="width: 20px;">
-                    Chọn biểu tượng
-                </div>
-                <button type="button" class="icon-picker-close" onclick="closeIconPicker()">
-                    <img src="{{ asset('images/close.png') }}" alt="Close" style="width: 16px;">
-                </button>
-            </div>
-
-            <div class="icon-picker-body">
-                <div class="icon-search">
-                    <img src="{{ asset('images/search.png') }}" class="icon-search-icon" alt="Search">
-                    <input 
-                        type="text" 
-                        id="icon-search-input" 
-                        placeholder="Tìm kiếm biểu tượng đẹp cho danh mục..."
-                        autocomplete="off"
-                    >
-                </div>
-                <div class="icon-grid" id="icon-grid"></div>
-            </div>
-            <div class="icon-picker-footer">
-                <button type="button" class="btn-secondary" onclick="closeIconPicker()">
-                    Hủy bỏ
-                </button>
-                <button type="button" class="btn-primary" onclick="confirmIconSelection()">
-                    Xác nhận
-                </button>
-            </div>
-        </div>
-    </div>
+ 
+    {{-- Modals --}}
+    @include('categories._modal_create')
+    @include('categories._modal_edit')
+ 
 </div>
-
+ 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-const CATEGORY_ICONS = [
-    { file: 'money.png', name: 'Tiền mặt', tags: 'tien mat cash money' },
-    { file: 'salary.png', name: 'Lương', tags: 'luong salary wage income' },
-    { file: 'gift.png', name: 'Quà tặng', tags: 'qua tang gift present' },
-    { file: 'investment.png', name: 'Đầu tư', tags: 'dau tu investment stock' },
-    { file: 'food.png', name: 'Ăn uống', tags: 'an uong food eat drink' },
-    { file: 'shopping.png', name: 'Mua sắm', tags: 'mua sam shopping shop cart' },
-    { file: 'transport.png', name: 'Di chuyển', tags: 'di chuyen transport car bus' },
-    { file: 'house.png', name: 'Nhà cửa', tags: 'nha cua house home rent' },
-    { file: 'health.png', name: 'Sức khỏe', tags: 'suc khoe health medical hospital' },
-    { file: 'education.png', name: 'Giáo dục', tags: 'giao duc education school book' },
-    { file: 'entertainment.png', name: 'Giải trí', tags: 'giai tri entertainment fun game' },
-    { file: 'travel.png', name: 'Du lịch', tags: 'du lich travel vacation trip' },
-    { file: 'bills.png', name: 'Hóa đơn', tags: 'hoa don bills utility payment' },
-    { file: 'phone.png', name: 'Điện thoại', tags: 'dien thoai phone mobile' },
-    { file: 'internet.png', name: 'Internet', tags: 'internet wifi network' },
-    { file: 'insurance.png', name: 'Bảo hiểm', tags: 'bao hiem insurance protection' },
-    { file: 'sports.png', name: 'Thể thao', tags: 'the thao sport fitness gym' },
-    { file: 'beauty.png', name: 'Làm đẹp', tags: 'lam dep beauty cosmetic spa' },
-    { file: 'pet.png', name: 'Thú cưng', tags: 'thu cung pet dog cat animal' },
-    { file: 'other.png', name: 'Khác', tags: 'khac other misc' }
-];
-
-// Biến oàn cục
-let searchTimeout;
-let tempSelectedIcon = null;
-let editTempSelectedIcon = null;
-
-// Lấy tên icon từ file 
-const getIconName = file => CATEGORY_ICONS.find(i => i.file === file)?.name || 'Tiền mặt';
-
-// Đóng modal (hàm dùng chung) 
-const closeModal = modalId => document.getElementById(modalId)?.classList.remove('active');
-
-setTimeout(() => {
-    document.querySelectorAll('.alert').forEach(alert => {
-        alert.style.opacity = '0';
-        alert.style.transform = 'translateY(-10px)';
-        setTimeout(() => alert.remove(), 300);
-    });
-}, 5000);
-
-const searchInput = document.querySelector('input[name="search"]');
-const searchForm = searchInput?.closest('form'); // Lấy form chứa input
-
-
-if (searchInput && searchForm) {
-    searchInput.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        const searchValue = this.value.trim();
-        
-        searchTimeout = setTimeout(() => {
-            // Submit form để search trong database
-            searchForm.submit();
-        }, 500); 
-    });
-}
-
-// Hiển thị không có kết quả 
-function showNoResultMessage(count) {
-    const tbody = document.querySelector('tbody');
-    let noResultRow = tbody.querySelector('.no-result-row');
-    const pagination = document.querySelector('.pagination-wrapper');
+(function() {
     
-    if (count === 0) {
-        if (!noResultRow) {
-            noResultRow = document.createElement('tr');
-            noResultRow.className = 'no-result-row';
-            noResultRow.innerHTML = `
-                <td colspan="7">
-                    <div class="empty-state">
-                        <div class="empty-icon">
-                            <img src="{{ asset('images/empty-folder.png') }}" alt="Empty">
-                        </div>
-                        <h3>Không tìm thấy kết quả</h3>
-                        <p>Thử thay đổi từ khóa tìm kiếm</p>
-                    </div>
-                </td>
-            `;
-            tbody.appendChild(noResultRow);
-        }
-        noResultRow.style.display = '';
-        if (pagination) pagination.style.display = 'none';
-    } else {
-        if (noResultRow) noResultRow.style.display = 'none';
-        if (pagination && !searchInput.value.trim()) pagination.style.display = 'flex';
+var API_BASE = '/api/v1/categories';
+ 
+const CATEGORY_ICONS = [
+    { file: 'money.png',         name: 'Tiền mặt',   tags: 'tien mat cash money' },
+    { file: 'salary.png',        name: 'Lương',       tags: 'luong salary wage income' },
+    { file: 'gift.png',          name: 'Quà tặng',   tags: 'qua tang gift present' },
+    { file: 'investment.png',    name: 'Đầu tư',     tags: 'dau tu investment stock' },
+    { file: 'food.png',          name: 'Ăn uống',    tags: 'an uong food eat drink' },
+    { file: 'shopping.png',      name: 'Mua sắm',    tags: 'mua sam shopping shop cart' },
+    { file: 'transport.png',     name: 'Di chuyển',  tags: 'di chuyen transport car bus' },
+    { file: 'house.png',         name: 'Nhà cửa',    tags: 'nha cua house home rent' },
+    { file: 'health.png',        name: 'Sức khỏe',   tags: 'suc khoe health medical hospital' },
+    { file: 'education.png',     name: 'Giáo dục',   tags: 'giao duc education school book' },
+    { file: 'entertainment.png', name: 'Giải trí',   tags: 'giai tri entertainment fun game' },
+    { file: 'travel.png',        name: 'Du lịch',    tags: 'du lich travel vacation trip' },
+    { file: 'bills.png',         name: 'Hóa đơn',    tags: 'hoa don bills utility payment' },
+    { file: 'phone.png',         name: 'Điện thoại', tags: 'dien thoai phone mobile' },
+    { file: 'internet.png',      name: 'Internet',   tags: 'internet wifi network' },
+    { file: 'insurance.png',     name: 'Bảo hiểm',   tags: 'bao hiem insurance protection' },
+    { file: 'sports.png',        name: 'Thể thao',   tags: 'the thao sport fitness gym' },
+    { file: 'beauty.png',        name: 'Làm đẹp',    tags: 'lam dep beauty cosmetic spa' },
+    { file: 'pet.png',           name: 'Thú cưng',   tags: 'thu cung pet dog cat animal' },
+    { file: 'other.png',         name: 'Khác',       tags: 'khac other misc' },
+];
+ 
+let currentPage          = 1;
+let searchTimeout        = null;
+let tempSelectedIcon     = null;
+let editTempSelectedIcon = null;
+ 
+/* HELPERS*/
+function escHtml(s) {
+    return (s ?? '').toString().replace(/[&<>"']/g, c =>
+        ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])
+    );
+}
+const getIconName = file => CATEGORY_ICONS.find(i => i.file === file)?.name ?? 'Tiền mặt';
+const closeModal  = id   => document.getElementById(id)?.classList.remove('active');
+ 
+/* API HELPER */
+async function api(method, url, body = null) {
+    const opts = {
+        method,
+        headers: {
+            'Accept':       'application/json',
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        },
+        credentials: 'same-origin',
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res  = await fetch(url, opts);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw data;
+    return data;
+}
+ 
+/* TOAST */
+function showToast(msg, type = 'success') {
+    const el       = document.getElementById('toast');
+    el.className   = `alert alert-${type === 'success' ? 'success' : 'error'}`;
+    el.textContent = msg;
+    el.style.display   = 'flex';
+    el.style.opacity   = '1';
+    el.style.transform = '';
+    clearTimeout(el._t);
+    el._t = setTimeout(() => {
+        el.style.opacity   = '0';
+        el.style.transform = 'translateY(-10px)';
+        setTimeout(() => { el.style.display = 'none'; }, 300);
+    }, 4000);
+}
+ 
+/* BUILD QUERY STRING*/
+function getFilters(page = 1) {
+    const p = new URLSearchParams();
+    const search  = document.getElementById('filter-search').value.trim();
+    const loai    = document.getElementById('filter-loai').value;
+    const status  = document.getElementById('filter-trang-thai').value;
+    const sortBy  = document.getElementById('filter-sort-by').value;
+    const sortOrd = document.getElementById('filter-sort-order').value;
+    if (search)        p.set('search',     search);
+    if (loai)          p.set('loai',       loai);
+    if (status !== '') p.set('trang_thai', status);
+    p.set('sort_by',    sortBy);
+    p.set('sort_order', sortOrd);
+    p.set('page',       page);
+    return p.toString();
+}
+ 
+/* LOAD CATEGORIES */
+async function loadCategories(page = 1) {
+    currentPage = page;
+    document.getElementById('table-loading').style.display = 'block';
+    document.getElementById('table-body').style.display    = 'none';
+    document.getElementById('empty-state').style.display   = 'none';
+ 
+    try {
+        const data = await api('GET', `${API_BASE}?${getFilters(page)}`);
+        renderTable(data.categories);
+        renderStats(data.categories);
+        renderParentOptions(data.parentCategories);
+    } catch {
+        showToast('Không thể tải danh sách danh mục.', 'error');
+    } finally {
+        document.getElementById('table-loading').style.display = 'none';
     }
 }
-
-const filterForm = document.querySelector('.filter-form');
-const btnApply = filterForm?.querySelector('.btn-search');
-
-if (btnApply) {
-    const imgElement = btnApply.querySelector('img');
-    btnApply.innerHTML = '';
-    btnApply.appendChild(imgElement);
-    btnApply.appendChild(document.createTextNode(' Áp dụng'));
+ 
+/* RENDER TABLE= */
+function renderTable(p) {
+    const items = p.data;
+    if (!items.length) {
+        document.getElementById('empty-state').style.display = 'block';
+        return;
+    }
+    document.getElementById('table-body').style.display = 'block';
+    const offset = p.from ?? 1;
+ 
+    document.getElementById('categories-tbody').innerHTML = items.map((cat, i) => `
+        <tr data-id="${cat.id}">
+            <td>${offset + i}</td>
+            <td>
+                <div class="category-name">
+                    <div class="category-icon ${cat.loai_danh_muc === 'THU' ? 'income' : 'expense'}">
+                        <img src="/images/category-icons/${escHtml(cat.bieu_tuong ?? 'money.png')}" alt="icon">
+                    </div>
+                    <strong>${escHtml(cat.ten_danh_muc)}</strong>
+                </div>
+            </td>
+            <td>
+                <span class="badge badge-${cat.loai_danh_muc === 'THU' ? 'income' : 'expense'}">
+                    ${escHtml(cat.loai_danh_muc)}
+                </span>
+            </td>
+            <td>${cat.parent ? escHtml(cat.parent.ten_danh_muc) : '---'}</td>
+            <td>${cat.mo_ta ? escHtml(cat.mo_ta.substring(0,50)) + (cat.mo_ta.length > 50 ? '…' : '') : 'Không có mô tả'}</td>
+            <td>
+                <span class="badge badge-${cat.trang_thai ? 'active' : 'inactive'}">
+                    <span class="status-dot ${cat.trang_thai ? 'active' : 'inactive'}"></span>
+                    ${cat.trang_thai ? 'Hoạt động' : 'Vô hiệu hóa'}
+                </span>
+            </td>
+            <td>
+                <div class="action-buttons">
+                    <button type="button" class="btn-action btn-toggle"
+                        onclick="handleToggleStatus(${cat.id})"
+                        title="${cat.trang_thai ? 'Vô hiệu hóa' : 'Kích hoạt'}">
+                        <img src="/images/${cat.trang_thai ? 'lock' : 'unlock'}.png" alt="toggle">
+                    </button>
+                    <button type="button" class="btn-action btn-edit"
+                        onclick='openEditModal(${JSON.stringify(cat)})'
+                        title="Chỉnh sửa">
+                        <img src="/images/edit.png" alt="edit">
+                    </button>
+                    <button type="button" class="btn-action btn-delete"
+                        onclick="handleDelete(${cat.id})"
+                        title="Xóa">
+                        <img src="/images/delete.png" alt="delete">
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+ 
+    document.getElementById('pagination-info').textContent =
+        `Hiển thị ${p.from ?? 0} - ${p.to ?? 0} / ${p.total} kết quả`;
+ 
+    renderPaginationLinks(p);
 }
-
-document.getElementById('open-create-modal')?.addEventListener('click', () => {
-    document.getElementById('create-modal').classList.add('active');
-});
-
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-    overlay.addEventListener('click', function(e) {
-        if (e.target === this) this.classList.remove('active');
+ 
+function renderPaginationLinks(p) {
+    const el   = document.getElementById('pagination-links');
+    const cur  = p.current_page;
+    const last = p.last_page;
+    let html   = '<div style="display:flex;gap:6px;">';
+    if (cur > 1)
+        html += `<button class="btn-filter btn-reset" style="min-width:36px;padding:0 10px;height:36px;" onclick="loadCategories(${cur-1})">‹</button>`;
+    for (let i = Math.max(1, cur-2); i <= Math.min(last, cur+2); i++)
+        html += `<button class="btn-filter ${i===cur?'btn-search':'btn-reset'}" style="min-width:36px;padding:0 10px;height:36px;" onclick="loadCategories(${i})">${i}</button>`;
+    if (cur < last)
+        html += `<button class="btn-filter btn-reset" style="min-width:36px;padding:0 10px;height:36px;" onclick="loadCategories(${cur+1})">›</button>`;
+    html += '</div>';
+    el.innerHTML = html;
+}
+ 
+function renderStats(p) {
+    const thu = p.data.filter(c => c.loai_danh_muc === 'THU').length;
+    const chi = p.data.filter(c => c.loai_danh_muc === 'CHI').length;
+    document.getElementById('table-stats').innerHTML = `
+        <span class="stat-badge income"><img src="/images/arrows.png" alt=""> Thu: ${thu}</span>
+        <span class="stat-badge expense"><img src="/images/down.png" alt=""> Chi: ${chi}</span>
+        <span class="stat-badge total"><img src="/images/chart.png" alt=""> Tổng: ${p.total}</span>
+    `;
+}
+ 
+function renderParentOptions(parents) {
+    ['create-parent', 'edit-parent'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const val = el.value;
+        el.innerHTML = '<option value="">-- Không chọn danh mục cha --</option>'
+            + parents.map(p => `<option value="${p.id}" ${p.id == val ? 'selected' : ''}>${escHtml(p.ten_danh_muc)}</option>`).join('');
     });
-});
-
+}
+ 
+/* CREATE= */
+async function handleCreate(e) {
+    e.preventDefault();
+    clearErrors('create');
+    const body = {
+        ten_danh_muc:    document.getElementById('category-name-input').value,
+        loai_danh_muc:   document.querySelector('input[name="loai_danh_muc"]:checked')?.value,
+        danh_muc_cha_id: document.getElementById('create-parent').value || null,
+        bieu_tuong:      document.getElementById('selected-icon-input').value,
+        mo_ta:           document.getElementById('category-desc-input')?.value || '',
+    };
+    try {
+        await api('POST', API_BASE, body);
+        showToast('Thêm danh mục thành công!');
+        closeModal('create-modal');
+        e.target.reset();
+        document.getElementById('current-icon-preview').src      = '/images/category-icons/money.png';
+        document.getElementById('current-icon-name').textContent = 'Tiền mặt';
+        document.getElementById('selected-icon-input').value     = 'money.png';
+        document.getElementById('preview-icon-img').src          = '/images/category-icons/money.png';
+        loadCategories(currentPage);
+    } catch (err) {
+        if (err.errors)  showErrors(err.errors, 'create');
+        if (err.message) showToast(err.message, 'error');
+    }
+}
+ 
+/* UPDATE */
+async function handleUpdate(e) {
+    e.preventDefault();
+    clearErrors('edit');
+    const id   = document.getElementById('edit-form').dataset.id;
+    const body = {
+        ten_danh_muc:    document.getElementById('edit-ten').value,
+        loai_danh_muc:   document.querySelector('input[name="edit_loai"]:checked')?.value,
+        danh_muc_cha_id: document.getElementById('edit-parent').value || null,
+        bieu_tuong:      document.getElementById('edit-selected-icon-input').value,
+        mo_ta:           document.getElementById('edit-mota').value || '',
+    };
+    try {
+        await api('PATCH', `${API_BASE}/${id}`, body);
+        showToast('Cập nhật danh mục thành công!');
+        closeModal('edit-modal');
+        loadCategories(currentPage);
+    } catch (err) {
+        if (err.errors)  showErrors(err.errors, 'edit');
+        if (err.message) showToast(err.message, 'error');
+    }
+}
+ 
+/* DELETE */
+function handleDelete(id) {
+    Swal.fire({
+        title: 'Bạn chắc chưa?', text: 'Xóa rồi không khôi phục được đâu!',
+        icon: 'warning', showCancelButton: true,
+        confirmButtonText: 'Xóa', cancelButtonText: 'Hủy',
+        background: '#1E2937', confirmButtonColor: '#ef4444', cancelButtonColor: '#6b6c80',
+    }).then(async r => {
+        if (!r.isConfirmed) return;
+        try {
+            await api('DELETE', `${API_BASE}/${id}`);
+            showToast('Xóa danh mục thành công!');
+            loadCategories(currentPage);
+        } catch (err) {
+            showToast(err.message ?? 'Không thể xóa danh mục.', 'error');
+        }
+    });
+}
+ 
+/* TOGGLE STATUS */
+async function handleToggleStatus(id) {
+    try {
+        const data = await api('PATCH', `${API_BASE}/${id}/status`);
+        showToast(data.message);
+        loadCategories(currentPage);
+    } catch (err) {
+        showToast(err.message ?? 'Có lỗi xảy ra.', 'error');
+    }
+}
+ 
+/* ERRORS*/
+function showErrors(errors, prefix) {
+    Object.keys(errors).forEach(field => {
+        const el = document.getElementById(`${prefix}-error-${field}`);
+        if (el) { el.textContent = errors[field][0]; el.style.display = 'block'; }
+    });
+}
+function clearErrors(prefix) {
+    document.querySelectorAll(`[id^="${prefix}-error-"]`).forEach(el => {
+        el.textContent = ''; el.style.display = 'none';
+    });
+}
+ 
+/* ICON PICKER*/
 function initIconPicker(gridId, searchId, isEdit = false) {
-    const iconGrid = document.getElementById(gridId);
-    const searchInput = document.getElementById(searchId);
-    if (!iconGrid || !searchInput) return;
-
-    const renderIcons = (icons = CATEGORY_ICONS) => {
-        const tempIcon = isEdit ? editTempSelectedIcon : tempSelectedIcon;
-        iconGrid.innerHTML = icons.map(icon => `
-            <div class="icon-item ${icon.file === tempIcon?.file ? 'selected' : ''}" 
-                data-icon="${icon.file}" 
-                data-name="${icon.name}"
+    const grid     = document.getElementById(gridId);
+    const searchEl = document.getElementById(searchId);
+    if (!grid || !searchEl) return;
+ 
+    const render = (icons = CATEGORY_ICONS) => {
+        const selected = isEdit ? editTempSelectedIcon : tempSelectedIcon;
+        grid.innerHTML = icons.map(icon => `
+            <div class="icon-item ${icon.file === selected?.file ? 'selected' : ''}"
+                data-icon="${icon.file}" data-name="${icon.name}"
                 onclick="${isEdit ? 'selectEditTempIcon' : 'selectTempIcon'}('${icon.file}', '${icon.name}')">
                 <img src="/images/category-icons/${icon.file}" alt="${icon.name}">
-                <div class="icon-item-check">
-                    <img src="/images/check.png" alt="Selected">
-                </div>
+                <div class="icon-item-check"><img src="/images/check.png" alt="ok"></div>
             </div>
         `).join('');
     };
-
-    searchInput.addEventListener('input', function() {
-        const query = this.value.toLowerCase().trim();
-        
-        if (!query) {
-            renderIcons();
-            return;
-        }
-
-        const filtered = CATEGORY_ICONS.filter(icon => 
-            icon.name.toLowerCase().includes(query) || icon.tags.toLowerCase().includes(query)
-        );
-
-        if (filtered.length === 0) {
-            iconGrid.innerHTML = `
-                <div style="grid-column: 1/-1; text-align: center; padding: 40px 20px; color: #9ca3af;">
-                    <img src="/images/search.png" style="width: 40px; opacity: 0.3; margin-bottom: 12px;">
-                    <div style="font-size: 14px;">Không tìm thấy icon phù hợp</div>
-                </div>
-            `;
-        } else {
-            renderIcons(filtered);
-        }
+ 
+    searchEl.addEventListener('input', function () {
+        const q = this.value.toLowerCase().trim();
+        if (!q) { render(); return; }
+        const f = CATEGORY_ICONS.filter(i => i.name.toLowerCase().includes(q) || i.tags.toLowerCase().includes(q));
+        if (!f.length) {
+            grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af;font-size:14px;">Không tìm thấy icon phù hợp</div>`;
+        } else { render(f); }
     });
-
-    renderIcons();
+ 
+    render();
 }
-
+ 
 function openIconPicker() {
-    const modal = document.getElementById('icon-picker-modal');
-    const currentIcon = document.getElementById('selected-icon-input').value;
-    const currentName = document.getElementById('current-icon-name').textContent;
-    
-    tempSelectedIcon = { file: currentIcon, name: currentName };
-    modal.classList.add('active');
+    const cur = document.getElementById('selected-icon-input').value;
+    tempSelectedIcon = { file: cur, name: getIconName(cur) };
+    document.getElementById('icon-picker-modal').classList.add('active');
     document.body.style.overflow = 'hidden';
-    
     document.getElementById('icon-search-input').value = '';
     initIconPicker('icon-grid', 'icon-search-input', false);
 }
-
 function closeIconPicker() {
     document.getElementById('icon-picker-modal').classList.remove('active');
     document.body.style.overflow = '';
     tempSelectedIcon = null;
 }
-
 function selectTempIcon(file, name) {
-    document.querySelectorAll('#icon-grid .icon-item').forEach(item => item.classList.remove('selected'));
+    document.querySelectorAll('#icon-grid .icon-item').forEach(el => el.classList.remove('selected'));
     document.querySelector(`#icon-grid [data-icon="${file}"]`)?.classList.add('selected');
     tempSelectedIcon = { file, name };
 }
-
 function confirmIconSelection() {
     if (!tempSelectedIcon) return closeIconPicker();
-    
     const { file, name } = tempSelectedIcon;
-    const iconPath = `/images/category-icons/${file}`;
-    
-    document.getElementById('selected-icon-input').value = file;
-    document.getElementById('current-icon-preview').src = iconPath;
+    document.getElementById('selected-icon-input').value     = file;
+    document.getElementById('current-icon-preview').src      = `/images/category-icons/${file}`;
     document.getElementById('current-icon-name').textContent = name;
-    document.getElementById('preview-icon-img').src = iconPath;
-    
+    document.getElementById('preview-icon-img').src          = `/images/category-icons/${file}`;
     closeIconPicker();
 }
-
-function openEditModal(cat) {
-    const form = document.getElementById('edit-form');
-    form.action = `/categories/${cat.id}`;
-    
-    // Fill data
-    const fields = {
-        'edit-ten': cat.ten_danh_muc,
-        'edit-mota': cat.mo_ta,
-        'edit-parent': cat.danh_muc_cha_id
-    };
-    
-    Object.entries(fields).forEach(([id, value]) => {
-        const el = document.getElementById(id);
-        if (el) el.value = value || '';
-    });
-    
-    // Radio buttons
-    document.getElementById('thu-edit').checked = (cat.loai_danh_muc === 'THU');
-    document.getElementById('chi-edit').checked = (cat.loai_danh_muc === 'CHI');
-    
-    // Icon
-    const iconFile = cat.bieu_tuong || 'money.png';
-    document.getElementById('edit-selected-icon-input').value = iconFile;
-    document.getElementById('edit-current-icon-preview').src = `/images/category-icons/${iconFile}`;
-    document.getElementById('edit-current-icon-name').textContent = getIconName(iconFile);
-    
-    // Preview
-    updateEditPreview(cat.ten_danh_muc, cat.loai_danh_muc, iconFile);
-    
-    document.getElementById('edit-modal').classList.add('active');
-    initEditLivePreview();
-}
-
-function updateEditPreview(name, type, icon) {
-    document.getElementById('edit-preview-name').textContent = name || 'Tên danh mục';
-    document.getElementById('edit-preview-icon-img').src = `/images/category-icons/${icon}`;
-    
-    const badge = document.getElementById('edit-preview-badge');
-    badge.textContent = type === 'THU' ? 'THU NHẬP' : 'CHI TIÊU';
-    badge.className = `badge badge-${type === 'THU' ? 'income' : 'expense'}`;
-}
-
-function initEditLivePreview() {
-    const elements = {
-        name: document.getElementById('edit-ten'),
-        thu: document.getElementById('thu-edit'),
-        chi: document.getElementById('chi-edit')
-    };
-    
-    // Clone to remove old listeners
-    Object.keys(elements).forEach(key => {
-        const el = elements[key];
-        const clone = el.cloneNode(true);
-        el.parentNode.replaceChild(clone, el);
-        elements[key] = clone;
-    });
-    
-    // Name input
-    elements.name.addEventListener('input', function() {
-        document.getElementById('edit-preview-name').textContent = this.value.trim() || 'Tên danh mục';
-    });
-    
-    // Type change
-    const updateType = () => {
-        const isIncome = document.getElementById('thu-edit').checked;
-        const badge = document.getElementById('edit-preview-badge');
-        badge.textContent = isIncome ? 'THU NHẬP' : 'CHI TIÊU';
-        badge.className = `badge badge-${isIncome ? 'income' : 'expense'}`;
-    };
-    
-    elements.thu.addEventListener('change', updateType);
-    elements.chi.addEventListener('change', updateType);
-}
-
+ 
 function openEditIconPicker() {
-    const modal = document.getElementById('edit-icon-picker-modal');
-    const currentIcon = document.getElementById('edit-selected-icon-input').value;
-    const currentName = document.getElementById('edit-current-icon-name').textContent;
-    
-    editTempSelectedIcon = { file: currentIcon, name: currentName };
-    modal.classList.add('active');
+    const cur = document.getElementById('edit-selected-icon-input').value;
+    editTempSelectedIcon = { file: cur, name: getIconName(cur) };
+    document.getElementById('edit-icon-picker-modal').classList.add('active');
     document.body.style.overflow = 'hidden';
-    
     document.getElementById('edit-icon-search-input').value = '';
     initIconPicker('edit-icon-grid', 'edit-icon-search-input', true);
 }
-
 function closeEditIconPicker() {
     document.getElementById('edit-icon-picker-modal').classList.remove('active');
     document.body.style.overflow = '';
     editTempSelectedIcon = null;
 }
-
 function selectEditTempIcon(file, name) {
-    document.querySelectorAll('#edit-icon-grid .icon-item').forEach(item => item.classList.remove('selected'));
+    document.querySelectorAll('#edit-icon-grid .icon-item').forEach(el => el.classList.remove('selected'));
     document.querySelector(`#edit-icon-grid [data-icon="${file}"]`)?.classList.add('selected');
     editTempSelectedIcon = { file, name };
 }
-
 function confirmEditIconSelection() {
     if (!editTempSelectedIcon) return closeEditIconPicker();
-    
     const { file, name } = editTempSelectedIcon;
-    const iconPath = `/images/category-icons/${file}`;
-    
-    document.getElementById('edit-selected-icon-input').value = file;
-    document.getElementById('edit-current-icon-preview').src = iconPath;
-    document.getElementById('edit-current-icon-name').textContent = name;
-    document.getElementById('edit-preview-icon-img').src = iconPath;
-    
+    document.getElementById('edit-selected-icon-input').value     = file;
+    document.getElementById('edit-current-icon-preview').src       = `/images/category-icons/${file}`;
+    document.getElementById('edit-current-icon-name').textContent  = name;
+    document.getElementById('edit-preview-icon-img').src           = `/images/category-icons/${file}`;
     closeEditIconPicker();
 }
-
+ 
+/* EDIT MODAL*/
+function openEditModal(cat) {
+    const form = document.getElementById('edit-form');
+    form.dataset.id = cat.id;
+    document.getElementById('edit-ten').value    = cat.ten_danh_muc    ?? '';
+    document.getElementById('edit-mota').value   = cat.mo_ta           ?? '';
+    document.getElementById('edit-parent').value = cat.danh_muc_cha_id ?? '';
+    document.getElementById('thu-edit').checked  = (cat.loai_danh_muc === 'THU');
+    document.getElementById('chi-edit').checked  = (cat.loai_danh_muc === 'CHI');
+ 
+    const iconFile = cat.bieu_tuong || 'money.png';
+    document.getElementById('edit-selected-icon-input').value     = iconFile;
+    document.getElementById('edit-current-icon-preview').src      = `/images/category-icons/${iconFile}`;
+    document.getElementById('edit-current-icon-name').textContent = getIconName(iconFile);
+ 
+    updateEditPreview(cat.ten_danh_muc, cat.loai_danh_muc, iconFile);
+    document.getElementById('edit-modal').classList.add('active');
+    initEditLivePreview();
+}
+ 
+function updateEditPreview(name, type, icon) {
+    document.getElementById('edit-preview-name').textContent = name || 'Tên danh mục';
+    document.getElementById('edit-preview-icon-img').src     = `/images/category-icons/${icon}`;
+    const badge = document.getElementById('edit-preview-badge');
+    badge.textContent = type === 'THU' ? 'THU NHẬP' : 'CHI TIÊU';
+    badge.className   = `badge badge-${type === 'THU' ? 'income' : 'expense'}`;
+}
+ 
+function initEditLivePreview() {
+    ['edit-ten', 'thu-edit', 'chi-edit'].forEach(id => {
+        const el = document.getElementById(id);
+        const clone = el.cloneNode(true);
+        el.parentNode.replaceChild(clone, el);
+    });
+    document.getElementById('edit-ten').addEventListener('input', function () {
+        document.getElementById('edit-preview-name').textContent = this.value.trim() || 'Tên danh mục';
+    });
+    const syncBadge = () => {
+        const inc   = document.getElementById('thu-edit').checked;
+        const badge = document.getElementById('edit-preview-badge');
+        badge.textContent = inc ? 'THU NHẬP' : 'CHI TIÊU';
+        badge.className   = `badge badge-${inc ? 'income' : 'expense'}`;
+    };
+    document.getElementById('thu-edit').addEventListener('change', syncBadge);
+    document.getElementById('chi-edit').addEventListener('change', syncBadge);
+}
+ 
+/* CREATE LIVE PREVIEW */
 function initLivePreview() {
-    const nameInput = document.getElementById('category-name-input');
-    const previewName = document.getElementById('preview-name');
-    const radioThu = document.getElementById('thu-create');
-    const radioChi = document.getElementById('chi-create');
+    document.getElementById('category-name-input')?.addEventListener('input', function () {
+        document.getElementById('preview-name').textContent = this.value.trim() || 'Tên danh mục';
+    });
+    const syncBadge = () => {
+        const badge = document.getElementById('preview-badge');
+        if (!badge) return;
+        const inc = document.getElementById('thu-create')?.checked;
+        badge.textContent = inc ? 'THU NHẬP' : 'CHI TIÊU';
+        badge.className   = `badge badge-${inc ? 'income' : 'expense'}`;
+    };
+    document.getElementById('thu-create')?.addEventListener('change', syncBadge);
+    document.getElementById('chi-create')?.addEventListener('change', syncBadge);
+    syncBadge();
+}
+ 
+/* INIT= */
+function initPage() {
+    loadCategories();
+    initLivePreview();
 
-    if (!nameInput || !previewName) return;
-
-    nameInput.addEventListener('input', function() {
-        previewName.textContent = this.value.trim() || 'Tên danh mục';
+    document.getElementById('btn-search').addEventListener('click', () => loadCategories(1));
+    document.getElementById('btn-reset').addEventListener('click', () => {
+        document.getElementById('filter-search').value     = '';
+        document.getElementById('filter-loai').value       = '';
+        document.getElementById('filter-trang-thai').value = '';
+        document.getElementById('filter-sort-by').value    = 'created_at';
+        document.getElementById('filter-sort-order').value = 'desc';
+        loadCategories(1);
     });
 
-    const updateType = () => {
-        const badge = document.getElementById('preview-badge');
-        const isIncome = radioThu?.checked;
-        badge.textContent = isIncome ? 'THU NHẬP' : 'CHI TIÊU';
-        badge.className = `badge badge-${isIncome ? 'income' : 'expense'}`;
-    };
-    
-    radioThu?.addEventListener('change', updateType);
-    radioChi?.addEventListener('change', updateType);
-    updateType();
-}
+    document.getElementById('filter-search').addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => loadCategories(1), 500);
+    });
 
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
+    document.getElementById('open-create-modal').addEventListener('click', () =>
+        document.getElementById('create-modal').classList.add('active'));
+    document.getElementById('empty-add-btn')?.addEventListener('click', () =>
+        document.getElementById('create-modal').classList.add('active'));
+
+    document.querySelectorAll('.modal-overlay').forEach(overlay =>
+        overlay.addEventListener('click', e => {
+            if (e.target === overlay) overlay.classList.remove('active');
+        })
+    );
+
+    document.getElementById('create-form')?.addEventListener('submit', handleCreate);
+    document.getElementById('edit-form')?.addEventListener('submit', handleUpdate);
+
+    document.addEventListener('keydown', e => {
+        if (e.key !== 'Escape') return;
         ['icon-picker-modal', 'edit-icon-picker-modal'].forEach(id => {
-            const modal = document.getElementById(id);
-            if (modal?.classList.contains('active')) {
-                modal.classList.remove('active');
+            const m = document.getElementById(id);
+            if (m?.classList.contains('active')) {
+                m.classList.remove('active');
                 document.body.style.overflow = '';
             }
         });
-    }
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    initLivePreview();
-});
-
-@if($errors->any() && !$errors->has('id'))
-    document.getElementById('create-modal')?.classList.add('active');
-@endif
-    // Xác nhận xóa 
-    document.querySelectorAll('.form-delete').forEach(form => {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault(); // chặn submit mặc định
-
-            Swal.fire({
-                title: 'Bạn chắc chưa?',
-                text: 'Xóa rồi không khôi phục được đâu!',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Xóa',
-                cancelButtonText: 'Hủy',
-                background: '#1E2937',
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#6b6c80'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit(); // submit lại nếu đồng ý
-                }
-            });
-        });
     });
+}
+
+window.openEditModal            = openEditModal;
+window.handleDelete             = handleDelete;
+window.handleToggleStatus       = handleToggleStatus;
+window.openIconPicker           = openIconPicker;
+window.closeIconPicker          = closeIconPicker;
+window.selectTempIcon           = selectTempIcon;
+window.confirmIconSelection     = confirmIconSelection;
+window.openEditIconPicker       = openEditIconPicker;
+window.closeEditIconPicker      = closeEditIconPicker;
+window.selectEditTempIcon       = selectEditTempIcon;
+window.confirmEditIconSelection = confirmEditIconSelection;
+window.loadCategories           = loadCategories;
+window.closeModal               = closeModal;
+// Gọi ngay lập tức, không chờ DOMContentLoaded
+initPage();
+})();
 </script>
 @endsection

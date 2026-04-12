@@ -49,11 +49,11 @@ Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/dashboard', fn() => view('dashboard')) ->name('dashboard');
     // Transactions
-    Route::get('/transactions', fn() => view('transactions')) ->name('transactions.index');
+    Route::get('/transactions', fn() => view('transactions.index')) ->name('transactions.index');
     // Categories
     Route::get('/categories', fn() => view('categories.index'))->name('categories.index');
     // Budgets
-    Route::get('/wallets', fn() => view('wallets'))->name('wallets.index');
+    Route::get('/budgets', fn() => view('budgets.index'))->name('budgets.index');
     // Profile
     Route::get('/profile', fn() => view('profile.show'))->name('profile.show');
     // Change password

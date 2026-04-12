@@ -54,7 +54,7 @@ class Transaction extends Model
     public function wallet()
     {
         return $this->hasOneThrough(
-            Wallet::class,
+            Budgets::class,
             Category::class,
             'id',
             'category_id',

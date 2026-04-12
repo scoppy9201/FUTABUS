@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Transaction;
 use App\Models\Category;
-use App\Models\Wallet;
+use App\Models\Budgets;
 use Illuminate\Support\Facades\Auth;
 
 class SearchController extends Controller
@@ -58,7 +58,7 @@ class SearchController extends Controller
         }
 
         // Ngân sách
-        $wallets = Wallet::where('user_id', Auth::id())
+        $wallets = Budgets::where('user_id', Auth::id())
             ->where('ten_ngan_sach', 'like', "%{$q}%")
             ->limit(3)
             ->get();
@@ -68,7 +68,7 @@ class SearchController extends Controller
                 'type'  => 'wallet',
                 'label' => $w->ten_ngan_sach,
                 'sub'   => 'Ngân sách · ' . number_format($w->so_du, 0, ',', '.') . 'đ',
-                'url'   => route('wallets.index'),
+                'url'   => route('budgets.index'),
                 'badge' => 'wallet',
             ];
         }

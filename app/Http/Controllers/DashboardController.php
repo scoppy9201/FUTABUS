@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Transaction;
-use App\Models\Wallet;
+use App\Models\Budgets;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -62,7 +62,7 @@ class DashboardController extends Controller
             })
             ->values();
 
-        $warningWallets = Wallet::where('user_id', $userId)
+        $warningWallets = Budgets::where('user_id', $userId)
             ->where('trang_thai', true)
             ->get()
             ->filter(fn($wallet) => $wallet->spent_percentage >= 50)
@@ -97,7 +97,7 @@ class DashboardController extends Controller
             })
             ->values();
 
-        $activeWallets = Wallet::where('user_id', $userId)
+        $activeWallets = Budgets::where('user_id', $userId)
             ->where('trang_thai', true)
             ->with('category')
             ->orderByDesc('ngan_sach_goc')

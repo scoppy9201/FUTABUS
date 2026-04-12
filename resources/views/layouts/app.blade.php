@@ -169,6 +169,7 @@
         pointer-events: none;
     "></div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
             // Small helper for fetch-based REST calls used by legacy Blade views
             window.apiFetch = async function (url, options = {}) {

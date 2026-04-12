@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Quản lý giao dịch')
+@section('title', 'Quản lý ngân sách')
 @section('content')
 <style>
     :root {
@@ -9,26 +9,28 @@
         --danger: #ef4444;
         --warning: #f59e0b;
         --info: #06b6d4;
+        
         --dark-bg: #1a1f29;
         --dark-card: #242936;
         --dark-border: rgba(255, 255, 255, 0.08);
+        
         --gray-100: #f8fafc;
         --gray-200: #e2e8f0;
         --gray-300: #cbd5e0;
         --gray-600: #4a5568;
         --gray-800: #2d3748;
         --gray-900: #1a202c;
+        
         --radius: 12px;
         --radius-sm: 10px;
+        
         --shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         --shadow-lg: 0 8px 20px rgba(0, 0, 0, 0.1);
     }
 
-    /* Dark mode */
     body.dark .page-header,
     body.dark .filter-card,
-    body.dark .table-card,
-    body.dark .stats-grid {
+    body.dark .table-card {
         background: var(--dark-card);
         border-color: var(--dark-border);
     }
@@ -36,7 +38,6 @@
     body.dark .page-title,
     body.dark .filter-title,
     body.dark .table-title,
-    body.dark .stat-card h3,
     body.dark th,
     body.dark td {
         color: #e5e7eb;
@@ -55,19 +56,14 @@
         border-color: var(--primary);
     }
 
+    body.dark .form-label {
+        color: #9ca3af;
+    }
+
     body.dark tbody tr:hover {
         background: rgba(255, 255, 255, 0.03);
     }
 
-    body.dark .stat-card {
-        background: var(--dark-bg);
-    }
-
-    body.dark .stat-value {
-        color: #e5e7eb;
-    }
-
-    /* Layout */
     .page-header {
         display: flex;
         justify-content: space-between;
@@ -103,80 +99,6 @@
         width: 100%;
     }
 
-    /* Stats Grid */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 16px;
-        margin-bottom: 24px;
-    }
-
-    .stat-card {
-        background: white;
-        padding: 20px;
-        border-radius: var(--radius);
-        box-shadow: var(--shadow);
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }
-
-    .stat-icon {
-        width: 56px;
-        height: 56px;
-        border-radius: var(--radius-sm);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 14px;
-    }
-
-    .stat-icon.income {
-        background: linear-gradient(135deg, #10b981, #059669);
-    }
-
-    .stat-icon.expense {
-        background: linear-gradient(135deg, #ef4444, #dc2626);
-    }
-
-    .stat-icon.balance {
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
-    }
-
-    .stat-icon.total {
-        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-    }
-
-    .stat-icon img {
-        width: 100%;
-    }
-
-    .stat-info {
-        flex: 1;
-    }
-
-    .stat-label {
-        font-size: 13px;
-        color: #6b7280;
-        font-weight: 600;
-        margin-bottom: 4px;
-    }
-
-    .stat-value {
-        font-size: 20px;
-        font-weight: 700;
-        color: #1f2937;
-    }
-
-    .stat-value.positive {
-        color: #10b981;
-    }
-
-    .stat-value.negative {
-        color: #ef4444;
-    }
-
-    /* Buttons */
     .btn-primary {
         padding: 10px 20px;
         border-radius: var(--radius-sm);
@@ -199,6 +121,27 @@
 
     .btn-primary img {
         width: 16px;
+    }
+
+    .btn-secondary {
+        background: var(--gray-200);
+        color: #6b7280;
+        border: 2px solid var(--gray-300);
+        padding: 10px 20px;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.2s ease;
+        flex: 1;
+        justify-content: center;
+    }
+
+    .btn-secondary:hover {
+        background: var(--gray-300);
     }
 
     .btn-filter {
@@ -239,7 +182,33 @@
         background: #e5e7eb;
     }
 
-    /* Filter Card */
+    .alert {
+        padding: 14px 18px;
+        border-radius: var(--radius);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .alert img {
+        width: 20px;
+    }
+
+    .alert-success {
+        background: #d1fae5;
+        color: #065f46;
+        border-left: 4px solid var(--success);
+    }
+
+    .alert-error {
+        background: #fee2e2;
+        color: #991b1b;
+        border-left: 4px solid var(--danger);
+    }
+
     .filter-card {
         background: white;
         border-radius: var(--radius);
@@ -262,11 +231,10 @@
         width: 20px;
     }
 
-    /* Filter Form - Compact */
     .filter-form {
         display: grid;
-        grid-template-columns: 1.2fr 0.8fr 0.8fr 0.8fr 0.8fr auto;
-        gap: 12px;
+        grid-template-columns: 1.5fr 1fr 1fr 1fr auto;
+        gap: 16px;
         align-items: flex-end;
     }
 
@@ -277,7 +245,7 @@
     .filter-actions {
         display: flex;
         gap: 8px;
-        min-width: 180px;
+        min-width: 220px;
     }
 
     .form-group {
@@ -294,7 +262,8 @@
     }
 
     .form-control,
-    .form-select {
+    .form-select,
+    .form-textarea {
         padding: 10px 12px;
         border: 2px solid #e5e7eb;
         border-radius: var(--radius-sm);
@@ -306,7 +275,8 @@
     }
 
     .form-control:focus,
-    .form-select:focus {
+    .form-select:focus,
+    .form-textarea:focus {
         outline: none;
         border-color: var(--primary);
         background: white;
@@ -323,7 +293,6 @@
         margin-left: 2px;
     }
 
-    /* Table */
     .table-card {
         background: white;
         border-radius: var(--radius);
@@ -374,19 +343,19 @@
         width: 14px;
     }
 
-    .stat-badge.income {
+    .stat-badge.total {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .stat-badge.active {
         background: #d1fae5;
         color: #065f46;
     }
 
-    .stat-badge.expense {
+    .stat-badge.inactive {
         background: #fee2e2;
         color: #991b1b;
-    }
-
-    .stat-badge.total {
-        background: #dbeafe;
-        color: #1e40af;
     }
 
     .table-wrapper {
@@ -417,13 +386,25 @@
         white-space: nowrap;
     }
 
+    body.dark th {
+        color: #9ca3af !important;
+    }
+
     tbody tr {
         border-bottom: 1px solid #f3f4f6;
         transition: background 0.2s ease;
     }
 
+    body.dark tbody tr {
+        border-bottom-color: rgba(255, 255, 255, 0.05);
+    }
+
     tbody tr:hover {
         background: #f9fafb;
+    }
+
+    body.dark tbody tr:hover {
+        background: rgba(255, 255, 255, 0.03);
     }
 
     td {
@@ -432,13 +413,17 @@
         color: #374151;
     }
 
-    .transaction-info {
+    body.dark td {
+        color: #e5e7eb;
+    }
+
+    .wallet-name {
         display: flex;
         align-items: center;
         gap: 12px;
     }
 
-    .transaction-icon {
+    .wallet-icon {
         width: 40px;
         height: 40px;
         border-radius: var(--radius-sm);
@@ -446,46 +431,124 @@
         align-items: center;
         justify-content: center;
         padding: 8px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     }
 
-    .transaction-icon.income {
-        background: #d1fae5;
-    }
-
-    .transaction-icon.expense {
-        background: #fee2e2;
-    }
-
-    .transaction-icon img {
+    .wallet-icon img {
         width: 100%;
     }
 
-    .transaction-details {
-        flex: 1;
+    .btn-sync {
+        background: #fef3c7; 
+        border: 2px solid #f59e0b;
     }
 
-    .transaction-category {
-        font-weight: 600;
-        color: #1f2937;
-        margin-bottom: 2px;
+    .btn-sync:hover {
+        background: #f59e0b;
     }
 
-    .transaction-desc {
+    .budget-info {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 250px;
+    }
+
+    .budget-amounts {
+        display: flex;
+        justify-content: space-between;
         font-size: 12px;
         color: #6b7280;
+        margin-bottom: 4px;
     }
 
-    .amount {
+    .budget-spent {
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    body.dark .budget-spent {
+        color: #e5e7eb;
+    }
+
+    .budget-limit {
+        color: #9ca3af;
+    }
+
+    .progress-bar {
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    body.dark .progress-bar {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .progress-fill {
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.3s ease, background 0.3s ease;
+        position: relative;
+    }
+
+    .progress-fill.low {
+        background: linear-gradient(90deg, var(--success), #34d399);
+    }
+
+    .progress-fill.medium {
+        background: linear-gradient(90deg, var(--warning), #fbbf24);
+    }
+
+    .progress-fill.high {
+        background: linear-gradient(90deg, var(--danger), #f87171);
+    }
+
+    .progress-fill.over {
+        background: linear-gradient(90deg, #dc2626, #991b1b);
+    }
+
+    .progress-percentage {
+        font-size: 11px;
         font-weight: 700;
-        font-size: 15px;
+        color: #6b7280;
+        margin-top: 4px;
     }
 
-    .amount.income {
-        color: #10b981;
+    body.dark .progress-percentage {
+        color: #9ca3af;
     }
 
-    .amount.expense {
-        color: #ef4444;
+    .budget-status {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 12px;
+    }
+
+    .budget-status.safe {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .budget-status.warning {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .budget-status.danger {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .budget-status.over {
+        background: #7f1d1d;
+        color: white;
     }
 
     .badge {
@@ -500,17 +563,30 @@
         letter-spacing: 0.3px;
     }
 
-    .badge-income {
-        background: var(--success);
-        color: white;
+    .badge-active {
+        background: #d1fae5;
+        color: #065f46;
     }
 
-    .badge-expense {
-        background: var(--danger);
-        color: white;
+    .badge-inactive {
+        background: #fee2e2;
+        color: #991b1b;
     }
 
-    /* Action Buttons */
+    .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+    }
+
+    .status-dot.active {
+        background: #059669;
+    }
+
+    .status-dot.inactive {
+        background: #dc2626;
+    }
+
     .action-buttons {
         display: flex;
         gap: 6px;
@@ -533,6 +609,15 @@
         width: 100%;
     }
 
+    .btn-toggle {
+        background: #fef3c7;
+        border: 2px solid var(--warning);
+    }
+
+    .btn-toggle:hover {
+        background: var(--warning);
+    }
+
     .btn-edit {
         background: #dbeafe;
         border: 2px solid var(--info);
@@ -551,7 +636,6 @@
         background: var(--danger);
     }
 
-    /* Empty State */
     .empty-state {
         text-align: center;
         padding: 60px 20px;
@@ -586,7 +670,6 @@
         margin-bottom: 24px;
     }
 
-    /* Pagination */
     .pagination-wrapper {
         padding: 20px 24px;
         border-top: 1px solid #f3f4f6;
@@ -638,7 +721,12 @@
         color: white;
     }
 
-    /* Modal */
+    .pagination .disabled span {
+        background: #f9fafb;
+        color: #d1d5db;
+        cursor: not-allowed;
+    }
+
     .modal-overlay {
         position: fixed;
         inset: 0;
@@ -671,10 +759,6 @@
         overflow: hidden;
     }
 
-    body.dark .modal-content {
-        background: var(--dark-card);
-    }
-
     .modal-header {
         padding: 24px 32px;
         background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
@@ -690,6 +774,18 @@
         align-items: center;
         gap: 12px;
         color: white;
+    }
+
+    .modal-title .page-icon {
+        width: 36px;
+        height: 36px;
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;
     }
 
     .modal-close {
@@ -719,7 +815,84 @@
         flex: 1;
     }
 
-    .modal-actions {
+    .form-group-compact {
+        margin-bottom: 20px;
+    }
+
+    .form-group-compact:last-child {
+        margin-bottom: 0;
+    }
+
+    .form-group-compact .form-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .form-group-compact .form-label strong {
+        color: #1f2937;
+    }
+
+    .form-help-compact {
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 6px;
+        display: flex;
+        align-items: flex-start;
+        gap: 6px;
+        line-height: 1.4;
+    }
+
+    .form-help-compact::before {
+        content: "💡";
+        font-size: 14px;
+    }
+
+    /* Budget Status Badges */
+    .budget-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .budget-status img {
+        width: 16px;
+        height: 16px;
+        object-fit: contain;
+    }
+
+    .budget-status.over {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fca5a5;
+    }
+
+    .budget-status.danger {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fcd34d;
+    }
+
+    .budget-status.warning {
+        background: #fef3c7;
+        color: #b45309;
+        border: 1px solid #fbbf24;
+    }
+
+    .budget-status.safe {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #6ee7b7;
+    }
+
+    .modal-actions-fixed {
         padding: 20px 32px;
         background: white;
         border-top: 1px solid #e5e7eb;
@@ -727,63 +900,42 @@
         gap: 12px;
     }
 
-    body.dark .modal-actions {
+    .modal-actions-fixed .btn-primary,
+    .modal-actions-fixed .btn-secondary {
+        flex: 1;
+        min-height: 44px;
+        font-size: 14px;
+        border-radius: 8px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s ease;
+    }
+
+    body.dark .modal-content {
+        background: var(--dark-card);
+    }
+
+    body.dark .modal-body {
+        background: var(--dark-card);
+    }
+
+    body.dark .modal-actions-fixed {
         background: var(--dark-card);
         border-top-color: var(--dark-border);
     }
 
-    .btn-secondary {
-        background: #f3f4f6;
-        border: 2px solid #e5e7eb;
-        color: #4b5563;
-        padding: 12px 24px;
-        border-radius: var(--radius-sm);
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        flex: 1;
-        transition: background 0.2s ease;
+    body.dark .form-group-compact .form-label {
+        color: #9ca3af;
     }
 
-    .btn-secondary:hover {
-        background: #e5e7eb;
+    body.dark .form-group-compact .form-label strong {
+        color: #e5e7eb;
     }
 
-    .modal-actions .btn-primary {
-        flex: 1;
-        justify-content: center;
-        padding: 12px 24px;
-    }
-
-    /* Alert */
-    .alert {
-        padding: 14px 18px;
-        border-radius: var(--radius);
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        font-size: 14px;
-        font-weight: 500;
-    }
-
-    .alert img {
-        width: 20px;
-    }
-
-    .alert-success {
-        background: #d1fae5;
-        color: #065f46;
-        border-left: 4px solid var(--success);
-    }
-
-    .alert-error {
-        background: #fee2e2;
-        color: #991b1b;
-        border-left: 4px solid var(--danger);
-    }
-
-    /* Responsive */
     @media (max-width: 1024px) {
         .filter-form {
             grid-template-columns: 1fr 1fr;
@@ -794,27 +946,22 @@
             width: 100%;
         }
 
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
+        table {
+            min-width: 1000px;
         }
     }
 
     @media (max-width: 768px) {
-        .stats-grid {
-            grid-template-columns: 1fr;
+        .modal-content {
+            max-width: 96%;
         }
 
-        .page-header {
-            flex-direction: column;
-            align-items: flex-start;
+        .modal-header {
+            padding: 20px 24px;
         }
 
-        .table-wrapper {
-            overflow-x: scroll;
-        }
-
-        table {
-            min-width: 900px;
+        .modal-body {
+            padding: 24px 28px;
         }
     }
 
@@ -822,25 +969,6 @@
         .filter-form {
             grid-template-columns: 1fr;
         }
-
-        .filter-actions {
-            flex-direction: column;
-        }
-
-        .btn-filter {
-            width: 100%;
-        }
-    }
-    body.dark .transaction-category {
-    color: #e5e7eb; 
-    }
-
-    body.dark .transaction-desc {
-        color: #9ca3af; 
-    }
-
-    body.dark td {
-        color: #e5e7eb;
     }
 
         /* ── Fix Laravel Pagination ── */
@@ -911,26 +1039,23 @@
     }
 </style>
 
-<div class="transaction-container">
+<div class="wallet-container">
     <!-- Page Header -->
     <div class="page-header">
         <div class="page-title">
             <div class="page-icon">
-                <img src="{{ asset('images/transaction.png') }}" alt="Transaction">
+                <img src="{{ asset('images/asset-allocation.png') }}" alt="Wallet">
             </div>
-            <span>Quản lý giao dịch</span>
+            <span>Quản lý ngân sách</span>
         </div>
         <button type="button" class="btn-primary" id="open-create-modal">
             <img src="{{ asset('images/plus.png') }}" alt="Add">
-            Thêm giao dịch
+            Thêm ngân sách
         </button>
     </div>
 
     <!-- Toast -->
     <div id="toast" class="alert" style="display:none;"></div>
-
-    <!-- Stats -->
-    <div class="stats-grid" id="stats-grid" style="display:none;"></div>
 
     <!-- Filter -->
     <div class="filter-card">
@@ -941,29 +1066,29 @@
         <div class="filter-form">
             <div class="form-group">
                 <label class="form-label">Tìm kiếm</label>
-                <input type="text" id="filter-search" class="form-control" placeholder="Nhập tên hoặc loại giao dịch...">
+                <input type="text" id="filter-search" class="form-control" placeholder="Nhập tên ngân sách...">
             </div>
             <div class="form-group">
                 <label class="form-label">Danh mục</label>
-                <select id="filter-danh-muc" class="form-select">
+                <select id="filter-category" class="form-select">
                     <option value="">Tất cả danh mục</option>
                 </select>
             </div>
             <div class="form-group">
-                <label class="form-label">Loại</label>
-                <select id="filter-loai" class="form-select">
+                <label class="form-label">Trạng thái</label>
+                <select id="filter-status" class="form-select">
                     <option value="">Tất cả</option>
-                    <option value="THU">Thu</option>
-                    <option value="CHI">Chi</option>
+                    <option value="1">Hoạt động</option>
+                    <option value="0">Vô hiệu hóa</option>
                 </select>
             </div>
             <div class="form-group">
-                <label class="form-label">Từ ngày</label>
-                <input type="date" id="filter-tu-ngay" class="form-control">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Đến ngày</label>
-                <input type="date" id="filter-den-ngay" class="form-control">
+                <label class="form-label">Sắp xếp</label>
+                <select id="filter-sort" class="form-select">
+                    <option value="created_at">Ngày tạo</option>
+                    <option value="ten_ngan_sach">Tên ngân sách</option>
+                    <option value="ngan_sach_goc">Hạn mức</option>
+                </select>
             </div>
             <div class="filter-actions">
                 <button type="button" class="btn-filter btn-search" id="btn-search">
@@ -980,7 +1105,7 @@
     <div class="table-card">
         <div class="table-header">
             <h3 class="table-title">
-                <img src="{{ asset('images/list.png') }}" alt="List"> Danh sách giao dịch
+                <img src="{{ asset('images/list.png') }}" alt="List"> Danh sách ngân sách
             </h3>
             <div class="table-stats" id="table-stats"></div>
         </div>
@@ -995,14 +1120,15 @@
                     <thead>
                         <tr>
                             <th style="width:50px;">#</th>
-                            <th>Danh mục & Mô tả</th>
-                            <th style="width:100px;">Loại</th>
-                            <th style="width:150px;">Số tiền</th>
-                            <th style="width:120px;">Ngày giao dịch</th>
-                            <th style="width:100px;">Thao tác</th>
+                            <th>Tên ngân sách</th>
+                            <th>Danh mục</th>
+                            <th style="min-width:280px;">Tiến độ sử dụng</th>
+                            <th>Hạn mức</th>
+                            <th>Trạng thái</th>
+                            <th style="width:160px;">Thao tác</th>
                         </tr>
                     </thead>
-                    <tbody id="transactions-tbody"></tbody>
+                    <tbody id="wallets-tbody"></tbody>
                 </table>
             </div>
             <div class="pagination-wrapper">
@@ -1015,34 +1141,37 @@
             <div class="empty-icon">
                 <img src="{{ asset('images/empty-folder.png') }}" alt="Empty">
             </div>
-            <h3>Chưa có giao dịch nào</h3>
-            <p>Hãy thêm giao dịch đầu tiên để bắt đầu theo dõi thu chi</p>
+            <h3>Chưa có ngân sách nào</h3>
+            <p>Hãy tạo ngân sách đầu tiên để quản lý chi tiêu hiệu quả</p>
             <button type="button" class="btn-primary" id="empty-add-btn">
-                <img src="{{ asset('images/plus.png') }}" alt="Add"> Thêm giao dịch đầu tiên
+                <img src="{{ asset('images/plus.png') }}" alt="Add"> Thêm ngân sách đầu tiên
             </button>
         </div>
     </div>
 
-    @include('transactions._modal_create')
-    @include('transactions._modal_edit')
+    @include('budgets._modal_create')
+    @include('budgets._modal_edit')
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 (function () {
 
-var API_BASE = '/api/v1/transactions';
+var API_BASE = '/api/v1/budgets';
 
-let currentPage    = 1;
-let searchTimeout  = null;
-let allCategories  = [];
-let allWallets     = [];
+let currentPage   = 1;
+let searchTimeout = null;
+let allCategories = [];
 
 /* HELPERS */
 function escHtml(s) {
     return (s ?? '').toString().replace(/[&<>"']/g, c =>
         ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])
     );
+}
+
+function formatMoney(n) {
+    return parseInt(n).toLocaleString('vi-VN') + 'đ';
 }
 
 function showToast(msg, type = 'success') {
@@ -1056,10 +1185,6 @@ function showToast(msg, type = 'success') {
         el.style.opacity = '0';
         setTimeout(() => { el.style.display = 'none'; }, 300);
     }, 4000);
-}
-
-function formatMoney(n) {
-    return parseInt(n).toLocaleString('vi-VN') + 'đ';
 }
 
 /* API */
@@ -1084,21 +1209,19 @@ async function api(method, url, body = null) {
 function getFilters(page = 1) {
     const p = new URLSearchParams();
     const search   = document.getElementById('filter-search').value.trim();
-    const danhMuc  = document.getElementById('filter-danh-muc').value;
-    const loai     = document.getElementById('filter-loai').value;
-    const tuNgay   = document.getElementById('filter-tu-ngay').value;
-    const denNgay  = document.getElementById('filter-den-ngay').value;
-    if (search)   p.set('search',      search);
-    if (danhMuc)  p.set('danh_muc_id', danhMuc);
-    if (loai)     p.set('loai',        loai);
-    if (tuNgay)   p.set('tu_ngay',     tuNgay);
-    if (denNgay)  p.set('den_ngay',    denNgay);
-    p.set('page', page);
+    const category = document.getElementById('filter-category').value;
+    const status   = document.getElementById('filter-status').value;
+    const sort     = document.getElementById('filter-sort').value;
+    if (search)        p.set('search',      search);
+    if (category)      p.set('category_id', category);
+    if (status !== '') p.set('trang_thai',  status);
+    p.set('sort_by', sort);
+    p.set('page',    page);
     return p.toString();
 }
 
 /* LOAD */
-async function loadTransactions(page = 1) {
+async function loadWallets(page = 1) {
     currentPage = page;
     document.getElementById('table-loading').style.display = 'block';
     document.getElementById('table-body').style.display    = 'none';
@@ -1106,15 +1229,13 @@ async function loadTransactions(page = 1) {
 
     try {
         const data = await api('GET', `${API_BASE}?${getFilters(page)}`);
-
         allCategories = data.categories ?? [];
-        allWallets    = data.wallets    ?? [];
-
-        renderTable(data.transactions);
-        renderStats(data.totalIncome, data.totalExpense, data.transactions.total);
+        renderTable(data.wallets);
+        renderStats(data.wallets);
         renderCategoryFilter(allCategories);
+        renderCategoryOptions(allCategories);
     } catch {
-        showToast('Không thể tải danh sách giao dịch.', 'error');
+        showToast('Không thể tải danh sách ngân sách.', 'error');
     } finally {
         document.getElementById('table-loading').style.display = 'none';
     }
@@ -1129,58 +1250,85 @@ function renderTable(p) {
     document.getElementById('table-body').style.display = 'block';
     const offset = p.from ?? 1;
 
-    document.getElementById('transactions-tbody').innerHTML = p.data.map((t, i) => `
+    document.getElementById('wallets-tbody').innerHTML = p.data.map((w, i) => {
+        const pct      = w.spent_percentage ?? 0;
+        const fillClass = pct > 100 ? 'over' : pct >= 80 ? 'high' : pct >= 50 ? 'medium' : 'low';
+        const statusClass = w.is_over_budget ? 'over' : pct >= 80 ? 'danger' : pct >= 50 ? 'warning' : 'safe';
+        const statusLabel = w.is_over_budget ? 'Vượt mức' : pct >= 80 ? 'Sắp hết' : pct >= 50 ? 'Cảnh báo' : 'An toàn';
+        const statusIcon  = w.is_over_budget ? 'warning' : pct >= 80 ? 'alert' : pct >= 50 ? 'caution' : 'check';
+
+        return `
         <tr>
             <td>${offset + i}</td>
             <td>
-                <div class="transaction-info">
-                    <div class="transaction-icon ${t.loai_giao_dich === 'THU' ? 'income' : 'expense'}">
-                        <img src="/images/category-icons/${escHtml(t.category?.bieu_tuong ?? 'money.png')}" alt="icon">
+                <div class="wallet-name">
+                    <div class="wallet-icon">
+                        <img src="/images/category-icons/${escHtml(w.category?.bieu_tuong ?? 'money.png')}" alt="icon">
                     </div>
-                    <div class="transaction-details">
-                        <div class="transaction-category">${escHtml(t.category?.ten_danh_muc ?? '')}</div>
-                        <div class="transaction-desc">${escHtml(t.ghi_chu ?? 'Không có ghi chú')}</div>
+                    <div>
+                        <strong>${escHtml(w.ten_ngan_sach)}</strong>
+                        ${w.mo_ta ? `<div style="font-size:12px;color:#9ca3af;margin-top:2px;">${escHtml(w.mo_ta.substring(0,40))}${w.mo_ta.length > 40 ? '…' : ''}</div>` : ''}
+                    </div>
+                </div>
+            </td>
+            <td>${escHtml(w.category?.ten_danh_muc ?? '---')}</td>
+            <td>
+                <div class="budget-info">
+                    <div class="budget-amounts">
+                        <span class="budget-spent">Đã chi: ${formatMoney(w.spent_amount ?? 0)}</span>
+                        <span class="budget-limit">/ ${formatMoney(w.ngan_sach_goc)}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill ${fillClass}" style="width:${Math.min(pct, 100)}%"></div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <div class="progress-percentage">${parseFloat(pct).toFixed(1)}%</div>
+                        <div class="budget-status ${statusClass}">
+                            <img src="/images/${statusIcon}.png" alt="${statusLabel}">
+                            ${statusLabel}
+                        </div>
                     </div>
                 </div>
             </td>
             <td>
-                <span class="badge badge-${t.loai_giao_dich === 'THU' ? 'income' : 'expense'}">
-                    ${escHtml(t.loai_giao_dich)}
-                </span>
+                <div style="font-weight:600;">${formatMoney(w.ngan_sach_goc)}</div>
+                <div style="font-size:12px;color:#9ca3af;">Còn: ${formatMoney(w.so_du)}</div>
             </td>
             <td>
-                <span class="amount ${t.loai_giao_dich === 'THU' ? 'income' : 'expense'}">
-                    ${t.loai_giao_dich === 'THU' ? '+' : '-'}${formatMoney(t.so_tien)}
+                <span class="badge badge-${w.trang_thai ? 'active' : 'inactive'}">
+                    <span class="status-dot ${w.trang_thai ? 'active' : 'inactive'}"></span>
+                    ${w.trang_thai ? 'Hoạt động' : 'Vô hiệu hóa'}
                 </span>
             </td>
-            <td>${formatDate(t.ngay_giao_dich)}</td>
             <td>
                 <div class="action-buttons">
+                    <button type="button" class="btn-action btn-sync"
+                        onclick="handleSync(${w.id})" title="Đồng bộ số dư">
+                        <img src="/images/refresh.png" alt="Sync">
+                    </button>
+                    <button type="button" class="btn-action btn-toggle"
+                        onclick="handleToggle(${w.id})"
+                        title="${w.trang_thai ? 'Vô hiệu hóa' : 'Kích hoạt'}">
+                        <img src="/images/${w.trang_thai ? 'lock' : 'unlock'}.png" alt="toggle">
+                    </button>
                     <button type="button" class="btn-action btn-edit"
-                        onclick='openEditModal(${JSON.stringify(t)})'
+                        onclick='openEditModal(${JSON.stringify(w)})'
                         title="Chỉnh sửa">
                         <img src="/images/edit.png" alt="edit">
                     </button>
                     <button type="button" class="btn-action btn-delete"
-                        onclick="handleDelete(${t.id})"
+                        onclick="handleDelete(${w.id})"
                         title="Xóa">
                         <img src="/images/delete.png" alt="delete">
                     </button>
                 </div>
             </td>
-        </tr>
-    `).join('');
+        </tr>`;
+    }).join('');
 
     document.getElementById('pagination-info').textContent =
         `Hiển thị ${p.from ?? 0} - ${p.to ?? 0} / ${p.total} kết quả`;
-
     renderPagination(p);
-}
-
-function formatDate(dateStr) {
-    if (!dateStr) return '';
-    const d = new Date(dateStr);
-    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 }
 
 function renderPagination(p) {
@@ -1189,69 +1337,66 @@ function renderPagination(p) {
     const last = p.last_page;
     let html   = '<div style="display:flex;gap:6px;">';
     if (cur > 1)
-        html += `<button class="btn-filter btn-reset" style="min-width:36px;padding:0 10px;height:36px;" onclick="loadTransactions(${cur-1})">‹</button>`;
+        html += `<button class="btn-filter btn-reset" style="min-width:36px;padding:0 10px;height:36px;" onclick="loadWallets(${cur-1})">‹</button>`;
     for (let i = Math.max(1, cur-2); i <= Math.min(last, cur+2); i++)
-        html += `<button class="btn-filter ${i===cur?'btn-search':'btn-reset'}" style="min-width:36px;padding:0 10px;height:36px;" onclick="loadTransactions(${i})">${i}</button>`;
+        html += `<button class="btn-filter ${i===cur?'btn-search':'btn-reset'}" style="min-width:36px;padding:0 10px;height:36px;" onclick="loadWallets(${i})">${i}</button>`;
     if (cur < last)
-        html += `<button class="btn-filter btn-reset" style="min-width:36px;padding:0 10px;height:36px;" onclick="loadTransactions(${cur+1})">›</button>`;
+        html += `<button class="btn-filter btn-reset" style="min-width:36px;padding:0 10px;height:36px;" onclick="loadWallets(${cur+1})">›</button>`;
     html += '</div>';
     el.innerHTML = html;
 }
 
-function renderStats(income, expense, total) {
+function renderStats(p) {
+    const active   = p.data.filter(w => w.trang_thai).length;
+    const inactive = p.data.filter(w => !w.trang_thai).length;
     document.getElementById('table-stats').innerHTML = `
-        <span class="stat-badge income"><img src="/images/arrows.png" alt=""> Thu: ${formatMoney(income)}</span>
-        <span class="stat-badge expense"><img src="/images/down.png" alt=""> Chi: ${formatMoney(expense)}</span>
-        <span class="stat-badge total"><img src="/images/chart.png" alt=""> Tổng: ${total}</span>
+        <span class="stat-badge total"><img src="/images/chart.png" alt=""> Tổng: ${p.total}</span>
+        <span class="stat-badge active"><img src="/images/check.png" alt=""> Hoạt động: ${active}</span>
+        <span class="stat-badge inactive"><img src="/images/lock.png" alt=""> Vô hiệu: ${inactive}</span>
     `;
 }
 
 function renderCategoryFilter(categories) {
-    const el = document.getElementById('filter-danh-muc');
+    const el  = document.getElementById('filter-category');
     const val = el.value;
-    el.innerHTML = '<option value="">Tất cả danh mục</option>';
+    el.innerHTML = '<option value="">Tất cả danh mục</option>' +
+        categories.map(c => `<option value="${c.id}" ${c.id == val ? 'selected':''}>${escHtml(c.ten_danh_muc)}</option>`).join('');
+}
 
-    const thu = categories.filter(c => c.loai_danh_muc === 'THU');
-    const chi = categories.filter(c => c.loai_danh_muc === 'CHI');
-
-    if (thu.length) {
-        el.innerHTML += '<optgroup label="Thu nhập">' +
-            thu.map(c => `<option value="${c.id}" ${c.id == val ? 'selected':''}>${escHtml(c.ten_danh_muc)}</option>`).join('') +
-            '</optgroup>';
-    }
-    if (chi.length) {
-        el.innerHTML += '<optgroup label="Chi tiêu">' +
-            chi.map(c => `<option value="${c.id}" ${c.id == val ? 'selected':''}>${escHtml(c.ten_danh_muc)}</option>`).join('') +
-            '</optgroup>';
-    }
+function renderCategoryOptions(categories) {
+    ['create-category', 'edit-category'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const val = el.value;
+        el.innerHTML = '<option value="">-- Chọn danh mục --</option>' +
+            categories.map(c => `<option value="${c.id}" ${c.id == val ? 'selected':''}>${escHtml(c.ten_danh_muc)} (Chi)</option>`).join('');
+    });
 }
 
 /* CREATE */
 async function handleCreate(e) {
     e.preventDefault();
-    const form = e.target;
-    const amountDisplay = form.querySelector('.amount-display');
-    const amountHidden  = form.querySelector('[name="so_tien"]');
-    if (amountDisplay) amountHidden.value = amountDisplay.value.replace(/\D/g, '');
+    clearFormErrors('create');
+    const form   = e.target;
+    const amount = form.querySelector('.amount-display')?.value.replace(/\D/g, '') ?? '';
+    form.querySelector('[name="ngan_sach_goc"]').value = amount;
 
     const body = {
-        loai_giao_dich:         form.querySelector('[name="loai_giao_dich"]').value,
-        phuong_thuc_thanh_toan: form.querySelector('[name="phuong_thuc_thanh_toan"]').value,
-        category_id:            form.querySelector('[name="category_id"]').value,
-        so_tien:                amountHidden.value,
-        ngay_giao_dich:         form.querySelector('[name="ngay_giao_dich"]').value,
-        ghi_chu:                form.querySelector('[name="ghi_chu"]').value,
-        money_wallet_id:        form.querySelector('[name="money_wallet_id"]').value || null,
+        ten_ngan_sach: form.querySelector('[name="ten_ngan_sach"]').value,
+        category_id:   form.querySelector('[name="category_id"]').value,
+        ngan_sach_goc: amount,
+        mo_ta:         form.querySelector('[name="mo_ta"]').value,
     };
 
     try {
         await api('POST', API_BASE, body);
-        showToast('Thêm giao dịch thành công!');
+        showToast('Thêm ngân sách thành công!');
         document.getElementById('create-modal').classList.remove('active');
         form.reset();
-        loadTransactions(currentPage);
+        form.querySelector('.amount-display').value = '';
+        loadWallets(currentPage);
     } catch (err) {
-        if (err.errors) showFormErrors(err.errors, 'create');
+        if (err.errors)  showFormErrors(err.errors, 'create');
         if (err.message) showToast(err.message, 'error');
     }
 }
@@ -1259,29 +1404,26 @@ async function handleCreate(e) {
 /* UPDATE */
 async function handleUpdate(e) {
     e.preventDefault();
-    const form = e.target;
-    const id   = form.dataset.id;
-    const amountDisplay = form.querySelector('.amount-display');
-    const amountHidden  = form.querySelector('[name="so_tien"]');
-    if (amountDisplay) amountHidden.value = amountDisplay.value.replace(/\D/g, '');
+    clearFormErrors('edit');
+    const form   = e.target;
+    const id     = form.dataset.id;
+    const amount = form.querySelector('.amount-display')?.value.replace(/\D/g, '') ?? '';
+    form.querySelector('[name="ngan_sach_goc"]').value = amount;
 
     const body = {
-        loai_giao_dich:         form.querySelector('[name="loai_giao_dich"]').value,
-        phuong_thuc_thanh_toan: form.querySelector('[name="phuong_thuc_thanh_toan"]').value,
-        category_id:            form.querySelector('[name="category_id"]').value,
-        so_tien:                amountHidden.value,
-        ngay_giao_dich:         form.querySelector('[name="ngay_giao_dich"]').value,
-        ghi_chu:                form.querySelector('[name="ghi_chu"]').value,
-        money_wallet_id:        form.querySelector('[name="money_wallet_id"]').value || null,
+        ten_ngan_sach: form.querySelector('[name="ten_ngan_sach"]').value,
+        category_id:   form.querySelector('[name="category_id"]').value,
+        ngan_sach_goc: amount,
+        mo_ta:         form.querySelector('[name="mo_ta"]').value,
     };
 
     try {
         await api('PATCH', `${API_BASE}/${id}`, body);
-        showToast('Cập nhật giao dịch thành công!');
+        showToast('Cập nhật ngân sách thành công!');
         document.getElementById('edit-modal').classList.remove('active');
-        loadTransactions(currentPage);
+        loadWallets(currentPage);
     } catch (err) {
-        if (err.errors) showFormErrors(err.errors, 'edit');
+        if (err.errors)  showFormErrors(err.errors, 'edit');
         if (err.message) showToast(err.message, 'error');
     }
 }
@@ -1297,68 +1439,65 @@ function handleDelete(id) {
         if (!r.isConfirmed) return;
         try {
             await api('DELETE', `${API_BASE}/${id}`);
-            showToast('Xóa giao dịch thành công!');
-            loadTransactions(currentPage);
+            showToast('Xóa ngân sách thành công!');
+            loadWallets(currentPage);
         } catch (err) {
-            showToast(err.message ?? 'Không thể xóa giao dịch.', 'error');
+            showToast(err.message ?? 'Không thể xóa ngân sách.', 'error');
         }
     });
 }
 
-/* EDIT MODAL */
-function openEditModal(t) {
-    const form = document.getElementById('edit-form');
-    form.dataset.id = t.id;
-
-    form.querySelector('[name="loai_giao_dich"]').value         = t.loai_giao_dich;
-    form.querySelector('[name="phuong_thuc_thanh_toan"]').value = t.phuong_thuc_thanh_toan;
-    form.querySelector('[name="ngay_giao_dich"]').value         = t.ngay_giao_dich;
-    form.querySelector('[name="ghi_chu"]').value                = t.ghi_chu ?? '';
-    form.querySelector('[name="money_wallet_id"]').value        = t.money_wallet_id ?? '';
-
-    // Set amount
-    const amountDisplay = form.querySelector('.amount-display');
-    const amountHidden  = form.querySelector('[name="so_tien"]');
-    if (amountDisplay) {
-        amountDisplay.value = parseInt(t.so_tien).toLocaleString('vi-VN');
-        amountHidden.value  = t.so_tien;
+/* TOGGLE STATUS */
+async function handleToggle(id) {
+    try {
+        const data = await api('PATCH', `${API_BASE}/${id}/status`);
+        showToast(data.message ?? 'Cập nhật trạng thái thành công!');
+        loadWallets(currentPage);
+    } catch (err) {
+        showToast(err.message ?? 'Có lỗi xảy ra.', 'error');
     }
+}
 
-    // Filter categories by type then set value
-    filterCategoriesByType('edit');
+/* SYNC BALANCE */
+async function handleSync(id) {
+    const confirmed = await Swal.fire({
+        title: 'Đồng bộ số dư?',
+        text: 'Tính lại số dư dựa trên tất cả giao dịch?',
+        icon: 'question', showCancelButton: true,
+        confirmButtonText: 'Đồng bộ', cancelButtonText: 'Hủy',
+        background: '#1E2937', confirmButtonColor: '#4a90e2', cancelButtonColor: '#6b6c80',
+    });
+    if (!confirmed.isConfirmed) return;
+
+    try {
+        const data = await api('POST', `${API_BASE}/${id}/sync`);
+        showToast(data.message ?? 'Đồng bộ thành công!');
+        loadWallets(currentPage);
+    } catch (err) {
+        showToast(err.message ?? 'Có lỗi xảy ra.', 'error');
+    }
+}
+
+/* EDIT MODAL */
+function openEditModal(w) {
+    const form = document.getElementById('edit-form');
+    form.dataset.id = w.id;
+    form.querySelector('[name="ten_ngan_sach"]').value = w.ten_ngan_sach ?? '';
+    form.querySelector('[name="mo_ta"]').value         = w.mo_ta ?? '';
+
+    // Amount
+    const display = form.querySelector('.amount-display');
+    const hidden  = form.querySelector('[name="ngan_sach_goc"]');
+    if (display) display.value = parseInt(w.ngan_sach_goc).toLocaleString('vi-VN');
+    if (hidden)  hidden.value  = w.ngan_sach_goc;
+
+    // Category
+    renderCategoryOptions(allCategories);
     setTimeout(() => {
-        form.querySelector('[name="category_id"]').value = t.category_id;
+        form.querySelector('[name="category_id"]').value = w.category_id;
     }, 50);
 
-    // Render wallet options
-    renderWalletOptions('edit-wallet', t.money_wallet_id);
-
     document.getElementById('edit-modal').classList.add('active');
-}
-
-function renderWalletOptions(selectId, selectedId = null) {
-    const el = document.getElementById(selectId);
-    if (!el) return;
-    el.innerHTML = '<option value="">-- Không chọn ví (tùy chọn) --</option>' +
-        allWallets.map(w => `<option value="${w.id}" ${w.id == selectedId ? 'selected' : ''}>${escHtml(w.ten_ngan_sach ?? w.ten_vi ?? '')}</option>`).join('');
-}
-
-function filterCategoriesByType(prefix = 'create') {
-    const loaiEl    = document.getElementById(`${prefix}-loai-giao-dich`);
-    const catEl     = document.getElementById(`${prefix}-category`);
-    if (!loaiEl || !catEl) return;
-
-    const loai = loaiEl.value;
-    catEl.innerHTML = '<option value="">-- Chọn danh mục --</option>';
-
-    if (loai) {
-        allCategories.filter(c => c.loai_danh_muc === loai).forEach(c => {
-            const opt = document.createElement('option');
-            opt.value = c.id;
-            opt.textContent = c.ten_danh_muc;
-            catEl.appendChild(opt);
-        });
-    }
 }
 
 /* FORM ERRORS */
@@ -1368,25 +1507,21 @@ function showFormErrors(errors, prefix) {
         if (el) { el.textContent = errors[field][0]; el.style.display = 'block'; }
     });
 }
-
 function clearFormErrors(prefix) {
     document.querySelectorAll(`[id^="${prefix}-error-"]`).forEach(el => {
         el.textContent = ''; el.style.display = 'none';
     });
 }
 
-/* CURRENCY INPUT */
-function setupAmountInput(displayId, hiddenName, form) {
+/* AMOUNT INPUT */
+function setupAmountInput(displayId, form) {
     const display = document.getElementById(displayId);
     if (!display) return;
-
     display.addEventListener('focus', () => {
         display.value = display.value.replace(/\D/g, '');
     });
     display.addEventListener('blur', () => {
         const num = parseInt(display.value.replace(/\D/g, '')) || 0;
-        const hidden = form.querySelector(`[name="${hiddenName}"]`);
-        if (hidden) hidden.value = num;
         display.value = num ? num.toLocaleString('vi-VN') : '';
     });
     display.addEventListener('keypress', e => {
@@ -1396,21 +1531,20 @@ function setupAmountInput(displayId, hiddenName, form) {
 
 /* INIT */
 function initPage() {
-    loadTransactions();
+    loadWallets();
 
-    document.getElementById('btn-search').addEventListener('click', () => loadTransactions(1));
+    document.getElementById('btn-search').addEventListener('click', () => loadWallets(1));
     document.getElementById('btn-reset').addEventListener('click', () => {
-        document.getElementById('filter-search').value    = '';
-        document.getElementById('filter-danh-muc').value = '';
-        document.getElementById('filter-loai').value     = '';
-        document.getElementById('filter-tu-ngay').value  = '';
-        document.getElementById('filter-den-ngay').value = '';
-        loadTransactions(1);
+        document.getElementById('filter-search').value   = '';
+        document.getElementById('filter-category').value = '';
+        document.getElementById('filter-status').value   = '';
+        document.getElementById('filter-sort').value     = 'created_at';
+        loadWallets(1);
     });
 
     document.getElementById('filter-search').addEventListener('input', () => {
         clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => loadTransactions(1), 500);
+        searchTimeout = setTimeout(() => loadWallets(1), 500);
     });
 
     document.getElementById('open-create-modal').addEventListener('click', () =>
@@ -1427,16 +1561,8 @@ function initPage() {
     document.getElementById('create-form')?.addEventListener('submit', handleCreate);
     document.getElementById('edit-form')?.addEventListener('submit', handleUpdate);
 
-    // Category filter by type
-    document.getElementById('create-loai-giao-dich')?.addEventListener('change', () => filterCategoriesByType('create'));
-    document.getElementById('edit-loai-giao-dich')?.addEventListener('change', () => filterCategoriesByType('edit'));
-
-    // Amount inputs
-    setupAmountInput('create-amount-display', 'so_tien', document.getElementById('create-form'));
-    setupAmountInput('edit-amount-display',   'so_tien', document.getElementById('edit-form'));
-
-    // Set default date
-    document.getElementById('create-ngay-giao-dich').value = new Date().toISOString().split('T')[0];
+    setupAmountInput('create-amount-display', document.getElementById('create-form'));
+    setupAmountInput('edit-amount-display',   document.getElementById('edit-form'));
 
     document.addEventListener('keydown', e => {
         if (e.key !== 'Escape') return;
@@ -1444,9 +1570,11 @@ function initPage() {
     });
 }
 
-window.openEditModal   = openEditModal;
-window.handleDelete    = handleDelete;
-window.loadTransactions = loadTransactions;
+window.openEditModal  = openEditModal;
+window.handleDelete   = handleDelete;
+window.handleToggle   = handleToggle;
+window.handleSync     = handleSync;
+window.loadWallets    = loadWallets;
 
 initPage();
 

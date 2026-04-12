@@ -8,8 +8,7 @@ use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TransactionController;
-// Budgets (API controller lives under Api\WalletController)
-use App\Http\Controllers\Api\WalletController as BudgetsController;
+use App\Http\Controllers\BudgetsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AIAssistantController;
 use App\Http\Controllers\SearchController;
@@ -112,8 +111,10 @@ Route::prefix('v1')->name('api.')->group(function () {
             Route::get('/', [SettingsController::class, 'index'])->name('index');
 
             Route::prefix('email')->name('email.')->group(function () {
-                Route::patch('/',    [EmailSettingController::class, 'update'])  ->name('update');
-                Route::post('/test', [EmailSettingController::class, 'testMail'])->name('test');
+                Route::get('/',         [EmailSettingController::class, 'show'])    ->name('show');
+                Route::patch('/',       [EmailSettingController::class, 'update'])  ->name('update');
+                Route::patch('/toggle', [EmailSettingController::class, 'toggle'])  ->name('toggle');
+                Route::post('/test',    [EmailSettingController::class, 'testMail'])->name('test');
             });
         });
 
@@ -133,6 +134,13 @@ Route::prefix('v1')->name('api.')->group(function () {
         | BUDGETS
         */
         Route::prefix('budgets')->name('budgets.')->group(function () {
+            Route::get('/',                  [BudgetsController::class, 'index'])       ->name('index');
+            Route::post('/',                 [BudgetsController::class, 'store'])       ->name('store');
+            Route::get('/{wallet}',          [BudgetsController::class, 'show'])        ->name('show');
+            Route::patch('/{wallet}',        [BudgetsController::class, 'update'])      ->name('update');
+            Route::delete('/{wallet}',       [BudgetsController::class, 'destroy'])     ->name('destroy');
+            Route::patch('/{wallet}/status', [BudgetsController::class, 'toggleStatus'])->name('toggle-status');
+            Route::post('/{wallet}/sync',    [BudgetsController::class, 'syncBalance']) ->name('sync-balance');
             Route::get('/',                  [BudgetsController::class, 'index'])        ->name('index');
             Route::post('/',                 [BudgetsController::class, 'store'])        ->name('store');
             Route::get('/{wallet}',          [BudgetsController::class, 'show'])         ->name('show');
