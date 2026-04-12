@@ -1428,26 +1428,79 @@ async function handleUpdate(e) {
     }
 }
 
-/* DELETE */
+/* Modal xác nhận xóa giao dịch */
+function showDeleteModal(onConfirm) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,0.45);
+    display: flex; align-items: center; justify-content: center;
+  `;
+
+  const isDark = document.body.classList.contains('dark');
+
+  overlay.innerHTML = `
+    <div style="
+      background: ${isDark ? '#1E2937' : '#ffffff'};
+      color: ${isDark ? '#e5e7eb' : '#1f2937'};
+      border-radius: 16px;
+      padding: 2rem 2rem 1.5rem;
+      max-width: 380px; width: 90%;
+      box-sizing: border-box;
+    ">
+      <div style="
+        width: 48px; height: 48px; border-radius: 50%;
+        background: #FCEBEB;
+        display: flex; align-items: center; justify-content: center;
+        margin-bottom: 1.25rem;
+      ">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 6v4m0 4h.01M10 2a8 8 0 100 16A8 8 0 0010 2z"
+            stroke="#E24B4A" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <p style="font-size: 17px; font-weight: 500; margin: 0 0 10px;">
+        Xác nhận xóa ngấn sách
+      </p>
+      <p style="font-size: 14px; opacity: 0.7; margin: 0 0 1.75rem; line-height: 1.6;">
+        Hành động này sẽ xóa dữ liệu vĩnh viễn. Bạn sẽ không thể khôi phục lại sau khi xác nhận.
+      </p>
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button id="btn-cancel" style="
+          padding: 8px 20px; border-radius: 8px;
+          border: 1px solid #d1d5db;
+          background: transparent;
+          color: inherit; font-size: 14px; cursor: pointer;
+        ">Hủy</button>
+        <button id="btn-confirm" style="
+          padding: 8px 20px; border-radius: 8px;
+          border: none; background: #ef4444;
+          color: #fff; font-size: 14px; font-weight: 500; cursor: pointer;
+        ">Xóa</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const close = () => document.body.removeChild(overlay);
+
+  overlay.querySelector('#btn-cancel').onclick = close;
+  overlay.querySelector('#btn-confirm').onclick = () => { close(); onConfirm(); };
+  overlay.onclick = (e) => { if (e.target === overlay) close(); };
+}
+
+/* Dùng trong handleDelete */
 function handleDelete(id) {
-   const isDark = document.body.classList.contains('dark');
-    Swal.fire({
-        title: 'Bạn chắc chưa?', text: 'Xóa rồi không khôi phục được đâu!',
-        icon: 'warning', showCancelButton: true,
-        confirmButtonText: 'Xóa', cancelButtonText: 'Hủy',
-        background: isDark ? '#1E2937' : '#ffffff',
-        color: isDark ? '#e5e7eb' : '#1f2937',
-        confirmButtonColor: '#ef4444', cancelButtonColor: '#6b6c80',
-    }).then(async r => {
-        if (!r.isConfirmed) return;
-        try {
-            await api('DELETE', `${API_BASE}/${id}`);
-            window.showToast({ type: 'success', title: 'Thành công', message: 'Xóa ngân sách thành công!' });
-            loadWallets(currentPage);
-        } catch (err) {
-            window.showToast({ type: 'error', title: 'Lỗi', message: err.message ?? 'Không thể xóa ngân sách.' });
-        }
-    });
+  showDeleteModal(async () => {
+    try {
+      await api('DELETE', `${API_BASE}/${id}`);
+      window.showToast({ type: 'success', title: 'Thành công', message: 'Xóa ngấn sách thành công!' });
+      loadTransactions(currentPage);
+    } catch (err) {
+      window.showToast({ type: 'error', title: 'Lỗi', message: err.message ?? 'Không thể xóa.' });
+    }
+  });
 }
 
 /* TOGGLE STATUS */

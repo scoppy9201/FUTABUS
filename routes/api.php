@@ -156,10 +156,7 @@ Route::prefix('v1')->name('api.')->group(function () {
         Route::apiResource('transactions', TransactionController::class);
 
         /*
-        |--------------------------------------------------------------------------
         | GROUPS (Split bill)
-        | search-users phải đứng TRƯỚC /{group} để tránh bị match nhầm
-        |--------------------------------------------------------------------------
         */
         Route::prefix('groups')->name('groups.')->group(function () {
 
@@ -211,10 +208,7 @@ Route::prefix('v1')->name('api.')->group(function () {
         });
 
         /*
-        |--------------------------------------------------------------------------
         | MONEY WALLETS
-        | /summary và /qr/* phải đứng TRƯỚC /{moneyWallet} để tránh match nhầm
-        |--------------------------------------------------------------------------
         */
         Route::prefix('money-wallets')->name('money-wallets.')->group(function () {
 
@@ -222,7 +216,7 @@ Route::prefix('v1')->name('api.')->group(function () {
             Route::post('/',        [MoneyWalletController::class, 'store'])->name('store');
             Route::get('/summary',  [MoneyWalletController::class, 'summary'])->name('summary');
 
-            // QR — phải đứng TRƯỚC /{moneyWallet}
+            // QR 
             Route::get('/qr/history',                [QrTransferController::class, 'history']) ->name('qr.history');
             Route::post('/qr/generate',              [QrTransferController::class, 'generate'])->name('qr.generate');
             Route::get('/qr/{token}',                [QrTransferController::class, 'show'])    ->name('qr.show');

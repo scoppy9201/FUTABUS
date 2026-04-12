@@ -12,6 +12,7 @@
     <script>window.qr = window.qr || {};</script>
     @vite('resources/js/app.js')
 </head>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 <body
     class="{{ cookie('theme', 'light') === 'dark' ? 'dark' : '' }}"
     data-authenticated="{{ $authUser ? '1' : '0' }}"
@@ -277,7 +278,6 @@
         }
     } catch(e) {}
 
-    // ── Session toasts từ server ────────────────────────────────────────────
     window.__serverToasts = [];
     @if(session('toast'))
         window.__serverToasts.push(@json(session('toast')));
@@ -295,9 +295,7 @@
         window.__serverToasts.push({ type: 'info', title: 'Thông báo', message: @json(session('info')) });
     @endif
 
-    // ── Hiển thị tất cả toasts sau khi DOM + Vite JS load xong ─────────────
     document.addEventListener('DOMContentLoaded', function () {
-        // Đợi thêm 1 tick để đảm bảo showToast từ Vite đã được mount
         setTimeout(function () {
             if (typeof showToast !== 'function') return;
 
@@ -312,7 +310,7 @@
         }, 100);
     });
 
-    // ── User info từ localStorage (khi chưa login qua session) ─────────────
+    // User info từ localStorage (khi chưa login qua session)
     (() => {
         const serverAuthenticated = document.body.dataset.authenticated === '1';
         if (serverAuthenticated) return;

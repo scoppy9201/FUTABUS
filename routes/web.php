@@ -66,17 +66,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/groups/{group}', [SplitGroupController::class, 'show'])->name('groups.show');
     Route::match(['PUT','PATCH'], '/groups/{group}', [SplitGroupController::class, 'update'])->name('groups.update');
     Route::delete('/groups/{group}', [SplitGroupController::class, 'destroy'])->name('groups.destroy');
-
     // Group member actions (invite, leave, promote/demote, remove)
     Route::post('/groups/{group}/leave', [GroupMemberController::class, 'leave'])->name('groups.leave');
     Route::post('/groups/{group}/invite', [GroupMemberController::class, 'invite'])->name('groups.invite');
     Route::get('/groups/invite/accept/{token}', [GroupMemberController::class, 'accept'])->name('groups.invite.accept');
     Route::get('/groups/invite/decline/{token}', [GroupMemberController::class, 'decline'])->name('groups.invite.decline');
-
     Route::post('/groups/{group}/members/{member}/promote', [GroupMemberController::class, 'promote'])->name('groups.members.promote');
     Route::post('/groups/{group}/members/{member}/demote', [GroupMemberController::class, 'demote'])->name('groups.members.demote');
     Route::delete('/groups/{group}/members/{member}', [GroupMemberController::class, 'remove'])->name('groups.members.remove');
-
     // Toggle visibility of balances (used in Blade)
     Route::post('/groups/{group}/toggle-visibility', [SplitGroupController::class, 'toggleBalanceVisibility'])->name('groups.toggle-visibility');
 
@@ -94,9 +91,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/groups/{group}/debt/summary', [GroupDebtController::class, 'summary'])->name('groups.debt.summary');
     Route::post('/groups/{group}/debt', [GroupDebtController::class, 'store'])->name('groups.debt.store');
     Route::post('/groups/{group}/debt/{debt}/settle', [GroupDebtController::class, 'settle'])->name('groups.debt.settle');
-
-
-
 
     // QR Transfer pages (web views that link to API endpoints)
         Route::prefix('money-wallets/qr')->name('money-wallets.qr.')->group(function () {
@@ -129,15 +123,17 @@ Route::middleware('auth')->group(function () {
             })->name('cancel');
         });
 
-        // Money wallets
-        Route::get('/money-wallets', fn() => view('money-wallets.index')) ->name('money-wallets.index');
-        Route::get('/money-wallets/{moneyWallet}', fn() => view('money-wallets.show')) ->name('money-wallets.show');
+    // Money wallets
+    Route::get('/money-wallets', fn() => view('money-wallets.index')) ->name('money-wallets.index');
+    Route::get('/money-wallets/{moneyWallet}', fn() => view('money-wallets.show')) ->name('money-wallets.show');
+    
     // Wallet transfers (web views + actions that call API controllers)
-        Route::prefix('wallet-transfers')->name('wallet-transfers.')->group(function () {
-            Route::get('/', fn() => view('money-wallets.transfers.index')) ->name('index');
-            Route::post('/', [WalletTransferController::class, 'store']) ->name('store');
-            Route::delete('/{walletTransfer}', [WalletTransferController::class, 'destroy']) ->name('destroy');
-        });
+    Route::prefix('wallet-transfers')->name('wallet-transfers.')->group(function () {
+        Route::get('/', fn() => view('money-wallets.transfers.index')) ->name('index');
+        Route::post('/', [WalletTransferController::class, 'store']) ->name('store');
+        Route::delete('/{walletTransfer}', [WalletTransferController::class, 'destroy']) ->name('destroy');
+    });
+
     // Notifications
     Route::get('/notifications', fn() => view('notifications')) ->name('notifications.index');
     // AI Assistant

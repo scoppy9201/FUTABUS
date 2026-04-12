@@ -367,7 +367,16 @@ profileDropdown?.addEventListener('click', (event) => {
                 osc.start(); osc.stop(ctx.currentTime + 0.3);
             } catch {}
         }
-
+        
+        if (type === 'success') {
+            const end = Date.now() + 1500;
+            const frame = () => {
+                confetti({ particleCount: 6, angle: 60,  spread: 55, origin: { x: 0 }, zIndex: 999999 });
+                confetti({ particleCount: 6, angle: 120, spread: 55, origin: { x: 1 }, zIndex: 999999 });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            };
+            frame();
+        }
         if (timeout > 0) {
             setTimeout(() => dismissToast(toast.querySelector('.g-toast-close'), id), timeout);
         }
