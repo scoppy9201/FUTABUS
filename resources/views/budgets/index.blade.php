@@ -1496,7 +1496,7 @@ function handleDelete(id) {
     try {
       await api('DELETE', `${API_BASE}/${id}`);
       window.showToast({ type: 'success', title: 'Thành công', message: 'Xóa ngấn sách thành công!' });
-      loadTransactions(currentPage);
+      loadWallets(currentPage);
     } catch (err) {
       window.showToast({ type: 'error', title: 'Lỗi', message: err.message ?? 'Không thể xóa.' });
     }
