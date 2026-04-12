@@ -276,7 +276,7 @@ $iconDown   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
             {!! $iconWarn !!} Bật hiển thị số dư để tạo đề xuất phân phối
         </div>
         @else
-        <form action="{{ route('groups.balance.propose', $group) }}" method="POST">
+        <form action="{{ route('groups.balance.propose', $group) }}" method="POST" class="js-rest">
             @csrf
             <div style="display:grid;grid-template-columns:1fr 2fr;gap:24px;align-items:start;">
                 {{-- Cột trái --}}
@@ -299,6 +299,26 @@ $iconDown   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
                 {{-- Cột phải: bảng phân bổ --}}
                 <div>
                     <label class="form-label">Phân bổ số dư mới cho từng người <span style="color:var(--danger)">*</span></label>
+
+                    {{-- [SỬA LỖI 4-A] Selector kiểu chia --}}
+                    <div style="margin-bottom:16px;">
+                        <label class="form-label">Kiểu phân phối</label>
+                        <div style="display:flex;gap:10px;margin-top:6px;">
+                            <label style="flex:1;border:2px solid #e5e7eb;border-radius:10px;padding:10px 14px;
+                                   cursor:pointer;text-align:center;font-size:13px;font-weight:700;"
+                                   id="kieu-deu-label" onclick="setKieu('equal')">
+                                <input type="radio" name="_kieu" value="equal" style="display:none" checked>
+                                ⚖️ Chia đều
+                            </label>
+                            <label style="flex:1;border:2px solid #e5e7eb;border-radius:10px;padding:10px 14px;
+                                   cursor:pointer;text-align:center;font-size:13px;font-weight:700;"
+                                   id="kieu-tuy-label" onclick="setKieu('custom')">
+                                <input type="radio" name="_kieu" value="custom" style="display:none">
+                                ✏️ Tùy chỉnh
+                            </label>
+                        </div>
+                    </div>
+
                     <table class="alloc-table">
                         <thead>
                             <tr>
@@ -335,11 +355,23 @@ $iconDown   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
                                 <td style="font-size:13px;color:#6b7280;white-space:nowrap;">
                                     {{ number_format($curBal) }}đ
                                 </td>
+                                {{-- [SỬA LỖI 4-C] Input người cuối tự động tính --}}
                                 <td>
-                                    <input type="number" name="phan_bo[{{ $i }}][so_du_moi]"
-                                        class="alloc-input" min="0" step="1000"
-                                        value="{{ old("phan_bo.{$i}.so_du_moi", max(0,$curBal)) }}"
-                                        oninput="recalcTotal()" required>
+                                    @if($loop->last)
+                                        <input type="number" name="phan_bo[{{ $i }}][so_du_moi]"
+                                            class="alloc-input" id="last-alloc-input"
+                                            min="0" step="1000"
+                                            value="{{ old("phan_bo.{$i}.so_du_moi", max(0,$curBal)) }}"
+                                            placeholder="Tự động tính" readonly
+                                            style="background:#f0f9ff;color:#0369a1;font-style:italic;"
+                                            required>
+                                        <div style="font-size:11px;color:#0369a1;margin-top:4px;">✨ Tự động tính từ số dư còn lại</div>
+                                    @else
+                                        <input type="number" name="phan_bo[{{ $i }}][so_du_moi]"
+                                            class="alloc-input" min="0" step="1000"
+                                            value="{{ old("phan_bo.{$i}.so_du_moi", max(0,$curBal)) }}"
+                                            oninput="autoCalcLast(); recalcTotal()" required>
+                                    @endif
                                 </td>
                             </tr>
                             @endforeach
@@ -383,11 +415,11 @@ $iconDown   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
         </div>
         <div class="pi-progress-label">{{ $p['approved_count'] }}/{{ $p['total_members'] }} người đồng ý</div>
         <div class="pi-actions">
-            <form action="{{ route('groups.balance.approve', [$group, $p['id']]) }}" method="POST">
+            <form action="{{ route('groups.balance.approve', [$group, $p['id']]) }}" method="POST" class="js-rest">
                 @csrf
                 <button type="submit" class="btn-primary btn-success btn-sm">{!! $iconCheck !!} Đồng ý</button>
             </form>
-            <form action="{{ route('groups.balance.reject', [$group, $p['id']]) }}" method="POST" style="display:inline">
+            <form action="{{ route('groups.balance.reject', [$group, $p['id']]) }}" method="POST" style="display:inline" class="js-rest">
                 @csrf
                 <button type="submit" class="btn-primary btn-danger btn-sm">{!! $iconX !!} Từ chối</button>
             </form>
@@ -413,7 +445,6 @@ $iconDown   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
                     {{ \Carbon\Carbon::parse($p['created_at'])->format('d/m/Y') }}
                 </div>
             </div>
-            {{-- FIX: dùng @if thay vì match() để tránh SVG bị render thành text --}}
             @if($p['trang_thai'] === 'pending')
                 <span class="pi-status st-pending">{!! $iconClock !!} Chờ duyệt</span>
             @elseif($p['trang_thai'] === 'approved')
@@ -433,16 +464,16 @@ $iconDown   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
 
         @if($p['my_approval'] === null)
         <div class="pi-actions">
-            <form action="{{ route('groups.balance.approve', [$group, $p['id']]) }}" method="POST">
+            <form action="{{ route('groups.balance.approve', [$group, $p['id']]) }}" method="POST" class="js-rest">
                 @csrf
                 <button type="submit" class="btn-primary btn-success btn-sm">{!! $iconCheck !!} Đồng ý</button>
             </form>
-            <form action="{{ route('groups.balance.reject', [$group, $p['id']]) }}" method="POST" style="display:inline">
+            <form action="{{ route('groups.balance.reject', [$group, $p['id']]) }}" method="POST" style="display:inline" class="js-rest">
                 @csrf
                 <button type="submit" class="btn-primary btn-danger btn-sm">{!! $iconX !!} Từ chối</button>
             </form>
             @if($laAdmin)
-            <form action="{{ route('groups.balance.cancel', [$group, $p['id']]) }}" method="POST" style="display:inline">
+            <form action="{{ route('groups.balance.cancel', [$group, $p['id']]) }}" method="POST" style="display:inline" class="js-rest">
                 @csrf
                 <button type="submit" class="btn-ghost btn-sm">Hủy</button>
             </form>
@@ -477,28 +508,178 @@ $iconDown   = '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0
     @endforelse
 </div>
 
+{{-- [SỬA LỖI 4-B] JavaScript hoàn chỉnh --}}
 <script>
 const targetTotal = {{ $tongSoDu ?? 0 }};
+const memberCount = {{ count($members) }};
+let currentKieu = 'equal';
+
+function setKieu(kieu) {
+    currentKieu = kieu;
+
+    // Cập nhật style cho label
+    const equalLabel = document.getElementById('kieu-deu-label');
+    const tuyLabel   = document.getElementById('kieu-tuy-label');
+    if (equalLabel && tuyLabel) {
+        equalLabel.style.borderColor = kieu === 'equal' ? '#4a90e2' : '#e5e7eb';
+        equalLabel.style.background  = kieu === 'equal' ? 'rgba(74,144,226,0.06)' : 'white';
+        tuyLabel.style.borderColor   = kieu === 'custom' ? '#4a90e2' : '#e5e7eb';
+        tuyLabel.style.background    = kieu === 'custom' ? 'rgba(74,144,226,0.06)' : 'white';
+    }
+
+    const inputs = document.querySelectorAll('.alloc-input');
+
+    if (kieu === 'equal') {
+        // Chia đều: tính mỗi người nhận bao nhiêu, phần dư cộng vào người đầu
+        const perPerson = Math.floor(targetTotal / memberCount);
+        const remainder = targetTotal - (perPerson * memberCount);
+
+        inputs.forEach((input, i) => {
+            input.value    = i === 0 ? perPerson + remainder : perPerson;
+            input.readOnly = true;
+            input.style.background  = '#f3f4f6';
+            input.style.color       = '#6b7280';
+            input.style.fontStyle   = '';
+        });
+        recalcTotal();
+    } else {
+        // Tùy chỉnh: người cuối tự động tính, các người còn lại nhập tay
+        inputs.forEach((input, i) => {
+            if (i < inputs.length - 1) {
+                input.readOnly = false;
+                input.style.background = '';
+                input.style.color      = '';
+                input.style.fontStyle  = '';
+                input.value = '';
+                input.oninput = function () {
+                    autoCalcLast();
+                    recalcTotal();
+                };
+            }
+        });
+        // Người cuối: readonly, tự động tính
+        const lastInput = inputs[inputs.length - 1];
+        if (lastInput) {
+            lastInput.readOnly = true;
+            lastInput.style.background = '#f0f9ff';
+            lastInput.style.color      = '#0369a1';
+            lastInput.style.fontStyle  = 'italic';
+        }
+        autoCalcLast();
+        recalcTotal();
+    }
+}
+
+function autoCalcLast() {
+    const inputs    = document.querySelectorAll('.alloc-input');
+    const lastInput = inputs[inputs.length - 1];
+
+    let sumExcludingLast = 0;
+    inputs.forEach((input, i) => {
+        if (i < inputs.length - 1) {
+            sumExcludingLast += parseFloat(input.value) || 0;
+        }
+    });
+
+    const remaining  = targetTotal - sumExcludingLast;
+    lastInput.value  = remaining >= 0 ? remaining : 0;
+    lastInput.style.background = '#f0f9ff';
+    lastInput.style.color      = '#0369a1';
+    lastInput.style.fontStyle  = 'italic';
+}
 
 function recalcTotal() {
     const inputs = document.querySelectorAll('.alloc-input');
     let sum = 0;
-    inputs.forEach(i => sum += parseFloat(i.value)||0);
-    const el = document.getElementById('totalAllocated');
+    inputs.forEach(i => sum += parseFloat(i.value) || 0);
+    const el  = document.getElementById('totalAllocated');
     const chk = document.getElementById('totalCheck');
     if (el) {
-        el.textContent = sum.toLocaleString('vi-VN') + 'đ / ' + targetTotal.toLocaleString('vi-VN') + 'đ';
+        el.textContent = sum.toLocaleString('vi-VN') + 'đ / '
+                       + targetTotal.toLocaleString('vi-VN') + 'đ';
         const diff = Math.abs(sum - targetTotal);
         chk.className = 'total-check ' + (diff <= 1 ? 'ok' : 'warn');
     }
 }
-recalcTotal();
 
+// Khởi tạo mặc định là chia đều khi DOM sẵn sàng
+document.addEventListener('DOMContentLoaded', function () {
+    setKieu('equal');
+});
+
+// Tự ẩn alert sau 4.5 giây
 setTimeout(() => {
     document.querySelectorAll('.alert').forEach(a => {
-        a.style.transition='opacity .3s'; a.style.opacity='0';
-        setTimeout(()=>a.remove(),300);
+        a.style.transition = 'opacity .3s';
+        a.style.opacity    = '0';
+        setTimeout(() => a.remove(), 300);
     });
 }, 4500);
+</script>
+
+<script>
+async function refreshBalanceData() {
+    try {
+        const GROUP_ID = {{ $group->id }};
+        const res = await fetch(`/groups/${GROUP_ID}/balance`, { credentials: 'same-origin' });
+        if (!res.ok) return;
+        const j = await res.json();
+        if (!j) return;
+
+        // update balance grid
+        if (j.members && Array.isArray(j.members)) {
+            const grid = document.querySelector('.balance-grid');
+            if (grid) {
+                grid.innerHTML = j.members.map((m,i) => {
+                    const colors = ['#4a90e2','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
+                    const c = colors[i % colors.length];
+                    const bal = m.so_du ?? 0;
+                    const cls = bal > 0 ? 'pos' : (bal < 0 ? 'neg' : '');
+                    const prefix = bal > 0 ? '+' : '';
+                    const avatar = m.avatar ? (m.avatar.startsWith('http') ? m.avatar : '/storage/' + m.avatar) : null;
+                    return `
+                        <div class="bal-card">
+                            ${avatar ? `<img src="${avatar}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;margin:0 auto 12px;display:block;" alt="">` : `<div class="bal-av" style="background:linear-gradient(135deg,${c},${c}cc)">${(m.name||'').substr(0,2).toUpperCase()}</div>`}
+                            <div class="bal-name">${escapeHtml(m.name)}</div>
+                            <div class="bal-amount ${cls}">${prefix}${Number(bal).toLocaleString('vi-VN')}đ</div>
+                        </div>`;
+                }).join('');
+            }
+        }
+
+        // update total
+        if (typeof j.tongSoDu !== 'undefined') {
+            const totalEl = document.querySelector('.total-value');
+            if (totalEl) totalEl.textContent = Number(j.tongSoDu).toLocaleString('vi-VN') + 'đ';
+        }
+
+        // update proposals list if present
+        if (j.proposals && Array.isArray(j.proposals)) {
+            const history = document.querySelectorAll('.proposal-card')[0];
+            if (history) {
+                history.querySelectorAll('.proposal-item').forEach(n=>n.remove());
+                const container = history.querySelector('.phdr').parentElement;
+                container.insertAdjacentHTML('beforeend', j.proposals.map(p => {
+                    const status = p.trang_thai;
+                    const statusLabel = status === 'pending' ? 'Chờ duyệt' : (status === 'approved' ? 'Đã thực hiện' : (status==='rejected'?'Từ chối':'Đã hủy'));
+                    return `
+                        <div class="proposal-item">
+                            <div class="pi-top">
+                                <div class="pi-info">
+                                    <div class="pi-desc">${escapeHtml(p.mo_ta || 'Phân phối số dư')}</div>
+                                    <div class="pi-meta">Bởi ${escapeHtml(p.proposed_by)} · ${new Date(p.created_at).toLocaleDateString('vi-VN')}</div>
+                                </div>
+                                <span class="pi-status st-${status}">${statusLabel}</span>
+                            </div>
+                        </div>`;
+                }).join(''));
+            }
+        }
+    } catch (e) {}
+}
+
+function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+
+document.addEventListener('DOMContentLoaded', () => refreshBalanceData());
 </script>
 @endsection

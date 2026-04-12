@@ -33,6 +33,10 @@ class GroupMemberController extends Controller
 
         // Không mời chính mình
         if ($invitedUser->id === Auth::id()) {
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Bạn không thể mời chính mình.'], 422);
+            }
+
             return back()->with('error', 'Bạn không thể mời chính mình.');
         }
 
@@ -43,6 +47,10 @@ class GroupMemberController extends Controller
             ->exists();
 
         if ($alreadyMember) {
+            if (request()->wantsJson()) {
+                return response()->json(['message' => "{$invitedUser->name} đã là thành viên của nhóm."], 422);
+            }
+
             return back()->with('error', "{$invitedUser->name} đã là thành viên của nhóm.");
         }
 
@@ -54,6 +62,10 @@ class GroupMemberController extends Controller
             ->exists();
 
         if ($existingInvite) {
+            if (request()->wantsJson()) {
+                return response()->json(['message' => "Đã có lời mời đang chờ xác nhận cho {$email}."], 422);
+            }
+
             return back()->with('error', "Đã có lời mời đang chờ xác nhận cho {$email}.");
         }
 
@@ -62,8 +74,8 @@ class GroupMemberController extends Controller
             // Hủy lời mời cũ đã expired
             GroupInvitation::where('group_id', $group->id)
                 ->where('email', $email)
-                ->where('trang_thai', 'pending')
-                ->update(['trang_thai' => 'expired']);
+                ->whereIn('trang_thai', ['pending', 'expired'])
+                ->delete();
 
             $invitation = GroupInvitation::create([
                 'group_id'   => $group->id,
@@ -90,10 +102,18 @@ class GroupMemberController extends Controller
 
             GroupNotifier::invited($group, $email, Auth::user()->name);
 
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Đã gửi lời mời.', 'email' => $email], 201);
+            }
+
             return back()->with('success', "Đã gửi lời mời đến {$email}. Hết hạn sau 48 giờ.");
 
         } catch (\Exception $e) {
             DB::rollBack();
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Có lỗi khi gửi lời mời: ' . $e->getMessage()], 500);
+            }
+
             return back()->with('error', 'Có lỗi khi gửi lời mời: ' . $e->getMessage());
         }
     }
@@ -153,6 +173,14 @@ class GroupMemberController extends Controller
                 ->where('user_id', Auth::id())->first();
             if ($newMem) GroupNotifier::memberJoined($group, $newMem);
 
+            if (request()->wantsJson()) {
+                return response()->json([
+                    'message' => 'Đã gia nhập nhóm.',
+                    'group_id' => $group->id,
+                    'redirect' => route('groups.show', $group),
+                ]);
+            }
+
             return redirect()->route('groups.show', $group)
                 ->with('success', "Chào mừng bạn đã gia nhập nhóm \"{$group->ten_nhom}\"!");
 
@@ -183,6 +211,10 @@ class GroupMemberController extends Controller
             'responded_at' => now(),
         ]);
 
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Đã từ chối lời mời.', 'redirect' => route('groups.index')]);
+        }
+
         return redirect()->route('groups.index')
             ->with('success', 'Đã từ chối lời mời tham gia nhóm.');
     }
@@ -195,10 +227,18 @@ class GroupMemberController extends Controller
         abort_if($member->group_id !== $group->id, 404);
 
         if ($member->user_id === Auth::id()) {
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Dùng chức năng "Rời nhóm" để tự rời.'], 422);
+            }
+
             return back()->with('error', 'Dùng chức năng "Rời nhóm" để tự rời.');
         }
 
         if ($member->vai_tro === 'admin') {
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Không thể xóa admin. Hãy hạ quyền thành member trước.'], 422);
+            }
+
             return back()->with('error', 'Không thể xóa admin. Hãy hạ quyền thành member trước.');
         }
 
@@ -209,6 +249,10 @@ class GroupMemberController extends Controller
 
         GroupNotifier::memberRemoved($group, $member);
 
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Đã xóa thành viên.', 'user_id' => $member->user_id]);
+        }
+
         return back()->with('success', "Đã xóa {$member->user->name} khỏi nhóm.");
     }
 
@@ -218,16 +262,18 @@ class GroupMemberController extends Controller
         $member = $this->assertMember($group);
 
         // Admin duy nhất không được rời
-        if ($member->vai_tro === 'admin') {
+            if ($member->vai_tro === 'admin') {
             $adminCount = SplitGroupMember::where('group_id', $group->id)
                 ->where('trang_thai', 'active')
                 ->where('vai_tro', 'admin')
                 ->count();
 
             if ($adminCount <= 1) {
-                return back()->with('error',
-                    'Bạn là admin duy nhất. Hãy chỉ định admin khác trước khi rời nhóm.'
-                );
+                if (request()->wantsJson()) {
+                    return response()->json(['message' => 'Bạn là admin duy nhất. Hãy chỉ định admin khác trước khi rời nhóm.'], 422);
+                }
+
+                return back()->with('error', 'Bạn là admin duy nhất. Hãy chỉ định admin khác trước khi rời nhóm.');
             }
         }
 
@@ -237,6 +283,10 @@ class GroupMemberController extends Controller
         ]);
 
         GroupNotifier::memberLeft($group, $member);
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Đã rời nhóm.', 'group_id' => $group->id]);
+        }
 
         return redirect()->route('groups.index')
             ->with('success', "Bạn đã rời nhóm \"{$group->ten_nhom}\".");
@@ -253,6 +303,10 @@ class GroupMemberController extends Controller
 
         GroupNotifier::promoted($group, $member);
 
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Đã chỉ định Admin.', 'user_id' => $member->user_id]);
+        }
+
         return back()->with('success', "{$member->user->name} đã được chỉ định làm Admin.");
     }
 
@@ -264,6 +318,10 @@ class GroupMemberController extends Controller
 
         // Không cho hạ quyền chính mình
         if ($member->user_id === Auth::id()) {
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Không thể hạ quyền chính mình. Hãy dùng chức năng Rời nhóm.'], 422);
+            }
+
             return back()->with('error', 'Không thể hạ quyền chính mình. Hãy dùng chức năng Rời nhóm.');
         }
 
@@ -274,12 +332,20 @@ class GroupMemberController extends Controller
             ->count();
 
         if ($adminCount <= 1) {
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Nhóm phải có ít nhất 1 Admin.'], 422);
+            }
+
             return back()->with('error', 'Nhóm phải có ít nhất 1 Admin.');
         }
 
         $member->update(['vai_tro' => 'member']);
 
         GroupNotifier::demoted($group, $member);
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Đã hạ quyền.', 'user_id' => $member->user_id]);
+        }
 
         return back()->with('success', "Đã hạ quyền {$member->user->name} xuống Member.");
     }

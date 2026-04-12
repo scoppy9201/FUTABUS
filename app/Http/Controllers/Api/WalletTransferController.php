@@ -1,19 +1,20 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\MoneyWallet;
 use App\Models\WalletTransfer;
 use App\Models\Transaction;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class WalletTransferController extends Controller
 {
-    // ── Danh sách lịch sử chuyển tiền ────────────────────
-    public function index()
+    public function index(): JsonResponse
     {
         $userId = Auth::id();
 
@@ -23,22 +24,10 @@ class WalletTransferController extends Controller
             ->orderByDesc('created_at')
             ->paginate(20);
 
-        $wallets = MoneyWallet::forUser($userId)->active()->get();
-
-        // Danh mục để chọn khi tạo chuyển khoản
-        $categories = Category::where(function ($q) use ($userId) {
-                $q->where('user_id', $userId)->orWhereNull('user_id');
-            })
-            ->whereNotNull('danh_muc_cha_id')
-            ->orderBy('loai_danh_muc')
-            ->orderBy('ten_danh_muc')
-            ->get();
-
-        return view('money-wallets.transfers.index', compact('transfers', 'wallets', 'categories'));
+        return response()->json($transfers);
     }
 
-    // ── Thực hiện chuyển tiền ─────────────────────────────
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $userId = Auth::id();
 
@@ -50,17 +39,8 @@ class WalletTransferController extends Controller
             'category_id'    => 'required|exists:categories,id',
             'ngay_chuyen'    => 'required|date|before_or_equal:today',
             'ghi_chu'        => 'nullable|string|max:500',
-        ], [
-            'from_wallet_id.required' => 'Vui lòng chọn ví nguồn',
-            'to_wallet_id.required'   => 'Vui lòng chọn ví đích',
-            'to_wallet_id.different'  => 'Ví nguồn và ví đích không được giống nhau',
-            'so_tien.required'        => 'Vui lòng nhập số tiền',
-            'so_tien.min'             => 'Số tiền phải từ 1,000 trở lên',
-            'category_id.required'    => 'Vui lòng chọn danh mục',
-            'ngay_chuyen.required'    => 'Vui lòng chọn ngày',
         ]);
 
-        // Kiểm tra ví thuộc user
         $fromWallet = MoneyWallet::where('id', $validated['from_wallet_id'])
             ->where('user_id', $userId)->firstOrFail();
         $toWallet = MoneyWallet::where('id', $validated['to_wallet_id'])
@@ -70,14 +50,12 @@ class WalletTransferController extends Controller
         $phiChuyen = (float) ($validated['phi_chuyen'] ?? 0);
         $tongTru   = $soTien + $phiChuyen;
 
-        // Kiểm tra số dư ví nguồn
         if ($fromWallet->so_du < $tongTru) {
-            return back()->withInput()->with(
-                'error',
-                'Ví nguồn không đủ số dư! ' .
-                'Cần: ' . number_format($tongTru) . ' ' . $fromWallet->don_vi_tien_te .
-                ' | Hiện có: ' . number_format($fromWallet->so_du) . ' ' . $fromWallet->don_vi_tien_te
-            );
+            return response()->json([
+                'message' => 'Ví nguồn không đủ số dư! ' .
+                    'Cần: ' . number_format($tongTru) . ' ' . $fromWallet->don_vi_tien_te .
+                    ' | Hiện có: ' . number_format($fromWallet->so_du) . ' ' . $fromWallet->don_vi_tien_te,
+            ], 422);
         }
 
         DB::beginTransaction();
@@ -86,10 +64,6 @@ class WalletTransferController extends Controller
             $ngay   = $validated['ngay_chuyen'];
             $catId  = $validated['category_id'];
 
-            // Lấy category để xác định loại
-            $category = Category::find($catId);
-
-            // Tạo giao dịch CHI từ ví nguồn
             $fromTx = Transaction::create([
                 'user_id'                => $userId,
                 'money_wallet_id'        => $fromWallet->id,
@@ -102,7 +76,6 @@ class WalletTransferController extends Controller
                 'la_chuyen_vi'           => true,
             ]);
 
-            // Tạo giao dịch THU vào ví đích
             $toTx = Transaction::create([
                 'user_id'                => $userId,
                 'money_wallet_id'        => $toWallet->id,
@@ -115,8 +88,7 @@ class WalletTransferController extends Controller
                 'la_chuyen_vi'           => true,
             ]);
 
-            // Ghi wallet_transfers
-            WalletTransfer::create([
+            $transfer = WalletTransfer::create([
                 'user_id'             => $userId,
                 'from_wallet_id'      => $fromWallet->id,
                 'to_wallet_id'        => $toWallet->id,
@@ -129,26 +101,20 @@ class WalletTransferController extends Controller
                 'ghi_chu'             => $ghiChu,
             ]);
 
-            // Cập nhật số dư ví
             $fromWallet->decrement('so_du', $tongTru);
             $toWallet->increment('so_du', $soTien);
 
             DB::commit();
 
-            return redirect()->route('wallet-transfers.index')
-                ->with('success',
-                    "Đã chuyển " . number_format($soTien) . " {$fromWallet->don_vi_tien_te} " .
-                    "từ \"{$fromWallet->ten_vi}\" sang \"{$toWallet->ten_vi}\"!"
-                );
+            return response()->json($transfer->load(['fromWallet', 'toWallet']), 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
+            return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
     }
 
-    // ── Hủy chuyển tiền (hoàn tác) ───────────────────────
-    public function destroy(WalletTransfer $walletTransfer)
+    public function destroy(WalletTransfer $walletTransfer): JsonResponse
     {
         abort_if($walletTransfer->user_id !== Auth::id(), 403);
 
@@ -157,11 +123,9 @@ class WalletTransferController extends Controller
             $soTien    = (float) $walletTransfer->so_tien;
             $phiChuyen = (float) $walletTransfer->phi_chuyen;
 
-            // Hoàn tác số dư
             $walletTransfer->fromWallet?->increment('so_du', $soTien + $phiChuyen);
             $walletTransfer->toWallet?->decrement('so_du', $soTien);
 
-            // Xóa 2 giao dịch liên quan
             Transaction::whereIn('id', array_filter([
                 $walletTransfer->from_transaction_id,
                 $walletTransfer->to_transaction_id,
@@ -171,11 +135,11 @@ class WalletTransferController extends Controller
 
             DB::commit();
 
-            return back()->with('success', 'Đã hủy và hoàn tác giao dịch chuyển tiền.');
+            return response()->json(['success' => true]);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Có lỗi: ' . $e->getMessage());
+            return response()->json(['message' => 'Có lỗi: ' . $e->getMessage()], 500);
         }
     }
 }

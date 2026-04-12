@@ -19,10 +19,8 @@ body.dark .page-title { color:#e5e7eb; }
 .alert-success { background:#d1fae5;color:#065f46;border-left:4px solid var(--success); }
 .alert-error   { background:#fee2e2;color:#991b1b;border-left:4px solid var(--danger); }
 
-/* Main grid */
 .main-grid { display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start; }
 
-/* Transfer form */
 .form-card { background:white;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden; }
 body.dark .form-card { background:#191d27; }
 .fc-hdr { padding:18px 22px;border-bottom:1px solid #f3f4f6;background:linear-gradient(135deg,rgba(74,144,226,0.06),transparent); }
@@ -39,7 +37,6 @@ body.dark .form-label { color:#9ca3af; }
 .form-ctrl:focus { border-color:var(--primary);background:white; }
 body.dark .form-ctrl { background:#141820;border-color:rgba(255,255,255,0.1);color:#e5e7eb; }
 
-/* Wallet select cards */
 .wallet-select-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px; }
 .ws-card {
     border:2px solid #e5e7eb;border-radius:12px;padding:12px 14px;
@@ -50,14 +47,11 @@ body.dark .form-ctrl { background:#141820;border-color:rgba(255,255,255,0.1);col
 .ws-card.disabled-card { opacity:.4;pointer-events:none; }
 body.dark .ws-card { border-color:rgba(255,255,255,0.1); }
 body.dark .ws-card.selected { background:rgba(74,144,226,0.1); }
-.ws-card input { display:none; }
 .ws-icon { font-size:22px;flex-shrink:0; }
-.ws-info {}
 .ws-name { font-size:13px;font-weight:700;color:#1f2937; }
 body.dark .ws-name { color:#e5e7eb; }
 .ws-balance { font-size:11px;font-weight:600;color:#9ca3af; }
 
-/* Transfer preview */
 .transfer-preview {
     background:linear-gradient(135deg,rgba(74,144,226,0.06),rgba(42,82,152,0.04));
     border:1px solid rgba(74,144,226,0.2);border-radius:12px;
@@ -72,7 +66,6 @@ body.dark .preview-wallet-name { color:#e5e7eb; }
 .preview-amount { font-size:14px;font-weight:900;color:var(--primary); }
 .preview-placeholder { font-size:13px;color:#9ca3af;text-align:center;width:100%; }
 
-/* Section card */
 .section-card { background:white;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden; }
 body.dark .section-card { background:#191d27; }
 .sc-hdr { padding:16px 20px;border-bottom:1px solid #f3f4f6;display:flex;justify-content:space-between;align-items:center; }
@@ -80,7 +73,6 @@ body.dark .sc-hdr { border-color:rgba(255,255,255,0.06); }
 .sc-title { font-size:15px;font-weight:800;color:#1f2937; }
 body.dark .sc-title { color:#e5e7eb; }
 
-/* Transfer history item */
 .tf-item { display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid #f9fafb;transition:background .15s; }
 body.dark .tf-item { border-color:rgba(255,255,255,0.03); }
 .tf-item:last-child { border-bottom:none; }
@@ -103,14 +95,15 @@ body.dark .tf-route { color:#e5e7eb; }
 
 .empty-msg { text-align:center;padding:40px;color:#9ca3af;font-size:13px; }
 
-/* Buttons */
 .btn-primary { display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;font-size:13px;font-weight:700;border:none;cursor:pointer;text-decoration:none;transition:opacity .2s; }
 .btn-primary:hover { opacity:.88; }
 .btn-outline { display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:var(--radius-sm);border:2px solid var(--primary);color:var(--primary);background:transparent;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;transition:all .2s; }
 .btn-outline:hover { background:var(--primary);color:white; }
 
-/* Phi hint */
 .phi-hint { font-size:12px;color:#9ca3af;margin-top:5px;display:flex;align-items:center;gap:4px; }
+
+.skeleton { background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px; }
+@keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
 
 @media (max-width:1100px) { .main-grid { grid-template-columns:1fr; } }
 @media (max-width:768px) { .wallet-select-grid { grid-template-columns:1fr; } }
@@ -121,226 +114,178 @@ body.dark .tf-route { color:#e5e7eb; }
     <a href="{{ route('money-wallets.index') }}" class="btn-outline">← Quay lại ví</a>
 </div>
 
-@if(session('success'))<div class="alert alert-success">✓ {{ session('success') }}</div>@endif
-@if(session('error'))<div class="alert alert-error">⚠ {{ session('error') }}</div>@endif
+<div id="alertContainer"></div>
 
 <div class="main-grid">
-    {{-- LEFT: Form chuyển tiền --}}
     <div>
         <div class="form-card">
             <div class="fc-hdr"><div class="fc-title">Tạo giao dịch chuyển tiền</div></div>
-            <div class="fc-body">
-                @if($wallets->count() < 2)
-                <div style="text-align:center;padding:40px;color:#9ca3af;">
-                    <div style="font-size:40px;margin-bottom:12px;">💳</div>
-                    <div style="font-weight:700;margin-bottom:8px;">Cần ít nhất 2 ví</div>
-                    <div style="font-size:13px;margin-bottom:20px;">Tạo thêm ví để chuyển tiền giữa các nguồn</div>
-                    <a href="{{ route('money-wallets.index') }}" class="btn-primary">+ Thêm ví</a>
-                </div>
-                @else
-                <form action="{{ route('wallet-transfers.store') }}" method="POST" id="transferForm">
-                    @csrf
-
-                    {{-- Ví nguồn --}}
-                    <div class="form-group">
-                        <label class="form-label">Từ ví <span class="required">*</span></label>
-                        <div class="wallet-select-grid" id="fromGrid">
-                            @foreach($wallets as $w)
-                            <label class="ws-card" data-wallet-id="{{ $w->id }}" data-grid="from">
-                                <input type="radio" name="from_wallet_id" value="{{ $w->id }}" {{ old('from_wallet_id')==$w->id?'checked':'' }}>
-                                <div class="ws-icon">{{ $w->bieu_tuong }}</div>
-                                <div class="ws-info">
-                                    <div class="ws-name">{{ $w->ten_vi }}</div>
-                                    <div class="ws-balance">{{ number_format($w->so_du) }} {{ $w->don_vi_tien_te }}</div>
-                                </div>
-                            </label>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    {{-- Ví đích --}}
-                    <div class="form-group">
-                        <label class="form-label">Đến ví <span class="required">*</span></label>
-                        <div class="wallet-select-grid" id="toGrid">
-                            @foreach($wallets as $w)
-                            <label class="ws-card" data-wallet-id="{{ $w->id }}" data-grid="to">
-                                <input type="radio" name="to_wallet_id" value="{{ $w->id }}" {{ old('to_wallet_id')==$w->id?'checked':'' }}>
-                                <div class="ws-icon">{{ $w->bieu_tuong }}</div>
-                                <div class="ws-info">
-                                    <div class="ws-name">{{ $w->ten_vi }}</div>
-                                    <div class="ws-balance">{{ number_format($w->so_du) }} {{ $w->don_vi_tien_te }}</div>
-                                </div>
-                            </label>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    {{-- Preview --}}
-                    <div class="transfer-preview" id="transferPreview">
-                        <div class="preview-placeholder">Chọn ví nguồn và ví đích để xem trước</div>
-                    </div>
-
-                    {{-- Số tiền --}}
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                        <div class="form-group" style="margin-bottom:0">
-                            <label class="form-label">Số tiền <span class="required">*</span></label>
-                            <input name="so_tien" type="number" class="form-ctrl"
-                                placeholder="0" min="1000" step="1000"
-                                value="{{ old('so_tien') }}" required
-                                oninput="updatePreviewAmount(this.value)">
-                        </div>
-                        <div class="form-group" style="margin-bottom:0">
-                            <label class="form-label">Phí chuyển</label>
-                            <input name="phi_chuyen" type="number" class="form-ctrl"
-                                placeholder="0 (nếu có)" min="0" step="1000"
-                                value="{{ old('phi_chuyen', 0) }}">
-                            <div class="phi-hint">💡 Phí sẽ bị trừ thêm từ ví nguồn</div>
-                        </div>
-                    </div>
-
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;">
-                        <div class="form-group" style="margin-bottom:0">
-                            <label class="form-label">Ngày <span class="required">*</span></label>
-                            <input name="ngay_chuyen" type="date" class="form-ctrl"
-                                value="{{ old('ngay_chuyen', date('Y-m-d')) }}" required max="{{ date('Y-m-d') }}">
-                        </div>
-                        <div class="form-group" style="margin-bottom:0">
-                            <label class="form-label">Danh mục <span class="required">*</span></label>
-                            <select name="category_id" class="form-ctrl" required>
-                                <option value="">-- Chọn --</option>
-                                @foreach($categories->groupBy('loai_danh_muc') as $loai => $cats)
-                                <optgroup label="{{ $loai === 'THU' ? 'Thu nhập' : 'Chi tiêu' }}">
-                                    @foreach($cats as $cat)
-                                    <option value="{{ $cat->id }}" {{ old('category_id')==$cat->id?'selected':'' }}>
-                                        {{ $cat->ten_danh_muc }}
-                                    </option>
-                                    @endforeach
-                                </optgroup>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group" style="margin-top:16px;">
-                        <label class="form-label">Ghi chú</label>
-                        <input name="ghi_chu" class="form-ctrl" placeholder="Lý do chuyển tiền..." maxlength="500">
-                    </div>
-
-                    <button type="submit" class="btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:4px;">
-                        Chuyển tiền
-                    </button>
-                </form>
-                @endif
+            <div class="fc-body" id="formBody">
+                <div class="skeleton" style="height:300px;border-radius:10px;"></div>
             </div>
         </div>
     </div>
 
-    {{-- RIGHT: Lịch sử --}}
     <div>
         <div class="section-card">
-            <div class="sc-hdr">
-                <div class="sc-title">Lịch sử chuyển tiền</div>
-            </div>
-            @forelse($transfers as $tf)
-            <div class="tf-item">
-                <div class="tf-icon">↔️</div>
-                <div class="tf-info">
-                    <div class="tf-route">
-                        {{ $tf->fromWallet?->bieu_tuong }} {{ $tf->fromWallet?->ten_vi ?? '?' }}
-                        → {{ $tf->toWallet?->bieu_tuong }} {{ $tf->toWallet?->ten_vi ?? '?' }}
-                    </div>
-                    <div class="tf-meta">
-                        {{ \Carbon\Carbon::parse($tf->ngay_chuyen)->format('d/m/Y') }}
-                        @if($tf->phi_chuyen > 0) · Phí: {{ number_format($tf->phi_chuyen) }}đ @endif
-                        @if($tf->ghi_chu) · {{ Str::limit($tf->ghi_chu, 30) }} @endif
-                    </div>
-                    <form action="{{ route('wallet-transfers.destroy', $tf) }}" method="POST"
-                          onsubmit="return confirm('Hoàn tác giao dịch chuyển tiền này?')">
-                        @csrf @method('DELETE')
-                        <button type="submit" class="tf-cancel-btn">↩ Hoàn tác</button>
-                    </form>
-                </div>
-                <div class="tf-right">
-                    <div class="tf-amount">{{ number_format($tf->so_tien) }}đ</div>
-                    <div class="tf-date">{{ $tf->created_at->diffForHumans() }}</div>
-                </div>
-            </div>
-            @empty
-            <div class="empty-msg">Chưa có giao dịch chuyển tiền nào</div>
-            @endforelse
-            @if($transfers->hasPages())
-            <div style="padding:14px 20px;border-top:1px solid #f3f4f6;">{{ $transfers->links() }}</div>
-            @endif
+            <div class="sc-hdr"><div class="sc-title">Lịch sử chuyển tiền</div></div>
+            <div id="historyList"><div class="empty-msg"><div class="skeleton" style="height:80px;margin:8px;border-radius:10px;"></div></div></div>
         </div>
     </div>
 </div>
 
 <script>
-@php $walletsJson = $wallets->map(fn($w) => ['id'=>$w->id,'ten_vi'=>$w->ten_vi,'bieu_tuong'=>$w->bieu_tuong,'so_du'=>$w->so_du,'don_vi_tien_te'=>$w->don_vi_tien_te])->values(); @endphp
-const wallets = @json($walletsJson);
+const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+let wallets = [];
 let selectedFrom = null, selectedTo = null, previewAmount = 0;
+let categories = [];
 
-// Gắn event click cho từng card — KHÔNG dùng onclick inline để tránh conflict
-document.querySelectorAll('#fromGrid .ws-card').forEach(card => {
-    card.addEventListener('click', function () {
-        const walletId = parseInt(this.dataset.walletId);
-
-        // Bỏ chọn ví đích nếu trùng
-        if (selectedTo === walletId) {
-            selectedTo = null;
-            document.querySelectorAll('#toGrid .ws-card').forEach(c => {
-                c.classList.remove('selected', 'disabled-card');
-                c.querySelector('input').checked = false;
-            });
-        }
-
-        // Chọn ví nguồn
-        document.querySelectorAll('#fromGrid .ws-card').forEach(c => c.classList.remove('selected'));
-        this.classList.add('selected');
-        this.querySelector('input').checked = true;
-        selectedFrom = walletId;
-
-        // Disable card trùng ví đang chọn ở grid đích
-        syncDisabled('toGrid', walletId);
-        updatePreview();
+async function apiFetch(url, options = {}) {
+    const res = await fetch(url, {
+        headers: { 'Content-Type':'application/json', 'X-CSRF-TOKEN':CSRF, 'Accept':'application/json', ...options.headers },
+        ...options,
     });
-});
+    return res.json();
+}
 
-document.querySelectorAll('#toGrid .ws-card').forEach(card => {
-    card.addEventListener('click', function () {
-        const walletId = parseInt(this.dataset.walletId);
+function showAlert(msg, type = 'success') {
+    const el = document.createElement('div');
+    el.className = `alert alert-${type}`;
+    el.textContent = (type === 'success' ? '✓ ' : '⚠ ') + msg;
+    document.getElementById('alertContainer').appendChild(el);
+    setTimeout(() => { el.style.transition='opacity .3s'; el.style.opacity='0'; setTimeout(()=>el.remove(),320); }, 4500);
+}
 
-        // Bỏ chọn ví nguồn nếu trùng
-        if (selectedFrom === walletId) {
-            selectedFrom = null;
-            document.querySelectorAll('#fromGrid .ws-card').forEach(c => {
-                c.classList.remove('selected', 'disabled-card');
-                c.querySelector('input').checked = false;
-            });
-        }
+function fmt(n) { return Number(n).toLocaleString('vi-VN'); }
 
-        // Chọn ví đích
-        document.querySelectorAll('#toGrid .ws-card').forEach(c => c.classList.remove('selected'));
-        this.classList.add('selected');
-        this.querySelector('input').checked = true;
-        selectedTo = walletId;
+function renderForm() {
+    if (wallets.length < 2) {
+        document.getElementById('formBody').innerHTML = `
+        <div style="text-align:center;padding:40px;color:#9ca3af;">
+            <div style="font-size:40px;margin-bottom:12px;">💳</div>
+            <div style="font-weight:700;margin-bottom:8px;">Cần ít nhất 2 ví</div>
+            <div style="font-size:13px;margin-bottom:20px;">Tạo thêm ví để chuyển tiền giữa các nguồn</div>
+            <a href="{{ route('money-wallets.index') }}" class="btn-primary">+ Thêm ví</a>
+        </div>`;
+        return;
+    }
 
-        // Disable card trùng ví đang chọn ở grid nguồn
-        syncDisabled('fromGrid', walletId);
-        updatePreview();
-    });
-});
+    const today = new Date().toISOString().split('T')[0];
 
-// Disable đúng 1 card trong grid (card trùng với ví vừa chọn ở grid kia)
-// Giữ nguyên selection của các card còn lại
-function syncDisabled(gridId, disableWalletId) {
+    const catOptions = categories.reduce((acc, c) => {
+        if (!c.danh_muc_cha_id) return acc;
+        const g = c.loai_danh_muc === 'THU' ? 'Thu nhập' : 'Chi tiêu';
+        if (!acc[g]) acc[g] = [];
+        acc[g].push(c);
+        return acc;
+    }, {});
+
+    const catHtml = Object.entries(catOptions).map(([label, cats]) =>
+        `<optgroup label="${label}">${cats.map(c => `<option value="${c.id}">${c.ten_danh_muc}</option>`).join('')}</optgroup>`
+    ).join('');
+
+    document.getElementById('formBody').innerHTML = `
+    <div class="form-group">
+        <label class="form-label">Từ ví <span class="required">*</span></label>
+        <div class="wallet-select-grid" id="fromGrid">
+            ${wallets.map(w => `
+            <div class="ws-card" data-wallet-id="${w.id}" data-grid="from" onclick="selectFromWallet(${w.id})">
+                <div class="ws-icon">${w.bieu_tuong}</div>
+                <div>
+                    <div class="ws-name">${w.ten_vi}</div>
+                    <div class="ws-balance">${fmt(w.so_du)} ${w.don_vi_tien_te}</div>
+                </div>
+            </div>`).join('')}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Đến ví <span class="required">*</span></label>
+        <div class="wallet-select-grid" id="toGrid">
+            ${wallets.map(w => `
+            <div class="ws-card" data-wallet-id="${w.id}" data-grid="to" onclick="selectToWallet(${w.id})">
+                <div class="ws-icon">${w.bieu_tuong}</div>
+                <div>
+                    <div class="ws-name">${w.ten_vi}</div>
+                    <div class="ws-balance">${fmt(w.so_du)} ${w.don_vi_tien_te}</div>
+                </div>
+            </div>`).join('')}
+        </div>
+    </div>
+
+    <div class="transfer-preview" id="transferPreview">
+        <div class="preview-placeholder">Chọn ví nguồn và ví đích để xem trước</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Số tiền <span class="required">*</span></label>
+            <input id="soTien" type="number" class="form-ctrl" placeholder="0" min="1000" step="1000" oninput="updatePreviewAmount(this.value)">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Phí chuyển</label>
+            <input id="phiChuyen" type="number" class="form-ctrl" placeholder="0 (nếu có)" min="0" step="1000" value="0">
+            <div class="phi-hint">💡 Phí sẽ bị trừ thêm từ ví nguồn</div>
+        </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;">
+        <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Ngày <span class="required">*</span></label>
+            <input id="ngayChuyen" type="date" class="form-ctrl" value="${today}" max="${today}">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Danh mục <span class="required">*</span></label>
+            <select id="categoryId" class="form-ctrl">
+                <option value="">-- Chọn --</option>
+                ${catHtml}
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group" style="margin-top:16px;">
+        <label class="form-label">Ghi chú</label>
+        <input id="ghiChu" class="form-ctrl" placeholder="Lý do chuyển tiền..." maxlength="500">
+    </div>
+
+    <button onclick="submitTransfer()" class="btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:4px;">
+        Chuyển tiền
+    </button>`;
+}
+
+function selectFromWallet(id) {
+    if (selectedTo === id) {
+        selectedTo = null;
+        document.querySelectorAll('#toGrid .ws-card').forEach(c => {
+            c.classList.remove('selected', 'disabled-card');
+        });
+    }
+    document.querySelectorAll('#fromGrid .ws-card').forEach(c => c.classList.remove('selected'));
+    document.querySelector(`#fromGrid [data-wallet-id="${id}"]`)?.classList.add('selected');
+    selectedFrom = id;
+    syncDisabled('toGrid', id);
+    updatePreview();
+}
+
+function selectToWallet(id) {
+    if (selectedFrom === id) {
+        selectedFrom = null;
+        document.querySelectorAll('#fromGrid .ws-card').forEach(c => {
+            c.classList.remove('selected', 'disabled-card');
+        });
+    }
+    document.querySelectorAll('#toGrid .ws-card').forEach(c => c.classList.remove('selected'));
+    document.querySelector(`#toGrid [data-wallet-id="${id}"]`)?.classList.add('selected');
+    selectedTo = id;
+    syncDisabled('fromGrid', id);
+    updatePreview();
+}
+
+function syncDisabled(gridId, disableId) {
     document.querySelectorAll(`#${gridId} .ws-card`).forEach(c => {
         const id = parseInt(c.dataset.walletId);
-        if (id === disableWalletId) {
-            c.classList.add('disabled-card');
-        } else {
-            c.classList.remove('disabled-card');
-        }
+        c.classList.toggle('disabled-card', id === disableId);
     });
 }
 
@@ -351,6 +296,7 @@ function updatePreviewAmount(val) {
 
 function updatePreview() {
     const preview = document.getElementById('transferPreview');
+    if (!preview) return;
     const from = wallets.find(w => w.id === selectedFrom);
     const to   = wallets.find(w => w.id === selectedTo);
 
@@ -360,53 +306,98 @@ function updatePreview() {
     }
 
     const fromHtml = from
-        ? `<div class="preview-from">
-               <div style="font-size:28px;">${from.bieu_tuong}</div>
-               <div class="preview-wallet-name">${from.ten_vi}</div>
-               <div class="preview-wallet-bal">${from.so_du.toLocaleString('vi-VN')}đ</div>
-           </div>`
+        ? `<div class="preview-from"><div style="font-size:28px;">${from.bieu_tuong}</div><div class="preview-wallet-name">${from.ten_vi}</div><div class="preview-wallet-bal">${fmt(from.so_du)}đ</div></div>`
         : `<div class="preview-from" style="opacity:.4;text-align:center;font-size:13px;color:#9ca3af;">Chọn ví nguồn</div>`;
 
     const toHtml = to
-        ? `<div class="preview-to">
-               <div style="font-size:28px;">${to.bieu_tuong}</div>
-               <div class="preview-wallet-name">${to.ten_vi}</div>
-               <div class="preview-wallet-bal">${to.so_du.toLocaleString('vi-VN')}đ</div>
-           </div>`
+        ? `<div class="preview-to"><div style="font-size:28px;">${to.bieu_tuong}</div><div class="preview-wallet-name">${to.ten_vi}</div><div class="preview-wallet-bal">${fmt(to.so_du)}đ</div></div>`
         : `<div class="preview-to" style="opacity:.4;text-align:center;font-size:13px;color:#9ca3af;">Chọn ví đích</div>`;
 
     const amountHtml = previewAmount > 0
-        ? `<div style="text-align:center;flex-shrink:0;">
-               <div class="preview-arrow">→</div>
-               <div class="preview-amount">${previewAmount.toLocaleString('vi-VN')}đ</div>
-           </div>`
+        ? `<div style="text-align:center;flex-shrink:0;"><div class="preview-arrow">→</div><div class="preview-amount">${fmt(previewAmount)}đ</div></div>`
         : `<div class="preview-arrow" style="flex-shrink:0;">→</div>`;
 
     preview.innerHTML = fromHtml + amountHtml + toHtml;
 }
 
-// Khởi tạo lại state nếu có old() value từ Laravel (sau khi submit lỗi)
-(function initOldValues() {
-    const oldFrom = document.querySelector('#fromGrid input[checked]');
-    const oldTo   = document.querySelector('#toGrid input[checked]');
-    if (oldFrom) {
-        selectedFrom = parseInt(oldFrom.value);
-        oldFrom.closest('.ws-card').classList.add('selected');
-        syncDisabled('toGrid', selectedFrom);
-    }
-    if (oldTo) {
-        selectedTo = parseInt(oldTo.value);
-        oldTo.closest('.ws-card').classList.add('selected');
-        syncDisabled('fromGrid', selectedTo);
-    }
-    if (oldFrom || oldTo) updatePreview();
-})();
+async function submitTransfer() {
+    if (!selectedFrom || !selectedTo) { showAlert('Vui lòng chọn ví nguồn và ví đích', 'error'); return; }
+    const body = {
+        from_wallet_id: selectedFrom,
+        to_wallet_id:   selectedTo,
+        so_tien:        parseFloat(document.getElementById('soTien').value),
+        phi_chuyen:     parseFloat(document.getElementById('phiChuyen').value) || 0,
+        ngay_chuyen:    document.getElementById('ngayChuyen').value,
+        category_id:    document.getElementById('categoryId').value,
+        ghi_chu:        document.getElementById('ghiChu').value.trim(),
+    };
+    if (!body.so_tien || body.so_tien < 1000) { showAlert('Số tiền tối thiểu là 1.000đ', 'error'); return; }
+    if (!body.category_id) { showAlert('Vui lòng chọn danh mục', 'error'); return; }
+    if (!body.ngay_chuyen) { showAlert('Vui lòng chọn ngày', 'error'); return; }
 
-setTimeout(() => {
-    document.querySelectorAll('.alert').forEach(a => {
-        a.style.transition='opacity .3s'; a.style.opacity='0';
-        setTimeout(()=>a.remove(),320);
-    });
-}, 4500);
+    const res = await apiFetch('/api/v1/wallet-transfers', { method: 'POST', body: JSON.stringify(body) });
+    if (res.id) {
+        showAlert('Chuyển tiền thành công');
+        selectedFrom = null; selectedTo = null; previewAmount = 0;
+        loadPage();
+    } else {
+        showAlert(res.message || 'Có lỗi xảy ra', 'error');
+    }
+}
+
+async function cancelTransfer(id) {
+    if (!confirm('Hoàn tác giao dịch chuyển tiền này?')) return;
+    const res = await apiFetch(`/api/v1/wallet-transfers/${id}`, { method: 'DELETE' });
+    if (res.success) { showAlert('Đã hoàn tác giao dịch'); loadHistory(); }
+    else showAlert(res.message || 'Có lỗi xảy ra', 'error');
+}
+
+async function loadHistory() {
+    const data = await apiFetch('/api/v1/wallet-transfers');
+    const el = document.getElementById('historyList');
+    if (!data.data?.length && !data.length) {
+        el.innerHTML = '<div class="empty-msg">Chưa có giao dịch chuyển tiền nào</div>';
+        return;
+    }
+    const items = data.data || data;
+    el.innerHTML = items.map(tf => {
+        const date = new Date(tf.ngay_chuyen).toLocaleDateString('vi-VN');
+        const ago  = tf.created_at_human || '';
+        return `
+        <div class="tf-item">
+            <div class="tf-icon">↔️</div>
+            <div class="tf-info">
+                <div class="tf-route">
+                    ${tf.from_wallet?.bieu_tuong || ''} ${tf.from_wallet?.ten_vi || '?'}
+                    → ${tf.to_wallet?.bieu_tuong || ''} ${tf.to_wallet?.ten_vi || '?'}
+                </div>
+                <div class="tf-meta">
+                    ${date}
+                    ${tf.phi_chuyen > 0 ? ` · Phí: ${fmt(tf.phi_chuyen)}đ` : ''}
+                    ${tf.ghi_chu ? ` · ${tf.ghi_chu.substring(0,30)}` : ''}
+                </div>
+                <button class="tf-cancel-btn" onclick="cancelTransfer(${tf.id})">↩ Hoàn tác</button>
+            </div>
+            <div class="tf-right">
+                <div class="tf-amount">${fmt(tf.so_tien)}đ</div>
+                ${ago ? `<div class="tf-date">${ago}</div>` : ''}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+async function loadPage() {
+    const [walletRes, catRes] = await Promise.all([
+        apiFetch('/api/v1/money-wallets'),
+        apiFetch('/api/v1/categories'),
+    ]);
+    const _walletList = Array.isArray(walletRes) ? walletRes : (walletRes.data ?? []);
+    wallets    = _walletList.filter(w => w.trang_thai !== 'khong_hoat_dong');
+    categories = catRes;
+    renderForm();
+    loadHistory();
+}
+
+loadPage();
 </script>
 @endsection

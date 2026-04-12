@@ -260,7 +260,7 @@ body.dark .vis-label { color: #9ca3af; }
             @if($laAdmin)
             <button class="btn-hero" onclick="openEdit()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M13.5 3.5L16.5 6.5 7 16H4v-3z"/><path d="M11.5 5.5l3 3"/></svg> Sửa</button>
             @endif
-            <form action="{{ route('groups.leave', $group) }}" method="POST" onsubmit="return confirm('Bạn chắc chắn muốn rời nhóm?')">
+            <form action="{{ route('groups.leave', $group) }}" method="POST" class="js-rest" onsubmit="return confirm('Bạn chắc chắn muốn rời nhóm?')">
                 @csrf
                 <button type="submit" class="btn-hero danger"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M5 2h10a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M3 18h14"/><circle cx="13" cy="10.5" r="1" fill="currentColor" stroke="none"/></svg> Rời nhóm</button>
             </form>
@@ -349,7 +349,7 @@ body.dark .vis-label { color: #9ca3af; }
                         {{ $group->hien_so_du ? '(Đang bật)' : '(Đang tắt)' }}
                     </span>
                 </div>
-                <form action="{{ route('groups.toggle-visibility', $group) }}" method="POST" id="visForm">
+                <form action="{{ route('groups.toggle-visibility', $group) }}" method="POST" id="visForm" class="js-rest">
                     @csrf
                     <label class="toggle-switch" title="{{ $group->hien_so_du ? 'Nhấn để tắt' : 'Nhấn để bật' }} hiển thị số dư"
                            onclick="this.closest('form').submit(); return false;"
@@ -407,8 +407,8 @@ body.dark .vis-label { color: #9ca3af; }
                     {{-- Nút chỉ định admin: chỉ admin thấy, không áp cho chính mình --}}
                     @if($laAdmin && $m['user_id'] !== Auth::id())
                         @if($m['vai_tro'] === 'member')
-                        <form action="{{ route('groups.members.promote', [$group, $m['id']]) }}" method="POST"
-                              onsubmit="return confirm('Chỉ định {{ $m['name'] }} làm Admin?')">
+                        <form action="{{ route('groups.members.promote', [$group, $m['id']]) }}" method="POST" class="js-rest"
+                            onsubmit="return confirm('Chỉ định {{ $m['name'] }} làm Admin?')">
                             @csrf
                             <button type="submit" style="
                                 background:rgba(74,144,226,0.08);border:1px solid rgba(74,144,226,0.3);
@@ -418,8 +418,8 @@ body.dark .vis-label { color: #9ca3af; }
                             </button>
                         </form>
                         @else
-                        <form action="{{ route('groups.members.demote', [$group, $m['id']]) }}" method="POST"
-                              onsubmit="return confirm('Hạ quyền {{ $m['name'] }} xuống Member?')">
+                        <form action="{{ route('groups.members.demote', [$group, $m['id']]) }}" method="POST" class="js-rest"
+                            onsubmit="return confirm('Hạ quyền {{ $m['name'] }} xuống Member?')">
                             @csrf
                             <button type="submit" style="
                                 background:rgba(107,114,128,0.08);border:1px solid rgba(107,114,128,0.2);
@@ -433,7 +433,7 @@ body.dark .vis-label { color: #9ca3af; }
 
                     {{-- Nút xóa thành viên --}}
                     @if($laAdmin && $m['user_id'] !== Auth::id() && $m['vai_tro'] !== 'admin')
-                    <form action="{{ route('groups.members.remove', [$group, $m['id']]) }}" method="POST"
+                      <form action="{{ route('groups.members.remove', [$group, $m['id']]) }}" method="POST" class="js-rest"
                           onsubmit="return confirm('Xóa {{ $m['name'] }} khỏi nhóm?')">
                         @csrf @method('DELETE')
                         <button type="submit" style="
@@ -450,7 +450,7 @@ body.dark .vis-label { color: #9ca3af; }
 
             {{-- Invite picker --}}
             <div id="inviteBox" style="display:none; padding:16px 20px; border-top:1px solid #f3f4f6;">
-                <form action="{{ route('groups.invite', $group) }}" method="POST" id="inviteForm">
+                <form action="{{ route('groups.invite', $group) }}" method="POST" id="inviteForm" class="js-rest">
                     @csrf
                     <input type="hidden" name="email" id="inviteEmailHidden">
                     <div style="position:relative; margin-bottom:10px;">
@@ -492,8 +492,8 @@ body.dark .vis-label { color: #9ca3af; }
                 <div class="section-title" style="color:#ef4444;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 2L2 17h16z"/><path d="M10 8v4M10 14.5v.5"/></svg> Khu vực nguy hiểm</div>
             </div>
             <div style="padding:18px 22px;">
-                <form action="{{ route('groups.destroy', $group) }}" method="POST"
-                      onsubmit="return confirm('Lưu trữ nhóm {{ addslashes($group->ten_nhom) }}? Dữ liệu sẽ không bị xóa.')">
+                    <form action="{{ route('groups.destroy', $group) }}" method="POST" class="js-rest"
+                        onsubmit="return confirm('Lưu trữ nhóm {{ addslashes($group->ten_nhom) }}? Dữ liệu sẽ không bị xóa.')">
                     @csrf @method('DELETE')
                     <button type="submit" class="btn-primary btn-danger" style="width:100%;justify-content:center">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><rect x="2" y="4" width="16" height="4" rx="1"/><path d="M3 8v8a1 1 0 001 1h12a1 1 0 001-1V8"/><path d="M8 12h4"/></svg> Lưu trữ nhóm
@@ -516,7 +516,7 @@ body.dark .vis-label { color: #9ca3af; }
             <div style="font-size:17px;font-weight:800;color:white"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M13.5 3.5L16.5 6.5 7 16H4v-3z"/><path d="M11.5 5.5l3 3"/></svg> Sửa thông tin nhóm</div>
             <button onclick="closeEdit()" style="background:rgba(255,255,255,0.2);border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;color:white;font-size:16px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
         </div>
-        <form action="{{ route('groups.update', $group) }}" method="POST" style="padding:24px 26px">
+        <form action="{{ route('groups.update', $group) }}" method="POST" class="js-rest" style="padding:24px 26px">
             @csrf @method('PUT')
             <div style="margin-bottom:16px">
                 <label style="font-size:13px;font-weight:700;color:#374151;display:block;margin-bottom:6px">Tên nhóm *</label>
@@ -574,7 +574,7 @@ function searchUsers(q) {
 
     spin.style.display = 'block';
     searchTimer = setTimeout(() => {
-        fetch(`/groups/search-users?q=${encodeURIComponent(q)}&exclude=${memberIds.join(',')}`, {
+        fetch(`/api/v1/groups/search-users?q=${encodeURIComponent(q)}&exclude=${memberIds.join(',')}`, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
         .then(r => r.json())
@@ -715,5 +715,71 @@ const observer = new MutationObserver(() => {
     }
 });
 observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+</script>
+<script>
+async function refreshGroupData() {
+    try {
+        const GROUP_ID = {{ $group->id }};
+        const res = await fetch(`/groups/${GROUP_ID}`, { credentials: 'same-origin' });
+        if (!res.ok) return;
+        const j = await res.json();
+        const g = j.group;
+        if (!g) return;
+
+        document.querySelectorAll('.hero-name').forEach(el => el.textContent = g.ten_nhom);
+        document.querySelectorAll('.hero-desc').forEach(el => el.textContent = g.mo_ta || 'Chưa có mô tả');
+
+        const meta = document.querySelector('.hero-meta');
+        if (meta) {
+            meta.innerHTML = '';
+            const mode = document.createElement('span');
+            mode.className = 'hero-tag';
+            mode.textContent = g.che_do === 'balance' ? 'Phân phối số dư' : (g.che_do === 'expense' ? 'Chia khoản chi' : 'Cả hai chế độ');
+            meta.appendChild(mode);
+            const membersTag = document.createElement('span');
+            membersTag.className = 'hero-tag';
+            membersTag.textContent = (g.members||[]).length + ' thành viên';
+            meta.appendChild(membersTag);
+            const createdTag = document.createElement('span');
+            createdTag.className = 'hero-tag';
+            createdTag.textContent = new Date(g.created_at).toLocaleDateString('vi-VN');
+            meta.appendChild(createdTag);
+        }
+
+        // Update members list
+        const membersContainer = document.querySelectorAll('.section-card .member-item');
+        const membersListWrap = document.querySelector('.section-card');
+        if (membersListWrap && j.members) {
+            const listHtml = j.members.map(m => {
+                const initials = (m.name||'').substr(0,2).toUpperCase();
+                const avatar = m.avatar ? (m.avatar.startsWith('http') ? m.avatar : '/storage/' + m.avatar) : null;
+                return `
+                    <div class="member-item">
+                        ${avatar ? `<img src="${avatar}" class="member-av" style="object-fit:cover;" alt="">`:
+                        `<div class="member-av" style="background:linear-gradient(135deg,#4a90e2,#4a90e2cc)">${initials}</div>`}
+                        <div class="member-info"><div class="member-name">${escapeHtml(m.name)}</div><div class="member-email">${escapeHtml(m.email||'')}</div></div>
+                        <div class="member-meta"><span class="member-role ${m.vai_tro==='admin'?'role-admin':'role-member'}">${m.vai_tro==='admin'?'Admin':'Member'}</span></div>
+                    </div>`;
+            }).join('');
+            const memberSection = document.querySelectorAll('#inviteBox')[0];
+            // find parent where members are listed (first column)
+            const col = document.querySelector('.show-grid > div');
+            if (col) {
+                const section = col.querySelector('.section-card');
+                if (section) {
+                    // replace inner member list area by finding existing member-item parent
+                    const items = section.querySelectorAll('.member-item');
+                    if (items.length) {
+                        items[0].parentElement.innerHTML = listHtml; // best effort
+                    }
+                }
+            }
+        }
+    } catch (e) {}
+}
+
+function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+
+document.addEventListener('DOMContentLoaded', () => refreshGroupData());
 </script>
 @endsection

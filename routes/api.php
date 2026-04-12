@@ -20,23 +20,18 @@ use App\Http\Controllers\GroupExpenseController;
 use App\Http\Controllers\GroupDebtController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\EmailSettingController;
-use App\Http\Controllers\MoneyWalletController;
-use App\Http\Controllers\WalletTransferController;
+use App\Http\Controllers\Api\MoneyWalletController;
+use App\Http\Controllers\Api\WalletTransferController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\QrTransferController;
+use App\Http\Controllers\Api\QrTransferController;
 
 /*
+|--------------------------------------------------------------------------
 | API Routes
 |
 | Tất cả routes đều có prefix /api/v1
-| VD: /api/v1/auth/login, /api/v1/transactions ...
-|
-| Yêu cầu:
-| 1. composer require laravel/sanctum
-| 2. php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
-| 3. php artisan migrate
-| 4. Thêm HasApiTokens vào User model
-|
+| VD: /api/v1/auth/login, /api/v1/groups/...
+|--------------------------------------------------------------------------
 */
 
 Route::prefix('v1')->name('api.')->group(function () {
@@ -45,15 +40,13 @@ Route::prefix('v1')->name('api.')->group(function () {
     | AUTH ROUTES (public — không cần token)
     */
     Route::prefix('auth')->name('auth.')->group(function () {
-
         Route::post('/register', [RegisterController::class, 'register'])->name('register');
         Route::post('/login',    [LoginController::class,    'login'])   ->name('login');
 
-        // Forgot password flow
         Route::prefix('password')->name('password.')->group(function () {
-            Route::post('/forgot', [ForgotPasswordController::class, 'sendResetCode'])->name('forgot');  // Gửi code về email
-            Route::post('/verify', [ForgotPasswordController::class, 'verifyCode'])   ->name('verify');  // Xác minh code
-            Route::post('/reset',  [ForgotPasswordController::class, 'resetPassword'])->name('reset');   // Đặt lại mật khẩu
+            Route::post('/forgot', [ForgotPasswordController::class, 'sendResetCode'])->name('forgot');
+            Route::post('/verify', [ForgotPasswordController::class, 'verifyCode'])   ->name('verify');
+            Route::post('/reset',  [ForgotPasswordController::class, 'resetPassword'])->name('reset');
         });
     });
 
@@ -70,7 +63,6 @@ Route::prefix('v1')->name('api.')->group(function () {
     */
     Route::middleware('auth:sanctum')->group(function () {
 
-        // Đăng xuất
         Route::post('/auth/logout', [LoginController::class, 'logout'])->name('auth.logout');
 
         /*
@@ -90,19 +82,15 @@ Route::prefix('v1')->name('api.')->group(function () {
         | CURRENCY
         */
         Route::prefix('currency')->name('currency.')->group(function () {
-            Route::get('/',               [CurrencyController::class, 'index'])        ->name('index');
-            Route::post('/convert',       [CurrencyController::class, 'convert'])      ->name('convert');
-            Route::get('/history',        [CurrencyController::class, 'history'])      ->name('history');
-            Route::delete('/history',     [CurrencyController::class, 'clearHistory']) ->name('history.clear');
-            Route::delete('/history/{currencyHistory}', [CurrencyController::class, 'deleteHistory'])->name('history.delete');
+            Route::get('/',                              [CurrencyController::class, 'index'])        ->name('index');
+            Route::post('/convert',                      [CurrencyController::class, 'convert'])      ->name('convert');
+            Route::get('/history',                       [CurrencyController::class, 'history'])      ->name('history');
+            Route::delete('/history',                    [CurrencyController::class, 'clearHistory']) ->name('history.clear');
+            Route::delete('/history/{currencyHistory}',  [CurrencyController::class, 'deleteHistory'])->name('history.delete');
         });
 
         /*
         | PROFILE
-        | GET    /profile          → show
-        | PATCH  /profile          → update
-        | POST   /profile/avatar   → upload avatar
-        | DELETE /profile/avatar   → xóa avatar
         */
         Route::prefix('profile')->name('profile.')->group(function () {
             Route::get('/',          [ProfileController::class, 'show'])        ->name('show');
@@ -132,31 +120,18 @@ Route::prefix('v1')->name('api.')->group(function () {
 
         /*
         | CATEGORIES
-        | GET    /categories               → index
-        | POST   /categories               → store
-        | GET    /categories/{id}          → show
-        | PATCH  /categories/{id}          → update
-        | DELETE /categories/{id}          → destroy
-        | PATCH  /categories/{id}/status   → toggle status
         */
         Route::prefix('categories')->name('categories.')->group(function () {
-            Route::get('/',                    [CategoryController::class, 'index'])       ->name('index');
-            Route::post('/',                   [CategoryController::class, 'store'])       ->name('store');
-            Route::get('/{category}',          [CategoryController::class, 'show'])        ->name('show');
-            Route::patch('/{category}',        [CategoryController::class, 'update'])      ->name('update');
-            Route::delete('/{category}',       [CategoryController::class, 'destroy'])     ->name('destroy');
-            Route::patch('/{category}/status', [CategoryController::class, 'toggleStatus'])->name('toggle-status');
+            Route::get('/',                    [CategoryController::class, 'index'])        ->name('index');
+            Route::post('/',                   [CategoryController::class, 'store'])        ->name('store');
+            Route::get('/{category}',          [CategoryController::class, 'show'])         ->name('show');
+            Route::patch('/{category}',        [CategoryController::class, 'update'])       ->name('update');
+            Route::delete('/{category}',       [CategoryController::class, 'destroy'])      ->name('destroy');
+            Route::patch('/{category}/status', [CategoryController::class, 'toggleStatus']) ->name('toggle-status');
         });
 
         /*
-        | BUDGETS (Ngân sách)
-        | GET    /budgets               → index
-        | POST   /budgets               → store
-        | GET    /budgets/{id}          → show
-        | PATCH  /budgets/{id}          → update
-        | DELETE /budgets/{id}          → destroy
-        | PATCH  /budgets/{id}/status   → toggle status
-        | POST   /budgets/{id}/sync     → sync balance
+        | BUDGETS
         */
         Route::prefix('budgets')->name('budgets.')->group(function () {
             Route::get('/',                  [BudgetsController::class, 'index'])       ->name('index');
@@ -166,128 +141,108 @@ Route::prefix('v1')->name('api.')->group(function () {
             Route::delete('/{wallet}',       [BudgetsController::class, 'destroy'])     ->name('destroy');
             Route::patch('/{wallet}/status', [BudgetsController::class, 'toggleStatus'])->name('toggle-status');
             Route::post('/{wallet}/sync',    [BudgetsController::class, 'syncBalance']) ->name('sync-balance');
+            Route::get('/',                  [BudgetsController::class, 'index'])        ->name('index');
+            Route::post('/',                 [BudgetsController::class, 'store'])        ->name('store');
+            Route::get('/{wallet}',          [BudgetsController::class, 'show'])         ->name('show');
+            Route::patch('/{wallet}',        [BudgetsController::class, 'update'])       ->name('update');
+            Route::delete('/{wallet}',       [BudgetsController::class, 'destroy'])      ->name('destroy');
+            Route::patch('/{wallet}/status', [BudgetsController::class, 'toggleStatus']) ->name('toggle-status');
+            Route::post('/{wallet}/sync',    [BudgetsController::class, 'syncBalance'])  ->name('sync-balance');
         });
 
         /*
         | TRANSACTIONS
-        | GET    /transactions       → index
-        | POST   /transactions       → store
-        | GET    /transactions/{id}  → show
-        | PATCH  /transactions/{id}  → update
-        | DELETE /transactions/{id}  → destroy
         */
         Route::apiResource('transactions', TransactionController::class);
 
         /*
+        |--------------------------------------------------------------------------
         | GROUPS (Split bill)
+        | search-users phải đứng TRƯỚC /{group} để tránh bị match nhầm
+        |--------------------------------------------------------------------------
         */
         Route::prefix('groups')->name('groups.')->group(function () {
 
+            Route::get('/search-users', [SplitGroupController::class, 'searchUsers'])->name('search-users');
             Route::get('/',             [SplitGroupController::class, 'index'])      ->name('index');
             Route::post('/',            [SplitGroupController::class, 'store'])      ->name('store');
-            Route::get('/search-users', [SplitGroupController::class, 'searchUsers'])->name('search-users');
             Route::get('/{group}',      [SplitGroupController::class, 'show'])       ->name('show');
             Route::patch('/{group}',    [SplitGroupController::class, 'update'])     ->name('update');
             Route::delete('/{group}',   [SplitGroupController::class, 'destroy'])    ->name('destroy');
             Route::patch('/{group}/balance-visibility', [SplitGroupController::class, 'toggleBalanceVisibility'])->name('toggle-visibility');
 
             // Members
-            Route::prefix('/{group}/members')->name('members.')->group(function () {
-                Route::post('/',               [GroupMemberController::class, 'invite']) ->name('invite');
-                Route::delete('/leave',        [GroupMemberController::class, 'leave'])  ->name('leave');
-                Route::delete('/{member}',     [GroupMemberController::class, 'remove']) ->name('remove');
-                Route::patch('/{member}/role', [GroupMemberController::class, 'promote'])->name('promote');
-            });
+            Route::post('/{group}/members',                [GroupMemberController::class, 'invite']) ->name('members.invite');
+            Route::delete('/{group}/members/leave',        [GroupMemberController::class, 'leave'])  ->name('members.leave');
+            Route::delete('/{group}/members/{member}',     [GroupMemberController::class, 'remove']) ->name('members.remove');
+            Route::patch('/{group}/members/{member}/role', [GroupMemberController::class, 'promote'])->name('members.promote');
 
             // Balance & Proposals
-            Route::prefix('/{group}/balance')->name('balance.')->group(function () {
-                Route::get('/',                               [GroupBalanceController::class, 'index'])  ->name('index');
-                Route::post('/proposals',                     [GroupBalanceController::class, 'propose'])->name('propose');
-                Route::patch('/proposals/{proposal}/approve', [GroupBalanceController::class, 'approve'])->name('approve');
-                Route::patch('/proposals/{proposal}/reject',  [GroupBalanceController::class, 'reject']) ->name('reject');
-                Route::patch('/proposals/{proposal}/cancel',  [GroupBalanceController::class, 'cancel']) ->name('cancel');
-            });
+            Route::get('/{group}/balance',                                [GroupBalanceController::class, 'index'])  ->name('balance.index');
+            Route::post('/{group}/balance/proposals',                     [GroupBalanceController::class, 'propose'])->name('balance.propose');
+            Route::patch('/{group}/balance/proposals/{proposal}/approve', [GroupBalanceController::class, 'approve'])->name('balance.approve');
+            Route::patch('/{group}/balance/proposals/{proposal}/reject',  [GroupBalanceController::class, 'reject']) ->name('balance.reject');
+            Route::patch('/{group}/balance/proposals/{proposal}/cancel',  [GroupBalanceController::class, 'cancel']) ->name('balance.cancel');
 
             // Expenses
-            Route::prefix('/{group}/expenses')->name('expense.')->group(function () {
-                Route::get('/',                               [GroupExpenseController::class, 'index'])  ->name('index');
-                Route::post('/',                              [GroupExpenseController::class, 'store'])  ->name('store');
-                Route::patch('/proposals/{proposal}/approve', [GroupExpenseController::class, 'approve'])->name('approve');
-                Route::patch('/proposals/{proposal}/reject',  [GroupExpenseController::class, 'reject']) ->name('reject');
-                Route::patch('/proposals/{proposal}/cancel',  [GroupExpenseController::class, 'cancel']) ->name('cancel');
-            });
+            Route::get('/{group}/expenses',                                [GroupExpenseController::class, 'index'])  ->name('expense.index');
+            Route::post('/{group}/expenses',                               [GroupExpenseController::class, 'store'])  ->name('expense.store');
+            Route::patch('/{group}/expenses/proposals/{proposal}/approve', [GroupExpenseController::class, 'approve'])->name('expense.approve');
+            Route::patch('/{group}/expenses/proposals/{proposal}/reject',  [GroupExpenseController::class, 'reject']) ->name('expense.reject');
+            Route::patch('/{group}/expenses/proposals/{proposal}/cancel',  [GroupExpenseController::class, 'cancel']) ->name('expense.cancel');
 
             // Debts
-            Route::prefix('/{group}/debts')->name('debt.')->group(function () {
-                Route::post('/',               [GroupDebtController::class, 'store'])  ->name('store');
-                Route::get('/summary',         [GroupDebtController::class, 'summary'])->name('summary');
-                Route::patch('/{debt}/settle', [GroupDebtController::class, 'settle']) ->name('settle');
-            });
+            Route::post('/{group}/debts',                [GroupDebtController::class, 'store'])  ->name('debt.store');
+            Route::get('/{group}/debts/summary',         [GroupDebtController::class, 'summary'])->name('debt.summary');
+            Route::patch('/{group}/debts/{debt}/settle', [GroupDebtController::class, 'settle']) ->name('debt.settle');
         });
 
         /*
         | NOTIFICATIONS
-        | GET    /notifications                       → index
-        | GET    /notifications/dropdown              → 5-10 gần nhất
-        | GET    /notifications/by-date               → group theo ngày
-        | GET    /notifications/badge                 → số unread
-        | PATCH  /notifications/read-all              → đánh dấu tất cả đã đọc
-        | PATCH  /notifications/{id}/read             → đánh dấu 1 đã đọc
-        | POST   /notifications/invite-action/{token} → xử lý invite
         */
         Route::prefix('notifications')->name('notifications.')->group(function () {
-            Route::get('/',                       [NotificationController::class, 'index'])            ->name('index');
-            Route::get('/dropdown',               [NotificationController::class, 'dropdown'])         ->name('dropdown');
-            Route::get('/by-date',                [NotificationController::class, 'byDate'])           ->name('by-date');
-            Route::get('/badge',                  [NotificationController::class, 'badge'])            ->name('badge');
-            Route::patch('/read-all',             [NotificationController::class, 'markAllRead'])      ->name('mark-all-read');
-            Route::patch('/{notification}/read',  [NotificationController::class, 'markRead'])         ->name('mark-read');
-            Route::post('/invite-action/{token}', [NotificationController::class, 'handleInviteAction'])->name('invite-action');
+            Route::get('/',                        [NotificationController::class, 'index'])             ->name('index');
+            Route::get('/dropdown',                [NotificationController::class, 'dropdown'])          ->name('dropdown');
+            Route::get('/by-date',                 [NotificationController::class, 'byDate'])            ->name('by-date');
+            Route::get('/badge',                   [NotificationController::class, 'badge'])             ->name('badge');
+            Route::patch('/read-all',              [NotificationController::class, 'markAllRead'])       ->name('mark-all-read');
+            Route::patch('/{notification}/read',   [NotificationController::class, 'markRead'])          ->name('mark-read');
+            Route::post('/invite-action/{token}',  [NotificationController::class, 'handleInviteAction'])->name('invite-action');
         });
 
         /*
-        | MONEY WALLETS (Ví tiền thực)
-        | GET    /money-wallets                → index
-        | POST   /money-wallets                → store
-        | GET    /money-wallets/{id}           → show
-        | PATCH  /money-wallets/{id}           → update
-        | DELETE /money-wallets/{id}           → destroy
-        | POST   /money-wallets/{id}/restore   → khôi phục ví đã xóa
-        | PATCH  /money-wallets/{id}/balance   → điều chỉnh số dư
+        |--------------------------------------------------------------------------
+        | MONEY WALLETS
+        | /summary và /qr/* phải đứng TRƯỚC /{moneyWallet} để tránh match nhầm
+        |--------------------------------------------------------------------------
         */
         Route::prefix('money-wallets')->name('money-wallets.')->group(function () {
-            Route::get('/',                        [MoneyWalletController::class, 'index'])  ->name('index');
-            Route::post('/',                       [MoneyWalletController::class, 'store'])  ->name('store');
-            Route::get('/{moneyWallet}',           [MoneyWalletController::class, 'show'])   ->name('show');
-            Route::patch('/{moneyWallet}',         [MoneyWalletController::class, 'update']) ->name('update');
-            Route::delete('/{moneyWallet}',        [MoneyWalletController::class, 'destroy'])->name('destroy');
-            Route::post('/{moneyWallet}/restore',  [MoneyWalletController::class, 'restore'])->name('restore');
-            Route::patch('/{moneyWallet}/balance', [MoneyWalletController::class, 'adjust']) ->name('adjust');
+
+            Route::get('/',         [MoneyWalletController::class, 'index'])->name('index');
+            Route::post('/',        [MoneyWalletController::class, 'store'])->name('store');
+            Route::get('/summary',  [MoneyWalletController::class, 'summary'])->name('summary');
+
+            // QR — phải đứng TRƯỚC /{moneyWallet}
+            Route::get('/qr/history',                [QrTransferController::class, 'history']) ->name('qr.history');
+            Route::post('/qr/generate',              [QrTransferController::class, 'generate'])->name('qr.generate');
+            Route::get('/qr/{token}',                [QrTransferController::class, 'show'])    ->name('qr.show');
+            Route::post('/qr/{token}/confirm',       [QrTransferController::class, 'confirm']) ->name('qr.confirm');
+            Route::post('/qr/{qrTransfer}/cancel',   [QrTransferController::class, 'cancel'])  ->name('qr.cancel');
+
+            // Wallet CRUD & sub-resources
+            Route::get('/{moneyWallet}',                    [MoneyWalletController::class, 'show'])        ->name('show');
+            Route::match(['PUT','PATCH'], '/{moneyWallet}', [MoneyWalletController::class, 'update'])      ->name('update');
+            Route::delete('/{moneyWallet}',                 [MoneyWalletController::class, 'destroy'])     ->name('destroy');
+            Route::post('/{moneyWallet}/restore',           [MoneyWalletController::class, 'restore'])     ->name('restore');
+            Route::post('/{moneyWallet}/adjust',            [MoneyWalletController::class, 'adjust'])      ->name('adjust');
+            Route::patch('/{moneyWallet}/balance',          [MoneyWalletController::class, 'adjust'])      ->name('balance');
+            Route::get('/{moneyWallet}/transactions',       [MoneyWalletController::class, 'transactions'])->name('transactions');
+            Route::get('/{moneyWallet}/transfers',          [MoneyWalletController::class, 'transfers'])   ->name('transfers');
+            Route::get('/{moneyWallet}/adjustments',        [MoneyWalletController::class, 'adjustments']) ->name('adjustments');
         });
 
         /*
-        | QR TRANSFERS (Chuyển tiền qua QR)
-        | Tách ra khỏi money-wallets vì QR không phải sub-resource của 1 wallet cụ thể
-        |
-        | GET    /qr-transfers                     → index (danh sách QR)
-        | POST   /qr-transfers                     → store (tạo QR mới)
-        | DELETE /qr-transfers/{id}                → cancel (huỷ QR)
-        | GET    /qr-transfers/scan/{token}        → xem trang scan
-        | POST   /qr-transfers/scan/{token}/confirm → xác nhận chuyển tiền
-        */
-        Route::prefix('qr-transfers')->name('qr-transfers.')->group(function () {
-            Route::get('/',                       [QrTransferController::class, 'index'])   ->name('index');
-            Route::post('/',                      [QrTransferController::class, 'generate'])->name('store');
-            Route::delete('/{qrTransfer}',        [QrTransferController::class, 'cancel'])  ->name('destroy');
-            Route::get('/scan/{token}',           [QrTransferController::class, 'scanPage'])->name('scan');
-            Route::post('/scan/{token}/confirm',  [QrTransferController::class, 'confirm']) ->name('confirm');
-        });
-
-        /*
-        | WALLET TRANSFERS (Chuyển tiền giữa các ví)
-        | GET    /wallet-transfers       → index
-        | POST   /wallet-transfers       → store
-        | DELETE /wallet-transfers/{id}  → destroy
+        | WALLET TRANSFERS
         */
         Route::prefix('wallet-transfers')->name('wallet-transfers.')->group(function () {
             Route::get('/',                    [WalletTransferController::class, 'index'])  ->name('index');
@@ -297,11 +252,6 @@ Route::prefix('v1')->name('api.')->group(function () {
 
         /*
         | AI ASSISTANT
-        | GET    /ai/suggestions  → gợi ý tự động
-        | GET    /ai/insights     → phân tích tổng quan
-        | POST   /ai/chat         → chat với AI
-        | POST   /ai/analyze      → phân tích theo yêu cầu
-        | DELETE /ai/history      → xóa lịch sử chat
         */
         Route::prefix('ai')->name('ai.')->group(function () {
             Route::get('/suggestions', [AIAssistantController::class, 'suggestions'])->name('suggestions');
@@ -310,5 +260,7 @@ Route::prefix('v1')->name('api.')->group(function () {
             Route::post('/analyze',    [AIAssistantController::class, 'analyze'])    ->name('analyze');
             Route::delete('/history',  [AIAssistantController::class, 'clearHistory'])->name('clear-history');
         });
+
     }); // end auth:sanctum
-});
+
+}); // end v1

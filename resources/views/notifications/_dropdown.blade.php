@@ -354,7 +354,7 @@ let currentTab      = 'all';
 let notifOpen       = false;
 let notifLoaded     = false;
 let badgePollingTimer = null;
-let timeAgoTimer    = null; 
+let timeAgoTimer    = null;
 
 function calcTimeAgo(unixTimestamp) {
     if (!unixTimestamp) return 'Không rõ';
@@ -447,8 +447,8 @@ function renderList() {
     if (items.length === 0) {
         // Định nghĩa icon và văn bản dựa trên tab hiện tại
         const isEmptyUnread = currentTab === 'unread';
-        
-        const iconSvg = isEmptyUnread 
+
+        const iconSvg = isEmptyUnread
             ? `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
@@ -458,8 +458,8 @@ function renderList() {
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>`; // Icon chuông trống màu xám
 
-        const message = isEmptyUnread 
-            ? 'Không có thông báo chưa đọc' 
+        const message = isEmptyUnread
+            ? 'Không có thông báo chưa đọc'
             : 'Chưa có thông báo nào';
 
         // Đổ dữ liệu vào HTML
@@ -579,7 +579,7 @@ function renderItem(n) {
 async function onItemClick(e, id, url) {
     e.preventDefault();
     try {
-        await fetch(`{{ url('/api/monaxe/notifications') }}/${id}/read`, {
+        await fetch(`{{ url('/notifications') }}/${id}/read`, {
             method: 'PATCH',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
@@ -604,7 +604,7 @@ async function handleInvite(token, action, notifId, btn) {
     wrap.innerHTML = '<span style="font-size:12px;color:#9ca3af;padding:4px 0;">Đang xử lý...</span>';
 
     try {
-        const res  = await fetch(`/api/monaxe/notifications/invite-action/${token}`, {
+        const res  = await fetch(`/notifications/invite-action/${token}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

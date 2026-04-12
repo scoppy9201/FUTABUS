@@ -44,6 +44,10 @@ class SplitGroupController extends Controller
                         ];
                     });
 
+        if (request()->wantsJson()) {
+            return response()->json(['groups' => $groups]);
+        }
+
         return view('groups.index', compact('groups'));
     }
 
@@ -82,6 +86,17 @@ class SplitGroupController extends Controller
             ->where('trang_thai', 'pending')->count();
         $pendingExpense = $group->expenseProposals()
             ->where('trang_thai', 'pending')->count();
+
+        if (request()->wantsJson()) {
+            return response()->json([
+                'group' => $group,
+                'members' => $members,
+                'laAdmin' => $laAdmin,
+                'hienSoDu' => $hienSoDu,
+                'pendingBalance' => $pendingBalance,
+                'pendingExpense' => $pendingExpense,
+            ]);
+        }
 
         return view('groups.show', compact(
             'group', 'members', 'laAdmin', 'hienSoDu',
@@ -125,11 +140,23 @@ class SplitGroupController extends Controller
 
             DB::commit();
 
+            if (request()->wantsJson()) {
+                return response()->json([
+                    'message' => "Tạo nhóm \"{$group->ten_nhom}\" thành công!",
+                    'group' => $group,
+                    'redirect' => route('groups.show', $group),
+                ], 201);
+            }
+
             return redirect()->route('groups.show', $group)
                 ->with('success', "Tạo nhóm \"{$group->ten_nhom}\" thành công!");
 
         } catch (\Exception $e) {
             DB::rollBack();
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
+            }
+
             return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage())->withInput();
         }
     }
@@ -151,6 +178,14 @@ class SplitGroupController extends Controller
             'che_do'   => $validated['che_do'],
         ]);
 
+        if (request()->wantsJson()) {
+            return response()->json([
+                'message' => 'Cập nhật nhóm thành công!',
+                'group' => $group,
+                'redirect' => route('groups.show', $group),
+            ]);
+        }
+
         return redirect()->route('groups.show', $group)
             ->with('success', 'Cập nhật nhóm thành công!');
     }
@@ -162,6 +197,14 @@ class SplitGroupController extends Controller
 
         $group->update(['trang_thai' => 'archived']);
 
+        if (request()->wantsJson()) {
+            return response()->json([
+                'message' => "Đã lưu trữ nhóm \"{$group->ten_nhom}\".",
+                'group_id' => $group->id,
+                'redirect' => route('groups.index'),
+            ]);
+        }
+
         return redirect()->route('groups.index')
             ->with('success', "Đã lưu trữ nhóm \"{$group->ten_nhom}\".");
     }
@@ -172,6 +215,10 @@ class SplitGroupController extends Controller
         $this->assertAdmin($group);
 
         if (!in_array($group->che_do, ['balance', 'both'])) {
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Nhóm này không hỗ trợ chế độ phân phối số dư.'], 422);
+            }
+
             return back()->with('error', 'Nhóm này không hỗ trợ chế độ phân phối số dư.');
         }
 
@@ -180,6 +227,10 @@ class SplitGroupController extends Controller
         $msg = $group->fresh()->hien_so_du
             ? 'Đã bật hiển thị số dư cho các thành viên.'
             : 'Đã tắt hiển thị số dư.';
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => $msg, 'hien_so_du' => $group->fresh()->hien_so_du]);
+        }
 
         return back()->with('success', $msg);
     }

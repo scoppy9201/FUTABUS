@@ -364,8 +364,8 @@
                     <strong style="color:#1e293b;">Hướng dẫn Gmail:</strong><br>
                     Bật 2FA → <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:#4a90e2; font-weight:500;">myaccount.google.com/apppasswords</a>
                     → Tạo App Password → Dùng thay cho mật khẩu Google thường.<br>
-                    <strong>Host:</strong> <code style="background:#fff; padding:2px 4px; border-radius:4px;">smtp.gmail.com</code> &nbsp;|&nbsp; 
-                    <strong>Port:</strong> <code style="background:#fff; padding:2px 4px; border-radius:4px;">587</code> &nbsp;|&nbsp; 
+                    <strong>Host:</strong> <code style="background:#fff; padding:2px 4px; border-radius:4px;">smtp.gmail.com</code> &nbsp;|&nbsp;
+                    <strong>Port:</strong> <code style="background:#fff; padding:2px 4px; border-radius:4px;">587</code> &nbsp;|&nbsp;
                     <strong>Mã hóa:</strong> <code style="background:#fff; padding:2px 4px; border-radius:4px;">TLS</code>
                 </div>
             </div>
