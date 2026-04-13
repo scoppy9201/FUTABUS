@@ -607,7 +607,7 @@ body.dark .dashboard-container .export-btn {
 }
 
 /* ===== EXPORT MODAL ===== */
-.modal-overlay {
+.export-modal-overlay {
     display: none;
     position: fixed;
     inset: 0;
@@ -617,7 +617,11 @@ body.dark .dashboard-container .export-btn {
     justify-content: center;
 }
 
-.modal-content {
+.export-modal-overlay.active {
+    display: flex;
+}
+
+.export-modal-content {
     background: #fff;
     border-radius: 16px;
     width: 90%;
@@ -626,7 +630,7 @@ body.dark .dashboard-container .export-btn {
     overflow: hidden;
 }
 
-.modal-header {
+.export-modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -634,7 +638,7 @@ body.dark .dashboard-container .export-btn {
     border-bottom: 1px solid #f3f4f6;
 }
 
-.modal-title {
+.export-modal-title {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -643,7 +647,7 @@ body.dark .dashboard-container .export-btn {
     color: #1f2937;
 }
 
-.modal-close {
+.export-modal-close {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -655,18 +659,18 @@ body.dark .dashboard-container .export-btn {
     transition: background 0.2s;
 }
 
-.modal-close:hover {
+.export-modal-close:hover {
     background: #fee2e2;
 }
 
-.modal-body {
+.export-modal-body {
     display: flex;
     flex-direction: column;
     gap: 16px;
     padding: 24px;
 }
 
-.modal-actions-fixed {
+.export-modal-actions {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
@@ -674,19 +678,19 @@ body.dark .dashboard-container .export-btn {
     border-top: 1px solid #f3f4f6;
 }
 
-.form-group-compact {
+.export-form-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.form-label {
+.export-form-label {
     font-size: 13px;
     color: #374151;
 }
 
-.form-select,
-.form-control {
+.export-form-select,
+.export-form-control {
     width: 100%;
     padding: 10px 14px;
     border: 1px solid #e5e7eb;
@@ -698,31 +702,31 @@ body.dark .dashboard-container .export-btn {
     transition: border-color 0.2s;
 }
 
-.form-select:focus,
-.form-control:focus {
+.export-form-select:focus,
+.export-form-control:focus {
     outline: none;
     border-color: var(--primary);
 }
 
-.radio-group-compact {
+.export-radio-group {
     display: flex;
     gap: 16px;
 }
 
-.radio-item {
+.export-radio-item {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.radio-label-compact {
+.export-radio-label {
     font-size: 14px;
     color: #374151;
     cursor: pointer;
 }
 
-.btn-primary,
-.btn-secondary {
+.export-btn-primary,
+.export-btn-secondary {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -735,55 +739,55 @@ body.dark .dashboard-container .export-btn {
     transition: all 0.2s;
 }
 
-.btn-primary {
+.export-btn-primary {
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     color: #fff;
     box-shadow: 0 4px 12px rgba(74, 144, 226, 0.25);
 }
 
-.btn-primary:hover {
+.export-btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(74, 144, 226, 0.35);
 }
 
-.btn-secondary {
+.export-btn-secondary {
     background: #f3f4f6;
     color: #374151;
 }
 
-.btn-secondary:hover {
+.export-btn-secondary:hover {
     background: #e5e7eb;
 }
 
-/* Dark mode modal */
-body.dark .modal-content {
+/* Dark mode */
+body.dark .export-modal-content {
     background: var(--dark-card);
 }
 
-body.dark .modal-header,
-body.dark .modal-actions-fixed {
+body.dark .export-modal-header,
+body.dark .export-modal-actions {
     border-color: rgba(255, 255, 255, 0.08);
 }
 
-body.dark .modal-title,
-body.dark .radio-label-compact,
-body.dark .form-label {
+body.dark .export-modal-title,
+body.dark .export-radio-label,
+body.dark .export-form-label {
     color: #e5e7eb;
 }
 
-body.dark .form-select,
-body.dark .form-control {
+body.dark .export-form-select,
+body.dark .export-form-control {
     background: #212736;
     border-color: rgba(255, 255, 255, 0.1);
     color: #e5e7eb;
 }
 
-body.dark .modal-close,
-body.dark .btn-secondary {
+body.dark .export-modal-close,
+body.dark .export-btn-secondary {
     background: #212736;
     color: #e5e7eb;
 }
 
-body.dark .modal-close:hover {
+body.dark .export-modal-close:hover {
     background: rgba(239, 68, 68, 0.2);
 }

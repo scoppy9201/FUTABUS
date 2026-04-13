@@ -1,17 +1,17 @@
-<div class="modal-overlay" id="export-modal">
-    <div class="modal-content" style="max-width:500px">
+<div class="export-modal-overlay" id="export-modal">
+    <div class="export-modal-content">
 
         <!-- Header -->
-        <div class="modal-header">
-            <div class="modal-title">
+        <div class="export-modal-header">
+            <div class="export-modal-title">
                 Xuất báo cáo
             </div>
-            <div class="modal-close" id="close-export-modal">
+            <div class="export-modal-close" id="close-export-modal">
                 <img src="{{ asset('images/close.png') }}" style="width:14px;opacity:0.5">
             </div>
         </div>
 
-        <div class="modal-body">
+        <div class="export-modal-body">
 
             <!-- Subtitle -->
             <p style="margin:0;font-size:13px;color:var(--color-text-secondary);line-height:1.6">
@@ -21,17 +21,17 @@
             </p>
 
             <!-- Định dạng tệp -->
-            <div class="form-group-compact">
-                <label class="form-label"><strong>Định dạng tệp</strong></label>
-                <select id="export-format-select" class="form-select">
+            <div class="export-form-group">
+                <label class="export-form-label"><strong>Định dạng tệp</strong></label>
+                <select id="export-format-select" class="export-form-select">
                     <option value="xlsx">Excel (.xlsx)</option>
                     <option value="pdf">PDF (.pdf)</option>
                 </select>
             </div>
 
             <!-- Phạm vi xuất -->
-            <div class="form-group-compact">
-                <label class="form-label"><strong>Xuất khẩu</strong></label>
+            <div class="export-form-group">
+                <label class="export-form-label"><strong>Xuất khẩu</strong></label>
                 <div style="display:flex;flex-direction:column;gap:10px">
                     <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:var(--color-text-primary)">
                         <input type="radio" name="export-scope" value="all" checked
@@ -79,7 +79,7 @@
                 <input
                     type="email"
                     id="export-email-input"
-                    class="form-control"
+                    class="export-form-control"
                     placeholder="Nhập địa chỉ email nhận báo cáo"
                 >
             </div>
@@ -87,11 +87,11 @@
         </div>
 
         <!-- Footer -->
-        <div class="modal-actions-fixed">
-            <button type="button" class="btn-secondary" id="cancel-export-btn">
+        <div class="export-modal-actions">
+            <button type="button" class="export-btn-secondary" id="cancel-export-btn">
                 Huỷ bỏ
             </button>
-            <button type="button" class="btn-primary" id="confirm-export-btn">
+            <button type="button" class="export-btn-primary" id="confirm-export-btn">
                 <img src="{{ asset('images/export.png') }}" style="width:16px;filter:brightness(10)">
                 Xuất báo cáo
             </button>
@@ -105,7 +105,6 @@
 </div>
 
 <script>
-    // Hiển thị email user trong subtitle
     window.addEventListener('DOMContentLoaded', () => {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         const emailEl = document.getElementById('export-user-email');

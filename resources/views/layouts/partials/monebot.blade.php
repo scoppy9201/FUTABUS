@@ -37,7 +37,14 @@
                     </div>
                 </div>
             </div>
-            <button type="button" class="monebot-clear" id="monebotClear">Làm mới</button>
+            <div style="display:flex;gap:6px;align-items:center;">
+                <button type="button" id="monebotHistory" title="Lịch sử" style="background:none;border:none;cursor:pointer;padding:6px 8px;border-radius:8px;color:rgba(255,255,255,0.7);font-size:16px;transition:all 0.15s;">
+                    <i class="fas fa-clock-rotate-left"></i>
+                </button>
+                <button type="button" id="monebotClear" title="Cuộc trò chuyện mới" style="background:none;border:none;cursor:pointer;padding:6px 8px;border-radius:8px;color:rgba(255,255,255,0.7);font-size:16px;transition:all 0.15s;">
+                    <i class="fas fa-pen-to-square"></i>
+                </button>
+            </div>
         </div>
 
         <div class="monebot-scroll">
@@ -197,9 +204,7 @@
 
             if (isOpen) {
                 updateUnread(0);
-                window.setTimeout(function () {
-                    input.focus();
-                }, 120);
+                window.setTimeout(function () { input.focus(); }, 120);
             }
         }
 
@@ -225,6 +230,10 @@
 
             if (!isOpen && sender === 'bot') {
                 updateUnread(Math.min(unreadCount + 1, 9));
+            }
+
+            if (!options.id && !options.skipSave) {
+                saveToStorage(sender, content, options.allowHtml);
             }
         }
 
@@ -265,6 +274,34 @@
             }
 
             return 'MoneBot đang hiện diện trên toàn hệ thống để giúp bạn định hướng nhanh. Bạn có thể <a class="monebot-inline-link" href="' + loginUrl + '">đăng nhập</a> để hỏi sâu về dữ liệu tài chính, hoặc <a class="monebot-inline-link" href="' + registerUrl + '">tạo tài khoản miễn phí</a> để bắt đầu ngay.';
+        }
+
+        const STORAGE_KEY = 'monebot_history_' + (root.dataset.userInitial || 'guest');
+
+        function saveToStorage(sender, content, isHtml) {
+            const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            // Giới hạn 50 tin để không quá nặng
+            if (history.length >= 50) history.shift();
+            history.push({ sender, content, isHtml: !!isHtml });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+        }
+
+        function loadFromStorage() {
+            const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            if (history.length === 0) return;
+            
+            // Xóa hết tin nhắn cũ đã render trước khi load lại
+            messages.querySelectorAll('.monebot-msg:not(.is-static)').forEach(function(item) {
+                item.remove();
+            });
+            
+            history.forEach(function(item) {
+                appendMessage(item.sender, item.content, { allowHtml: item.isHtml, skipSave: true });
+            });
+        }
+
+        function clearStorage() {
+            localStorage.removeItem(STORAGE_KEY);
         }
 
         function sendMessage(text) {
@@ -330,6 +367,7 @@
             messages.querySelectorAll('.monebot-msg:not(.is-static)').forEach(function (item) {
                 item.remove();
             });
+            clearStorage(); 
             updateUnread(0);
             setOpen(true);
         });
@@ -374,6 +412,24 @@
             }
         });
 
+        // Expose ra window
+        window.monebotSetOpen   = setOpen;
+        window.monebotAppendMsg = appendMessage;
+        window.monebotClearMsgs = function () {
+            messages.querySelectorAll('.monebot-msg:not(.is-static)').forEach(el => el.remove());
+        };
+
+        // Gắn nút lịch sử
+        const historyBtn = document.getElementById('monebotHistory');
+        if (historyBtn) {
+            historyBtn.addEventListener('click', function () {
+                setOpen(false);
+                if (typeof openMonebotHistory === 'function') openMonebotHistory();
+            });
+        }
+
+        loadFromStorage();
         resizeInput();
     })();
 </script>
+@include('layouts.partials._modal-monebot-history')

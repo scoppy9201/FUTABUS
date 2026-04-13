@@ -255,8 +255,7 @@ Route::prefix('v1')->name('api.')->group(function () {
             Route::post('/chat',       [AIAssistantController::class, 'chat'])       ->name('chat');
             Route::post('/analyze',    [AIAssistantController::class, 'analyze'])    ->name('analyze');
             Route::delete('/history',  [AIAssistantController::class, 'clearHistory'])->name('clear-history');
+            Route::get('/history',     [AIAssistantController::class, 'getHistory']) ->name('history'); 
         });
-
-    }); // end auth:sanctum
-
-}); // end v1
+    }); 
+}); 
