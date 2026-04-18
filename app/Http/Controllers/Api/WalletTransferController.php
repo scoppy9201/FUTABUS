@@ -36,7 +36,7 @@ class WalletTransferController extends Controller
             'to_wallet_id'   => 'required|exists:money_wallets,id|different:from_wallet_id',
             'so_tien'        => 'required|numeric|min:1000|max:999999999999',
             'phi_chuyen'     => 'nullable|numeric|min:0',
-            'category_id'    => 'required|exists:categories,id',
+            'category_id'    => 'nullable|exists:categories,id',
             'ngay_chuyen'    => 'required|date|before_or_equal:today',
             'ghi_chu'        => 'nullable|string|max:500',
         ]);
@@ -62,7 +62,7 @@ class WalletTransferController extends Controller
         try {
             $ghiChu = $validated['ghi_chu'] ?? '';
             $ngay   = $validated['ngay_chuyen'];
-            $catId  = $validated['category_id'];
+            $catId  = $validated['category_id'] ?? null;
 
             $fromTx = Transaction::create([
                 'user_id'                => $userId,
