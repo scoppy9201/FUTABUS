@@ -59,24 +59,34 @@ class LoginController extends Controller
 
         $user = User::where('email', $googleUser->getEmail())->first();
 
+        $isNew = false; 
+
         if (!$user) {
             $user = User::create([
-                'name' => $googleUser->getName(),
-                'email' => $googleUser->getEmail(),
+                'name'      => $googleUser->getName(),
+                'email'     => $googleUser->getEmail(),
                 'google_id' => $googleUser->getId(),
-                'avatar' => $googleUser->getAvatar(),
-                'password' => Hash::make(Str::random(16)),
+                'avatar'    => $googleUser->getAvatar(),
+                'password'  => Hash::make(Str::random(16)),
             ]);
+            $isNew = true; 
         } else {
             $user->update([
                 'google_id' => $googleUser->getId(),
-                'avatar' => $googleUser->getAvatar(),
+                'avatar'    => $googleUser->getAvatar(),
             ]);
         }
 
         Auth::login($user);
 
         $token = $user->createToken('auth_token')->plainTextToken;
+
+        $message = $isNew ? 'Tạo tài khoản Google thành công!' : 'Đăng nhập Google thành công!';
+        session()->flash('pending_toast', json_encode([
+            'type'    => 'success',
+            'title'   => 'Thành công',
+            'message' => $message,
+        ]));
 
         return redirect('/dashboard?token=' . $token);
     }

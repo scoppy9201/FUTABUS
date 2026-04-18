@@ -1,13 +1,24 @@
 .dashboard-container {
     position: relative;
+    --dashboard-surface: #ffffff;
+    --dashboard-surface-soft: #f8fafc;
+    --dashboard-surface-muted: #f9fafb;
+    --dashboard-border: rgba(148, 163, 184, 0.18);
+    --dashboard-border-strong: rgba(148, 163, 184, 0.26);
+    --dashboard-text: #1f2937;
+    --dashboard-muted: #64748b;
+    --dashboard-subtle: #94a3b8;
+    --dashboard-shadow: 0 18px 44px rgba(15, 23, 42, 0.07);
+    --dashboard-heatmap-empty: #edf2f7;
 }
 
 .dashboard-container .page-header,
 .dashboard-container .stat-card,
 .dashboard-container .card {
-    background: #fff;
+    background: var(--dashboard-surface);
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--dashboard-border);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
 }
 
 .dashboard-container .page-header {
@@ -67,7 +78,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    color: #1f2937;
+    color: var(--dashboard-text);
 }
 
 .dashboard-container .page-title {
@@ -79,7 +90,7 @@
 .dashboard-container .page-subtitle {
     margin: 0;
     max-width: 620px;
-    color: #64748b;
+    color: var(--dashboard-muted);
     font-size: 14px;
     line-height: 1.55;
 }
@@ -122,7 +133,7 @@
     background: rgba(255, 255, 255, 0.9);
     font-size: 14px;
     font-weight: 600;
-    color: #1f2937;
+    color: var(--dashboard-text);
     box-shadow: 0 10px 30px rgba(255, 255, 255, 0.28);
 }
 
@@ -159,6 +170,11 @@
 .dashboard-container .card:hover {
     transform: translateY(-4px);
     box-shadow: 0 10px 32px rgba(0, 0, 0, 0.1);
+}
+
+body.dark .dashboard-container .stat-card:hover,
+body.dark .dashboard-container .card:hover {
+    box-shadow: 0 24px 54px rgba(2, 6, 23, 0.42);
 }
 
 .dashboard-container .stat-card {
@@ -200,14 +216,14 @@
     margin-bottom: 8px;
     font-size: 13px;
     font-weight: 600;
-    color: #6b7280;
+    color: var(--dashboard-muted);
     text-transform: uppercase;
 }
 
 .dashboard-container .stat-value {
     font-size: 24px;
     font-weight: 900;
-    color: #1f2937;
+    color: var(--dashboard-text);
     line-height: 1.15;
 }
 
@@ -268,7 +284,7 @@
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    background: #f3f4f6;
+    background: var(--dashboard-surface-soft);
     text-decoration: none;
 }
 
@@ -297,14 +313,15 @@
     gap: 12px;
     padding: 12px;
     border-radius: 10px;
-    background: #f9fafb;
+    background: var(--dashboard-surface-muted);
+    border: 1px solid rgba(148, 163, 184, 0.12);
 }
 
 .dashboard-container .transaction-item:hover,
 .dashboard-container .category-item:hover,
 .dashboard-container .budget-warning-item:hover {
     transform: translateX(4px);
-    background: #f3f4f6;
+    background: var(--dashboard-surface-soft);
 }
 
 .dashboard-container .transaction-icon,
@@ -338,7 +355,7 @@
 .dashboard-container .budget-warning-name {
     font-size: 14px;
     font-weight: 600;
-    color: #1f2937;
+    color: var(--dashboard-text);
 }
 
 .dashboard-container .transaction-amount,
@@ -422,7 +439,7 @@
 .dashboard-container .dashboard-state {
     padding: 40px 20px;
     text-align: center;
-    color: #9ca3af;
+    color: var(--dashboard-muted);
 }
 
 .dashboard-container .empty-state-mini img {
@@ -460,6 +477,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    padding: 12px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(255, 255, 255, 0.98));
+    border: 1px solid var(--dashboard-border);
+    overflow: hidden;
 }
 
 .dashboard-container .chart-shell canvas {
@@ -467,10 +490,97 @@
     width: 100% !important;
 }
 
+.dashboard-container .dashboard-search {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--dashboard-border);
+    background: var(--dashboard-surface-soft);
+    color: var(--dashboard-text);
+    font-size: 13px;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-container .dashboard-search:focus {
+    outline: none;
+    border-color: rgba(74, 144, 226, 0.45);
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.08);
+}
+
+.dashboard-container .heatmap-grid {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 6px;
+}
+
+.dashboard-container .heatmap-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    padding: 0 1px;
+    font-size: 10px;
+    color: var(--dashboard-muted);
+}
+
+.dashboard-container .heatmap-legend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--dashboard-muted);
+}
+
+.dashboard-container .heatmap-legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+}
+
+.dashboard-container .heatmap-cell {
+    width: calc((100% - 116px) / 30);
+    min-width: 18px;
+    aspect-ratio: 1;
+    border-radius: 4px;
+    border: 1px solid var(--dashboard-border);
+    cursor: default;
+    position: relative;
+}
+
+.dashboard-container .heatmap-cell.is-today {
+    border: 2px solid var(--primary);
+}
+
+body.dark .dashboard-container {
+    --dashboard-surface: #191d27;
+    --dashboard-surface-soft: #141a24;
+    --dashboard-surface-muted: #111827;
+    --dashboard-border: rgba(255, 255, 255, 0.08);
+    --dashboard-border-strong: rgba(255, 255, 255, 0.14);
+    --dashboard-text: #e5e7eb;
+    --dashboard-muted: #94a3b8;
+    --dashboard-subtle: #64748b;
+    --dashboard-shadow: 0 24px 60px rgba(2, 6, 23, 0.34);
+    --dashboard-heatmap-empty: rgba(148, 163, 184, 0.14);
+}
+
 body.dark .dashboard-container .page-header,
 body.dark .dashboard-container .stat-card,
 body.dark .dashboard-container .card {
-    background: var(--dark-card);
+    background: var(--dashboard-surface);
+    border: 1px solid var(--dashboard-border);
+    box-shadow: var(--dashboard-shadow);
+}
+
+body.dark .dashboard-container .page-header {
+    background:
+        radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 28%),
+        linear-gradient(135deg, rgba(74, 144, 226, 0.18), rgba(25, 29, 39, 0.98) 42%);
 }
 
 body.dark .dashboard-container .page-title,
@@ -478,9 +588,12 @@ body.dark .dashboard-container .card-title,
 body.dark .dashboard-container .transaction-name,
 body.dark .dashboard-container .category-name,
 body.dark .dashboard-container .budget-warning-name,
-body.dark .dashboard-container .stat-value,
-body.dark .dashboard-container .page-subtitle {
+body.dark .dashboard-container .stat-value {
     color: #e5e7eb;
+}
+
+body.dark .dashboard-container .page-subtitle {
+    color: #9fb0c6;
 }
 
 body.dark .dashboard-container .stat-label,
@@ -494,13 +607,14 @@ body.dark .dashboard-container .dashboard-state {
 body.dark .dashboard-container .transaction-item,
 body.dark .dashboard-container .category-item,
 body.dark .dashboard-container .card-menu {
-    background: #212736;
+    background: var(--dashboard-surface-soft);
+    border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 body.dark .dashboard-container .transaction-item:hover,
 body.dark .dashboard-container .category-item:hover,
 body.dark .dashboard-container .card-menu:hover {
-    background: #2a3147;
+    background: #20283a;
 }
 
 body.dark .dashboard-container .date-filter select {
@@ -520,12 +634,34 @@ body.dark .dashboard-container .category-bar {
     background: rgba(255, 255, 255, 0.08);
 }
 
+body.dark .dashboard-container .dashboard-search {
+    background: var(--dashboard-surface-soft);
+    border-color: var(--dashboard-border);
+    color: var(--dashboard-text);
+}
+
+body.dark .dashboard-container .dashboard-search:focus {
+    background: rgba(17, 24, 39, 0.96);
+    box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.14);
+}
+
+body.dark .dashboard-container .chart-shell {
+    background: linear-gradient(180deg, rgba(20, 26, 36, 0.98), rgba(17, 24, 39, 0.96));
+    border-color: var(--dashboard-border);
+}
+
 body.dark .dashboard-container .budget-warning-item.warning {
     background: rgba(245, 158, 11, 0.12);
 }
 
 body.dark .dashboard-container .budget-warning-item.danger {
     background: rgba(239, 68, 68, 0.12);
+}
+
+body.dark .dashboard-alert {
+    border-color: rgba(248, 113, 113, 0.24);
+    background: rgba(127, 29, 29, 0.22);
+    color: #fecaca;
 }
 
 .dashboard-container .date-filter {

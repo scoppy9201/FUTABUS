@@ -103,11 +103,3 @@
 <div id="export-modal-root"
     data-export-icon="{{ asset('images/export.png') }}">
 </div>
-
-<script>
-    window.addEventListener('DOMContentLoaded', () => {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const emailEl = document.getElementById('export-user-email');
-        if (emailEl && user.email) emailEl.textContent = user.email;
-    });
-</script>

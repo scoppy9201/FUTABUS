@@ -1268,7 +1268,7 @@ async function handleCreate(e) {
         loadTransactions(currentPage);
     } catch (err) {
         if (err.errors) showFormErrors(err.errors, 'create');
-        if (err.message) showToast(err.message, 'error');
+        if (err.message) window.showToast({ type: 'error', message: err.message });
     }
 }
 

@@ -131,6 +131,7 @@ profileDropdown?.addEventListener('click', (event) => {
         '/login', '/register', '/logout',
         '/auth/google', '/forgot-password',
         '/verify-code', '/reset-password',
+        '/change-password',
     ];
 
     function shouldExclude(url) {
@@ -171,6 +172,33 @@ profileDropdown?.addEventListener('click', (event) => {
         });
     }
 
+    async function executeContentScripts(container) {
+        const scripts = Array.from(container.querySelectorAll('script'));
+
+        for (const old of scripts) {
+            if (old.src) {
+                if (document.querySelector(`script[src="${old.src}"]`)) {
+                    old.remove();
+                    continue;
+                }
+
+                await new Promise((resolve, reject) => {
+                    const s = document.createElement('script');
+                    s.src = old.src;
+                    s.async = false;
+                    s.onload = resolve;
+                    s.onerror = reject;
+                    old.replaceWith(s);
+                });
+                continue;
+            }
+
+            const s = document.createElement('script');
+            s.textContent = `(function(){ ${old.textContent} })();`;
+            old.replaceWith(s);
+        }
+    }
+
     function navigateTo(url, pushState = true) {
         if (shouldExclude(url)) {
             window.location.href = url;
@@ -195,11 +223,15 @@ profileDropdown?.addEventListener('click', (event) => {
                 }
                 return res.text();
             })
-            .then(html => {
+            .then(async html => {
                 if (!html) return;
 
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
+
+                if (typeof window.__dashboardCleanup === 'function') {
+                    window.__dashboardCleanup();
+                }
 
                 // Lấy phần nội dung bên trong #mainContent
                 const newContent = doc.getElementById('mainContent');
@@ -217,25 +249,8 @@ profileDropdown?.addEventListener('click', (event) => {
                 // Cập nhật active menu
                 updateActiveMenu(url);
 
-                // Chạy lại các <script> inline trong content mới
-                contentEl.querySelectorAll('script').forEach(old => {
-                    // Bỏ qua script external đã load rồi (sweetalert, cdn...)
-                    if (old.src) {
-                        if (!document.querySelector(`script[src="${old.src}"]`)) {
-                            const s = document.createElement('script');
-                            s.src = old.src;
-                            s.async = false;
-                            old.replaceWith(s);
-                        } else {
-                            old.remove(); 
-                        }
-                        return;
-                    }
-
-                    const s = document.createElement('script');
-                    s.textContent = `(function(){ ${old.textContent} })();`;
-                    old.replaceWith(s);
-                });
+                // Chạy lại script theo thứ tự và chờ external script load xong
+                await executeContentScripts(contentEl);
 
                 // Scroll lên đầu trang
                 window.scrollTo({ top: 0, behavior: 'smooth' });
