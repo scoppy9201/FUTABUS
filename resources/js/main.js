@@ -131,6 +131,7 @@ profileDropdown?.addEventListener('click', (event) => {
         '/login', '/register', '/logout',
         '/auth/google', '/forgot-password',
         '/verify-code', '/reset-password',
+        '/change-password',
     ];
 
     function shouldExclude(url) {

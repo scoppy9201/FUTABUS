@@ -102,8 +102,8 @@
                     <input
                         type="text"
                         id="search-transactions"
+                        class="dashboard-search"
                         placeholder="Tìm giao dịch..."
-                        style="width:100%;padding:7px 12px;border-radius:8px;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-size:13px;box-sizing:border-box"
                     >
                 </div>
                 <div id="recent-transactions"></div>
@@ -213,6 +213,7 @@
             setTimeout(() => { el.style.display = 'none'; }, 300);
         }, 4000);
     };
+    window.__dashboardCleanup?.();
     (() => {
         const page = document.getElementById('dashboardPage');
         const filter = document.getElementById('month-filter');
@@ -224,16 +225,71 @@
         const warnings = document.getElementById('budget-warnings');
         const categories = document.getElementById('top-categories');
         const wallets = document.getElementById('wallet-summary');
+        const spiking = document.getElementById('spiking-categories');
+        const expenseByDay = document.getElementById('expense-by-day');
+        const heatmap = document.getElementById('expense-heatmap');
         const pieShell = document.getElementById('expense-pie-chart-shell');
         const lineCanvas = document.getElementById('incomeExpenseChart');
+        const pieCanvas = document.getElementById('expensePieChart');
+        const barCanvas = document.getElementById('categoryBarChart');
+        const searchInput = document.getElementById('search-transactions');
         const chartColors = { success: '#10b981', danger: '#ef4444' };
-        const state = { 
-            currentPeriod: 'this_month', 
-            lineChart: null, 
-            pieChart: null, 
+        const state = {
+            currentPeriod: 'this_month',
+            lineChart: null,
+            pieChart: null,
             barChart: null,
-            recentTransactions: []  
+            recentTransactions: [],
+            lastPayload: null,
+            renderToken: 0,
+            frameTask: null,
+            idleTask: null,
+            themeObserver: null,
         };
+
+        if (!page || !filter || !content) {
+            return;
+        }
+
+        function cancelScheduledWork() {
+            if (state.frameTask !== null) {
+                cancelAnimationFrame(state.frameTask);
+                state.frameTask = null;
+            }
+
+            if (state.idleTask !== null) {
+                if ('cancelIdleCallback' in window) {
+                    window.cancelIdleCallback(state.idleTask);
+                } else {
+                    clearTimeout(state.idleTask);
+                }
+                state.idleTask = null;
+            }
+        }
+
+        function scheduleNextFrame(callback) {
+            cancelScheduledWork();
+            state.frameTask = requestAnimationFrame(() => {
+                state.frameTask = null;
+                callback();
+            });
+        }
+
+        function scheduleWhenIdle(callback, timeout = 220) {
+            const runner = () => callback();
+            if ('requestIdleCallback' in window) {
+                state.idleTask = window.requestIdleCallback(() => {
+                    state.idleTask = null;
+                    runner();
+                }, { timeout });
+                return;
+            }
+
+            state.idleTask = window.setTimeout(() => {
+                state.idleTask = null;
+                runner();
+            }, 48);
+        }
 
         function escapeHtml(value) {
             return String(value ?? '')
@@ -273,6 +329,61 @@
             }
 
             return headers;
+        }
+
+        function isDarkMode() {
+            return document.body.classList.contains('dark');
+        }
+
+        function getChartTheme() {
+            const dark = isDarkMode();
+            return {
+                dark,
+                text: dark ? '#e5e7eb' : '#1f2937',
+                muted: dark ? '#94a3b8' : '#64748b',
+                grid: dark ? 'rgba(148, 163, 184, 0.16)' : 'rgba(148, 163, 184, 0.2)',
+                border: dark ? '#191d27' : '#ffffff',
+                tooltipBg: dark ? 'rgba(15, 23, 42, 0.96)' : 'rgba(255, 255, 255, 0.96)',
+                tooltipBorder: dark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)',
+                incomeFill: dark ? 'rgba(16, 185, 129, 0.14)' : 'rgba(16, 185, 129, 0.1)',
+                expenseFill: dark ? 'rgba(239, 68, 68, 0.14)' : 'rgba(239, 68, 68, 0.1)',
+            };
+        }
+
+        function getBaseChartOptions() {
+            const theme = getChartTheme();
+
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                normalized: true,
+                devicePixelRatio: Math.min(window.devicePixelRatio || 1, 1.5),
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: theme.text,
+                            usePointStyle: true,
+                            boxWidth: 8,
+                            boxHeight: 8,
+                            padding: 16,
+                            font: {
+                                family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+                                size: 12,
+                            },
+                        },
+                    },
+                    tooltip: {
+                        backgroundColor: theme.tooltipBg,
+                        titleColor: theme.text,
+                        bodyColor: theme.text,
+                        borderColor: theme.tooltipBorder,
+                        borderWidth: 1,
+                        padding: 12,
+                        displayColors: true,
+                    },
+                },
+            };
         }
 
         // Modal export
@@ -479,7 +590,7 @@
         }
 
         // Xử lý tìm kiếm
-        document.getElementById('search-transactions')?.addEventListener('input', function () {
+        searchInput?.addEventListener('input', function () {
             const keyword = this.value.trim().toLowerCase();
             if (!keyword) {
                 renderTransactionList(state.recentTransactions);
@@ -540,6 +651,9 @@
                 return;
             }
 
+            const theme = getChartTheme();
+            const baseOptions = getBaseChartOptions();
+
             if (state.lineChart) {
                 state.lineChart.destroy();
             }
@@ -553,27 +667,35 @@
                             label: 'Thu nhap',
                             data: (monthlyData || []).map(item => Number(item.income || 0)),
                             borderColor: chartColors.success,
-                            backgroundColor: 'rgba(16,185,129,.1)',
+                            backgroundColor: theme.incomeFill,
                             borderWidth: 3,
-                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            pointHitRadius: 14,
+                            tension: 0.32,
                             fill: true,
                         },
                         {
                             label: 'Chi tieu',
                             data: (monthlyData || []).map(item => Number(item.expense || 0)),
                             borderColor: chartColors.danger,
-                            backgroundColor: 'rgba(239,68,68,.1)',
+                            backgroundColor: theme.expenseFill,
                             borderWidth: 3,
-                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            pointHitRadius: 14,
+                            tension: 0.32,
                             fill: true,
                         }
                     ]
                 },
                 options: {
-                    responsive: true,
+                    ...baseOptions,
                     interaction: { mode: 'index', intersect: false },
                     plugins: {
+                        ...baseOptions.plugins,
                         tooltip: {
+                            ...baseOptions.plugins.tooltip,
                             callbacks: {
                                 label(context) {
                                     return `${context.dataset.label}: ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(context.parsed.y)}`;
@@ -582,12 +704,26 @@
                         }
                     },
                     scales: {
+                        x: {
+                            ticks: {
+                                color: theme.muted,
+                                maxRotation: 0,
+                            },
+                            grid: {
+                                display: false,
+                            }
+                        },
                         y: {
                             beginAtZero: true,
                             ticks: {
+                                color: theme.muted,
                                 callback(value) {
                                     return `${new Intl.NumberFormat('vi-VN', { notation: 'compact', compactDisplay: 'short' }).format(value)} VND`;
                                 }
+                            },
+                            grid: {
+                                color: theme.grid,
+                                drawBorder: false,
                             }
                         }
                     }
@@ -596,41 +732,47 @@
         }
 
         function renderPieChart(list) {
-            if (!window.Chart || !pieShell) {
+            if (!window.Chart || !pieShell || !pieCanvas) {
                 return;
             }
+
+            const theme = getChartTheme();
+            const baseOptions = getBaseChartOptions();
 
             if (state.pieChart) {
                 state.pieChart.destroy();
                 state.pieChart = null;
             }
 
+            pieCanvas.hidden = !list?.length;
+            pieShell.querySelector('.empty-state-mini')?.remove();
+
             if (!list?.length) {
-                pieShell.innerHTML = emptyState(page.dataset.emptyIcon, 'Chưa có dữ liệu chi tiêu');
+                pieShell.insertAdjacentHTML('beforeend', emptyState(page.dataset.emptyIcon, 'Chưa có dữ liệu chi tiêu'));
                 return;
             }
 
-            pieShell.innerHTML = '<canvas id="expensePieChart"></canvas>';
-
-            state.pieChart = new Chart(document.getElementById('expensePieChart'), {
+            state.pieChart = new Chart(pieCanvas, {
                 type: 'doughnut',
                 data: {
                     labels: list.map(item => item.name),
                     datasets: [{
                         data: list.map(item => Number(item.total || 0)),
                         backgroundColor: ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'],
-                        borderWidth: 3,
-                        borderColor: '#fff',
-                        hoverOffset: 10,
+                        borderWidth: 2,
+                        borderColor: theme.border,
+                        hoverOffset: 6,
                     }]
                 },
                 options: {
-                    responsive: true,
+                    ...baseOptions,
+                    cutout: '62%',
                     plugins: {
+                        ...baseOptions.plugins,
                         legend: {
                             position: 'right',
                             labels: {
-                                usePointStyle: true,
+                                ...baseOptions.plugins.legend.labels,
                                 generateLabels(chart) {
                                     const values = chart.data.datasets[0].data;
                                     const total = values.reduce((sum, item) => sum + item, 0);
@@ -651,12 +793,14 @@
         function renderBarChart(list) {
             if (!window.Chart || !list?.length) return;
 
-            const canvas = document.getElementById('categoryBarChart');
-            if (!canvas) return;
+            if (!barCanvas) return;
+
+            const theme = getChartTheme();
+            const baseOptions = getBaseChartOptions();
 
             if (state.barChart) state.barChart.destroy();
 
-            state.barChart = new Chart(canvas, {
+            state.barChart = new Chart(barCanvas, {
                 type: 'bar',
                 data: {
                     labels: list.map(i => i.ten_danh_muc),
@@ -669,14 +813,31 @@
                 },
                 options: {
                     indexAxis: 'y',   // bar nằm ngang
-                    responsive: true,
-                    plugins: { legend: { display: false } },
+                    ...baseOptions,
+                    plugins: {
+                        ...baseOptions.plugins,
+                        legend: { display: false },
+                    },
                     scales: {
                         x: {
                             ticks: {
+                                color: theme.muted,
                                 callback: v => new Intl.NumberFormat('vi-VN', {
                                     notation: 'compact', compactDisplay: 'short'
                                 }).format(v)
+                            },
+                            grid: {
+                                color: theme.grid,
+                                drawBorder: false,
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: theme.muted,
+                            },
+                            grid: {
+                                display: false,
+                                drawBorder: false,
                             }
                         }
                     }
@@ -685,22 +846,36 @@
         }
 
         function renderDashboard(data) {
+            state.lastPayload = data;
+            const renderToken = ++state.renderToken;
+            cancelScheduledWork();
+
             renderStats(data);
             renderRecentTransactions(data.recentTransactions || []);
             renderWarnings(data.warningWallets || []);
             renderTopCategories(data.topCategories || [], data.totalExpense || 0);
             renderWalletSummary(data.activeWallets || []);
-            renderLineChart(data.monthlyData || []);
-            renderPieChart(data.categoryExpenses || []);
-            renderBarChart(data.topCategories || []);
-            renderSpikingCategories(data.spikingCategories || []);
-            renderExpenseByDay(data.expenseByDay || []);
-            renderHeatmap(data.heatmap || []);
+
+            scheduleNextFrame(() => {
+                if (renderToken !== state.renderToken) return;
+
+                renderLineChart(data.monthlyData || []);
+                renderPieChart(data.categoryExpenses || []);
+
+                scheduleWhenIdle(() => {
+                    if (renderToken !== state.renderToken) return;
+
+                    renderBarChart(data.topCategories || []);
+                    renderSpikingCategories(data.spikingCategories || []);
+                    renderExpenseByDay(data.expenseByDay || []);
+                    renderHeatmap(data.heatmap || []);
+                });
+            });
         }
 
         // Cảnh báo tăng đột biến
         function renderSpikingCategories(list) {
-            const el = document.getElementById('spiking-categories');
+            const el = spiking;
             if (!el) return;
             if (!list?.length) {
                 el.innerHTML = emptyState(page.dataset.safeIcon, 'Không có danh mục tăng đột biến');
@@ -723,8 +898,12 @@
 
         // Ngày chi nhiều nhất
         function renderExpenseByDay(list) {
-            const el = document.getElementById('expense-by-day');
-            if (!el || !list?.length) return;
+            const el = expenseByDay;
+            if (!el) return;
+            if (!list?.length) {
+                el.innerHTML = emptyState(page.dataset.emptyIcon, 'Chua co du lieu theo ngay');
+                return;
+            }
             const max = Math.max(...list.map(d => d.total));
             el.innerHTML = `<div class="category-list">${list.map(item => {
                 const pct = max > 0 ? Math.round((item.total / max) * 100) : 0;
@@ -744,14 +923,18 @@
         }
 
         function renderHeatmap(list) {
-            const el = document.getElementById('expense-heatmap');
-            if (!el || !list?.length) return;
+            const el = heatmap;
+            if (!el) return;
+            if (!list?.length) {
+                el.innerHTML = emptyState(page.dataset.emptyIcon, 'Chua co heatmap chi tieu');
+                return;
+            }
 
             const max   = Math.max(...list.map(d => d.total), 1);
             const today = new Date().toISOString().slice(0, 10);
 
             function getColor(total) {
-                if (total <= 0) return 'var(--color-background-secondary)';
+                if (total <= 0) return 'var(--dashboard-heatmap-empty)';
                 const ratio = total / max;
                 if (ratio >= 0.75) return '#ef4444';
                 if (ratio >= 0.50) return '#f97316';
@@ -761,45 +944,99 @@
 
             const cells = list.map(item => {
                 const d     = new Date(item.date);
-                const label = `${d.getDate()}/${d.getMonth() + 1}`;
                 const isToday = item.date === today;
                 return `
-                    <div title="${item.date}: ${formatMoney(item.total)}"
-                        style="
-                            width: calc((100% - 116px) / 30);
-                            min-width: 18px;
-                            aspect-ratio: 1;
-                            border-radius: 4px;
-                            background: ${getColor(item.total)};
-                            border: ${isToday ? '2px solid var(--color-text-info)' : '1px solid var(--color-border-tertiary)'};
-                            cursor: default;
-                            position: relative;
-                        "
+                    <div
+                        class="heatmap-cell${isToday ? ' is-today' : ''}"
+                        title="${item.date}: ${formatMoney(item.total)}"
+                        style="background:${getColor(item.total)}"
                     ></div>`;
             }).join('');
 
             const labels = list.filter((_, i) => i % 5 === 0).map(item => {
                 const d = new Date(item.date);
-                return `<span style="font-size:10px;color:var(--color-text-secondary)">${d.getDate()}/${d.getMonth()+1}</span>`;
+                return `<span>${d.getDate()}/${d.getMonth()+1}</span>`;
             }).join('');
 
             el.innerHTML = `
-                <div style="display:flex;gap:3px;align-items:center;flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px">
+                <div class="heatmap-grid">
                     ${cells}
                 </div>
-                <div style="display:flex;justify-content:space-between;margin-top:4px;padding:0 1px">
+                <div class="heatmap-labels">
                     ${labels}
                 </div>
-                <div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:11px;color:var(--color-text-secondary)">
+                <div class="heatmap-legend">
                     <span>Ít</span>
-                    <div style="width:14px;height:14px;border-radius:3px;background:#fde68a"></div>
-                    <div style="width:14px;height:14px;border-radius:3px;background:#fbbf24"></div>
-                    <div style="width:14px;height:14px;border-radius:3px;background:#f97316"></div>
-                    <div style="width:14px;height:14px;border-radius:3px;background:#ef4444"></div>
+                    <div class="heatmap-legend-swatch" style="background:#fde68a"></div>
+                    <div class="heatmap-legend-swatch" style="background:#fbbf24"></div>
+                    <div class="heatmap-legend-swatch" style="background:#f97316"></div>
+                    <div class="heatmap-legend-swatch" style="background:#ef4444"></div>
                     <span>Nhiều</span>
                 </div>
             `;
         }
+
+        function destroyCharts() {
+            if (state.lineChart) {
+                state.lineChart.destroy();
+                state.lineChart = null;
+            }
+
+            if (state.pieChart) {
+                state.pieChart.destroy();
+                state.pieChart = null;
+            }
+
+            if (state.barChart) {
+                state.barChart.destroy();
+                state.barChart = null;
+            }
+        }
+
+        function rerenderThemeSensitiveParts() {
+            if (!state.lastPayload) return;
+
+            const renderToken = ++state.renderToken;
+            cancelScheduledWork();
+
+            scheduleNextFrame(() => {
+                if (renderToken !== state.renderToken) return;
+
+                renderLineChart(state.lastPayload.monthlyData || []);
+                renderPieChart(state.lastPayload.categoryExpenses || []);
+
+                scheduleWhenIdle(() => {
+                    if (renderToken !== state.renderToken) return;
+
+                    renderBarChart(state.lastPayload.topCategories || []);
+                    renderHeatmap(state.lastPayload.heatmap || []);
+                });
+            });
+        }
+
+        function observeThemeChanges() {
+            let lastDarkMode = isDarkMode();
+
+            state.themeObserver?.disconnect();
+            state.themeObserver = new MutationObserver(() => {
+                const nextDarkMode = isDarkMode();
+                if (nextDarkMode === lastDarkMode) return;
+
+                lastDarkMode = nextDarkMode;
+                rerenderThemeSensitiveParts();
+            });
+
+            state.themeObserver.observe(document.body, {
+                attributes: true,
+                attributeFilter: ['class'],
+            });
+        }
+
+        window.__dashboardCleanup = function () {
+            cancelScheduledWork();
+            state.themeObserver?.disconnect();
+            destroyCharts();
+        };
 
         async function loadDashboard(period = state.currentPeriod) {
             state.currentPeriod = period;
@@ -829,13 +1066,17 @@
                 filter.value = state.currentPeriod;
                 renderDashboard(data);
             } catch (error) {
+                destroyCharts();
+                state.lastPayload = null;
                 setAlert(error.message || 'Không thể tải dữ liệu dashboard.');
                 stats.innerHTML = '';
                 recent.innerHTML = emptyState(page.dataset.emptyIcon, 'Chưa có giao dịch nào trong thời gian này.');
                 warnings.innerHTML = emptyState(page.dataset.safeIcon, 'Tất cả ngân sách đều ổn định.');
                 categories.innerHTML = emptyState(page.dataset.emptyIcon, 'Chưa có dữ liệu chi tiêu.');
                 wallets.innerHTML = emptyState(page.dataset.emptyIcon, 'Chưa có ngân sách nào.');
-                renderPieChart([]);
+                spiking.innerHTML = emptyState(page.dataset.safeIcon, 'Khong co danh muc tang dot bien.');
+                expenseByDay.innerHTML = emptyState(page.dataset.emptyIcon, 'Chua co du lieu theo ngay.');
+                heatmap.innerHTML = emptyState(page.dataset.emptyIcon, 'Chua co heatmap chi tieu.');
             } finally {
                 setLoading(false);
             }
@@ -847,6 +1088,7 @@
             return;
         }
 
+        observeThemeChanges();
         filter.addEventListener('change', event => loadDashboard(event.target.value));
         loadDashboard(filter.value);
     })();

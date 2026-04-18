@@ -519,87 +519,40 @@ body.dark .modal-foot { border-color: rgba(255,255,255,0.06); background: #191d2
 </div>
 
 <script>
-function openCreate()  { document.getElementById('createModal').classList.add('active'); }
-function closeCreate() { document.getElementById('createModal').classList.remove('active'); }
+(function() {
+    function openCreate()  { document.getElementById('createModal').classList.add('active'); }
+    function closeCreate() { document.getElementById('createModal').classList.remove('active'); }
 
-function selectMode(el) {
-    document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
-    el.querySelector('input').checked = true;
-}
+    // Gắn vào window để onclick= trong HTML tìm thấy
+    window.openCreate  = openCreate;
+    window.closeCreate = closeCreate;
 
-document.getElementById('createModal').addEventListener('click', e => {
-    if (e.target === e.currentTarget) closeCreate();
-});
+    window.selectMode = function(el) {
+        document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        el.querySelector('input').checked = true;
+    };
 
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeCreate();
-});
-
-@if($errors->any())
-openCreate();
-@endif
-
-// Auto-hide alerts
-setTimeout(() => {
-    document.querySelectorAll('.alert').forEach(a => {
-        a.style.transition='opacity .3s';
-        a.style.opacity='0';
-        setTimeout(()=>a.remove(),300);
+    document.getElementById('createModal').addEventListener('click', e => {
+        if (e.target === e.currentTarget) closeCreate();
     });
-}, 4500);
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeCreate();
+    });
+
+    @if($errors->any())
+    openCreate();
+    @endif
+
+    setTimeout(() => {
+        document.querySelectorAll('.alert').forEach(a => {
+            a.style.transition = 'opacity .3s';
+            a.style.opacity = '0';
+            setTimeout(() => a.remove(), 300);
+        });
+    }, 4500);
+})();
 </script>
 
-<script>
-// Fetch groups from API and render into .groups-grid (if API returns data)
-async function fetchAndRenderGroups() {
-    try {
-        const res = await fetch('/groups', { credentials: 'same-origin' });
-        if (!res.ok) return;
-        const data = await res.json();
-        if (!data.groups) return;
-        const grid = document.querySelector('.groups-grid');
-        if (!grid) return;
-        grid.innerHTML = data.groups.map(g => {
-            const modeClass = g.che_do === 'balance' ? 'mode-balance' : (g.che_do === 'expense' ? 'mode-expense' : 'mode-both');
-            const modeName = g.che_do === 'balance' ? 'Phân phối số dư' : (g.che_do === 'expense' ? 'Chia khoản chi' : 'Cả hai chế độ');
-            const modeBadgeClass = g.che_do === 'balance' ? 'mode-b' : (g.che_do === 'expense' ? 'mode-e' : 'mode-m');
-            const created = new Date(g.created_at).toLocaleDateString('vi-VN');
-            const membersHtml = (g.members || []).slice(0,4).map(m => {
-                if (m.avatar) {
-                    const src = m.avatar.startsWith('http') ? m.avatar : '/storage/' + m.avatar;
-                    return `<img src="${src}" class="gc-av" style="object-fit:cover;" alt="">`;
-                }
-                const initials = (m.name||'').substr(0,2).toUpperCase();
-                return `<div class="gc-av" style="background:${m.color}">${initials}</div>`;
-            }).join('');
-            const extra = (g.so_thanh_vien || 0) > 4 ? `<div class="gc-av extra">+${(g.so_thanh_vien||0)-4}</div>` : '';
-            return `
-                <a href="/groups/${g.id}" class="group-card">
-                    <div class="gc-body">
-                        <div class="gc-top">
-                            <div class="gc-icon ${modeClass}"></div>
-                            <div class="gc-badges">
-                                <span class="gc-badge ${g.la_admin ? 'admin' : 'member'}">${g.la_admin ? 'Admin' : 'Thành viên'}</span>
-                                <span class="gc-badge ${modeBadgeClass}">${modeName}</span>
-                            </div>
-                        </div>
-                        <div class="gc-name">${escapeHtml(g.ten_nhom)}</div>
-                        <div class="gc-desc">${escapeHtml(g.mo_ta || 'Chưa có mô tả')}</div>
-                        <div class="gc-members"><div class="gc-avatars">${membersHtml}${extra}</div>
-                        <span class="gc-member-count">${g.so_thanh_vien||0} thành viên</span></div>
-                    </div>
-                    <div class="gc-footer"><span class="gc-date">${created}</span>
-                    <div class="gc-arrow"></div></div>
-                </a>`;
-        }).join('');
-    } catch (e) {
-        // silent
-    }
-}
-
-function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
-
-document.addEventListener('DOMContentLoaded', () => fetchAndRenderGroups());
-</script>
 @endsection

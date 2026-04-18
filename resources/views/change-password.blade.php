@@ -14,12 +14,43 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e94c5 100%);
+            background:
+                radial-gradient(circle at top left, rgba(74, 144, 226, 0.2), transparent 34%),
+                radial-gradient(circle at bottom right, rgba(74, 144, 226, 0.12), transparent 28%),
+                linear-gradient(135deg, #f5f7fa 0%, #edf2fb 52%, #e8eef8 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 40px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            pointer-events: none;
+        }
+
+        body::before {
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(74, 144, 226, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(74, 144, 226, 0.04) 1px, transparent 1px);
+            background-size: 64px 64px;
+            mask-image: radial-gradient(circle at center, black 28%, transparent 88%);
+            opacity: 0.65;
+        }
+
+        body::after {
+            inset: 0;
+            background:
+                radial-gradient(circle at -4% -10%, rgba(74, 144, 226, 0.26) 0%, transparent 26%),
+                radial-gradient(circle at 104% 108%, rgba(42, 82, 152, 0.14) 0%, transparent 30%);
+            filter: blur(14px);
+            opacity: 0.95;
         }
 
         .container {
@@ -32,6 +63,7 @@
             max-width: 900px;
             min-height: 580px;
             display: flex;
+            z-index: 1;
         }
 
         .form-section {
