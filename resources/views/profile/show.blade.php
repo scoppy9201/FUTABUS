@@ -140,13 +140,22 @@
 
                     {{-- Giới tính --}}
                     <div class="profile-field profile-field--full">
-                        <label for="profile_gender" class="profile-label">Giới tính</label>
-                        <select id="profile_gender" name="gioi_tinh" class="profile-input profile-select">
-                            <option value="">Chọn giới tính</option>
-                            <option value="Nam">Nam</option>
-                            <option value="Nữ">Nữ</option>
-                            <option value="Khác">Khác</option>
-                        </select>
+                        <label class="profile-label">Giới tính</label>
+                        <div class="custom-select-wrap" id="genderDropdown">
+                            <div class="custom-select-trigger" id="genderTrigger">
+                                <span id="genderLabel">Chọn giới tính</span>
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                    <path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <div class="custom-select-options" id="genderOptions">
+                                <div class="custom-select-option" data-value="">Chọn giới tính</div>
+                                <div class="custom-select-option" data-value="Nam">Nam</div>
+                                <div class="custom-select-option" data-value="Nữ">Nữ</div>
+                                <div class="custom-select-option" data-value="Khác">Khác</div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="profile_gender" name="gioi_tinh">
                         <span class="profile-error" id="err_gioi_tinh"></span>
                     </div>
                 </div>
@@ -295,7 +304,15 @@
                 : '';
 
             const genderSel = document.getElementById('profile_gender');
-            genderSel.value = data.gioi_tinh ?? '';
+            // Sync custom select
+            const savedGender = data.gioi_tinh ?? '';
+            genderInput.value = savedGender;
+            genderOptions.forEach(function (opt) {
+                if (opt.dataset.value === savedGender) {
+                    genderLabel.textContent = opt.textContent;
+                    opt.classList.add('selected');
+                }
+            });
 
             /* Khoá / mở khoá field Google */
             if (isGoogle) {
@@ -475,6 +492,33 @@
             }
         });
 
+
+        // Custom select giới tính
+        const genderWrap    = document.getElementById('genderDropdown');
+        const genderTrigger = document.getElementById('genderTrigger');
+        const genderLabel   = document.getElementById('genderLabel');
+        const genderInput   = document.getElementById('profile_gender');
+        const genderOptions = document.querySelectorAll('#genderOptions .custom-select-option');
+
+        genderTrigger.addEventListener('click', function (e) {
+            e.stopPropagation();
+            genderWrap.classList.toggle('open');
+        });
+
+        genderOptions.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+                const val = this.dataset.value;
+                genderInput.value  = val;
+                genderLabel.textContent = this.textContent;
+                genderOptions.forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                genderWrap.classList.remove('open');
+            });
+        });
+
+        document.addEventListener('click', function () {
+            genderWrap.classList.remove('open');
+        });
         loadProfile();
     })();
     </script>
