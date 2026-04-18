@@ -21,16 +21,18 @@
 .wallet-hero::before {
     content:''; position:absolute; top:-50px; right:-50px;
     width:200px; height:200px; background:rgba(255,255,255,0.08); border-radius:50%;
+    pointer-events: none;
 }
 .wallet-hero::after {
     content:''; position:absolute; bottom:-60px; left:40%;
     width:160px; height:160px; background:rgba(255,255,255,0.05); border-radius:50%;
+    pointer-events: none;
 }
-.hero-top { display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:24px; }
+.hero-top { display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:24px;position:relative;z-index:1; }
 .hero-icon { font-size:52px; line-height:1; }
 .hero-name { font-size:26px; font-weight:900; color:white; letter-spacing:-0.5px; margin-bottom:4px; }
 .hero-type { font-size:13px; color:rgba(255,255,255,0.75); font-weight:600; }
-.hero-actions { display:flex; gap:8px; }
+.hero-actions { display:flex; gap:8px; position:relative; z-index:2; }
 .btn-hero {
     padding:8px 16px; border-radius:10px;
     background:rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.25);
@@ -40,11 +42,11 @@
 }
 .btn-hero:hover { background:rgba(255,255,255,0.28); }
 .btn-hero.danger { background:rgba(239,68,68,0.25); border-color:rgba(239,68,68,0.4); }
-.hero-balance { margin-bottom:20px; }
+.hero-balance { margin-bottom:20px; position:relative; z-index:1; }
 .hero-balance-label { font-size:12px;color:rgba(255,255,255,0.65);font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px; }
 .hero-balance-val { font-size:44px;font-weight:900;color:white;letter-spacing:-2px;line-height:1; }
 .hero-balance-currency { font-size:20px;font-weight:600;opacity:.7;margin-left:8px; }
-.hero-stats { display:flex;gap:20px;flex-wrap:wrap; }
+.hero-stats { display:flex;gap:20px;flex-wrap:wrap;position:relative;z-index:1; }
 .hs-label { font-size:11px;color:rgba(255,255,255,0.6);font-weight:700;text-transform:uppercase;letter-spacing:0.6px; }
 .hs-val { font-size:16px;font-weight:800;color:white;margin-top:3px; }
 
@@ -426,10 +428,12 @@ async function loadAdjustments() {
 }
 
 async function loadCategories() {
-    const data = await apiFetch('/api/v1/categories');
+    const res = await apiFetch('/api/v1/categories');
+    const list = res.categories?.data ?? [];
+
     const sel = document.getElementById('adjCategory');
     const groups = {};
-    data.filter(c => c.danh_muc_cha_id).forEach(c => {
+    list.filter(c => c.danh_muc_cha_id).forEach(c => {
         const g = c.loai_danh_muc === 'THU' ? 'Thu nhập' : 'Chi tiêu';
         if (!groups[g]) groups[g] = [];
         groups[g].push(c);

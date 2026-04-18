@@ -392,7 +392,7 @@ async function loadPage() {
     ]);
     const _walletList = Array.isArray(walletRes) ? walletRes : (walletRes.data ?? []);
     wallets    = _walletList.filter(w => w.trang_thai !== 'khong_hoat_dong');
-    categories = Array.isArray(catRes) ? catRes : (catRes.data ?? []);
+    categories = catRes.categories?.data ?? (Array.isArray(catRes) ? catRes : (catRes.data ?? []));
     renderForm();
     loadHistory();
 }

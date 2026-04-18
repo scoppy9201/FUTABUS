@@ -187,20 +187,20 @@ class MoneyWalletController extends Controller
     {
         $this->checkOwnership($moneyWallet);
 
-        $activeCount = MoneyWallet::forUser(Auth::id())->active()->count();
-        if ($activeCount <= 1) {
+        $activeCount = MoneyWallet::where('user_id', Auth::id())
+            ->where('trang_thai', 'active')
+            ->where('id', '!=', $moneyWallet->id)
+            ->count();
+
+        if ($activeCount < 1) {
             return response()->json([
                 'message' => 'Không thể xóa ví duy nhất. Bạn cần ít nhất 1 ví đang hoạt động.',
             ], 422);
         }
 
-        if ($moneyWallet->canDelete()) {
-            $moneyWallet->delete();
-            return response()->json(['success' => true, 'deleted' => true]);
-        }
+        $moneyWallet->delete();
 
-        $moneyWallet->update(['trang_thai' => 'inactive']);
-        return response()->json(['success' => true, 'deleted' => false, 'message' => 'Đã ẩn ví. Lịch sử giao dịch vẫn được giữ lại.']);
+        return response()->json(['success' => true, 'deleted' => true]);
     }
 
     public function restore(MoneyWallet $moneyWallet): JsonResponse
