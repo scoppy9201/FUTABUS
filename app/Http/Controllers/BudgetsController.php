@@ -109,6 +109,19 @@ class BudgetsController extends Controller
                 ], 422);
             }
 
+            // Kiểm tra trùng tên trong tất cả ngân sách của user
+            $duplicateName = Budgets::where('user_id', Auth::id())
+                ->where('ten_ngan_sach', $validated['ten_ngan_sach'])
+                ->exists();
+
+            if ($duplicateName) {
+                DB::rollBack();
+                return response()->json([
+                    'message' => 'Tên ngân sách "' . $validated['ten_ngan_sach'] . '" đã tồn tại, vui lòng chọn tên khác!',
+                    'errors'  => ['ten_ngan_sach' => ['Tên ngân sách đã tồn tại.']],
+                ], 422);
+            }
+
             $wallet = Budgets::create([
                 'user_id'      => Auth::id(),
                 'category_id'  => $validated['category_id'],
@@ -151,6 +164,20 @@ class BudgetsController extends Controller
                 DB::rollBack();
                 return response()->json([
                     'message' => 'Chỉ có thể cập nhật cho danh mục con loại CHI!',
+                ], 422);
+            }
+
+            // Kiểm tra trùng tên ngân sách
+            $duplicateName = Budgets::where('user_id', Auth::id())
+                ->where('ten_ngan_sach', $validated['ten_ngan_sach'])
+                ->where('id', '!=', $wallet->id)
+                ->exists();
+
+            if ($duplicateName) {
+                DB::rollBack();
+                return response()->json([
+                    'message' => 'Tên ngân sách "' . $validated['ten_ngan_sach'] . '" đã tồn tại, vui lòng chọn tên khác!',
+                    'errors'  => ['ten_ngan_sach' => ['Tên ngân sách đã tồn tại.']],
                 ], 422);
             }
 
