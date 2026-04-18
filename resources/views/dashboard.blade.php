@@ -414,9 +414,24 @@
             btn.disabled    = true;
             btn.textContent = 'Đang xuất...';
 
-            const url = format === 'pdf'
-                ? `/api/v1/dashboard/export-pdf?period=${period}`
-                : `/api/v1/dashboard/export?period=${period}`;
+            let res;
+            if (format === 'pdf') {
+                const lineImg = state.lineChart?.toBase64Image() || '';
+                const pieImg  = state.pieChart?.toBase64Image()  || '';
+                const barImg  = state.barChart?.toBase64Image()  || '';
+
+                res = await fetch(`/api/v1/dashboard/export-pdf`, {
+                    method: 'POST',
+                    headers: { ...buildHeaders(), 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ period, lineImg, pieImg, barImg }),
+                });
+            } else {
+                res = await fetch(`/api/v1/dashboard/export?period=${period}`, {
+                    headers: buildHeaders(),
+                    credentials: 'same-origin',
+                });
+            }
 
             try {
                 // Lấy email từ API profile
@@ -442,11 +457,6 @@
                 if (emailInputWrap?.style.display !== 'none' && emailInput?.value?.trim()) {
                     email = emailInput.value.trim();
                 }
-
-                const res = await fetch(url, {
-                    headers: buildHeaders(),
-                    credentials: 'same-origin',
-                });
 
                 if (!res.ok) throw new Error('Xuất thất bại');
 

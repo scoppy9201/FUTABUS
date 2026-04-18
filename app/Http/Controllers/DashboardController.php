@@ -588,7 +588,7 @@ class DashboardController extends Controller
     public function exportPdf(Request $request)
     {
         $userId = $request->user()?->id ?? Auth::id();
-        $period = $request->string('period')->toString() ?: 'this_month';
+        $period = $request->input('period', 'this_month');
 
         if (!in_array($period, ['all', 'this_month', 'last_month', 'this_year'], true)) {
             $period = 'this_month';
@@ -603,8 +603,14 @@ class DashboardController extends Controller
             default      => 'Tất cả',
         };
 
-        $pdf = Pdf::loadView('dashboard_pdf', compact('data', 'periodLabel'))
-                ->setPaper('a4', 'portrait');
+        // Nhận ảnh chart từ frontend
+        $lineImg = $request->input('lineImg', '');
+        $pieImg  = $request->input('pieImg',  '');
+        $barImg  = $request->input('barImg',  '');
+
+        $pdf = Pdf::loadView('dashboard_pdf', compact(
+            'data', 'periodLabel', 'lineImg', 'pieImg', 'barImg'
+        ))->setPaper('a4', 'portrait');
 
         return $pdf->download("baocao_{$period}_" . now()->format('Y-m-d') . ".pdf");
     }
@@ -636,37 +642,195 @@ class DashboardController extends Controller
         $filename = "baocao_{$period}_" . now()->format('Y-m-d') . ".{$format}";
         $tempPath = storage_path('app/temp_' . $filename);
 
-        if ($format === 'pdf') {
-            $pdf = Pdf::loadView('dashboard_pdf', compact('data', 'periodLabel'))
+        try {
+            if ($format === 'pdf') {
+                $lineImg = '';
+                $pieImg  = '';
+                $barImg  = '';
+
+                $pdf = Pdf::loadView('dashboard_pdf', compact('data', 'periodLabel', 'lineImg', 'pieImg', 'barImg'))
                     ->setPaper('a4', 'portrait');
-            file_put_contents($tempPath, $pdf->output());
-            $mimeType = 'application/pdf';
-        } else {
-            $response = $this->export($request);
-            $spreadsheet = new Spreadsheet();
-            $mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-        }
 
-        \Illuminate\Support\Facades\Mail::send([], [], function ($message) use ($email, $tempPath, $filename, $mimeType, $periodLabel) {
-            $message->to($email)
-                ->subject("Báo cáo tài chính Monexa - {$periodLabel}")
-                ->html("
-                    <h2>Báo cáo tài chính Monexa</h2>
-                    <p>Xin chào,</p>
-                    <p>Báo cáo tài chính kỳ <strong>{$periodLabel}</strong> đã được đính kèm trong email này.</p>
-                    <p>Trân trọng,<br>Monexa</p>
-                ")
-                ->attach($tempPath, [
-                    'as'   => $filename,
-                    'mime' => $mimeType,
+                file_put_contents($tempPath, $pdf->output());
+                $mimeType = 'application/pdf';
+
+            } else {
+                $spreadsheet = new Spreadsheet();
+
+                $sheet1 = $spreadsheet->getActiveSheet()->setTitle('TongQuan');
+
+                $sheet1->getColumnDimension('A')->setWidth(28);
+                $sheet1->getColumnDimension('B')->setWidth(28);
+
+                $sheet1->setCellValue('A1', 'BÁO CÁO TÀI CHÍNH - MONEXA');
+                $sheet1->setCellValue('A2', 'Kỳ báo cáo: ' . $periodLabel . '   |   Xuất ngày: ' . now()->format('d/m/Y H:i'));
+                $sheet1->setCellValue('A4', 'Chỉ số');
+                $sheet1->setCellValue('B4', 'Giá trị');
+                $sheet1->setCellValue('A5', 'Thu nhập');
+                $sheet1->setCellValue('B5', $data['totalIncome']);
+                $sheet1->setCellValue('A6', 'Chi tiêu');
+                $sheet1->setCellValue('B6', $data['totalExpense']);
+                $sheet1->setCellValue('A7', 'Số dư');
+                $sheet1->setCellValue('B7', $data['balance']);
+                $sheet1->setCellValue('A8', 'Tỷ lệ tiết kiệm');
+                $sheet1->setCellValue('B8', ($data['savingRate'] ?? 0) . '%');
+                $sheet1->setCellValue('A9', 'Tổng giao dịch');
+                $sheet1->setCellValue('B9', $data['totalTransactions']);
+
+                if (!empty($data['incomeChange'])) {
+                    $sheet1->setCellValue('A10', 'Thu nhập so kỳ trước');
+                    $sheet1->setCellValue('B10', $data['incomeChange'] . '%');
+                }
+                if (!empty($data['expenseChange'])) {
+                    $sheet1->setCellValue('A11', 'Chi tiêu so kỳ trước');
+                    $sheet1->setCellValue('B11', $data['expenseChange'] . '%');
+                }
+                if (!empty($data['forecast'])) {
+                    $sheet1->setCellValue('A12', 'Dự báo chi tiêu cuối tháng');
+                    $sheet1->setCellValue('B12', $data['forecast']);
+                }
+
+                $highestRow1 = $sheet1->getHighestRow();
+
+                $sheet1->mergeCells('A1:B1');
+                $sheet1->getStyle('A1')->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 16, 'color' => ['rgb' => 'FFFFFF']],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1D4ED8']],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                        'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    ],
                 ]);
-        });
+                $sheet1->getRowDimension(1)->setRowHeight(36);
 
-        // Xóa file tạm sau khi gửi
-        if (file_exists($tempPath)) {
-            unlink($tempPath);
+                $sheet1->mergeCells('A2:B2');
+                $sheet1->getStyle('A2')->applyFromArray([
+                    'font' => ['italic' => true, 'size' => 10, 'color' => ['rgb' => '64748B']],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'EFF6FF']],
+                ]);
+
+                $sheet1->getStyle('A4:B4')->applyFromArray([
+                    'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1E40AF']],
+                    'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                ]);
+
+                for ($row = 5; $row <= $highestRow1; $row++) {
+                    $bg = ($row % 2 === 0) ? 'DBEAFE' : 'F0F9FF';
+                    $sheet1->getStyle("A{$row}:B{$row}")->applyFromArray([
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bg]],
+                    ]);
+                }
+
+                $sheet1->getStyle('B5')->getFont()->getColor()->setRGB('059669');
+                $sheet1->getStyle('B6')->getFont()->getColor()->setRGB('DC2626');
+                $sheet1->getStyle('B7')->getFont()->getColor()->setRGB($data['balance'] >= 0 ? '059669' : 'DC2626');
+
+                $sheet1->getStyle('A4:B' . $highestRow1)->applyFromArray([
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'BFDBFE']]],
+                ]);
+
+                $sheet2 = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($spreadsheet, 'ThuChi');
+                $spreadsheet->addSheet($sheet2);
+
+                $sheet2->getColumnDimension('A')->setWidth(15);
+                $sheet2->getColumnDimension('B')->setWidth(22);
+                $sheet2->getColumnDimension('C')->setWidth(22);
+
+                $sheet2->setCellValue('A1', 'Tháng');
+                $sheet2->setCellValue('B1', 'Thu nhap');
+                $sheet2->setCellValue('C1', 'Chi tieu');
+
+                $sheet2->getStyle('A1:C1')->applyFromArray([
+                    'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '059669']],
+                    'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                ]);
+
+                $monthlyData = $data['monthlyData'] ?? [];
+                foreach ($monthlyData as $i => $item) {
+                    $row = $i + 2;
+                    $sheet2->setCellValue('A' . $row, 'Thang ' . $item['month']);
+                    $sheet2->setCellValue('B' . $row, (float) $item['income']);
+                    $sheet2->setCellValue('C' . $row, (float) $item['expense']);
+
+                    $bg = ($i % 2 === 0) ? 'ECFDF5' : 'FFFFFF';
+                    $sheet2->getStyle("A{$row}:C{$row}")->applyFromArray([
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bg]],
+                    ]);
+                    $sheet2->getStyle("B{$row}")->getFont()->getColor()->setRGB('059669');
+                    $sheet2->getStyle("C{$row}")->getFont()->getColor()->setRGB('DC2626');
+                }
+
+                $lastRow2 = count($monthlyData) + 1;
+                $sheet2->getStyle('A1:C' . $lastRow2)->applyFromArray([
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'D1FAE5']]],
+                ]);
+
+                $sheet3 = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($spreadsheet, 'DanhMuc');
+                $spreadsheet->addSheet($sheet3);
+
+                $sheet3->getColumnDimension('A')->setWidth(28);
+                $sheet3->getColumnDimension('B')->setWidth(22);
+
+                $sheet3->setCellValue('A1', 'Danh muc');
+                $sheet3->setCellValue('B1', 'So tien');
+
+                $sheet3->getStyle('A1:B1')->applyFromArray([
+                    'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'D97706']],
+                    'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                ]);
+
+                $categoryData = $data['categoryExpenses'] ?? [];
+                foreach ($categoryData as $i => $item) {
+                    $row = $i + 2;
+                    $sheet3->setCellValue('A' . $row, $item['name']);
+                    $sheet3->setCellValue('B' . $row, (float) $item['total']);
+
+                    $bg = ($i % 2 === 0) ? 'FFFBEB' : 'FFFFFF';
+                    $sheet3->getStyle("A{$row}:B{$row}")->applyFromArray([
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bg]],
+                    ]);
+                    $sheet3->getStyle("B{$row}")->getFont()->getColor()->setRGB('DC2626');
+                }
+
+                $lastRow3 = count($categoryData) + 1;
+                $sheet3->getStyle('A1:B' . $lastRow3)->applyFromArray([
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'FDE68A']]],
+                ]);
+                
+                $writer = new Xlsx($spreadsheet);
+                $writer->save($tempPath);
+                $mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            }
+
+            // Gửi email
+            \Illuminate\Support\Facades\Mail::send([], [], function ($message) use ($email, $tempPath, $filename, $mimeType, $periodLabel) {
+                $message->to($email)
+                    ->subject("Báo cáo tài chính Monexa - {$periodLabel}")
+                    ->html("
+                        <h2>Báo cáo tài chính Monexa</h2>
+                        <p>Xin chào,</p>
+                        <p>Báo cáo tài chính kỳ <strong>{$periodLabel}</strong> đã được đính kèm trong email này.</p>
+                        <p>Trân trọng,<br>Monexa</p>
+                    ")
+                    ->attach($tempPath, [
+                        'as'   => $filename,
+                        'mime' => $mimeType,
+                    ]);
+            });
+
+            return response()->json(['message' => 'Đã gửi báo cáo đến ' . $email]);
+
+        } catch (\Exception $e) {
+            \Log::error('sendReport error: ' . $e->getMessage());
+            return response()->json(['message' => 'Gửi thất bại: ' . $e->getMessage()], 500);
+        } finally {
+            // Xóa file tạm dù thành công hay thất bại
+            if (isset($tempPath) && file_exists($tempPath)) {
+                unlink($tempPath);
+            }
         }
-
-        return response()->json(['message' => 'Đã gửi báo cáo đến ' . $email]);
     }
 }

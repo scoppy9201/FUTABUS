@@ -71,8 +71,8 @@ Route::prefix('v1')->name('api.')->group(function () {
         Route::prefix('dashboard')->name('dashboard.')->group(function () {
             Route::get('/',             [DashboardController::class, 'index'])     ->name('index');
             Route::get('/export',       [DashboardController::class, 'export'])    ->name('export');
-            Route::get('/export-pdf',   [DashboardController::class, 'exportPdf']) ->name('export-pdf');
-            Route::post('/send-report', [DashboardController::class, 'sendReport'])->name('send-report'); // thêm dòng này
+            Route::post('/export-pdf', [DashboardController::class, 'exportPdf'])->name('export-pdf');
+            Route::post('/send-report', [DashboardController::class, 'sendReport'])->name('send-report'); 
         });
 
         /*
