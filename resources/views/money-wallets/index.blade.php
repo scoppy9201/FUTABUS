@@ -95,6 +95,14 @@ body.dark .wc-footer { background: rgba(255,255,255,0.02); border-color: rgba(25
 }
 .wallet-card:hover .wc-arrow { background: var(--primary); color: white; }
 
+.wallet-card-delete {
+    position: absolute; top: 10px; right: 10px; z-index: 5;
+    background: rgba(255,255,255,0.9); border: 1px solid rgba(0,0,0,0.06);
+    width:34px; height:34px; border-radius:8px; display:flex;align-items:center;justify-content:center;cursor:pointer;
+    font-size:14px; color:#ef4444;
+}
+body.dark .wallet-card-delete { background: rgba(0,0,0,0.18); border-color: rgba(255,255,255,0.06); }
+
 .empty-wrap {
     grid-column: 1/-1; text-align: center; padding: 80px 20px;
     background: white; border-radius: var(--radius); box-shadow: var(--shadow);
@@ -519,6 +527,7 @@ function walletCardHTML(w) {
     const created = new Date(w.created_at).toLocaleDateString('vi-VN');
     return `
     <a href="/money-wallets/${w.id}" class="wallet-card">
+        <div class="wallet-card-delete" onclick="event.preventDefault(); event.stopPropagation(); deleteWalletFromIndex(${w.id})">🗑</div>
         <div class="wallet-card-bar" style="background:${color};"></div>
         <div class="wc-body">
             <div class="wc-top">
@@ -721,5 +730,16 @@ document.querySelectorAll('.modal-overlay').forEach(o => {
 });
 
 loadPage();
+
+async function deleteWalletFromIndex(id) {
+    if (!confirm('Xóa/ẩn ví này?')) return;
+    const res = await apiFetch(API.destroy(id), { method: 'DELETE' });
+    if (res.success) {
+        showAlert('Đã xóa/ẩn ví');
+        loadPage();
+    } else {
+        showAlert(res.message || 'Có lỗi xảy ra', 'error');
+    }
+}
 </script>
 @endsection

@@ -173,7 +173,7 @@ function renderForm() {
 
     const today = new Date().toISOString().split('T')[0];
 
-    const catOptions = categories.reduce((acc, c) => {
+    const catOptions = (Array.isArray(categories) ? categories : []).reduce((acc, c) => {
         if (!c.danh_muc_cha_id) return acc;
         const g = c.loai_danh_muc === 'THU' ? 'Thu nhập' : 'Chi tiêu';
         if (!acc[g]) acc[g] = [];
@@ -236,18 +236,18 @@ function renderForm() {
             <input id="ngayChuyen" type="date" class="form-ctrl" value="${today}" max="${today}">
         </div>
         <div class="form-group" style="margin-bottom:0">
-            <label class="form-label">Danh mục <span class="required">*</span></label>
+            <label class="form-label">Danh mục (tùy chọn)</label>
             <select id="categoryId" class="form-ctrl">
-                <option value="">-- Chọn --</option>
+                <option value="">-- Không chọn --</option>
                 ${catHtml}
             </select>
         </div>
     </div>
 
-    <div class="form-group" style="margin-top:16px;">
-        <label class="form-label">Ghi chú</label>
-        <input id="ghiChu" class="form-ctrl" placeholder="Lý do chuyển tiền..." maxlength="500">
-    </div>
+        <div class="form-group" style="margin-top:16px;">
+            <label class="form-label">Ghi chú</label>
+            <input id="ghiChu" class="form-ctrl" placeholder="Lý do chuyển tiền..." maxlength="500">
+        </div>
 
     <button onclick="submitTransfer()" class="btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:4px;">
         Chuyển tiền
@@ -332,7 +332,6 @@ async function submitTransfer() {
         ghi_chu:        document.getElementById('ghiChu').value.trim(),
     };
     if (!body.so_tien || body.so_tien < 1000) { showAlert('Số tiền tối thiểu là 1.000đ', 'error'); return; }
-    if (!body.category_id) { showAlert('Vui lòng chọn danh mục', 'error'); return; }
     if (!body.ngay_chuyen) { showAlert('Vui lòng chọn ngày', 'error'); return; }
 
     const res = await apiFetch('/api/v1/wallet-transfers', { method: 'POST', body: JSON.stringify(body) });
@@ -393,7 +392,7 @@ async function loadPage() {
     ]);
     const _walletList = Array.isArray(walletRes) ? walletRes : (walletRes.data ?? []);
     wallets    = _walletList.filter(w => w.trang_thai !== 'khong_hoat_dong');
-    categories = catRes;
+    categories = Array.isArray(catRes) ? catRes : (catRes.data ?? []);
     renderForm();
     loadHistory();
 }

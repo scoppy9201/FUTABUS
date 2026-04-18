@@ -327,7 +327,6 @@ async function loadWallet() {
             <div class="hero-actions">
                 <button class="btn-hero" onclick="openAdjust()">⚖️ Điều chỉnh số dư</button>
                 <button class="btn-hero" onclick="openEdit()">✏️ Sửa</button>
-                <button class="btn-hero danger" onclick="deleteWallet()">🗑 Xóa</button>
             </div>
         </div>
         <div class="hero-balance">
