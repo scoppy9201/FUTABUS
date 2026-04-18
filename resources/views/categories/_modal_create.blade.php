@@ -89,7 +89,7 @@
                     {{-- Icon Picker --}}
                     <div class="upload-section">
                         <div class="upload-section-title">
-                            <img src="{{ asset('images/image.png') }}" alt="Icon">
+                            <img src="{{ asset('images/category.png') }}" alt="Icon">
                             Biểu tượng danh mục
                         </div>
                         <input type="hidden" name="bieu_tuong" id="selected-icon-input" value="money.png">
@@ -146,7 +146,7 @@
     <div class="icon-picker-content">
         <div class="icon-picker-header">
             <div class="icon-picker-header-title">
-                <img src="{{ asset('images/image.png') }}" alt="Icon" style="width:20px;">
+                <img src="{{ asset('images/category.png') }}" alt="Icon" style="width:20px;">
                 Chọn biểu tượng
             </div>
             <button type="button" class="icon-picker-close" onclick="closeIconPicker()">
