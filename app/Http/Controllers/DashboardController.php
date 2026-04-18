@@ -603,7 +603,7 @@ class DashboardController extends Controller
             default      => 'Tất cả',
         };
 
-        $pdf = Pdf::loadView('exports.dashboard_pdf', compact('data', 'periodLabel'))
+        $pdf = Pdf::loadView('dashboard_pdf', compact('data', 'periodLabel'))
                 ->setPaper('a4', 'portrait');
 
         return $pdf->download("baocao_{$period}_" . now()->format('Y-m-d') . ".pdf");
@@ -637,16 +637,13 @@ class DashboardController extends Controller
         $tempPath = storage_path('app/temp_' . $filename);
 
         if ($format === 'pdf') {
-            $pdf = Pdf::loadView('exports.dashboard_pdf', compact('data', 'periodLabel'))
+            $pdf = Pdf::loadView('dashboard_pdf', compact('data', 'periodLabel'))
                     ->setPaper('a4', 'portrait');
             file_put_contents($tempPath, $pdf->output());
             $mimeType = 'application/pdf';
         } else {
-            // Tái sử dụng logic export xlsx
             $response = $this->export($request);
-            // Tạo file xlsx tạm
             $spreadsheet = new Spreadsheet();
-            // ... (dùng lại code export xlsx ở trên)
             $mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
         }
 

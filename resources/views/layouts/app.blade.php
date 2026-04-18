@@ -294,6 +294,9 @@
     @if(session('info'))
         window.__serverToasts.push({ type: 'info', title: 'Thông báo', message: @json(session('info')) });
     @endif
+    @if(session('pending_toast'))
+        window.__pendingToast = @json(json_decode(session('pending_toast')));
+    @endif
 
     document.addEventListener('DOMContentLoaded', function () {
         setTimeout(function () {
@@ -374,6 +377,83 @@
             });
         }
     })();
+    </script>
+
+    // Hàm showToast toàn cục để các script khác có thể gọi
+    <script>
+        window.showToast = function(opts) {
+            let msg, type, title;
+            if (typeof opts === 'object' && opts !== null) {
+                msg   = opts.message || opts.title || '';
+                type  = opts.type || 'success';
+                title = opts.title && opts.message ? opts.title : null;
+            } else {
+                msg  = String(opts || '');
+                type = arguments[1] || 'success';
+            }
+
+            if (!msg) return;
+
+            const s = JSON.parse(localStorage.getItem('monexa_settings') || '{}');
+            if (s.toastEnabled === false) return;
+
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+
+            const colors = {
+                success: { bg:'#f0fdf4', border:'#bbf7d0', icon:'✓', iconBg:'#16a34a', titleColor:'#15803d' },
+                error:   { bg:'#fef2f2', border:'#fecaca', icon:'✕', iconBg:'#dc2626', titleColor:'#b91c1c' },
+                warning: { bg:'#fffbeb', border:'#fde68a', icon:'!', iconBg:'#d97706', titleColor:'#b45309' },
+                info:    { bg:'#eff6ff', border:'#bfdbfe', icon:'i', iconBg:'#2563eb', titleColor:'#1d4ed8' },
+            };
+            const c = colors[type] || colors.info;
+            const duration = (s.toastDuration || 5) * 1000;
+
+            const toast = document.createElement('div');
+            toast.setAttribute('data-toast', '1');
+            toast.style.cssText = `
+                background:${c.bg};border:1px solid ${c.border};border-radius:12px;
+                padding:12px 16px;display:flex;align-items:flex-start;gap:10px;
+                pointer-events:auto;box-shadow:0 4px 16px rgba(0,0,0,0.08);
+                opacity:0;transform:translateX(20px);transition:opacity 0.25s,transform 0.25s;
+            `;
+            toast.innerHTML = `
+                <div style="width:20px;height:20px;border-radius:50%;background:${c.iconBg};color:#fff;
+                    display:flex;align-items:center;justify-content:center;font-size:11px;
+                    font-weight:700;flex-shrink:0;margin-top:1px">${c.icon}</div>
+                <div style="flex:1;min-width:0">
+                    ${title ? `<div style="font-weight:700;font-size:13px;color:${c.titleColor};margin-bottom:2px">${title}</div>` : ''}
+                    <div style="font-size:13px;color:#374151;line-height:1.5">${msg}</div>
+                </div>
+                <div style="cursor:pointer;color:#9ca3af;font-size:18px;line-height:1;flex-shrink:0;padding:0 2px"
+                    onclick="this.closest('[data-toast]').remove()">×</div>
+            `;
+            container.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.style.opacity   = '1';
+                toast.style.transform = 'translateX(0)';
+            });
+
+            setTimeout(() => {
+                toast.style.opacity   = '0';
+                toast.style.transform = 'translateX(20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+
+            if (s.toastSound) {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const o = ctx.createOscillator();
+                    const g = ctx.createGain();
+                    o.connect(g); g.connect(ctx.destination);
+                    o.frequency.value = type === 'error' ? 300 : 600;
+                    g.gain.setValueAtTime(0.1, ctx.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                    o.start(); o.stop(ctx.currentTime + 0.3);
+                } catch(_) {}
+            }
+        };
     </script>
     @stack('scripts')
 </body>

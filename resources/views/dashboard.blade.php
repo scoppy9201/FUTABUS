@@ -47,7 +47,6 @@
     </div>
 
     <div id="dashboard-alert" hidden></div>
-    <div id="toast" class="alert" style="display:none;position:fixed;top:20px;right:20px;z-index:9999;min-width:300px;max-width:400px;"></div>
     <div id="dashboard-loading" class="card dashboard-state">
         <p>Đang tải dữ liệu dashboard...</p>
     </div>
@@ -188,31 +187,6 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
-    // TOAST GLOBAL
-    window.showToast = function(opts) {
-        let msg, type;
-        if (typeof opts === 'object') {
-            msg  = opts.message ?? opts.title ?? '';
-            type = opts.type ?? 'success';
-        } else {
-            msg  = opts;
-            type = arguments[1] ?? 'success';
-        }
-
-        const el = document.getElementById('toast');
-        if (!el) return;
-        el.className       = `alert alert-${type === 'success' ? 'success' : 'error'}`;
-        el.textContent     = msg;
-        el.style.display   = 'flex';
-        el.style.opacity   = '1';
-        el.style.transform = '';
-        clearTimeout(el._t);
-        el._t = setTimeout(() => {
-            el.style.opacity   = '0';
-            el.style.transform = 'translateY(-10px)';
-            setTimeout(() => { el.style.display = 'none'; }, 300);
-        }, 4000);
-    };
     window.__dashboardCleanup?.();
     (() => {
         const page = document.getElementById('dashboardPage');
@@ -395,8 +369,24 @@
         const exportIcon     = document.getElementById('export-modal-root')?.dataset.exportIcon || '';
 
         // Mở modal
-        document.getElementById('export-report-btn').addEventListener('click', () => {
+        document.getElementById('export-report-btn').addEventListener('click', async () => {
             exportModal.style.display = 'flex';
+
+            // Load email ngay khi mở modal
+            try {
+                const profileRes = await fetch('/api/v1/profile', {
+                    headers: buildHeaders(),
+                    credentials: 'same-origin',
+                });
+                if (profileRes.ok) {
+                    const profileData = await profileRes.json();
+                    const email = profileData?.data?.email || profileData?.email || '';
+                    const emailEl = document.getElementById('export-user-email');
+                    if (emailEl && email) emailEl.textContent = email;
+                    const emailInput = document.getElementById('export-email-input');
+                    if (emailInput && email) emailInput.value = email;
+                }
+            } catch (_) {}
         });
 
         // Đóng modal
@@ -419,8 +409,6 @@
         document.getElementById('confirm-export-btn').addEventListener('click', async () => {
             const period = document.getElementById('month-filter').value;
             const format = document.getElementById('export-format-select').value;
-            const user   = JSON.parse(localStorage.getItem('user') || '{}');
-            const email  = user.email || '';
             const btn    = document.getElementById('confirm-export-btn');
 
             btn.disabled    = true;
@@ -431,6 +419,30 @@
                 : `/api/v1/dashboard/export?period=${period}`;
 
             try {
+                // Lấy email từ API profile
+                let email = '';
+                try {
+                    const profileRes = await fetch('/api/v1/profile', {
+                        headers: buildHeaders(),
+                        credentials: 'same-origin',
+                    });
+                    if (profileRes.ok) {
+                        const profileData = await profileRes.json();
+                        email = profileData?.data?.email || profileData?.email || '';
+
+                        // Hiển thị email lên modal
+                        const emailEl = document.getElementById('export-user-email');
+                        if (emailEl && email) emailEl.textContent = email;
+                    }
+                } catch (_) {}
+
+                // Nếu user tự nhập email thì ưu tiên dùng cái đó
+                const emailInputWrap = document.getElementById('email-input-wrap');
+                const emailInput     = document.getElementById('export-email-input');
+                if (emailInputWrap?.style.display !== 'none' && emailInput?.value?.trim()) {
+                    email = emailInput.value.trim();
+                }
+
                 const res = await fetch(url, {
                     headers: buildHeaders(),
                     credentials: 'same-origin',
@@ -444,25 +456,33 @@
                 link.download = `baocao_${period}_${new Date().toISOString().slice(0,10)}.${format}`;
                 link.click();
                 URL.revokeObjectURL(link.href);
+
                 if (email) {
                     const mailRes = await fetch(`/api/v1/dashboard/send-report`, {
                         method: 'POST',
-                        headers: {
-                            ...buildHeaders(),
-                            'Content-Type': 'application/json',
-                        },
+                        headers: { ...buildHeaders(), 'Content-Type': 'application/json' },
                         credentials: 'same-origin',
                         body: JSON.stringify({ period, format, email }),
                     });
-                    if (mailRes.ok) {
-                        window.showToast({ type: 'success', message: `Đã gửi báo cáo đến ${email}` });
-                    }
+                    
+                    const mailData = await mailRes.json();
+                    console.log('mailRes status:', mailRes.status);
+                    console.log('mailData:', mailData);  // ← xem cấu trúc response
+                    
+                    window.showToast({
+                        type: mailRes.ok ? 'success' : 'error',
+                        message: mailRes.ok ? `Đã gửi báo cáo đến ${email}` : 'Gửi email thất bại',
+                    });
+                } else {
+                    window.showToast({ type: 'success', message: 'Xuất báo cáo thành công' });
                 }
+
                 exportModal.style.display = 'none';
+
             } catch (err) {
                 window.showToast({ type: 'error', message: 'Không thể xuất: ' + err.message });
             } finally {
-                btn.disabled = false;
+                btn.disabled  = false;
                 btn.innerHTML = `<img src="${exportIcon}" style="width:14px;height:14px;filter:brightness(10)"> Xuất khẩu`;
             }
         });
