@@ -379,7 +379,6 @@
     })();
     </script>
 
-    // Hàm showToast toàn cục để các script khác có thể gọi
     <script>
         window.showToast = function(opts) {
             let msg, type, title;
