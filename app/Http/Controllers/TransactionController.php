@@ -175,7 +175,16 @@ class TransactionController extends Controller
                 return response()->json(['message' => 'Loại giao dịch không khớp với loại danh mục!'], 422);
             }
 
-            // Tìm budget active cho danh mục này
+
+            // Kiểm tra danh mục cha có đang active không
+            $parentCategory = Category::find($category->danh_muc_cha_id);
+            if ($parentCategory && !$parentCategory->trang_thai) {
+                DB::rollBack();
+                return response()->json([
+                    'message' => 'Danh mục cha đã bị vô hiệu hóa, không thể thực hiện giao dịch!'
+                ], 422);
+            }
+
             $wallet = Budgets::where('category_id', $validated['category_id'])
                             ->where('user_id', Auth::id())
                             ->where('trang_thai', true)
