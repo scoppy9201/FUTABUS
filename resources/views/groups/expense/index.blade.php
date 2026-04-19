@@ -180,6 +180,85 @@ body.dark .empty-msg-text { color:#9ca3af; }
 .icon { width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0; }
 
 @media (max-width:1100px) { .main-grid { grid-template-columns:1fr; } }
+
+body.dark .form-ctrl {
+    background: #141820;
+    border-color: rgba(255,255,255,0.1);
+    color: #e5e7eb;
+}
+body.dark .form-ctrl::placeholder { color: #4b5563; }
+body.dark .form-ctrl:focus { border-color: var(--primary); background: #0f1217; }
+
+/* Select dropdown */
+body.dark select.form-ctrl option { background: #141820; color: #e5e7eb; }
+
+/* Kieu chia cards */
+body.dark .kieu-card {
+    border-color: rgba(255,255,255,0.1);
+    background: #141820;
+}
+body.dark .kieu-card:hover { border-color: rgba(255,255,255,0.2); }
+body.dark .kieu-card.selected {
+    border-color: var(--primary);
+    background: rgba(74,144,226,0.1);
+}
+body.dark .kieu-name { color: #e5e7eb; }
+body.dark .kieu-icon { color: #9ca3af; }
+body.dark .kieu-card.selected .kieu-name { color: var(--primary); }
+
+/* Member table */
+body.dark .member-table td { border-color: rgba(255,255,255,0.05); }
+body.dark .mem-name { color: #e5e7eb; }
+body.dark .mem-input {
+    background: #141820;
+    border-color: rgba(255,255,255,0.1);
+    color: #e5e7eb;
+}
+body.dark .mem-input:focus { border-color: var(--primary); background: #0f1217; }
+body.dark .mem-input::placeholder { color: #4b5563; }
+
+/* Kieu hint */
+body.dark #kieu-hint { color: #6b7280; }
+
+/* Info box ghi nợ thẳng */
+body.dark div[style*="rgba(74,144,226,0.06)"] {
+    background: rgba(74,144,226,0.1) !important;
+    color: #93c5fd !important;
+}
+
+/* Debt flow cards */
+body.dark .debt-flow-card { background: #191d27; }
+body.dark .dfc-name { color: #e5e7eb; }
+
+/* Pending section border */
+body.dark .section-card[style*="rgba(245,158,11,0.3)"] {
+    border-color: rgba(245,158,11,0.2) !important;
+}
+
+/* Tab nav */
+body.dark .tab-nav { background: rgba(255,255,255,0.06); }
+body.dark .tab-btn { color: #6b7280; }
+body.dark .tab-btn:hover { color: #9ca3af; }
+body.dark .tab-btn.active { background: #191d27; color: var(--primary); }
+
+/* btn-ghost dark */
+body.dark .btn-ghost {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.1);
+    color: #9ca3af;
+}
+body.dark .btn-ghost:hover { background: rgba(255,255,255,0.12); color: #e5e7eb; }
+
+/* Empty message */
+body.dark .empty-msg-text { color: #9ca3af; }
+body.dark .empty-msg { color: #6b7280; }
+body.dark .empty-msg-icon { background: rgba(16,185,129,0.1); color: #6ee7b7; }
+
+/* Split pills */
+body.dark .split-pill { background: rgba(255,255,255,0.06); color: #9ca3af; }
+
+/* Simplified header */
+body.dark .simplified-hdr { border-color: rgba(255,255,255,0.06); }
 </style>
 
 @php
