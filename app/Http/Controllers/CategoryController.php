@@ -148,6 +148,8 @@ class CategoryController extends Controller
         if ($category->user_id !== Auth::id()) return response()->json(['message' => 'Unauthorized'], 403);
 
         if (!$category->canDelete())
+            return response()->json(['message' => 'Không thể xóa danh mục đã có ngân sách.'], 422);
+        if (!$category->canDelete())
             return response()->json(['message' => 'Không thể xóa danh mục đã có giao dịch.'], 422);
         if ($category->children()->count() > 0)
             return response()->json(['message' => 'Không thể xóa danh mục có danh mục con.'], 422);
@@ -164,17 +166,34 @@ class CategoryController extends Controller
     }
 
     // PATCH /api/v1/categories/{id}/status
-    public function toggleStatus(Category $category): JsonResponse
+        public function toggleStatus(Category $category): JsonResponse
     {
-        if ($category->user_id !== Auth::id()) return response()->json(['message' => 'Unauthorized'], 403);
+        if ($category->user_id !== Auth::id()) 
+            return response()->json(['message' => 'Unauthorized'], 403);
 
-        $category->update(['trang_thai' => !$category->trang_thai]);
-        $status = $category->trang_thai ? 'kích hoạt' : 'vô hiệu hóa';
+        $newStatus = !$category->trang_thai;
+        
+        DB::beginTransaction();
+        try {
+            $category->update(['trang_thai' => $newStatus]);
+            
+            // Nếu vô hiệu hóa cha → vô hiệu hóa tất cả con
+            // Nếu kích hoạt cha → kích hoạt tất cả con
+            if ($category->danh_muc_cha_id === null) {
+                $category->children()->update(['trang_thai' => $newStatus]);
+            }
+            
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Có lỗi xảy ra.'], 500);
+        }
 
+        $status = $newStatus ? 'kích hoạt' : 'vô hiệu hóa';
         return response()->json([
             'success'    => true,
             'message'    => "Đã {$status} danh mục thành công!",
-            'trang_thai' => $category->trang_thai,
+            'trang_thai' => $newStatus,
         ]);
     }
 }
