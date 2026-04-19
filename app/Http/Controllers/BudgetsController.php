@@ -123,13 +123,18 @@ class BudgetsController extends Controller
             }
 
             $wallet = Budgets::create([
-                'user_id'      => Auth::id(),
-                'category_id'  => $validated['category_id'],
-                'ten_ngan_sach' => $validated['ten_ngan_sach'],
-                'ngan_sach_goc' => $validated['ngan_sach_goc'],
-                'so_du'        => $validated['ngan_sach_goc'],
-                'mo_ta'        => $validated['mo_ta'] ?? null,
-                'trang_thai'   => true,
+                'user_id'        => Auth::id(),
+                'category_id'    => $validated['category_id'],
+                'ten_ngan_sach'  => $validated['ten_ngan_sach'],
+                'ngan_sach_goc'  => $validated['ngan_sach_goc'],
+                'so_du'          => $validated['ngan_sach_goc'],
+                'mo_ta'          => $validated['mo_ta'] ?? null,
+                'trang_thai'     => true,
+                'loai_thoi_gian' => $validated['loai_thoi_gian'],  
+                'ngay_bat_dau'   => $validated['ngay_bat_dau'],    
+                'ngay_ket_thuc'  => $validated['ngay_ket_thuc'],  
+                'tu_dong_reset'  => $validated['tu_dong_reset'],   
+                'da_het_han'     => false,                        
             ]);
 
             DB::commit();
@@ -204,11 +209,16 @@ class BudgetsController extends Controller
                 }
 
                 $wallet->update([
-                    'ten_ngan_sach' => $validated['ten_ngan_sach'],
-                    'category_id'   => $validated['category_id'],
-                    'ngan_sach_goc' => $validated['ngan_sach_goc'],
-                    'so_du'         => $validated['ngan_sach_goc'],
-                    'mo_ta'         => $validated['mo_ta'] ?? null,
+                    'ten_ngan_sach'  => $validated['ten_ngan_sach'],
+                    'category_id'    => $validated['category_id'],
+                    'ngan_sach_goc'  => $validated['ngan_sach_goc'],
+                    'so_du'          => $validated['ngan_sach_goc'],
+                    'mo_ta'          => $validated['mo_ta'] ?? null,
+                    'loai_thoi_gian' => $validated['loai_thoi_gian'],  
+                    'ngay_bat_dau'   => $validated['ngay_bat_dau'],   
+                    'ngay_ket_thuc'  => $validated['ngay_ket_thuc'],   
+                    'tu_dong_reset'  => $validated['tu_dong_reset'],   
+                    'da_het_han'     => false,                        
                 ]);
 
             } else {
@@ -225,10 +235,15 @@ class BudgetsController extends Controller
                 }
 
                 $wallet->update([
-                    'ten_ngan_sach' => $validated['ten_ngan_sach'],
-                    'ngan_sach_goc' => $validated['ngan_sach_goc'],
-                    'so_du'         => $newBalance,
-                    'mo_ta'         => $validated['mo_ta'] ?? null,
+                    'ten_ngan_sach'  => $validated['ten_ngan_sach'],
+                    'ngan_sach_goc'  => $validated['ngan_sach_goc'],
+                    'so_du'          => $newBalance,
+                    'mo_ta'          => $validated['mo_ta'] ?? null,
+                    'loai_thoi_gian' => $validated['loai_thoi_gian'],  
+                    'ngay_bat_dau'   => $validated['ngay_bat_dau'],   
+                    'ngay_ket_thuc'  => $validated['ngay_ket_thuc'],  
+                    'tu_dong_reset'  => $validated['tu_dong_reset'],   
+                    'da_het_han'     => false,                       
                 ]);
             }
 
@@ -281,7 +296,7 @@ class BudgetsController extends Controller
     /**
      * PATCH /api/v1/budgets/{wallet}/status
      * Bật / tắt trạng thái ngân sách
-     */
+    */
     public function toggleStatus(Budgets $wallet): JsonResponse
     {
         if ($wallet->user_id !== Auth::id()) {
@@ -293,6 +308,14 @@ class BudgetsController extends Controller
             $newStatus = !$wallet->trang_thai;
 
             if ($newStatus) {
+                // ← Chặn kích hoạt lại nếu đã hết hạn
+                if ($wallet->da_het_han) {
+                    DB::rollBack();
+                    return response()->json([
+                        'message' => "Ngân sách '{$wallet->ten_ngan_sach}' đã hết hạn, không thể kích hoạt lại!",
+                    ], 422);
+                }
+
                 // Kiểm tra trùng lặp khi kích hoạt lại
                 $exists = Budgets::where('user_id', Auth::id())
                     ->where('category_id', $wallet->category_id)
@@ -397,6 +420,26 @@ class BudgetsController extends Controller
                 'nullable', 'string', 'max:500',
                 'regex:/^[\p{L}\p{N}\s\.,!?@#\-\(\)]*$/u',
             ],
+
+            // validation thời gian
+            'loai_thoi_gian' => ['required', 'in:thang,ngay'],
+            'ngay_bat_dau'   => [
+                'required', 'date',
+            ],
+            'ngay_ket_thuc'  => [
+                'required', 'date', 'after:ngay_bat_dau',
+                // Loại ngày: tối đa 30 ngày
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->loai_thoi_gian === 'ngay') {
+                        $start = \Carbon\Carbon::parse($request->ngay_bat_dau);
+                        $end   = \Carbon\Carbon::parse($value);
+                        if ($start->diffInDays($end) > 30) {
+                            $fail('Ngân sách theo ngày không được vượt quá 30 ngày!');
+                        }
+                    }
+                },
+            ],
+            'tu_dong_reset'  => ['boolean'],
         ], [
             'ten_ngan_sach.required' => 'Vui lòng nhập tên ngân sách',
             'ten_ngan_sach.max'      => 'Tên ngân sách không được vượt quá 255 ký tự',
@@ -410,12 +453,27 @@ class BudgetsController extends Controller
             'ngan_sach_goc.regex'    => 'Hạn mức không hợp lệ',
             'mo_ta.max'              => 'Mô tả không được vượt quá 500 ký tự',
             'mo_ta.regex'            => 'Mô tả chứa ký tự không hợp lệ',
+            'loai_thoi_gian.required'=> 'Vui lòng chọn loại thời gian',
+            'loai_thoi_gian.in'      => 'Loại thời gian không hợp lệ',
+            'ngay_bat_dau.required'  => 'Vui lòng chọn ngày bắt đầu',
+            'ngay_bat_dau.date'      => 'Ngày bắt đầu không hợp lệ',
+            'ngay_ket_thuc.required' => 'Vui lòng chọn ngày kết thúc',
+            'ngay_ket_thuc.date'     => 'Ngày kết thúc không hợp lệ',
+            'ngay_ket_thuc.after'    => 'Ngày kết thúc phải sau ngày bắt đầu',
         ]);
 
         // Trim
         $validated['ten_ngan_sach'] = trim($validated['ten_ngan_sach']);
         $validated['ngan_sach_goc'] = (float) trim((string) $validated['ngan_sach_goc']);
         $validated['mo_ta']         = isset($validated['mo_ta']) ? trim($validated['mo_ta']) : null;
+        $validated['tu_dong_reset'] = $validated['tu_dong_reset'] ?? true;
+
+        // Loại tháng → tự động tính ngày bắt đầu & kết thúc theo tháng
+        if ($validated['loai_thoi_gian'] === 'thang') {
+            $start = \Carbon\Carbon::parse($validated['ngay_bat_dau'])->startOfMonth();
+            $validated['ngay_bat_dau']  = $start->toDateString();
+            $validated['ngay_ket_thuc'] = $start->endOfMonth()->toDateString();
+        }
 
         return $validated;
     }

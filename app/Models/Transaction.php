@@ -14,6 +14,7 @@ class Transaction extends Model
     protected $fillable = [
         'user_id',
         'category_id',
+        'wallet_id',         
         'so_tien',
         'loai_giao_dich',
         'phuong_thuc_thanh_toan',
@@ -112,5 +113,10 @@ class Transaction extends Model
     public function getTypeColorAttribute()
     {
         return $this->loai_giao_dich == 'THU' ? 'success' : 'danger';
+    }
+
+    public function budget()
+    {
+        return $this->belongsTo(Budgets::class, 'wallet_id');
     }
 }
