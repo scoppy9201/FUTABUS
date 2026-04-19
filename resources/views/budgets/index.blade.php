@@ -1,6 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Quản lý ngân sách')
 @section('content')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
     :root {
         --primary: #4a90e2;
@@ -1355,6 +1356,27 @@ function renderTable(p) {
             <td>
                 <div style="font-weight:600;">${formatMoney(w.ngan_sach_goc)}</div>
                 <div style="font-size:12px;color:#9ca3af;">Còn: ${formatMoney(w.so_du)}</div>
+                <div style="font-size:11px;color:#9ca3af;margin-top:4px;">
+                    ${w.loai_thoi_gian === 'thang' 
+                        ? '<i class="fa-regular fa-calendar"></i> Theo tháng' 
+                        : '<i class="fa-solid fa-calendar-days"></i> Theo ngày'}
+                    
+                    ${w.ngay_ket_thuc 
+                        ? ` · Hết: ${w.ngay_ket_thuc.substring(0,10)}` 
+                        : ''}
+                    
+                    ${w.da_het_han 
+                        ? '<span style="color:#ef4444;font-weight:600;"> · Hết hạn</span>' 
+                        : ''}
+                    
+                    ${w.days_remaining === 0 
+                        ? '<span style="color:#ef4444;"> · Hết hôm nay</span>' 
+                        : ''}
+                    
+                    ${w.days_remaining > 0 && w.days_remaining <= 3 
+                        ? `<span style="color:#f59e0b;"> · Còn ${w.days_remaining} ngày</span>` 
+                        : ''}
+                </div>
             </td>
             <td>
                 <span class="badge badge-${w.trang_thai ? 'active' : 'inactive'}">
@@ -1441,17 +1463,17 @@ function getTimeData(prefix) {
     let ngayBatDau, ngayKetThuc, tuDongReset;
 
     if (loai === 'thang') {
-        const thang = document.getElementById(`${prefix}-thang-ap-dung`).value; // "2025-01"
+        const thang = document.getElementById(`${prefix}-thang-ap-dung`).value;
         if (!thang) return null;
-        const [year, month] = thang.split('-');
-        const start = new Date(year, month - 1, 1);
-        const end   = new Date(year, month, 0); // ngày cuối tháng
-        ngayBatDau  = start.toISOString().split('T')[0];
-        ngayKetThuc = end.toISOString().split('T')[0];
+        const [year, month] = thang.split('-').map(Number);
+        const lastDay = new Date(year, month, 0).getDate();
+        ngayBatDau  = `${year}-${String(month).padStart(2,'0')}-01`;
+        ngayKetThuc = `${year}-${String(month).padStart(2,'0')}-${lastDay}`;
         tuDongReset = document.getElementById(`${prefix}-tu-dong-reset`).checked ? 1 : 0;
     } else {
         ngayBatDau  = document.getElementById(`${prefix}-ngay-bat-dau`).value;
         ngayKetThuc = document.getElementById(`${prefix}-ngay-ket-thuc`).value;
+        if (!ngayBatDau || !ngayKetThuc) return null;
         tuDongReset = 0;
     }
 
@@ -1466,10 +1488,16 @@ async function handleCreate(e) {
     const amount = form.querySelector('.amount-display')?.value.replace(/\D/g, '') ?? '';
     form.querySelector('[name="ngan_sach_goc"]').value = amount;
 
-    const timeData = getTimeData('create');
+    const timeData = getTimeData('create'); // hoặc 'edit'
     if (!timeData) {
-        document.getElementById('create-error-ngay_bat_dau').textContent = 'Vui lòng chọn tháng áp dụng';
-        document.getElementById('create-error-ngay_bat_dau').style.display = 'block';
+        const loai = document.getElementById('create-loai-thoi-gian').value;
+        if (loai === 'thang') {
+            document.getElementById('create-error-ngay_bat_dau').textContent = 'Vui lòng chọn tháng áp dụng';
+            document.getElementById('create-error-ngay_bat_dau').style.display = 'block';
+        } else {
+            document.getElementById('create-error-ngay_bat_dau_custom').textContent = 'Vui lòng chọn ngày bắt đầu và kết thúc';
+            document.getElementById('create-error-ngay_bat_dau_custom').style.display = 'block';
+        }
         return;
     }
 
@@ -1491,6 +1519,9 @@ async function handleCreate(e) {
         form.reset();
         form.querySelector('.amount-display').value = '';
         initCreateDefaults(); // reset về mặc định
+        document.getElementById('create-section-thang').style.display = 'block';
+        document.getElementById('create-section-ngay').style.display  = 'none';
+        document.getElementById('create-loai-thoi-gian').value        = 'thang';
         loadWallets(currentPage);
     } catch (err) {
         if (err.errors)  showFormErrors(err.errors, 'create');
@@ -1720,8 +1751,8 @@ function openEditModal(w) {
     document.getElementById('edit-section-ngay').style.display  = isNgay ? 'block' : 'none';
 
     if (isNgay) {
-        document.getElementById('edit-ngay-bat-dau').value  = w.ngay_bat_dau ?? '';
-        document.getElementById('edit-ngay-ket-thuc').value = w.ngay_ket_thuc ?? '';
+        document.getElementById('edit-ngay-bat-dau').value  = (w.ngay_bat_dau ?? '').substring(0, 10);
+        document.getElementById('edit-ngay-ket-thuc').value = (w.ngay_ket_thuc ?? '').substring(0, 10);
     } else {
         if (w.ngay_bat_dau) {
             document.getElementById('edit-thang-ap-dung').value = w.ngay_bat_dau.substring(0, 7);

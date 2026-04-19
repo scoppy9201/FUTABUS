@@ -88,21 +88,21 @@
 
             <div class="monebot-quick-grid">
                 @if($monebotUser)
-                    <button type="button" class="monebot-quick" data-message="Phân tích chi tiêu tháng này của tôi">
+                    <button type="button" class="monebot-quick" data-action="analyze">
                         <span class="monebot-quick-icon"><i class="fas fa-chart-pie"></i></span>
-                        <span>Chi tiêu tháng này</span>
+                        <span>Phân tích chi tiêu</span>
                     </button>
-                    <button type="button" class="monebot-quick" data-message="Gợi ý tối ưu ngân sách cho tôi">
+                    <button type="button" class="monebot-quick" data-action="budget-suggestion">
                         <span class="monebot-quick-icon"><i class="fas fa-magic"></i></span>
-                        <span>Tối ưu ngân sách</span>
+                        <span>Đề xuất ngân sách</span>
                     </button>
-                    <button type="button" class="monebot-quick" data-message="Dự báo dòng tiền tháng tới">
+                    <button type="button" class="monebot-quick" data-action="forecast">
                         <span class="monebot-quick-icon"><i class="fas fa-chart-line"></i></span>
-                        <span>Dự báo dòng tiền</span>
+                        <span>Dự báo chi tiêu</span>
                     </button>
-                    <button type="button" class="monebot-quick" data-link="{{ route('ai-assistant.index') }}">
-                        <span class="monebot-quick-icon"><i class="fas fa-robot"></i></span>
-                        <span>Mở trợ lý AI</span>
+                    <button type="button" class="monebot-quick" data-action="export">
+                        <span class="monebot-quick-icon"><i class="fas fa-file-export"></i></span>
+                        <span>Xuất báo cáo</span>
                     </button>
                 @else
                     <button type="button" class="monebot-quick" data-message="Tôi muốn xem bản demo Monexa">
@@ -390,8 +390,9 @@
 
         quickButtons.forEach(function (button) {
             button.addEventListener('click', function () {
-                const link = button.dataset.link;
+                const link    = button.dataset.link;
                 const message = button.dataset.message;
+                const action  = button.dataset.action;
 
                 setOpen(true);
 
@@ -400,11 +401,198 @@
                     return;
                 }
 
+                if (action) {
+                    handleQuickAction(action);
+                    return;
+                }
+
                 if (message) {
                     sendMessage(message);
                 }
             });
         });
+
+        function handleQuickAction(action) {
+            if (mode !== 'auth' || !csrf) return;
+
+            const actionMap = {
+                'analyze':          { label: 'Phân tích chi tiêu tháng này',   url: '/api/v1/ai/analyze',           key: 'analysis' },
+                'forecast':         { label: 'Dự báo chi tiêu tháng này',      url: '/api/v1/ai/forecast',          key: 'forecast' },
+                'budget-suggestion':{ label: 'Đề xuất cải thiện ngân sách',    url: '/api/v1/ai/budget-suggestion', key: 'suggestion' },
+                'export':           { label: 'Xuất báo cáo tài chính',         url: '/api/v1/ai/export-report',     key: 'message' },
+            };
+
+            const cfg = actionMap[action];
+            if (!cfg) return;
+
+            // Nếu là export → hỏi user muốn kỳ nào trước
+            if (action === 'export') {
+                appendMessage('user', cfg.label);
+                appendMessage('bot',
+                    'Bạn muốn xuất báo cáo kỳ nào và định dạng nào?' +
+                    '<div class="monebot-export-options" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;">' +
+                        '<button class="monebot-export-btn" data-period="this_month" data-format="xlsx" style="padding:5px 10px;border-radius:6px;border:1px solid #3b82f6;background:#eff6ff;color:#1d4ed8;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:4px;">\
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 24 24">\
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>\
+                        <rect x="7" y="13" width="2" height="4" fill="white"/>\
+                        <rect x="11" y="10" width="2" height="7" fill="white"/>\
+                        <rect x="15" y="7" width="2" height="10" fill="white"/>\
+                        </svg> Tháng này (Excel)</button>' +
+
+                        '<button class="monebot-export-btn" data-period="last_month" data-format="xlsx" style="padding:5px 10px;border-radius:6px;border:1px solid #3b82f6;background:#eff6ff;color:#1d4ed8;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:4px;">\
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 24 24">\
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>\
+                        <rect x="7" y="13" width="2" height="4" fill="white"/>\
+                        <rect x="11" y="10" width="2" height="7" fill="white"/>\
+                        <rect x="15" y="7" width="2" height="10" fill="white"/>\
+                        </svg> Tháng trước (Excel)</button>' +
+
+                        '<button class="monebot-export-btn" data-period="this_year" data-format="xlsx" style="padding:5px 10px;border-radius:6px;border:1px solid #3b82f6;background:#eff6ff;color:#1d4ed8;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:4px;">\
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 24 24">\
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>\
+                        <rect x="7" y="13" width="2" height="4" fill="white"/>\
+                        <rect x="11" y="10" width="2" height="7" fill="white"/>\
+                        <rect x="15" y="7" width="2" height="10" fill="white"/>\
+                        </svg> Năm nay (Excel)</button>' +
+
+                        '<button class="monebot-export-btn" data-period="this_month" data-format="pdf" style="padding:5px 10px;border-radius:6px;border:1px solid #dc2626;background:#fef2f2;color:#dc2626;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:4px;">\
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 24 24">\
+                        <path d="M6 2h9l5 5v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>\
+                        <text x="8" y="17" font-size="6" fill="white">PDF</text>\
+                        </svg> Tháng này (PDF)</button>' +
+
+                        '<button class="monebot-export-btn" data-period="last_month" data-format="pdf" style="padding:5px 10px;border-radius:6px;border:1px solid #dc2626;background:#fef2f2;color:#dc2626;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:4px;">\
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 24 24">\
+                        <path d="M6 2h9l5 5v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>\
+                        <text x="8" y="17" font-size="6" fill="white">PDF</text>\
+                        </svg> Tháng trước (PDF)</button>' +
+
+                        '<button class="monebot-export-btn" data-period="this_year" data-format="pdf" style="padding:5px 10px;border-radius:6px;border:1px solid #dc2626;background:#fef2f2;color:#dc2626;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:4px;">\
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 24 24">\
+                        <path d="M6 2h9l5 5v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>\
+                        <text x="8" y="17" font-size="6" fill="white">PDF</text>\
+                        </svg> Năm nay (PDF)</button>' +
+                    '</div>',
+                    { allowHtml: true }
+                );
+
+                // Gắn event cho các nút export vừa render
+                document.querySelectorAll('.monebot-export-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        const period = btn.dataset.period;
+                        const format = btn.dataset.format;
+                        doExport(period, format);
+                        // Disable hết các nút sau khi chọn
+                        document.querySelectorAll('.monebot-export-btn').forEach(b => b.disabled = true);
+                    });
+                });
+
+                return;
+            }
+
+            // Các action khác (analyze, forecast, budget-suggestion)
+            appendMessage('user', cfg.label);
+
+            const typingId = 'monebot-thinking-' + Date.now();
+            appendTyping(typingId);
+
+            const bearerToken = localStorage.getItem('token') ?? '';
+            const authHeaders = bearerToken
+                ? { 'Authorization': 'Bearer ' + bearerToken }
+                : { 'X-CSRF-TOKEN': csrf };
+
+            fetch(cfg.url, {
+                method: 'POST',
+                headers: Object.assign({ 'Content-Type': 'application/json', 'Accept': 'application/json' }, authHeaders),
+                body: JSON.stringify({}),
+            })
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById(typingId)?.remove();
+                if (data && data.success) {
+                    const content = data[cfg.key] || data.message || 'Đã xử lý xong!';
+                    appendMessage('bot', content);
+                } else {
+                    appendMessage('bot', data.message || 'Có lỗi xảy ra, bạn thử lại nhé!');
+                }
+            })
+            .catch(() => {
+                document.getElementById(typingId)?.remove();
+                appendMessage('bot', 'Mất kết nối tạm thời. Bạn thử lại sau nhé!');
+            });
+        }
+
+        function doExport(period, format) {
+            const periodLabels = {
+                'this_month': 'tháng này',
+                'last_month': 'tháng trước',
+                'this_year' : 'năm nay',
+                'all'       : 'tất cả',
+            };
+
+            const typingId = 'monebot-thinking-' + Date.now();
+            appendTyping(typingId);
+
+            const bearerToken = localStorage.getItem('token') ?? '';
+            const authHeaders = bearerToken
+                ? { 'Authorization': 'Bearer ' + bearerToken }
+                : { 'X-CSRF-TOKEN': csrf };
+
+            // Excel → GET, PDF → POST
+            const fetchUrl     = format === 'xlsx'
+                ? `/api/v1/dashboard/export?period=${period}`
+                : `/api/v1/dashboard/export-pdf`;
+
+            const fetchOptions = format === 'xlsx'
+                ? {
+                    method : 'GET',
+                    headers: Object.assign({ 'Accept': 'application/octet-stream' }, authHeaders),
+                }
+                : {
+                    method : 'POST',
+                    headers: Object.assign({ 'Content-Type': 'application/json', 'Accept': 'application/json' }, authHeaders),
+                    body   : JSON.stringify({ period }),
+                };
+
+            fetch(fetchUrl, fetchOptions)
+            .then(response => {
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+
+                // Lấy tên file từ header
+                const disposition = response.headers.get('Content-Disposition');
+                let filename = `baocao_${period}_${new Date().toISOString().slice(0, 10)}`;
+                filename += format === 'pdf' ? '.pdf' : '.xlsx';
+                if (disposition && disposition.includes('filename=')) {
+                    filename = disposition.split('filename=')[1].replace(/['"]/g, '').trim();
+                }
+
+                return response.blob().then(blob => ({ blob, filename }));
+            })
+            .then(({ blob, filename }) => {
+                document.getElementById(typingId)?.remove();
+
+                // Trigger download
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href     = blobUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(blobUrl);
+
+                const icon  = format === 'pdf' ? '📄' : '📊';
+                const label = format === 'pdf' ? 'PDF' : 'Excel';
+                appendMessage('bot',
+                    `${icon} Đã tải báo cáo ${label} kỳ ${periodLabels[period]} về máy rồi nhé! Bạn cần mình giúp gì thêm không?`
+                );
+            })
+            .catch(err => {
+                document.getElementById(typingId)?.remove();
+                appendMessage('bot', 'Không thể tải báo cáo lúc này. Bạn thử lại sau nhé!');
+                console.error('Export error:', err);
+            });
+        }
 
         document.addEventListener('click', function (event) {
             if (isOpen && !root.contains(event.target)) {

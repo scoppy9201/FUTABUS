@@ -59,7 +59,13 @@ class BudgetsController extends Controller
 
         // Gắn thêm thông tin tính toán cho mỗi wallet
         $wallets->getCollection()->transform(function (Budgets $wallet) {
-            $wallet->append(['spent_amount', 'spent_percentage', 'is_over_budget']);
+            $wallet->append([
+                'spent_amount',
+                'spent_percentage',
+                'is_over_budget',
+                'days_remaining',   
+                'time_range_text',  
+            ]);
             return $wallet;
         });
 

@@ -250,12 +250,15 @@ Route::prefix('v1')->name('api.')->group(function () {
         | AI ASSISTANT
         */
         Route::prefix('ai')->name('ai.')->group(function () {
-            Route::get('/suggestions', [AIAssistantController::class, 'suggestions'])->name('suggestions');
-            Route::get('/insights',    [AIAssistantController::class, 'insights'])   ->name('insights');
-            Route::post('/chat',       [AIAssistantController::class, 'chat'])       ->name('chat');
-            Route::post('/analyze',    [AIAssistantController::class, 'analyze'])    ->name('analyze');
-            Route::delete('/history',  [AIAssistantController::class, 'clearHistory'])->name('clear-history');
-            Route::get('/history',     [AIAssistantController::class, 'getHistory']) ->name('history'); 
+            Route::get('/suggestions',        [AIAssistantController::class, 'suggestions'])      ->name('suggestions');
+            Route::get('/insights',           [AIAssistantController::class, 'insights'])         ->name('insights');
+            Route::post('/chat',              [AIAssistantController::class, 'chat'])             ->name('chat');
+            Route::post('/analyze',           [AIAssistantController::class, 'analyze'])          ->name('analyze');
+            Route::post('/forecast',          [AIAssistantController::class, 'forecast'])         ->name('forecast');
+            Route::post('/budget-suggestion', [AIAssistantController::class, 'budgetSuggestion'])->name('budget-suggestion'); 
+            Route::delete('/history',         [AIAssistantController::class, 'clearHistory'])     ->name('clear-history');
+            Route::get('/history',            [AIAssistantController::class, 'getHistory'])       ->name('history');
+            Route::post('/export-report', [AIAssistantController::class, 'exportReport'])->name('export-report');
         });
     }); 
 }); 
