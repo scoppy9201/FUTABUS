@@ -751,12 +751,19 @@
         background: white;
         border-radius: var(--radius);
         width: 100%;
-        max-width: 600px;
-        max-height: 90vh;
+        max-width: min(960px, calc(100vw - 32px));
+        max-height: min(92vh, 820px);
         box-shadow: var(--shadow-lg);
         display: flex;
         flex-direction: column;
         overflow: hidden;
+    }
+
+    .budget-modal-form {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-height: 0;
     }
 
     .modal-header {
@@ -810,17 +817,49 @@
     }
 
     .modal-body {
-        padding: 28px 32px;
+        padding: 24px 32px;
         overflow-y: auto;
         flex: 1;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px 24px;
+        align-items: start;
     }
 
     .form-group-compact {
-        margin-bottom: 20px;
+        margin-bottom: 0;
+        min-width: 0;
     }
 
     .form-group-compact:last-child {
         margin-bottom: 0;
+    }
+
+    .budget-modal-span-2 {
+        grid-column: 1 / -1;
+    }
+
+    .budget-time-grid,
+    .budget-date-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px 20px;
+    }
+
+    .budget-toggle-card {
+        padding: 16px 18px;
+        border: 1px solid #e5e7eb;
+        border-radius: var(--radius-sm);
+        background: #f8fafc;
+        align-self: start;
+    }
+
+    .budget-toggle-card .form-label {
+        margin-bottom: 0;
+    }
+
+    .budget-toggle-card .form-help-compact {
+        margin-top: 10px;
     }
 
     .form-group-compact .form-label {
@@ -893,7 +932,7 @@
     }
 
     .modal-actions-fixed {
-        padding: 20px 32px;
+        padding: 18px 32px;
         background: white;
         border-top: 1px solid #e5e7eb;
         display: flex;
@@ -936,6 +975,11 @@
         color: #e5e7eb;
     }
 
+    body.dark .budget-toggle-card {
+        background: rgba(255, 255, 255, 0.03);
+        border-color: var(--dark-border);
+    }
+
     @media (max-width: 1024px) {
         .filter-form {
             grid-template-columns: 1fr 1fr;
@@ -954,6 +998,7 @@
     @media (max-width: 768px) {
         .modal-content {
             max-width: 96%;
+            max-height: calc(100vh - 24px);
         }
 
         .modal-header {
@@ -961,7 +1006,24 @@
         }
 
         .modal-body {
-            padding: 24px 28px;
+            padding: 20px 24px;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .budget-modal-span-2 {
+            grid-column: auto;
+        }
+
+        .budget-time-grid,
+        .budget-date-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .modal-actions-fixed {
+            padding: 16px 24px;
+            flex-direction: column;
         }
     }
 
@@ -1373,6 +1435,29 @@ function renderCategoryOptions(categories) {
     });
 }
 
+/* Hàm lấy dữ liệu thời gian từ form */
+function getTimeData(prefix) {
+    const loai = document.getElementById(`${prefix}-loai-thoi-gian`).value;
+    let ngayBatDau, ngayKetThuc, tuDongReset;
+
+    if (loai === 'thang') {
+        const thang = document.getElementById(`${prefix}-thang-ap-dung`).value; // "2025-01"
+        if (!thang) return null;
+        const [year, month] = thang.split('-');
+        const start = new Date(year, month - 1, 1);
+        const end   = new Date(year, month, 0); // ngày cuối tháng
+        ngayBatDau  = start.toISOString().split('T')[0];
+        ngayKetThuc = end.toISOString().split('T')[0];
+        tuDongReset = document.getElementById(`${prefix}-tu-dong-reset`).checked ? 1 : 0;
+    } else {
+        ngayBatDau  = document.getElementById(`${prefix}-ngay-bat-dau`).value;
+        ngayKetThuc = document.getElementById(`${prefix}-ngay-ket-thuc`).value;
+        tuDongReset = 0;
+    }
+
+    return { loai_thoi_gian: loai, ngay_bat_dau: ngayBatDau, ngay_ket_thuc: ngayKetThuc, tu_dong_reset: tuDongReset };
+}
+
 /* CREATE */
 async function handleCreate(e) {
     e.preventDefault();
@@ -1381,11 +1466,22 @@ async function handleCreate(e) {
     const amount = form.querySelector('.amount-display')?.value.replace(/\D/g, '') ?? '';
     form.querySelector('[name="ngan_sach_goc"]').value = amount;
 
+    const timeData = getTimeData('create');
+    if (!timeData) {
+        document.getElementById('create-error-ngay_bat_dau').textContent = 'Vui lòng chọn tháng áp dụng';
+        document.getElementById('create-error-ngay_bat_dau').style.display = 'block';
+        return;
+    }
+
     const body = {
-        ten_ngan_sach: form.querySelector('[name="ten_ngan_sach"]').value,
-        category_id:   form.querySelector('[name="category_id"]').value,
-        ngan_sach_goc: amount,
-        mo_ta:         form.querySelector('[name="mo_ta"]').value,
+        ten_ngan_sach:   form.querySelector('[name="ten_ngan_sach"]').value,
+        category_id:     form.querySelector('[name="category_id"]').value,
+        ngan_sach_goc:   amount,
+        mo_ta:           form.querySelector('[name="mo_ta"]').value,
+        loai_thoi_gian:  timeData.loai_thoi_gian,
+        ngay_bat_dau:    timeData.ngay_bat_dau,
+        ngay_ket_thuc:   timeData.ngay_ket_thuc,
+        tu_dong_reset:   timeData.tu_dong_reset,
     };
 
     try {
@@ -1394,6 +1490,7 @@ async function handleCreate(e) {
         document.getElementById('create-modal').classList.remove('active');
         form.reset();
         form.querySelector('.amount-display').value = '';
+        initCreateDefaults(); // reset về mặc định
         loadWallets(currentPage);
     } catch (err) {
         if (err.errors)  showFormErrors(err.errors, 'create');
@@ -1410,11 +1507,22 @@ async function handleUpdate(e) {
     const amount = form.querySelector('.amount-display')?.value.replace(/\D/g, '') ?? '';
     form.querySelector('[name="ngan_sach_goc"]').value = amount;
 
+    const timeData = getTimeData('edit');
+    if (!timeData) {
+        document.getElementById('edit-error-ngay_bat_dau').textContent = 'Vui lòng chọn tháng áp dụng';
+        document.getElementById('edit-error-ngay_bat_dau').style.display = 'block';
+        return;
+    }
+
     const body = {
-        ten_ngan_sach: form.querySelector('[name="ten_ngan_sach"]').value,
-        category_id:   form.querySelector('[name="category_id"]').value,
-        ngan_sach_goc: amount,
-        mo_ta:         form.querySelector('[name="mo_ta"]').value,
+        ten_ngan_sach:   form.querySelector('[name="ten_ngan_sach"]').value,
+        category_id:     form.querySelector('[name="category_id"]').value,
+        ngan_sach_goc:   amount,
+        mo_ta:           form.querySelector('[name="mo_ta"]').value,
+        loai_thoi_gian:  timeData.loai_thoi_gian,
+        ngay_bat_dau:    timeData.ngay_bat_dau,
+        ngay_ket_thuc:   timeData.ngay_ket_thuc,
+        tu_dong_reset:   timeData.tu_dong_reset,
     };
 
     try {
@@ -1602,6 +1710,25 @@ function openEditModal(w) {
         form.querySelector('[name="category_id"]').value = w.category_id;
     }, 50);
 
+    // ── Thời gian ──
+    const loaiEl = document.getElementById('edit-loai-thoi-gian');
+    loaiEl.value = w.loai_thoi_gian ?? 'thang';
+
+    // Toggle thủ công
+    const isNgay = loaiEl.value === 'ngay';
+    document.getElementById('edit-section-thang').style.display = isNgay ? 'none' : 'block';
+    document.getElementById('edit-section-ngay').style.display  = isNgay ? 'block' : 'none';
+
+    if (isNgay) {
+        document.getElementById('edit-ngay-bat-dau').value  = w.ngay_bat_dau ?? '';
+        document.getElementById('edit-ngay-ket-thuc').value = w.ngay_ket_thuc ?? '';
+    } else {
+        if (w.ngay_bat_dau) {
+            document.getElementById('edit-thang-ap-dung').value = w.ngay_bat_dau.substring(0, 7);
+        }
+        document.getElementById('edit-tu-dong-reset').checked = !!w.tu_dong_reset;
+    }
+
     document.getElementById('edit-modal').classList.add('active');
 }
 
@@ -1634,8 +1761,56 @@ function setupAmountInput(displayId, form) {
     });
 }
 
+/* Toggle hiển thị section thời gian */
+function setupTimeToggle(prefix) {
+    const select = document.getElementById(`${prefix}-loai-thoi-gian`);
+    if (!select) return;
+
+    function toggle() {
+        const isNgay = select.value === 'ngay';
+        document.getElementById(`${prefix}-section-thang`).style.display = isNgay ? 'none' : 'block';
+        document.getElementById(`${prefix}-section-ngay`).style.display  = isNgay ? 'block' : 'none';
+    }
+
+    select.addEventListener('change', toggle);
+    toggle(); // chạy ngay khi init
+}
+
+/* Giới hạn ngày kết thúc tối đa 30 ngày */
+function setupDateLimit(prefix) {
+    const startEl = document.getElementById(`${prefix}-ngay-bat-dau`);
+    const endEl   = document.getElementById(`${prefix}-ngay-ket-thuc`);
+    if (!startEl || !endEl) return;
+
+    startEl.addEventListener('change', () => {
+        if (!startEl.value) return;
+        const start = new Date(startEl.value);
+        const max   = new Date(start);
+        max.setDate(max.getDate() + 30);
+        endEl.min = startEl.value;
+        endEl.max = max.toISOString().split('T')[0];
+        if (endEl.value && new Date(endEl.value) > max) {
+            endEl.value = max.toISOString().split('T')[0];
+        }
+    });
+}
+
+/* Set mặc định tháng hiện tại khi mở modal create */
+function initCreateDefaults() {
+    const now   = new Date();
+    const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const el    = document.getElementById('create-thang-ap-dung');
+    if (el) el.value = month;
+}
+
 /* INIT */
 function initPage() {
+    // Setup time toggles
+    setupTimeToggle('create');
+    setupTimeToggle('edit');
+    setupDateLimit('create');
+    setupDateLimit('edit');
+    initCreateDefaults();
     loadWallets();
 
     document.getElementById('btn-search').addEventListener('click', () => loadWallets(1));

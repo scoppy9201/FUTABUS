@@ -161,9 +161,9 @@ class TransactionController extends Controller
         DB::beginTransaction();
         try {
             $category = Category::where('id', $validated['category_id'])
-                                 ->where('user_id', Auth::id())
-                                 ->whereNotNull('danh_muc_cha_id')
-                                 ->first();
+                                ->where('user_id', Auth::id())
+                                ->whereNotNull('danh_muc_cha_id')
+                                ->first();
 
             if (!$category) {
                 DB::rollBack();
@@ -174,6 +174,7 @@ class TransactionController extends Controller
                 DB::rollBack();
                 return response()->json(['message' => 'Loại giao dịch không khớp với loại danh mục!'], 422);
             }
+
 
             // Kiểm tra danh mục cha có đang active không
             $parentCategory = Category::find($category->danh_muc_cha_id);
@@ -190,18 +191,68 @@ class TransactionController extends Controller
                             ->lockForUpdate()
                             ->first();
 
-            if ($validated['loai_giao_dich'] == 'CHI' && $wallet) {
-                if ($wallet->so_du < $validated['so_tien']) {
-                    DB::rollBack();
-                    return response()->json([
-                        'message' => 'Ngân sách không đủ! Số dư hiện tại: ' . number_format($wallet->so_du, 0, ',', '.') . 'đ'
-                    ], 422);
+            // Kiểm tra ngân sách chỉ với giao dịch CHI
+            if ($validated['loai_giao_dich'] === 'CHI') {
+
+                if (!$wallet) {
+                    // Không có budget active → kiểm tra tại sao
+                    $coHetHan = Budgets::where('category_id', $validated['category_id'])
+                        ->where('user_id', Auth::id())
+                        ->where('da_het_han', true)
+                        ->exists();
+
+                    $coVoHieu = Budgets::where('category_id', $validated['category_id'])
+                        ->where('user_id', Auth::id())
+                        ->where('trang_thai', false)
+                        ->where('da_het_han', false)
+                        ->exists();
+
+                    if ($coHetHan) {
+                        DB::rollBack();
+                        return response()->json([
+                            'message'      => 'Ngân sách cho danh mục này đã hết hạn, không thể thêm giao dịch!',
+                            'warning_type' => 'het_han',
+                        ], 422);
+                    }
+
+                    if ($coVoHieu) {
+                        DB::rollBack();
+                        return response()->json([
+                            'message'      => 'Ngân sách cho danh mục này đang bị vô hiệu hóa!',
+                            'warning_type' => 'vo_hieu',
+                        ], 422);
+                    }
+
+                    // Không có budget nào → cho phép tạo giao dịch bình thường (không bắt buộc phải có budget)
+
+                } else {
+                    // Có budget active → kiểm tra thời hạn
+                    if ($wallet->da_het_han || !$wallet->is_active_time) {
+                        $wallet->checkAndExpire();
+                        DB::rollBack();
+                        return response()->json([
+                            'message'      => 'Ngân sách cho danh mục này đã hết hạn, không thể thêm giao dịch!',
+                            'warning_type' => 'het_han',
+                        ], 422);
+                    }
+
+                    // Kiểm tra số dư
+                    if ($wallet->so_du < $validated['so_tien']) {
+                        DB::rollBack();
+                        return response()->json([
+                            'message'      => 'Ngân sách không đủ! Số dư hiện tại: '
+                                . number_format($wallet->so_du, 0, ',', '.') . 'đ',
+                            'warning_type' => 'khong_du',
+                        ], 422);
+                    }
                 }
             }
 
+            // Tạo giao dịch
             Transaction::create([
                 'user_id'                => Auth::id(),
                 'category_id'            => $validated['category_id'],
+                'wallet_id'              => $wallet?->id,
                 'loai_giao_dich'         => $validated['loai_giao_dich'],
                 'phuong_thuc_thanh_toan' => $validated['phuong_thuc_thanh_toan'],
                 'so_tien'                => $validated['so_tien'],
@@ -210,7 +261,8 @@ class TransactionController extends Controller
                 'money_wallet_id'        => $validated['money_wallet_id'] ?? null,
             ]);
 
-            if ($wallet) {
+            // Cập nhật số dư budget nếu còn active và còn hạn
+            if ($wallet && !$wallet->da_het_han && $wallet->is_active_time) {
                 if ($validated['loai_giao_dich'] == 'THU') {
                     $wallet->increment('so_du', $validated['so_tien']);
                 } else {
@@ -218,6 +270,7 @@ class TransactionController extends Controller
                 }
             }
 
+            // Cập nhật MoneyWallet
             if (!empty($validated['money_wallet_id'])) {
                 $mWallet = \App\Models\MoneyWallet::where('id', $validated['money_wallet_id'])
                     ->where('user_id', Auth::id())
@@ -312,96 +365,65 @@ class TransactionController extends Controller
         DB::beginTransaction();
         try {
             $category = Category::where('id', $validated['category_id'])
-                                 ->where('user_id', Auth::id())
-                                 ->whereNotNull('danh_muc_cha_id')
-                                 ->first();
+                                ->where('user_id', Auth::id())
+                                ->whereNotNull('danh_muc_cha_id')
+                                ->first();
 
             if (!$category) {
                 DB::rollBack();
                 return response()->json(['message' => 'Chỉ có thể cập nhật giao dịch cho danh mục con!'], 422);
             }
 
-            $oldCategoryId    = $transaction->category_id;
             $oldAmount        = $transaction->so_tien;
             $oldType          = $transaction->loai_giao_dich;
             $oldMoneyWalletId = $transaction->money_wallet_id;
+            $oldWalletId      = $transaction->wallet_id; // ← lấy wallet_id cũ trực tiếp
 
-            if ($oldCategoryId == $validated['category_id']) {
-                $wallet = Budgets::where('category_id', $oldCategoryId)
-                                ->where('user_id', Auth::id())
-                                ->where('trang_thai', true)
-                                ->lockForUpdate()
-                                ->first();
-
-                if ($wallet) {
-                    if ($oldType == 'THU') {
-                        $wallet->decrement('so_du', $oldAmount);
-                    } else {
-                        $wallet->increment('so_du', $oldAmount);
-                    }
-
-                    $wallet->refresh();
-
-                    if ($validated['loai_giao_dich'] == 'CHI') {
-                        if ($wallet->so_du < $validated['so_tien']) {
-                            DB::rollBack();
-                            return response()->json([
-                                'message' => 'Ngân sách không đủ! Số dư hiện tại: ' . number_format($wallet->so_du, 0, ',', '.') . 'đ'
-                            ], 422);
-                        }
-                    }
-
-                    if ($validated['loai_giao_dich'] == 'THU') {
-                        $wallet->increment('so_du', $validated['so_tien']);
-                    } else {
-                        $wallet->decrement('so_du', $validated['so_tien']);
-                    }
-                }
-            } else {
-                $oldWallet = Budgets::where('category_id', $oldCategoryId)
-                                   ->where('user_id', Auth::id())
-                                   ->where('trang_thai', true)
-                                   ->lockForUpdate()
-                                   ->first();
+            // Bước 1: Hoàn tiền về budget CŨ (dùng wallet_id, không tìm theo category nữa)
+            if ($oldWalletId) {
+                $oldWallet = Budgets::where('id', $oldWalletId)
+                                    ->where('user_id', Auth::id())
+                                    ->lockForUpdate()
+                                    ->first();
 
                 if ($oldWallet) {
                     if ($oldType == 'THU') {
-                        if ($oldWallet->so_du < $oldAmount) {
-                            DB::rollBack();
-                            return response()->json(['message' => 'Không thể cập nhật vì sẽ làm số dư ngân sách cũ âm!'], 422);
-                        }
                         $oldWallet->decrement('so_du', $oldAmount);
                     } else {
                         $oldWallet->increment('so_du', $oldAmount);
                     }
                 }
+            }
 
-                $newWallet = Budgets::where('category_id', $validated['category_id'])
-                                   ->where('user_id', Auth::id())
-                                   ->where('trang_thai', true)
-                                   ->lockForUpdate()
-                                   ->first();
+            // Bước 2: Tìm budget ACTIVE của category mới để áp tiền vào
+            $newWallet = Budgets::where('category_id', $validated['category_id'])
+                                ->where('user_id', Auth::id())
+                                ->where('trang_thai', true)
+                                ->lockForUpdate()
+                                ->first();
 
-                if ($newWallet) {
-                    if ($validated['loai_giao_dich'] == 'CHI') {
-                        if ($newWallet->so_du < $validated['so_tien']) {
-                            DB::rollBack();
-                            return response()->json([
-                                'message' => 'Ngân sách mới không đủ! Số dư hiện tại: ' . number_format($newWallet->so_du, 0, ',', '.') . 'đ'
-                            ], 422);
-                        }
+            if ($newWallet) {
+                if ($validated['loai_giao_dich'] == 'CHI') {
+                    if ($newWallet->so_du < $validated['so_tien']) {
+                        DB::rollBack();
+                        return response()->json([
+                            'message' => 'Ngân sách không đủ! Số dư hiện tại: '
+                                . number_format($newWallet->so_du, 0, ',', '.') . 'đ'
+                        ], 422);
                     }
+                }
 
-                    if ($validated['loai_giao_dich'] == 'THU') {
-                        $newWallet->increment('so_du', $validated['so_tien']);
-                    } else {
-                        $newWallet->decrement('so_du', $validated['so_tien']);
-                    }
+                if ($validated['loai_giao_dich'] == 'THU') {
+                    $newWallet->increment('so_du', $validated['so_tien']);
+                } else {
+                    $newWallet->decrement('so_du', $validated['so_tien']);
                 }
             }
 
+            // Bước 3: Cập nhật giao dịch — gắn wallet_id mới
             $transaction->update([
                 'category_id'            => $validated['category_id'],
+                'wallet_id'              => $newWallet?->id, // ← cập nhật wallet_id mới
                 'loai_giao_dich'         => $validated['loai_giao_dich'],
                 'phuong_thuc_thanh_toan' => $validated['phuong_thuc_thanh_toan'],
                 'so_tien'                => $validated['so_tien'],
@@ -410,11 +432,12 @@ class TransactionController extends Controller
                 'money_wallet_id'        => $validated['money_wallet_id'] ?? null,
             ]);
 
-            // Revert old money wallet
+            // Bước 4: Hoàn tiền về MoneyWallet cũ
             if ($oldMoneyWalletId) {
                 $oldW = \App\Models\MoneyWallet::where('id', $oldMoneyWalletId)
                     ->where('user_id', Auth::id())
-                    ->lockForUpdate()->first();
+                    ->lockForUpdate()
+                    ->first();
 
                 if ($oldW) {
                     if ($oldType == 'THU') {
@@ -425,12 +448,13 @@ class TransactionController extends Controller
                 }
             }
 
-            // Apply new money wallet
+            // Bước 5: Áp tiền vào MoneyWallet mới
             $newMoneyWalletId = $validated['money_wallet_id'] ?? null;
             if ($newMoneyWalletId) {
                 $newW = \App\Models\MoneyWallet::where('id', $newMoneyWalletId)
                     ->where('user_id', Auth::id())
-                    ->lockForUpdate()->first();
+                    ->lockForUpdate()
+                    ->first();
 
                 if ($newW) {
                     if ($validated['loai_giao_dich'] == 'THU') {
@@ -450,7 +474,6 @@ class TransactionController extends Controller
         }
     }
 
-    // Xóa giao dịch 
     public function destroy(Transaction $transaction)
     {
         if ($transaction->user_id !== Auth::id()) {
@@ -459,31 +482,35 @@ class TransactionController extends Controller
 
         DB::beginTransaction();
         try {
-            $wallet = Budgets::where('category_id', $transaction->category_id)
-                            ->where('user_id', Auth::id())
-                            ->where('trang_thai', true)
-                            ->lockForUpdate()
-                            ->first();
+            // Dùng wallet_id trực tiếp — chính xác budget nào sở hữu giao dịch này
+            if ($transaction->wallet_id) {
+                $wallet = Budgets::where('id', $transaction->wallet_id)
+                                ->where('user_id', Auth::id())
+                                ->lockForUpdate()
+                                ->first();
 
-            if ($wallet) {
-                if ($transaction->loai_giao_dich == 'THU') {
-                    if ($wallet->so_du < $transaction->so_tien) {
-                        DB::rollBack();
-                        return response()->json([
-                            'message' => 'Không thể xóa giao dịch này vì sẽ làm số dư âm! Số dư hiện tại: ' .
-                                number_format($wallet->so_du, 0, ',', '.') . 'đ'
-                        ], 422);
+                if ($wallet) {
+                    if ($transaction->loai_giao_dich == 'THU') {
+                        if ($wallet->so_du < $transaction->so_tien) {
+                            DB::rollBack();
+                            return response()->json([
+                                'message' => 'Không thể xóa giao dịch này vì sẽ làm số dư âm! Số dư hiện tại: ' .
+                                    number_format($wallet->so_du, 0, ',', '.') . 'đ'
+                            ], 422);
+                        }
+                        $wallet->decrement('so_du', $transaction->so_tien);
+                    } else {
+                        $wallet->increment('so_du', $transaction->so_tien);
                     }
-                    $wallet->decrement('so_du', $transaction->so_tien);
-                } else {
-                    $wallet->increment('so_du', $transaction->so_tien);
                 }
             }
 
+            // Hoàn tiền MoneyWallet
             if ($transaction->money_wallet_id) {
                 $mWallet = \App\Models\MoneyWallet::where('id', $transaction->money_wallet_id)
                     ->where('user_id', Auth::id())
-                    ->lockForUpdate()->first();
+                    ->lockForUpdate()
+                    ->first();
 
                 if ($mWallet) {
                     if ($transaction->loai_giao_dich == 'THU') {

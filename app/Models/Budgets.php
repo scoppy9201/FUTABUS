@@ -18,12 +18,21 @@ class Budgets extends Model
         'so_du',
         'mo_ta',
         'trang_thai',
+        'loai_thoi_gian',   
+        'ngay_bat_dau',     
+        'ngay_ket_thuc',    
+        'tu_dong_reset',   
+        'da_het_han',      
     ];
 
     protected $casts = [
         'ngan_sach_goc' => 'decimal:2',
-        'so_du' => 'decimal:2',
-        'trang_thai' => 'boolean',
+        'so_du'         => 'decimal:2',
+        'trang_thai'    => 'boolean',
+        'tu_dong_reset' => 'boolean',   
+        'da_het_han'    => 'boolean',   
+        'ngay_bat_dau'  => 'date',      
+        'ngay_ket_thuc' => 'date',   
     ];
     
     /**
@@ -43,11 +52,11 @@ class Budgets extends Model
     }
 
     /**
-     * Relationship: Giao dịch của ngân sách này (qua category)
+     * Relationship: Giao dịch của ngân sách này (trực tiệp wallet_id)
      */
     public function transactions()
     {
-        return $this->hasMany(Transaction::class, 'category_id', 'category_id');
+        return $this->hasMany(Transaction::class, 'wallet_id');
     }
     
     /**
@@ -239,19 +248,15 @@ class Budgets extends Model
      */
     public function recalculateBalance()
     {
-        $totalSpent = Transaction::where('user_id', $this->user_id)
-            ->where('category_id', $this->category_id)
+        $totalSpent = $this->transactions()
             ->where('loai_giao_dich', 'CHI')
             ->sum('so_tien');
 
-        $totalIncome = Transaction::where('user_id', $this->user_id)
-            ->where('category_id', $this->category_id)
+        $totalIncome = $this->transactions()
             ->where('loai_giao_dich', 'THU')
             ->sum('so_tien');
 
-        // Số dư = Ngân sách gốc + Thu - Chi
         $newBalance = $this->ngan_sach_goc + $totalIncome - $totalSpent;
-
         $this->update(['so_du' => $newBalance]);
 
         return $newBalance;
@@ -260,11 +265,9 @@ class Budgets extends Model
     /**
      * Kiểm tra ngân sách có thể xóa không
      */
-    public function canDelete()
+    public function canDelete(): bool
     {
-        return !$this->transactions()
-                     ->where('user_id', $this->user_id)
-                     ->exists();
+        return !$this->transactions()->exists();
     }
 
     /**
@@ -321,5 +324,78 @@ class Budgets extends Model
             'is_low_balance' => $this->is_low_balance,
             'is_critical_balance' => $this->is_critical_balance,
         ];
+    }
+
+    /**
+     * Accessor: Kiểm tra ngân sách có đang trong thời hạn không
+     */
+    public function getIsActiveTimeAttribute(): bool
+    {
+        $today = now()->startOfDay();
+
+        if ($this->loai_thoi_gian === 'thang') {
+            // Loại tháng → kiểm tra ngày hiện tại có trong tháng của ngay_bat_dau không
+            if (!$this->ngay_bat_dau) return true;
+            return $today->lte($this->ngay_ket_thuc);
+        }
+
+        // Loại ngày → kiểm tra khoảng thời gian
+        if (!$this->ngay_bat_dau || !$this->ngay_ket_thuc) return true;
+        return $today->gte($this->ngay_bat_dau) && $today->lte($this->ngay_ket_thuc);
+    }
+
+    /**
+     * Accessor: Số ngày còn lại
+     */
+    public function getDaysRemainingAttribute(): ?int
+    {
+        if (!$this->ngay_ket_thuc) return null;
+        $today = now()->startOfDay();
+        if ($today->gt($this->ngay_ket_thuc)) return 0;
+        return $today->diffInDays($this->ngay_ket_thuc);
+    }
+
+    /**
+     * Accessor: Phần trăm thời gian đã trôi qua
+     */
+    public function getTimeProgressAttribute(): ?float
+    {
+        if (!$this->ngay_bat_dau || !$this->ngay_ket_thuc) return null;
+        $total   = $this->ngay_bat_dau->diffInDays($this->ngay_ket_thuc);
+        $elapsed = $this->ngay_bat_dau->diffInDays(now()->startOfDay());
+        if ($total <= 0) return 100;
+        return round(min(($elapsed / $total) * 100, 100), 2);
+    }
+
+    /**
+     * Accessor: Text thời hạn hiển thị UI
+     */
+    public function getTimeRangeTextAttribute(): string
+    {
+        if (!$this->ngay_bat_dau || !$this->ngay_ket_thuc) return 'Không giới hạn';
+
+        if ($this->loai_thoi_gian === 'thang') {
+            return 'Tháng ' . $this->ngay_bat_dau->format('m/Y');
+        }
+
+        return $this->ngay_bat_dau->format('d/m/Y') . ' - ' . $this->ngay_ket_thuc->format('d/m/Y');
+    }
+
+    /**
+     * Kiểm tra và khóa ngân sách nếu hết hạn
+     */
+    public function checkAndExpire(): bool
+    {
+        if ($this->da_het_han) return true; // đã hết hạn rồi
+
+        if (!$this->is_active_time) {
+            $this->update([
+                'trang_thai' => false,
+                'da_het_han' => true,
+            ]);
+            return true;
+        }
+
+        return false;
     }
 }
