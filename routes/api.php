@@ -143,13 +143,6 @@ Route::prefix('v1')->name('api.')->group(function () {
             Route::delete('/{wallet}',       [BudgetsController::class, 'destroy'])     ->name('destroy');
             Route::patch('/{wallet}/status', [BudgetsController::class, 'toggleStatus'])->name('toggle-status');
             Route::post('/{wallet}/sync',    [BudgetsController::class, 'syncBalance']) ->name('sync-balance');
-            Route::get('/',                  [BudgetsController::class, 'index'])        ->name('index');
-            Route::post('/',                 [BudgetsController::class, 'store'])        ->name('store');
-            Route::get('/{wallet}',          [BudgetsController::class, 'show'])         ->name('show');
-            Route::patch('/{wallet}',        [BudgetsController::class, 'update'])       ->name('update');
-            Route::delete('/{wallet}',       [BudgetsController::class, 'destroy'])      ->name('destroy');
-            Route::patch('/{wallet}/status', [BudgetsController::class, 'toggleStatus']) ->name('toggle-status');
-            Route::post('/{wallet}/sync',    [BudgetsController::class, 'syncBalance'])  ->name('sync-balance');
         });
 
         /*
