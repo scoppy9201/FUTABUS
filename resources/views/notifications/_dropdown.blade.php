@@ -368,7 +368,6 @@ function calcTimeAgo(unixTimestamp) {
     if (diff < 604800) return Math.floor(diff / 86400) + ' ngày trước';
     if (diff < 2592000) return Math.floor(diff / 604800) + ' tuần trước';
 
-    // Nếu quá cũ thì hiển thị ngày tháng
     const d = new Date(unixTimestamp * 1000);
     return d.toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' });
 }
@@ -376,10 +375,9 @@ function calcTimeAgo(unixTimestamp) {
 function isFresh(unixTimestamp) {
     if (!unixTimestamp) return false;
     const diff = Math.floor(Date.now() / 1000) - unixTimestamp;
-    return diff < 3600; // < 1 giờ = fresh (màu xanh)
+    return diff < 3600;
 }
 
-// ── Cập nhật time ago định kỳ mà không re-render toàn bộ ──
 function updateAllTimeAgo() {
     document.querySelectorAll('[data-unix]').forEach(el => {
         const unix = parseInt(el.dataset.unix);
@@ -399,7 +397,6 @@ function toggleNotifPanel() {
     }
 }
 
-// Đóng khi click bên ngoài
 document.addEventListener('click', e => {
     if (!e.target.closest('#notifWrap') && notifOpen) {
         notifOpen = false;
@@ -419,7 +416,6 @@ async function loadNotifications() {
         updateBadge(data.unread_count);
         window._notifHasOlder = data.has_older;
 
-        // Bắt đầu cập nhật time ago mỗi 30 giây
         if (timeAgoTimer) clearInterval(timeAgoTimer);
         timeAgoTimer = setInterval(updateAllTimeAgo, 30000);
 
@@ -445,24 +441,22 @@ function renderList() {
         : notifData;
 
     if (items.length === 0) {
-        // Định nghĩa icon và văn bản dựa trên tab hiện tại
         const isEmptyUnread = currentTab === 'unread';
 
         const iconSvg = isEmptyUnread
             ? `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>` // Icon hoàn thành màu xanh
+            </svg>`
             : `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-            </svg>`; // Icon chuông trống màu xám
+            </svg>`;
 
         const message = isEmptyUnread
             ? 'Không có thông báo chưa đọc'
             : 'Chưa có thông báo nào';
 
-        // Đổ dữ liệu vào HTML
         list.innerHTML = `
             <div class="np-empty" style="text-align: center; padding: 40px 20px;">
                 <div class="np-empty-icon" style="margin-bottom: 12px; display: flex; justify-content: center;">
@@ -475,7 +469,6 @@ function renderList() {
         return;
     }
 
-    // Nhóm theo ngày
     const groups = {};
     items.forEach(n => {
         const date = n.date;
@@ -502,13 +495,11 @@ function renderList() {
 }
 
 function renderItem(n) {
-    // Dùng created_at_unix nếu có, fallback về time_ago từ server
     const unix     = n.created_at_unix || 0;
     const timeText = unix ? calcTimeAgo(unix) : (n.time_ago || '');
     const fresh    = unix ? isFresh(unix) : (n.time_ago === 'Vừa xong' || (n.time_ago || '').includes('phút'));
     const unreadCls = n.da_doc ? '' : 'unread';
 
-    // Avatar
     let avHtml;
     if (n.actor_avatar) {
         const src = n.actor_avatar.startsWith('http')
@@ -535,7 +526,6 @@ function renderItem(n) {
 
     const href = n.url || '#';
 
-    // Invite action buttons
     let inviteButtons = '';
     if (n.loai === 'group_invited' && !n.da_doc) {
         const tokenMatch = n.url ? n.url.match(/invitations\/([^/]+)\/accept/) : null;
@@ -669,7 +659,6 @@ function updateBadge(count) {
     badge.classList.add('pop');
 }
 
-// ── Badge polling mỗi 30s (thay vì 60s) ───────────────────
 async function pollBadge() {
     try {
         const res  = await fetch('{{ route("api.notifications.badge") }}', {
@@ -685,7 +674,7 @@ async function pollBadge() {
 }
 
 pollBadge();
-badgePollingTimer = setInterval(pollBadge, 30000); // 30s thay vì 60s
+badgePollingTimer = setInterval(pollBadge, 30000);
 
 function openCalendar() {
     document.getElementById('notifCalendar').classList.add('open');
@@ -715,8 +704,8 @@ async function loadByDate(date) {
             return;
         }
 
-        result.innerHTML = `
-            <div class="np-cal-date-label" style="display: flex; align-items: center; gap: 8px; font-weight: 500; color: #374151;">
+        // ✅ FIX: gán toàn bộ vào 1 assignment, bỏ dấu ; sai chỗ
+        result.innerHTML = `<div class="np-cal-date-label" style="display: flex; align-items: center; gap: 8px; font-weight: 500; color: #374151;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                     <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -724,7 +713,7 @@ async function loadByDate(date) {
                     <line x1="3" y1="10" x2="21" y2="10"></line>
                 </svg>
                 <span>${data.date} — ${items.length} thông báo</span>
-            </div>`;
+            </div>`
             + items.map(n => `
                 <a href="${escHtml(n.url || '#')}" class="np-item ${n.da_doc ? '' : 'unread'}" style="text-decoration:none;">
                     <div class="np-av" style="background:#f3f4f6;font-size:20px;display:flex;align-items:center;justify-content:center;">
@@ -735,6 +724,7 @@ async function loadByDate(date) {
                         <div class="np-time">${n.time_ago}</div>
                     </div>
                 </a>`).join('');
+
     } catch(e) {
         result.innerHTML = '<div class="np-empty"><div class="np-empty-text">Lỗi tải dữ liệu</div></div>';
     }

@@ -11,6 +11,7 @@ use App\Http\Controllers\GroupDebtController;
 use App\Http\Controllers\Api\WalletTransferController;
 use App\Http\Controllers\Api\QrTransferController;
 use Illuminate\Http\Request;
+use App\Http\Controllers\NotificationController;
 
 /*
 | Web Routes
@@ -126,7 +127,7 @@ Route::middleware('auth')->group(function () {
     // Money wallets
     Route::get('/money-wallets', fn() => view('money-wallets.index')) ->name('money-wallets.index');
     Route::get('/money-wallets/{moneyWallet}', fn() => view('money-wallets.show')) ->name('money-wallets.show');
-    
+
     // Wallet transfers (web views + actions that call API controllers)
     Route::prefix('wallet-transfers')->name('wallet-transfers.')->group(function () {
         Route::get('/', fn() => view('money-wallets.transfers.index')) ->name('index');
@@ -135,7 +136,8 @@ Route::middleware('auth')->group(function () {
     });
 
     // Notifications
-    Route::get('/notifications', fn() => view('notifications')) ->name('notifications.index');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
     // AI Assistant
     Route::get('/ai-assistant', fn() => view('ai-assistant')) ->name('ai-assistant.index');
     // Currency
