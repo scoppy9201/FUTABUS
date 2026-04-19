@@ -92,19 +92,11 @@ class Budgets extends Model
     }
 
     /**
-     * Accessor: Số tiền còn lại
-     */
-    public function getRemainingAmountAttribute()
-    {
-        return $this->so_du;
-    }
-
-    /**
      * Accessor: Format số tiền còn lại
      */
     public function getFormattedRemainingAmountAttribute()
     {
-        return number_format($this->remaining_amount, 0, ',', '.') . 'đ';
+        return number_format($this->so_du, 0, ',', '.') . 'đ';
     }
 
     /**
@@ -177,22 +169,11 @@ class Budgets extends Model
      */
     public function getStatusColorAttribute()
     {
-        if ($this->is_over_budget) {
+        if ($this->is_over_budget || $this->is_critical_balance) {
             return 'danger';
         }
-        
-        if ($this->is_critical_balance) {
-            return 'danger';
-        }
-        
-        if ($this->is_low_balance) {
-            return 'warning';
-        }
-        
-        if ($this->spent_percentage >= 50) {
-            return 'info';
-        }
-        
+        if ($this->is_low_balance) return 'warning';
+        if ($this->spent_percentage >= 50) return 'info';
         return 'success';
     }
     
@@ -280,13 +261,11 @@ class Budgets extends Model
     }
 
     /**
-     * Lấy giao dịch của user sở hữu wallet
+     * Lấy giao dịch của ngân sách này
      */
     public function getUserTransactions()
     {
-        return $this->transactions()
-                    ->where('user_id', $this->user_id)
-                    ->get();
+        return $this->transactions()->get();
     }
 
     /**
@@ -295,7 +274,6 @@ class Budgets extends Model
     public function getRecentTransactions($limit = 5)
     {
         return $this->transactions()
-                    ->where('user_id', $this->user_id)
                     ->orderBy('ngay_giao_dich', 'desc')
                     ->orderBy('created_at', 'desc')
                     ->limit($limit)
@@ -307,9 +285,7 @@ class Budgets extends Model
      */
     public function getStatistics()
     {
-        $transactions = $this->transactions()
-                            ->where('user_id', $this->user_id)
-                            ->get();
+        $transactions = $this->transactions()->get();
         
         return [
             'total_transactions' => $transactions->count(),

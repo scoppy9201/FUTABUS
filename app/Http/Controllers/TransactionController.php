@@ -6,13 +6,14 @@ use App\Models\Transaction;
 use App\Models\Category;
 use App\Models\Budgets;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class TransactionController extends Controller
 {
     // Danh sách giao dịch 
-    public function index(Request $request)
+    public function index(Request $request) : JsonResponse
     {
         $userId = Auth::id();
 
@@ -94,7 +95,7 @@ class TransactionController extends Controller
     }
 
     // Lưu giao dịch 
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'category_id' => [
@@ -304,7 +305,7 @@ class TransactionController extends Controller
     }
 
     // Cập nhật giao dịch 
-    public function update(Request $request, Transaction $transaction)
+    public function update(Request $request, Transaction $transaction) : JsonResponse
     {
         if ($transaction->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
@@ -474,7 +475,8 @@ class TransactionController extends Controller
         }
     }
 
-    public function destroy(Transaction $transaction)
+    // Xóa giao dịch
+    public function destroy(Transaction $transaction) : JsonResponse
     {
         if ($transaction->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);

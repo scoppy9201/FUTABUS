@@ -1091,7 +1091,7 @@ async function api(method, url, body = null) {
     return data;
 }
 
-/* FILTERS */
+/* Lấy giá trị filter từ form để gắn vào URL (không gọi API) */
 function getFilters(page = 1) {
     const p = new URLSearchParams();
     const search   = document.getElementById('filter-search').value.trim();
@@ -1108,7 +1108,7 @@ function getFilters(page = 1) {
     return p.toString();
 }
 
-/* LOAD */
+/* Load danh sách giao dịch - GET /api/v1/transactions → TransactionController@index */
 async function loadTransactions(page = 1) {
     currentPage = page;
     document.getElementById('table-loading').style.display = 'block';
@@ -1132,7 +1132,7 @@ async function loadTransactions(page = 1) {
     }
 }
 
-/* RENDER TABLE */
+/* Render danh sách giao dịch ra bảng (không gọi API) */
 function renderTable(p) {
     if (!p.data.length) {
         document.getElementById('empty-state').style.display = 'block';
@@ -1195,6 +1195,7 @@ function formatDate(dateStr) {
     return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 }
 
+/* Render phân trang (không gọi API) */
 function renderPagination(p) {
     const el   = document.getElementById('pagination-links');
     const cur  = p.current_page;
@@ -1210,6 +1211,7 @@ function renderPagination(p) {
     el.innerHTML = html;
 }
 
+/* Render tổng thu/chi (không gọi API) */
 function renderStats(income, expense, total) {
     document.getElementById('table-stats').innerHTML = `
         <span class="stat-badge income"><img src="/images/arrows.png" alt=""> Thu: ${formatMoney(income)}</span>
@@ -1218,6 +1220,7 @@ function renderStats(income, expense, total) {
     `;
 }
 
+/* Render bộ lọc danh mục (không gọi API) */
 function renderCategoryFilter(categories) {
     const el = document.getElementById('filter-danh-muc');
     const val = el.value;
@@ -1238,7 +1241,7 @@ function renderCategoryFilter(categories) {
     }
 }
 
-/* CREATE */
+/* Tạo mới giao dịch - POST /api/v1/transactions → TransactionController@store*/
 async function handleCreate(e) {
     e.preventDefault();
     const form = e.target;
@@ -1272,7 +1275,7 @@ async function handleCreate(e) {
     }
 }
 
-/* UPDATE */
+/* Cập nhật giao dịch - PATCH /api/v1/transactions/{id} → TransactionController@update */
 async function handleUpdate(e) {
     e.preventDefault();
     const form = e.target;
@@ -1306,7 +1309,7 @@ async function handleUpdate(e) {
         }
 }
 
-/* Modal xác nhận xóa giao dịch */
+/* Hiển thị modal xác nhận xóa giao dịch (không gọi API) */
 function showDeleteModal(onConfirm) {
   const overlay = document.createElement('div');
   overlay.style.cssText = `
@@ -1368,7 +1371,7 @@ function showDeleteModal(onConfirm) {
   overlay.onclick = (e) => { if (e.target === overlay) close(); };
 }
 
-/* Dùng trong handleDelete */
+/* Xóa giao dịch - DELETE /api/v1/transactions/{id} → TransactionController@destroys*/
 function handleDelete(id) {
   showDeleteModal(async () => {
     try {
@@ -1381,7 +1384,7 @@ function handleDelete(id) {
   });
 }
 
-/* EDIT MODAL */
+/* Mở modal edit, điền data vào form (không gọi API)*/
 function openEditModal(t) {
     const form = document.getElementById('edit-form');
     form.dataset.id = t.id;
@@ -1412,6 +1415,7 @@ function openEditModal(t) {
     document.getElementById('edit-modal').classList.add('active');
 }
 
+/* Render danh sách ví (không gọi API) */
 function renderWalletOptions(selectId, selectedId = null) {
     const el = document.getElementById(selectId);
     if (!el) return;
@@ -1431,6 +1435,7 @@ function renderWalletOptions(selectId, selectedId = null) {
         }).join('');
 }
 
+/* Filter danh mục theo loại giao dịch */
 function filterCategoriesByType(prefix = 'create') {
     const loaiEl    = document.getElementById(`${prefix}-loai-giao-dich`);
     const catEl     = document.getElementById(`${prefix}-category`);
@@ -1449,7 +1454,7 @@ function filterCategoriesByType(prefix = 'create') {
     }
 }
 
-/* FORM ERRORS */
+/* Hiển thị lỗi validation từ server lên form (không gọi API) */
 function showFormErrors(errors, prefix) {
     Object.keys(errors).forEach(field => {
         const el = document.getElementById(`${prefix}-error-${field}`);
@@ -1457,13 +1462,14 @@ function showFormErrors(errors, prefix) {
     });
 }
 
+/* Xóa lỗi cũ trên form (không gọi API) */
 function clearFormErrors(prefix) {
     document.querySelectorAll(`[id^="${prefix}-error-"]`).forEach(el => {
         el.textContent = ''; el.style.display = 'none';
     });
 }
 
-/* CURRENCY INPUT */
+/* Xử lý input số tiền (format, validate) (không gọi API) */
 function setupAmountInput(displayId, hiddenName, form) {
     const display = document.getElementById(displayId);
     const errorId = displayId.includes('create') ? 'create-error-so_tien' : 'edit-error-so_tien';
@@ -1508,6 +1514,7 @@ function setupAmountInput(displayId, hiddenName, form) {
     });
 }
 
+/* Kiểm tra số dư ví khi chọn ví và nhập số tiền (không gọi API) */
 function validateWalletAmount() {
     const walletSelect  = document.getElementById('create-wallet');
     const amountDisplay = document.getElementById('create-amount-display');
@@ -1536,6 +1543,7 @@ function validateWalletAmount() {
     return true;
 }
 
+/* Kiểm tra số dư ví khi chọn ví và nhập số tiền trong form edit (không gọi API) */
 function validateWalletAmountEdit() {
     const walletSelect  = document.getElementById('edit-wallet');
     const amountDisplay = document.getElementById('edit-amount-display');
@@ -1564,7 +1572,7 @@ function validateWalletAmountEdit() {
     return true;
 }
 
-// Validate ngày giao dịch
+/* Validate ngày giao dịch không được là ngày trong tương lai (không gọi API) */
 function validateDate(inputEl, errorId) {
     if (!inputEl) return true;
     const val = inputEl.value;
@@ -1587,7 +1595,7 @@ function validateDate(inputEl, errorId) {
     return true;
 }
 
-// Hàm helper dùng chung
+/* Hiển thị 1 lỗi cụ thể (không gọi API) */
 function showError(errorId, message) {
     const el = document.getElementById(errorId);
     if (!el) return;
@@ -1595,6 +1603,7 @@ function showError(errorId, message) {
     el.classList.add('show');
 }
 
+/* Xóa lỗi cụ thể (không gọi API) */    
 function clearError(errorId) {
     const el = document.getElementById(errorId);
     if (!el) return;
@@ -1602,7 +1611,7 @@ function clearError(errorId) {
     el.classList.remove('show');
 }
 
-/* INIT */
+/* Khởi tạo trang, gắn tất cả event listener (không gọi API) */
 function initPage() {
     loadTransactions();
 

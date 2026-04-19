@@ -1268,7 +1268,7 @@ async function api(method, url, body = null) {
     return data;
 }
 
-/* FILTERS */
+/* Lấy giá trị filter từ form để gắn vào URL (không gọi API) */
 function getFilters(page = 1) {
     const p = new URLSearchParams();
     const search   = document.getElementById('filter-search').value.trim();
@@ -1283,7 +1283,7 @@ function getFilters(page = 1) {
     return p.toString();
 }
 
-/* LOAD */
+/* Load danh sách ngân sách - GET /api/v1/budgets → BudgetsController@index */
 async function loadWallets(page = 1) {
     currentPage = page;
     document.getElementById('table-loading').style.display = 'block';
@@ -1304,7 +1304,7 @@ async function loadWallets(page = 1) {
     }
 }
 
-/* RENDER TABLE */
+/* Render danh sách ngân sách ra bảng (không gọi API) */
 function renderTable(p) {
     if (!p.data.length) {
         document.getElementById('empty-state').style.display = 'block';
@@ -1415,6 +1415,7 @@ function renderTable(p) {
     renderPagination(p);
 }
 
+/* Render phân trang (không gọi API) */
 function renderPagination(p) {
     const el   = document.getElementById('pagination-links');
     const cur  = p.current_page;
@@ -1430,6 +1431,7 @@ function renderPagination(p) {
     el.innerHTML = html;
 }
 
+/* Render thống kê trạng thái (không gọi API) */
 function renderStats(p) {
     const active   = p.data.filter(w => w.trang_thai).length;
     const inactive = p.data.filter(w => !w.trang_thai).length;
@@ -1440,6 +1442,7 @@ function renderStats(p) {
     `;
 }
 
+/* Render options cho filter và form (không gọi API) */
 function renderCategoryFilter(categories) {
     const el  = document.getElementById('filter-category');
     const val = el.value;
@@ -1447,6 +1450,7 @@ function renderCategoryFilter(categories) {
         categories.map(c => `<option value="${c.id}" ${c.id == val ? 'selected':''}>${escHtml(c.ten_danh_muc)}</option>`).join('');
 }
 
+/* Render options cho form (không gọi API) */
 function renderCategoryOptions(categories) {
     ['create-category', 'edit-category'].forEach(id => {
         const el = document.getElementById(id);
@@ -1480,7 +1484,7 @@ function getTimeData(prefix) {
     return { loai_thoi_gian: loai, ngay_bat_dau: ngayBatDau, ngay_ket_thuc: ngayKetThuc, tu_dong_reset: tuDongReset };
 }
 
-/* CREATE */
+/* Tạo ngân sách mới - POST /api/v1/budgets → BudgetsController@store*/
 async function handleCreate(e) {
     e.preventDefault();
     clearFormErrors('create');
@@ -1529,7 +1533,7 @@ async function handleCreate(e) {
     }
 }
 
-/* UPDATE */
+/* Cập nhật ngân sách - PATCH /api/v1/budgets/{id} → BudgetsController@update */
 async function handleUpdate(e) {
     e.preventDefault();
     clearFormErrors('edit');
@@ -1629,7 +1633,7 @@ function showDeleteModal(onConfirm) {
   overlay.onclick = (e) => { if (e.target === overlay) close(); };
 }
 
-/* Dùng trong handleDelete */
+/* Xóa ngân sách - DELETE /api/v1/budgets/{id} → BudgetsController@destroy*/
 function handleDelete(id) {
   showDeleteModal(async () => {
     try {
@@ -1642,7 +1646,7 @@ function handleDelete(id) {
   });
 }
 
-/* TOGGLE STATUS */
+/* Cập nhật trạng thái ngân sách - PATCH /api/v1/budgets/{id}/status → BudgetsController@updateStatus */
 async function handleToggle(id) {
     try {
         const data = await api('PATCH', `${API_BASE}/${id}/status`);
@@ -1653,6 +1657,7 @@ async function handleToggle(id) {
     }
 }
 
+/* Đồng bộ số dư ngân sách - POST /api/v1/budgets/{id}/sync → BudgetsController@sync */
 async function handleSync(id) {
     const overlay = document.createElement('div');
     overlay.style.cssText = `
@@ -1722,7 +1727,7 @@ async function handleSync(id) {
     };
 }
 
-/* EDIT MODAL */
+/* Mở modal edit, điền data vào form (không gọi API) */
 function openEditModal(w) {
     const form = document.getElementById('edit-form');
     form.dataset.id = w.id;
@@ -1741,7 +1746,7 @@ function openEditModal(w) {
         form.querySelector('[name="category_id"]').value = w.category_id;
     }, 50);
 
-    // ── Thời gian ──
+    // Thời gian và loại thời gian
     const loaiEl = document.getElementById('edit-loai-thoi-gian');
     loaiEl.value = w.loai_thoi_gian ?? 'thang';
 
@@ -1763,20 +1768,22 @@ function openEditModal(w) {
     document.getElementById('edit-modal').classList.add('active');
 }
 
-/* FORM ERRORS */
+/* Hiển thị lỗi validation từ server lên form (không gọi API) */
 function showFormErrors(errors, prefix) {
     Object.keys(errors).forEach(field => {
         const el = document.getElementById(`${prefix}-error-${field}`);
         if (el) { el.textContent = errors[field][0]; el.style.display = 'block'; }
     });
 }
+
+/* Xóa lỗi validation từ form (không gọi API) */
 function clearFormErrors(prefix) {
     document.querySelectorAll(`[id^="${prefix}-error-"]`).forEach(el => {
         el.textContent = ''; el.style.display = 'none';
     });
 }
 
-/* AMOUNT INPUT */
+/* Xử lý input số tiền (format, validate) (không gọi API) */
 function setupAmountInput(displayId, form) {
     const display = document.getElementById(displayId);
     if (!display) return;
@@ -1834,7 +1841,7 @@ function initCreateDefaults() {
     if (el) el.value = month;
 }
 
-/* INIT */
+/* Khởi tạo trang, gắn tất cả event listener (không gọi API) */
 function initPage() {
     // Setup time toggles
     setupTimeToggle('create');

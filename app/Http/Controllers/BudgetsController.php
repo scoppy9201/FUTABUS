@@ -46,8 +46,8 @@ class BudgetsController extends Controller
         }
 
         // Sắp xếp
-        $sortBy    = $request->get('sort_by', 'created_at');
-        $sortOrder = $request->get('sort_order', 'desc');
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortOrder = $request->input('sort_order', 'desc');
 
         $allowedSorts = ['ten_ngan_sach', 'ngan_sach_goc', 'so_du', 'created_at'];
         if (in_array($sortBy, $allowedSorts)) {
@@ -393,7 +393,7 @@ class BudgetsController extends Controller
     /**
      * Validate dữ liệu wallet (dùng chung cho store & update)
      */
-    private function validateWallet(Request $request, ?int $walletId = null): array
+    private function validateWallet(Request $request): array
     {
         $validated = $request->validate([
             'ten_ngan_sach' => [
@@ -445,7 +445,7 @@ class BudgetsController extends Controller
                     }
                 },
             ],
-            'tu_dong_reset'  => ['boolean'],
+            'tu_dong_reset' => ['nullable', 'boolean'],
         ], [
             'ten_ngan_sach.required' => 'Vui lòng nhập tên ngân sách',
             'ten_ngan_sach.max'      => 'Tên ngân sách không được vượt quá 255 ký tự',
