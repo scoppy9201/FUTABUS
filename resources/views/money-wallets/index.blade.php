@@ -143,7 +143,6 @@ body.dark .inactive-chip { background: rgba(255,255,255,0.04); border-color: rgb
 }
 .restore-btn:hover { background: rgba(74,144,226,0.2); }
 
-/* ── Form inline alert (inside modal) ── */
 .form-alert {
     display: flex; align-items: center; gap: 10px;
     padding: 11px 14px; border-radius: var(--radius-sm);
@@ -156,7 +155,6 @@ body.dark .form-alert.error   { background: rgba(239,68,68,0.12); color: #fca5a5
 body.dark .form-alert.success { background: rgba(16,185,129,0.12); color: #6ee7b7; border-left-color: var(--success); }
 @keyframes fadeInDown { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
 
-/* ── Page toast (top-right, minimal, only when no modal open) ── */
 .page-toast {
     position: fixed; top: 20px; right: 20px; z-index: 99999;
     display: flex; align-items: center; gap: 10px;
@@ -342,7 +340,6 @@ body.dark .skeleton {
             <button class="modal-close-btn" id="btnCloseCreate">✕</button>
         </div>
         <div class="modal-body">
-            {{-- Inline alert inside form --}}
             <div id="createFormAlert" style="display:none;"></div>
 
             <div class="form-group">
@@ -374,31 +371,25 @@ body.dark .skeleton {
                     </label>
                 </div>
             </div>
+
             <div class="form-group">
                 <label class="form-label">Tên ví <span class="required">*</span></label>
                 <input id="createTenVi" class="form-ctrl" placeholder="Ví dụ: Tiền mặt cá nhân, ACB, MoMo..." maxlength="100">
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                <div class="form-group" style="margin-bottom:0">
-                    <label class="form-label">Số dư ban đầu <span class="required">*</span></label>
-                    <input id="createSoDu" type="number" class="form-ctrl" placeholder="0" min="0" step="1000" value="0">
-                    <div id="soDuHint" style="font-size:11px;margin-top:5px;color:#9ca3af;">
-                        Còn có thể phân bổ: <strong id="conLai">--</strong>
-                    </div>
-                </div>
-                <div class="form-group" style="margin-bottom:0">
-                    <label class="form-label">Đơn vị tiền tệ <span class="required">*</span></label>
-                    <select id="createDonVi" class="form-ctrl">
-                        <option value="VND" selected>VND — Việt Nam Đồng</option>
-                        <option value="USD">USD — Đô la Mỹ</option>
-                        <option value="EUR">EUR — Euro</option>
-                        <option value="JPY">JPY — Yên Nhật</option>
-                        <option value="KRW">KRW — Won Hàn Quốc</option>
-                        <option value="SGD">SGD — Đô la Singapore</option>
-                    </select>
-                </div>
+
+            <div class="form-group">
+                <label class="form-label">Đơn vị tiền tệ <span class="required">*</span></label>
+                <select id="createDonVi" class="form-ctrl">
+                    <option value="VND" selected>VND — Việt Nam Đồng</option>
+                    <option value="USD">USD — Đô la Mỹ</option>
+                    <option value="EUR">EUR — Euro</option>
+                    <option value="JPY">JPY — Yên Nhật</option>
+                    <option value="KRW">KRW — Won Hàn Quốc</option>
+                    <option value="SGD">SGD — Đô la Singapore</option>
+                </select>
             </div>
-            <div class="form-group" style="margin-top:16px;">
+
+            <div class="form-group">
                 <label class="form-label">Biểu tượng</label>
                 <div class="emoji-grid" id="createEmojiGrid">
                     <button type="button" class="emoji-btn selected" data-emoji="💰">💰</button>
@@ -420,6 +411,7 @@ body.dark .skeleton {
                 </div>
                 <input type="hidden" id="createEmoji" value="💰">
             </div>
+
             <div class="form-group">
                 <label class="form-label">Mô tả</label>
                 <input id="createMoTa" class="form-ctrl" placeholder="Ghi chú thêm..." maxlength="500">
@@ -507,7 +499,6 @@ body.dark .skeleton {
 
 <script>
 (function () {
-    // Guard SPA
     if (window.__walletIndexInit) return;
     window.__walletIndexInit = true;
 
@@ -533,9 +524,8 @@ body.dark .skeleton {
         dau_tu: 'Đầu tư', khac: 'Khác',
     };
 
-    let summaryData  = {};
-    let createEmoji  = '💰';
-    let editEmoji    = '';
+    let createEmoji = '💰';
+    let editEmoji   = '';
 
     // ── Helpers ──────────────────────────────────────────
     function fmt(n) { return Number(n).toLocaleString('vi-VN'); }
@@ -557,7 +547,6 @@ body.dark .skeleton {
         return data;
     }
 
-    // ── Toast (chỉ dùng khi không có modal nào đang mở) ──
     function pageToast(msg, type = 'success') {
         const el = document.createElement('div');
         el.className = `page-toast ${type}`;
@@ -571,13 +560,11 @@ body.dark .skeleton {
         }, 3500);
     }
 
-    // ── Alert bên trong form modal ────────────────────────
     function showFormAlert(containerId, msg, type = 'error') {
         const el = document.getElementById(containerId);
         if (!el) return;
         el.style.display = 'block';
         el.innerHTML = `<div class="form-alert ${type}">${type === 'error' ? '⚠' : '✓'} ${msg}</div>`;
-        // Scroll to top of modal body so alert is visible
         el.closest('.modal-body')?.scrollTo({ top: 0, behavior: 'smooth' });
     }
     function clearFormAlert(containerId) {
@@ -627,8 +614,7 @@ body.dark .skeleton {
             apiFetch(API.summary),
         ]);
 
-        summaryData = summaryRes;
-        const { tong_tai_san, tong_thu, tong_chi, tong_vi, tong_so_du_vi, con_lai } = summaryRes;
+        const { tong_tai_san, tong_thu, tong_chi, tong_vi, tong_so_du_vi } = summaryRes;
 
         const amountEl = document.getElementById('totalAmount');
         if (amountEl) {
@@ -659,15 +645,7 @@ body.dark .skeleton {
             </div>`;
         }
 
-        // Update "còn lại" hint in create form
-        const conLaiEl = document.getElementById('conLai');
-        if (conLaiEl) {
-            const soDuVal = parseFloat(document.getElementById('createSoDu')?.value) || 0;
-            const remaining = (con_lai || 0) - soDuVal;
-            conLaiEl.textContent = (remaining < 0 ? '-' : '') + fmt(Math.abs(remaining)) + 'đ';
-        }
-
-        const _list  = Array.isArray(walletRes) ? walletRes : (walletRes.data ?? []);
+        const _list    = Array.isArray(walletRes) ? walletRes : (walletRes.data ?? []);
         const active   = _list.filter(w => w.trang_thai !== 'khong_hoat_dong');
         const inactive = _list.filter(w => w.trang_thai === 'khong_hoat_dong');
 
@@ -684,12 +662,9 @@ body.dark .skeleton {
                 document.getElementById('btnOpenCreateEmpty')?.addEventListener('click', openCreate);
             } else {
                 grid.innerHTML = active.map(walletCardHTML).join('');
-                // Bind delete buttons (event delegation)
-                grid.addEventListener('click', gridClickHandler, { once: true });
             }
         }
 
-        // Re-bind every reload because grid is replaced
         bindGridDeleteButtons();
 
         const inactiveSection = document.getElementById('inactiveSection');
@@ -722,7 +697,6 @@ body.dark .skeleton {
         }
     }
 
-    // ── Delete buttons (re-bind after each load) ──────────
     function bindGridDeleteButtons() {
         document.getElementById('walletGrid')?.querySelectorAll('[data-delete-id]').forEach(btn => {
             btn.addEventListener('click', function(e) {
@@ -733,9 +707,6 @@ body.dark .skeleton {
         });
     }
 
-    function gridClickHandler() {} // placeholder, binding done in bindGridDeleteButtons
-
-    // ── Delete wallet ─────────────────────────────────────
     async function deleteWallet(id) {
         if (!confirm('Xóa/ẩn ví này?')) return;
         try {
@@ -754,7 +725,6 @@ body.dark .skeleton {
         }
     }
 
-    // ── Restore wallet ────────────────────────────────────
     async function restoreWallet(id) {
         try {
             const res = await apiFetch(API.restore(id), { method: 'POST' });
@@ -772,49 +742,27 @@ body.dark .skeleton {
         }
     }
 
-    // ── Open / close modals ───────────────────────────────
     function openCreate() {
         clearFormAlert('createFormAlert');
         resetCreateForm();
         document.getElementById('createModal').classList.add('active');
     }
-    function closeCreate() {
-        document.getElementById('createModal').classList.remove('active');
-    }
-    function closeEdit() {
-        document.getElementById('editModal').classList.remove('active');
-    }
+    function closeCreate() { document.getElementById('createModal').classList.remove('active'); }
+    function closeEdit()   { document.getElementById('editModal').classList.remove('active'); }
 
     function resetCreateForm() {
         document.getElementById('createTenVi').value = '';
-        document.getElementById('createSoDu').value = '0';
-        document.getElementById('createMoTa').value = '';
+        document.getElementById('createMoTa').value  = '';
         createEmoji = '💰';
         document.getElementById('createEmoji').value = '💰';
-        // Reset loai
         document.querySelectorAll('#createLoaiGrid .loai-card').forEach(c => {
             c.classList.toggle('selected', c.dataset.val === 'tien_mat');
             const r = c.querySelector('input');
             if (r) r.checked = c.dataset.val === 'tien_mat';
         });
-        // Reset emoji
         document.querySelectorAll('#createEmojiGrid .emoji-btn').forEach(b => {
             b.classList.toggle('selected', b.dataset.emoji === '💰');
         });
-        // Update con lai
-        updateConLai(0);
-    }
-
-    function updateConLai(soDuVal) {
-        const conLaiMax = summaryData.con_lai || 0;
-        const remaining = conLaiMax - soDuVal;
-        const conEl = document.getElementById('conLai');
-        const hint  = document.getElementById('soDuHint');
-        if (conEl) {
-            conEl.textContent = (remaining < 0 ? '-' : '') + fmt(Math.abs(remaining)) + 'đ';
-            conEl.style.color = remaining < 0 ? '#ef4444' : '#10b981';
-        }
-        if (hint) hint.style.color = remaining < 0 ? '#ef4444' : '#9ca3af';
     }
 
     // ── Submit Create ─────────────────────────────────────
@@ -832,7 +780,7 @@ body.dark .skeleton {
         const body = {
             loai_vi:        loaiEl?.value || 'tien_mat',
             ten_vi:         tenVi,
-            so_du_ban_dau:  parseFloat(document.getElementById('createSoDu').value) || 0,
+            so_du_ban_dau:  0,
             don_vi_tien_te: document.getElementById('createDonVi').value,
             bieu_tuong:     createEmoji,
             mo_ta:          document.getElementById('createMoTa').value.trim(),
@@ -849,7 +797,6 @@ body.dark .skeleton {
                 pageToast('Tạo ví thành công!');
                 loadPage();
             } else {
-                // Lỗi từ server — hiện TRONG form
                 const msg = res.errors
                     ? Object.values(res.errors).flat().join(' • ')
                     : (res.message || 'Có lỗi xảy ra');
@@ -908,7 +855,6 @@ body.dark .skeleton {
         }
     }
 
-    // ── Open edit modal with data ─────────────────────────
     function openEditModal(wallet) {
         clearFormAlert('editFormAlert');
         document.getElementById('editWalletId').value = wallet.id;
@@ -919,7 +865,6 @@ body.dark .skeleton {
         editEmoji = wallet.bieu_tuong;
         document.getElementById('editEmoji').value = editEmoji;
 
-        // Set loai
         document.querySelectorAll('#editLoaiGrid .loai-card').forEach(c => {
             const match = c.dataset.val === wallet.loai_vi;
             c.classList.toggle('selected', match);
@@ -927,7 +872,6 @@ body.dark .skeleton {
             if (r) r.checked = match;
         });
 
-        // Set emoji
         document.querySelectorAll('#editEmojiGrid .emoji-btn').forEach(b => {
             b.classList.toggle('selected', b.dataset.emoji === wallet.bieu_tuong);
         });
@@ -935,7 +879,6 @@ body.dark .skeleton {
         document.getElementById('editModal').classList.add('active');
     }
 
-    // ── Toggle inactive list ──────────────────────────────
     function toggleInactive() {
         const list  = document.getElementById('inactive-list');
         const arrow = document.getElementById('inactive-arrow');
@@ -945,7 +888,6 @@ body.dark .skeleton {
         if (arrow) arrow.textContent = shown ? '▼' : '▲';
     }
 
-    // ── Loai card selection ───────────────────────────────
     function bindLoaiGrid(gridId) {
         document.getElementById(gridId)?.querySelectorAll('.loai-card').forEach(card => {
             card.addEventListener('click', function () {
@@ -957,7 +899,6 @@ body.dark .skeleton {
         });
     }
 
-    // ── Emoji grid selection ──────────────────────────────
     function bindEmojiGrid(gridId, onSelect) {
         document.getElementById(gridId)?.querySelectorAll('.emoji-btn').forEach(btn => {
             btn.addEventListener('click', function () {
@@ -968,7 +909,7 @@ body.dark .skeleton {
         });
     }
 
-    // ── Bind modal buttons ────────────────────────────────
+    // ── Bind events ───────────────────────────────────────
     document.getElementById('btnOpenCreate')?.addEventListener('click', openCreate);
     document.getElementById('btnCloseCreate')?.addEventListener('click', closeCreate);
     document.getElementById('btnCancelCreate')?.addEventListener('click', closeCreate);
@@ -978,25 +919,21 @@ body.dark .skeleton {
     document.getElementById('btnCancelEdit')?.addEventListener('click', closeEdit);
     document.getElementById('btnSubmitEdit')?.addEventListener('click', submitEdit);
 
-    // Close on overlay click
     document.querySelectorAll('.modal-overlay').forEach(o => {
         o.addEventListener('click', e => {
             if (e.target === o) o.classList.remove('active');
         });
     });
 
-    // Close on Escape
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape') {
             document.querySelectorAll('.modal-overlay.active').forEach(o => o.classList.remove('active'));
         }
     });
 
-    // Loai grids
     bindLoaiGrid('createLoaiGrid');
     bindLoaiGrid('editLoaiGrid');
 
-    // Emoji grids
     bindEmojiGrid('createEmojiGrid', emoji => {
         createEmoji = emoji;
         document.getElementById('createEmoji').value = emoji;
@@ -1006,15 +943,9 @@ body.dark .skeleton {
         document.getElementById('editEmoji').value = emoji;
     });
 
-    // So du hint
-    document.getElementById('createSoDu')?.addEventListener('input', function () {
-        updateConLai(parseFloat(this.value) || 0);
-    });
-
     // ── Init ──────────────────────────────────────────────
     loadPage();
 
-    // Cleanup on SPA navigation
     window.addEventListener('spa:navigated', function cleanup() {
         window.__walletIndexInit = false;
         window.removeEventListener('spa:navigated', cleanup);
