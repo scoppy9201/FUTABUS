@@ -113,6 +113,73 @@ body.dark .debt-table tbody tr:hover { background:rgba(255,255,255,0.02); }
 .btn-success { background:linear-gradient(135deg,var(--success),#059669); }
 .btn-ghost { display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;background:#f3f4f6;border:2px solid #e5e7eb;color:#6b7280;font-size:12px;font-weight:600;cursor:pointer;transition:background .2s;text-decoration:none; }
 .btn-ghost:hover { background:#e5e7eb; }
+
+/* Balance cards */
+body.dark .bal-card { background: #191d27; }
+body.dark .bal-card.zero { border-color: rgba(255,255,255,0.08); }
+body.dark .bal-name { color: #e5e7eb; }
+body.dark .bal-label { color: #6b7280; }
+
+/* btn-ghost */
+body.dark .btn-ghost {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.1);
+    color: #9ca3af;
+}
+body.dark .btn-ghost:hover { background: rgba(255,255,255,0.12); color: #e5e7eb; }
+
+/* Flow cards */
+body.dark .flow-card {
+    background: rgba(255,255,255,0.02);
+    border-color: rgba(255,255,255,0.08);
+}
+body.dark .flow-card:hover {
+    border-color: var(--danger);
+    box-shadow: 0 6px 18px rgba(239,68,68,0.12);
+}
+body.dark .fc-name { color: #e5e7eb; }
+
+/* Settle button inside flow card */
+body.dark .fc-settle-btn {
+    background: rgba(16,185,129,0.12);
+    color: #6ee7b7;
+}
+body.dark .fc-settle-btn:hover { background: rgba(16,185,129,0.2); }
+
+/* Cleared box */
+body.dark .cleared-title { color: #e5e7eb; }
+body.dark .cleared-sub { color: #6b7280; }
+
+/* sc-hdr subtle tint */
+body.dark .sc-hdr[style*="rgba(239,68,68,0.04)"] {
+    background: rgba(239,68,68,0.07) !important;
+}
+
+/* Debt table */
+body.dark .debt-table th {
+    background: rgba(255,255,255,0.02);
+    border-color: rgba(255,255,255,0.06);
+    color: #6b7280;
+}
+body.dark .debt-table td {
+    border-color: rgba(255,255,255,0.03);
+    color: #9ca3af;
+}
+body.dark .debt-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+/* Person names in debt table (hardcoded inline color:#1f2937) */
+body.dark .debt-persons strong { color: #e5e7eb !important; }
+body.dark .debt-arrow-sm { color: #4b5563; }
+
+/* Status badges */
+body.dark .st-confirmed { background: rgba(245,158,11,0.12); color: #fbbf24; }
+body.dark .st-settled   { background: rgba(16,185,129,0.12); color: #6ee7b7; }
+
+/* Section subtitle text */
+body.dark .sc-hdr div[style*="color:#9ca3af"] { color: #4b5563 !important; }
+
+/* Empty state */
+body.dark div[style*="color:#9ca3af"] { color: #6b7280; }
 </style>
 
 <div class="breadcrumb">

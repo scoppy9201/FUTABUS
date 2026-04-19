@@ -180,6 +180,89 @@ body.dark .pi-progress { background:rgba(255,255,255,0.1); }
 
 /* Icon helpers */
 .icon { width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0; }
+
+body.dark .form-ctrl {
+    background: #141820;
+    border-color: rgba(255,255,255,0.1);
+    color: #e5e7eb;
+}
+body.dark .form-ctrl::placeholder { color: #4b5563; }
+body.dark .form-ctrl:focus { border-color: var(--primary); background: #0f1217; }
+
+/* Kiểu phân phối labels */
+body.dark #kieu-deu-label,
+body.dark #kieu-tuy-label {
+    border-color: rgba(255,255,255,0.12) !important;
+    background: #141820 !important;
+    color: #9ca3af !important;
+}
+body.dark #kieu-deu-label:hover,
+body.dark #kieu-tuy-label:hover {
+    border-color: var(--primary) !important;
+    color: #e5e7eb !important;
+}
+
+/* Total check bar */
+body.dark .total-check {
+    background: rgba(255,255,255,0.04);
+    color: #9ca3af;
+}
+body.dark .total-check.ok   { background: rgba(16,185,129,0.12); color: #6ee7b7; }
+body.dark .total-check.warn { background: rgba(239,68,68,0.12);  color: #fca5a5; }
+body.dark .total-check-label { color: #6b7280; }
+
+/* Info box "Tổng số dư mới phải bằng..." */
+body.dark .propose-body div[style*="rgba(74,144,226,0.06)"] {
+    background: rgba(74,144,226,0.1) !important;
+    color: #93c5fd !important;
+}
+
+/* Alloc table header */
+body.dark .alloc-table th {
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(255,255,255,0.06);
+    color: #6b7280;
+}
+body.dark .alloc-table td {
+    border-color: rgba(255,255,255,0.04);
+    color: #9ca3af;
+}
+
+/* Alloc input (regular) */
+body.dark .alloc-input {
+    background: #141820;
+    border-color: rgba(255,255,255,0.1);
+    color: #e5e7eb;
+}
+body.dark .alloc-input:focus {
+    border-color: var(--primary);
+    background: #0f1217;
+}
+
+/* Alloc input (last – auto computed, light blue tint) */
+body.dark #last-alloc-input,
+body.dark .alloc-input[readonly][style*="#f0f9ff"] {
+    background: rgba(3,105,161,0.18) !important;
+    color: #7dd3fc !important;
+    border-color: rgba(3,105,161,0.35) !important;
+}
+
+/* Alloc username */
+body.dark .alloc-uname { color: #e5e7eb; }
+
+/* propose-hdr subtitle text */
+body.dark .propose-hdr div[style*="color:#9ca3af"] { color: #4b5563 !important; }
+
+/* btn-ghost dark */
+body.dark .btn-ghost {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.1);
+    color: #9ca3af;
+}
+body.dark .btn-ghost:hover {
+    background: rgba(255,255,255,0.12);
+    color: #e5e7eb;
+}
 </style>
 
 @php
