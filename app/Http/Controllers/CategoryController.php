@@ -52,6 +52,28 @@ class CategoryController extends Controller
             $parent = Category::where('id', $validated['danh_muc_cha_id'])
                               ->where('user_id', Auth::id())->first();
             if (!$parent) return response()->json(['message' => 'Danh mục cha không hợp lệ!'], 422);
+
+             // Kiểm tra cùng loại danh mục giữa cha và con
+            if ($parent->loai_danh_muc !== $validated['loai_danh_muc']) {
+        return response()->json([
+            'message' => "Danh mục con phải cùng loại giao dịch với danh mục cha ({$parent->loai_danh_muc})!",
+            'errors'  => ['loai_danh_muc' => ["Phải chọn loại {$parent->loai_danh_muc} theo danh mục cha."]],
+        ], 422);
+    }
+        }
+
+        // Kiểm tra trùng tên: cùng user + cùng tên + cùng loại + cùng cấp (cha hoặc trong cùng danh mục cha)
+        $duplicate = Category::where('user_id', Auth::id())
+            ->where('ten_danh_muc', $validated['ten_danh_muc'])
+            ->where('loai_danh_muc', $validated['loai_danh_muc'])
+            ->where('danh_muc_cha_id', $validated['danh_muc_cha_id'] ?? null)
+            ->exists();
+
+        if ($duplicate) {
+            return response()->json([
+                'message' => 'Tên danh mục đã tồn tại, vui lòng chọn tên khác!',
+                'errors'  => ['ten_danh_muc' => ['Tên danh mục đã tồn tại.']],
+            ], 422);
         }
 
         $category = Category::create([
@@ -91,6 +113,29 @@ class CategoryController extends Controller
             $parent = Category::where('id', $validated['danh_muc_cha_id'])
                               ->where('user_id', Auth::id())->first();
             if (!$parent) return response()->json(['message' => 'Danh mục cha không hợp lệ!'], 422);
+
+            // Kiểm tra danh mục con và cha chung loại giao dịch
+            if ($parent->loai_danh_muc !== $validated['loai_danh_muc']) {
+        return response()->json([
+            'message' => "Danh mục con phải cùng loại giao dịch với danh mục cha ({$parent->loai_danh_muc})!",
+            'errors'  => ['loai_danh_muc' => ["Phải chọn loại {$parent->loai_danh_muc} theo danh mục cha."]],
+        ], 422);
+    }
+        }
+
+        // Kiểm tra trùng tên: loại trừ chính danh mục đang update
+        $duplicate = Category::where('user_id', Auth::id())
+            ->where('ten_danh_muc', $validated['ten_danh_muc'])
+            ->where('loai_danh_muc', $validated['loai_danh_muc'])
+            ->where('danh_muc_cha_id', $validated['danh_muc_cha_id'] ?? null)
+            ->where('id', '!=', $category->id)
+            ->exists();
+
+        if ($duplicate) {
+            return response()->json([
+                'message' => 'Tên danh mục đã tồn tại, vui lòng chọn tên khác!',
+                'errors'  => ['ten_danh_muc' => ['Tên danh mục đã tồn tại.']],
+            ], 422);
         }
 
         $category->update($validated);

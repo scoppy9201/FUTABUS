@@ -48,21 +48,44 @@ class ProfileController extends Controller
         $userId = $user->id;
 
         $rules = [
-            'phone'      => 'nullable|string|max:15|regex:/^[0-9]+$/',
-            'ngay_sinh'  => 'nullable|date|before:today',
-            'gioi_tinh'  => 'nullable|in:Nam,Nữ,Khác',
+        'phone' => [
+        'nullable',
+        'regex:/^\d+$/',   // Kiểm tra có chữ/ký tự đb
+        'digits:10',       // kiểm tra đúng 10 số
+    ],
+        'ngay_sinh' => 'nullable|date|before:' . now()->subYears(18)->format('Y-m-d'), // phải >= 18 tuổi
+        'gioi_tinh' => 'nullable|in:Nam,Nữ,Khác',    
         ];
 
         if (!$user->google_id) {
             $rules['name']  = 'required|string|max:255';
-            $rules['email'] = [
-                'required',
-                'email',
-                Rule::unique('users')->ignore($userId),
-            ];
+           $rules['email'] = [
+            'required',
+            'email',
+            'regex:/^[a-zA-Z0-9._%+\-]+@gmail\.com$/',                   // bắt buộc đuôi @gmail.com
+            Rule::unique('users')->ignore($userId),
+];
         }
 
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, [
+        // SĐT
+        'phone.regex'  => 'Số điện thoại không được chứa chữ cái hoặc ký tự đặc biệt.',
+        'phone.digits' => 'Số điện thoại phải đúng 10 chữ số.',
+        // nếu nhập chữ thì digits sẽ fail, nhưng cần tách rõ hơn:
+
+        // Email
+        'email.required' => 'Vui lòng nhập email.',
+        'email.email'    => 'Email không đúng định dạng.',
+        'email.regex'    => 'Email phải có đuôi @gmail.com.',
+        'email.unique'   => 'Email này đã được sử dụng.',
+
+        // Ngày sinh
+        'ngay_sinh.before' => 'Bạn phải đủ 18 tuổi trở lên.',
+
+        // Tên
+        'name.required' => 'Vui lòng nhập họ tên.',
+        'name.max'      => 'Họ tên không được vượt quá 255 ký tự.',
+    ]);
 
         $updateData = [
             'phone'     => $validated['phone']     ?? null,
