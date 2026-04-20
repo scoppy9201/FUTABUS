@@ -3,9 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
+use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\Category;
 use App\Models\Transaction;
@@ -23,59 +22,52 @@ class GroupSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->command->info('🌱 Bắt đầu seed dữ liệu nhóm chia tiền...');
+        $this->command->info('Bắt đầu seed dữ liệu nhóm chia tiền...');
 
-        // ── 1. TẠO USERS TEST ─────────────────────────────────────────
-        $this->command->info('   👤 Tạo users...');
+        $this->command->info(' Chuẩn bị users...');
+        $users = $this->prepareUsers();
 
-        $users = $this->createUsers();
-
-        // ── 2. TẠO CATEGORIES CHO TỪNG USER ──────────────────────────
-        $this->command->info('   📂 Tạo categories...');
-
+        $this->command->info(' Tạo categories...');
         foreach ($users as $user) {
             $this->createCategoriesForUser($user);
         }
 
-        // ── 3. TẠO TRANSACTIONS (số dư) ──────────────────────────────
-        $this->command->info('   💰 Tạo transactions...');
-
+        $this->command->info(' Tạo transactions...');
         $this->createTransactions($users);
 
-        // ── 4. NHÓM 1: GIA ĐÌNH (chế độ balance) ────────────────────
-        $this->command->info('   👨‍👩‍👧 Tạo nhóm Gia đình (chế độ balance)...');
-
+        $this->command->info('Tạo nhóm Gia đình (balance)...');
         $this->createFamilyGroup($users);
 
-        // ── 5. NHÓM 2: SINH VIÊN (chế độ expense + debt) ────────────
-        $this->command->info('   🎓 Tạo nhóm Sinh viên (chế độ expense)...');
-
+        $this->command->info('Tạo nhóm Phòng trọ (expense)...');
         $this->createStudentGroup($users);
 
-        // ── 6. NHÓM 3: DU LỊCH (chế độ both) ───────────────────────
-        $this->command->info('   ✈️  Tạo nhóm Du lịch (chế độ both)...');
-
+        $this->command->info('Tạo nhóm Du lịch (both)...');
         $this->createTripGroup($users);
 
         $this->command->info('');
-        $this->command->info('✅ Seed xong! Tài khoản test:');
+        $this->command->info('Seed xong! Tài khoản test:');
         $this->command->table(
             ['Tên', 'Email', 'Mật khẩu', 'Vai trò'],
             [
-                ['Nguyễn Văn Bố', 'bo@test.com',   'Test@1234', 'Admin nhóm Gia đình'],
-                ['Trần Thị Mẹ',  'me@test.com',   'Test@1234', 'Member nhóm Gia đình'],
-                ['Lê Văn Con',   'con@test.com',  'Test@1234', 'Member nhóm Gia đình'],
-                ['Phạm Văn An',  'an@test.com',   'Test@1234', 'Admin nhóm Sinh viên'],
-                ['Hoàng Thị Bình','binh@test.com','Test@1234', 'Member nhóm Sinh viên'],
-                ['Đỗ Văn Cường', 'cuong@test.com','Test@1234', 'Member nhóm Sinh viên'],
+                ['Hưng Mạnh (cũ)',    'buimanhhung3105@gmail.com', '(giữ nguyên)', 'User thật id=1'],
+                ['Nguyễn Văn Bố',     'bo@test.com',               'Test@1234',    'Admin nhóm Gia đình'],
+                ['Trần Thị Mẹ',       'me@test.com',               'Test@1234',    'Member nhóm Gia đình'],
+                ['Lê Văn Con',        'con@test.com',              'Test@1234',    'Member nhóm Gia đình'],
+                ['Phạm Văn An',       'an@test.com',               'Test@1234',    'Admin nhóm Sinh viên'],
+                ['Hoàng Thị Bình',    'binh@test.com',             'Test@1234',    'Member nhóm Sinh viên'],
+                ['Đỗ Văn Cường',      'cuong@test.com',            'Test@1234',    'Member nhóm Sinh viên'],
             ]
         );
     }
 
-    // ── USERS ──────────────────────────────────────────────────────────
-    private function createUsers(): array
+    // USERS 
+    private function prepareUsers(): array
     {
-        $userData = [
+        // Lấy user thật id=1 (Hưng Mạnh)
+        $hungManh = User::find(1);
+
+        // Tạo thêm 6 user test mới nếu chưa có
+        $testUsers = [
             ['name' => 'Nguyễn Văn Bố',   'email' => 'bo@test.com'],
             ['name' => 'Trần Thị Mẹ',     'email' => 'me@test.com'],
             ['name' => 'Lê Văn Con',       'email' => 'con@test.com'],
@@ -84,15 +76,14 @@ class GroupSeeder extends Seeder
             ['name' => 'Đỗ Văn Cường',     'email' => 'cuong@test.com'],
         ];
 
-        $users = [];
-        foreach ($userData as $data) {
+        $users = $hungManh ? [$hungManh] : [];
+
+        foreach ($testUsers as $data) {
             $users[] = User::firstOrCreate(
                 ['email' => $data['email']],
                 [
-                    'name'       => $data['name'],
-                    'password'   => Hash::make('Test@1234'),
-                    'created_at' => now()->subDays(rand(30, 90)),
-                    'updated_at' => now(),
+                    'name'     => $data['name'],
+                    'password' => Hash::make('Test@1234'),
                 ]
             );
         }
@@ -100,7 +91,7 @@ class GroupSeeder extends Seeder
         return $users;
     }
 
-    // ── CATEGORIES ────────────────────────────────────────────────────
+    // CATEGORIES 
     private function createCategoriesForUser(User $user): void
     {
         // Danh mục cha THU
@@ -109,132 +100,120 @@ class GroupSeeder extends Seeder
             ['loai_danh_muc' => 'THU', 'bieu_tuong' => 'money.png', 'trang_thai' => true]
         );
 
+        // Danh mục con THU
+        foreach (['Lương', 'Thưởng'] as $ten) {
+            Category::firstOrCreate(
+                ['user_id' => $user->id, 'ten_danh_muc' => $ten, 'danh_muc_cha_id' => $thu->id],
+                ['loai_danh_muc' => 'THU', 'bieu_tuong' => 'money.png', 'trang_thai' => true]
+            );
+        }
+
         // Danh mục cha CHI
         $chi = Category::firstOrCreate(
             ['user_id' => $user->id, 'ten_danh_muc' => 'Chi tiêu', 'danh_muc_cha_id' => null],
             ['loai_danh_muc' => 'CHI', 'bieu_tuong' => 'budget.png', 'trang_thai' => true]
         );
 
-        // Danh mục con THU
-        Category::firstOrCreate(
-            ['user_id' => $user->id, 'ten_danh_muc' => 'Lương', 'danh_muc_cha_id' => $thu->id],
-            ['loai_danh_muc' => 'THU', 'bieu_tuong' => 'money.png', 'trang_thai' => true]
-        );
-        Category::firstOrCreate(
-            ['user_id' => $user->id, 'ten_danh_muc' => 'Thưởng', 'danh_muc_cha_id' => $thu->id],
-            ['loai_danh_muc' => 'THU', 'bieu_tuong' => 'profits.png', 'trang_thai' => true]
-        );
-
-        // Danh mục con CHI
-        foreach (['Ăn uống', 'Điện nước', 'Di chuyển', 'Giải trí', 'Mua sắm'] as $name) {
+        // Danh mục con CHI sinh hoạt
+        foreach (['Ăn uống', 'Điện nước', 'Di chuyển', 'Giải trí', 'Mua sắm'] as $ten) {
             Category::firstOrCreate(
-                ['user_id' => $user->id, 'ten_danh_muc' => $name, 'danh_muc_cha_id' => $chi->id],
+                ['user_id' => $user->id, 'ten_danh_muc' => $ten, 'danh_muc_cha_id' => $chi->id],
                 ['loai_danh_muc' => 'CHI', 'bieu_tuong' => 'budget.png', 'trang_thai' => true]
             );
         }
 
-        // Danh mục nhóm (tạo sẵn để GroupExpenseController dùng)
-        $nhom = Category::firstOrCreate(
-            ['user_id' => $user->id, 'ten_danh_muc' => 'Nhóm', 'danh_muc_cha_id' => null],
+        // Danh mục nhóm CHI (dùng cho GroupExpenseController)
+        $nhomChi = Category::firstOrCreate(
+            ['user_id' => $user->id, 'ten_danh_muc' => 'Nhóm Chi', 'danh_muc_cha_id' => null],
             ['loai_danh_muc' => 'CHI', 'bieu_tuong' => 'category.png', 'trang_thai' => true]
         );
-        Category::firstOrCreate(
-            ['user_id' => $user->id, 'ten_danh_muc' => 'Chi nhóm', 'danh_muc_cha_id' => $nhom->id],
-            ['loai_danh_muc' => 'CHI', 'bieu_tuong' => 'category.png', 'trang_thai' => true]
-        );
-        Category::firstOrCreate(
-            ['user_id' => $user->id, 'ten_danh_muc' => 'Trả nợ nhóm', 'danh_muc_cha_id' => $nhom->id],
-            ['loai_danh_muc' => 'CHI', 'bieu_tuong' => 'category.png', 'trang_thai' => true]
-        );
+        foreach (['Chi nhóm', 'Trả nợ nhóm', 'Điều chỉnh nhóm (CHI)'] as $ten) {
+            Category::firstOrCreate(
+                ['user_id' => $user->id, 'ten_danh_muc' => $ten, 'danh_muc_cha_id' => $nhomChi->id],
+                ['loai_danh_muc' => 'CHI', 'bieu_tuong' => 'category.png', 'trang_thai' => true]
+            );
+        }
 
+        // Danh mục nhóm THU (dùng cho GroupExpenseController)
         $nhomThu = Category::firstOrCreate(
             ['user_id' => $user->id, 'ten_danh_muc' => 'Nhóm Thu', 'danh_muc_cha_id' => null],
             ['loai_danh_muc' => 'THU', 'bieu_tuong' => 'category.png', 'trang_thai' => true]
         );
-        Category::firstOrCreate(
-            ['user_id' => $user->id, 'ten_danh_muc' => 'Thu nợ nhóm', 'danh_muc_cha_id' => $nhomThu->id],
-            ['loai_danh_muc' => 'THU', 'bieu_tuong' => 'category.png', 'trang_thai' => true]
-        );
-        Category::firstOrCreate(
-            ['user_id' => $user->id, 'ten_danh_muc' => 'Điều chỉnh nhóm (THU)', 'danh_muc_cha_id' => $nhomThu->id],
-            ['loai_danh_muc' => 'THU', 'bieu_tuong' => 'category.png', 'trang_thai' => true]
-        );
-        $chiDieuChinh = Category::firstOrCreate(
-            ['user_id' => $user->id, 'ten_danh_muc' => 'Nhóm Chi', 'danh_muc_cha_id' => null],
-            ['loai_danh_muc' => 'CHI', 'bieu_tuong' => 'category.png', 'trang_thai' => true]
-        );
-        Category::firstOrCreate(
-            ['user_id' => $user->id, 'ten_danh_muc' => 'Điều chỉnh nhóm (CHI)', 'danh_muc_cha_id' => $chiDieuChinh->id],
-            ['loai_danh_muc' => 'CHI', 'bieu_tuong' => 'category.png', 'trang_thai' => true]
-        );
+        foreach (['Thu nợ nhóm', 'Điều chỉnh nhóm (THU)'] as $ten) {
+            Category::firstOrCreate(
+                ['user_id' => $user->id, 'ten_danh_muc' => $ten, 'danh_muc_cha_id' => $nhomThu->id],
+                ['loai_danh_muc' => 'THU', 'bieu_tuong' => 'category.png', 'trang_thai' => true]
+            );
+        }
     }
 
-    // ── TRANSACTIONS (tạo số dư khác nhau) ────────────────────────────
+    // TRANSACTIONS 
     private function createTransactions(array $users): void
     {
-        // [user_index, THU, CHI] → số dư = THU - CHI
+        // Số dư mỗi user: thu - chi
         $balanceData = [
-            0 => ['thu' => 25_000_000, 'chi' => 18_000_000], // Bố: +7tr
-            1 => ['thu' => 20_000_000, 'chi' => 15_500_000], // Mẹ: +4.5tr
-            2 => ['thu' => 8_000_000,  'chi' => 7_500_000],  // Con: +500k
-            3 => ['thu' => 12_000_000, 'chi' => 9_000_000],  // An: +3tr
-            4 => ['thu' => 10_000_000, 'chi' => 8_200_000],  // Bình: +1.8tr
-            5 => ['thu' => 9_000_000,  'chi' => 7_800_000],  // Cường: +1.2tr
+            'buimanhhung3105@gmail.com' => ['thu' => 20_000_000, 'chi' => 14_720_000],
+            'bo@test.com'               => ['thu' => 25_000_000, 'chi' => 18_000_000],
+            'me@test.com'               => ['thu' => 20_000_000, 'chi' => 15_500_000],
+            'con@test.com'              => ['thu' => 8_000_000,  'chi' => 7_500_000],
+            'an@test.com'               => ['thu' => 12_000_000, 'chi' => 9_000_000],
+            'binh@test.com'             => ['thu' => 10_000_000, 'chi' => 8_200_000],
+            'cuong@test.com'            => ['thu' => 9_000_000,  'chi' => 7_800_000],
         ];
 
-        foreach ($users as $i => $user) {
-            $data = $balanceData[$i] ?? ['thu' => 10_000_000, 'chi' => 8_000_000];
+        foreach ($users as $user) {
+            // Bỏ qua nếu đã có transaction
+            if (Transaction::where('user_id', $user->id)->exists()) continue;
 
-            // Lấy category lương của user
-            $catThu = Category::where('user_id', $user->id)
+            $data = $balanceData[$user->email] ?? ['thu' => 10_000_000, 'chi' => 8_000_000];
+
+            $catLuong = Category::where('user_id', $user->id)
                 ->where('ten_danh_muc', 'Lương')
                 ->whereNotNull('danh_muc_cha_id')
                 ->first();
 
-            $catChi = Category::where('user_id', $user->id)
+            $catAnUong = Category::where('user_id', $user->id)
                 ->where('ten_danh_muc', 'Ăn uống')
                 ->whereNotNull('danh_muc_cha_id')
                 ->first();
 
-            if (!$catThu || !$catChi) continue;
+            if (!$catLuong || !$catAnUong) continue;
 
-            // Chỉ tạo nếu chưa có transaction
-            if (Transaction::where('user_id', $user->id)->exists()) continue;
-
-            // THU: 2 tháng lương
             Transaction::create([
                 'user_id'                => $user->id,
-                'category_id'            => $catThu->id,
+                'category_id'            => $catLuong->id,
                 'loai_giao_dich'         => 'THU',
                 'phuong_thuc_thanh_toan' => 'Chuyển khoản',
                 'so_tien'                => $data['thu'],
-                'ngay_giao_dich'         => now()->subDays(60)->toDateString(),
-                'ghi_chu'                => 'Lương tháng ' . now()->subMonths(2)->format('n/Y'),
+                'ngay_giao_dich'         => now()->subDays(30)->toDateString(),
+                'ghi_chu'                => 'Lương tháng ' . now()->subMonth()->format('n/Y'),
             ]);
 
-            // CHI: chi tiêu hàng tháng
             Transaction::create([
                 'user_id'                => $user->id,
-                'category_id'            => $catChi->id,
+                'category_id'            => $catAnUong->id,
                 'loai_giao_dich'         => 'CHI',
                 'phuong_thuc_thanh_toan' => 'Tiền mặt',
                 'so_tien'                => $data['chi'],
-                'ngay_giao_dich'         => now()->subDays(30)->toDateString(),
-                'ghi_chu'                => 'Chi tiêu sinh hoạt tháng ' . now()->subMonth()->format('n/Y'),
+                'ngay_giao_dich'         => now()->subDays(15)->toDateString(),
+                'ghi_chu'                => 'Chi tiêu tháng ' . now()->subMonth()->format('n/Y'),
             ]);
         }
     }
 
-    // ── NHÓM 1: GIA ĐÌNH ──────────────────────────────────────────────
+    // NHÓM 1: GIA ĐÌNH (balance)
     private function createFamilyGroup(array $users): void
     {
-        [$bo, $me, $con] = $users; // index 0, 1, 2
+        $bo  = collect($users)->firstWhere('email', 'bo@test.com');
+        $me  = collect($users)->firstWhere('email', 'me@test.com');
+        $con = collect($users)->firstWhere('email', 'con@test.com');
 
-        // Tạo nhóm
+        if (!$bo || !$me || !$con) return;
+
         $group = SplitGroup::firstOrCreate(
             ['ten_nhom' => 'Gia đình Nguyễn', 'created_by' => $bo->id],
             [
-                'mo_ta'      => 'Quản lý tài chính gia đình, phân phối chi tiêu hàng tháng',
+                'mo_ta'      => 'Quản lý tài chính gia đình hàng tháng',
                 'che_do'     => 'balance',
                 'hien_so_du' => true,
                 'trang_thai' => 'active',
@@ -242,73 +221,63 @@ class GroupSeeder extends Seeder
             ]
         );
 
-        // Thêm thành viên
         $this->addMember($group, $bo,  'admin');
         $this->addMember($group, $me,  'member');
         $this->addMember($group, $con, 'member');
 
-        // ── Đề xuất 1: Đã thực hiện (approved) ──
+        // Đề xuất 1: đã approved
         $p1 = GroupBalanceProposal::firstOrCreate(
-            ['group_id' => $group->id, 'proposed_by' => $bo->id, 'mo_ta' => 'Phân phối tháng 1/2026'],
+            ['group_id' => $group->id, 'mo_ta' => 'Phân phối tháng 1/2026'],
             [
-                'tong_so_du' => 12_000_000,
-                'trang_thai' => 'approved',
-                'executed_at'=> now()->subDays(30),
-                'created_at' => now()->subDays(32),
+                'proposed_by' => $bo->id,
+                'tong_so_du'  => 12_000_000,
+                'trang_thai'  => 'approved',
+                'executed_at' => now()->subDays(30),
+                'created_at'  => now()->subDays(32),
             ]
         );
-
-        $splitData1 = [
-            [$bo->id,  7_000_000, 7_000_000],  // Bố: không đổi
-            [$me->id,  4_000_000, 3_500_000],  // Mẹ: giảm 500k
-            [$con->id, 1_000_000, 1_500_000],  // Con: tăng 500k
-        ];
-        $this->createBalanceSplits($p1, $splitData1, 12_000_000);
+        $this->createBalanceSplits($p1, [
+            [$bo->id,  7_000_000, 7_000_000],
+            [$me->id,  4_000_000, 3_500_000],
+            [$con->id, 1_000_000, 1_500_000],
+        ]);
         $this->createApprovals($p1, [$bo, $me, $con], GroupBalanceProposal::class);
 
-        // ── Đề xuất 2: Đang chờ duyệt (pending) ──
-        $currentBalance = [
-            $bo->id  => 7_000_000,
-            $me->id  => 4_500_000,
-            $con->id => 500_000,
-        ];
-
+        // Đề xuất 2: đang pending (chỉ Bố duyệt)
         $p2 = GroupBalanceProposal::firstOrCreate(
-            ['group_id' => $group->id, 'proposed_by' => $bo->id, 'mo_ta' => 'Phân phối tháng 3/2026'],
+            ['group_id' => $group->id, 'mo_ta' => 'Phân phối tháng 3/2026'],
             [
-                'tong_so_du' => 12_000_000,
-                'trang_thai' => 'pending',
-                'created_at' => now()->subDays(1),
+                'proposed_by' => $bo->id,
+                'tong_so_du'  => 12_000_000,
+                'trang_thai'  => 'pending',
+                'created_at'  => now()->subDays(1),
             ]
         );
-
-        $splitData2 = [
-            [$bo->id,  7_000_000, 6_000_000],  // Bố giảm 1tr
-            [$me->id,  4_500_000, 4_500_000],  // Mẹ không đổi
-            [$con->id, 500_000,   1_500_000],  // Con tăng 1tr
-        ];
-        $this->createBalanceSplits($p2, $splitData2, 12_000_000);
-
-        // Chỉ Bố đã approve, Mẹ và Con chưa
+        $this->createBalanceSplits($p2, [
+            [$bo->id,  7_000_000, 6_000_000],
+            [$me->id,  4_500_000, 4_500_000],
+            [$con->id, 500_000,   1_500_000],
+        ]);
         GroupApproval::firstOrCreate(
             ['approvable_type' => GroupBalanceProposal::class, 'approvable_id' => $p2->id, 'user_id' => $bo->id],
             ['quyet_dinh' => 'approved', 'created_at' => now()->subHours(20)]
         );
 
-        // ── Đề xuất 3: Bị từ chối (rejected) ──
+        // Đề xuất 3: bị rejected (Mẹ từ chối)
         $p3 = GroupBalanceProposal::firstOrCreate(
-            ['group_id' => $group->id, 'proposed_by' => $bo->id, 'mo_ta' => 'Thử nghiệm phân phối mới'],
+            ['group_id' => $group->id, 'mo_ta' => 'Thử nghiệm phân phối mới'],
             [
-                'tong_so_du' => 12_000_000,
-                'trang_thai' => 'rejected',
-                'created_at' => now()->subDays(15),
+                'proposed_by' => $bo->id,
+                'tong_so_du'  => 12_000_000,
+                'trang_thai'  => 'rejected',
+                'created_at'  => now()->subDays(15),
             ]
         );
         $this->createBalanceSplits($p3, [
             [$bo->id,  3_000_000, 3_000_000],
             [$me->id,  4_000_000, 4_000_000],
             [$con->id, 5_000_000, 5_000_000],
-        ], 12_000_000);
+        ]);
         GroupApproval::firstOrCreate(
             ['approvable_type' => GroupBalanceProposal::class, 'approvable_id' => $p3->id, 'user_id' => $bo->id],
             ['quyet_dinh' => 'approved', 'created_at' => now()->subDays(15)]
@@ -319,15 +288,19 @@ class GroupSeeder extends Seeder
         );
     }
 
-    // ── NHÓM 2: SINH VIÊN ─────────────────────────────────────────────
+    // NHÓM 2: PHÒNG TRỌ SINH VIÊN (expense) 
     private function createStudentGroup(array $users): void
     {
-        [$bo, $me, $con, $an, $binh, $cuong] = $users;
+        $an    = collect($users)->firstWhere('email', 'an@test.com');
+        $binh  = collect($users)->firstWhere('email', 'binh@test.com');
+        $cuong = collect($users)->firstWhere('email', 'cuong@test.com');
+
+        if (!$an || !$binh || !$cuong) return;
 
         $group = SplitGroup::firstOrCreate(
             ['ten_nhom' => 'Phòng trọ 3 người', 'created_by' => $an->id],
             [
-                'mo_ta'      => 'Chia sẻ chi phí phòng trọ: điện, nước, mạng internet',
+                'mo_ta'      => 'Chia sẻ chi phí phòng trọ: điện, nước, internet',
                 'che_do'     => 'expense',
                 'hien_so_du' => false,
                 'trang_thai' => 'active',
@@ -339,16 +312,17 @@ class GroupSeeder extends Seeder
         $this->addMember($group, $binh,  'member');
         $this->addMember($group, $cuong, 'member');
 
-        // Lấy category chi nhóm
-        $getCat = fn($user) => Category::where('user_id', $user->id)
+        $members = [$an, $binh, $cuong];
+        $getCat  = fn($user) => Category::where('user_id', $user->id)
             ->where('ten_danh_muc', 'Chi nhóm')
             ->whereNotNull('danh_muc_cha_id')
             ->first();
 
-        // ── Khoản chi 1: Tiền phòng tháng 2 (approved, chia đều) ──
+        // Khoản 1: Tiền phòng tháng 2 - approved, chia đều
         $p1 = GroupExpenseProposal::firstOrCreate(
-            ['group_id' => $group->id, 'proposed_by' => $an->id, 'mo_ta' => 'Tiền phòng tháng 2/2026'],
+            ['group_id' => $group->id, 'mo_ta' => 'Tiền phòng tháng 2/2026'],
             [
+                'proposed_by' => $an->id,
                 'category_id' => $getCat($an)?->id,
                 'tong_tien'   => 3_000_000,
                 'ngay_chi'    => now()->subDays(45)->toDateString(),
@@ -358,18 +332,18 @@ class GroupSeeder extends Seeder
                 'created_at'  => now()->subDays(46),
             ]
         );
-
         $this->createExpenseSplits($p1, [
-            [$an->id,    1_000_000, null],
-            [$binh->id,  1_000_000, null],
-            [$cuong->id, 1_000_000, null],
-        ], [$an, $binh, $cuong], $getCat);
-        $this->createApprovals($p1, [$an, $binh, $cuong], GroupExpenseProposal::class);
+            [$an->id,    1_000_000],
+            [$binh->id,  1_000_000],
+            [$cuong->id, 1_000_000],
+        ], $members, $getCat);
+        $this->createApprovals($p1, $members, GroupExpenseProposal::class);
 
-        // ── Khoản chi 2: Tiền điện tháng 2 (approved, custom) ──
+        // Khoản 2: Tiền điện tháng 2 - approved, chia custom (An dùng nhiều hơn)
         $p2 = GroupExpenseProposal::firstOrCreate(
-            ['group_id' => $group->id, 'proposed_by' => $binh->id, 'mo_ta' => 'Tiền điện tháng 2/2026'],
+            ['group_id' => $group->id, 'mo_ta' => 'Tiền điện tháng 2/2026'],
             [
+                'proposed_by' => $binh->id,
                 'category_id' => $getCat($binh)?->id,
                 'tong_tien'   => 450_000,
                 'ngay_chi'    => now()->subDays(40)->toDateString(),
@@ -380,16 +354,17 @@ class GroupSeeder extends Seeder
             ]
         );
         $this->createExpenseSplits($p2, [
-            [$an->id,    200_000, null],  // An dùng máy tính nhiều hơn
-            [$binh->id,  150_000, null],
-            [$cuong->id, 100_000, null],
-        ], [$an, $binh, $cuong], $getCat);
-        $this->createApprovals($p2, [$an, $binh, $cuong], GroupExpenseProposal::class);
+            [$an->id,    200_000],
+            [$binh->id,  150_000],
+            [$cuong->id, 100_000],
+        ], $members, $getCat);
+        $this->createApprovals($p2, $members, GroupExpenseProposal::class);
 
-        // ── Khoản chi 3: Tiền mạng tháng 3 (pending, chia theo %) ──
+        // Khoản 3: Internet tháng 3 - pending, chia theo %, chỉ An duyệt
         $p3 = GroupExpenseProposal::firstOrCreate(
-            ['group_id' => $group->id, 'proposed_by' => $an->id, 'mo_ta' => 'Internet + điện thoại tháng 3/2026'],
+            ['group_id' => $group->id, 'mo_ta' => 'Internet + điện thoại tháng 3/2026'],
             [
+                'proposed_by' => $an->id,
                 'category_id' => $getCat($an)?->id,
                 'tong_tien'   => 300_000,
                 'ngay_chi'    => now()->subDays(3)->toDateString(),
@@ -403,16 +378,16 @@ class GroupSeeder extends Seeder
             [$binh->id,  100_000, 33.33],
             [$cuong->id, 100_000, 33.34],
         ]);
-        // An đã approve, Bình và Cường chưa
         GroupApproval::firstOrCreate(
             ['approvable_type' => GroupExpenseProposal::class, 'approvable_id' => $p3->id, 'user_id' => $an->id],
             ['quyet_dinh' => 'approved', 'created_at' => now()->subDays(2)]
         );
 
-        // ── Khoản chi 4: Bị từ chối ──
+        // Khoản 4: Mua máy lọc không khí - rejected (An từ chối)
         $p4 = GroupExpenseProposal::firstOrCreate(
-            ['group_id' => $group->id, 'proposed_by' => $cuong->id, 'mo_ta' => 'Mua máy lọc không khí chung'],
+            ['group_id' => $group->id, 'mo_ta' => 'Mua máy lọc không khí chung'],
             [
+                'proposed_by' => $cuong->id,
                 'tong_tien'   => 2_000_000,
                 'ngay_chi'    => now()->subDays(20)->toDateString(),
                 'kieu_chia'   => 'equal',
@@ -420,11 +395,11 @@ class GroupSeeder extends Seeder
                 'created_at'  => now()->subDays(22),
             ]
         );
-        $this->createExpenseSplits($p4, [
-            [$an->id,    666_667, null],
-            [$binh->id,  666_667, null],
-            [$cuong->id, 666_666, null],
-        ], [$an, $binh, $cuong], $getCat);
+        $this->createExpenseSplitsRaw($p4, [
+            [$an->id,    666_667],
+            [$binh->id,  666_667],
+            [$cuong->id, 666_666],
+        ]);
         GroupApproval::firstOrCreate(
             ['approvable_type' => GroupExpenseProposal::class, 'approvable_id' => $p4->id, 'user_id' => $cuong->id],
             ['quyet_dinh' => 'approved', 'created_at' => now()->subDays(21)]
@@ -434,33 +409,36 @@ class GroupSeeder extends Seeder
             ['quyet_dinh' => 'rejected', 'ghi_chu' => 'Không cần thiết', 'created_at' => now()->subDays(21)]
         );
 
-        // ── Ghi nợ thẳng ──
-        // Cường nợ An tiền đi chợ
+        // Ghi nợ thẳng
         GroupExpenseDebt::firstOrCreate(
             ['group_id' => $group->id, 'chu_no_id' => $an->id, 'nguoi_no_id' => $cuong->id, 'so_tien' => 150_000],
             ['ghi_chu' => 'Đi chợ hộ tuần trước', 'trang_thai' => 'confirmed', 'created_at' => now()->subDays(7)]
         );
-        // Bình nợ Cường tiền grab
         GroupExpenseDebt::firstOrCreate(
             ['group_id' => $group->id, 'chu_no_id' => $cuong->id, 'nguoi_no_id' => $binh->id, 'so_tien' => 80_000],
             ['ghi_chu' => 'Grab đi làm hôm qua', 'trang_thai' => 'confirmed', 'created_at' => now()->subDays(1)]
         );
-        // An nợ Bình tiền cafe
         GroupExpenseDebt::firstOrCreate(
             ['group_id' => $group->id, 'chu_no_id' => $binh->id, 'nguoi_no_id' => $an->id, 'so_tien' => 55_000],
             ['ghi_chu' => 'Cafe sáng thứ 6', 'trang_thai' => 'confirmed', 'created_at' => now()->subDays(2)]
         );
-        // Đã settled
         GroupExpenseDebt::firstOrCreate(
             ['group_id' => $group->id, 'chu_no_id' => $an->id, 'nguoi_no_id' => $binh->id, 'so_tien' => 200_000, 'trang_thai' => 'settled'],
             ['ghi_chu' => 'Tiền thuốc tháng trước', 'settled_at' => now()->subDays(10), 'created_at' => now()->subDays(15)]
         );
     }
 
-    // ── NHÓM 3: DU LỊCH ──────────────────────────────────────────────
+    // NHÓM 3: DU LỊCH (both) 
     private function createTripGroup(array $users): void
     {
-        [$bo, $me, $con, $an, $binh, $cuong] = $users;
+        $bo    = collect($users)->firstWhere('email', 'bo@test.com');
+        $me    = collect($users)->firstWhere('email', 'me@test.com');
+        $con   = collect($users)->firstWhere('email', 'con@test.com');
+        $an    = collect($users)->firstWhere('email', 'an@test.com');
+        $binh  = collect($users)->firstWhere('email', 'binh@test.com');
+        $cuong = collect($users)->firstWhere('email', 'cuong@test.com');
+
+        if (!$an || !$binh || !$cuong || !$bo || !$me || !$con) return;
 
         $group = SplitGroup::firstOrCreate(
             ['ten_nhom' => 'Du lịch Đà Lạt 2026', 'created_by' => $an->id],
@@ -473,15 +451,14 @@ class GroupSeeder extends Seeder
             ]
         );
 
-        // Tất cả 6 user đều tham gia
-        $this->addMember($group, $an,    'admin');
-        $this->addMember($group, $binh,  'member');
-        $this->addMember($group, $cuong, 'member');
-        $this->addMember($group, $bo,    'member');
-        $this->addMember($group, $me,    'member');
-        $this->addMember($group, $con,   'member');
+        $allMembers = [$an, $binh, $cuong, $bo, $me, $con];
 
-        // Lời mời pending (chưa chấp nhận)
+        $this->addMember($group, $an,    'admin');
+        foreach ([$binh, $cuong, $bo, $me, $con] as $member) {
+            $this->addMember($group, $member, 'member');
+        }
+
+        // Lời mời pending chưa chấp nhận
         GroupInvitation::firstOrCreate(
             ['group_id' => $group->id, 'email' => 'friend@gmail.com'],
             [
@@ -498,14 +475,12 @@ class GroupSeeder extends Seeder
             ->whereNotNull('danh_muc_cha_id')
             ->first();
 
-        // ── Khoản chi: Khách sạn (approved, chia đều) ──
-        $allMembers = [$an, $binh, $cuong, $bo, $me, $con];
-        $perPerson  = 500_000;
-
+        // Khoản 1: Khách sạn 2 đêm - approved, chia đều 500k/người
         $p1 = GroupExpenseProposal::firstOrCreate(
-            ['group_id' => $group->id, 'proposed_by' => $an->id, 'mo_ta' => 'Khách sạn 2 đêm'],
+            ['group_id' => $group->id, 'mo_ta' => 'Khách sạn 2 đêm'],
             [
-                'tong_tien'   => $perPerson * 6,
+                'proposed_by' => $an->id,
+                'tong_tien'   => 3_000_000,
                 'ngay_chi'    => now()->addDays(14)->toDateString(),
                 'kieu_chia'   => 'equal',
                 'trang_thai'  => 'approved',
@@ -513,17 +488,19 @@ class GroupSeeder extends Seeder
                 'created_at'  => now()->subDays(5),
             ]
         );
-        $splits = [];
-        foreach ($allMembers as $m) {
-            $splits[] = [$m->id, $perPerson, null];
-        }
-        $this->createExpenseSplits($p1, $splits, $allMembers, $getCat);
+        $this->createExpenseSplits(
+            $p1,
+            array_map(fn($m) => [$m->id, 500_000], $allMembers),
+            $allMembers,
+            $getCat
+        );
         $this->createApprovals($p1, $allMembers, GroupExpenseProposal::class);
 
-        // ── Khoản chi: Thuê xe (pending, chờ 3 người duyệt) ──
+        // Khoản 2: Thuê xe 7 chỗ - pending, 3 người đã duyệt
         $p2 = GroupExpenseProposal::firstOrCreate(
-            ['group_id' => $group->id, 'proposed_by' => $binh->id, 'mo_ta' => 'Thuê xe 7 chỗ khứ hồi'],
+            ['group_id' => $group->id, 'mo_ta' => 'Thuê xe 7 chỗ khứ hồi'],
             [
+                'proposed_by' => $binh->id,
                 'tong_tien'   => 2_400_000,
                 'ngay_chi'    => now()->addDays(15)->toDateString(),
                 'kieu_chia'   => 'equal',
@@ -531,9 +508,10 @@ class GroupSeeder extends Seeder
                 'created_at'  => now()->subDays(1),
             ]
         );
-        $splits2 = array_map(fn($m) => [$m->id, 400_000, null], $allMembers);
-        $this->createExpenseSplitsRaw($p2, $splits2);
-        // 3 người đã approve
+        $this->createExpenseSplitsRaw(
+            $p2,
+            array_map(fn($m) => [$m->id, 400_000], $allMembers)
+        );
         foreach ([$an, $binh, $bo] as $approver) {
             GroupApproval::firstOrCreate(
                 ['approvable_type' => GroupExpenseProposal::class, 'approvable_id' => $p2->id, 'user_id' => $approver->id],
@@ -541,7 +519,7 @@ class GroupSeeder extends Seeder
             );
         }
 
-        // ── Ghi nợ: Bố ứng tiền mua nước / đồ ăn ──
+        // Ghi nợ: Bố ứng tiền mua đồ ăn vặt
         GroupExpenseDebt::firstOrCreate(
             ['group_id' => $group->id, 'chu_no_id' => $bo->id, 'nguoi_no_id' => $an->id, 'so_tien' => 120_000],
             ['ghi_chu' => 'An nợ Bố tiền mua snack', 'trang_thai' => 'confirmed', 'created_at' => now()->subDays(1)]
@@ -552,8 +530,6 @@ class GroupSeeder extends Seeder
         );
     }
 
-    // ── HELPER METHODS ─────────────────────────────────────────────────
-
     private function addMember(SplitGroup $group, User $user, string $role): void
     {
         SplitGroupMember::firstOrCreate(
@@ -561,13 +537,12 @@ class GroupSeeder extends Seeder
             [
                 'vai_tro'    => $role,
                 'trang_thai' => 'active',
-                'joined_at'  => $group->created_at->addDays(rand(0, 3)),
-                'created_at' => $group->created_at->addDays(rand(0, 3)),
+                'joined_at'  => $group->created_at,
             ]
         );
     }
 
-    private function createBalanceSplits(GroupBalanceProposal $proposal, array $data, float $total): void
+    private function createBalanceSplits(GroupBalanceProposal $proposal, array $data): void
     {
         foreach ($data as [$userId, $soDuCu, $soDuMoi]) {
             GroupBalanceSplit::firstOrCreate(
@@ -589,7 +564,7 @@ class GroupSeeder extends Seeder
         array $users,
         callable $getCat
     ): void {
-        foreach ($data as [$userId, $soTien, $tyLe]) {
+        foreach ($data as [$userId, $soTien]) {
             $user = collect($users)->firstWhere('id', $userId);
             $cat  = $user ? $getCat($user) : null;
 
@@ -597,11 +572,11 @@ class GroupSeeder extends Seeder
             if ($proposal->trang_thai === 'approved' && $cat) {
                 $tx = Transaction::firstOrCreate(
                     [
-                        'user_id'       => $userId,
-                        'category_id'   => $cat->id,
-                        'so_tien'       => $soTien,
-                        'ngay_giao_dich'=> $proposal->ngay_chi,
-                        'ghi_chu'       => 'Chi nhóm: ' . $proposal->mo_ta,
+                        'user_id'        => $userId,
+                        'category_id'    => $cat->id,
+                        'so_tien'        => $soTien,
+                        'ngay_giao_dich' => $proposal->ngay_chi,
+                        'ghi_chu'        => 'Chi nhóm: ' . $proposal->mo_ta,
                     ],
                     [
                         'loai_giao_dich'         => 'CHI',
@@ -615,7 +590,7 @@ class GroupSeeder extends Seeder
                 ['proposal_id' => $proposal->id, 'user_id' => $userId],
                 [
                     'so_tien'           => $soTien,
-                    'ty_le'             => $tyLe,
+                    'ty_le'             => null,
                     'transaction_id'    => $transactionId,
                     'trang_thai_dong_y' => $proposal->trang_thai === 'approved' ? 'approved' : 'pending',
                     'responded_at'      => $proposal->trang_thai === 'approved' ? $proposal->executed_at : null,
@@ -641,12 +616,12 @@ class GroupSeeder extends Seeder
 
     private function createExpenseSplitsRaw(GroupExpenseProposal $proposal, array $data): void
     {
-        foreach ($data as [$userId, $soTien, $tyLe]) {
+        foreach ($data as [$userId, $soTien]) {
             GroupExpenseSplit::firstOrCreate(
                 ['proposal_id' => $proposal->id, 'user_id' => $userId],
                 [
                     'so_tien'           => $soTien,
-                    'ty_le'             => $tyLe,
+                    'ty_le'             => null,
                     'trang_thai_dong_y' => 'pending',
                 ]
             );

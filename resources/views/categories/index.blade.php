@@ -1777,7 +1777,7 @@
             </div>
             <div class="filter-actions">
                 <button type="button" class="btn-filter btn-search" id="btn-search">
-                    <img src="{{ asset('images/search.png') }}" alt="Search"> Tìm kiếm
+                    <img src="{{ asset('images/search.png') }}" alt="Search"> Áp dụng lọc
                 </button>
                 <button type="button" class="btn-filter btn-reset" id="btn-reset">
                     <img src="{{ asset('images/refresh.png') }}" alt="Reset"> Đặt lại

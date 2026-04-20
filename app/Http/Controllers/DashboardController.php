@@ -6,9 +6,8 @@ use App\Models\Category;
 use App\Models\Transaction;
 use App\Models\Budgets;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\DashboardExport;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Chart\Chart;
@@ -23,7 +22,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request)
+    /*  GET /api/v1/dashboard → Lấy toàn bộ data dashboard theo kỳ*/
+    public function index(Request $request) : JsonResponse
     {
         $userId = $request->user()?->id ?? Auth::id();
         $period = $request->string('period')->toString() ?: 'this_month';
@@ -37,9 +37,7 @@ class DashboardController extends Controller
         return response()->json($data);
     }
 
-    /**
-     * Tách data ra hàm riêng để tái sử dụng cho cả index() và export()
-     */
+    /* Hàm nội bộ, tổng hợp toàn bộ data, dùng chung cho index/export/sendReport */
     protected function getDashboardData(int $userId, string $period): array
     {
         $query = Transaction::where('user_id', $userId);
@@ -129,6 +127,7 @@ class DashboardController extends Controller
         $incomeCount       = (clone $query)->where('loai_giao_dich', 'THU')->count();
         $expenseCount      = (clone $query)->where('loai_giao_dich', 'CHI')->count();
 
+        // Danh sách giao dịch gần nhất
         $recentTransactions = Transaction::where('user_id', $userId)
             ->with('category')
             ->orderBy('ngay_giao_dich', 'desc')
@@ -149,6 +148,7 @@ class DashboardController extends Controller
             })
             ->values();
 
+        // Danh sách ngân sách đang cảnh báo (đã chiếm >= 50% ngân sách)
         $warningWallets = Budgets::where('user_id', $userId)
             ->where('trang_thai', true)
             ->get()
@@ -164,6 +164,7 @@ class DashboardController extends Controller
             })
             ->values();
 
+        // Danh mục chi tiêu nhiều nhất và có sự tăng giảm mạnh so với kỳ trước
         $topCategories = Category::where('user_id', $userId)
             ->where('loai_danh_muc', 'CHI')
             ->withSum(['transactions as total_expense' => function ($query) use ($period) {
@@ -184,6 +185,7 @@ class DashboardController extends Controller
             })
             ->values();
 
+        // Danh sách ngân sách đang hoạt động, sắp xếp theo số dư gốc giảm dần
         $activeWallets = Budgets::where('user_id', $userId)
             ->where('trang_thai', true)
             ->with('category')
@@ -202,25 +204,29 @@ class DashboardController extends Controller
             })
             ->values();
 
+        // Dữ liệu thu chi theo tháng trong 6 tháng gần nhất
+        $monthly = Transaction::where('user_id', $userId)
+            ->where('ngay_giao_dich', '>=', now()->subMonths(5)->startOfMonth()->toDateString())
+            ->selectRaw('YEAR(ngay_giao_dich) as year, MONTH(ngay_giao_dich) as month, loai_giao_dich, SUM(so_tien) as total')
+            ->groupBy('year', 'month', 'loai_giao_dich')
+            ->get()
+            ->groupBy(fn($t) => $t->year . '-' . $t->month);
+
+        // Tạo mảng đủ 6 tháng kể cả tháng không có giao dịch => dùng cho heatmap và biểu đồ
         $monthlyData = [];
         for ($i = 5; $i >= 0; $i--) {
-            $date = now()->subMonths($i);
+            $date  = now()->subMonths($i);
+            $key   = $date->year . '-' . $date->month;
+            $group = $monthly[$key] ?? collect();
 
             $monthlyData[] = [
-                'month'   => $date->format('n'),
-                'income'  => (float) Transaction::where('user_id', $userId)
-                    ->where('loai_giao_dich', 'THU')
-                    ->whereMonth('ngay_giao_dich', $date->month)
-                    ->whereYear('ngay_giao_dich', $date->year)
-                    ->sum('so_tien'),
-                'expense' => (float) Transaction::where('user_id', $userId)
-                    ->where('loai_giao_dich', 'CHI')
-                    ->whereMonth('ngay_giao_dich', $date->month)
-                    ->whereYear('ngay_giao_dich', $date->year)
-                    ->sum('so_tien'),
+                'month'   => (int) $date->format('n'),
+                'income'  => (float) $group->where('loai_giao_dich', 'THU')->sum('total'),
+                'expense' => (float) $group->where('loai_giao_dich', 'CHI')->sum('total'),
             ];
         }
 
+        // Danh mục chi tiêu nhiều nhất trong kỳ, sắp xếp theo tổng chi giảm dần, chỉ lấy những danh mục có chi tiêu > 0
         $categoryExpenses = Category::where('user_id', $userId)
             ->where('loai_danh_muc', 'CHI')
             ->withSum(['transactions as total' => function ($query) use ($period) {
@@ -237,7 +243,7 @@ class DashboardController extends Controller
             ])
             ->values();
 
-        // Headmap chi tiêu tỏng vòng 30 ngày
+        // Dữ liệu heatmap: tổng chi tiêu theo ngày trong 30 ngày gần nhất
         $heatmap = Transaction::where('user_id', $userId)
             ->where('loai_giao_dich', 'CHI')
             ->where('ngay_giao_dich', '>=', now()->subDays(29)->toDateString())
@@ -282,6 +288,7 @@ class DashboardController extends Controller
         ];
     }
 
+    /* Hàm nội bộ, lọc query theo kỳ hiện tại (tháng này/trước/năm nay/tất cả) */
     protected function applyPeriodFilter($query, string $period)
     {
         match($period) {
@@ -298,6 +305,7 @@ class DashboardController extends Controller
         return $query;
     }
 
+    /* Hàm nội bộ, lọc query theo kỳ trước để so sánh tăng/giảm */
     protected function applyPreviousPeriodFilter($query, string $period)
     {
         match($period) {
@@ -314,7 +322,184 @@ class DashboardController extends Controller
         return $query;
     }
 
-    public function export(Request $request)
+    /* Hàm nội bộ, tạo file Excel 3 sheet, dùng chung cho export/sendReport */
+    private function buildExcelFile(array $data, string $periodLabel, string $tempPath): void
+    {
+        $spreadsheet = new Spreadsheet();
+
+        // Sheet 1: Tổng quan
+        $sheet1 = $spreadsheet->getActiveSheet();
+        $sheet1->setTitle('TongQuan');
+        $sheet1->getColumnDimension('A')->setWidth(28);
+        $sheet1->getColumnDimension('B')->setWidth(28);
+
+        $sheet1->setCellValue('A1', 'BÁO CÁO TÀI CHÍNH - MONEXA');
+        $sheet1->setCellValue('A2', 'Kỳ báo cáo: ' . $periodLabel . '   |   Xuất ngày: ' . now()->format('d/m/Y H:i'));
+        $sheet1->setCellValue('A4', 'Chỉ số');
+        $sheet1->setCellValue('B4', 'Giá trị');
+        $sheet1->setCellValue('A5', 'Thu nhập');        $sheet1->setCellValue('B5', $data['totalIncome']);
+        $sheet1->setCellValue('A6', 'Chi tiêu');        $sheet1->setCellValue('B6', $data['totalExpense']);
+        $sheet1->setCellValue('A7', 'Số dư');           $sheet1->setCellValue('B7', $data['balance']);
+        $sheet1->setCellValue('A8', 'Tỷ lệ tiết kiệm');$sheet1->setCellValue('B8', ($data['savingRate'] ?? 0) . '%');
+        $sheet1->setCellValue('A9', 'Tổng giao dịch'); $sheet1->setCellValue('B9', $data['totalTransactions']);
+
+        if (!empty($data['incomeChange'])) {
+            $sheet1->setCellValue('A10', 'Thu nhập so kỳ trước');
+            $sheet1->setCellValue('B10', $data['incomeChange'] . '%');
+        }
+        if (!empty($data['expenseChange'])) {
+            $sheet1->setCellValue('A11', 'Chi tiêu so kỳ trước');
+            $sheet1->setCellValue('B11', $data['expenseChange'] . '%');
+        }
+        if (!empty($data['forecast'])) {
+            $sheet1->setCellValue('A12', 'Dự báo chi tiêu cuối tháng');
+            $sheet1->setCellValue('B12', $data['forecast']);
+        }
+
+        $highestRow1 = $sheet1->getHighestRow();
+
+        $sheet1->mergeCells('A1:B1');
+        $sheet1->getStyle('A1')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 16, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1D4ED8']],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+        ]);
+        $sheet1->getRowDimension(1)->setRowHeight(36);
+
+        $sheet1->mergeCells('A2:B2');
+        $sheet1->getStyle('A2')->applyFromArray([
+            'font' => ['italic' => true, 'size' => 10, 'color' => ['rgb' => '64748B']],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'EFF6FF']],
+        ]);
+
+        $sheet1->getStyle('A4:B4')->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1E40AF']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+        ]);
+
+        for ($row = 5; $row <= $highestRow1; $row++) {
+            $bg = ($row % 2 === 0) ? 'DBEAFE' : 'F0F9FF';
+            $sheet1->getStyle("A{$row}:B{$row}")->applyFromArray([
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bg]],
+            ]);
+        }
+
+        $sheet1->getStyle('B5')->getFont()->getColor()->setRGB('059669');
+        $sheet1->getStyle('B6')->getFont()->getColor()->setRGB('DC2626');
+        $sheet1->getStyle('B7')->getFont()->getColor()->setRGB($data['balance'] >= 0 ? '059669' : 'DC2626');
+
+        $sheet1->getStyle('A4:B' . $highestRow1)->applyFromArray([
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'BFDBFE']]],
+        ]);
+
+        // Sheet 2: Thu Chi 
+        $sheet2 = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($spreadsheet, 'ThuChi');
+        $spreadsheet->addSheet($sheet2);
+        $sheet2->getColumnDimension('A')->setWidth(15);
+        $sheet2->getColumnDimension('B')->setWidth(22);
+        $sheet2->getColumnDimension('C')->setWidth(22);
+
+        $sheet2->setCellValue('A1', 'Tháng');
+        $sheet2->setCellValue('B1', 'Thu nhap');
+        $sheet2->setCellValue('C1', 'Chi tieu');
+
+        $sheet2->getStyle('A1:C1')->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '059669']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+        ]);
+
+        $monthlyData = $data['monthlyData'] ?? [];
+        foreach ($monthlyData as $i => $item) {
+            $row = $i + 2;
+            $sheet2->setCellValue('A' . $row, 'Thang ' . $item['month']);
+            $sheet2->setCellValue('B' . $row, (float) $item['income']);
+            $sheet2->setCellValue('C' . $row, (float) $item['expense']);
+
+            $bg = ($i % 2 === 0) ? 'ECFDF5' : 'FFFFFF';
+            $sheet2->getStyle("A{$row}:C{$row}")->applyFromArray([
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bg]],
+            ]);
+            $sheet2->getStyle("B{$row}")->getFont()->getColor()->setRGB('059669');
+            $sheet2->getStyle("C{$row}")->getFont()->getColor()->setRGB('DC2626');
+        }
+
+        $lastRow2 = count($monthlyData) + 1;
+        $sheet2->getStyle('A1:C' . $lastRow2)->applyFromArray([
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'D1FAE5']]],
+        ]);
+
+        if (count($monthlyData) > 0) {
+            $labels = new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, 'ThuChi!$A$2:$A$' . $lastRow2, null, count($monthlyData));
+            $incomeValues  = new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_NUMBER, 'ThuChi!$B$2:$B$' . $lastRow2, null, count($monthlyData));
+            $expenseValues = new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_NUMBER, 'ThuChi!$C$2:$C$' . $lastRow2, null, count($monthlyData));
+            $seriesLabels  = [
+                new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, null, null, 1, ['Thu nhap']),
+                new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, null, null, 1, ['Chi tieu']),
+            ];
+            $lineChart = new Chart('line_chart', new Title('Thu chi 6 thang'), new Legend(Legend::POSITION_BOTTOM),
+                new PlotArea(null, [new DataSeries(DataSeries::TYPE_LINECHART, DataSeries::GROUPING_STANDARD, range(0, 1), $seriesLabels, [$labels], [$incomeValues, $expenseValues])])
+            );
+            $lineChart->setTopLeftPosition('E2');
+            $lineChart->setBottomRightPosition('N20');
+            $sheet2->addChart($lineChart);
+        }
+
+        // Sheet 3: Danh Mục
+        $sheet3 = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($spreadsheet, 'DanhMuc');
+        $spreadsheet->addSheet($sheet3);
+        $sheet3->getColumnDimension('A')->setWidth(28);
+        $sheet3->getColumnDimension('B')->setWidth(22);
+
+        $sheet3->setCellValue('A1', 'Danh muc');
+        $sheet3->setCellValue('B1', 'So tien');
+
+        $sheet3->getStyle('A1:B1')->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'D97706']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+        ]);
+
+        $categoryData = $data['categoryExpenses'] ?? [];
+        foreach ($categoryData as $i => $item) {
+            $row = $i + 2;
+            $sheet3->setCellValue('A' . $row, $item['name']);
+            $sheet3->setCellValue('B' . $row, (float) $item['total']);
+
+            $bg = ($i % 2 === 0) ? 'FFFBEB' : 'FFFFFF';
+            $sheet3->getStyle("A{$row}:B{$row}")->applyFromArray([
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bg]],
+            ]);
+            $sheet3->getStyle("B{$row}")->getFont()->getColor()->setRGB('DC2626');
+        }
+
+        $lastRow3 = count($categoryData) + 1;
+        $sheet3->getStyle('A1:B' . $lastRow3)->applyFromArray([
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'FDE68A']]],
+        ]);
+
+        if (count($categoryData) > 0) {
+            $catLabels = new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, 'DanhMuc!$A$2:$A$' . $lastRow3, null, count($categoryData));
+            $catValues = new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_NUMBER, 'DanhMuc!$B$2:$B$' . $lastRow3, null, count($categoryData));
+            $pieChart  = new Chart('pie_chart', new Title('Phan bo chi tieu'), new Legend(Legend::POSITION_RIGHT),
+                new PlotArea(null, [new DataSeries(DataSeries::TYPE_PIECHART, null, range(0, 0), [null], [$catLabels], [$catValues])])
+            );
+            $pieChart->setTopLeftPosition('D2');
+            $pieChart->setBottomRightPosition('M22');
+            $sheet3->addChart($pieChart);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->setIncludeCharts(true);
+        $writer->save($tempPath);
+    }
+
+    /* GET /api/v1/dashboard/export?period=this_month → Xuất báo cáo Excel */
+    public function export(Request $request) : \Symfony\Component\HttpFoundation\BinaryFileResponse
     {
         $userId = $request->user()?->id ?? Auth::id();
         $period = $request->string('period')->toString() ?: 'this_month';
@@ -332,259 +517,17 @@ class DashboardController extends Controller
             default      => 'Tất cả',
         };
 
-        $spreadsheet = new Spreadsheet();
-
-        $sheet1 = $spreadsheet->getActiveSheet();
-        $sheet1->setTitle('TongQuan');
-
-        $sheet1->getColumnDimension('A')->setWidth(28);
-        $sheet1->getColumnDimension('B')->setWidth(28);
-
-        $sheet1->setCellValue('A1', 'BÁO CÁO TÀI CHÍNH - MONEXA');
-        $sheet1->setCellValue('A2', 'Kỳ báo cáo: ' . $periodLabel . '   |   Xuất ngày: ' . now()->format('d/m/Y H:i'));
-        $sheet1->setCellValue('A3', '');
-        $sheet1->setCellValue('A4', 'Chỉ số');
-        $sheet1->setCellValue('B4', 'Giá trị');
-        $sheet1->setCellValue('A5', 'Thu nhập');
-        $sheet1->setCellValue('B5', $data['totalIncome']);
-        $sheet1->setCellValue('A6', 'Chi tiêu');
-        $sheet1->setCellValue('B6', $data['totalExpense']);
-        $sheet1->setCellValue('A7', 'Số dư');
-        $sheet1->setCellValue('B7', $data['balance']);
-        $sheet1->setCellValue('A8', 'Tỷ lệ tiết kiệm');
-        $sheet1->setCellValue('B8', ($data['savingRate'] ?? 0) . '%');
-        $sheet1->setCellValue('A9', 'Tổng giao dịch');
-        $sheet1->setCellValue('B9', $data['totalTransactions']);
-
-        if (!empty($data['incomeChange'])) {
-            $sheet1->setCellValue('A10', 'Thu nhập so kỳ trước');
-            $sheet1->setCellValue('B10', $data['incomeChange'] . '%');
-        }
-        if (!empty($data['expenseChange'])) {
-            $sheet1->setCellValue('A11', 'Chi tiêu so kỳ trước');
-            $sheet1->setCellValue('B11', $data['expenseChange'] . '%');
-        }
-        if (!empty($data['forecast'])) {
-            $sheet1->setCellValue('A12', 'Dự báo chi tiêu cuối tháng');
-            $sheet1->setCellValue('B12', $data['forecast']);
-        }
-
-        $highestRow1 = $sheet1->getHighestRow();
-
-        // Merge + style title
-        $sheet1->mergeCells('A1:B1');
-        $sheet1->getStyle('A1')->applyFromArray([
-            'font' => ['bold' => true, 'size' => 16, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '1D4ED8']],
-            'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-            ],
-        ]);
-        $sheet1->getRowDimension(1)->setRowHeight(36);
-
-        // Subtitle
-        $sheet1->mergeCells('A2:B2');
-        $sheet1->getStyle('A2')->applyFromArray([
-            'font' => ['italic' => true, 'size' => 10, 'color' => ['rgb' => '64748B']],
-            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'EFF6FF']],
-        ]);
-
-        // Header bảng
-        $sheet1->getStyle('A4:B4')->applyFromArray([
-            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '1E40AF']],
-            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
-        ]);
-
-        // Zebra stripe
-        for ($row = 5; $row <= $highestRow1; $row++) {
-            $bg = ($row % 2 === 0) ? 'DBEAFE' : 'F0F9FF';
-            $sheet1->getStyle("A{$row}:B{$row}")->applyFromArray([
-                'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => $bg]],
-            ]);
-        }
-
-        // Màu số tiền
-        $sheet1->getStyle('B5')->getFont()->getColor()->setRGB('059669');
-        $sheet1->getStyle('B6')->getFont()->getColor()->setRGB('DC2626');
-        $sheet1->getStyle('B7')->getFont()->getColor()->setRGB($data['balance'] >= 0 ? '059669' : 'DC2626');
-
-        // Border
-        $sheet1->getStyle('A4:B' . $highestRow1)->applyFromArray([
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                    'color'       => ['rgb' => 'BFDBFE'],
-                ],
-            ],
-        ]);
-
-        $sheet2 = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($spreadsheet, 'ThuChi');
-        $spreadsheet->addSheet($sheet2);
-
-        $sheet2->getColumnDimension('A')->setWidth(15);
-        $sheet2->getColumnDimension('B')->setWidth(22);
-        $sheet2->getColumnDimension('C')->setWidth(22);
-
-        $sheet2->setCellValue('A1', 'Tháng');
-        $sheet2->setCellValue('B1', 'Thu nhap');
-        $sheet2->setCellValue('C1', 'Chi tieu');
-
-        // Style header
-        $sheet2->getStyle('A1:C1')->applyFromArray([
-            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '059669']],
-            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
-        ]);
-
-        $monthlyData = $data['monthlyData'] ?? [];
-        foreach ($monthlyData as $i => $item) {
-            $row = $i + 2;
-            $sheet2->setCellValue('A' . $row, 'Thang ' . $item['month']);
-            $sheet2->setCellValue('B' . $row, (float) $item['income']);
-            $sheet2->setCellValue('C' . $row, (float) $item['expense']);
-
-            $bg = ($i % 2 === 0) ? 'ECFDF5' : 'FFFFFF';
-            $sheet2->getStyle("A{$row}:C{$row}")->applyFromArray([
-                'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => $bg]],
-            ]);
-            $sheet2->getStyle("B{$row}")->getFont()->getColor()->setRGB('059669');
-            $sheet2->getStyle("C{$row}")->getFont()->getColor()->setRGB('DC2626');
-        }
-
-        $count   = count($monthlyData);
-        $lastRow = $count + 1;
-
-        // Border sheet2
-        $sheet2->getStyle('A1:C' . $lastRow)->applyFromArray([
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                    'color'       => ['rgb' => 'D1FAE5'],
-                ],
-            ],
-        ]);
-
-        if ($count > 0) {
-            $labels = new DataSeriesValues(
-                DataSeriesValues::DATASERIES_TYPE_STRING,
-                'ThuChi!$A$2:$A$' . $lastRow, null, $count
-            );
-            $incomeValues = new DataSeriesValues(
-                DataSeriesValues::DATASERIES_TYPE_NUMBER,
-                'ThuChi!$B$2:$B$' . $lastRow, null, $count
-            );
-            $expenseValues = new DataSeriesValues(
-                DataSeriesValues::DATASERIES_TYPE_NUMBER,
-                'ThuChi!$C$2:$C$' . $lastRow, null, $count
-            );
-            $seriesLabels = [
-                new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, null, null, 1, ['Thu nhap']),
-                new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, null, null, 1, ['Chi tieu']),
-            ];
-            $lineSeries = new DataSeries(
-                DataSeries::TYPE_LINECHART,
-                DataSeries::GROUPING_STANDARD,
-                range(0, 1),
-                $seriesLabels,
-                [$labels],
-                [$incomeValues, $expenseValues]
-            );
-            $lineChart = new Chart(
-                'line_chart',
-                new Title('Thu chi 6 thang'),
-                new Legend(Legend::POSITION_BOTTOM),
-                new PlotArea(null, [$lineSeries])
-            );
-            $lineChart->setTopLeftPosition('E2');
-            $lineChart->setBottomRightPosition('N20');
-            $sheet2->addChart($lineChart);
-        }
-
-        $sheet3 = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($spreadsheet, 'DanhMuc');
-        $spreadsheet->addSheet($sheet3);
-
-        $sheet3->getColumnDimension('A')->setWidth(28);
-        $sheet3->getColumnDimension('B')->setWidth(22);
-
-        $sheet3->setCellValue('A1', 'Danh muc');
-        $sheet3->setCellValue('B1', 'So tien');
-
-        // Style header
-        $sheet3->getStyle('A1:B1')->applyFromArray([
-            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'D97706']],
-            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
-        ]);
-
-        $categoryData = $data['categoryExpenses'] ?? [];
-        foreach ($categoryData as $i => $item) {
-            $row = $i + 2;
-            $sheet3->setCellValue('A' . $row, $item['name']);
-            $sheet3->setCellValue('B' . $row, (float) $item['total']);
-
-            $bg = ($i % 2 === 0) ? 'FFFBEB' : 'FFFFFF';
-            $sheet3->getStyle("A{$row}:B{$row}")->applyFromArray([
-                'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => $bg]],
-            ]);
-            $sheet3->getStyle("B{$row}")->getFont()->getColor()->setRGB('DC2626');
-        }
-
-        $catCount   = count($categoryData);
-        $catLastRow = $catCount + 1;
-
-        // Border sheet3
-        $sheet3->getStyle('A1:B' . $catLastRow)->applyFromArray([
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                    'color'       => ['rgb' => 'FDE68A'],
-                ],
-            ],
-        ]);
-
-        if ($catCount > 0) {
-            $catLabels = new DataSeriesValues(
-                DataSeriesValues::DATASERIES_TYPE_STRING,
-                'DanhMuc!$A$2:$A$' . $catLastRow, null, $catCount
-            );
-            $catValues = new DataSeriesValues(
-                DataSeriesValues::DATASERIES_TYPE_NUMBER,
-                'DanhMuc!$B$2:$B$' . $catLastRow, null, $catCount
-            );
-            $pieSeries = new DataSeries(
-                DataSeries::TYPE_PIECHART,
-                null,
-                range(0, 0),
-                [null],
-                [$catLabels],
-                [$catValues]
-            );
-            $pieChart = new Chart(
-                'pie_chart',
-                new Title('Phan bo chi tieu'),
-                new Legend(Legend::POSITION_RIGHT),
-                new PlotArea(null, [$pieSeries])
-            );
-            $pieChart->setTopLeftPosition('D2');
-            $pieChart->setBottomRightPosition('M22');
-            $sheet3->addChart($pieChart);
-        }
-
-        $writer = new Xlsx($spreadsheet);
-        $writer->setIncludeCharts(true);
-
         $filename = "baocao_{$period}_" . now()->format('Y-m-d') . ".xlsx";
         $tempPath = storage_path('app/temp_' . $filename);
 
-        $writer->save($tempPath);
+        $this->buildExcelFile($data, $periodLabel, $tempPath); // ← dùng hàm chung
 
         return response()->download($tempPath, $filename, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ])->deleteFileAfterSend(true);
     }
 
+    /* POST /api/v1/dashboard/export-pdf?period=this_month → Xuất báo cáo PDF */
     public function exportPdf(Request $request)
     {
         $userId = $request->user()?->id ?? Auth::id();
@@ -615,6 +558,7 @@ class DashboardController extends Controller
         return $pdf->download("baocao_{$period}_" . now()->format('Y-m-d') . ".pdf");
     }
 
+    /* POST /api/v1/dashboard/report → Gửi báo cáo qua email */
     public function sendReport(Request $request)
     {
         $userId = $request->user()?->id ?? Auth::id();
@@ -622,12 +566,16 @@ class DashboardController extends Controller
         $format = $request->string('format')->toString() ?: 'xlsx';
         $email  = $request->string('email')->toString();
 
-        if (!$email) {
+        if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return response()->json(['message' => 'Email không hợp lệ'], 422);
         }
 
         if (!in_array($period, ['all', 'this_month', 'last_month', 'this_year'], true)) {
             $period = 'this_month';
+        }
+
+        if (!in_array($format, ['xlsx', 'pdf'], true)) {
+            $format = 'xlsx';
         }
 
         $data = $this->getDashboardData($userId, $period);
@@ -644,164 +592,21 @@ class DashboardController extends Controller
 
         try {
             if ($format === 'pdf') {
-                $lineImg = '';
-                $pieImg  = '';
-                $barImg  = '';
-
-                $pdf = Pdf::loadView('dashboard_pdf', compact('data', 'periodLabel', 'lineImg', 'pieImg', 'barImg'))
-                    ->setPaper('a4', 'portrait');
+                // ← Tạo PDF
+                $pdf = Pdf::loadView('dashboard_pdf', [
+                    'data'        => $data,
+                    'periodLabel' => $periodLabel,
+                    'lineImg'     => '',
+                    'pieImg'      => '',
+                    'barImg'      => '',
+                ])->setPaper('a4', 'portrait');
 
                 file_put_contents($tempPath, $pdf->output());
                 $mimeType = 'application/pdf';
 
             } else {
-                $spreadsheet = new Spreadsheet();
-
-                $sheet1 = $spreadsheet->getActiveSheet()->setTitle('TongQuan');
-
-                $sheet1->getColumnDimension('A')->setWidth(28);
-                $sheet1->getColumnDimension('B')->setWidth(28);
-
-                $sheet1->setCellValue('A1', 'BÁO CÁO TÀI CHÍNH - MONEXA');
-                $sheet1->setCellValue('A2', 'Kỳ báo cáo: ' . $periodLabel . '   |   Xuất ngày: ' . now()->format('d/m/Y H:i'));
-                $sheet1->setCellValue('A4', 'Chỉ số');
-                $sheet1->setCellValue('B4', 'Giá trị');
-                $sheet1->setCellValue('A5', 'Thu nhập');
-                $sheet1->setCellValue('B5', $data['totalIncome']);
-                $sheet1->setCellValue('A6', 'Chi tiêu');
-                $sheet1->setCellValue('B6', $data['totalExpense']);
-                $sheet1->setCellValue('A7', 'Số dư');
-                $sheet1->setCellValue('B7', $data['balance']);
-                $sheet1->setCellValue('A8', 'Tỷ lệ tiết kiệm');
-                $sheet1->setCellValue('B8', ($data['savingRate'] ?? 0) . '%');
-                $sheet1->setCellValue('A9', 'Tổng giao dịch');
-                $sheet1->setCellValue('B9', $data['totalTransactions']);
-
-                if (!empty($data['incomeChange'])) {
-                    $sheet1->setCellValue('A10', 'Thu nhập so kỳ trước');
-                    $sheet1->setCellValue('B10', $data['incomeChange'] . '%');
-                }
-                if (!empty($data['expenseChange'])) {
-                    $sheet1->setCellValue('A11', 'Chi tiêu so kỳ trước');
-                    $sheet1->setCellValue('B11', $data['expenseChange'] . '%');
-                }
-                if (!empty($data['forecast'])) {
-                    $sheet1->setCellValue('A12', 'Dự báo chi tiêu cuối tháng');
-                    $sheet1->setCellValue('B12', $data['forecast']);
-                }
-
-                $highestRow1 = $sheet1->getHighestRow();
-
-                $sheet1->mergeCells('A1:B1');
-                $sheet1->getStyle('A1')->applyFromArray([
-                    'font' => ['bold' => true, 'size' => 16, 'color' => ['rgb' => 'FFFFFF']],
-                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1D4ED8']],
-                    'alignment' => [
-                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                        'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-                    ],
-                ]);
-                $sheet1->getRowDimension(1)->setRowHeight(36);
-
-                $sheet1->mergeCells('A2:B2');
-                $sheet1->getStyle('A2')->applyFromArray([
-                    'font' => ['italic' => true, 'size' => 10, 'color' => ['rgb' => '64748B']],
-                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'EFF6FF']],
-                ]);
-
-                $sheet1->getStyle('A4:B4')->applyFromArray([
-                    'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1E40AF']],
-                    'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
-                ]);
-
-                for ($row = 5; $row <= $highestRow1; $row++) {
-                    $bg = ($row % 2 === 0) ? 'DBEAFE' : 'F0F9FF';
-                    $sheet1->getStyle("A{$row}:B{$row}")->applyFromArray([
-                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bg]],
-                    ]);
-                }
-
-                $sheet1->getStyle('B5')->getFont()->getColor()->setRGB('059669');
-                $sheet1->getStyle('B6')->getFont()->getColor()->setRGB('DC2626');
-                $sheet1->getStyle('B7')->getFont()->getColor()->setRGB($data['balance'] >= 0 ? '059669' : 'DC2626');
-
-                $sheet1->getStyle('A4:B' . $highestRow1)->applyFromArray([
-                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'BFDBFE']]],
-                ]);
-
-                $sheet2 = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($spreadsheet, 'ThuChi');
-                $spreadsheet->addSheet($sheet2);
-
-                $sheet2->getColumnDimension('A')->setWidth(15);
-                $sheet2->getColumnDimension('B')->setWidth(22);
-                $sheet2->getColumnDimension('C')->setWidth(22);
-
-                $sheet2->setCellValue('A1', 'Tháng');
-                $sheet2->setCellValue('B1', 'Thu nhap');
-                $sheet2->setCellValue('C1', 'Chi tieu');
-
-                $sheet2->getStyle('A1:C1')->applyFromArray([
-                    'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '059669']],
-                    'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
-                ]);
-
-                $monthlyData = $data['monthlyData'] ?? [];
-                foreach ($monthlyData as $i => $item) {
-                    $row = $i + 2;
-                    $sheet2->setCellValue('A' . $row, 'Thang ' . $item['month']);
-                    $sheet2->setCellValue('B' . $row, (float) $item['income']);
-                    $sheet2->setCellValue('C' . $row, (float) $item['expense']);
-
-                    $bg = ($i % 2 === 0) ? 'ECFDF5' : 'FFFFFF';
-                    $sheet2->getStyle("A{$row}:C{$row}")->applyFromArray([
-                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bg]],
-                    ]);
-                    $sheet2->getStyle("B{$row}")->getFont()->getColor()->setRGB('059669');
-                    $sheet2->getStyle("C{$row}")->getFont()->getColor()->setRGB('DC2626');
-                }
-
-                $lastRow2 = count($monthlyData) + 1;
-                $sheet2->getStyle('A1:C' . $lastRow2)->applyFromArray([
-                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'D1FAE5']]],
-                ]);
-
-                $sheet3 = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($spreadsheet, 'DanhMuc');
-                $spreadsheet->addSheet($sheet3);
-
-                $sheet3->getColumnDimension('A')->setWidth(28);
-                $sheet3->getColumnDimension('B')->setWidth(22);
-
-                $sheet3->setCellValue('A1', 'Danh muc');
-                $sheet3->setCellValue('B1', 'So tien');
-
-                $sheet3->getStyle('A1:B1')->applyFromArray([
-                    'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'D97706']],
-                    'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
-                ]);
-
-                $categoryData = $data['categoryExpenses'] ?? [];
-                foreach ($categoryData as $i => $item) {
-                    $row = $i + 2;
-                    $sheet3->setCellValue('A' . $row, $item['name']);
-                    $sheet3->setCellValue('B' . $row, (float) $item['total']);
-
-                    $bg = ($i % 2 === 0) ? 'FFFBEB' : 'FFFFFF';
-                    $sheet3->getStyle("A{$row}:B{$row}")->applyFromArray([
-                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bg]],
-                    ]);
-                    $sheet3->getStyle("B{$row}")->getFont()->getColor()->setRGB('DC2626');
-                }
-
-                $lastRow3 = count($categoryData) + 1;
-                $sheet3->getStyle('A1:B' . $lastRow3)->applyFromArray([
-                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'FDE68A']]],
-                ]);
-                
-                $writer = new Xlsx($spreadsheet);
-                $writer->save($tempPath);
+                // ← Dùng hàm chung thay vì viết lại toàn bộ code Excel
+                $this->buildExcelFile($data, $periodLabel, $tempPath);
                 $mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
             }
 
@@ -827,7 +632,6 @@ class DashboardController extends Controller
             \Log::error('sendReport error: ' . $e->getMessage());
             return response()->json(['message' => 'Gửi thất bại: ' . $e->getMessage()], 500);
         } finally {
-            // Xóa file tạm dù thành công hay thất bại
             if (isset($tempPath) && file_exists($tempPath)) {
                 unlink($tempPath);
             }

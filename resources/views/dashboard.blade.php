@@ -5,6 +5,7 @@
 @php
     echo '<style>' . file_get_contents(resource_path('css/dashboard.css')) . '</style>';
 @endphp
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <div
     class="dashboard-container"
     id="dashboardPage"
@@ -406,6 +407,7 @@
             });
         });
 
+        /* Chọn định dạng xuất và gọi API để xuất export - GET /api/v1/dashboard/export?period=... → DashboardController@export */
         document.getElementById('confirm-export-btn').addEventListener('click', async () => {
             const period = document.getElementById('month-filter').value;
             const format = document.getElementById('export-format-select').value;
@@ -496,6 +498,7 @@
                 btn.innerHTML = `<img src="${exportIcon}" style="width:14px;height:14px;filter:brightness(10)"> Xuất khẩu`;
             }
         });
+
         function syncTokenFromUrl() {
             const url = new URL(window.location.href);
             const token = url.searchParams.get('token');
@@ -542,10 +545,17 @@
 
             function changeTag(val, inverse = false) {
                 if (val === null || val === undefined) return '';
+
                 const isGood = inverse ? val < 0 : val > 0;
                 const color  = isGood ? 'up' : 'down';
-                const arrow  = val > 0 ? '▲' : '▼';
-                return `<div class="stat-change ${color}">${arrow} ${Math.abs(val)}% so kỳ trước</div>`;
+
+                const icon = val > 0
+                    ? '<i class="fa-solid fa-arrow-up"></i>'
+                    : '<i class="fa-solid fa-arrow-down"></i>';
+
+                return `<div class="stat-change ${color}">
+                            ${icon} ${Math.abs(val)}% so kỳ trước
+                        </div>`;
             }
 
             const forecastHtml = data.forecast
@@ -1068,6 +1078,7 @@
             destroyCharts();
         };
 
+        /* Load dữ liệu dashboard -  GET /api/v1/dashboard?period=...→ DashboardController@index*/
         async function loadDashboard(period = state.currentPeriod) {
             state.currentPeriod = period;
             filter.value = period;

@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Auth;
  */
 class GroupNotifier
 {
-    // ── Mời thành viên ─────────────────────────────────────
+    // Mời thành viên 
     public static function invited(SplitGroup $group, string $email, string $inviterName): void
     {
         $user = \App\Models\User::where('email', $email)->first();
@@ -47,7 +47,7 @@ class GroupNotifier
         );
     }
 
-    // ── Thành viên mới tham gia ────────────────────────────
+    // Thành viên mới tham gia 
     public static function memberJoined(SplitGroup $group, SplitGroupMember $newMember): void
     {
         $newUser     = $newMember->user;
@@ -67,7 +67,7 @@ class GroupNotifier
         );
     }
 
-    // ── Thành viên rời nhóm ────────────────────────────────
+    // Thành viên rời nhóm 
     public static function memberLeft(SplitGroup $group, SplitGroupMember $member): void
     {
         $memberIds = $group->activeMembers()
@@ -86,7 +86,7 @@ class GroupNotifier
         );
     }
 
-    // ── Xóa thành viên ─────────────────────────────────────
+    //Xóa thành viên 
     public static function memberRemoved(SplitGroup $group, SplitGroupMember $member): void
     {
         // Thông báo cho người bị xóa
@@ -102,7 +102,7 @@ class GroupNotifier
         );
     }
 
-    // ── Chỉ định / Hạ quyền Admin ──────────────────────────
+    // Chỉ định / Hạ quyền Admin
     public static function promoted(SplitGroup $group, SplitGroupMember $member): void
     {
         NotificationService::send(
@@ -131,7 +131,7 @@ class GroupNotifier
         );
     }
 
-    // ── Balance proposals ───────────────────────────────────
+    // Balance proposals 
     public static function balanceProposed(GroupBalanceProposal $proposal): void
     {
         $group     = $proposal->group;
@@ -208,7 +208,7 @@ class GroupNotifier
         );
     }
 
-    // ── Expense proposals ───────────────────────────────────
+    //Expense proposals 
     public static function expenseProposed(GroupExpenseProposal $proposal): void
     {
         $group     = $proposal->group;
@@ -284,7 +284,7 @@ class GroupNotifier
         );
     }
 
-    // ── Debts ───────────────────────────────────────────────
+    // Debts 
     public static function debtRecorded(GroupExpenseDebt $debt): void
     {
         $group   = $debt->group;
