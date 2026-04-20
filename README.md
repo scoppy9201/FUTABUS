@@ -1,49 +1,133 @@
 <p align="center">
-  <img src="screenshots/logo.png" style="max-width: 80%; height: auto;" alt="Monexa Logo">
+  <img src="screenshots/logo.png" style="max-width: 200px; height: auto;" alt="Monexa — Personal Finance Manager">
+</p>
+
+<h1 align="center">Monexa</h1>
+
+<p align="center">
+  <strong>Open-source personal finance manager built with Laravel</strong><br>
+  Track income and expenses, set budgets, and visualize your financial health — all in one place.
 </p>
 
 <p align="center">
-  <strong>Ứng dụng Quản lý Chi tiêu Cá nhân</strong>
+  <a href="https://laravel.com"><img src="https://img.shields.io/badge/Laravel-11.x-FF2D20?style=flat&logo=laravel" alt="Laravel 11.x"></a>
+  <a href="https://php.net"><img src="https://img.shields.io/badge/PHP-8.3-777BB4?style=flat&logo=php" alt="PHP 8.3"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-green?style=flat" alt="MIT License"></a>
+  <a href="https://github.com/scoppy9201/monexa/stargazers"><img src="https://img.shields.io/github/stars/scoppy9201/monexa?style=flat" alt="GitHub Stars"></a>
+</p>
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Configuration](#configuration)
+- [Database Schema](#database-schema)
+- [Contributing](#contributing)
+- [Security](#security)
+- [License](#license)
+
+---
+
+## Overview
+
+**Monexa** is a self-hosted, open-source personal finance web application built on Laravel. It gives individuals a clean, intuitive interface to track every dollar in and out — with smart budgeting, category breakdowns, and real-time charts — without handing your financial data over to a third-party service.
+
+**Who is it for?**
+- Individuals who want full control over their financial data
+- Developers looking for a real-world Laravel project to study or extend
+- Teams building personal finance tools who need a solid starting point
+
+---
+
+## Features
+
+### 🔐 Authentication & Security
+- Email/password registration with server-side validation
+- Google OAuth via Laravel Socialite
+- Profile management and password change
+- Route-level middleware protection
+
+### 💸 Transaction Management
+- Full CRUD for income and expense entries
+- Category-based classification
+- Multi-criteria filtering (date, type, category, amount)
+- Pagination and sortable columns
+- Automatic budget balance updates on transaction save
+
+### 💰 Smart Budgeting
+- Create monthly or category-specific budgets
+- Real-time balance tracking
+- Visual progress bars with color-coded thresholds
+- Overspend alerts before you exceed your limit
+
+### 📊 Dashboard & Analytics
+- Summary cards: total income, total expenses, net balance
+- Monthly income vs. expense line chart (Chart.js)
+- Spending distribution pie chart by category
+- Top spending categories ranked
+- Recent transactions feed
+
+### 🏷️ Category Management
+- Create custom income and expense categories
+- Assign icons per category
+- Enable or disable categories without deleting data
+
+---
+
+## Screenshots
+
+<p align="center">
+  <img src="screenshots/dashboard.png" width="800" alt="Monexa Dashboard — overview charts and summary stats">
+  <br><em>Dashboard — real-time charts and financial summary</em>
 </p>
 
 <p align="center">
-<a href="https://laravel.com"><img src="https://img.shields.io/badge/Laravel-11.x-FF2D20?style=flat&logo=laravel" alt="Laravel Version"></a>
-<a href="https://php.net"><img src="https://img.shields.io/badge/PHP-8.3-777BB4?style=flat&logo=php" alt="PHP Version"></a>
-<a href="https://github.com/yourusername/monexa"><img src="https://img.shields.io/github/license/yourusername/monexa" alt="License"></a>
-<a href="https://github.com/yourusername/monexa/stargazers"><img src="https://img.shields.io/github/stars/yourusername/monexa" alt="Stars"></a>
+  <img src="screenshots/transactions.png" width="800" alt="Monexa Transactions — advanced filter and list view">
+  <br><em>Transactions — advanced filtering and pagination</em>
 </p>
 
-## Về Monexa
+<p align="center">
+  <img src="screenshots/wallets.png" width="800" alt="Monexa Budgets — progress tracking and alerts">
+  <br><em>Budgets — progress tracking with overspend alerts</em>
+</p>
 
-Monexa là ứng dụng web quản lý chi tiêu cá nhân được xây dựng trên nền tảng Laravel. Chúng tôi tin rằng việc quản lý tài chính cá nhân nên đơn giản, trực quan và hiệu quả. Monexa giúp bạn theo dõi thu chi, quản lý ngân sách và phân tích tài chính một cách dễ dàng với các tính năng:
+<p align="center">
+  <img src="screenshots/categories.png" width="800" alt="Monexa Categories — custom icons and toggle">
+  <br><em>Categories — custom icons, enable/disable per category</em>
+</p>
 
-- **Dashboard trực quan** với biểu đồ thời gian thực.
-- **Quản lý giao dịch** thu/chi với bộ lọc mạnh mẽ.
-- **Quản lý ngân sách** thông minh với cảnh báo vượt mức.
-- **Phân loại danh mục** tùy chỉnh với biểu tượng.
-- **Xác thực đa dạng** bao gồm Google OAuth.
-- **Giao diện responsive** hoạt động mượt mà trên mọi thiết bị.
+---
 
-Monexa được thiết kế để mang lại trải nghiệm quản lý tài chính tốt nhất cho người dùng cá nhân.
+## Tech Stack
 
-## Học Laravel
+| Layer | Technology |
+|---|---|
+| Framework | [Laravel 11.x](https://laravel.com) |
+| Language | PHP 8.3 |
+| Database | MySQL / MariaDB |
+| Charts | [Chart.js](https://www.chartjs.org/) |
+| OAuth | [Laravel Socialite](https://github.com/laravel/socialite) |
+| Frontend build | Vite + Node.js |
 
-Laravel có [tài liệu](https://laravel.com/docs) và thư viện video hướng dẫn rộng lớn nhất trong tất cả các framework hiện đại, giúp bạn dễ dàng bắt đầu. Bạn cũng có thể xem [Laravel Learn](https://laravel.com/learn), nơi bạn sẽ được hướng dẫn xây dựng ứng dụng Laravel hiện đại.
+---
 
-Nếu không muốn đọc, [Laracasts](https://laracasts.com) có thể giúp bạn. Laracasts chứa hàng nghìn video hướng dẫn về Laravel, PHP hiện đại, unit testing và JavaScript.
+## Getting Started
 
-## Cài đặt
-
-### Yêu cầu hệ thống
+### Prerequisites
 
 - PHP >= 8.2
 - Composer
-- MySQL hoặc MariaDB
+- MySQL or MariaDB
 - Node.js & NPM
 
-### Các bước cài đặt
+### Installation
 
-Clone repository và cài đặt dependencies:
+**1. Clone the repository and install dependencies**
 
 ```bash
 git clone https://github.com/scoppy9201/monexa.git
@@ -52,14 +136,14 @@ composer install
 npm install
 ```
 
-Tạo file môi trường và generate application key:
+**2. Set up the environment file**
 
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-Cấu hình database trong file `.env`:
+**3. Configure your database** in `.env`
 
 ```env
 DB_CONNECTION=mysql
@@ -70,43 +154,40 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-Chạy migrations và seeders:
+**4. Run migrations and seed default data**
 
 ```bash
 php artisan migrate
 php artisan db:seed
 ```
 
-Tạo symbolic link cho storage:
+**5. Create the storage symlink**
 
 ```bash
 php artisan storage:link
 ```
 
-Khởi động development server:
+**6. Start the development servers**
 
 ```bash
+# Laravel application server
 php artisan serve
+
+# Vite asset bundler (development)
+npm run dev
 ```
 
-Khởi động vite server:
+The app will be available at `http://localhost:8000`.
 
-```bash
-npm run build 
-```
+For production builds, run `npm run build` instead of `npm run dev`.
 
-Khởi chạy vite trên môi trường dev:
+---
 
-```bash
-npm run dev 
-```
+## Configuration
 
-Hệ thống sẽ chạy tại `http://localhost:8000`
-Hệ thống chạy vite tại `http://localhost:5173`
+### Google OAuth (Optional)
 
-## Cấu hình Google OAuth (Tùy chọn)
-
-Để sử dụng tính năng đăng nhập Google, cập nhật thông tin trong `.env`:
+To enable Sign in with Google, create OAuth credentials in the [Google Cloud Console](https://console.cloud.google.com/) and add the following to your `.env`:
 
 ```env
 GOOGLE_CLIENT_ID=your_google_client_id
@@ -114,122 +195,55 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/callback
 ```
 
-## Giao diện
+---
 
-<p align="center">
-  <img src="screenshots/dashboard.png" width="800" alt="Dashboard">
-  <br>
-  <em>Dashboard với thống kê và biểu đồ tổng quan</em>
-</p>
+## Database Schema
 
-<p align="center">
-  <img src="screenshots/transactions.png" width="800" alt="Transactions">
-  <br>
-  <em>Quản lý giao dịch với bộ lọc nâng cao</em>
-</p>
+Monexa uses four core tables:
 
-<p align="center">
-  <img src="screenshots/wallets.png" width="800" alt="Wallets">
-  <br>
-  <em>Theo dõi ngân sách và tiến độ chi tiêu</em>
-</p>
+| Table | Purpose |
+|---|---|
+| `users` | Registered user accounts |
+| `categories` | User-defined income and expense categories |
+| `wallets` | Budget definitions with limits and balances |
+| `transactions` | Individual income and expense records |
 
-<p align="center">
-  <img src="screenshots/categories.png" width="800" alt="Categories">
-  <br>
-  <em>Quản lý danh mục thu chi</em>
-</p>
+Full migration files are available in `database/migrations/`.
 
-## Tính năng chính
+---
 
-### 🔐 Xác thực & Bảo mật
-- Đăng ký/Đăng nhập với validation
-- Đăng nhập qua Google OAuth
-- Quản lý profile và đổi mật khẩu
-- Bảo mật với middleware
+## Contributing
 
-### 💸 Quản lý giao dịch
-- CRUD giao dịch thu/chi đầy đủ
-- Phân loại theo danh mục
-- Lọc theo nhiều tiêu chí
-- Phân trang và sắp xếp
-- Tích hợp với ngân sách
+Contributions are welcome. To get started:
 
-### 💰 Quản lý ngân sách
-- Tạo ngân sách cho từng danh mục
-- Cập nhật số dư tự động
-- Cảnh báo khi sắp vượt mức
-- Progress bar trực quan
+1. Fork this repository
+2. Create a feature branch: `git checkout -b feature/your-feature-name`
+3. Commit your changes: `git commit -m 'Add: short description of change'`
+4. Push to your branch: `git push origin feature/your-feature-name`
+5. Open a Pull Request against `main`
 
-### 📊 Dashboard & Báo cáo
-- Thống kê tổng quan
-- Line Chart thu chi theo tháng
-- Pie Chart phân bổ chi tiêu
-- Top danh mục chi tiêu
-- Giao dịch gần đây
+Please make sure your code passes existing tests and follows the project's coding style before submitting.
 
-### 🏷️ Quản lý danh mục
-- Tạo danh mục thu/chi
-- Chọn icon tùy chỉnh
-- Kích hoạt/Vô hiệu hóa
+---
 
-## Cấu trúc Database
+## Security
 
-Monexa sử dụng 4 bảng chính:
+If you discover a security vulnerability, please **do not** open a public GitHub issue. Instead, send a responsible disclosure email to [security@monexa.com](mailto:security@monexa.com). All reports will be reviewed and addressed promptly.
 
-- **users** - Thông tin người dùng
-- **categories** - Danh mục thu chi
-- **wallets** - Ngân sách
-- **transactions** - Giao dịch
+---
 
-Chi tiết schema có thể xem trong `database/migrations/`
+## License
 
-## Công nghệ sử dụng
-
-Monexa được xây dựng với:
-
-- **[Laravel 10.x](https://laravel.com)** - PHP Framework mạnh mẽ
-- **[Chart.js](https://www.chartjs.org/)** - Biểu đồ JavaScript
-- **[Laravel Socialite](https://github.com/laravel/socialite)** - OAuth authentication
-- **[MySQL](https://www.mysql.com/)** - Hệ quản trị cơ sở dữ liệu
-
-## Đóng góp
-
-Cảm ơn bạn đã quan tâm đến việc đóng góp cho Monexa! Để đóng góp:
-
-1. Fork repository này
-2. Tạo branch mới (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Mở Pull Request
-
-## Quy tắc ứng xử
-
-Để đảm bảo cộng đồng Monexa thân thiện với tất cả mọi người, vui lòng xem xét và tuân thủ [Quy tắc ứng xử](CODE_OF_CONDUCT.md).
-
-## Lỗ hổng bảo mật
-
-Nếu bạn phát hiện lỗ hổng bảo mật trong Monexa, vui lòng gửi email đến [security@monexa.com](mailto:security@monexa.com). Tất cả các lỗ hổng bảo mật sẽ được xử lý kịp thời.
-
-## Tác giả
-
-**Hung Manh**
-
-- GitHub: [@Manhung](https://github.com/scoppy9201)
-- Email: Buimanhhung3105@gmail.com
-
-## Giấy phép
-
-Monexa là phần mềm mã nguồn mở được cấp phép theo [Giấy phép MIT](https://opensource.org/licenses/MIT).
+Monexa is open-source software licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
 
 <p align="center">
-  Made with ❤️ by Hung Manh
+  Built by <a href="https://github.com/scoppy9201"><strong>Hung Manh</strong></a> · <a href="mailto:Buimanhhung3105@gmail.com">Buimanhhung3105@gmail.com</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/yourusername/monexa/stargazers">⭐ Star</a> •
-  <a href="https://github.com/yourusername/monexa/issues">🐛 Report Bug</a> •
-  <a href="https://github.com/yourusername/monexa/issues">✨ Request Feature</a>
+  <a href="https://github.com/scoppy9201/monexa/stargazers">⭐ Star this project</a> ·
+  <a href="https://github.com/scoppy9201/monexa/issues">🐛 Report a bug</a> ·
+  <a href="https://github.com/scoppy9201/monexa/issues">✨ Request a feature</a>
 </p>
