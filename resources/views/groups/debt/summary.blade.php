@@ -67,13 +67,6 @@ body.dark .fc-name { color:#e5e7eb; }
 .fc-arrow { font-size:22px;color:var(--danger); }
 .fc-amount { font-size:13px;font-weight:800;color:var(--danger); }
 
-.fc-settle-btn {
-    display:block;margin-top:10px;width:100%;
-    padding:7px;border-radius:8px;font-size:12px;font-weight:700;border:none;cursor:pointer;
-    background:rgba(16,185,129,0.1);color:var(--success);transition:background .2s;
-}
-.fc-settle-btn:hover { background:rgba(16,185,129,0.2); }
-
 /* Cleared state */
 .cleared-box {
     text-align: center;
@@ -111,6 +104,7 @@ body.dark .debt-table tbody tr:hover { background:rgba(255,255,255,0.02); }
 .btn-primary:hover { opacity:.88; }
 .btn-sm { padding:6px 12px;font-size:12px; }
 .btn-success { background:linear-gradient(135deg,var(--success),#059669); }
+.btn-danger  { background:linear-gradient(135deg,var(--danger),#dc2626); }
 .btn-ghost { display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;background:#f3f4f6;border:2px solid #e5e7eb;color:#6b7280;font-size:12px;font-weight:600;cursor:pointer;transition:background .2s;text-decoration:none; }
 .btn-ghost:hover { background:#e5e7eb; }
 
@@ -139,13 +133,6 @@ body.dark .flow-card:hover {
 }
 body.dark .fc-name { color: #e5e7eb; }
 
-/* Settle button inside flow card */
-body.dark .fc-settle-btn {
-    background: rgba(16,185,129,0.12);
-    color: #6ee7b7;
-}
-body.dark .fc-settle-btn:hover { background: rgba(16,185,129,0.2); }
-
 /* Cleared box */
 body.dark .cleared-title { color: #e5e7eb; }
 body.dark .cleared-sub { color: #6b7280; }
@@ -167,7 +154,7 @@ body.dark .debt-table td {
 }
 body.dark .debt-table tbody tr:hover { background: rgba(255,255,255,0.02); }
 
-/* Person names in debt table (hardcoded inline color:#1f2937) */
+/* Person names in debt table */
 body.dark .debt-persons strong { color: #e5e7eb !important; }
 body.dark .debt-arrow-sm { color: #4b5563; }
 
@@ -189,15 +176,31 @@ body.dark div[style*="color:#9ca3af"] { color: #6b7280; }
 </div>
 
 <div class="top-bar">
-    <div class="top-bar-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><rect x="3" y="11" width="3" height="6" rx="0.5"/><rect x="8.5" y="7" width="3" height="10" rx="0.5"/><rect x="14" y="4" width="3" height="13" rx="0.5"/><path d="M2 18h16"/></svg> Tổng kết nợ · {{ $group->ten_nhom }}</div>
+    <div class="top-bar-title">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><rect x="3" y="11" width="3" height="6" rx="0.5"/><rect x="8.5" y="7" width="3" height="10" rx="0.5"/><rect x="14" y="4" width="3" height="13" rx="0.5"/><path d="M2 18h16"/></svg>
+        Tổng kết nợ · {{ $group->ten_nhom }}
+    </div>
     <div style="display:flex;gap:8px">
-        <a href="{{ route('groups.expense.index', $group) }}" class="btn-ghost"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M12 4L6 10l6 6"/></svg> Chia khoản chi</a>
+        <a href="{{ route('groups.expense.index', $group) }}" class="btn-ghost">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M12 4L6 10l6 6"/></svg>
+            Chia khoản chi
+        </a>
         <a href="{{ route('groups.show', $group) }}" class="btn-ghost">Nhóm</a>
     </div>
 </div>
 
-@if(session('success'))<div class="alert alert-success"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M4 10l4.5 4.5L16 6"/></svg> {{ session('success') }}</div>@endif
-@if(session('error'))<div class="alert alert-error"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M10 2L2 17h16z"/><path d="M10 8v4M10 14.5v.5"/></svg> {{ session('error') }}</div>@endif
+@if(session('success'))
+<div class="alert alert-success">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M4 10l4.5 4.5L16 6"/></svg>
+    {{ session('success') }}
+</div>
+@endif
+@if(session('error'))
+<div class="alert alert-error">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M10 2L2 17h16z"/><path d="M10 8v4M10 14.5v.5"/></svg>
+    {{ session('error') }}
+</div>
+@endif
 
 {{-- Balance overview --}}
 <div class="balance-row">
@@ -205,9 +208,9 @@ body.dark div[style*="color:#9ca3af"] { color: #6b7280; }
     @php
         $member = $members[$userId] ?? null;
         if (!$member) continue;
-        $colors=['#4a90e2','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
-        $c = $colors[$loop->index % count($colors)];
-        $cls = $balance > 1 ? 'pos' : ($balance < -1 ? 'neg' : 'zero');
+        $colors = ['#4a90e2','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
+        $c      = $colors[$loop->index % count($colors)];
+        $cls    = $balance > 1 ? 'pos' : ($balance < -1 ? 'neg' : 'zero');
         $prefix = $balance > 1 ? '+' : '';
     @endphp
     <div class="bal-card {{ $cls }}">
@@ -224,10 +227,15 @@ body.dark div[style*="color:#9ca3af"] { color: #6b7280; }
         @endif
         <div class="bal-name">{{ $member->user->name }}</div>
         @if(abs($balance) <= 1)
-        <div class="bal-val zero">Không nợ</div>
+            <div class="bal-val zero">Không nợ</div>
         @else
-        <div class="bal-val {{ $cls }}">{{ $prefix }}{{ number_format(abs($balance)) }}đ</div>
-        <div class="bal-label">{!! $balance > 1 ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M12 4L6 10l6 6"/></svg> Đang được nợ' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M8 4l6 6-6 6"/></svg> Đang nợ người khác' !!}</div>
+            <div class="bal-val {{ $cls }}">{{ $prefix }}{{ number_format(abs($balance)) }}đ</div>
+            <div class="bal-label">
+                {!! $balance > 1
+                    ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M12 4L6 10l6 6"/></svg> Đang được nợ'
+                    : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M8 4l6 6-6 6"/></svg> Đang nợ người khác'
+                !!}
+            </div>
         @endif
     </div>
     @endforeach
@@ -236,21 +244,26 @@ body.dark div[style*="color:#9ca3af"] { color: #6b7280; }
 {{-- Simplified debts --}}
 <div class="section-card">
     <div class="sc-hdr" style="background:rgba(239,68,68,0.04)">
-        <div class="sc-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M5 8h10M5 12h10M8 4l-2 12M12 4l-2 12"/></svg> Giao dịch tối giản cần thực hiện</div>
+        <div class="sc-title">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M5 8h10M5 12h10M8 4l-2 12M12 4l-2 12"/></svg>
+            Giao dịch tối giản cần thực hiện
+        </div>
         <div style="font-size:12px;color:#9ca3af">Thuật toán rút gọn số giao dịch xuống mức tối thiểu</div>
     </div>
 
     @if(count($simplified) === 0)
     <div class="cleared-box">
-        <div class="cleared-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M4 16L9 4l7 7z"/><path d="M9 4l2 2M14 8l2 2"/><circle cx="15" cy="5" r="1" fill="currentColor" stroke="none"/><circle cx="5" cy="4" r="0.8" fill="currentColor" stroke="none"/></svg></div>
+        <div class="cleared-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M4 16L9 4l7 7z"/><path d="M9 4l2 2M14 8l2 2"/><circle cx="15" cy="5" r="1" fill="currentColor" stroke="none"/><circle cx="5" cy="4" r="0.8" fill="currentColor" stroke="none"/></svg>
+        </div>
         <div class="cleared-title">Không có ai nợ ai!</div>
         <div class="cleared-sub">Tất cả các khoản nợ đã được cân bằng hoặc thanh toán</div>
     </div>
     @else
-    <div class="flows-grid" style="justify-content:center;align-items:center;">
+    <div class="flows-grid">
         @foreach($simplified as $flow)
         @php
-            $colors=['#4a90e2','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
+            $colors     = ['#4a90e2','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
             $fromMember = $members[$flow['from']] ?? null;
             $toMember   = $members[$flow['to']] ?? null;
             $cf = $colors[array_search($flow['from'], array_keys($members->toArray())) % count($colors)];
@@ -273,7 +286,9 @@ body.dark div[style*="color:#9ca3af"] { color: #6b7280; }
                 <div style="font-size:11px;color:var(--danger);font-weight:600">nợ</div>
             </div>
             <div class="fc-mid">
-                <div class="fc-arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M8 4l6 6-6 6"/></svg></div>
+                <div class="fc-arrow">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M8 4l6 6-6 6"/></svg>
+                </div>
                 <div class="fc-amount">{{ number_format($flow['amount']) }}đ</div>
             </div>
             <div class="fc-person">
@@ -300,15 +315,23 @@ body.dark div[style*="color:#9ca3af"] { color: #6b7280; }
 {{-- Raw list --}}
 <div class="section-card">
     <div class="sc-hdr">
-        <div class="sc-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M6 2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M7 7h6M7 10h6M7 13h4"/></svg> Danh sách nợ gốc</div>
+        <div class="sc-title">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M6 2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M7 7h6M7 10h6M7 13h4"/></svg>
+            Danh sách nợ gốc
+        </div>
     </div>
+
     @if($rawList->count() > 0)
     <div style="overflow-x:auto">
         <table class="debt-table">
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Người nợ <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M8 4l6 6-6 6"/></svg> Chủ nợ</th>
+                    <th>
+                        Người nợ
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M8 4l6 6-6 6"/></svg>
+                        Chủ nợ
+                    </th>
                     <th>Số tiền</th>
                     <th>Ghi chú</th>
                     <th>Trạng thái</th>
@@ -317,13 +340,15 @@ body.dark div[style*="color:#9ca3af"] { color: #6b7280; }
             </thead>
             <tbody>
                 @foreach($rawList as $i => $d)
+                @php
+                    $colors = ['#4a90e2','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
+                    $isCreditor = $currentUserId == $d['chu_no_id'];
+                    $isDebtor   = $currentUserId == $d['nguoi_no_id'];
+                @endphp
                 <tr>
-                    <td>{{ $i+1 }}</td>
+                    <td>{{ $i + 1 }}</td>
                     <td>
                         <div class="debt-persons">
-                            @php
-                                $colors=['#4a90e2','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
-                            @endphp
                             @if($d['nguoi_no_avatar'] ?? null)
                                 @if(str_starts_with($d['nguoi_no_avatar'], 'http'))
                                     <img src="{{ $d['nguoi_no_avatar'] }}" class="debt-av-sm" style="object-fit:cover;" alt="">
@@ -331,12 +356,14 @@ body.dark div[style*="color:#9ca3af"] { color: #6b7280; }
                                     <img src="{{ asset('storage/' . $d['nguoi_no_avatar']) }}" class="debt-av-sm" style="object-fit:cover;" alt="">
                                 @endif
                             @else
-                                <div class="debt-av-sm" style="background:{{ $colors[$i%count($colors)] }}">
+                                <div class="debt-av-sm" style="background:{{ $colors[$i % count($colors)] }}">
                                     {{ strtoupper(substr($d['nguoi_no'], 0, 2)) }}
                                 </div>
                             @endif
                             <strong style="font-size:13px;color:#1f2937">{{ $d['nguoi_no'] }}</strong>
-                            <span class="debt-arrow-sm"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M8 4l6 6-6 6"/></svg></span>
+                            <span class="debt-arrow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M8 4l6 6-6 6"/></svg>
+                            </span>
                             @if($d['chu_no_avatar'] ?? null)
                                 @if(str_starts_with($d['chu_no_avatar'], 'http'))
                                     <img src="{{ $d['chu_no_avatar'] }}" class="debt-av-sm" style="object-fit:cover;" alt="">
@@ -344,7 +371,7 @@ body.dark div[style*="color:#9ca3af"] { color: #6b7280; }
                                     <img src="{{ asset('storage/' . $d['chu_no_avatar']) }}" class="debt-av-sm" style="object-fit:cover;" alt="">
                                 @endif
                             @else
-                                <div class="debt-av-sm" style="background:{{ $colors[($i+1)%count($colors)] }}">
+                                <div class="debt-av-sm" style="background:{{ $colors[($i + 1) % count($colors)] }}">
                                     {{ strtoupper(substr($d['chu_no'], 0, 2)) }}
                                 </div>
                             @endif
@@ -353,19 +380,46 @@ body.dark div[style*="color:#9ca3af"] { color: #6b7280; }
                     </td>
                     <td><strong style="color:var(--danger)">{{ number_format($d['so_tien']) }}đ</strong></td>
                     <td style="color:#6b7280">{{ $d['ghi_chu'] ?? '—' }}</td>
-                    <td><span class="st-badge st-{{ $d['trang_thai'] }}">{!! $d['trang_thai']==='settled'?'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M4 10l4.5 4.5L16 6"/></svg> Đã trả':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4.5l3 1.5"/></svg> Chờ trả' !!}</span></td>
+                    <td>
+                        <span class="st-badge st-{{ $d['trang_thai'] }}">
+                            {!! $d['trang_thai'] === 'settled'
+                                ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M4 10l4.5 4.5L16 6"/></svg> Đã trả'
+                                : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4.5l3 1.5"/></svg> Chờ trả'
+                            !!}
+                        </span>
+                    </td>
                     <td>
                         @if($d['trang_thai'] !== 'settled')
-                        <form action="{{ route('groups.debt.settle', [$group, $d['id']]) }}" method="POST" style="display:inline" class="js-rest">
-                            @csrf
-                            <input type="hidden" name="ghi_vao_so" value="1">
-                            <button type="submit" class="btn-primary btn-success btn-sm"
-                                onclick="return confirm('Đánh dấu đã thanh toán và ghi vào sổ?')">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" stroke-width="2.5"><path d="M4 10l4.5 4.5L16 6"/></svg> Đã trả
-                            </button>
-                        </form>
+                            @if($isCreditor)
+                                {{-- Chủ nợ: xác nhận đã nhận tiền, KHÔNG tạo giao dịch --}}
+                                <form action="{{ route('groups.debt.settle', [$group, $d['id']]) }}" method="POST" style="display:inline">
+                                    @csrf
+                                    <input type="hidden" name="ghi_vao_so" value="0">
+                                    <button type="submit"
+                                        class="btn-primary btn-success btn-sm"
+                                        onclick="return confirm('Xác nhận đã nhận tiền từ {{ $d['nguoi_no'] }}?')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M4 10l4.5 4.5L16 6"/></svg>
+                                        Đã nhận
+                                    </button>
+                                </form>
+                            @elseif($isDebtor)
+                                {{-- Người nợ: trả nợ và ghi vào sổ chi tiêu --}}
+                                <form action="{{ route('groups.debt.settle', [$group, $d['id']]) }}" method="POST" style="display:inline">
+                                    @csrf
+                                    <input type="hidden" name="ghi_vao_so" value="1">
+                                    <button type="submit"
+                                        class="btn-primary btn-danger btn-sm"
+                                        onclick="return confirm('Xác nhận trả nợ cho {{ $d['chu_no'] }} và ghi vào sổ chi tiêu?')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M10 2v10M6 14l4 4 4-4"/><path d="M4 18h12"/></svg>
+                                        Trả nợ
+                                    </button>
+                                </form>
+                            @else
+                                {{-- Không liên quan đến khoản nợ này --}}
+                                <span style="font-size:12px;color:#9ca3af">—</span>
+                            @endif
                         @else
-                        <span style="font-size:12px;color:#9ca3af">Hoàn tất</span>
+                            <span style="font-size:12px;color:#9ca3af">Hoàn tất</span>
                         @endif
                     </td>
                 </tr>
@@ -375,7 +429,9 @@ body.dark div[style*="color:#9ca3af"] { color: #6b7280; }
     </div>
     @else
     <div style="text-align:center;padding:50px;color:#9ca3af">
-        <div style="font-size:40px;margin-bottom:12px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0" ><path d="M6 2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M7 7h6M7 10h6M7 13h4"/></svg></div>
+        <div style="font-size:40px;margin-bottom:12px">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;flex-shrink:0"><path d="M6 2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M7 7h6M7 10h6M7 13h4"/></svg>
+        </div>
         <div style="font-weight:600">Chưa có khoản nợ nào</div>
     </div>
     @endif
@@ -384,11 +440,13 @@ body.dark div[style*="color:#9ca3af"] { color: #6b7280; }
 <script>
 setTimeout(() => {
     document.querySelectorAll('.alert').forEach(a => {
-        a.style.transition='opacity .3s'; a.style.opacity='0';
-        setTimeout(()=>a.remove(),300);
+        a.style.transition = 'opacity .3s';
+        a.style.opacity = '0';
+        setTimeout(() => a.remove(), 300);
     });
 }, 4500);
 </script>
+
 <script>
 async function refreshDebtSummary() {
     try {
@@ -398,72 +456,140 @@ async function refreshDebtSummary() {
         const j = await res.json();
         if (!j) return;
 
-        // update balances
+        const currentUserId = {{ $currentUserId }};
+
         if (j.balances) {
             const balRow = document.querySelector('.balance-row');
             if (balRow) {
                 balRow.innerHTML = Object.entries(j.balances).map(([uid, bal], i) => {
-                    const member = (j.members || []).find(m => m.user_id == uid) || {};
-                    const initials = (member.name||'').substr(0,2).toUpperCase();
-                    const cls = bal > 1 ? 'pos' : (bal < -1 ? 'neg' : 'zero');
-                    const prefix = bal > 1 ? '+' : '';
-                    const avatar = member.avatar ? (member.avatar.startsWith('http') ? member.avatar : '/storage/' + member.avatar) : null;
+                    const member   = (j.members || []).find(m => m.user_id == uid) || {};
+                    const initials = (member.name || '').substr(0, 2).toUpperCase();
+                    const cls      = bal > 1 ? 'pos' : (bal < -1 ? 'neg' : 'zero');
+                    const prefix   = bal > 1 ? '+' : '';
+                    const avatar   = member.avatar
+                        ? (member.avatar.startsWith('http') ? member.avatar : '/storage/' + member.avatar)
+                        : null;
                     return `
                         <div class="bal-card ${cls}">
-                            ${avatar ? `<img src="${avatar}" class="bal-av" style="object-fit:cover;" alt="">` : `<div class="bal-av" style="background:linear-gradient(135deg,#4a90e2,#4a90e2cc)">${initials}</div>`}
+                            ${avatar
+                                ? `<img src="${avatar}" class="bal-av" style="object-fit:cover;" alt="">`
+                                : `<div class="bal-av" style="background:linear-gradient(135deg,#4a90e2,#4a90e2cc)">${initials}</div>`
+                            }
                             <div class="bal-name">${escapeHtml(member.name || '—')}</div>
-                            ${Math.abs(bal) <= 1 ? `<div class="bal-val zero">Không nợ</div>` : `<div class="bal-val ${cls}">${prefix}${Number(Math.abs(bal)).toLocaleString('vi-VN')}đ</div>`}
+                            ${Math.abs(bal) <= 1
+                                ? `<div class="bal-val zero">Không nợ</div>`
+                                : `<div class="bal-val ${cls}">${prefix}${Number(Math.abs(bal)).toLocaleString('vi-VN')}đ</div>`
+                            }
                         </div>`;
                 }).join('');
             }
         }
 
-        // simplified flows
         if (j.simplified) {
             const grid = document.querySelector('.flows-grid');
             if (grid) {
                 if (j.simplified.length === 0) {
-                    grid.innerHTML = '<div class="cleared-box"><div class="cleared-icon">✔</div><div class="cleared-title">Không có ai nợ ai!</div><div class="cleared-sub">Tất cả các khoản nợ đã được cân bằng hoặc thanh toán</div></div>';
+                    grid.innerHTML = '<div class="cleared-box"><div class="cleared-title">Không có ai nợ ai!</div><div class="cleared-sub">Tất cả các khoản nợ đã được cân bằng hoặc thanh toán</div></div>';
                 } else {
                     grid.innerHTML = j.simplified.map(flow => `
                         <div class="flow-card">
-                            <div class="fc-person"><div class="fc-av" style="background:linear-gradient(135deg,#4a90e2,#4a90e2cc)">${(flow.from_name||'').substr(0,2).toUpperCase()}</div><div class="fc-name">${escapeHtml(flow.from_name)}</div><div style="font-size:11px;color:var(--danger);font-weight:600">nợ</div></div>
-                            <div class="fc-mid"><div class="fc-arrow">→</div><div class="fc-amount">${Number(flow.amount).toLocaleString('vi-VN')}đ</div></div>
-                            <div class="fc-person"><div class="fc-av" style="background:linear-gradient(135deg,#10b981,#10b981cc)">${(flow.to_name||'').substr(0,2).toUpperCase()}</div><div class="fc-name">${escapeHtml(flow.to_name)}</div><div style="font-size:11px;color:var(--success);font-weight:600">nhận</div></div>
+                            <div class="fc-person">
+                                <div class="fc-av" style="background:linear-gradient(135deg,#4a90e2,#4a90e2cc)">${(flow.from_name || '').substr(0, 2).toUpperCase()}</div>
+                                <div class="fc-name">${escapeHtml(flow.from_name)}</div>
+                                <div style="font-size:11px;color:var(--danger);font-weight:600">nợ</div>
+                            </div>
+                            <div class="fc-mid">
+                                <div class="fc-arrow">→</div>
+                                <div class="fc-amount">${Number(flow.amount).toLocaleString('vi-VN')}đ</div>
+                            </div>
+                            <div class="fc-person">
+                                <div class="fc-av" style="background:linear-gradient(135deg,#10b981,#10b981cc)">${(flow.to_name || '').substr(0, 2).toUpperCase()}</div>
+                                <div class="fc-name">${escapeHtml(flow.to_name)}</div>
+                                <div style="font-size:11px;color:var(--success);font-weight:600">nhận</div>
+                            </div>
                         </div>
                     `).join('');
                 }
             }
         }
 
-        // rawList table
         if (j.rawList) {
             const tbody = document.querySelector('.debt-table tbody');
             if (tbody) {
-                tbody.innerHTML = j.rawList.map((d, i) => `
-                    <tr>
-                        <td>${i+1}</td>
-                        <td>
-                            <div class="debt-persons">
-                                ${d.nguoi_no_avatar ? `<img src="${(d.nguoi_no_avatar.startsWith('http')?d.nguoi_no_avatar:'/storage/'+d.nguoi_no_avatar)}" class="debt-av-sm" style="object-fit:cover;">` : `<div class="debt-av-sm" style="background:#4a90e2">${(d.nguoi_no||'').substr(0,2).toUpperCase()}</div>`}
-                                <strong style="font-size:13px;color:#1f2937">${escapeHtml(d.nguoi_no)}</strong>
-                                <span class="debt-arrow-sm">→</span>
-                                ${d.chu_no_avatar ? `<img src="${(d.chu_no_avatar.startsWith('http')?d.chu_no_avatar:'/storage/'+d.chu_no_avatar)}" class="debt-av-sm" style="object-fit:cover;">` : `<div class="debt-av-sm" style="background:#10b981">${(d.chu_no||'').substr(0,2).toUpperCase()}</div>`}
-                                <strong style="font-size:13px;color:#1f2937">${escapeHtml(d.chu_no)}</strong>
-                            </div>
-                        </td>
-                        <td><strong style="color:var(--danger)">${Number(d.so_tien).toLocaleString('vi-VN')}đ</strong></td>
-                        <td style="color:#6b7280">${escapeHtml(d.ghi_chu || '—')}</td>
-                        <td><span class="st-badge st-${d.trang_thai}">${escapeHtml(d.trang_thai)}</span></td>
-                        <td>${d.trang_thai !== 'settled' ? `<button class="btn-primary btn-success btn-sm">Đã trả</button>` : '<span style="font-size:12px;color:#9ca3af">Hoàn tất</span>'}</td>
-                    </tr>
-                `).join('');
+                tbody.innerHTML = j.rawList.map((d, i) => {
+                    const isCreditor = currentUserId == d.chu_no_id;
+                    const isDebtor   = currentUserId == d.nguoi_no_id;
+
+                    let actionHtml;
+                    if (d.trang_thai !== 'settled') {
+                        if (isCreditor) {
+                            actionHtml = `
+                                <form action="/groups/${GROUP_ID}/debts/${d.id}/settle" method="POST" style="display:inline">
+                                    <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">
+                                    <input type="hidden" name="ghi_vao_so" value="0">
+                                    <button type="submit" class="btn-primary btn-success btn-sm"
+                                        onclick="return confirm('Xác nhận đã nhận tiền từ ${escapeHtml(d.nguoi_no)}?')">
+                                        ✓ Đã nhận
+                                    </button>
+                                </form>`;
+                        } else if (isDebtor) {
+                            actionHtml = `
+                                <form action="/groups/${GROUP_ID}/debts/${d.id}/settle" method="POST" style="display:inline">
+                                    <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">
+                                    <input type="hidden" name="ghi_vao_so" value="1">
+                                    <button type="submit" class="btn-primary btn-danger btn-sm"
+                                        onclick="return confirm('Xác nhận trả nợ cho ${escapeHtml(d.chu_no)} và ghi vào sổ chi tiêu?')">
+                                        ↓ Trả nợ
+                                    </button>
+                                </form>`;
+                        } else {
+                            actionHtml = `<span style="font-size:12px;color:#9ca3af">—</span>`;
+                        }
+                    } else {
+                        actionHtml = `<span style="font-size:12px;color:#9ca3af">Hoàn tất</span>`;
+                    }
+
+                    const nguoiNoAvatar = d.nguoi_no_avatar
+                        ? `<img src="${d.nguoi_no_avatar.startsWith('http') ? d.nguoi_no_avatar : '/storage/' + d.nguoi_no_avatar}" class="debt-av-sm" style="object-fit:cover;" alt="">`
+                        : `<div class="debt-av-sm" style="background:#4a90e2">${(d.nguoi_no || '').substr(0, 2).toUpperCase()}</div>`;
+
+                    const chuNoAvatar = d.chu_no_avatar
+                        ? `<img src="${d.chu_no_avatar.startsWith('http') ? d.chu_no_avatar : '/storage/' + d.chu_no_avatar}" class="debt-av-sm" style="object-fit:cover;" alt="">`
+                        : `<div class="debt-av-sm" style="background:#10b981">${(d.chu_no || '').substr(0, 2).toUpperCase()}</div>`;
+
+                    return `
+                        <tr>
+                            <td>${i + 1}</td>
+                            <td>
+                                <div class="debt-persons">
+                                    ${nguoiNoAvatar}
+                                    <strong style="font-size:13px;color:#1f2937">${escapeHtml(d.nguoi_no)}</strong>
+                                    <span class="debt-arrow-sm">→</span>
+                                    ${chuNoAvatar}
+                                    <strong style="font-size:13px;color:#1f2937">${escapeHtml(d.chu_no)}</strong>
+                                </div>
+                            </td>
+                            <td><strong style="color:var(--danger)">${Number(d.so_tien).toLocaleString('vi-VN')}đ</strong></td>
+                            <td style="color:#6b7280">${escapeHtml(d.ghi_chu || '—')}</td>
+                            <td><span class="st-badge st-${d.trang_thai}">${escapeHtml(d.trang_thai)}</span></td>
+                            <td>${actionHtml}</td>
+                        </tr>`;
+                }).join('');
             }
         }
-    } catch (e) {}
+    } catch (e) {
+        console.error('refreshDebtSummary error:', e);
+    }
 }
 
-function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+function escapeHtml(s) {
+    return String(s || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
 
 document.addEventListener('DOMContentLoaded', () => refreshDebtSummary());
 </script>

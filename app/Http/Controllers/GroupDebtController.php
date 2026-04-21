@@ -69,8 +69,8 @@ class GroupDebtController extends Controller
 
             if (request()->wantsJson()) {
                 return response()->json([
-                    'message' => 'Đã ghi nhận khoản nợ.',
-                    'debt_id' => $debt->id,
+                    'message'  => 'Đã ghi nhận khoản nợ.',
+                    'debt_id'  => $debt->id,
                     'redirect' => route('groups.debt.summary', $group),
                 ], 201);
             }
@@ -102,13 +102,11 @@ class GroupDebtController extends Controller
         $group->load('activeMembers.user');
         $members = $group->activeMembers->keyBy('user_id');
 
-        // Lấy tất cả nợ confirmed (chưa settled) trong nhóm
         $debts = GroupExpenseDebt::where('group_id', $group->id)
             ->where('trang_thai', 'confirmed')
             ->get();
 
         // ── Bước 1: Tính net balance từng cặp ─────────────
-        // rawDebts[A][B] = tổng A nợ B
         $rawDebts = [];
         foreach ($debts as $d) {
             $from = $d->nguoi_no_id;
@@ -117,7 +115,6 @@ class GroupDebtController extends Controller
         }
 
         // ── Bước 2: Tính net balance mỗi người ────────────
-        // balance > 0 = đang được nợ, balance < 0 = đang nợ
         $balances = [];
         foreach ($members as $userId => $member) {
             $balances[$userId] = 0;
@@ -125,7 +122,6 @@ class GroupDebtController extends Controller
 
         foreach ($rawDebts as $from => $tos) {
             foreach ($tos as $to => $amount) {
-                // Trừ qua lại để tính net
                 $net = $amount - ($rawDebts[$to][$from] ?? 0);
                 if ($net > 0) {
                     $balances[$from] = ($balances[$from] ?? 0) - $net;
@@ -137,37 +133,40 @@ class GroupDebtController extends Controller
         // ── Bước 3: Debt Simplification ───────────────────
         $simplified = $this->simplifyDebts($balances, $members);
 
-        // ── Tổng hợp để hiển thị ──────────────────────────
-        // Nợ gốc (raw) để hiển thị lịch sử
+        // ── Tổng hợp rawList để hiển thị ──────────────────
         $rawList = $debts->map(fn($d) => [
-            'id'               => $d->id,
-            'nguoi_no'         => $members[$d->nguoi_no_id]?->user?->name ?? 'Không rõ',
-            'chu_no'           => $members[$d->chu_no_id]?->user?->name ?? 'Không rõ',
-            // Thêm avatar để view render đồng bộ với profile
-            'nguoi_no_avatar'  => $members[$d->nguoi_no_id]?->user?->avatar ?? null,
-            'chu_no_avatar'    => $members[$d->chu_no_id]?->user?->avatar ?? null,
-            'so_tien'          => $d->so_tien,
-            'ghi_chu'          => $d->ghi_chu,
-            'trang_thai'       => $d->trang_thai,
-            'created_at'       => $d->created_at,
+            'id'              => $d->id,
+            'chu_no_id'       => $d->chu_no_id,
+            'nguoi_no_id'     => $d->nguoi_no_id,
+            'nguoi_no'        => $members[$d->nguoi_no_id]?->user?->name ?? 'Không rõ',
+            'chu_no'          => $members[$d->chu_no_id]?->user?->name ?? 'Không rõ',
+            'nguoi_no_avatar' => $members[$d->nguoi_no_id]?->user?->avatar ?? null,
+            'chu_no_avatar'   => $members[$d->chu_no_id]?->user?->avatar ?? null,
+            'so_tien'         => $d->so_tien,
+            'ghi_chu'         => $d->ghi_chu,
+            'trang_thai'      => $d->trang_thai,
+            'created_at'      => $d->created_at,
         ]);
+
+        $currentUserId = Auth::id();
 
         if (request()->wantsJson()) {
             return response()->json([
-                'group' => $group,
-                'members' => $members->map(fn($m) => [
+                'group'      => $group,
+                'members'    => $members->map(fn($m) => [
                     'user_id' => $m->user_id,
-                    'name' => $m->user?->name ?? null,
-                    'avatar' => $m->user?->avatar ?? null,
+                    'name'    => $m->user?->name ?? null,
+                    'avatar'  => $m->user?->avatar ?? null,
                 ]),
-                'simplified' => $simplified,
-                'rawList' => $rawList,
-                'balances' => $balances,
+                'simplified'    => $simplified,
+                'rawList'       => $rawList,
+                'balances'      => $balances,
+                'currentUserId' => $currentUserId,
             ]);
         }
 
         return view('groups.debt.summary', compact(
-            'group', 'members', 'simplified', 'rawList', 'balances'
+            'group', 'members', 'simplified', 'rawList', 'balances', 'currentUserId'
         ));
     }
 
@@ -178,7 +177,6 @@ class GroupDebtController extends Controller
 
         $this->assertMember($group);
 
-        // Chỉ chủ nợ hoặc người nợ mới được settle
         abort_if(
             $debt->chu_no_id !== $userId && $debt->nguoi_no_id !== $userId,
             403,
@@ -192,7 +190,7 @@ class GroupDebtController extends Controller
         );
 
         $validated = $request->validate([
-            'ghi_vao_so' => 'boolean', // true = tạo Transaction, false = chỉ đánh dấu
+            'ghi_vao_so' => 'nullable|boolean',
         ]);
 
         DB::beginTransaction();
@@ -241,7 +239,10 @@ class GroupDebtController extends Controller
             GroupNotifier::debtSettled($debt->fresh());
 
             if (request()->wantsJson()) {
-                return response()->json(['message' => 'Đã đánh dấu khoản nợ là đã thanh toán.', 'redirect' => route('groups.debt.summary', $group)]);
+                return response()->json([
+                    'message'  => 'Đã đánh dấu khoản nợ là đã thanh toán.',
+                    'redirect' => route('groups.debt.summary', $group),
+                ]);
             }
 
             return redirect()->route('groups.debt.summary', $group)
@@ -257,16 +258,13 @@ class GroupDebtController extends Controller
         }
     }
 
-    // ── THUẬT TOÁN RÚT GỌN NỢ ─────────────────────────────
-    // Input:  balances[user_id] = net (dương = được nợ, âm = đang nợ)
-    // Output: mảng ['from' => id, 'to' => id, 'amount' => số tiền, 'from_name', 'to_name']
+    // ── THUẬT TOÁN RÚT GỌN NỢ (Greedy) ───────────────────
     private function simplifyDebts(array $balances, $members): array
     {
         $result = [];
 
-        // Tách thành 2 nhóm
-        $creditors = []; // đang được nợ (balance > 0)
-        $debtors   = []; // đang nợ      (balance < 0)
+        $creditors = [];
+        $debtors   = [];
 
         foreach ($balances as $userId => $balance) {
             if ($balance > 1) {
@@ -276,12 +274,11 @@ class GroupDebtController extends Controller
             }
         }
 
-        // Sắp xếp giảm dần để ghép cặp lớn nhất trước
         usort($creditors, fn($a, $b) => $b['amount'] <=> $a['amount']);
         usort($debtors,   fn($a, $b) => $b['amount'] <=> $a['amount']);
 
-        $i = 0; // index creditors
-        $j = 0; // index debtors
+        $i = 0;
+        $j = 0;
 
         while ($i < count($creditors) && $j < count($debtors)) {
             $credit = $creditors[$i]['amount'];
@@ -301,7 +298,6 @@ class GroupDebtController extends Controller
                 ];
             }
 
-            // Trừ đi phần đã xử lý
             $creditors[$i]['amount'] -= $amount;
             $debtors[$j]['amount']   -= $amount;
 
@@ -312,7 +308,7 @@ class GroupDebtController extends Controller
         return $result;
     }
 
-    // ── Tạo category tự động cho trả nợ ───────────────────
+    // ── Tạo category tự động ───────────────────────────────
     private function getOrCreateDebtCategory(int $userId): ?Category
     {
         $parent = Category::firstOrCreate(
@@ -340,7 +336,6 @@ class GroupDebtController extends Controller
     }
 
     // ── Helpers ────────────────────────────────────────────
-
     protected function assertMember(SplitGroup $group): SplitGroupMember
     {
         $member = SplitGroupMember::where('group_id', $group->id)

@@ -394,6 +394,7 @@ body.dark .section-card [style*="color:#ef4444"].section-title { color:#f87171 !
     if (window.__groupsShowInit) return;
     window.__groupsShowInit = true;
 
+    //lấy group_id và ktra xem có hợp lệ hay ko
     const pathParts = window.location.pathname.split('/');
     const GROUP_ID = pathParts[pathParts.indexOf('groups') + 1];
     if (!GROUP_ID || isNaN(GROUP_ID)) return;
@@ -406,13 +407,15 @@ body.dark .section-card [style*="color:#ef4444"].section-title { color:#f87171 !
         return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
     }
 
+    //chuẩn hóa cách gọi api
     function apiFetch(url, opts = {}) {
+        //gộp header
         const headers = Object.assign({
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': csrfToken(),
+            'Accept': 'application/json',//trả về json
+            'X-Requested-With': 'XMLHttpRequest',// báo ajax request
+            'X-CSRF-TOKEN': csrfToken(),//chống csrf
         }, opts.headers || {});
-        return fetch(url, { credentials: 'same-origin', ...opts, headers })
+        return fetch(url, { credentials: 'same-origin', ...opts, headers })//gửi cookie/session cùng domain
             .then(r => r.json().then(d => ({ ok: r.ok, data: d })));
     }
 
@@ -674,8 +677,10 @@ body.dark .section-card [style*="color:#ef4444"].section-title { color:#f87171 !
 
     // ── Bind events ────────────────────────────────────
     function bindPageEvents(group, laAdmin, hienSoDu, members) {
+        //mở form edit
         document.getElementById('btnOpenEdit')?.addEventListener('click', () => openEditModal(group));
 
+        //mở form xác nhận rời nhóm
         document.getElementById('btnLeaveGroup')?.addEventListener('click', () => {
             if (!confirm('Bạn chắc chắn muốn rời nhóm?')) return;
             apiFetch(`/api/v1/groups/${GROUP_ID}/members/leave`, { method: 'DELETE' })
@@ -733,6 +738,7 @@ body.dark .section-card [style*="color:#ef4444"].section-title { color:#f87171 !
                 });
         });
 
+
         document.getElementById('btnToggleInvite')?.addEventListener('click', function () {
             const box = document.getElementById('inviteBox');
             if (!box) return;
@@ -775,6 +781,7 @@ body.dark .section-card [style*="color:#ef4444"].section-title { color:#f87171 !
                 })
                 .catch(err => showToast({ type: 'error', title: 'Lỗi', message: err.message }));
         });
+
 
         document.getElementById('btnArchiveGroup')?.addEventListener('click', function () {
             if (!confirm(`Lưu trữ nhóm "${group.ten_nhom}"? Dữ liệu sẽ không bị xóa.`)) return;
@@ -849,6 +856,7 @@ body.dark .section-card [style*="color:#ef4444"].section-title { color:#f87171 !
             }, 280);
         });
 
+        //lấy user đã chọn ở dropdown để mời vào group
         dropdown?.addEventListener('click', function (e) {
             const item = e.target.closest('[data-invite-user-id]');
             if (!item) return;
@@ -883,14 +891,16 @@ body.dark .section-card [style*="color:#ef4444"].section-title { color:#f87171 !
             dropdown.style.display = 'none';
         });
 
+        //gửi lời mời
         submitBtn?.addEventListener('click', function () {
             if (!_inviteSelectedEmail) return;
             this.disabled = true;
             this.style.opacity = '0.6';
             this.textContent = 'Đang gửi...';
 
+            //gửi email lời mời
             const body = new FormData();
-            body.append('email', _inviteSelectedEmail);
+            body.append('email', _inviteSelectedEmail);//thêm dữ liệu vào data
 
             apiFetch(`/api/v1/groups/${GROUP_ID}/members`, { method: 'POST', body })
                 .then(({ ok, data }) => {

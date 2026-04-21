@@ -619,6 +619,7 @@ const hintMap = {
     percentage: 'Theo % — nhập tỷ lệ % cho từng người (tổng phải bằng 100%)',
 };
 
+//chọn chế độ chia tiền
 function selectKieu(el, kieu) {
     document.querySelectorAll('.kieu-card').forEach(k => k.classList.remove('selected'));
     el.classList.add('selected');
