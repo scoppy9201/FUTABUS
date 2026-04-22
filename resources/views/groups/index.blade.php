@@ -477,11 +477,12 @@ body.dark .btn-cancel:hover { background: rgba(255,255,255,0.08); }
 
 <script>
 (function () {
-    // Guard: chỉ init 1 lần per navigation
+    // Guard: chỉ init 1 lần per navigation đảm bảo đoạn code phía dưới chỉ chạy 1 lần duy nhất
     if (window.__groupsIndexInit) return;
     window.__groupsIndexInit = true;
 
     // ── Helpers ──────────────────────────────────────────
+    //Biến kí tự nguy hiểm thành an toàn tránh XSS
     function esc(s) {
         return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
     }
@@ -496,14 +497,17 @@ body.dark .btn-cancel:hover { background: rgba(255,255,255,0.08); }
     }
 
     // ── Render helpers ───────────────────────────────────
+    // trả về CSS chính cho từng chế độ
     function modeClass(che_do) {
         return che_do === 'balance' ? 'mode-balance' : (che_do === 'expense' ? 'mode-expense' : 'mode-both');
     }
 
+    // trả về text hiển thị cho user
     function modeName(che_do) {
         return che_do === 'balance' ? 'Phân phối số dư' : (che_do === 'expense' ? 'Chia khoản chi' : 'Cả hai chế độ');
     }
 
+    // trả về class ngắn hơn(icon, màu,label)
     function modeBadgeClass(che_do) {
         return che_do === 'balance' ? 'mode-b' : (che_do === 'expense' ? 'mode-e' : 'mode-m');
     }
@@ -514,6 +518,8 @@ body.dark .btn-cancel:hover { background: rgba(255,255,255,0.08); }
         return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px"><path d="M3 6h9l3-3 3 3-3 3"/><path d="M3 14h9l3-3 3 3-3 3"/><path d="M6 9l-3 3M6 11l-3-3"/></svg>';
     }
 
+
+    // render html cho từng thành viên nhóm
     function buildMembersHtml(members, total) {
         const avColors = ['#4a90e2','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
         let html = '<div class="gc-avatars">';
@@ -532,6 +538,7 @@ body.dark .btn-cancel:hover { background: rgba(255,255,255,0.08); }
         return html;
     }
 
+    //render ra card nhóm
     function buildCardHtml(g) {
         const roleClass  = g.la_admin ? 'admin' : 'member';
         const roleLabel  = g.la_admin ? 'Admin' : 'Thành viên';

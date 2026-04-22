@@ -239,7 +239,7 @@ class GroupBalanceController extends Controller
             GroupNotifier::balanceApproved($proposal, $userId);
             $this->tryExecuteProposal($proposal->fresh());
 
-            DB::commit();
+            DB::commit();// xác nhận lưu vĩnh viễn các thay đổi trong database
 
             if (request()->wantsJson()) {
                 return response()->json(['message' => 'Đã xác nhận đồng ý phân phối.', 'redirect' => route('groups.balance.index', $group)]);

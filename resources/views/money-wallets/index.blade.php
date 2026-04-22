@@ -547,6 +547,7 @@ body.dark .skeleton {
         return data;
     }
 
+    //thông báo
     function pageToast(msg, type = 'success') {
         const el = document.createElement('div');
         el.className = `page-toast ${type}`;
@@ -560,6 +561,7 @@ body.dark .skeleton {
         }, 3500);
     }
 
+    //form cảnh báo
     function showFormAlert(containerId, msg, type = 'error') {
         const el = document.getElementById(containerId);
         if (!el) return;
@@ -572,7 +574,7 @@ body.dark .skeleton {
         if (el) { el.style.display = 'none'; el.innerHTML = ''; }
     }
 
-    // ── Wallet card HTML ──────────────────────────────────
+    // ── render ds card ví ──────────────────────────────────
     function walletCardHTML(w) {
         const color   = WALLET_COLORS[w.loai_vi] || '#6b7280';
         const bgLight = color + '18';

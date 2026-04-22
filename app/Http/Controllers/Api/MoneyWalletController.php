@@ -66,6 +66,7 @@ class MoneyWalletController extends Controller
         return response()->json($moneyWallet);
     }
 
+    // lấy ds giao dịch của 1 ví
     public function transactions(MoneyWallet $moneyWallet): JsonResponse
     {
         $this->checkOwnership($moneyWallet);
