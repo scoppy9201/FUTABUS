@@ -204,26 +204,69 @@ class DashboardController extends Controller
             })
             ->values();
 
-        // Dữ liệu thu chi theo tháng trong 6 tháng gần nhất
-        $monthly = Transaction::where('user_id', $userId)
-            ->where('ngay_giao_dich', '>=', now()->subMonths(5)->startOfMonth()->toDateString())
-            ->selectRaw('YEAR(ngay_giao_dich) as year, MONTH(ngay_giao_dich) as month, loai_giao_dich, SUM(so_tien) as total')
-            ->groupBy('year', 'month', 'loai_giao_dich')
-            ->get()
-            ->groupBy(fn($t) => $t->year . '-' . $t->month);
+        // Dữ liệu thu chi - thay đổi theo $period
+        switch ($period) {
+            case 'this_month':
+            case 'last_month':
+                $targetDate = $period === 'this_month' ? now() : now()->subMonth();
+                $monthly = Transaction::where('user_id', $userId)
+                    ->whereMonth('ngay_giao_dich', $targetDate->month)
+                    ->whereYear('ngay_giao_dich', $targetDate->year)
+                    ->selectRaw('DAY(ngay_giao_dich) as day, loai_giao_dich, SUM(so_tien) as total')
+                    ->groupBy('day', 'loai_giao_dich')
+                    ->get()
+                    ->groupBy('day');
 
-        // Tạo mảng đủ 6 tháng kể cả tháng không có giao dịch => dùng cho heatmap và biểu đồ
-        $monthlyData = [];
-        for ($i = 5; $i >= 0; $i--) {
-            $date  = now()->subMonths($i);
-            $key   = $date->year . '-' . $date->month;
-            $group = $monthly[$key] ?? collect();
+                $monthlyData = [];
+                for ($i = 1; $i <= $targetDate->daysInMonth; $i++) {
+                    $group = $monthly[$i] ?? collect();
+                    $monthlyData[] = [
+                        'label'   => 'Ngày ' . $i,
+                        'income'  => (float) $group->where('loai_giao_dich', 'THU')->sum('total'),
+                        'expense' => (float) $group->where('loai_giao_dich', 'CHI')->sum('total'),
+                    ];
+                }
+                break;
 
-            $monthlyData[] = [
-                'month'   => (int) $date->format('n'),
-                'income'  => (float) $group->where('loai_giao_dich', 'THU')->sum('total'),
-                'expense' => (float) $group->where('loai_giao_dich', 'CHI')->sum('total'),
-            ];
+            case 'this_year':
+                $monthly = Transaction::where('user_id', $userId)
+                    ->whereYear('ngay_giao_dich', now()->year)
+                    ->selectRaw('MONTH(ngay_giao_dich) as month, loai_giao_dich, SUM(so_tien) as total')
+                    ->groupBy('month', 'loai_giao_dich')
+                    ->get()
+                    ->groupBy('month');
+
+                $monthlyData = [];
+                for ($i = 1; $i <= 12; $i++) {
+                    $group = $monthly[$i] ?? collect();
+                    $monthlyData[] = [
+                        'label'   => 'Tháng ' . $i,
+                        'income'  => (float) $group->where('loai_giao_dich', 'THU')->sum('total'),
+                        'expense' => (float) $group->where('loai_giao_dich', 'CHI')->sum('total'),
+                    ];
+                }
+                break;
+
+            default: // 'all' - hiện 12 tháng gần nhất
+                $monthly = Transaction::where('user_id', $userId)
+                    ->where('ngay_giao_dich', '>=', now()->subMonths(11)->startOfMonth()->toDateString())
+                    ->selectRaw('YEAR(ngay_giao_dich) as year, MONTH(ngay_giao_dich) as month, loai_giao_dich, SUM(so_tien) as total')
+                    ->groupBy('year', 'month', 'loai_giao_dich')
+                    ->get()
+                    ->groupBy(fn($t) => $t->year . '-' . $t->month);
+
+                $monthlyData = [];
+                for ($i = 11; $i >= 0; $i--) {
+                    $date  = now()->subMonths($i);
+                    $key   = $date->year . '-' . $date->month;
+                    $group = $monthly[$key] ?? collect();
+                    $monthlyData[] = [
+                        'label'   => 'T' . $date->format('n/Y'),
+                        'income'  => (float) $group->where('loai_giao_dich', 'THU')->sum('total'),
+                        'expense' => (float) $group->where('loai_giao_dich', 'CHI')->sum('total'),
+                    ];
+                }
+                break;
         }
 
         // Danh mục chi tiêu nhiều nhất trong kỳ, sắp xếp theo tổng chi giảm dần, chỉ lấy những danh mục có chi tiêu > 0
@@ -278,13 +321,13 @@ class DashboardController extends Controller
             'activeWallets'      => $activeWallets,
             'monthlyData'        => $monthlyData,
             'categoryExpenses'   => $categoryExpenses,
-            'savingRate'     => $savingRate,
-            'incomeChange'   => $incomeChange,
-            'expenseChange'  => $expenseChange,
-            'forecast'       => $forecast,
-            'spikingCategories' => $spikingCategories,
-            'expenseByDay' => $expenseByDay,
-            'heatmap' => $heatmapData,
+            'savingRate'         => $savingRate,
+            'incomeChange'       => $incomeChange,
+            'expenseChange'      => $expenseChange,
+            'forecast'           => $forecast,
+            'spikingCategories'  => $spikingCategories,
+            'expenseByDay'       => $expenseByDay,
+            'heatmap'            => $heatmapData,
         ];
     }
 
@@ -299,7 +342,8 @@ class DashboardController extends Controller
                 ->whereMonth('ngay_giao_dich', now()->subMonth()->month)
                 ->whereYear('ngay_giao_dich', now()->subMonth()->year),
             'this_year'  => $query->whereYear('ngay_giao_dich', now()->year),
-            default      => null,
+             default => $query
+            ->where('ngay_giao_dich', '>=', now()->subMonths(6)->startOfMonth()->toDateString()),
         };
 
         return $query;
@@ -316,7 +360,11 @@ class DashboardController extends Controller
                 ->whereMonth('ngay_giao_dich', now()->subMonths(2)->month)
                 ->whereYear('ngay_giao_dich',  now()->subMonths(2)->year),
             'this_year'  => $query->whereYear('ngay_giao_dich', now()->subYear()->year),
-            default      => null,
+
+            // Case này: so 6 tháng gần nhất vs 6 tháng trước đó
+            default      => $query
+                ->where('ngay_giao_dich', '>=', now()->subMonths(12)->startOfMonth()->toDateString())
+                ->where('ngay_giao_dich', '<',  now()->subMonths(6)->startOfMonth()->toDateString()),
         };
 
         return $query;

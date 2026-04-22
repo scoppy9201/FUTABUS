@@ -701,7 +701,7 @@
             state.lineChart = new Chart(lineCanvas, {
                 type: 'line',
                 data: {
-                    labels: (monthlyData || []).map(item => `Thang ${item.month}`),
+                    labels: (monthlyData || []).map(item => item.label ?? `Thang ${item.month}`),
                     datasets: [
                         {
                             label: 'Thu nhap',
