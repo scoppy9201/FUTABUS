@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class Budgets extends Model
 {
@@ -180,7 +181,7 @@ class Budgets extends Model
     /**
      * Scope: Lọc theo danh mục
      */
-    public function scopeByCategory($query, $categoryId)
+    public function scopeByCategory(Builder $query, int $categoryId) : Builder
     {
         return $query->where('category_id', $categoryId);
     }
@@ -188,7 +189,7 @@ class Budgets extends Model
     /**
      * Scope: Chỉ lấy ngân sách đang hoạt động
      */
-    public function scopeActive($query)
+    public function scopeActive(Builder $query) : Builder
     {
         return $query->where('trang_thai', true);
     }
@@ -196,7 +197,7 @@ class Budgets extends Model
     /**
      * Scope: Tìm kiếm theo tên
      */
-    public function scopeSearch($query, $keyword)
+    public function scopeSearch(Builder $query, String $keyword) : Builder
     {
         if (empty($keyword)) {
             return $query;
@@ -211,7 +212,7 @@ class Budgets extends Model
     /**
      * Scope: Lọc ngân sách vượt chi
      */
-    public function scopeOverBudget($query)
+    public function scopeOverBudget(Builder $query) : Builder
     {
         return $query->where('so_du', '<', 0);
     }
@@ -219,7 +220,7 @@ class Budgets extends Model
     /**
      * Scope: Lọc ngân sách sắp hết
      */
-    public function scopeLowBalance($query, $threshold = 20)
+    public function scopeLowBalance(Builder $query, $threshold = 20) : Builder
     {
         return $query->whereRaw('((ngan_sach_goc - so_du) / ngan_sach_goc * 100) >= ?', [100 - $threshold]);
     }

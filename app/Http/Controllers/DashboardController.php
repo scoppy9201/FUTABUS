@@ -19,6 +19,7 @@ use PhpOffice\PhpSpreadsheet\Chart\Title;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Database\Eloquent\Builder;
 
 class DashboardController extends Controller
 {
@@ -332,7 +333,7 @@ class DashboardController extends Controller
     }
 
     /* Hàm nội bộ, lọc query theo kỳ hiện tại (tháng này/trước/năm nay/tất cả) */
-    protected function applyPeriodFilter($query, string $period)
+    protected function applyPeriodFilter(Builder $query, string $period) : Builder
     {
         match($period) {
             'this_month' => $query
@@ -350,7 +351,7 @@ class DashboardController extends Controller
     }
 
     /* Hàm nội bộ, lọc query theo kỳ trước để so sánh tăng/giảm */
-    protected function applyPreviousPeriodFilter($query, string $period)
+    protected function applyPreviousPeriodFilter(Builder $query, string $period) : Builder
     {
         match($period) {
             'this_month' => $query

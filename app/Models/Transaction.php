@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class Transaction extends Model
 {
@@ -70,7 +71,7 @@ class Transaction extends Model
     /**
      * Scope: Lọc giao dịch theo loại (THU/CHI)
      */
-    public function scopeOfType($query, $type)
+    public function scopeOfType(Builder $query, String $type) : Builder
     {
         return $query->where('loai_giao_dich', $type);
     }
@@ -78,7 +79,7 @@ class Transaction extends Model
     /**
      * Scope: Lọc giao dịch theo khoảng thời gian
      */
-    public function scopeBetweenDates($query, $startDate, $endDate)
+    public function scopeBetweenDates(Builder $query, String $startDate, String $endDate) : Builder
     {
         return $query->whereBetween('ngay_giao_dich', [$startDate, $endDate]);
     }
@@ -86,7 +87,7 @@ class Transaction extends Model
     /**
      * Scope: Chỉ lấy giao dịch của user hiện tại
      */
-    public function scopeForUser($query, $userId)
+    public function scopeForUser(Builder $query, int $userId) : Builder
     {
         return $query->where('user_id', $userId);
     }
@@ -94,7 +95,7 @@ class Transaction extends Model
     /**
      * Scope: Lọc theo phương thức thanh toán
      */
-    public function scopeByPaymentMethod($query, $method)
+    public function scopeByPaymentMethod(Builder $query, String $method) : Builder
     {
         return $query->where('phuong_thuc_thanh_toan', $method);
     }
@@ -102,7 +103,7 @@ class Transaction extends Model
     /**
      * Accessor: Format số tiền
      */
-    public function getFormattedAmountAttribute()
+    public function getFormattedAmountAttribute() : string
     {
         return number_format($this->so_tien, 0, ',', '.') . 'đ';
     }
@@ -110,7 +111,7 @@ class Transaction extends Model
     /**
      * Accessor: Lấy màu badge theo loại giao dịch
      */
-    public function getTypeColorAttribute()
+    public function getTypeColorAttribute() : string
     {
         return $this->loai_giao_dich == 'THU' ? 'success' : 'danger';
     }
