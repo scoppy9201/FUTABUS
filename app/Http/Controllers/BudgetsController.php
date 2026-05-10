@@ -19,8 +19,7 @@ class BudgetsController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Budgets::with('category')
-            ->where('user_id', Auth::id());
+        $query = Budgets::with('category')->where('user_id', Auth::id());
 
         // Tìm kiếm theo tên
         if ($request->filled('search')) {

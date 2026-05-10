@@ -125,7 +125,7 @@ Route::prefix('v1')->name('api.')->group(function () {
         */
         Route::prefix('categories')->name('categories.')->group(function () {
             Route::get('/',                    [CategoryController::class, 'index'])        ->name('index');
-            Route::post('/',                   [CategoryController::class, 'store'])        ->name('store');
+            //Route::post('/',                   [CategoryController::class, 'store'])        ->name('store');
             Route::get('/{category}',          [CategoryController::class, 'show'])         ->name('show');
             Route::patch('/{category}',        [CategoryController::class, 'update'])       ->name('update');
             Route::delete('/{category}',       [CategoryController::class, 'destroy'])      ->name('destroy');

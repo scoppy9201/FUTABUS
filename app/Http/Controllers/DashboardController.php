@@ -48,7 +48,7 @@ class DashboardController extends Controller
         $totalExpense = (clone $query)->where('loai_giao_dich', 'CHI')->sum('so_tien');
         $balance      = $totalIncome - $totalExpense;
 
-        // So với kỳ trước 
+        // So với kỳ trước
         $prevQuery = Transaction::where('user_id', $userId);
         $this->applyPreviousPeriodFilter($prevQuery, $period);
 
@@ -58,21 +58,23 @@ class DashboardController extends Controller
         $incomeChange  = $prevIncome  > 0 ? round((($totalIncome  - $prevIncome)  / $prevIncome)  * 100, 1) : null;
         $expenseChange = $prevExpense > 0 ? round((($totalExpense - $prevExpense) / $prevExpense) * 100, 1) : null;
 
-        // Tỷ lệ tiết kiệm 
+        // Tỷ lệ tiết kiệm
         $savingRate = $totalIncome > 0
             ? round((($totalIncome - $totalExpense) / $totalIncome) * 100, 1)
             : 0;
 
-        // Cảnh báo chi tiêu tăng đột biêns
+        $self = $this;
+
+        // Cảnh báo chi tiêu tăng đột biến
         $spikingCategories = Category::where('user_id', $userId)
             ->where('loai_danh_muc', 'CHI')
-            ->withSum(['transactions as current_expense' => function ($q) use ($period) {
+            ->withSum(['transactions as current_expense' => function ($q) use ($period, $self) {
                 $q->where('loai_giao_dich', 'CHI');
-                $this->applyPeriodFilter($q, $period);
+                $self->applyPeriodFilter($q, $period);
             }], 'so_tien')
-            ->withSum(['transactions as prev_expense' => function ($q) use ($period) {
+            ->withSum(['transactions as prev_expense' => function ($q) use ($period, $self) {
                 $q->where('loai_giao_dich', 'CHI');
-                $this->applyPreviousPeriodFilter($q, $period);
+                $self->applyPreviousPeriodFilter($q, $period);
             }], 'so_tien')
             ->having('current_expense', '>', 0)
             ->get()
@@ -87,12 +89,12 @@ class DashboardController extends Controller
                 $curr   = (float) $cat->current_expense;
                 $change = round((($curr - $prev) / $prev) * 100, 1);
                 return [
-                    'id'             => $cat->id,
-                    'ten_danh_muc'   => $cat->ten_danh_muc,
-                    'bieu_tuong'     => $cat->bieu_tuong ?? 'money.png',
-                    'current_expense'=> (float) $curr,
-                    'prev_expense'   => (float) $prev,
-                    'change_percent' => $change,
+                    'id'              => $cat->id,
+                    'ten_danh_muc'    => $cat->ten_danh_muc,
+                    'bieu_tuong'      => $cat->bieu_tuong ?? 'money.png',
+                    'current_expense' => $curr,
+                    'prev_expense'    => $prev,
+                    'change_percent'  => $change,
                 ];
             })
             ->sortByDesc('change_percent')
@@ -103,19 +105,19 @@ class DashboardController extends Controller
 
         $expenseByDay = Transaction::where('user_id', $userId)
             ->where('loai_giao_dich', 'CHI')
-            ->tap(fn($q) => $this->applyPeriodFilter($q, $period))
+            ->tap(fn($q) => $self->applyPeriodFilter($q, $period))
             ->selectRaw('DAYOFWEEK(ngay_giao_dich) as dow, SUM(so_tien) as total')
             ->groupBy('dow')
             ->orderByDesc('total')
             ->get()
             ->map(fn($row) => [
-                'dow'       => (int) $row->dow,
-                'ten_ngay'  => $dayNames[$row->dow] ?? 'Không rõ',
-                'total'     => (float) $row->total,
+                'dow'      => (int) $row->dow,
+                'ten_ngay' => $dayNames[$row->dow] ?? 'Không rõ',
+                'total'    => (float) $row->total,
             ])
             ->values();
 
-        // Dự báo cuối tháng 
+        // Dự báo cuối tháng
         $forecast = null;
         if ($period === 'this_month') {
             $daysElapsed = now()->day;
@@ -124,13 +126,14 @@ class DashboardController extends Controller
                 ? round(($totalExpense / $daysElapsed) * $totalDays, 0)
                 : 0;
         }
+
         $totalTransactions = (clone $query)->count();
         $incomeCount       = (clone $query)->where('loai_giao_dich', 'THU')->count();
         $expenseCount      = (clone $query)->where('loai_giao_dich', 'CHI')->count();
 
-        // Danh sách giao dịch gần nhất
         $recentTransactions = Transaction::where('user_id', $userId)
             ->with('category')
+            ->tap(fn($q) => $self->applyPeriodFilter($q, $period))
             ->orderBy('ngay_giao_dich', 'desc')
             ->orderBy('created_at', 'desc')
             ->limit(5)
@@ -149,63 +152,57 @@ class DashboardController extends Controller
             })
             ->values();
 
-        // Danh sách ngân sách đang cảnh báo (đã chiếm >= 50% ngân sách)
+        // Ngân sách đang cảnh báo (>= 50%)
         $warningWallets = Budgets::where('user_id', $userId)
             ->where('trang_thai', true)
             ->get()
             ->filter(fn($wallet) => $wallet->spent_percentage >= 50)
             ->sortByDesc('spent_percentage')
             ->take(5)
-            ->map(function ($wallet) {
-                return [
-                    'id'               => $wallet->id,
-                    'ten_ngan_sach'    => $wallet->ten_ngan_sach,
-                    'spent_percentage' => (float) $wallet->spent_percentage,
-                ];
-            })
+            ->map(fn($wallet) => [
+                'id'               => $wallet->id,
+                'ten_ngan_sach'    => $wallet->ten_ngan_sach,
+                'spent_percentage' => (float) $wallet->spent_percentage,
+            ])
             ->values();
 
-        // Danh mục chi tiêu nhiều nhất và có sự tăng giảm mạnh so với kỳ trước
+        // Top danh mục chi tiêu nhiều nhất
         $topCategories = Category::where('user_id', $userId)
             ->where('loai_danh_muc', 'CHI')
-            ->withSum(['transactions as total_expense' => function ($query) use ($period) {
-                $query->where('loai_giao_dich', 'CHI');
-                $this->applyPeriodFilter($query, $period);
+            ->withSum(['transactions as total_expense' => function ($q) use ($period, $self) {
+                $q->where('loai_giao_dich', 'CHI');
+                $self->applyPeriodFilter($q, $period);
             }], 'so_tien')
             ->having('total_expense', '>', 0)
             ->orderByDesc('total_expense')
             ->limit(5)
             ->get()
-            ->map(function ($category) {
-                return [
-                    'id'            => $category->id,
-                    'ten_danh_muc'  => $category->ten_danh_muc,
-                    'bieu_tuong'    => $category->bieu_tuong ?? 'money.png',
-                    'total_expense' => (float) $category->total_expense,
-                ];
-            })
+            ->map(fn($category) => [
+                'id'            => $category->id,
+                'ten_danh_muc'  => $category->ten_danh_muc,
+                'bieu_tuong'    => $category->bieu_tuong ?? 'money.png',
+                'total_expense' => (float) $category->total_expense,
+            ])
             ->values();
 
-        // Danh sách ngân sách đang hoạt động, sắp xếp theo số dư gốc giảm dần
+        // Ngân sách đang hoạt động
         $activeWallets = Budgets::where('user_id', $userId)
             ->where('trang_thai', true)
             ->with('category')
             ->orderByDesc('ngan_sach_goc')
             ->get()
-            ->map(function ($wallet) {
-                return [
-                    'id'               => $wallet->id,
-                    'ten_ngan_sach'    => $wallet->ten_ngan_sach,
-                    'so_du'            => (float) $wallet->so_du,
-                    'spent_percentage' => (float) $wallet->spent_percentage,
-                    'category'         => [
-                        'bieu_tuong' => $wallet->category->bieu_tuong ?? 'money.png',
-                    ],
-                ];
-            })
+            ->map(fn($wallet) => [
+                'id'               => $wallet->id,
+                'ten_ngan_sach'    => $wallet->ten_ngan_sach,
+                'so_du'            => (float) $wallet->so_du,
+                'spent_percentage' => (float) $wallet->spent_percentage,
+                'category'         => [
+                    'bieu_tuong' => $wallet->category->bieu_tuong ?? 'money.png',
+                ],
+            ])
             ->values();
 
-        // Dữ liệu thu chi - thay đổi theo $period
+        // Dữ liệu thu chi theo period
         switch ($period) {
             case 'this_month':
             case 'last_month':
@@ -248,7 +245,7 @@ class DashboardController extends Controller
                 }
                 break;
 
-            default: // 'all' - hiện 12 tháng gần nhất
+            default: // 'all' - 12 tháng gần nhất
                 $monthly = Transaction::where('user_id', $userId)
                     ->where('ngay_giao_dich', '>=', now()->subMonths(11)->startOfMonth()->toDateString())
                     ->selectRaw('YEAR(ngay_giao_dich) as year, MONTH(ngay_giao_dich) as month, loai_giao_dich, SUM(so_tien) as total')
@@ -270,12 +267,12 @@ class DashboardController extends Controller
                 break;
         }
 
-        // Danh mục chi tiêu nhiều nhất trong kỳ, sắp xếp theo tổng chi giảm dần, chỉ lấy những danh mục có chi tiêu > 0
+        // Danh mục chi tiêu theo period (cho pie chart)
         $categoryExpenses = Category::where('user_id', $userId)
             ->where('loai_danh_muc', 'CHI')
-            ->withSum(['transactions as total' => function ($query) use ($period) {
-                $query->where('loai_giao_dich', 'CHI');
-                $this->applyPeriodFilter($query, $period);
+            ->withSum(['transactions as total' => function ($q) use ($period, $self) {
+                $q->where('loai_giao_dich', 'CHI');
+                $self->applyPeriodFilter($q, $period);
             }], 'so_tien')
             ->having('total', '>', 0)
             ->orderByDesc('total')
@@ -287,7 +284,7 @@ class DashboardController extends Controller
             ])
             ->values();
 
-        // Dữ liệu heatmap: tổng chi tiêu theo ngày trong 30 ngày gần nhất
+        // Heatmap 30 ngày gần nhất (luôn cố định, không theo period)
         $heatmap = Transaction::where('user_id', $userId)
             ->where('loai_giao_dich', 'CHI')
             ->where('ngay_giao_dich', '>=', now()->subDays(29)->toDateString())
@@ -298,10 +295,9 @@ class DashboardController extends Controller
             ->keyBy('ngay')
             ->map(fn($row) => (float) $row->total);
 
-        // Tạo mảng đủ 30 ngày kể cả ngày không có giao dịch
         $heatmapData = [];
         for ($i = 29; $i >= 0; $i--) {
-            $date = now()->subDays($i)->toDateString();
+            $date          = now()->subDays($i)->toDateString();
             $heatmapData[] = [
                 'date'  => $date,
                 'total' => $heatmap[$date] ?? 0,
@@ -332,40 +328,54 @@ class DashboardController extends Controller
         ];
     }
 
-    /* Hàm nội bộ, lọc query theo kỳ hiện tại (tháng này/trước/năm nay/tất cả) */
-    protected function applyPeriodFilter(Builder $query, string $period) : Builder
+    protected function applyPeriodFilter(Builder $query, string $period): Builder
     {
-        match($period) {
+        match ($period) {
             'this_month' => $query
                 ->whereMonth('ngay_giao_dich', now()->month)
                 ->whereYear('ngay_giao_dich', now()->year),
-            'last_month' => $query
-                ->whereMonth('ngay_giao_dich', now()->subMonth()->month)
-                ->whereYear('ngay_giao_dich', now()->subMonth()->year),
-            'this_year'  => $query->whereYear('ngay_giao_dich', now()->year),
-             default => $query
-            ->where('ngay_giao_dich', '>=', now()->subMonths(6)->startOfMonth()->toDateString()),
+
+            // lưu vào $lastMonth tránh gọi subMonth() 2 lần
+            'last_month' => (function () use ($query) {
+                $lastMonth = now()->subMonth();
+                $query
+                    ->whereMonth('ngay_giao_dich', $lastMonth->month)
+                    ->whereYear('ngay_giao_dich', $lastMonth->year);
+            })(),
+
+            'this_year' => $query
+                ->whereYear('ngay_giao_dich', now()->year),
+            default => $query
+                ->where('ngay_giao_dich', '>=', now()->subMonths(11)->startOfMonth()->toDateString()),
         };
 
         return $query;
     }
 
     /* Hàm nội bộ, lọc query theo kỳ trước để so sánh tăng/giảm */
-    protected function applyPreviousPeriodFilter(Builder $query, string $period) : Builder
+    protected function applyPreviousPeriodFilter(Builder $query, string $period): Builder
     {
-        match($period) {
-            'this_month' => $query
-                ->whereMonth('ngay_giao_dich', now()->subMonth()->month)
-                ->whereYear('ngay_giao_dich',  now()->subMonth()->year),
-            'last_month' => $query
-                ->whereMonth('ngay_giao_dich', now()->subMonths(2)->month)
-                ->whereYear('ngay_giao_dich',  now()->subMonths(2)->year),
-            'this_year'  => $query->whereYear('ngay_giao_dich', now()->subYear()->year),
+        match ($period) {
+            'this_month' => (function () use ($query) {
+                $lastMonth = now()->subMonth();
+                $query
+                    ->whereMonth('ngay_giao_dich', $lastMonth->month)
+                    ->whereYear('ngay_giao_dich', $lastMonth->year);
+            })(),
 
-            // Case này: so 6 tháng gần nhất vs 6 tháng trước đó
-            default      => $query
-                ->where('ngay_giao_dich', '>=', now()->subMonths(12)->startOfMonth()->toDateString())
-                ->where('ngay_giao_dich', '<',  now()->subMonths(6)->startOfMonth()->toDateString()),
+            'last_month' => (function () use ($query) {
+                $twoMonthsAgo = now()->subMonths(2);
+                $query
+                    ->whereMonth('ngay_giao_dich', $twoMonthsAgo->month)
+                    ->whereYear('ngay_giao_dich', $twoMonthsAgo->year);
+            })(),
+
+            'this_year' => $query
+                ->whereYear('ngay_giao_dich', now()->subYear()->year),
+
+            default => $query
+                ->where('ngay_giao_dich', '>=', now()->subMonths(23)->startOfMonth()->toDateString())
+                ->where('ngay_giao_dich', '<',  now()->subMonths(11)->startOfMonth()->toDateString()),
         };
 
         return $query;

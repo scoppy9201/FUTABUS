@@ -378,7 +378,7 @@ class TransactionController extends Controller
             $oldAmount        = $transaction->so_tien;
             $oldType          = $transaction->loai_giao_dich;
             $oldMoneyWalletId = $transaction->money_wallet_id;
-            $oldWalletId      = $transaction->wallet_id; // ← lấy wallet_id cũ trực tiếp
+            $oldWalletId      = $transaction->wallet_id; 
 
             // Bước 1: Hoàn tiền về budget CŨ (dùng wallet_id, không tìm theo category nữa)
             if ($oldWalletId) {
