@@ -452,8 +452,18 @@ async function loadCategories() {
 }
 
 async function submitAdjust() {
+    const rawVal = document.getElementById('adjSoDu').value.trim();
+    const soDu   = parseFloat(rawVal);
+
+    if (rawVal === '' || isNaN(soDu)) {
+        showAlert('Vui lòng nhập số dư thực tế', 'error'); return;
+    }
+    if (soDu < 0) {
+        showAlert('Số dư thực tế không được âm', 'error'); return;
+    }
+
     const body = {
-        so_du_thuc_te: parseFloat(document.getElementById('adjSoDu').value),
+        so_du_thuc_te: soDu,
         category_id:   document.getElementById('adjCategory').value,
         ly_do:         document.getElementById('adjLyDo').value.trim(),
     };

@@ -532,14 +532,14 @@ body.dark .skeleton {
 
     async function apiFetch(url, opts = {}) {
         const res = await fetch(url, {
-            credentials: 'same-origin',
+            credentials: 'same-origin',// cho phép gửi session login, cookie
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': CSRF,
                 'Accept': 'application/json',
                 ...(opts.headers || {}),
             },
-            ...opts,
+            ...opts,// meg thêm option
         });
         let data;
         try { data = await res.json(); } catch { data = { message: 'Lỗi phản hồi từ server' }; }
@@ -948,7 +948,7 @@ body.dark .skeleton {
     // ── Init ──────────────────────────────────────────────
     loadPage();
 
-    window.addEventListener('spa:navigated', function cleanup() {
+    window.addEventListener('spa:navigated', function cleanup() {// khi SPA điều hướng đi nơi khác, dọn dẹp sự kiện để tránh rò rỉ bộ nhớ
         window.__walletIndexInit = false;
         window.removeEventListener('spa:navigated', cleanup);
     }, { once: true });
