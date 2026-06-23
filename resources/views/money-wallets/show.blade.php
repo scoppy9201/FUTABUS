@@ -138,6 +138,10 @@ body.dark .modal-foot { border-color:rgba(255,255,255,0.06);background:#191d27; 
 .btn-cancel:hover { background:#e5e7eb; }
 .modal-foot .btn-primary { flex:2;justify-content:center;padding:10px; }
 
+.modal-alert { display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;margin-bottom:14px; }
+.modal-alert-success { background:#d1fae5;color:#065f46;border-left:4px solid var(--success); }
+.modal-alert-error   { background:#fee2e2;color:#991b1b;border-left:4px solid var(--danger); }
+
 .skeleton { background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px; }
 @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
 </style>
@@ -194,6 +198,7 @@ body.dark .modal-foot { border-color:rgba(255,255,255,0.06);background:#191d27; 
             <button class="modal-close-btn" onclick="closeModal('adjustModal')">✕</button>
         </div>
         <div class="modal-body">
+            <div id="adjustAlertBox"></div>
             <div style="background:#f0f7ff;border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px;">
                 <div style="font-weight:700;color:#1e40af;margin-bottom:4px;">💡 Cách hoạt động</div>
                 <div style="color:#4b5563;">Nhập số tiền thực tế bạn đang có. Hệ thống sẽ tự động tạo giao dịch bù trừ để khớp số dư.</div>
@@ -301,6 +306,22 @@ function showAlert(msg, type = 'success') {
     el.textContent = (type === 'success' ? '✓ ' : '⚠ ') + msg;
     document.getElementById('alertContainer').appendChild(el);
     setTimeout(() => { el.style.transition='opacity .3s'; el.style.opacity='0'; setTimeout(()=>el.remove(),320); }, 4500);
+}
+
+function showModalAlert(modalAlertId, msg, type = 'success') {
+    const box = document.getElementById(modalAlertId);
+    box.innerHTML = `<div class="modal-alert modal-alert-${type}">${(type === 'success' ? '✓ ' : '⚠ ') + msg}</div>`;
+    setTimeout(() => {
+        const inner = box.firstChild;
+        if (!inner) return;
+        inner.style.transition = 'opacity .3s';
+        inner.style.opacity = '0';
+        setTimeout(() => { box.innerHTML = ''; }, 320);
+    }, 4500);
+}
+
+function clearModalAlert(modalAlertId) {
+    document.getElementById(modalAlertId).innerHTML = '';
 }
 
 function fmt(n) { return Number(n).toLocaleString('vi-VN'); }
@@ -456,10 +477,10 @@ async function submitAdjust() {
     const soDu   = parseFloat(rawVal);
 
     if (rawVal === '' || isNaN(soDu)) {
-        showAlert('Vui lòng nhập số dư thực tế', 'error'); return;
+        showModalAlert('adjustAlertBox', 'Vui lòng nhập số dư thực tế', 'error'); return;
     }
     if (soDu < 0) {
-        showAlert('Số dư thực tế không được âm', 'error'); return;
+        showModalAlert('adjustAlertBox', 'Số dư thực tế không được âm', 'error'); return;
     }
 
     const body = {
@@ -467,7 +488,9 @@ async function submitAdjust() {
         category_id:   document.getElementById('adjCategory').value,
         ly_do:         document.getElementById('adjLyDo').value.trim(),
     };
-    if (!body.category_id) { showAlert('Vui lòng chọn danh mục', 'error'); return; }
+    if (!body.category_id) {
+        showModalAlert('adjustAlertBox', 'Vui lòng chọn danh mục', 'error'); return;
+    }
 
     const res = await apiFetch(`/api/v1/money-wallets/${WALLET_ID}/adjust`, { method: 'POST', body: JSON.stringify(body) });
     if (res.success || res.id) {
@@ -477,7 +500,7 @@ async function submitAdjust() {
         loadTransactions();
         loadAdjustments();
     } else {
-        showAlert(res.message || 'Có lỗi xảy ra', 'error');
+        showModalAlert('adjustAlertBox', res.message || 'Có lỗi xảy ra', 'error');
     }
 }
 
@@ -508,7 +531,10 @@ async function deleteWallet() {
     else showAlert(res.message || 'Có lỗi xảy ra', 'error');
 }
 
-function openAdjust() { document.getElementById('adjustModal').classList.add('active'); }
+function openAdjust() {
+    clearModalAlert('adjustAlertBox');
+    document.getElementById('adjustModal').classList.add('active');
+}
 function openEdit()    { document.getElementById('editShowModal').classList.add('active'); }
 function closeModal(id){ document.getElementById(id).classList.remove('active'); }
 
