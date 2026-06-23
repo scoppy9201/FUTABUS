@@ -53,7 +53,7 @@ class QrTransferController extends Controller
         $wallet = MoneyWallet::where('id', $validated['wallet_id'])
             ->where('user_id', Auth::id())
             ->where('trang_thai', 'active')
-            ->firstOrFail();
+            ->firstOrFail();//lấy bản ghi đầu tiên tìm đc nếu ko có thì báo lỗi ngay
 
         if ($wallet->so_du < $validated['so_tien']) {
             return response()->json([

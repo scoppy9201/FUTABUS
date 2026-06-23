@@ -145,7 +145,7 @@ class MoneyWalletController extends Controller
                 'loai_vi'        => $validated['loai_vi'],
                 'so_du'          => $validated['so_du_ban_dau'],
                 'so_du_ban_dau'  => $validated['so_du_ban_dau'],
-                'don_vi_tien_te' => strtoupper($validated['don_vi_tien_te']),
+                'don_vi_tien_te' => strtoupper($validated['don_vi_tien_te']),// chuyển toàn bộ thành in hoa
                 'bieu_tuong'     => $validated['bieu_tuong'] ?? '💰',
                 'mo_ta'          => $validated['mo_ta'] ?? null,
                 'trang_thai'     => 'active',
@@ -190,7 +190,7 @@ class MoneyWalletController extends Controller
 
         $activeCount = MoneyWallet::where('user_id', Auth::id())
             ->where('trang_thai', 'active')
-            ->where('id', '!=', $moneyWallet->id)
+            ->where('id', '!=', $moneyWallet->id)// bỏ qua ví đang xử lí
             ->count();
 
         if ($activeCount < 1) {

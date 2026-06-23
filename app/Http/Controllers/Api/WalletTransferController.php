@@ -22,7 +22,7 @@ class WalletTransferController extends Controller
             ->with(['fromWallet', 'toWallet', 'category'])
             ->orderByDesc('ngay_chuyen')
             ->orderByDesc('created_at')
-            ->paginate(20);
+            ->paginate(20);// phân trang dữ liệu mỗi trang 20 bản ghi
 
         return response()->json($transfers);
     }
