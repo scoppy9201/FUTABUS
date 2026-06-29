@@ -1,151 +1,207 @@
-<p align="center">
-  <img src="screenshots/logo.png" style="max-width: 200px; height: auto;" alt="Monexa — Personal Finance Manager">
+﻿<p align="center">
+  <img src="screenshots/dashboard.png" width="980" alt="Monexa dashboard">
 </p>
 
 <h1 align="center">Monexa</h1>
 
 <p align="center">
-  <strong>Open-source personal finance manager built with Laravel</strong><br>
-  Track income and expenses, set budgets, and visualize your financial health — all in one place.
+  <strong>A self-hosted Laravel personal finance workspace for wallets, budgets, transactions, groups, QR transfers, and financial insights.</strong>
+  <br>
+  Monexa helps individuals and small groups track money, plan budgets, split expenses, transfer wallet balances, and understand financial activity from one private dashboard.
 </p>
 
 <p align="center">
-  <a href="https://laravel.com"><img src="https://img.shields.io/badge/Laravel-11.x-FF2D20?style=flat&logo=laravel" alt="Laravel 11.x"></a>
-  <a href="https://php.net"><img src="https://img.shields.io/badge/PHP-8.3-777BB4?style=flat&logo=php" alt="PHP 8.3"></a>
-  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-green?style=flat" alt="MIT License"></a>
-  <a href="https://github.com/scoppy9201/monexa/stargazers"><img src="https://img.shields.io/github/stars/scoppy9201/monexa?style=flat" alt="GitHub Stars"></a>
+  <img src="https://img.shields.io/badge/Laravel-12.x-FF2D20?style=flat&logo=laravel" alt="Laravel 12">
+  <img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=flat&logo=php" alt="PHP 8.2+">
+  <img src="https://img.shields.io/badge/Vite-6.x-646CFF?style=flat&logo=vite" alt="Vite 6">
+  <img src="https://img.shields.io/badge/License-MIT-16A34A?style=flat" alt="MIT License">
 </p>
-
----
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Screenshots](#screenshots)
-- [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
-- [Configuration](#configuration)
-- [Database Schema](#database-schema)
-- [Contributing](#contributing)
-- [Security](#security)
-- [License](#license)
 
 ---
 
 ## Overview
 
-**Monexa** is a self-hosted, open-source personal finance web application built on Laravel. It gives individuals a clean, intuitive interface to track every dollar in and out — with smart budgeting, category breakdowns, and real-time charts — without handing your financial data over to a third-party service.
+Monexa is a Laravel 12 finance management application built for people who want control over their own financial data. It combines day-to-day transaction tracking with wallets, budgets, group expense sharing, QR-based wallet transfers, notifications, currency tools, and AI-assisted finance workflows.
 
-**Who is it for?**
-- Individuals who want full control over their financial data
-- Developers looking for a real-world Laravel project to study or extend
-- Teams building personal finance tools who need a solid starting point
-
----
-
-## Features
-
-### 🔐 Authentication & Security
-- Email/password registration with server-side validation
-- Google OAuth via Laravel Socialite
-- Profile management and password change
-- Route-level middleware protection
-
-### 💸 Transaction Management
-- Full CRUD for income and expense entries
-- Category-based classification
-- Multi-criteria filtering (date, type, category, amount)
-- Pagination and sortable columns
-- Automatic budget balance updates on transaction save
-
-### 💰 Smart Budgeting
-- Create monthly or category-specific budgets
-- Real-time balance tracking
-- Visual progress bars with color-coded thresholds
-- Overspend alerts before you exceed your limit
-
-### 📊 Dashboard & Analytics
-- Summary cards: total income, total expenses, net balance
-- Monthly income vs. expense line chart (Chart.js)
-- Spending distribution pie chart by category
-- Top spending categories ranked
-- Recent transactions feed
-
-### 🏷️ Category Management
-- Create custom income and expense categories
-- Assign icons per category
-- Enable or disable categories without deleting data
+The project is designed as a practical full-stack Laravel product: Blade views for the web interface, API controllers for data operations, service-oriented finance logic, database-backed notifications, and integrations for Google sign-in, Excel export/import, PDF generation, and QR transfer flows.
 
 ---
 
 ## Screenshots
 
-<p align="center">
-  <img src="screenshots/dashboard.png" width="800" alt="Monexa Dashboard — overview charts and summary stats">
-  <br><em>Dashboard — real-time charts and financial summary</em>
-</p>
+<table>
+  <tr>
+    <td width="50%">
+      <img src="screenshots/dashboard.png" alt="Monexa dashboard">
+      <br><strong>Dashboard</strong>
+    </td>
+    <td width="50%">
+      <img src="screenshots/transactions.png" alt="Monexa transactions">
+      <br><strong>Transactions</strong>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <img src="screenshots/wallets.png" alt="Monexa wallets and budgets">
+      <br><strong>Wallets & Budgets</strong>
+    </td>
+    <td width="50%">
+      <img src="screenshots/categories.png" alt="Monexa categories">
+      <br><strong>Categories</strong>
+    </td>
+  </tr>
+</table>
 
-<p align="center">
-  <img src="screenshots/transactions.png" width="800" alt="Monexa Transactions — advanced filter and list view">
-  <br><em>Transactions — advanced filtering and pagination</em>
-</p>
+---
 
-<p align="center">
-  <img src="screenshots/wallets.png" width="800" alt="Monexa Budgets — progress tracking and alerts">
-  <br><em>Budgets — progress tracking with overspend alerts</em>
-</p>
+## Core Features
 
-<p align="center">
-  <img src="screenshots/categories.png" width="800" alt="Monexa Categories — custom icons and toggle">
-  <br><em>Categories — custom icons, enable/disable per category</em>
-</p>
+### Personal Finance
+
+- Dashboard summary for income, expenses, balances, recent activity, and financial trends.
+- Transaction management for income and expense records.
+- Category management for organizing financial activity.
+- Budget tracking with limits, balances, and progress states.
+- Wallet management for separating cash, bank, savings, and other money sources.
+- Wallet transfers and adjustment history.
+- Currency history and currency-oriented reporting support.
+
+### Group Finance
+
+- Split groups for shared expenses with members and invitations.
+- Group balance proposals with approval and rejection workflows.
+- Group expense proposals and split records.
+- Group debt summaries and settlement flow.
+- Member actions such as invite, accept, decline, promote, demote, remove, and leave group.
+- Optional group balance visibility controls.
+
+### Transfers And QR
+
+- Internal wallet transfer workflow.
+- QR transfer generation, scan, confirmation, cancellation, and result pages.
+- API-backed wallet and QR transfer controllers.
+- QR code support through `simplesoftwareio/simple-qrcode`.
+
+### Intelligence And Automation
+
+- AI assistant screen and AI chat history persistence.
+- AI-oriented category, transaction, and wallet controllers.
+- Search page for finding records quickly.
+- System notifications and mark-all-read workflow.
+- Email settings for mail-related configuration.
+
+### Account And Security
+
+- Email/password authentication.
+- Google OAuth login through Laravel Socialite.
+- Registration, login, logout, forgot password, verification code, reset password, profile, and change password screens.
+- Auth-protected finance pages.
+
+### Export And Documents
+
+- Excel-related tooling through Laravel Excel and PhpSpreadsheet.
+- PDF generation support through DomPDF.
+- Export stubs for model, query-model, and plain export patterns.
 
 ---
 
 ## Tech Stack
 
 | Layer | Technology |
-|---|---|
-| Framework | [Laravel 11.x](https://laravel.com) |
-| Language | PHP 8.3 |
-| Database | MySQL / MariaDB |
-| Charts | [Chart.js](https://www.chartjs.org/) |
-| OAuth | [Laravel Socialite](https://github.com/laravel/socialite) |
-| Frontend build | Vite + Node.js |
+| ----- | ---------- |
+| Backend | Laravel 12, PHP 8.2+ |
+| Frontend | Blade, Vite, Node.js |
+| Database | MySQL or MariaDB |
+| Authentication | Laravel auth, Laravel Socialite |
+| API/Auth Tokens | Laravel Sanctum |
+| Charts/Visuals | Blade UI and frontend chart assets |
+| Excel | `maatwebsite/excel`, `phpoffice/phpspreadsheet` |
+| PDF | `barryvdh/laravel-dompdf` |
+| QR | `simplesoftwareio/simple-qrcode` |
+| Development | Composer, npm, Artisan, PHPUnit, Laravel Pint |
+| Container | Dockerfile included |
 
 ---
 
-## Getting Started
+## Project Structure
 
-### Prerequisites
+```text
+app/
+  Http/Controllers/        Web, API, AI, auth, finance, group, and notification controllers
+  Models/                  Finance, wallet, group, QR, notification, and user models
+  Services/                Business services and supporting application logic
+  Exports/                 Export classes and spreadsheet support
 
-- PHP >= 8.2
-- Composer
-- MySQL or MariaDB
-- Node.js & NPM
+database/
+  migrations/              Core tables for users, categories, budgets, transactions, wallets, groups, QR, notifications, currency
+  seeders/                 Initial and demo data
 
-### Installation
+resources/
+  views/                   Blade screens for auth, dashboard, finance, wallets, groups, QR, settings, AI, search
+  css/ js/                 Frontend source assets
 
-**1. Clone the repository and install dependencies**
+routes/
+  web.php                  Blade page routes and web actions
+  api.php                  API endpoints for data operations
+
+screenshots/               README images
+stubs/                     Export class stubs
+```
+
+---
+
+## Main Routes
+
+| Area | Route |
+| ---- | ----- |
+| Landing | `/` |
+| Auth | `/login`, `/register`, `/forgot-password`, `/reset-password` |
+| Dashboard | `/dashboard` |
+| Transactions | `/transactions` |
+| Categories | `/categories` |
+| Budgets | `/budgets` |
+| Wallets | `/money-wallets` |
+| Wallet transfers | `/wallet-transfers` |
+| QR transfers | `/money-wallets/qr` |
+| Groups | `/groups` |
+| Notifications | `/notifications` |
+| AI assistant | `/ai-assistant` |
+| Currency | `/currency` |
+| Search | `/search` |
+| Settings | `/settings` |
+| Profile | `/profile` |
+
+---
+
+## Local Installation
+
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/scoppy9201/monexa.git
 cd monexa
+```
+
+### 2. Install dependencies
+
+```bash
 composer install
 npm install
 ```
 
-**2. Set up the environment file**
+### 3. Prepare the environment
 
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-**3. Configure your database** in `.env`
+Configure your database in `.env`:
 
 ```env
+APP_NAME=Monexa
+APP_URL=http://127.0.0.1:8000
+
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -154,96 +210,145 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-**4. Run migrations and seed default data**
+### 4. Run migrations and seeders
 
 ```bash
-php artisan migrate
-php artisan db:seed
-```
-
-**5. Create the storage symlink**
-
-```bash
+php artisan migrate --seed
 php artisan storage:link
 ```
 
-**6. Start the development servers**
+### 5. Start development servers
+
+Run Laravel and Vite in separate terminals:
 
 ```bash
-# Laravel application server
 php artisan serve
-
-# Vite asset bundler (development)
 npm run dev
 ```
 
-The app will be available at `http://localhost:8000`.
+Open:
 
-For production builds, run `npm run build` instead of `npm run dev`.
+```text
+http://127.0.0.1:8000
+```
 
 ---
 
-## Configuration
+## Google OAuth
 
-### Google OAuth (Optional)
-
-To enable Sign in with Google, create OAuth credentials in the [Google Cloud Console](https://console.cloud.google.com/) and add the following to your `.env`:
+To enable Google login, create OAuth credentials in Google Cloud Console and add these values to `.env`:
 
 ```env
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
-GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/callback
+GOOGLE_REDIRECT_URI=http://127.0.0.1:8000/auth/google/callback
 ```
 
 ---
 
-## Database Schema
+## Useful Commands
 
-Monexa uses four core tables:
+```bash
+# Run the frontend dev server
+npm run dev
 
-| Table | Purpose |
-|---|---|
-| `users` | Registered user accounts |
-| `categories` | User-defined income and expense categories |
-| `wallets` | Budget definitions with limits and balances |
-| `transactions` | Individual income and expense records |
+# Build production assets
+npm run build
 
-Full migration files are available in `database/migrations/`.
+# Run tests
+php artisan test
+
+# Run the Composer development stack
+composer run dev
+
+# Clear Laravel caches
+php artisan optimize:clear
+
+# Refresh autoload files
+composer dump-autoload
+
+# Run code style formatter if configured for the project
+./vendor/bin/pint
+```
+
+Composer also provides:
+
+```bash
+composer run setup
+```
+
+This installs dependencies, creates `.env` when missing, generates the app key, runs migrations, installs npm packages, and builds assets.
 
 ---
 
-## Contributing
+## Docker
 
-Contributions are welcome. To get started:
+A `Dockerfile` is included for container-based deployment or local experimentation.
 
-1. Fork this repository
-2. Create a feature branch: `git checkout -b feature/your-feature-name`
-3. Commit your changes: `git commit -m 'Add: short description of change'`
-4. Push to your branch: `git push origin feature/your-feature-name`
-5. Open a Pull Request against `main`
+Typical flow:
 
-Please make sure your code passes existing tests and follows the project's coding style before submitting.
+```bash
+docker build -t monexa .
+docker run --rm -p 8000:8000 monexa
+```
+
+Configure environment variables and persistent storage according to your deployment target before using Docker in production.
 
 ---
 
-## Security
+## Data Model Highlights
 
-If you discover a security vulnerability, please **do not** open a public GitHub issue. Instead, send a responsible disclosure email to [security@monexa.com](mailto:security@monexa.com). All reports will be reviewed and addressed promptly.
+| Model | Purpose |
+| ----- | ------- |
+| `User` | Authenticated account |
+| `Category` | Income and expense category |
+| `Transaction` | Income or expense record |
+| `Budgets` | Budget definition and tracking |
+| `MoneyWallet` | Wallet or money source |
+| `WalletTransfer` | Transfer between wallets |
+| `WalletAdjustment` | Wallet balance correction |
+| `QrTransfer` | QR-based transfer request |
+| `SplitGroup` | Shared expense group |
+| `SplitGroupMember` | Group membership |
+| `GroupInvitation` | Group invitation token and status |
+| `GroupBalanceProposal` | Proposed group balance change |
+| `GroupExpenseProposal` | Proposed shared expense |
+| `GroupExpenseDebt` | Debt records between group members |
+| `SystemNotification` | In-app notification |
+| `AiChatHistory` | AI assistant conversation history |
+| `CurrencyHistory` | Currency rate/history record |
+| `EmailSetting` | Mail configuration data |
+
+---
+
+## Development Standards
+
+- Keep financial rules in controllers/services clear and auditable.
+- Keep Blade views focused on presentation and avoid mixing complex data logic into templates.
+- Use authenticated routes for private finance data.
+- Keep API responses consistent for wallet, transaction, QR, and group actions.
+- Validate all money amounts, wallet ownership, member permissions, and proposal states before writing data.
+- Prefer explicit database migrations for finance records so changes remain traceable.
+- Run `php artisan test` and `npm run build` before preparing a release.
+
+---
+
+## Security Notes
+
+Monexa handles private financial data. Use HTTPS in production, protect `.env`, rotate OAuth secrets when needed, limit database access, and review permission checks for wallet and group operations before deployment.
+
+If you discover a security issue, report it privately to the maintainer instead of opening a public issue.
 
 ---
 
 ## License
 
-Monexa is open-source software licensed under the [MIT License](https://opensource.org/licenses/MIT).
+Monexa is open-sourced software licensed under the [MIT license](LICENSE).
 
 ---
 
 <p align="center">
-  Built by <a href="https://github.com/scoppy9201"><strong>Hung Manh</strong></a> · <a href="mailto:Buimanhhung3105@gmail.com">Buimanhhung3105@gmail.com</a>
-</p>
-
-<p align="center">
-  <a href="https://github.com/scoppy9201/monexa/stargazers">⭐ Star this project</a> ·
-  <a href="https://github.com/scoppy9201/monexa/issues">🐛 Report a bug</a> ·
-  <a href="https://github.com/scoppy9201/monexa/issues">✨ Request a feature</a>
+  Built with Laravel for private, practical finance management.
+  <br>
+  <strong>Monexa</strong>
 </p>
