@@ -100,6 +100,7 @@ body.dark .history-title { color: #e5e7eb; }
                     <select id="walletId" class="form-ctrl">
                         <option value="">-- Chọn ví --</option>
                     </select>
+                    <div id="walletHint" style="font-size:11px;color:#9ca3af;margin-top:4px;display:none;"></div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Số tiền <span class="required">*</span></label>
@@ -140,7 +141,8 @@ body.dark .history-title { color: #e5e7eb; }
                 <b>Người nhận:</b><br>
                 Quét QR hoặc mở link<br>
                 Chọn ví nhận → Xác nhận<br>
-                Tiền được chuyển ngay lập tức
+                Tiền được chuyển ngay lập tức<br><br>
+                <b>Lưu ý:</b> Ví loại <b>tiền mặt</b> không hỗ trợ chuyển/nhận qua QR.
             </div>
         </div>
     </div>
@@ -179,16 +181,40 @@ function showAlert(msg, type = 'success') {
 
 function fmt(n) { return Number(n).toLocaleString('vi-VN'); }
 
+let walletsCache = [];
+
 async function loadWallets() {
     const wallets = await apiFetch('/api/v1/money-wallets');
     const sel = document.getElementById('walletId');
+    const hint = document.getElementById('walletHint');
     const active = wallets.filter ? wallets.filter(w => w.trang_thai !== 'khong_hoat_dong') : wallets;
+    walletsCache = active;
+
     if (!active.length) {
         sel.innerHTML = '<option value="">Bạn chưa có ví nào. <a href="{{ route("money-wallets.index") }}">Tạo ví ngay</a></option>';
+        hint.style.display = 'none';
         return;
     }
+
+    // Ví tiền mặt không hỗ trợ chuyển khoản QR
+    const qrEligible = active.filter(w => w.loai_vi !== 'tien_mat');
+
+    if (!qrEligible.length) {
+        sel.innerHTML = '<option value="">Không có ví khả dụng (ví tiền mặt không hỗ trợ QR)</option>';
+        hint.textContent = 'Tất cả ví của bạn là ví tiền mặt — vui lòng tạo ví ngân hàng/ví điện tử để dùng QR.';
+        hint.style.display = 'block';
+        return;
+    }
+
     sel.innerHTML = '<option value="">-- Chọn ví --</option>' +
-        active.map(w => `<option value="${w.id}">${w.bieu_tuong} ${w.ten_vi} — ${fmt(w.so_du)}đ</option>`).join('');
+        qrEligible.map(w => `<option value="${w.id}">${w.bieu_tuong} ${w.ten_vi} — ${fmt(w.so_du)}đ</option>`).join('');
+
+    if (active.length > qrEligible.length) {
+        hint.textContent = 'Lưu ý: Ví tiền mặt không hỗ trợ chuyển khoản QR nên không hiển thị ở đây.';
+        hint.style.display = 'block';
+    } else {
+        hint.style.display = 'none';
+    }
 }
 
 async function loadHistory() {
@@ -247,6 +273,14 @@ async function generateQR() {
     const ghi_chu   = document.getElementById('ghiChu').value.trim();
 
     if (!wallet_id) { showAlert('Vui lòng chọn ví nguồn', 'error'); return; }
+
+    // Chặn ví tiền mặt (double-check, phòng trường hợp dropdown bị can thiệp)
+    const wallet = walletsCache.find(w => String(w.id) === String(wallet_id));
+    if (wallet && wallet.loai_vi === 'tien_mat') {
+        showAlert('Ví tiền mặt không thể chuyển tiền qua QR', 'error');
+        return;
+    }
+
     if (!so_tien || so_tien < 1000) { showAlert('Số tiền tối thiểu là 1.000đ', 'error'); return; }
 
     const res = await apiFetch('/api/v1/money-wallets/qr/generate', {
