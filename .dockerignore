@@ -1,0 +1,47 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Local environment & secrets — never ship into an image
+.env
+.env.*
+!.env.example
+auth.json
+
+# Dependencies (installed inside the image)
+/vendor
+/node_modules
+
+# Build output (regenerated in the frontend stage)
+/public/build
+/public/hot
+/public/storage
+
+# Runtime / cache
+/storage/*.key
+/storage/app/public/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+/bootstrap/cache/*.php
+
+# Dev & IDE tooling
+_ide_helper.php
+.phpunit.result.cache
+/.phpunit.cache
+.phpactor.json
+/.idea
+/.vscode
+/.fleet
+/.nova
+/.zed
+
+# Docs, tests artifacts and misc that don't belong in the runtime image
+/screenshots
+Thumbs.db
+.DS_Store
+
+# Docker meta (avoid recursive copies)
+docker-compose*.yml

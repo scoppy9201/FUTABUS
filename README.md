@@ -283,16 +283,39 @@ This installs dependencies, creates `.env` when missing, generates the app key, 
 
 ## Docker
 
-A `Dockerfile` is included for container-based deployment or local experimentation.
+Monexa ships a full, production-ready Docker + CI/CD setup. The multi-stage
+`Dockerfile` produces one PHP-FPM image reused by the web (`app`), queue worker,
+and scheduler services, fronted by nginx with MySQL and Redis as backing
+services. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the full architecture,
+environment/secret list, deploy and rollback procedures.
 
-Typical flow:
+### Development stack
 
 ```bash
-docker build -t monexa .
-docker run --rm -p 8000:8000 monexa
+cp .env.example .env
+docker compose up --build
+# App → http://localhost:8000, Vite → http://localhost:5173
 ```
 
-Configure environment variables and persistent storage according to your deployment target before using Docker in production.
+The project source is bind-mounted, so this is an alternative to the Laragon
+workflow and does not replace it.
+
+### Production
+
+Images are built and pushed to GitHub Container Registry by CI, then deployed
+over SSH:
+
+```bash
+# On the server (see docs/DEPLOYMENT.md for one-time bootstrap)
+APP_IMAGE=ghcr.io/OWNER/monexa-app:<sha> \
+NGINX_IMAGE=ghcr.io/OWNER/monexa-nginx:<sha> \
+./deploy.sh          # backup → migrate → restart → health-check → auto-rollback
+./rollback.sh        # revert to the previous release
+```
+
+CI (`.github/workflows/ci.yml`) runs lint, tests, asset build and a Docker
+smoke test on every PR/push. CD (`.github/workflows/cd.yml`) builds, pushes and
+deploys on push to `main`.
 
 ---
 
