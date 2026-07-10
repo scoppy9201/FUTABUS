@@ -64,11 +64,13 @@ jobs:
         continue-on-error: true
         run: vendor/bin/pint --test
 
-      - name: Run tests (PHPUnit)
-        run: php artisan test
-
+      # Build assets BEFORE tests: feature tests hit routes that render Blade
+      # views using @vite, which require public/build/manifest.json to exist.
       - name: Build front-end assets
         run: npm run build
+
+      - name: Run tests (PHPUnit)
+        run: php artisan test
 
   docker:
     name: Docker Image Build & Smoke Test
