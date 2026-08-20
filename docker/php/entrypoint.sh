@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-# Monexa container entrypoint.
+﻿#!/usr/bin/env bash
+# FUTEBUS container entrypoint.
 #
 # Runs common bootstrap tasks (writable dirs, framework cache) and then execs
 # the container command (php-fpm / queue worker / scheduler / artisan ...).
@@ -38,7 +38,7 @@ if [ "${APP_ENV:-production}" = "local" ]; then
         composer install --no-interaction --prefer-dist
     fi
     if [ ! -f .env ]; then
-        log "No .env found — copying .env.example"
+        log "No .env found â€” copying .env.example"
         cp -n .env.example .env || true
     fi
     if ! grep -q '^APP_KEY=base64' .env 2>/dev/null; then

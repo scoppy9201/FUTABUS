@@ -1,6 +1,6 @@
-# syntax=docker/dockerfile:1
+﻿# syntax=docker/dockerfile:1
 
-# Nginx image for Monexa.
+# Nginx image for FUTEBUS.
 #
 # Built FROM the application image so it serves the exact same, already-built
 # public/ assets (including the public/storage symlink and public/build).
@@ -10,7 +10,7 @@
 #   docker build -f docker/nginx/Dockerfile \
 #       --build-arg APP_IMAGE=<app-image:tag> -t <nginx-image:tag> .
 
-ARG APP_IMAGE=monexa-app:latest
+ARG APP_IMAGE=futabus-app:latest
 
 FROM ${APP_IMAGE} AS app
 

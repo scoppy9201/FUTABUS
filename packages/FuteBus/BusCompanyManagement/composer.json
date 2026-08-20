@@ -1,0 +1,22 @@
+{
+    "name": "futebus/buscompanymanagement",
+    "description": "BusCompanyManagement module for FUTEBUS.",
+    "type": "library",
+    "version": "1.0.0",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "FuteBus\\BusCompanyManagement\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "FuteBus\\BusCompanyManagement\\Providers\\BusCompanyManagementServiceProvider"
+            ]
+        }
+    }
+}

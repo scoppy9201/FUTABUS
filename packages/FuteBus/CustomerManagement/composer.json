@@ -1,0 +1,22 @@
+{
+    "name": "futebus/customermanagement",
+    "description": "CustomerManagement module for FUTEBUS.",
+    "type": "library",
+    "version": "1.0.0",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "FuteBus\\CustomerManagement\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "FuteBus\\CustomerManagement\\Providers\\CustomerManagementServiceProvider"
+            ]
+        }
+    }
+}

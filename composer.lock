@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5f2ca40eee8d4d4a8b807cb76abec014",
+    "content-hash": "644382360fed79e1e3851f60ddbbfbc6",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -136,6 +136,156 @@
                 }
             ],
             "time": "2026-02-21T08:51:10+00:00"
+        },
+        {
+            "name": "blade-ui-kit/blade-heroicons",
+            "version": "2.7.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/driesvints/blade-heroicons.git",
+                "reference": "66fa8ba09dba12e0cdb410b8cb94f3b890eca440"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/driesvints/blade-heroicons/zipball/66fa8ba09dba12e0cdb410b8cb94f3b890eca440",
+                "reference": "66fa8ba09dba12e0cdb410b8cb94f3b890eca440",
+                "shasum": ""
+            },
+            "require": {
+                "blade-ui-kit/blade-icons": "^1.6",
+                "illuminate/support": "^9.0|^10.0|^11.0|^12.0|^13.0",
+                "php": "^8.0"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^7.0|^8.0|^9.0|^10.0|^11.0",
+                "phpunit/phpunit": "^9.0|^10.5|^11.0|^12.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "BladeUI\\Heroicons\\BladeHeroiconsServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "BladeUI\\Heroicons\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Dries Vints",
+                    "homepage": "https://driesvints.com"
+                }
+            ],
+            "description": "A package to easily make use of Heroicons in your Laravel Blade views.",
+            "homepage": "https://github.com/driesvints/blade-heroicons",
+            "keywords": [
+                "Heroicons",
+                "blade",
+                "laravel"
+            ],
+            "support": {
+                "issues": "https://github.com/driesvints/blade-heroicons/issues",
+                "source": "https://github.com/driesvints/blade-heroicons/tree/2.7.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/driesvints",
+                    "type": "github"
+                },
+                {
+                    "url": "https://www.paypal.com/paypalme/driesvints",
+                    "type": "paypal"
+                }
+            ],
+            "time": "2026-03-16T13:00:23+00:00"
+        },
+        {
+            "name": "blade-ui-kit/blade-icons",
+            "version": "1.10.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/driesvints/blade-icons.git",
+                "reference": "6e072d021ea6249986c330b93293c33d0c4f0e34"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/driesvints/blade-icons/zipball/6e072d021ea6249986c330b93293c33d0c4f0e34",
+                "reference": "6e072d021ea6249986c330b93293c33d0c4f0e34",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "^8.0|^9.0|^10.0|^11.0|^12.0|^13.0",
+                "illuminate/filesystem": "^8.0|^9.0|^10.0|^11.0|^12.0|^13.0",
+                "illuminate/support": "^8.0|^9.0|^10.0|^11.0|^12.0|^13.0",
+                "illuminate/view": "^8.0|^9.0|^10.0|^11.0|^12.0|^13.0",
+                "php": "^7.4|^8.0",
+                "symfony/console": "^5.3|^6.0|^7.0|^8.0",
+                "symfony/finder": "^5.3|^6.0|^7.0|^8.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.5.1",
+                "orchestra/testbench": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0",
+                "phpunit/phpunit": "^9.0|^10.5|^11.0"
+            },
+            "bin": [
+                "bin/blade-icons-generate"
+            ],
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "BladeUI\\Icons\\BladeIconsServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/helpers.php"
+                ],
+                "psr-4": {
+                    "BladeUI\\Icons\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Dries Vints",
+                    "homepage": "https://driesvints.com"
+                }
+            ],
+            "description": "A package to easily make use of icons in your Laravel Blade views.",
+            "homepage": "https://github.com/driesvints/blade-icons",
+            "keywords": [
+                "blade",
+                "icons",
+                "laravel",
+                "svg"
+            ],
+            "support": {
+                "issues": "https://github.com/driesvints/blade-icons/issues",
+                "source": "https://github.com/driesvints/blade-icons"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/driesvints",
+                    "type": "github"
+                },
+                {
+                    "url": "https://www.paypal.com/paypalme/driesvints",
+                    "type": "paypal"
+                }
+            ],
+            "time": "2026-06-30T09:44:12+00:00"
         },
         {
             "name": "brick/math",
@@ -1194,6 +1344,732 @@
                 }
             ],
             "time": "2025-12-03T09:33:47+00:00"
+        },
+        {
+            "name": "futebus/aiassistant",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/futebus/AiAssistant",
+                "reference": "6d3debe41c6033ef99a55bfe9607741940970e6d"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\AiAssistant\\Providers\\AiAssistantServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\AiAssistant\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "AiAssistant module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/auth",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/futebus/Auth",
+                "reference": "d34196154f103d1c9142ba479190d0876385cfe0"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\Auth\\Providers\\AuthServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\Auth\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Auth module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/bookingmanagement",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/Customer/BookingManagement",
+                "reference": "a96444a6a1bef160d6505ebe0f0dbbde7e8a19bf"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\BookingManagement\\Providers\\BookingManagementServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\BookingManagement\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "BookingManagement module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/buscompanymanagement",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/futebus/BusCompanyManagement",
+                "reference": "eb0656810770b6a68e06670abd2603b5fb2ae505"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\BusCompanyManagement\\Providers\\BusCompanyManagementServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\BusCompanyManagement\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "BusCompanyManagement module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/busmanagement",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/futebus/BusManagement",
+                "reference": "a3a35514aa3f1176a94dfd31dc9bdcc5ea9de8e0"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\BusManagement\\Providers\\BusManagementServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\BusManagement\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "BusManagement module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/cancellation",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/Customer/Cancellation",
+                "reference": "378b7f80d5c879d0524151d85eaaade59a3f94b6"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\Cancellation\\Providers\\CancellationServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\Cancellation\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Cancellation module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/core",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/futebus/Core",
+                "reference": "029063f7b15ec11d3748426c001323b873fbc251"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\Core\\Providers\\CoreServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\Core\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Core module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/customermanagement",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/futebus/CustomerManagement",
+                "reference": "c99f87968640683f9bcf9e12d7974a2d7ed4505b"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\CustomerManagement\\Providers\\CustomerManagementServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\CustomerManagement\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "CustomerManagement module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/dashboard",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/futebus/Dashboard",
+                "reference": "2f8659175d9f8b543c4c0515254692cf7b34114b"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\Dashboard\\Providers\\DashboardServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\Dashboard\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Dashboard module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/notification",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/futebus/Notification",
+                "reference": "585e8bda15aa9249a1243d1d5adee788ce80642a"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\Notification\\Providers\\NotificationServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\Notification\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Notification module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/payment",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/futebus/Payment",
+                "reference": "d9069c15a387cd7ecfdc807b47340f9062f77192"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\Payment\\Providers\\PaymentServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\Payment\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Payment module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/profile",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/futebus/Profile",
+                "reference": "bd50ed557642260cc00d5c7f6b1ec00ab503e14a"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\Profile\\Providers\\ProfileServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\Profile\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Profile module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/reporting",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/futebus/Reporting",
+                "reference": "73a40dedf0cb4d6737ed94105f73408d6be6df7b"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\Reporting\\Providers\\ReportingServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\Reporting\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Reporting module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/rolepermission",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/futebus/RolePermission",
+                "reference": "17f46022b477ae9880cc1c418070e38962cfea3c"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\RolePermission\\Providers\\RolePermissionServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\RolePermission\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "RolePermission module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/routemanagement",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/futebus/RouteManagement",
+                "reference": "d0a144cbae2a7aa613a62b92dabc4949e6170d46"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\RouteManagement\\Providers\\RouteManagementServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\RouteManagement\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "RouteManagement module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/seatavailability",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/Customer/SeatAvailability",
+                "reference": "1164513c0c2b3840900037db4fabd05d54529f59"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\SeatAvailability\\Providers\\SeatAvailabilityServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\SeatAvailability\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "SeatAvailability module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/seatmanagement",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/futebus/SeatManagement",
+                "reference": "c17a6bec276334a80e2a2cd6c766b9ba300ae283"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\SeatManagement\\Providers\\SeatManagementServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\SeatManagement\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "SeatManagement module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/systemsetting",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/futebus/SystemSetting",
+                "reference": "406bd8e09c389b6f16ff9a53d7766034976d1353"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\SystemSetting\\Providers\\SystemSettingServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\SystemSetting\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "SystemSetting module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/ticketmanagement",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/Customer/TicketManagement",
+                "reference": "48842b89631d18d11d9059b3b4148e6c16f154b2"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\TicketManagement\\Providers\\TicketManagementServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\TicketManagement\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "TicketManagement module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/tripmanagement",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/futebus/TripManagement",
+                "reference": "d1e2b4adfa6735cc18659351dc8d9fd33d93b2a5"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\TripManagement\\Providers\\TripManagementServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\TripManagement\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "TripManagement module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/tripsearch",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/Customer/TripSearch",
+                "reference": "87c9ab641137ff418e7de55979957cae07039791"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\TripSearch\\Providers\\TripSearchServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\TripSearch\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "TripSearch module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/usermanagement",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/futebus/UserManagement",
+                "reference": "4448b452ce4850978623960ad45ed7578500b989"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\UserManagement\\Providers\\UserManagementServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\UserManagement\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "UserManagement module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
         },
         {
             "name": "graham-campbell/result-type",
@@ -10399,5 +11275,5 @@
         "php": "^8.2"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }

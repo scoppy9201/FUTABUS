@@ -1,0 +1,22 @@
+{
+    "name": "futebus/tripsearch",
+    "description": "TripSearch module for FUTEBUS.",
+    "type": "library",
+    "version": "1.0.0",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "FuteBus\\TripSearch\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "FuteBus\\TripSearch\\Providers\\TripSearchServiceProvider"
+            ]
+        }
+    }
+}

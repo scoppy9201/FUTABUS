@@ -5,21 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens; 
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens; 
+    use HasFactory, Notifiable, HasApiTokens;
 
     protected $fillable = [
         'name',
         'email',
         'password',
         'phone',
-        'ngay_sinh',
-        'gioi_tinh',
-        'google_id',
         'avatar',
+        'role',
+        'is_active',
     ];
 
     protected $hidden = [
@@ -29,12 +28,32 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-        'ngay_sinh' => 'date',
+        'password'          => 'hashed',
+        'is_active'         => 'boolean',
     ];
 
-    public function moneyWallets()
+    public function isAdmin(): bool
     {
-        return $this->hasMany(\App\Models\MoneyWallet::class);
+        return $this->role === 'admin';
+    }
+
+    public function isStaff(): bool
+    {
+        return $this->role === 'staff';
+    }
+
+    public function isCustomer(): bool
+    {
+        return $this->role === 'customer';
+    }
+
+    public function hasRole(string|array $roles): bool
+    {
+        return in_array($this->role ?? '', (array) $roles, true);
+    }
+
+    public function getIsActiveAttribute(): bool
+    {
+        return (bool) $this->is_active;
     }
 }

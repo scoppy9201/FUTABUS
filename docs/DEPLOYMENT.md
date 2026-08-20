@@ -1,6 +1,6 @@
-# Monexa — Docker & Deployment Guide
+﻿# FUTEBUS — Docker & Deployment Guide
 
-Production-ready Docker + CI/CD for the Monexa Laravel 12 application.
+Production-ready Docker + CI/CD for the FUTEBUS Laravel 12 application.
 
 ---
 
@@ -11,32 +11,32 @@ in three roles, fronted by nginx, with MySQL and Redis as backing services.
 
 ```
                     Internet / TLS proxy
-                            │  :80 (/443 terminated upstream)
-                            ▼
-                    ┌───────────────┐
-                    │     nginx     │  serves public/ static + build assets,
-                    │  (1.27-alpine)│  proxies *.php → app:9000 (FastCGI)
-                    └───────┬───────┘
-                            │ fastcgi
-        ┌───────────────────┼───────────────────────────┐
-        ▼                   ▼                             ▼
- ┌────────────┐     ┌──────────────┐             ┌────────────────┐
- │    app     │     │    queue     │             │   scheduler    │
- │  php-fpm   │     │ queue:work   │             │ schedule:work  │
- │ (web reqs) │     │  (worker)    │             │  (cron tasks)  │
- └─────┬──────┘     └──────┬───────┘             └───────┬────────┘
-       │  same image, different command                  │
-       └───────────────┬─────────────────────────────────┘
-                       ▼                    ▼
-                ┌────────────┐        ┌────────────┐
-                │   mysql    │        │   redis    │
-                │   8.0      │        │  7-alpine  │
-                └────────────┘        └────────────┘
-        (internal network only — never published to the Internet)
+                            â”‚  :80 (/443 terminated upstream)
+                            â–¼
+                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                    â”‚     nginx     â”‚  serves public/ static + build assets,
+                    â”‚  (1.27-alpine)â”‚  proxies *.php â†’ app:9000 (FastCGI)
+                    â””â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”˜
+                            â”‚ fastcgi
+        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+        â–¼                   â–¼                             â–¼
+ â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”     â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”             â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+ â”‚    app     â”‚     â”‚    queue     â”‚             â”‚   scheduler    â”‚
+ â”‚  php-fpm   â”‚     â”‚ queue:work   â”‚             â”‚ schedule:work  â”‚
+ â”‚ (web reqs) â”‚     â”‚  (worker)    â”‚             â”‚  (cron tasks)  â”‚
+ â””â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”˜     â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”˜             â””â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+       â”‚  same image, different command                  â”‚
+       â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                       â–¼                    â–¼
+                â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                â”‚   mysql    â”‚        â”‚   redis    â”‚
+                â”‚   8.0      â”‚        â”‚  7-alpine  â”‚
+                â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜        â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+        (internal network only â€” never published to the Internet)
 ```
 
-Services communicate over the `monexa` Docker network **by service name**
-(`mysql`, `redis`, `app`) — never `localhost`.
+Services communicate over the `FUTEBUS` Docker network **by service name**
+(`mysql`, `redis`, `app`) â€” never `localhost`.
 
 ### Services
 
@@ -56,24 +56,24 @@ The `queue`, `scheduler` and `app` services **reuse the exact same image**.
 ## 2. Files
 
 **Created**
-- `Dockerfile` (rewritten) — multi-stage: `base` → `frontend` → `vendor` → `production` / `development`
-- `docker/nginx/Dockerfile` — nginx image built FROM the app image (ships identical assets)
-- `docker/nginx/nginx.conf`, `docker/nginx/default.conf` — reverse proxy config
-- `docker/php/php.ini`, `docker/php/opcache.ini`, `docker/php/www.conf` — production PHP/FPM tuning
-- `docker/php/entrypoint.sh` — bootstrap (writable dirs, caches, DB wait); **does not migrate**
-- `docker/php/healthcheck.sh` — php-fpm FastCGI ping healthcheck
-- `docker-compose.yml` — development stack
-- `docker-compose.prod.yml` — production stack
+- `Dockerfile` (rewritten) â€” multi-stage: `base` â†’ `frontend` â†’ `vendor` â†’ `production` / `development`
+- `docker/nginx/Dockerfile` â€” nginx image built FROM the app image (ships identical assets)
+- `docker/nginx/nginx.conf`, `docker/nginx/default.conf` â€” reverse proxy config
+- `docker/php/php.ini`, `docker/php/opcache.ini`, `docker/php/www.conf` â€” production PHP/FPM tuning
+- `docker/php/entrypoint.sh` â€” bootstrap (writable dirs, caches, DB wait); **does not migrate**
+- `docker/php/healthcheck.sh` â€” php-fpm FastCGI ping healthcheck
+- `docker-compose.yml` â€” development stack
+- `docker-compose.prod.yml` â€” production stack
 - `.dockerignore`, `.env.docker.example`
 - `.github/workflows/ci.yml`, `.github/workflows/cd.yml`
-- `deploy.sh`, `rollback.sh`, `scripts/health-check.sh`
+- `deploy/deploy.sh`, `deploy/rollback.sh`, `deploy/health-check.sh`
 - `docs/DEPLOYMENT.md` (this file)
 
 ---
 
 ## 3. Development
 
-Run the full stack locally (alternative to the Laragon workflow — nothing is removed):
+Run the full stack locally (alternative to the Laragon workflow â€” nothing is removed):
 
 ```bash
 cp .env.example .env        # or .env.docker.example for the container defaults
@@ -96,32 +96,32 @@ The project source is bind-mounted, so code edits are reflected live. The
 On the target server:
 
 ```bash
-mkdir -p /opt/monexa && cd /opt/monexa
-# Copy these two files to the server (via git, scp, or CI artifact):
+mkdir -p /opt/futabus && cd /opt/futabus
+# Copy these files to the server (via git, scp, or CI artifact):
 #   docker-compose.prod.yml
-#   deploy.sh, rollback.sh, scripts/health-check.sh
+#   deploy/deploy.sh, deploy/rollback.sh, deploy/health-check.sh
 cp .env.docker.example .env        # then edit with real production values
 ```
 
 Generate an app key once and paste it into `.env`:
 
 ```bash
-docker run --rm ghcr.io/OWNER/monexa-app:latest php artisan key:generate --show
+docker run --rm ghcr.io/OWNER/futabus-app:latest php artisan key:generate --show
 ```
 
 ### 4.2 Deploy
 
-CI/CD runs `deploy.sh` automatically (see §6). To deploy manually:
+CI/CD runs `deploy.sh` automatically (see Â§6). To deploy manually:
 
 ```bash
-cd /opt/monexa
-APP_IMAGE=ghcr.io/OWNER/monexa-app:<sha> \
-NGINX_IMAGE=ghcr.io/OWNER/monexa-nginx:<sha> \
-./deploy.sh
+cd /opt/futabus
+APP_IMAGE=ghcr.io/OWNER/futabus-app:<sha> \
+NGINX_IMAGE=ghcr.io/OWNER/futabus-nginx:<sha> \
+./deploy/deploy.sh
 ```
 
-`deploy.sh` pulls images → **backs up the database** → runs migrations once →
-restarts services → health-checks `/up` → **auto-rolls-back on failure**.
+`deploy.sh` pulls images â†’ **backs up the database** â†’ runs migrations once â†’
+restarts services â†’ health-checks `/up` â†’ **auto-rolls-back on failure**.
 
 ### 4.3 Run migrations
 
@@ -155,7 +155,7 @@ docker compose -f docker-compose.prod.yml up -d --no-deps app   # after image ch
 Automatic on a failed health check. Manual:
 
 ```bash
-cd /opt/monexa && ./rollback.sh
+cd /opt/futabus && ./deploy/rollback.sh
 ```
 
 `rollback.sh` restores the previous image refs recorded in `.previous_images`
@@ -169,7 +169,7 @@ The stack publishes plain HTTP on `:80`. Terminate TLS with one of:
 
 - **External reverse proxy** (recommended): Caddy, Traefik, or an nginx on the
   host / a cloud load balancer forwarding to the `nginx` container. Set
-  `X-Forwarded-*` headers (already honored — see `default.conf` and Laravel
+  `X-Forwarded-*` headers (already honored â€” see `default.conf` and Laravel
   `TrustProxies`).
 - Point `HTTP_PORT` to an internal port and let the proxy own 80/443.
 
@@ -181,30 +181,30 @@ Set `APP_URL=https://your-domain` and `GOOGLE_REDIRECT` to the HTTPS callback.
 
 Platform: **GitHub Actions** (this repo is GitHub-hosted).
 
-### CI — `.github/workflows/ci.yml`
+### CI â€” `.github/workflows/ci.yml`
 Triggers: PRs and pushes to `main` / `dev`.
 
 Jobs:
-1. **test** — checkout → setup PHP 8.2 → cache Composer → `composer install`
-   (locked) → setup Node 20 → `npm ci` → `pint --test` (lint) →
-   `php artisan test` (PHPUnit) → `npm run build`.
-2. **docker** — build the `production` image + nginx image, then a **smoke test**
+1. **test** â€” checkout â†’ setup PHP 8.2 â†’ cache Composer â†’ `composer install`
+   (locked) â†’ setup Node 20 â†’ `npm ci` â†’ `pint --test` (lint) â†’
+   `php artisan test` (PHPUnit) â†’ `npm run build`.
+2. **docker** â€” build the `production` image + nginx image, then a **smoke test**
    that boots the container and waits for the FastCGI healthcheck to go
    `healthy`. Deploy is blocked if any step fails.
 
-### CD — `.github/workflows/cd.yml`
+### CD â€” `.github/workflows/cd.yml`
 Triggers: push to `main`, or a `v*` tag.
 
-1. **build-and-push** — build app + nginx images, tag with the **commit SHA**
+1. **build-and-push** â€” build app + nginx images, tag with the **commit SHA**
    and `latest`, push to **GitHub Container Registry (ghcr.io)**.
-2. **deploy** — connect over SSH and run `deploy.sh` on the server:
-   pull → DB backup → migrate → restart → health-check → rollback on failure.
+2. **deploy** â€” connect over SSH and run `deploy.sh` on the server:
+   pull â†’ DB backup â†’ migrate â†’ restart â†’ health-check â†’ rollback on failure.
    Secrets are passed as env vars and never printed (registry token via
    `--password-stdin`).
 
 ### Deploy flow
-`push main` → build/push (SHA+latest) → SSH → `deploy.sh` → backup → migrate →
-`up -d` → `/up` health check → **success** or **auto-rollback**.
+`push main` â†’ build/push (SHA+latest) â†’ SSH â†’ `deploy.sh` â†’ backup â†’ migrate â†’
+`up -d` â†’ `/up` health check â†’ **success** or **auto-rollback**.
 
 ---
 
@@ -235,9 +235,9 @@ Triggers: push to `main`, or a `v*` tag.
 | `SSH_PORT` | SSH port (optional, default 22) |
 | `SSH_USER` | SSH user |
 | `SSH_PRIVATE_KEY` | Private key for the deploy user |
-| `DEPLOY_PATH` | Path on server (e.g. `/opt/monexa`) |
+| `DEPLOY_PATH` | Path on server (e.g. `/opt/FUTEBUS`) |
 
-> `GITHUB_TOKEN` (built-in) authenticates to ghcr.io — no extra registry secret
+> `GITHUB_TOKEN` (built-in) authenticates to ghcr.io â€” no extra registry secret
 > is needed. If deploying to another registry, add `REGISTRY_USERNAME` /
 > `REGISTRY_TOKEN`.
 
@@ -251,7 +251,7 @@ images by `.dockerignore`.
 - **Health endpoint**: Laravel `/up`, checked by nginx, php-fpm (FastCGI ping),
   and `deploy.sh`.
 - **Non-root**: php-fpm workers run as `www-data`; nginx workers as `nginx`.
-- **Log rotation**: json-file driver, 10 MB × 5 files per service.
+- **Log rotation**: json-file driver, 10 MB Ã— 5 files per service.
 - **OPcache** enabled with timestamp validation off (immutable image).
 - **Graceful shutdown**: workers use SIGTERM + `stop_grace_period` (95s queue,
   30s scheduler) and `--max-time` so in-flight jobs finish.
@@ -268,12 +268,12 @@ images by `.dockerignore`.
 | Symptom | Fix |
 |---|---|
 | `APP_KEY` errors / cookie decrypt failures | Ensure `APP_KEY` is set in server `.env`; regenerate with `key:generate --show`. |
-| 502 from nginx | `app` (php-fpm) not healthy — `docker compose -f docker-compose.prod.yml logs app`. |
+| 502 from nginx | `app` (php-fpm) not healthy â€” `docker compose -f docker-compose.prod.yml logs app`. |
 | Uploaded files 404 via nginx | Confirm the `storage-data` volume is mounted on both `app` (rw) and `nginx` (ro). |
 | Migrations "already run" / lock | Migrations run once via `deploy.sh`; don't set `RUN_MIGRATIONS=true` in multi-container prod. |
-| Config change not applied | Entrypoint re-runs `config:cache` on boot — restart the service. |
+| Config change not applied | Entrypoint re-runs `config:cache` on boot â€” restart the service. |
 | Redis auth error | `REDIS_PASSWORD` must match in `.env` and the `redis` command. |
-| Deploy rolled back | Health check failed — inspect `docker compose logs app nginx`; previous release is live. |
+| Deploy rolled back | Health check failed â€” inspect `docker compose logs app nginx`; previous release is live. |
 
 ---
 
@@ -284,17 +284,17 @@ images by `.dockerignore`.
 docker compose up --build
 
 # Build production images locally
-docker build --target production -t monexa-app:local .
-docker build -f docker/nginx/Dockerfile --build-arg APP_IMAGE=monexa-app:local -t monexa-nginx:local .
+docker build --target production -t FUTEBUS-app:local .
+docker build -f docker/nginx/Dockerfile --build-arg APP_IMAGE=FUTEBUS-app:local -t FUTEBUS-nginx:local .
 
 # Validate compose
 docker compose config
 docker compose -f docker-compose.prod.yml config
 
 # Deploy / rollback (on server)
-APP_IMAGE=... NGINX_IMAGE=... ./deploy.sh
-./rollback.sh
+APP_IMAGE=... NGINX_IMAGE=... ./deploy/deploy.sh
+./deploy/rollback.sh
 
 # Health check
-HEALTH_URL=https://your-domain/up ./scripts/health-check.sh
+HEALTH_URL=https://your-domain/up ./deploy/health-check.sh
 ```

@@ -110,4 +110,4 @@ jobs:
              APP_IMAGE='${APP_IMAGE}' NGINX_IMAGE='${NGINX_IMAGE}' \
              REGISTRY='${{ env.REGISTRY }}' \
              REGISTRY_USERNAME='${REGISTRY_USERNAME}' REGISTRY_TOKEN='${REGISTRY_TOKEN}' \
-             bash -s" < deploy.sh
+             bash -s" < deploy/deploy.sh

@@ -1,0 +1,2732 @@
+[
+  {
+    "id": 1,
+    "name": "Cao đẳng Công nghệ Hà Nội",
+    "short": "HCT",
+    "type": "cao_dang",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 2,
+    "name": "Trường Cao đẳng Công nghệ và Kỹ thuật Ô tô",
+    "short": "JB",
+    "type": "cao_dang",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 3,
+    "name": "Trường Cao đẳng Công nghiệp Quốc phòng",
+    "short": "CDCNQP",
+    "type": "cao_dang",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 4,
+    "name": "Trường Cao đẳng Kinh tế - Kỹ thuật (ĐH Thái Nguyên)",
+    "short": "TEC",
+    "type": "cao_dang",
+    "city": "Thái Nguyên"
+  },
+  {
+    "id": 5,
+    "name": "Trường Cao đẳng Kỹ thuật Hải quân",
+    "short": "KTHQ",
+    "type": "cao_dang",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 6,
+    "name": "Trường Cao đẳng Quân y 1",
+    "short": "QY1",
+    "type": "cao_dang",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 7,
+    "name": "Trường Cao đẳng Quân y 2",
+    "short": "QY2",
+    "type": "cao_dang",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 8,
+    "name": "Đại học An Giang",
+    "short": "AGU",
+    "type": "dai_hoc",
+    "city": "An Giang"
+  },
+  {
+    "id": 9,
+    "name": "Trường Đại học Anh Quốc tại Việt Nam",
+    "short": "BUV",
+    "type": "nuoc_ngoai",
+    "city": "Hưng Yên"
+  },
+  {
+    "id": 10,
+    "name": "Trường Đại học Bà Rịa – Vũng Tàu",
+    "short": "BVU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Bà Rịa – Vũng Tàu"
+  },
+  {
+    "id": 11,
+    "name": "Trường Đại học Bạc Liêu",
+    "short": "BLU",
+    "type": "dai_hoc",
+    "city": "Cà Mau"
+  },
+  {
+    "id": 12,
+    "name": "Đại học Bách khoa Hà Nội",
+    "short": "HUST",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 13,
+    "name": "Trường Đại học Bách khoa (ĐH Đà Nẵng)",
+    "short": "DUT",
+    "type": "dai_hoc",
+    "city": "Đà Nẵng"
+  },
+  {
+    "id": 14,
+    "name": "Trường Đại học Bách khoa (ĐHQG-HCM)",
+    "short": "HCMUT",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 15,
+    "name": "Trường Đại học Bình Dương",
+    "short": "BDU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Bình Dương"
+  },
+  {
+    "id": 16,
+    "name": "Trường Đại học Cần Thơ",
+    "short": "CTU",
+    "type": "dai_hoc",
+    "city": "Cần Thơ"
+  },
+  {
+    "id": 17,
+    "name": "Trường Đại học Cảnh sát nhân dân",
+    "short": "T05",
+    "type": "cong_an",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 18,
+    "name": "Trường Đại học CMC",
+    "short": "CMCU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 19,
+    "name": "Trường Đại học Công nghệ (ĐHQGHN)",
+    "short": "VNU-UET",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 20,
+    "name": "Trường Đại học Công nghệ Đông Á",
+    "short": "EAUT",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Bắc Ninh"
+  },
+  {
+    "id": 21,
+    "name": "Trường Đại học Công nghệ Đồng Nai",
+    "short": "DNTU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Đồng Nai"
+  },
+  {
+    "id": 22,
+    "name": "Trường Đại học Công nghệ Giao thông Vận tải",
+    "short": "UTT",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 23,
+    "name": "Trường Đại học Công nghệ Miền Đông",
+    "short": "MUT",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Đồng Nai"
+  },
+  {
+    "id": 24,
+    "name": "Trường Đại học Công nghệ Sài Gòn",
+    "short": "STU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 25,
+    "name": "Trường Đại học Công nghệ Swinburne - FPT Việt Nam",
+    "short": "Swinburne",
+    "type": "nuoc_ngoai",
+    "city": "Toàn quốc"
+  },
+  {
+    "id": 26,
+    "name": "Trường Đại học Công nghệ Thành phố Hồ Chí Minh",
+    "short": "HUTECH",
+    "type": "dai_hoc_tu_thuc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 27,
+    "name": "Trường Đại học Công nghệ Thông tin (ĐHQG-HCM)",
+    "short": "UIT",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 28,
+    "name": "Trường Đại học Công nghệ thông tin và Truyền thông Việt – Hàn",
+    "short": "VKU",
+    "type": "dai_hoc",
+    "city": "Đà Nẵng"
+  },
+  {
+    "id": 29,
+    "name": "Trường Đại học Công nghệ Thông tin và Truyền thông (Thái Nguyên)",
+    "short": "ICTU",
+    "type": "dai_hoc",
+    "city": "Thái Nguyên"
+  },
+  {
+    "id": 30,
+    "name": "Trường Đại học Công nghệ và Quản lý hữu nghị",
+    "short": "UTM",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 31,
+    "name": "Trường Đại học Công nghệ Vạn Xuân",
+    "short": "VXUT",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Nghệ An"
+  },
+  {
+    "id": 32,
+    "name": "Trường Đại học Đại Nam",
+    "short": "DNU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 33,
+    "name": "Trường Đại học Dầu khí Việt Nam",
+    "short": "PVU",
+    "type": "dai_hoc",
+    "city": "Bà Rịa – Vũng Tàu"
+  },
+  {
+    "id": 34,
+    "name": "Trường Đại học Dân lập Duy Tân",
+    "short": "DTU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Đà Nẵng"
+  },
+  {
+    "id": 35,
+    "name": "Trường Đại học Dược Hà Nội",
+    "short": "HUP",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 36,
+    "name": "Trường Đại học Điện lực",
+    "short": "EPU",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 37,
+    "name": "Trường Đại học Điều dưỡng Nam Định",
+    "short": "NDUN",
+    "type": "dai_hoc",
+    "city": "Nam Định"
+  },
+  {
+    "id": 38,
+    "name": "Trường Đại học Đông Á",
+    "short": "UDA",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Đà Nẵng"
+  },
+  {
+    "id": 39,
+    "name": "Trường Đại học Đông Đô",
+    "short": "HDIU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 40,
+    "name": "Trường Đại học Đồng Nai",
+    "short": "DNU",
+    "type": "dai_hoc",
+    "city": "Đồng Nai"
+  },
+  {
+    "id": 41,
+    "name": "Trường Đại học Đồng Tháp",
+    "short": "DThU",
+    "type": "dai_hoc",
+    "city": "Đồng Tháp"
+  },
+  {
+    "id": 42,
+    "name": "Trường Đại học Fulbright Việt Nam",
+    "short": "FUV",
+    "type": "nuoc_ngoai",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 43,
+    "name": "Trường Đại học Gia Định",
+    "short": "GDU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 44,
+    "name": "Trường Đại học Giao thông vận tải",
+    "short": "UTC",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 45,
+    "name": "Trường Đại học Giao thông vận tải Thành phố Hồ Chí Minh",
+    "short": "UTH",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 46,
+    "name": "Trường Đại học Giáo dục (ĐHQGHN)",
+    "short": "VNU-UEd",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 47,
+    "name": "Trường Đại học Greenwich - FPT Việt Nam",
+    "short": "Greenwich",
+    "type": "nuoc_ngoai",
+    "city": "Toàn quốc"
+  },
+  {
+    "id": 48,
+    "name": "Trường Đại học Hà Nội",
+    "short": "HANU",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 49,
+    "name": "Trường Đại học Hà Tĩnh",
+    "short": "HTU",
+    "type": "dai_hoc",
+    "city": "Hà Tĩnh"
+  },
+  {
+    "id": 50,
+    "name": "Trường Đại học Hạ Long",
+    "short": "UHL",
+    "type": "dai_hoc",
+    "city": "Quảng Ninh"
+  },
+  {
+    "id": 51,
+    "name": "Trường Đại học Hải Dương",
+    "short": "UHD",
+    "type": "dai_hoc",
+    "city": "Hải Dương"
+  },
+  {
+    "id": 52,
+    "name": "Trường Đại học Hải Phòng",
+    "short": "DHHP",
+    "type": "dai_hoc",
+    "city": "Hải Phòng"
+  },
+  {
+    "id": 53,
+    "name": "Trường Đại học Hàng hải Việt Nam",
+    "short": "VMU",
+    "type": "dai_hoc",
+    "city": "Hải Phòng"
+  },
+  {
+    "id": 54,
+    "name": "Trường Đại học Hoa Lư",
+    "short": "HLUV",
+    "type": "dai_hoc",
+    "city": "Ninh Bình"
+  },
+  {
+    "id": 55,
+    "name": "Trường Đại học Hoa Sen",
+    "short": "HSU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 56,
+    "name": "Trường Đại học Hòa Bình",
+    "short": "HBU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 57,
+    "name": "Trường Đại học Hồng Đức",
+    "short": "HDU",
+    "type": "dai_hoc",
+    "city": "Thanh Hóa"
+  },
+  {
+    "id": 58,
+    "name": "Trường Đại học Hùng Vương",
+    "short": "HVU",
+    "type": "dai_hoc",
+    "city": "Phú Thọ"
+  },
+  {
+    "id": 59,
+    "name": "Trường Đại học Khánh Hòa",
+    "short": "UKH",
+    "type": "dai_hoc",
+    "city": "Khánh Hòa"
+  },
+  {
+    "id": 60,
+    "name": "Trường Đại học Khoa học (ĐH Huế)",
+    "short": "HUSC",
+    "type": "dai_hoc",
+    "city": "Huế"
+  },
+  {
+    "id": 61,
+    "name": "Trường Đại học Khoa học (ĐH Thái Nguyên)",
+    "short": "TNUS",
+    "type": "dai_hoc",
+    "city": "Thái Nguyên"
+  },
+  {
+    "id": 62,
+    "name": "Trường Đại học Khoa học Tự nhiên (ĐHQG-HCM)",
+    "short": "HCMUS",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 63,
+    "name": "Trường Đại học Khoa học Tự nhiên (ĐHQGHN)",
+    "short": "VNU-HUS",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 64,
+    "name": "Trường Đại học Khoa học Xã hội và Nhân văn (ĐHQG-HCM)",
+    "short": "HCMUSSH",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 65,
+    "name": "Trường Đại học Khoa học Xã hội và Nhân văn (ĐHQGHN)",
+    "short": "VNU-USSH",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 66,
+    "name": "Trường Đại học Kiên Giang",
+    "short": "KGU",
+    "type": "dai_hoc",
+    "city": "Kiên Giang"
+  },
+  {
+    "id": 67,
+    "name": "Trường Đại học Kiến trúc Đà Nẵng",
+    "short": "DAU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Đà Nẵng"
+  },
+  {
+    "id": 68,
+    "name": "Trường Đại học Kiến trúc Hà Nội",
+    "short": "HAU",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 69,
+    "name": "Trường Đại học Kiến trúc Thành phố Hồ Chí Minh",
+    "short": "UAH",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 70,
+    "name": "Trường Đại học Kiểm sát Hà Nội",
+    "short": "VPU",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 71,
+    "name": "Trường Đại học Kinh bắc",
+    "short": "UKB",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Bắc Ninh"
+  },
+  {
+    "id": 72,
+    "name": "Trường Đại học Kinh doanh và Công nghệ Hà Nội",
+    "short": "HUBT",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 73,
+    "name": "Trường Đại học Kinh tế (ĐH Đà Nẵng)",
+    "short": "DUE",
+    "type": "dai_hoc",
+    "city": "Đà Nẵng"
+  },
+  {
+    "id": 74,
+    "name": "Trường Đại học Kinh tế (ĐH Huế)",
+    "short": "HCE",
+    "type": "dai_hoc",
+    "city": "Huế"
+  },
+  {
+    "id": 75,
+    "name": "Trường Đại học Kinh tế (ĐHQGHN)",
+    "short": "VNU-UEB",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 76,
+    "name": "Trường Đại học Kinh tế – Luật (ĐHQG-HCM)",
+    "short": "UEL",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 77,
+    "name": "Trường Đại học Kinh tế – Tài chính TP.HCM",
+    "short": "UEF",
+    "type": "dai_hoc_tu_thuc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 78,
+    "name": "Trường Đại học Kinh tế Công nghiệp Long An",
+    "short": "DLA",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Long An"
+  },
+  {
+    "id": 79,
+    "name": "Trường Đại học Kinh tế Nghệ An",
+    "short": "NAUE",
+    "type": "dai_hoc",
+    "city": "Nghệ An"
+  },
+  {
+    "id": 80,
+    "name": "Trường Đại học Kinh tế Quốc dân",
+    "short": "NEU",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 81,
+    "name": "Trường Đại học Kinh tế Thành phố Hồ Chí Minh",
+    "short": "UEH",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 82,
+    "name": "Trường Đại học Kinh tế và Quản trị Kinh doanh (ĐH Thái Nguyên)",
+    "short": "TUEBA",
+    "type": "dai_hoc",
+    "city": "Thái Nguyên"
+  },
+  {
+    "id": 83,
+    "name": "Trường Đại học Kinh tế và Quản trị Kinh doanh (Thái Nguyên)",
+    "short": "TUEBA",
+    "type": "dai_hoc",
+    "city": "Thái Nguyên"
+  },
+  {
+    "id": 84,
+    "name": "Trường Đại học Kỹ thuật – Công nghệ Cần Thơ",
+    "short": "CTUT",
+    "type": "dai_hoc",
+    "city": "Cần Thơ"
+  },
+  {
+    "id": 85,
+    "name": "Trường Đại học Kỹ thuật Công nghiệp (ĐH Thái Nguyên)",
+    "short": "TNUT",
+    "type": "dai_hoc",
+    "city": "Thái Nguyên"
+  },
+  {
+    "id": 86,
+    "name": "Trường Đại học Kỹ thuật Y Dược Đà Nẵng",
+    "short": "DUMTP",
+    "type": "dai_hoc",
+    "city": "Đà Nẵng"
+  },
+  {
+    "id": 87,
+    "name": "Trường Đại học Kỹ thuật Y tế Hải Dương",
+    "short": "HMTU",
+    "type": "dai_hoc",
+    "city": "Hải Dương"
+  },
+  {
+    "id": 88,
+    "name": "Trường Đại học Lạc Hồng",
+    "short": "LHU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Đồng Nai"
+  },
+  {
+    "id": 89,
+    "name": "Trường Đại học Lâm nghiệp",
+    "short": "VNUF",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 90,
+    "name": "Trường Đại học Luật (ĐH Huế)",
+    "short": "HUL",
+    "type": "dai_hoc",
+    "city": "Huế"
+  },
+  {
+    "id": 91,
+    "name": "Trường Đại học Luật (ĐHQGHN)",
+    "short": "VNU-UL",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 92,
+    "name": "Trường Đại học Luật Hà Nội",
+    "short": "HLU",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 93,
+    "name": "Trường Đại học Luật Thành phố Hồ Chí Minh",
+    "short": "ULaw",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 94,
+    "name": "Trường Đại học Lương Thế Vinh",
+    "short": "LTVU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Nam Định"
+  },
+  {
+    "id": 95,
+    "name": "Trường Đại học Mỏ – Địa chất",
+    "short": "HUMG",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 96,
+    "name": "Trường Đại học Mở Hà Nội",
+    "short": "HOU",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 97,
+    "name": "Trường Đại học Mở Thành phố Hồ Chí Minh",
+    "short": "HCMOU",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 98,
+    "name": "Trường Đại học Mỹ thuật Công nghiệp",
+    "short": "UAD",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 99,
+    "name": "Trường Đại học Mỹ thuật Việt Nam",
+    "short": "VNUFA",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 100,
+    "name": "Trường Đại học Nam Cần Thơ",
+    "short": "DNC",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Cần Thơ"
+  },
+  {
+    "id": 101,
+    "name": "Trường Đại học Nghệ thuật (ĐH Huế)",
+    "short": "HUA",
+    "type": "dai_hoc",
+    "city": "Huế"
+  },
+  {
+    "id": 102,
+    "name": "Trường Đại học Ngoại ngữ (ĐH Đà Nẵng)",
+    "short": "DNUFL",
+    "type": "dai_hoc",
+    "city": "Đà Nẵng"
+  },
+  {
+    "id": 103,
+    "name": "Trường Đại học Ngoại ngữ (ĐH Huế)",
+    "short": "HUCFL",
+    "type": "dai_hoc",
+    "city": "Huế"
+  },
+  {
+    "id": 104,
+    "name": "Trường Đại học Ngoại ngữ (ĐHQGHN)",
+    "short": "VNU-ULIS",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 105,
+    "name": "Trường Đại học Ngoại ngữ – Tin học TP.HCM",
+    "short": "HUFLIT",
+    "type": "dai_hoc_tu_thuc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 106,
+    "name": "Trường Đại học Ngoại thương",
+    "short": "FTU",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 107,
+    "name": "Trường Đại học Ngô Quyền",
+    "short": "SQCB",
+    "type": "quan_su",
+    "city": "Bình Dương"
+  },
+  {
+    "id": 108,
+    "name": "Trường Đại học Nguyễn Huệ",
+    "short": "SQLQ2",
+    "type": "quan_su",
+    "city": "Đồng Nai"
+  },
+  {
+    "id": 109,
+    "name": "Trường Đại học Nguyễn Tất Thành",
+    "short": "NTTU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 110,
+    "name": "Trường Đại học Nguyễn Trãi",
+    "short": "NTU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 111,
+    "name": "Trường Đại học Nha Trang",
+    "short": "NTU",
+    "type": "dai_hoc",
+    "city": "Khánh Hòa"
+  },
+  {
+    "id": 112,
+    "name": "Trường Đại học Nông Lâm (ĐH Huế)",
+    "short": "HUAF",
+    "type": "dai_hoc",
+    "city": "Huế"
+  },
+  {
+    "id": 113,
+    "name": "Trường Đại học Nông Lâm (ĐH Thái Nguyên)",
+    "short": "TUAF",
+    "type": "dai_hoc",
+    "city": "Thái Nguyên"
+  },
+  {
+    "id": 114,
+    "name": "Trường Đại học Nông Lâm Thành phố Hồ Chí Minh",
+    "short": "NLU",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 115,
+    "name": "Trường Đại học Phạm Văn Đồng",
+    "short": "PDU",
+    "type": "dai_hoc",
+    "city": "Quảng Ngãi"
+  },
+  {
+    "id": 116,
+    "name": "Trường Đại học Phan Châu Trinh",
+    "short": "PCTU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Quảng Nam"
+  },
+  {
+    "id": 117,
+    "name": "Trường Đại học Phan Thiết",
+    "short": "UPT",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Bình Thuận"
+  },
+  {
+    "id": 118,
+    "name": "Trường Đại học Phenikaa",
+    "short": "Phenikaa",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 119,
+    "name": "Trường Đại học Phú Xuân",
+    "short": "PXU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Huế"
+  },
+  {
+    "id": 120,
+    "name": "Trường Đại học Phú Yên",
+    "short": "PYU",
+    "type": "dai_hoc",
+    "city": "Phú Yên"
+  },
+  {
+    "id": 121,
+    "name": "Trường Đại học Phòng cháy chữa cháy",
+    "short": "PCCC",
+    "type": "cong_an",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 122,
+    "name": "Trường Đại học Quản lý và Công nghệ Hải Phòng",
+    "short": "HPU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Hải Phòng"
+  },
+  {
+    "id": 123,
+    "name": "Trường Đại học Quản lý và Công nghệ TP.HCM",
+    "short": "UMT",
+    "type": "dai_hoc_tu_thuc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 124,
+    "name": "Trường Đại học Quảng Bình",
+    "short": "QBU",
+    "type": "dai_hoc",
+    "city": "Quảng Bình"
+  },
+  {
+    "id": 125,
+    "name": "Trường Đại học Quảng Nam",
+    "short": "QNamUni",
+    "type": "dai_hoc",
+    "city": "Quảng Nam"
+  },
+  {
+    "id": 126,
+    "name": "Trường Đại học Quốc tế (ĐHQG-HCM)",
+    "short": "HCMIU",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 127,
+    "name": "Trường Đại học Quốc tế Bắc Hà",
+    "short": "BHIU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Bắc Ninh"
+  },
+  {
+    "id": 128,
+    "name": "Trường Đại học Quốc tế Hồng Bàng",
+    "short": "HIU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 129,
+    "name": "Trường Đại học Quốc tế Miền Đông",
+    "short": "EIU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Bình Dương"
+  },
+  {
+    "id": 130,
+    "name": "Trường Đại học Quốc tế RMIT Việt Nam",
+    "short": "RMIT",
+    "type": "nuoc_ngoai",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 131,
+    "name": "Trường Đại học Quốc tế Sài Gòn",
+    "short": "SIU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 132,
+    "name": "Trường Đại học Quy Nhơn",
+    "short": "QNU",
+    "type": "dai_hoc",
+    "city": "Bình Định"
+  },
+  {
+    "id": 133,
+    "name": "Trường Đại học Sài Gòn",
+    "short": "SGU",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 134,
+    "name": "Trường Đại học Sản phụ khoa (Học viện Quân y)",
+    "short": "VMMU",
+    "type": "quan_su",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 135,
+    "name": "Trường Đại học Sân khấu – Điện ảnh Hà Nội",
+    "short": "SKDA",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 136,
+    "name": "Trường Đại học Sân khấu – Điện ảnh TP.HCM",
+    "short": "SKDA-HCM",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 137,
+    "name": "Trường Đại học Sao Đỏ",
+    "short": "SDU",
+    "type": "dai_hoc",
+    "city": "Hải Dương"
+  },
+  {
+    "id": 138,
+    "name": "Trường Đại học Sư phạm (ĐH Đà Nẵng)",
+    "short": "UED",
+    "type": "dai_hoc",
+    "city": "Đà Nẵng"
+  },
+  {
+    "id": 139,
+    "name": "Trường Đại học Sư phạm (ĐH Huế)",
+    "short": "HUCE",
+    "type": "dai_hoc",
+    "city": "Huế"
+  },
+  {
+    "id": 140,
+    "name": "Trường Đại học Sư phạm (ĐH Thái Nguyên)",
+    "short": "TNUE",
+    "type": "dai_hoc",
+    "city": "Thái Nguyên"
+  },
+  {
+    "id": 141,
+    "name": "Trường Đại học Sư phạm Hà Nội",
+    "short": "HNUE",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 142,
+    "name": "Trường Đại học Sư phạm Kỹ thuật Hưng Yên",
+    "short": "HYUTE",
+    "type": "dai_hoc",
+    "city": "Hưng Yên"
+  },
+  {
+    "id": 143,
+    "name": "Trường Đại học Sư phạm Kỹ thuật Nam Định",
+    "short": "NUTE",
+    "type": "dai_hoc",
+    "city": "Nam Định"
+  },
+  {
+    "id": 144,
+    "name": "Trường Đại học Sư phạm Kỹ thuật Thành phố Hồ Chí Minh",
+    "short": "HCMUTE",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 145,
+    "name": "Trường Đại học Sư phạm Kỹ thuật Vinh",
+    "short": "VUTE",
+    "type": "dai_hoc",
+    "city": "Nghệ An"
+  },
+  {
+    "id": 146,
+    "name": "Trường Đại học Sư phạm Kỹ thuật Vĩnh Long",
+    "short": "VLUTE",
+    "type": "dai_hoc",
+    "city": "Vĩnh Long"
+  },
+  {
+    "id": 147,
+    "name": "Trường Đại học Sư phạm Thành phố Hồ Chí Minh",
+    "short": "HCMUE",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 148,
+    "name": "Trường Đại học Tài chính – Marketing",
+    "short": "UFM",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 149,
+    "name": "Trường Đại học Tài chính – Ngân hàng Hà Nội",
+    "short": "FBU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 150,
+    "name": "Trường Đại học Tài nguyên và Môi trường Hà Nội",
+    "short": "HUNRE",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 151,
+    "name": "Trường Đại học Tài nguyên và Môi trường TP.HCM",
+    "short": "HCMUNRE",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 152,
+    "name": "Trường Đại học Tại chức (Cũ) / Các cơ sở liên kết",
+    "short": "TC",
+    "type": "dai_hoc",
+    "city": "Toàn quốc"
+  },
+  {
+    "id": 153,
+    "name": "Trường Đại học Tân Tạo",
+    "short": "TTU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Long An"
+  },
+  {
+    "id": 154,
+    "name": "Trường Đại học Tân Trào",
+    "short": "TTrUT",
+    "type": "dai_hoc",
+    "city": "Tuyên Quang"
+  },
+  {
+    "id": 155,
+    "name": "Trường Đại học Tây Bắc",
+    "short": "UTB",
+    "type": "dai_hoc",
+    "city": "Sơn La"
+  },
+  {
+    "id": 156,
+    "name": "Trường Đại học Tây Đô",
+    "short": "TDU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Cần Thơ"
+  },
+  {
+    "id": 157,
+    "name": "Trường Đại học Tây Nguyên",
+    "short": "TTN",
+    "type": "dai_hoc",
+    "city": "Đắk Lắk"
+  },
+  {
+    "id": 158,
+    "name": "Trường Đại học Thăng Long",
+    "short": "TLU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 159,
+    "name": "Trường Đại học Thành Đô",
+    "short": "TDU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 160,
+    "name": "Trường Đại học Thành Đông",
+    "short": "TDU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Hải Dương"
+  },
+  {
+    "id": 161,
+    "name": "Trường Đại học Thể dục Thể thao Bắc Ninh",
+    "short": "UPES1",
+    "type": "dai_hoc",
+    "city": "Bắc Ninh"
+  },
+  {
+    "id": 162,
+    "name": "Trường Đại học Thể dục Thể thao Đà Nẵng",
+    "short": "UPES3",
+    "type": "dai_hoc",
+    "city": "Đà Nẵng"
+  },
+  {
+    "id": 163,
+    "name": "Trường Đại học Thể dục Thể thao TP.HCM",
+    "short": "UPES2",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 164,
+    "name": "Trường Đại học Thủ Dầu Một",
+    "short": "TDMU",
+    "type": "dai_hoc",
+    "city": "Bình Dương"
+  },
+  {
+    "id": 165,
+    "name": "Trường Đại học Thủ đô Hà Nội",
+    "short": "HNMU",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 166,
+    "name": "Trường Đại học Thủy lợi",
+    "short": "TLU",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 167,
+    "name": "Trường Đại học Thương mại",
+    "short": "TMU",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 168,
+    "name": "Trường Đại học Tiền Giang",
+    "short": "TGU",
+    "type": "dai_hoc",
+    "city": "Tiền Giang"
+  },
+  {
+    "id": 169,
+    "name": "Trường Đại học Tôn Đức Thắng",
+    "short": "TDTU",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 170,
+    "name": "Trường Đại học Trà Vinh",
+    "short": "TVU",
+    "type": "dai_hoc",
+    "city": "Trà Vinh"
+  },
+  {
+    "id": 171,
+    "name": "Trường Đại học Trưng Vương",
+    "short": "TVU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Vĩnh Phúc"
+  },
+  {
+    "id": 172,
+    "name": "Trường Đại học Văn Hiến",
+    "short": "VHU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 173,
+    "name": "Trường Đại học Văn Lang",
+    "short": "VLU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 174,
+    "name": "Trường Đại học Văn hóa Hà Nội",
+    "short": "HUC",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 175,
+    "name": "Trường Đại học Văn hóa Thành phố Hồ Chí Minh",
+    "short": "VHS",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 176,
+    "name": "Trường Đại học Văn hóa, Thể thao và Du lịch Thanh Hóa",
+    "short": "TUCST",
+    "type": "dai_hoc",
+    "city": "Thanh Hóa"
+  },
+  {
+    "id": 177,
+    "name": "Trường Đại học Việt Đức",
+    "short": "VGU",
+    "type": "dai_hoc",
+    "city": "Bình Dương"
+  },
+  {
+    "id": 178,
+    "name": "Trường Đại học Việt Nhật (ĐHQGHN)",
+    "short": "VNU-VJU",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 179,
+    "name": "Trường Đại học Vinh",
+    "short": "VinhUni",
+    "type": "dai_hoc",
+    "city": "Nghệ An"
+  },
+  {
+    "id": 180,
+    "name": "Trường Đại học VinUni",
+    "short": "VinUni",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 181,
+    "name": "Trường Đại học Võ Trường Toản",
+    "short": "VTTU",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Hậu Giang"
+  },
+  {
+    "id": 182,
+    "name": "Trường Đại học Xây dựng Hà Nội",
+    "short": "HUCE",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 183,
+    "name": "Trường Đại học Y Dược (ĐH Huế)",
+    "short": "YDH",
+    "type": "dai_hoc",
+    "city": "Huế"
+  },
+  {
+    "id": 184,
+    "name": "Trường Đại học Y Dược (ĐH Thái Nguyên)",
+    "short": "TUMP",
+    "type": "dai_hoc",
+    "city": "Thái Nguyên"
+  },
+  {
+    "id": 185,
+    "name": "Trường Đại học Y Dược (ĐHQGHN)",
+    "short": "VNU-UMP",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 186,
+    "name": "Trường Đại học Y Dược Buôn Ma Thuột",
+    "short": "BUH",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Đắk Lắk"
+  },
+  {
+    "id": 187,
+    "name": "Trường Đại học Y Dược Cần Thơ",
+    "short": "CTUMP",
+    "type": "dai_hoc",
+    "city": "Cần Thơ"
+  },
+  {
+    "id": 188,
+    "name": "Trường Đại học Y Dược Hải Phòng",
+    "short": "HPMU",
+    "type": "dai_hoc",
+    "city": "Hải Phòng"
+  },
+  {
+    "id": 189,
+    "name": "Trường Đại học Y Dược Thành phố Hồ Chí Minh",
+    "short": "UMP",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 190,
+    "name": "Trường Đại học Y Dược Thái Bình",
+    "short": "TBUMP",
+    "type": "dai_hoc",
+    "city": "Thái Bình"
+  },
+  {
+    "id": 191,
+    "name": "Trường Đại học Y Hà Nội",
+    "short": "HMU",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 192,
+    "name": "Trường Đại học Y khoa Phạm Ngọc Thạch",
+    "short": "PNTU",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 193,
+    "name": "Trường Đại học Y khoa Tokyo Việt Nam",
+    "short": "THUV",
+    "type": "nuoc_ngoai",
+    "city": "Hưng Yên"
+  },
+  {
+    "id": 194,
+    "name": "Trường Đại học Y khoa Vinh",
+    "short": "VMU",
+    "type": "dai_hoc",
+    "city": "Nghệ An"
+  },
+  {
+    "id": 195,
+    "name": "Trường Đại học Yersin Đà Lạt",
+    "short": "Yersin",
+    "type": "dai_hoc_tu_thuc",
+    "city": "Lâm Đồng"
+  },
+  {
+    "id": 196,
+    "name": "Học viện Âm nhạc Quốc gia Việt Nam",
+    "short": "VNAM",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 197,
+    "name": "Học viện Âm nhạc Huế",
+    "short": "HVMH",
+    "type": "dai_hoc",
+    "city": "Huế"
+  },
+  {
+    "id": 198,
+    "name": "Học viện An ninh nhân dân",
+    "short": "T01",
+    "type": "cong_an",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 199,
+    "name": "Học viện Báo chí và Tuyên truyền",
+    "short": "AJC",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 200,
+    "name": "Học viện Biên phòng",
+    "short": "BP",
+    "type": "quan_su",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 201,
+    "name": "Học viện Cán bộ Thành phố Hồ Chí Minh",
+    "short": "HCA",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 202,
+    "name": "Học viện Cảnh sát nhân dân",
+    "short": "T02",
+    "type": "cong_an",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 203,
+    "name": "Học viện Chính trị - Công an Nhân dân",
+    "short": "T03",
+    "type": "cong_an",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 204,
+    "name": "Học viện Chính sách và Phát triển",
+    "short": "APD",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 205,
+    "name": "Học viện Công giáo Việt Nam",
+    "short": "CIV",
+    "type": "ton_giao",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 206,
+    "name": "Học viện Công nghệ Bưu chính Viễn thông",
+    "short": "PTIT",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 207,
+    "name": "Học viện Hàng không Việt Nam",
+    "short": "VAA",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 208,
+    "name": "Học viện Hải quân",
+    "short": "HQ",
+    "type": "quan_su",
+    "city": "Khánh Hòa"
+  },
+  {
+    "id": 209,
+    "name": "Học viện Hậu cần",
+    "short": "HEC",
+    "type": "quan_su",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 210,
+    "name": "Học viện Khoa học Quân sự",
+    "short": "MSA",
+    "type": "quan_su",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 211,
+    "name": "Học viện Kỹ thuật Mật mã",
+    "short": "KMA",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 212,
+    "name": "Học viện Kỹ thuật Quân sự",
+    "short": "MTA",
+    "type": "quan_su",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 213,
+    "name": "Học viện Lục quân",
+    "short": "HVLQ",
+    "type": "quan_su",
+    "city": "Lâm Đồng"
+  },
+  {
+    "id": 214,
+    "name": "Học viện Ngân hàng",
+    "short": "BAV",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 215,
+    "name": "Học viện Ngoại giao",
+    "short": "DAV",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 216,
+    "name": "Học viện Nông nghiệp Việt Nam",
+    "short": "VNUA",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 217,
+    "name": "Học viện Phật giáo Nam tông Khmer",
+    "short": "VBU-K",
+    "type": "ton_giao",
+    "city": "Cần Thơ"
+  },
+  {
+    "id": 218,
+    "name": "Học viện Phật giáo Việt Nam tại Hà Nội",
+    "short": "VBA",
+    "type": "ton_giao",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 219,
+    "name": "Học viện Phật giáo Việt Nam tại Huế",
+    "short": "VBAH",
+    "type": "ton_giao",
+    "city": "Huế"
+  },
+  {
+    "id": 220,
+    "name": "Học viện Phật giáo Việt Nam tại TP.HCM",
+    "short": "VBU",
+    "type": "ton_giao",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 221,
+    "name": "Học viện Phòng không – Không quân",
+    "short": "PKKQ",
+    "type": "quan_su",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 222,
+    "name": "Học viện Phụ nữ Việt Nam",
+    "short": "VWA",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 223,
+    "name": "Học viện Quản lý giáo dục",
+    "short": "NAEM",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 224,
+    "name": "Học viện Quân y",
+    "short": "VMMU",
+    "type": "quan_su",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 225,
+    "name": "Học viện Quốc gia Hành chính",
+    "short": "NAPA",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 226,
+    "name": "Học viện Tài chính",
+    "short": "AOF",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 227,
+    "name": "Học viện Thanh thiếu niên Việt Nam",
+    "short": "VAYM",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 228,
+    "name": "Học viện Tòa án",
+    "short": "VCA",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 229,
+    "name": "Học viện Tư pháp",
+    "short": "VIJ",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 230,
+    "name": "Nhạc viện Thành phố Hồ Chí Minh",
+    "short": "HCMCONS",
+    "type": "dai_hoc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 231,
+    "name": "Trường Quản trị và Kinh doanh (ĐHQGHN)",
+    "short": "VNU-HSB",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 232,
+    "name": "Trường Quốc tế (ĐHQGHN)",
+    "short": "VNU-IS",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 233,
+    "name": "Trường Khoa học liên ngành và Nghệ thuật (ĐHQGHN)",
+    "short": "VNU-SIS",
+    "type": "dai_hoc",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 234,
+    "name": "Trường Sĩ quan Công binh",
+    "short": "SQCB",
+    "type": "quan_su",
+    "city": "Bình Dương"
+  },
+  {
+    "id": 235,
+    "name": "Trường Sĩ quan Không quân",
+    "short": "SQKQ",
+    "type": "quan_su",
+    "city": "Khánh Hòa"
+  },
+  {
+    "id": 236,
+    "name": "Trường Sĩ quan Pháo binh",
+    "short": "SQPB",
+    "type": "quan_su",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 237,
+    "name": "Trường Sĩ quan Thông tin",
+    "short": "TCU",
+    "type": "quan_su",
+    "city": "Khánh Hòa"
+  },
+  {
+    "id": 238,
+    "name": "Trường Sĩ quan Đặc công",
+    "short": "SQDC",
+    "type": "quan_su",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 239,
+    "name": "Trường Sĩ quan Lục quân 1",
+    "short": "SQLQ1",
+    "type": "quan_su",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 240,
+    "name": "Trường Sĩ quan Lục quân 2",
+    "short": "SQLQ2",
+    "type": "quan_su",
+    "city": "Đồng Nai"
+  },
+  {
+    "id": 241,
+    "name": "Trường Sĩ quan Phòng hóa",
+    "short": "SQPH",
+    "type": "quan_su",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 242,
+    "name": "Trường Sĩ quan Tăng – Thiết giáp",
+    "short": "SQTTG",
+    "type": "quan_su",
+    "city": "Vĩnh Phúc"
+  },
+  {
+    "id": 243,
+    "name": "Trường Thánh kinh Thần học Hà Nội",
+    "short": "HBC",
+    "type": "ton_giao",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 244,
+    "name": "Viện Thánh kinh Thần học",
+    "short": "IBT",
+    "type": "ton_giao",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 245,
+    "name": "Trường Đại học Thái Bình",
+    "short": "TBU",
+    "type": "dai_hoc",
+    "city": "Thái Bình"
+  },
+  {
+    "id": 246,
+    "name": "Trường Đại học Fulbright Việt Nam",
+    "short": "FUV",
+    "type": "nuoc_ngoai",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 247,
+    "name": "Trường Cao đẳng Y tế Hà Đông",
+    "short": "CYHĐ",
+    "type": "cao_dang",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 248,
+    "name": "Trường Cao đẳng Y tế Bạch Mai",
+    "short": "BMPC",
+    "type": "cao_dang",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 249,
+    "name": "Trường Cao đẳng Kinh tế đối ngoại",
+    "short": "COFER",
+    "type": "cao_dang",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 250,
+    "name": "Trường Cao đẳng Công nghệ Thủ Đức",
+    "short": "TDC",
+    "type": "cao_dang",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 251,
+    "name": "Trường Cao đẳng Lý Tự Trọng TP.HCM",
+    "short": "LTTP",
+    "type": "cao_dang",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 252,
+    "name": "Trường Cao đẳng Sư phạm Trung ương",
+    "short": "NCE",
+    "type": "cao_dang",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 253,
+    "name": "Trường Cao đẳng Sư phạm Trung ương TP.HCM",
+    "short": "NCEHCM",
+    "type": "cao_dang",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 254,
+    "name": "Trường Cao đẳng Du lịch Hà Nội",
+    "short": "HTC",
+    "type": "cao_dang",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 255,
+    "name": "Trường Cao đẳng Du lịch Sài Gòn",
+    "short": "SGTC",
+    "type": "cao_dang_tu_thuc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 256,
+    "name": "Trường Cao đẳng FPT Polytechnic",
+    "short": "FPL",
+    "type": "cao_dang_tu_thuc",
+    "city": "Toàn quốc"
+  },
+  {
+    "id": 257,
+    "name": "Trường Cao đẳng Giao thông vận tải Trung ương I",
+    "short": "GTVT1",
+    "type": "cao_dang",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 258,
+    "name": "Trường Cao đẳng Điện lực Miền Bắc",
+    "short": "NEPC",
+    "type": "cao_dang",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 259,
+    "name": "Trường Cao đẳng Cơ điện Hà Nội",
+    "short": "HCEM",
+    "type": "cao_dang",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 260,
+    "name": "Trường Cao đẳng Thương mại và Du lịch Hà Nội",
+    "short": "HCCT",
+    "type": "cao_dang",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 261,
+    "name": "Trường Cao đẳng An ninh nhân dân I",
+    "short": "T08",
+    "type": "cao_dang_cong_an",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 262,
+    "name": "Trường Cao đẳng Bách khoa Đà Nẵng",
+    "short": "DPC",
+    "type": "cao_dang_tu_thuc",
+    "city": "Đà Nẵng"
+  },
+  {
+    "id": 263,
+    "name": "Trường Cao đẳng Cảnh sát nhân dân I",
+    "short": "T09",
+    "type": "cao_dang_cong_an",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 264,
+    "name": "Trường Cao đẳng Cảnh sát nhân dân II",
+    "short": "T10",
+    "type": "cao_dang_cong_an",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 265,
+    "name": "Trường Cao đẳng Công nghệ Bắc Hà",
+    "short": "BHC",
+    "type": "cao_dang_tu_thuc",
+    "city": "Bắc Ninh"
+  },
+  {
+    "id": 266,
+    "name": "Trường Cao đẳng Công nghệ và Quản trị Sonadezi",
+    "short": "SDZ",
+    "type": "cao_dang_tu_thuc",
+    "city": "Đồng Nai"
+  },
+  {
+    "id": 267,
+    "name": "Trường Cao đẳng Công nghiệp Huế",
+    "short": "HueIC",
+    "type": "cao_dang",
+    "city": "Huế"
+  },
+  {
+    "id": 268,
+    "name": "Trường Cao đẳng Công nghiệp Nam Định",
+    "short": "CNE",
+    "type": "cao_dang",
+    "city": "Nam Định"
+  },
+  {
+    "id": 269,
+    "name": "Trường Cao đẳng Công nghiệp Thực phẩm",
+    "short": "FIC",
+    "type": "cao_dang",
+    "city": "Phú Thọ"
+  },
+  {
+    "id": 270,
+    "name": "Trường Cao đẳng Công nghiệp Tuy Hòa",
+    "short": "TIC",
+    "type": "cao_dang",
+    "city": "Phú Yên"
+  },
+  {
+    "id": 271,
+    "name": "Trường Cao đẳng Cơ điện và Nông nghiệp Nam Bộ",
+    "short": "CEA",
+    "type": "cao_dang",
+    "city": "Cần Thơ"
+  },
+  {
+    "id": 272,
+    "name": "Trường Cao đẳng Cơ khí Nông nghiệp",
+    "short": "CAM",
+    "type": "cao_dang",
+    "city": "Vĩnh Phúc"
+  },
+  {
+    "id": 273,
+    "name": "Trường Cao đẳng Công thương Thành phố Hồ Chí Minh",
+    "short": "HITU",
+    "type": "cao_dang",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 274,
+    "name": "Trường Cao đẳng Du lịch Đà Nẵng",
+    "short": "DVTC",
+    "type": "cao_dang",
+    "city": "Đà Nẵng"
+  },
+  {
+    "id": 275,
+    "name": "Trường Cao đẳng Du lịch Huế",
+    "short": "HVTC",
+    "type": "cao_dang",
+    "city": "Huế"
+  },
+  {
+    "id": 276,
+    "name": "Trường Cao đẳng Du lịch Vũng Tàu",
+    "short": "VTC",
+    "type": "cao_dang",
+    "city": "Bà Rịa – Vũng Tàu"
+  },
+  {
+    "id": 277,
+    "name": "Trường Cao đẳng Giao thông vận tải TP.HCM",
+    "short": "GTVT-HCM",
+    "type": "cao_dang",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 278,
+    "name": "Trường Cao đẳng Giao thông vận tải Trung ương II",
+    "short": "GTVT2",
+    "type": "cao_dang",
+    "city": "Hải Phòng"
+  },
+  {
+    "id": 279,
+    "name": "Trường Cao đẳng Giao thông vận tải Trung ương III",
+    "short": "GTVT3",
+    "type": "cao_dang",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 280,
+    "name": "Trường Cao đẳng Giao thông vận tải Trung ương IV",
+    "short": "GTVT4",
+    "type": "cao_dang",
+    "city": "Nghệ An"
+  },
+  {
+    "id": 281,
+    "name": "Trường Cao đẳng Giao thông vận tải Trung ương V",
+    "short": "GTVT5",
+    "type": "cao_dang",
+    "city": "Đà Nẵng"
+  },
+  {
+    "id": 282,
+    "name": "Trường Cao đẳng Hải quan",
+    "short": "CC",
+    "type": "cao_dang",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 283,
+    "name": "Trường Cao đẳng Kinh tế Thành phố Hồ Chí Minh",
+    "short": "HCE",
+    "type": "cao_dang",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 284,
+    "name": "Trường Cao đẳng Kinh tế – Kỹ thuật Cần Thơ",
+    "short": "CTEC",
+    "type": "cao_dang",
+    "city": "Cần Thơ"
+  },
+  {
+    "id": 285,
+    "name": "Trường Cao đẳng Kinh tế – Kỹ thuật Phú Thọ",
+    "short": "PTTEC",
+    "type": "cao_dang",
+    "city": "Phú Thọ"
+  },
+  {
+    "id": 286,
+    "name": "Trường Cao đẳng Kinh tế – Kỹ thuật Quảng Nam",
+    "short": "QNTEC",
+    "type": "cao_dang",
+    "city": "Quảng Nam"
+  },
+  {
+    "id": 287,
+    "name": "Trường Cao đẳng Kinh tế – Kỹ thuật Vĩnh Phúc",
+    "short": "VTEC",
+    "type": "cao_dang",
+    "city": "Vĩnh Phúc"
+  },
+  {
+    "id": 288,
+    "name": "Trường Cao đẳng Kỹ thuật Cao Thắng",
+    "short": "CKCT",
+    "type": "cao_dang",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 289,
+    "name": "Trường Cao đẳng Kỹ thuật Công nghiệp",
+    "short": "BCIT",
+    "type": "cao_dang",
+    "city": "Bắc Giang"
+  },
+  {
+    "id": 290,
+    "name": "Trường Cao đẳng Kỹ thuật Lý Tự Trọng",
+    "short": "LTTP",
+    "type": "cao_dang",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 291,
+    "name": "Trường Cao đẳng Kỹ thuật Nguyễn Trường Tộ",
+    "short": "NTT",
+    "type": "cao_dang",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 292,
+    "name": "Trường Cao đẳng Kỹ thuật Vinhempich",
+    "short": "SQLQ-VHP",
+    "type": "quan_su",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 293,
+    "name": "Trường Cao đẳng Nghề Đà Nẵng",
+    "short": "DANAVTC",
+    "type": "cao_dang",
+    "city": "Đà Nẵng"
+  },
+  {
+    "id": 294,
+    "name": "Trường Cao đẳng Ngoại ngữ – Công nghệ Việt Nhật",
+    "short": "CNC",
+    "type": "cao_dang_tu_thuc",
+    "city": "Bắc Ninh"
+  },
+  {
+    "id": 295,
+    "name": "Trường Cao đẳng Phát thanh – Truyền hình I",
+    "short": "VOV1",
+    "type": "cao_dang",
+    "city": "Hà Nam"
+  },
+  {
+    "id": 296,
+    "name": "Trường Cao đẳng Phát thanh – Truyền hình II",
+    "short": "VOV2",
+    "type": "cao_dang",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 297,
+    "name": "Trường Cao đẳng Sư phạm Bà Rịa – Vũng Tàu",
+    "short": "CĐSP-BRVT",
+    "type": "cao_dang_su_pham",
+    "city": "Bà Rịa – Vũng Tàu"
+  },
+  {
+    "id": 298,
+    "name": "Trường Cao đẳng Sư phạm Đà Lạt",
+    "short": "CĐSP-ĐL",
+    "type": "cao_dang_su_pham",
+    "city": "Lâm Đồng"
+  },
+  {
+    "id": 299,
+    "name": "Trường Cao đẳng Sư phạm Gia Lai",
+    "short": "CĐSP-GL",
+    "type": "cao_dang_su_pham",
+    "city": "Gia Lai"
+  },
+  {
+    "id": 300,
+    "name": "Trường Cao đẳng Sư phạm Hà Nam",
+    "short": "CĐSP-HN",
+    "type": "cao_dang_su_pham",
+    "city": "Hà Nam"
+  },
+  {
+    "id": 301,
+    "name": "Trường Cao đẳng Sư phạm Lạng Sơn",
+    "short": "CĐSP-LS",
+    "type": "cao_dang_su_pham",
+    "city": "Lạng Sơn"
+  },
+  {
+    "id": 302,
+    "name": "Trường Cao đẳng Sư phạm Nghệ An",
+    "short": "CDSP-NA",
+    "type": "cao_dang_su_pham",
+    "city": "Nghệ An"
+  },
+  {
+    "id": 303,
+    "name": "Trường Cao đẳng Sư phạm Nha Trang",
+    "short": "CĐSP-NT",
+    "type": "cao_dang_su_pham",
+    "city": "Khánh Hòa"
+  },
+  {
+    "id": 304,
+    "name": "Trường Cao đẳng Sư phạm Thái Bình",
+    "short": "CĐSP-TB",
+    "type": "cao_dang_su_pham",
+    "city": "Thái Bình"
+  },
+  {
+    "id": 305,
+    "name": "Trường Cao đẳng Sư phạm Thừa Thiên Huế",
+    "short": "CĐSP-TTH",
+    "type": "cao_dang_su_pham",
+    "city": "Huế"
+  },
+  {
+    "id": 306,
+    "name": "Trường Cao đẳng Tài chính - Quản trị kinh doanh",
+    "short": "CQT",
+    "type": "cao_dang",
+    "city": "Hưng Yên"
+  },
+  {
+    "id": 307,
+    "name": "Trường Cao đẳng Tài nguyên và Môi trường Miền Trung",
+    "short": "CEM",
+    "type": "cao_dang",
+    "city": "Quảng Nam"
+  },
+  {
+    "id": 308,
+    "name": "Trường Cao đẳng Thương mại Đà Nẵng",
+    "short": "VCO",
+    "type": "cao_dang",
+    "city": "Đà Nẵng"
+  },
+  {
+    "id": 309,
+    "name": "Trường Cao đẳng Viễn Đông",
+    "short": "VĐC",
+    "type": "cao_dang_tu_thuc",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 310,
+    "name": "Trường Cao đẳng Vĩnh Long",
+    "short": "VLC",
+    "type": "cao_dang",
+    "city": "Vĩnh Long"
+  },
+  {
+    "id": 311,
+    "name": "Trường Cao đẳng Xây dựng Công trình đô thị",
+    "short": "CUWC",
+    "type": "cao_dang",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 312,
+    "name": "Trường Cao đẳng Xây dựng số 1",
+    "short": "CTC1",
+    "type": "cao_dang",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 313,
+    "name": "Trường Cao đẳng Xây dựng Thành phố Hồ Chí Minh",
+    "short": "HCC2",
+    "type": "cao_dang",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 314,
+    "name": "Trường Cao đẳng Y tế Bình Dương",
+    "short": "CYBD",
+    "type": "cao_dang_y_te",
+    "city": "Bình Dương"
+  },
+  {
+    "id": 315,
+    "name": "Trường Cao đẳng Y tế Bình Định",
+    "short": "CYBĐ",
+    "type": "cao_dang_y_te",
+    "city": "Bình Định"
+  },
+  {
+    "id": 316,
+    "name": "Trường Cao đẳng Y tế Cần Thơ",
+    "short": "CYCT",
+    "type": "cao_dang_y_te",
+    "city": "Cần Thơ"
+  },
+  {
+    "id": 317,
+    "name": "Trường Cao đẳng Y tế Đồng Nai",
+    "short": "CYĐN",
+    "type": "cao_dang_y_te",
+    "city": "Đồng Nai"
+  },
+  {
+    "id": 318,
+    "name": "Trường Cao đẳng Y tế Hà Nội",
+    "short": "HMTC",
+    "type": "cao_dang_y_te",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 319,
+    "name": "Trường Cao đẳng Y tế Hải Phòng",
+    "short": "CYHP",
+    "type": "cao_dang_y_te",
+    "city": "Hải Phòng"
+  },
+  {
+    "id": 320,
+    "name": "Trường Cao đẳng Y tế Huế",
+    "short": "CYH",
+    "type": "cao_dang_y_te",
+    "city": "Huế"
+  },
+  {
+    "id": 321,
+    "name": "Trường Cao đẳng Y tế Khánh Hòa",
+    "short": "CYKH",
+    "type": "cao_dang_y_te",
+    "city": "Khánh Hòa"
+  },
+  {
+    "id": 322,
+    "name": "Trường Cao đẳng Y tế Quảng Ninh",
+    "short": "CYQN",
+    "type": "cao_dang_y_te",
+    "city": "Quảng Ninh"
+  },
+  {
+    "id": 323,
+    "name": "Trường Cao đẳng Y tế Sơn La",
+    "short": "CYSL",
+    "type": "cao_dang_y_te",
+    "city": "Sơn La"
+  },
+  {
+    "id": 324,
+    "name": "Trường Cao đẳng Y tế Thái Bình",
+    "short": "CYTB",
+    "type": "cao_dang_y_te",
+    "city": "Thái Bình"
+  },
+  {
+    "id": 325,
+    "name": "Trường Cao đẳng Y tế Thanh Hóa",
+    "short": "CYTH",
+    "type": "cao_dang_y_te",
+    "city": "Thanh Hóa"
+  },
+  {
+    "id": 326,
+    "name": "Trường Cao đẳng Y tế Tiền Giang",
+    "short": "CYTG",
+    "type": "cao_dang_y_te",
+    "city": "Tiền Giang"
+  },
+  {
+    "id": 327,
+    "name": "Trường Cao đẳng Y tế Trà Vinh",
+    "short": "CYTV",
+    "type": "cao_dang_y_te",
+    "city": "Trà Vinh"
+  },
+  {
+    "id": 328,
+    "name": "Trường Cao đẳng Y tế Thành phố Hồ Chí Minh",
+    "short": "CYTP",
+    "type": "cao_dang_y_te",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 329,
+    "name": "Trường Cao đẳng Công nghệ và Kinh tế Bảo Lộc",
+    "short": "BLC",
+    "type": "cao_dang",
+    "city": "Lâm Đồng"
+  },
+  {
+    "id": 330,
+    "name": "Trường Cao đẳng Kỹ thuật Trang thiết bị Y tế",
+    "short": "CYE",
+    "type": "cao_dang",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 331,
+    "name": "Trường Cao đẳng Cộng đồng Hà Nội",
+    "short": "HCC",
+    "type": "cao_dang",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 332,
+    "name": "Trường Cao đẳng Cộng đồng Hậu Giang",
+    "short": "HGCC",
+    "type": "cao_dang",
+    "city": "Hậu Giang"
+  },
+  {
+    "id": 333,
+    "name": "Trường Cao đẳng Cộng đồng Đồng Tháp",
+    "short": "DTCC",
+    "type": "cao_dang",
+    "city": "Đồng Tháp"
+  },
+  {
+    "id": 334,
+    "name": "Trường Cao đẳng Cộng đồng Bình Thuận",
+    "short": "BTCC",
+    "type": "cao_dang",
+    "city": "Bình Thuận"
+  },
+  {
+    "id": 335,
+    "name": "Trường Cao đẳng Cộng đồng Vĩnh Long",
+    "short": "VLCC",
+    "type": "cao_dang",
+    "city": "Vĩnh Long"
+  },
+  {
+    "id": 336,
+    "name": "Trường Cao đẳng Nghề An Giang",
+    "short": "AGVC",
+    "type": "cao_dang_nghe",
+    "city": "An Giang"
+  },
+  {
+    "id": 337,
+    "name": "Trường Cao đẳng Nghề Bạc Liêu",
+    "short": "BLVC",
+    "type": "cao_dang_nghe",
+    "city": "Bạc Liêu"
+  },
+  {
+    "id": 338,
+    "name": "Trường Cao đẳng Nghề Bắc Ninh",
+    "short": "BNVC",
+    "type": "cao_dang_nghe",
+    "city": "Bắc Ninh"
+  },
+  {
+    "id": 339,
+    "name": "Trường Cao đẳng Nghề Cần Thơ",
+    "short": "CTVC",
+    "type": "cao_dang_nghe",
+    "city": "Cần Thơ"
+  },
+  {
+    "id": 340,
+    "name": "Trường Cao đẳng Nghề Đà Lạt",
+    "short": "DLVC",
+    "type": "cao_dang_nghe",
+    "city": "Lâm Đồng"
+  },
+  {
+    "id": 341,
+    "name": "Trường Cao đẳng Nghề Đồng Nai",
+    "short": "DNVC",
+    "type": "cao_dang_nghe",
+    "city": "Đồng Nai"
+  },
+  {
+    "id": 342,
+    "name": "Trường Cao đẳng Nghề Giao thông vận tải Trung ương I",
+    "short": "GTVTVC1",
+    "type": "cao_dang_nghe",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 343,
+    "name": "Trường Cao đẳng Nghề Hà Tĩnh",
+    "short": "HTVC",
+    "type": "cao_dang_nghe",
+    "city": "Hà Tĩnh"
+  },
+  {
+    "id": 344,
+    "name": "Trường Cao đẳng Nghề Hải Phòng",
+    "short": "HPVC",
+    "type": "cao_dang_nghe",
+    "city": "Hải Phòng"
+  },
+  {
+    "id": 345,
+    "name": "Trường Cao đẳng Nghề Kiên Giang",
+    "short": "KGVC",
+    "type": "cao_dang_nghe",
+    "city": "Kiên Giang"
+  },
+  {
+    "id": 346,
+    "name": "Trường Cao đẳng Nghề Long An",
+    "short": "LAVC",
+    "type": "cao_dang_nghe",
+    "city": "Long An"
+  },
+  {
+    "id": 347,
+    "name": "Trường Cao đẳng Nghề Nam Định",
+    "short": "NDVC",
+    "type": "cao_dang_nghe",
+    "city": "Nam Định"
+  },
+  {
+    "id": 348,
+    "name": "Trường Cao đẳng Nghề Nghệ An",
+    "short": "NAVC",
+    "type": "cao_dang_nghe",
+    "city": "Nghệ An"
+  },
+  {
+    "id": 349,
+    "name": "Trường Cao đẳng Nghề Ninh Thuận",
+    "short": "NTVC",
+    "type": "cao_dang_nghe",
+    "city": "Ninh Thuận"
+  },
+  {
+    "id": 350,
+    "name": "Trường Cao đẳng Nghề Phú Yên",
+    "short": "PYVC",
+    "type": "cao_dang_nghe",
+    "city": "Phú Yên"
+  },
+  {
+    "id": 351,
+    "name": "Trường Cao đẳng Nghề Quy Nhơn",
+    "short": "QNVC",
+    "type": "cao_dang_nghe",
+    "city": "Bình Định"
+  },
+  {
+    "id": 352,
+    "name": "Trường Cao đẳng Nghề Sóc Trăng",
+    "short": "STVC",
+    "type": "cao_dang_nghe",
+    "city": "Sóc Trăng"
+  },
+  {
+    "id": 353,
+    "name": "Trường Cao đẳng Nghề Thái Bình",
+    "short": "TBVC",
+    "type": "cao_dang_nghe",
+    "city": "Thái Bình"
+  },
+  {
+    "id": 354,
+    "name": "Trường Cao đẳng Nghề Thanh Hóa",
+    "short": "THVC",
+    "type": "cao_dang_nghe",
+    "city": "Thanh Hóa"
+  },
+  {
+    "id": 355,
+    "name": "Trường Cao đẳng Nghề Thừa Thiên Huế",
+    "short": "TTHVC",
+    "type": "cao_dang_nghe",
+    "city": "Huế"
+  },
+  {
+    "id": 356,
+    "name": "Trường Cao đẳng Nghề Tiền Giang",
+    "short": "TGVC",
+    "type": "cao_dang_nghe",
+    "city": "Tiền Giang"
+  },
+  {
+    "id": 357,
+    "name": "Trường Cao đẳng Nghề Trà Vinh",
+    "short": "TVVC",
+    "type": "cao_dang_nghe",
+    "city": "Trà Vinh"
+  },
+  {
+    "id": 358,
+    "name": "Trường Cao đẳng Nghề Vĩnh Phúc",
+    "short": "VPVC",
+    "type": "cao_dang_nghe",
+    "city": "Vĩnh Phúc"
+  },
+  {
+    "id": 359,
+    "name": "Trường Cao đẳng Nghề Yên Bái",
+    "short": "YBVC",
+    "type": "cao_dang_nghe",
+    "city": "Yên Bái"
+  },
+  {
+    "id": 360,
+    "name": "Trường Cao đẳng Nghề Việt Xô",
+    "short": "VXV",
+    "type": "cao_dang_nghe",
+    "city": "Vĩnh Phúc"
+  },
+  {
+    "id": 361,
+    "name": "Trường Cao đẳng Nghề Việt Nam – Hàn Quốc Thành phố Hà Nội",
+    "short": "HHT",
+    "type": "cao_dang_nghe",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 362,
+    "name": "Trường Cao đẳng Nghề Việt Nam – Hàn Quốc Quảng Ngãi",
+    "short": "QNVK",
+    "type": "cao_dang_nghe",
+    "city": "Quảng Ngãi"
+  },
+  {
+    "id": 363,
+    "name": "Trường Cao đẳng Nghề Việt Nam – Hàn Quốc Bắc Giang",
+    "short": "BGVK",
+    "type": "cao_dang_nghe",
+    "city": "Bắc Giang"
+  },
+  {
+    "id": 364,
+    "name": "Trường Cao đẳng Nghề Việt Nam – Hàn Quốc Bình Dương",
+    "short": "BDVK",
+    "type": "cao_dang_nghe",
+    "city": "Bình Dương"
+  },
+  {
+    "id": 365,
+    "name": "Trường Cao đẳng Nghề Công nghệ cao Đồng Nai",
+    "short": "DNC",
+    "type": "cao_dang_nghe",
+    "city": "Đồng Nai"
+  },
+  {
+    "id": 366,
+    "name": "Trường Cao đẳng Nghề Công nghệ cao Hà Nội",
+    "short": "HHT",
+    "type": "cao_dang_nghe",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 367,
+    "name": "Trường Cao đẳng Nghề Kỹ thuật Công nghệ Thành phố Hồ Chí Minh",
+    "short": "HVCT",
+    "type": "cao_dang_nghe",
+    "city": "TP.HCM"
+  },
+  {
+    "id": 368,
+    "name": "Trường Cao đẳng Nghề Kỹ thuật Công nghệ",
+    "short": "KTCN",
+    "type": "cao_dang_nghe",
+    "city": "Hà Nội"
+  },
+  {
+    "id": 369,
+    "name": "Trường Cao đẳng Nghề Than – Khoáng sản Việt Nam",
+    "short": "TKV",
+    "type": "cao_dang_nghe",
+    "city": "Quảng Ninh"
+  },
+  {
+    "id": 370,
+    "name": "Trường Cao đẳng Y tế Bình Phước",
+    "short": "CYBP",
+    "type": "cao_dang_y_te",
+    "city": "Bình Phước"
+  },
+  {
+    "id": 371,
+    "name": "Trường Cao đẳng Y tế Cà Mau",
+    "short": "CYCM",
+    "type": "cao_dang_y_te",
+    "city": "Cà Mau"
+  },
+  {
+    "id": 372,
+    "name": "Trường Cao đẳng Y tế Hà Nam",
+    "short": "CYHN",
+    "type": "cao_dang_y_te",
+    "city": "Hà Nam"
+  },
+  {
+    "id": 373,
+    "name": "Trường Cao đẳng Y tế Kiên Giang",
+    "short": "CYKG",
+    "type": "cao_dang_y_te",
+    "city": "Kiên Giang"
+  },
+  {
+    "id": 374,
+    "name": "Trường Cao đẳng Y tế Lạng Sơn",
+    "short": "CYLS",
+    "type": "cao_dang_y_te",
+    "city": "Lạng Sơn"
+  },
+  {
+    "id": 375,
+    "name": "Trường Cao đẳng Y tế Lâm Đồng",
+    "short": "CYLĐ",
+    "type": "cao_dang_y_te",
+    "city": "Lâm Đồng"
+  },
+  {
+    "id": 376,
+    "name": "Trường Cao đẳng Y tế Phú Thọ",
+    "short": "CYPT",
+    "type": "cao_dang_y_te",
+    "city": "Phú Thọ"
+  },
+  {
+    "id": 377,
+    "name": "Trường Cao đẳng Y tế Quảng Nam",
+    "short": "CYQN",
+    "type": "cao_dang_y_te",
+    "city": "Quảng Nam"
+  },
+  {
+    "id": 378,
+    "name": "Trường Cao đẳng Y tế Quảng Trị",
+    "short": "CYQT",
+    "type": "cao_dang_y_te",
+    "city": "Quảng Trị"
+  },
+  {
+    "id": 379,
+    "name": "Trường Cao đẳng Y tế Tây Ninh",
+    "short": "CYTN",
+    "type": "cao_dang_y_te",
+    "city": "Tây Ninh"
+  },
+  {
+    "id": 380,
+    "name": "Trường Cao đẳng Y tế Vĩnh Phúc",
+    "short": "CYVP",
+    "type": "cao_dang_y_te",
+    "city": "Vĩnh Phúc"
+  },
+  {
+    "id": 381,
+    "name": "Trường Cao đẳng Sư phạm Bắc Ninh",
+    "short": "CĐSP-BN",
+    "type": "cao_dang_su_pham",
+    "city": "Bắc Ninh"
+  },
+  {
+    "id": 382,
+    "name": "Trường Cao đẳng Sư phạm Cao Bằng",
+    "short": "CĐSP-CB",
+    "type": "cao_dang_su_pham",
+    "city": "Cao Bằng"
+  },
+  {
+    "id": 383,
+    "name": "Trường Cao đẳng Sư phạm Điện Biên",
+    "short": "CĐSP-ĐB",
+    "type": "cao_dang_su_pham",
+    "city": "Điện Biên"
+  },
+  {
+    "id": 384,
+    "name": "Trường Cao đẳng Sư phạm Hòa Bình",
+    "short": "CĐSP-HB",
+    "type": "cao_dang_su_pham",
+    "city": "Hòa Bình"
+  },
+  {
+    "id": 385,
+    "name": "Trường Cao đẳng Sư phạm Kiên Giang",
+    "short": "CĐSP-KG",
+    "type": "cao_dang_su_pham",
+    "city": "Kiên Giang"
+  },
+  {
+    "id": 386,
+    "name": "Trường Cao đẳng Sư phạm Lào Cai",
+    "short": "CĐSP-LC",
+    "type": "cao_dang_su_pham",
+    "city": "Lào Cai"
+  },
+  {
+    "id": 387,
+    "name": "Trường Cao đẳng Sư phạm Quảng Trị",
+    "short": "CĐSP-QT",
+    "type": "cao_dang_su_pham",
+    "city": "Quảng Trị"
+  },
+  {
+    "id": 388,
+    "name": "Trường Cao đẳng Sư phạm Sóc Trăng",
+    "short": "CĐSP-ST",
+    "type": "cao_dang_su_pham",
+    "city": "Sóc Trăng"
+  },
+  {
+    "id": 389,
+    "name": "Trường Cao đẳng Sư phạm Thái Nguyên",
+    "short": "CĐSP-TN",
+    "type": "cao_dang_su_pham",
+    "city": "Thái Nguyên"
+  },
+  {
+    "id": 390,
+    "name": "Trường Cao đẳng Sư phạm Yên Bái",
+    "short": "CĐSP-YB",
+    "type": "cao_dang_su_pham",
+    "city": "Yên Bái"
+  }
+]

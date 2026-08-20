@@ -1,0 +1,22 @@
+{
+    "name": "futebus/tripmanagement",
+    "description": "TripManagement module for FUTEBUS.",
+    "type": "library",
+    "version": "1.0.0",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "FuteBus\\TripManagement\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "FuteBus\\TripManagement\\Providers\\TripManagementServiceProvider"
+            ]
+        }
+    }
+}

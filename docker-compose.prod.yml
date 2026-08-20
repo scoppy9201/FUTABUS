@@ -1,11 +1,11 @@
-# Monexa — production stack.
+﻿# FUTEBUS — production stack.
 #
 # Images are pre-built and pushed by CI; this file only runs them.
 #   APP_IMAGE / NGINX_IMAGE are provided by deploy.sh (commit-SHA tagged).
 #
 #   docker compose -f docker-compose.prod.yml up -d
 #
-# Database and Redis are NOT published to the host/Internet — only nginx is.
+# Database and Redis are NOT published to the host/Internet â€” only nginx is.
 # TLS is expected to be terminated by an external proxy (see docs/DEPLOYMENT.md).
 
 x-app-logging: &default-logging
@@ -27,7 +27,7 @@ x-app-env: &app-env
 
 services:
   app:
-    image: ${APP_IMAGE:-ghcr.io/owner/monexa-app:latest}
+    image: ${APP_IMAGE:-ghcr.io/owner/futabus-app:latest}
     restart: unless-stopped
     <<: *app-env
     volumes:
@@ -50,10 +50,10 @@ services:
           cpus: "1.5"
           memory: 768M
     networks:
-      - monexa
+      - futabus
 
   nginx:
-    image: ${NGINX_IMAGE:-ghcr.io/owner/monexa-nginx:latest}
+    image: ${NGINX_IMAGE:-ghcr.io/owner/futabus-nginx:latest}
     restart: unless-stopped
     ports:
       - "${HTTP_PORT:-80}:80"
@@ -76,10 +76,10 @@ services:
           cpus: "0.5"
           memory: 128M
     networks:
-      - monexa
+      - futabus
 
   queue:
-    image: ${APP_IMAGE:-ghcr.io/owner/monexa-app:latest}
+    image: ${APP_IMAGE:-ghcr.io/owner/futabus-app:latest}
     restart: unless-stopped
     <<: *app-env
     command: ["php", "artisan", "queue:work", "--tries=3", "--timeout=90", "--sleep=3", "--max-time=3600"]
@@ -105,10 +105,10 @@ services:
           cpus: "1.0"
           memory: 512M
     networks:
-      - monexa
+      - futabus
 
   scheduler:
-    image: ${APP_IMAGE:-ghcr.io/owner/monexa-app:latest}
+    image: ${APP_IMAGE:-ghcr.io/owner/futabus-app:latest}
     restart: unless-stopped
     <<: *app-env
     command: ["php", "artisan", "schedule:work"]
@@ -136,7 +136,7 @@ services:
           cpus: "0.5"
           memory: 256M
     networks:
-      - monexa
+      - futabus
 
   mysql:
     image: mysql:8.0
@@ -165,7 +165,7 @@ services:
           cpus: "2.0"
           memory: 1536M
     networks:
-      - monexa
+      - futabus
 
   redis:
     image: redis:7-alpine
@@ -185,7 +185,7 @@ services:
           cpus: "0.5"
           memory: 256M
     networks:
-      - monexa
+      - futabus
 
 volumes:
   mysql-data:
@@ -196,5 +196,5 @@ volumes:
     driver: local
 
 networks:
-  monexa:
+  futabus:
     driver: bridge

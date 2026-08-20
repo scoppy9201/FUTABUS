@@ -1,18 +1,18 @@
-# Monexa — development stack.
+﻿# FUTEBUS — development stack.
 #
 #   docker compose up --build
 #
 # The application source is bind-mounted so code changes are reflected live.
 # MySQL and Redis run as containers; assets are built with the "vite" service
 # or on the host (npm run dev). This does not affect your existing Laragon
-# workflow — it is an alternative, self-contained environment.
+# workflow â€” it is an alternative, self-contained environment.
 
 services:
   app:
     build:
       context: .
       target: development
-    image: monexa-app:dev
+    image: futabus-app:dev
     restart: unless-stopped
     working_dir: /var/www/html
     env_file:
@@ -23,8 +23,8 @@ services:
       DB_CONNECTION: mysql
       DB_HOST: mysql
       DB_PORT: "3306"
-      DB_DATABASE: ${DB_DATABASE:-monexa}
-      DB_USERNAME: ${DB_USERNAME:-monexa}
+      DB_DATABASE: ${DB_DATABASE:-futabus}
+      DB_USERNAME: ${DB_USERNAME:-futabus}
       DB_PASSWORD: ${DB_PASSWORD:-secret}
       REDIS_HOST: redis
       REDIS_PORT: "6379"
@@ -41,7 +41,7 @@ services:
       redis:
         condition: service_started
     networks:
-      - monexa
+      - futabus
 
   nginx:
     image: nginx:1.27-alpine
@@ -55,11 +55,11 @@ services:
     depends_on:
       - app
     networks:
-      - monexa
+      - futabus
 
   # Queue worker (database/redis backed). Uses the same app image.
   queue:
-    image: monexa-app:dev
+    image: futabus-app:dev
     restart: unless-stopped
     working_dir: /var/www/html
     env_file:
@@ -79,7 +79,7 @@ services:
     depends_on:
       - app
     networks:
-      - monexa
+      - futabus
 
   # Vite dev server for hot asset building (optional).
   vite:
@@ -92,14 +92,14 @@ services:
       - .:/app
       - /app/node_modules
     networks:
-      - monexa
+      - futabus
 
   mysql:
     image: mysql:8.0
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE:-monexa}
-      MYSQL_USER: ${DB_USERNAME:-monexa}
+      MYSQL_DATABASE: ${DB_DATABASE:-futabus}
+      MYSQL_USER: ${DB_USERNAME:-futabus}
       MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootsecret}
     ports:
@@ -112,7 +112,7 @@ services:
       timeout: 5s
       retries: 10
     networks:
-      - monexa
+      - futabus
 
   redis:
     image: redis:7-alpine
@@ -123,12 +123,12 @@ services:
     volumes:
       - redis-data:/data
     networks:
-      - monexa
+      - futabus
 
 volumes:
   mysql-data:
   redis-data:
 
 networks:
-  monexa:
+  futabus:
     driver: bridge

@@ -1,0 +1,22 @@
+{
+    "name": "futebus/auth",
+    "description": "Auth module for FUTEBUS.",
+    "type": "library",
+    "version": "1.0.0",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "FuteBus\\Auth\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "FuteBus\\Auth\\Providers\\AuthServiceProvider"
+            ]
+        }
+    }
+}

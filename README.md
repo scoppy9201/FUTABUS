@@ -1,185 +1,154 @@
 ﻿<p align="center">
-  <img src="screenshots/dashboard.png" width="980" alt="Monexa dashboard">
-</p>
-
-<h1 align="center">Monexa</h1>
-
-<p align="center">
-  <strong>A self-hosted Laravel personal finance workspace for wallets, budgets, transactions, groups, QR transfers, and financial insights.</strong>
-  <br>
-  Monexa helps individuals and small groups track money, plan budgets, split expenses, transfer wallet balances, and understand financial activity from one private dashboard.
+  <img src="public/icons/svg/dashboard.svg" width="80" alt="FUTEBUS logo">
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Laravel-12.x-FF2D20?style=flat&logo=laravel" alt="Laravel 12">
-  <img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=flat&logo=php" alt="PHP 8.2+">
-  <img src="https://img.shields.io/badge/Vite-6.x-646CFF?style=flat&logo=vite" alt="Vite 6">
-  <img src="https://img.shields.io/badge/License-MIT-16A34A?style=flat" alt="MIT License">
+  <strong>Online bus ticket booking platform with AI, built as a Laravel modular monolith.</strong>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/PHP-8.2+-777BB4?logo=php&logoColor=white" alt="PHP 8.2+">
+  <img src="https://img.shields.io/badge/Laravel-12-FF2D20?logo=laravel&logoColor=white" alt="Laravel 12">
+  <img src="https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white" alt="Vite 7">
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4-38BDF8?logo=tailwindcss&logoColor=white" alt="Tailwind CSS 4">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-2F855A" alt="MIT License"></a>
+</p>
+
+<p align="center">
+  <a href="#overview">Overview</a> ·
+  <a href="#features">Features</a> ·
+  <a href="#packages">Packages</a> ·
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#data-model">Data model</a> ·
+  <a href="#development">Development</a> ·
+  <a href="#documentation">Documentation</a>
 </p>
 
 ---
 
 ## Overview
 
-Monexa is a Laravel 12 finance management application built for people who want control over their own financial data. It combines day-to-day transaction tracking with wallets, budgets, group expense sharing, QR-based wallet transfers, notifications, currency tools, and AI-assisted finance workflows.
+FUTEBUS is a complete online bus-ticket booking platform built on Laravel 12. It connects customers and bus operators in one system: customers can search trips, choose seats, book and pay for tickets, then look up or cancel them; operators and administrators manage bus companies, buses, routes, trips, seat layouts, bookings, tickets, customers, and payments from a unified dashboard.
 
-The project is designed as a practical full-stack Laravel product: Blade views for the web interface, API controllers for data operations, service-oriented finance logic, database-backed notifications, and integrations for Google sign-in, Excel export/import, PDF generation, and QR transfer flows.
+The project is engineered as a **modular monolith** modeled on the Futa Bus operating model. Instead of one giant application, business capabilities live in focused, self-contained packages under `packages/`, while shared platform code stays in `app/`. This keeps the codebase organized, testable, and easy to evolve without the operational cost of microservices.
 
----
+An **AI assistant** (powered by Google Gemini) helps customers and staff with bus-related questions and recommendations through a chat history backed by the platform.
 
-## Screenshots
+## Features
 
-<table>
-  <tr>
-    <td width="50%">
-      <img src="screenshots/dashboard.png" alt="Monexa dashboard">
-      <br><strong>Dashboard</strong>
-    </td>
-    <td width="50%">
-      <img src="screenshots/transactions.png" alt="Monexa transactions">
-      <br><strong>Transactions</strong>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <img src="screenshots/wallets.png" alt="Monexa wallets and budgets">
-      <br><strong>Wallets & Budgets</strong>
-    </td>
-    <td width="50%">
-      <img src="screenshots/categories.png" alt="Monexa categories">
-      <br><strong>Categories</strong>
-    </td>
-  </tr>
-</table>
+### Booking & tickets
 
----
+- Trip search across routes, companies, dates, and departure/arrival points.
+- Real-time seat selection from per-bus seat layouts.
+- Booking flow with checkout and confirmation.
+- Ticket generation and ticket lookup by ticket code or QR.
+- Cancellation flow with seat availability updates.
 
-## Core Features
+### Platform & administration
 
-### Personal Finance
+- Role-based access control for admin, staff, and customer.
+- Bus company, bus, route, and trip management.
+- Seat layout configuration per bus.
+- Customer management and user management.
+- Payment and booking administration.
+- Reporting and dashboard summaries.
 
-- Dashboard summary for income, expenses, balances, recent activity, and financial trends.
-- Transaction management for income and expense records.
-- Category management for organizing financial activity.
-- Budget tracking with limits, balances, and progress states.
-- Wallet management for separating cash, bank, savings, and other money sources.
-- Wallet transfers and adjustment history.
-- Currency history and currency-oriented reporting support.
+### Intelligence & automation
 
-### Group Finance
+- AI assistant with chat history persistence.
+- Route and company search intelligence.
+- System notifications with read/unread workflow.
+- Excel export/import, PDF generation, and QR code tooling.
 
-- Split groups for shared expenses with members and invitations.
-- Group balance proposals with approval and rejection workflows.
-- Group expense proposals and split records.
-- Group debt summaries and settlement flow.
-- Member actions such as invite, accept, decline, promote, demote, remove, and leave group.
-- Optional group balance visibility controls.
+### Account & security
 
-### Transfers And QR
+- Email/password authentication (register, login, logout, password reset).
+- Profile and change-password flows.
+- Auth-protected pages and API routes via Laravel Sanctum.
 
-- Internal wallet transfer workflow.
-- QR transfer generation, scan, confirmation, cancellation, and result pages.
-- API-backed wallet and QR transfer controllers.
-- QR code support through `simplesoftwareio/simple-qrcode`.
+## Packages
 
-### Intelligence And Automation
+FUTEBUS organizes business capabilities into packages. Shared, all-role modules live under `packages/FuteBus/`; customer-facing modules live under `packages/Customer/`. Each package is a Composer library (`futebus/*`) with its own namespace, routes, and views.
 
-- AI assistant screen and AI chat history persistence.
-- AI-oriented category, transaction, and wallet controllers.
-- Search page for finding records quickly.
-- System notifications and mark-all-read workflow.
-- Email settings for mail-related configuration.
+| Package | Purpose |
+| --- | --- |
+| `FuteBus\Auth` | Authentication, registration, password flows |
+| `FuteBus\Core` | Shared platform utilities and search |
+| `FuteBus\Dashboard` | Dashboard and summary screens |
+| `FuteBus\Notification` | In-app notification system |
+| `FuteBus\Profile` | User profile and account settings |
+| `FuteBus\RolePermission` | Roles and permission management |
+| `FuteBus\UserManagement` | User administration |
+| `FuteBus\CustomerManagement` | Customer administration |
+| `FuteBus\BusCompanyManagement` | Bus company management |
+| `FuteBus\BusManagement` | Bus fleet management |
+| `FuteBus\RouteManagement` | Route management |
+| `FuteBus\TripManagement` | Trip scheduling and management |
+| `FuteBus\SeatManagement` | Seat layout configuration |
+| `FuteBus\Payment` | Payment administration |
+| `FuteBus\Reporting` | Reports and analytics |
+| `FuteBus\SystemSetting` | System configuration |
+| `FuteBus\AiAssistant` | AI assistant and chat history |
+| `Customer\BookingManagement` | Booking flow and checkout |
+| `Customer\Cancellation` | Ticket cancellation |
+| `Customer\SeatAvailability` | Seat availability and selection |
+| `Customer\TicketManagement` | Ticket lookup and management |
+| `Customer\TripSearch` | Trip search |
 
-### Account And Security
+## Technology
 
-- Email/password authentication.
-- Google OAuth login through Laravel Socialite.
-- Registration, login, logout, forgot password, verification code, reset password, profile, and change password screens.
-- Auth-protected finance pages.
-
-### Export And Documents
-
-- Excel-related tooling through Laravel Excel and PhpSpreadsheet.
-- PDF generation support through DomPDF.
-- Export stubs for model, query-model, and plain export patterns.
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-| ----- | ---------- |
-| Backend | Laravel 12, PHP 8.2+ |
-| Frontend | Blade, Vite, Node.js |
-| Database | MySQL or MariaDB |
-| Authentication | Laravel auth, Laravel Socialite |
-| API/Auth Tokens | Laravel Sanctum |
-| Charts/Visuals | Blade UI and frontend chart assets |
-| Excel | `maatwebsite/excel`, `phpoffice/phpspreadsheet` |
-| PDF | `barryvdh/laravel-dompdf` |
+| Area | Stack |
+| --- | --- |
+| Application | Laravel 12, PHP 8.2+ |
+| Interface | Blade, Vite 7, Tailwind CSS 4 |
+| Data | MySQL or MariaDB |
+| Auth | Laravel auth, Laravel Sanctum, Laravel Socialite |
+| AI | Google Gemini API |
+| Documents | `maatwebsite/excel`, `phpoffice/phpspreadsheet`, `barryvdh/laravel-dompdf` |
 | QR | `simplesoftwareio/simple-qrcode` |
-| Development | Composer, npm, Artisan, PHPUnit, Laravel Pint |
-| Container | Dockerfile included |
+| Icons | `blade-ui-kit/blade-heroicons` |
+| Quality | PHPUnit, Laravel Pint |
+| Runtime | Nginx, PHP-FPM, Docker Compose |
 
----
-
-## Project Structure
+## Project structure
 
 ```text
 app/
-  Http/Controllers/        Web, API, AI, auth, finance, group, and notification controllers
-  Models/                  Finance, wallet, group, QR, notification, and user models
-  Services/                Business services and supporting application logic
-  Exports/                 Export classes and spreadsheet support
+  Http/Controllers/      Base controller (Controller.php)
+  Http/Middleware/       Platform middleware
+  Models/                User model and shared platform models
+  Support/               Shared support helpers (e.g. role redirector)
+  Traits/                Shared traits (e.g. API response helper)
+  Data/                  JSON data files (provinces, banks, countries, ...)
 
 database/
-  migrations/              Core tables for users, categories, budgets, transactions, wallets, groups, QR, notifications, currency
-  seeders/                 Initial and demo data
+  migrations/            Central schema (users, roles, bus companies, buses, routes,
+                         seat layouts, trips, customers, bookings, tickets, payments,
+                         notifications, AI)
+  seeders/               RolePermission, BusCompany, DemoData, Database seeders
+  factories/             User factory
 
-resources/
-  views/                   Blade screens for auth, dashboard, finance, wallets, groups, QR, settings, AI, search
-  css/ js/                 Frontend source assets
+packages/
+  FuteBus/               Shared, all-role modules (17)
+  Customer/              Customer-facing modules (5)
 
 routes/
-  web.php                  Blade page routes and web actions
-  api.php                  API endpoints for data operations
+  web.php                Web page routes
+  api.php                API endpoints
+  console.php            Console routes
 
-screenshots/               README images
-stubs/                     Export class stubs
+resources/               Frontend source assets (built per package via Vite)
+public/
+  vendor/blade-heroicons/ Published Heroicons SVG set
 ```
 
----
-
-## Main Routes
-
-| Area | Route |
-| ---- | ----- |
-| Landing | `/` |
-| Auth | `/login`, `/register`, `/forgot-password`, `/reset-password` |
-| Dashboard | `/dashboard` |
-| Transactions | `/transactions` |
-| Categories | `/categories` |
-| Budgets | `/budgets` |
-| Wallets | `/money-wallets` |
-| Wallet transfers | `/wallet-transfers` |
-| QR transfers | `/money-wallets/qr` |
-| Groups | `/groups` |
-| Notifications | `/notifications` |
-| AI assistant | `/ai-assistant` |
-| Currency | `/currency` |
-| Search | `/search` |
-| Settings | `/settings` |
-| Profile | `/profile` |
-
----
-
-## Local Installation
+## Quick start
 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/scoppy9201/monexa.git
-cd monexa
+git clone https://github.com/scoppy9201/FUTABUS.git
+cd FUTABUS
 ```
 
 ### 2. Install dependencies
@@ -199,13 +168,13 @@ php artisan key:generate
 Configure your database in `.env`:
 
 ```env
-APP_NAME=Monexa
+APP_NAME=FUTEBUS
 APP_URL=http://127.0.0.1:8000
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=monexa
+DB_DATABASE=futabus
 DB_USERNAME=root
 DB_PASSWORD=
 ```
@@ -232,21 +201,27 @@ Open:
 http://127.0.0.1:8000
 ```
 
----
+## Data model
 
-## Google OAuth
+| Table | Purpose |
+| --- | --- |
+| `users` | Authenticated accounts (admin, staff, customer) |
+| `roles`, `permissions` | Role-based access control |
+| `bus_companies` | Bus operator companies |
+| `buses` | Bus fleet |
+| `routes` | Departure/arrival routes |
+| `seat_layouts` | Seat configuration per bus |
+| `trips` | Scheduled trips |
+| `customers` | Customer records |
+| `bookings` | Booking records |
+| `booked_seats` | Seats reserved per booking |
+| `tickets` | Issued tickets |
+| `payments` | Payment records |
+| `notifications` | In-app notifications |
+| `ai_chat_history` | AI assistant conversation history |
+| `system_settings`, `email_settings` | Platform configuration |
 
-To enable Google login, create OAuth credentials in Google Cloud Console and add these values to `.env`:
-
-```env
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-GOOGLE_REDIRECT_URI=http://127.0.0.1:8000/auth/google/callback
-```
-
----
-
-## Useful Commands
+## Development
 
 ```bash
 # Run the frontend dev server
@@ -267,11 +242,11 @@ php artisan optimize:clear
 # Refresh autoload files
 composer dump-autoload
 
-# Run code style formatter if configured for the project
+# Run code style formatter
 ./vendor/bin/pint
 ```
 
-Composer also provides:
+Composer also provides a one-command setup:
 
 ```bash
 composer run setup
@@ -279,15 +254,9 @@ composer run setup
 
 This installs dependencies, creates `.env` when missing, generates the app key, runs migrations, installs npm packages, and builds assets.
 
----
-
 ## Docker
 
-Monexa ships a full, production-ready Docker + CI/CD setup. The multi-stage
-`Dockerfile` produces one PHP-FPM image reused by the web (`app`), queue worker,
-and scheduler services, fronted by nginx with MySQL and Redis as backing
-services. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the full architecture,
-environment/secret list, deploy and rollback procedures.
+FUTEBUS ships a production-ready Docker + CI/CD setup. The multi-stage `Dockerfile` produces one PHP-FPM image reused by the web (`app`), queue worker, and scheduler services, fronted by nginx with MySQL and Redis as backing services. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the full architecture, environment/secret list, deploy and rollback procedures.
 
 ### Development stack
 
@@ -297,81 +266,44 @@ docker compose up --build
 # App → http://localhost:8000, Vite → http://localhost:5173
 ```
 
-The project source is bind-mounted, so this is an alternative to the Laragon
-workflow and does not replace it.
-
 ### Production
 
-Images are built and pushed to GitHub Container Registry by CI, then deployed
-over SSH:
+Images are built and pushed to the container registry by CI, then deployed over SSH. Deploy and rollback scripts live in `deploy/`:
 
 ```bash
-# On the server (see docs/DEPLOYMENT.md for one-time bootstrap)
-APP_IMAGE=ghcr.io/OWNER/monexa-app:<sha> \
-NGINX_IMAGE=ghcr.io/OWNER/monexa-nginx:<sha> \
-./deploy.sh          # backup → migrate → restart → health-check → auto-rollback
-./rollback.sh        # revert to the previous release
+APP_IMAGE=ghcr.io/OWNER/futabus-app:<sha> \
+NGINX_IMAGE=ghcr.io/OWNER/futabus-nginx:<sha> \
+./deploy/deploy.sh       # backup → migrate → restart → health-check → auto-rollback
+./deploy/rollback.sh     # revert to the previous release
+./deploy/health-check.sh # poll the /up endpoint (used by deploy/rollback)
 ```
 
-CI (`.github/workflows/ci.yml`) runs lint, tests, asset build and a Docker
-smoke test on every PR/push. CD (`.github/workflows/cd.yml`) builds, pushes and
-deploys on push to `main`.
+CI (`.github/workflows/ci.yml`) runs lint, code-quality diff, tests, and a Docker smoke test on every PR/push. CD (`.github/workflows/cd.yml`) builds, pushes, and deploys on push to `main`.
 
----
+### CI check scripts
 
-## Data Model Highlights
+`scripts/ci/` provides diff-aware CI tooling (adapted from the modular-monolith conventions):
 
-| Model | Purpose |
-| ----- | ------- |
-| `User` | Authenticated account |
-| `Category` | Income and expense category |
-| `Transaction` | Income or expense record |
-| `Budgets` | Budget definition and tracking |
-| `MoneyWallet` | Wallet or money source |
-| `WalletTransfer` | Transfer between wallets |
-| `WalletAdjustment` | Wallet balance correction |
-| `QrTransfer` | QR-based transfer request |
-| `SplitGroup` | Shared expense group |
-| `SplitGroupMember` | Group membership |
-| `GroupInvitation` | Group invitation token and status |
-| `GroupBalanceProposal` | Proposed group balance change |
-| `GroupExpenseProposal` | Proposed shared expense |
-| `GroupExpenseDebt` | Debt records between group members |
-| `SystemNotification` | In-app notification |
-| `AiChatHistory` | AI assistant conversation history |
-| `CurrencyHistory` | Currency rate/history record |
-| `EmailSetting` | Mail configuration data |
+| Script | Purpose |
+| --- | --- |
+| `resolve-base.php` | Resolves the diff base commit for CI |
+| `validate-diff.php` | Validates changed files: PHP/JSON/YAML syntax and conflict markers |
+| `pint-diff.php` | Runs Laravel Pint on changed PHP files only |
+| `code-quality-diff.php` | Diff-only quality gate (debug code, inline SVG, TODO owner, oversized changes, ...) |
+| `test-diff.php` | Runs only the impacted PHPUnit targets for changed modules |
 
----
+## Documentation
 
-## Development Standards
-
-- Keep financial rules in controllers/services clear and auditable.
-- Keep Blade views focused on presentation and avoid mixing complex data logic into templates.
-- Use authenticated routes for private finance data.
-- Keep API responses consistent for wallet, transaction, QR, and group actions.
-- Validate all money amounts, wallet ownership, member permissions, and proposal states before writing data.
-- Prefer explicit database migrations for finance records so changes remain traceable.
-- Run `php artisan test` and `npm run build` before preparing a release.
-
----
-
-## Security Notes
-
-Monexa handles private financial data. Use HTTPS in production, protect `.env`, rotate OAuth secrets when needed, limit database access, and review permission checks for wallet and group operations before deployment.
-
-If you discover a security issue, report it privately to the maintainer instead of opening a public issue.
-
----
+| Guide | Purpose |
+| --- | --- |
+| [Deployment](docs/DEPLOYMENT.md) | Container architecture, deploy and rollback procedures |
 
 ## License
 
-Monexa is open-sourced software licensed under the [MIT license](LICENSE).
-
----
+FUTEBUS is open-source software licensed under the [MIT License](LICENSE).
 
 <p align="center">
-  Built with Laravel for private, practical finance management.
+  Built with Laravel for practical online bus-ticket booking.
   <br>
-  <strong>Monexa</strong>
+  <strong>FUTEBUS</strong>
 </p>

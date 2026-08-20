@@ -1,84 +1,232 @@
 name: CI
 
 on:
-  push:
-    branches: [main, dev]
+  workflow_dispatch:
   pull_request:
-    branches: [main, dev]
-
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+    branches:
+      - dev
+      - staging
+  push:
+    branches:
+      - dev
+      - staging
 
 permissions:
   contents: read
+  pull-requests: write
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test:
-    name: Lint, Test & Build
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Setup PHP 8.3
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.3"
-          extensions: bcmath, exif, gd, intl, pdo_mysql, zip, pcntl, redis
+          php-version: "8.2"
+          extensions: bcmath, ctype, curl, dom, fileinfo, gd, intl, json, mbstring, mysql, openssl, pdo_mysql, tokenizer, xml, zip
           coverage: none
-          tools: composer:v2
 
-      - name: Get composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+      - name: Detect lint dependency requirements
+        id: lint_changes
+        env:
+          CI_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        shell: bash
+        run: |
+          base="$CI_BASE_SHA"
+          if [[ -z "$base" || "$base" =~ ^0+$ ]] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            base="$(git rev-parse HEAD^)"
+          fi
 
-      - name: Cache composer dependencies
+          changed_files="$(git diff --name-only --diff-filter=ACMRT "$base" HEAD)"
+
+          if grep -Eq '\.(php|ya?ml)$' <<< "$changed_files"; then
+            echo "composer=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "composer=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Cache Composer downloads
+        if: steps.lint_changes.outputs.composer == 'true'
         uses: actions/cache@v4
         with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: composer-${{ hashFiles('composer.lock') }}
-          restore-keys: composer-
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
 
-      - name: Install PHP dependencies (locked)
-        run: composer install --prefer-dist --no-interaction --no-progress
+      - name: Install Composer dependencies
+        if: steps.lint_changes.outputs.composer == 'true'
+        run: composer install --no-interaction --prefer-dist --no-progress --no-scripts
 
-      - name: Setup Node 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
+      - name: Validate changed files and conflict markers
+        env:
+          CI_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: php scripts/ci/validate-diff.php
 
-      - name: Install Node dependencies (locked)
-        run: npm ci
+      - name: Pint PHP style check
+        env:
+          CI_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: php scripts/ci/pint-diff.php
 
-      - name: Prepare application
-        run: |
-          cp .env.example .env
-          php artisan key:generate
-
-      # NOTE: the existing codebase predates Pint enforcement, so this is
-      # reported but non-blocking for now. Remove `continue-on-error` once the
-      # code style has been normalised (`vendor/bin/pint`) to make lint a gate.
-      - name: Lint (Laravel Pint)
-        continue-on-error: true
-        run: vendor/bin/pint --test
-
-      # Build assets BEFORE tests: feature tests hit routes that render Blade
-      # views using @vite, which require public/build/manifest.json to exist.
-      - name: Build front-end assets
-        run: npm run build
-
-      - name: Run tests (PHPUnit)
-        run: php artisan test
-
-  docker:
-    name: Docker Image Build & Smoke Test
+  code-quality:
+    name: Code Quality Diff
     runs-on: ubuntu-latest
-    needs: test
+    timeout-minutes: 10
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          coverage: none
+
+      - name: Run diff-only quality gate
+        id: quality
+        continue-on-error: true
+        env:
+          CI_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          CODE_QUALITY_REPORT: code-quality-report.md
+        run: php scripts/ci/code-quality-diff.php
+
+      - name: Comment code-quality report on PR
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- futabus-ci-code-quality -->';
+            const body = fs.readFileSync('code-quality-report.md', 'utf8');
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.rest.issues.listComments({ owner, repo, issue_number, per_page: 100 });
+            const existing = comments.data.find((comment) => comment.body && comment.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
+      - name: Block merge on code-quality violations
+        if: steps.quality.outcome == 'failure'
+        run: |
+          echo "::error::Code-quality rules failed. Read the PR report, fix every hard failure, and push a new commit."
+          exit 1
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: futabus_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      APP_ENV: testing
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: futabus_test
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      CACHE_DRIVER: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: array
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: bcmath, ctype, curl, dom, fileinfo, gd, intl, json, mbstring, mysql, openssl, pdo_mysql, tokenizer, xml, zip
+          coverage: none
+
+      - name: Cache Composer downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare Laravel storage directories
+        run: |
+          mkdir -p storage/framework/{sessions,views,cache/data}
+          mkdir -p storage/logs
+          mkdir -p bootstrap/cache
+          chmod -R 775 storage bootstrap/cache
+
+      - name: Prepare Laravel environment
+        run: |
+          cp .env.example .env
+          sed -i "s|^APP_KEY=.*|APP_KEY=$(php -r "echo 'base64:'.base64_encode(random_bytes(32));")|" .env
+
+      - name: Run migrations
+        run: php artisan migrate --force
+
+      - name: Run impacted PHPUnit suite
+        env:
+          CI_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: php scripts/ci/test-diff.php
+
+  docker:
+    name: Docker Build and Smoke Test
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - code-quality
+      - test
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare Docker environment
+        run: |
+          cp .env.example .env
+          sed -i "s|^APP_KEY=.*|APP_KEY=$(php -r "echo 'base64:'.base64_encode(random_bytes(32));")|" .env
+
+      - name: Validate Compose manifests
+        run: |
+          docker compose config --quiet
+          APP_IMAGE=futabus-app:test NGINX_IMAGE=futabus-nginx:test \
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml config --quiet
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -88,40 +236,64 @@ jobs:
         with:
           context: .
           target: production
-          tags: monexa-app:ci
           load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          tags: futabus-app:local
+          cache-from: type=gha,scope=futabus-app
+          cache-to: type=gha,mode=max,scope=futabus-app
 
-      - name: Build nginx image
+      - name: Build Nginx image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: docker/nginx/Dockerfile
-          build-args: |
-            APP_IMAGE=monexa-app:ci
-          tags: monexa-nginx:ci
           load: true
+          tags: futabus-nginx:local
+          cache-from: |
+            type=gha,scope=futabus-nginx
+            type=gha,scope=futabus-app
+          cache-to: type=gha,mode=max,scope=futabus-nginx
 
-      - name: Smoke test — image boots
+      - name: Start runtime smoke-test stack
+        run: docker compose up -d --no-build app nginx
+
+      - name: Verify HTTP and application health
         run: |
-          set -euo pipefail
-          docker run -d --name monexa_smoke \
-            -e APP_KEY=base64:$(openssl rand -base64 32) \
-            -e APP_ENV=production \
-            -e DB_CONNECTION=sqlite \
-            -e DB_DATABASE=/tmp/db.sqlite \
-            -e WAIT_FOR_DB=false \
-            -e CACHE_STORE=file \
-            -e SESSION_DRIVER=file \
-            -e QUEUE_CONNECTION=sync \
-            monexa-app:ci
-          echo "Waiting for the php-fpm healthcheck to report healthy..."
-          for i in $(seq 1 20); do
-            status=$(docker inspect --format='{{.State.Health.Status}}' monexa_smoke || echo "starting")
-            echo "attempt $i: $status"
-            [ "$status" = "healthy" ] && break
-            [ "$i" -eq 20 ] && { docker logs monexa_smoke; exit 1; }
-            sleep 3
+          for _ in $(seq 1 24); do
+            if curl --fail --silent http://127.0.0.1:8080/up; then
+              exit 0
+            fi
+            sleep 5
           done
-          docker rm -f monexa_smoke
+          docker compose ps
+          docker compose logs app nginx
+          exit 1
+
+      - name: Stop smoke-test stack
+        if: always()
+        run: docker compose down --volumes --remove-orphans
+
+  auto-merge:
+    name: Auto Merge Approved Branch Flow
+    if: >-
+      github.event_name == 'pull_request' &&
+      (github.event.pull_request.base.ref == 'dev' ||
+       (github.event.pull_request.base.ref == 'staging' && github.event.pull_request.head.ref == 'dev'))
+    runs-on: ubuntu-latest
+    needs: docker
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Merge successful pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
+        run: |
+          if [ "$BASE_BRANCH" = "dev" ]; then
+            gh pr merge "$PR_URL" --merge --delete-branch
+          else
+            gh pr merge "$PR_URL" --merge
+          fi

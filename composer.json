@@ -1,13 +1,36 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "futabus/futabus",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "FUTABUS - Nền tảng đặt và quản lý vé xe khách trực tuyến tích hợp AI (Laravel 12 modular monolith).",
+    "keywords": ["laravel", "bus", "ticket", "booking", "modular", "monolith"],
     "license": "MIT",
     "require": {
         "php": "^8.2",
         "barryvdh/laravel-dompdf": "^3.1",
+        "blade-ui-kit/blade-heroicons": "2.7",
+        "futebus/aiassistant": "*",
+        "futebus/auth": "*",
+        "futebus/bookingmanagement": "*",
+        "futebus/buscompanymanagement": "*",
+        "futebus/busmanagement": "*",
+        "futebus/cancellation": "*",
+        "futebus/core": "*",
+        "futebus/customermanagement": "*",
+        "futebus/dashboard": "*",
+        "futebus/notification": "*",
+        "futebus/payment": "*",
+        "futebus/profile": "*",
+        "futebus/reporting": "*",
+        "futebus/rolepermission": "*",
+        "futebus/routemanagement": "*",
+        "futebus/seatavailability": "*",
+        "futebus/seatmanagement": "*",
+        "futebus/systemsetting": "*",
+        "futebus/ticketmanagement": "*",
+        "futebus/tripmanagement": "*",
+        "futebus/tripsearch": "*",
+        "futebus/usermanagement": "*",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.3",
         "laravel/socialite": "^5.26",
@@ -38,6 +61,118 @@
             "Tests\\": "tests/"
         }
     },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "packages/Customer/BookingManagement",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/Customer/Cancellation",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/Customer/SeatAvailability",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/Customer/TicketManagement",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/Customer/TripSearch",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/futebus/AiAssistant",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/futebus/Auth",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/futebus/BusCompanyManagement",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/futebus/BusManagement",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/futebus/Core",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/futebus/CustomerManagement",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/futebus/Dashboard",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/futebus/Notification",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/futebus/Payment",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/futebus/Profile",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/futebus/Reporting",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/futebus/RolePermission",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/futebus/RouteManagement",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/futebus/SeatManagement",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/futebus/SystemSetting",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/futebus/TripManagement",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/futebus/UserManagement",
+            "options": { "symlink": true }
+        }
+    ],
     "scripts": {
         "setup": [
             "composer install",

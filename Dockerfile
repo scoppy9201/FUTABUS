@@ -1,6 +1,6 @@
-# syntax=docker/dockerfile:1
+﻿# syntax=docker/dockerfile:1
 
-# Monexa — Multi-stage, production-ready image for a Laravel 12 application.
+# FUTEBUS — Multi-stage, production-ready image for a Laravel 12 application.
 #
 # Stages:
 #   base        -> PHP 8.3-FPM (Alpine) + required extensions + Composer
@@ -56,7 +56,7 @@ RUN set -eux; \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Production PHP + OPcache + FPM tuning.
-COPY docker/php/php.ini      /usr/local/etc/php/conf.d/zz-monexa.ini
+COPY docker/php/php.ini      /usr/local/etc/php/conf.d/zz-futabus.ini
 COPY docker/php/opcache.ini  /usr/local/etc/php/conf.d/zz-opcache.ini
 COPY docker/php/www.conf     /usr/local/etc/php-fpm.d/zz-www.conf
 
@@ -72,7 +72,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 # Build assets. VITE_APP_NAME can be overridden at build time.
-ARG VITE_APP_NAME=Monexa
+ARG VITE_APP_NAME=FUTEBUS
 ENV VITE_APP_NAME=${VITE_APP_NAME}
 COPY vite.config.js ./
 COPY resources ./resources
