@@ -11,5 +11,6 @@ class DatabaseSeeder extends Seeder
         $this->call(RolePermissionSeeder::class);
         $this->call(BusCompanySeeder::class);
         $this->call(DemoDataSeeder::class);
+        $this->call(PromotionSeeder::class);
     }
 }

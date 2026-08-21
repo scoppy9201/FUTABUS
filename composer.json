@@ -53,7 +53,29 @@
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/"
+            "Database\\Seeders\\": "database/seeders/",
+            "FuteBus\\Core\\": "packages/FuteBus/Core/src/",
+            "FuteBus\\Auth\\": "packages/FuteBus/Auth/src/",
+            "FuteBus\\Dashboard\\": "packages/FuteBus/Dashboard/src/",
+            "FuteBus\\Notification\\": "packages/FuteBus/Notification/src/",
+            "FuteBus\\Profile\\": "packages/FuteBus/Profile/src/",
+            "FuteBus\\RolePermission\\": "packages/FuteBus/RolePermission/src/",
+            "FuteBus\\UserManagement\\": "packages/FuteBus/UserManagement/src/",
+            "FuteBus\\CustomerManagement\\": "packages/FuteBus/CustomerManagement/src/",
+            "FuteBus\\BusCompanyManagement\\": "packages/FuteBus/BusCompanyManagement/src/",
+            "FuteBus\\BusManagement\\": "packages/FuteBus/BusManagement/src/",
+            "FuteBus\\RouteManagement\\": "packages/FuteBus/RouteManagement/src/",
+            "FuteBus\\TripManagement\\": "packages/FuteBus/TripManagement/src/",
+            "FuteBus\\SeatManagement\\": "packages/FuteBus/SeatManagement/src/",
+            "FuteBus\\Payment\\": "packages/FuteBus/Payment/src/",
+            "FuteBus\\Reporting\\": "packages/FuteBus/Reporting/src/",
+            "FuteBus\\SystemSetting\\": "packages/FuteBus/SystemSetting/src/",
+            "FuteBus\\AiAssistant\\": "packages/FuteBus/AiAssistant/src/",
+            "FuteBus\\TripSearch\\": "packages/Customer/TripSearch/src/",
+            "FuteBus\\BookingManagement\\": "packages/Customer/BookingManagement/src/",
+            "FuteBus\\Cancellation\\": "packages/Customer/Cancellation/src/",
+            "FuteBus\\SeatAvailability\\": "packages/Customer/SeatAvailability/src/",
+            "FuteBus\\TicketManagement\\": "packages/Customer/TicketManagement/src/"
         }
     },
     "autoload-dev": {

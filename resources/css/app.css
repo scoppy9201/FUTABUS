@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@theme {
+    --color-futa-orange: #f97316;
+    --color-futa-orange-dark: #ea580c;
+    --color-futa-green: #16a34a;
+    --color-futa-green-dark: #15803d;
+    --color-futa-red: #dc2626;
+    --font-family-sans: "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+}

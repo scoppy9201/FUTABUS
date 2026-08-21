@@ -1,22 +1,17 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 /*
+|--------------------------------------------------------------------------
 | Web Routes
+|--------------------------------------------------------------------------
 |
-| Các route nền tảng tối giản. Logic chi tiết sẽ được đăng ký từng module
-| qua ServiceProvider tương ứng (xem packages/).
+| Routes chính sẽ được load từ các Packages qua ServiceProvider.
+| File này chỉ chứa routes cơ bản cần thiết.
 |
 */
-
-Route::get('/', function () {
-    if (Auth::check()) {
-        return redirect('/dashboard');
-    }
-    return view('welcome');
-});
 
 Route::get('/login', fn () => view('auth.login'))->name('login');
 Route::get('/register', fn () => view('auth.register'))->name('register');
