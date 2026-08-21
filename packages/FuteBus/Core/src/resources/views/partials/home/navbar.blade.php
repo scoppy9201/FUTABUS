@@ -5,21 +5,27 @@
                 {{-- Language dropdown --}}
                 <div class="relative" x-data="{ open: false }" @click.away="open = false">
                     <button type="button" @click="open = !open" class="flex items-center gap-1.5 text-sm font-bold" aria-label="{{ __('core::app.home.navbar.language_selector') }}">
-                        @if(app()->getLocale() === 'vi')
-                            <svg class="h-[18px] w-[18px] rounded-sm" viewBox="0 0 640 480"><path fill="#da251d" d="M0 0h640v480H0z"/><path fill="#ffcd00" d="m339.4 180.3-35.3 108.6-35.4-108.6h-38l53.3 163.4h34.4l53.3-163.4z"/></svg>
-                        @else
-                            <svg class="h-[18px] w-[18px] rounded-sm" viewBox="0 0 60 30"><clipPath id="s"><path d="M0,0 v30 h60 v-30 z"/></clipPath><clipPath id="t"><path d="M30,15 h30 v15 zv15 h-30 z h-30 v-15 zv-15 h30 z"/></clipPath><g clip-path="url(#s)"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#t)" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></g></svg>
-                        @endif
+                        <span class="inline-flex h-[26px] w-[26px] items-center justify-center overflow-hidden rounded-full">
+                            @if(app()->getLocale() === 'vi')
+                                <svg class="h-full w-full" viewBox="0 0 640 480"><path fill="#da251d" d="M0 0h640v480H0z"/><path fill="#ffcd00" d="m339.4 180.3-35.3 108.6-35.4-108.6h-38l53.3 163.4h34.4l53.3-163.4z"/></svg>
+                            @else
+                                <svg class="h-full w-full" viewBox="0 0 60 30"><clipPath id="s"><path d="M0,0 v30 h60 v-30 z"/></clipPath><clipPath id="t"><path d="M30,15 h30 v15 zv15 h-30 z h-30 v-15 zv-15 h30 z"/></clipPath><g clip-path="url(#s)"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#t)" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></g></svg>
+                            @endif
+                        </span>
                         <span>{{ strtoupper(app()->getLocale()) }}</span>
                         <svg class="h-3 w-3 fill-none stroke-current stroke-2 transition-transform duration-200" :class="open ? 'rotate-180' : ''" viewBox="0 0 20 20"><path d="m5 7.5 5 5 5-5" /></svg>
                     </button>
                     <div x-show="open" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="absolute left-0 top-full z-50 mt-2 w-[160px] overflow-hidden rounded-lg border border-white/20 bg-white py-1 shadow-xl" style="display: none;">
                         <a href="{{ route('home') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold transition-colors {{ app()->getLocale() === 'vi' ? 'bg-orange-50 text-[#ef5222]' : 'text-gray-700 hover:bg-gray-50' }}">
-                            <svg class="h-5 w-5 rounded-sm" viewBox="0 0 640 480"><path fill="#da251d" d="M0 0h640v480H0z"/><path fill="#ffcd00" d="m339.4 180.3-35.3 108.6-35.4-108.6h-38l53.3 163.4h34.4l53.3-163.4z"/></svg>
+                            <span class="inline-flex h-[22px] w-[22px] items-center justify-center overflow-hidden rounded-full">
+                                <svg class="h-full w-full" viewBox="0 0 640 480"><path fill="#da251d" d="M0 0h640v480H0z"/><path fill="#ffcd00" d="m339.4 180.3-35.3 108.6-35.4-108.6h-38l53.3 163.4h34.4l53.3-163.4z"/></svg>
+                            </span>
                             <span>Tiếng Việt</span>
                         </a>
                         <a href="{{ route('home') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold transition-colors {{ app()->getLocale() === 'en' ? 'bg-orange-50 text-[#ef5222]' : 'text-gray-700 hover:bg-gray-50' }}">
-                            <svg class="h-5 w-5 rounded-sm" viewBox="0 0 60 30"><clipPath id="s2"><path d="M0,0 v30 h60 v-30 z"/></clipPath><clipPath id="t2"><path d="M30,15 h30 v15 zv15 h-30 z h-30 v-15 zv-15 h30 z"/></clipPath><g clip-path="url(#s2)"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#t2)" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></g></svg>
+                            <span class="inline-flex h-[22px] w-[22px] items-center justify-center overflow-hidden rounded-full">
+                                <svg class="h-full w-full" viewBox="0 0 60 30"><clipPath id="s2"><path d="M0,0 v30 h60 v-30 z"/></clipPath><clipPath id="t2"><path d="M30,15 h30 v15 zv15 h-30 z h-30 v-15 zv-15 h30 z"/></clipPath><g clip-path="url(#s2)"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#t2)" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></g></svg>
+                            </span>
                             <span>English</span>
                         </a>
                     </div>

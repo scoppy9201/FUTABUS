@@ -4,7 +4,7 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {{-- Title --}}
         <div class="mb-8 text-center">
-            <h2 class="text-2xl font-black uppercase tracking-wider text-orange-600 sm:text-3xl">
+            <h2 class="text-2xl font-black uppercase tracking-wider text-[#1E603C] sm:text-3xl">
                 {{ __('core::app.home.promotions.title') }}
             </h2>
         </div>
