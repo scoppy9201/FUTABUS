@@ -140,7 +140,7 @@ EXPOSE 9000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
     CMD healthcheck || exit 1
 
-ENTRYPOINT ["entrypoint"]
+ENTRYPOINT ["bash", "/usr/local/bin/entrypoint"]
 CMD ["php-fpm"]
 
 #development
@@ -157,5 +157,5 @@ COPY docker/php/entrypoint.sh /usr/local/bin/entrypoint
 COPY docker/php/healthcheck.sh /usr/local/bin/healthcheck
 RUN chmod +x /usr/local/bin/entrypoint /usr/local/bin/healthcheck
 
-ENTRYPOINT ["entrypoint"]
+ENTRYPOINT ["bash", "/usr/local/bin/entrypoint"]
 CMD ["php-fpm"]

@@ -103,7 +103,7 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootsecret}
     ports:
-      - "${DB_FORWARD_PORT:-33060}:3306"
+      - "${DB_FORWARD_PORT:-33070}:3306"
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:

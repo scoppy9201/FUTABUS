@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 # FUTEBUS container entrypoint.
 #
 # Runs common bootstrap tasks (writable dirs, framework cache) and then execs
