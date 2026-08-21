@@ -1,5 +1,5 @@
 ﻿<p align="center">
-  <img src="public/icons/svg/dashboard.svg" width="80" alt="FUTEBUS logo">
+  <img src="public/icons/futabus-logo.png" width="200" alt="FUTA Bus Lines logo">
 </p>
 
 <p align="center">
