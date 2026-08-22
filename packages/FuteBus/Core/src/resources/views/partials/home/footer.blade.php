@@ -92,7 +92,10 @@
                     @foreach($companyLinks as $link)
                         <li class="flex gap-3">
                             <span class="mt-2 size-2 shrink-0 rounded-full bg-gray-300"></span>
-                            <a href="#" class="leading-5 transition-colors hover:text-[#ef5222]">
+                            <a
+                                href="{{ $link === 'about' ? route('about') : '#' }}"
+                                class="leading-5 transition-colors hover:text-[#ef5222]"
+                            >
                                 {{ __("core::app.home.footer.links.{$link}") }}
                             </a>
                         </li>

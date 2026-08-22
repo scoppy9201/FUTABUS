@@ -2,6 +2,10 @@
 
 @source "../../packages/FuteBus/Core/src/resources/views/**/*.blade.php";
 
+[x-cloak] {
+    display: none !important;
+}
+
 @theme {
     --color-futa-orange: #f97316;
     --color-futa-orange-dark: #ea580c;
