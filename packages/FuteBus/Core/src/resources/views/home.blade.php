@@ -6,6 +6,8 @@
     @include('core::partials.home.promotions')
     @include('core::partials.home.popular-routes')
     @include('core::partials.home.service-quality')
+    @include('core::partials.home.latest-news')
+    @include('core::partials.home.futa-ecosystem')
 
     {{-- Footer --}}
     <footer class="bg-gray-900 py-8">

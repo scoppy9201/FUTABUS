@@ -70,6 +70,27 @@ return [
             'illustration_alt' => 'Cam kết chất lượng dịch vụ của FUTA Bus Lines',
         ],
 
+        'latest_news' => [
+            'title'       => 'Tin tức mới',
+            'subtitle'    => 'Được khách hàng tin tưởng và lựa chọn',
+            'view_all'    => 'Xem tất cả',
+            'details'     => 'Chi tiết',
+            'empty'       => 'Chưa có tin tức mới.',
+            'image_alt'   => 'Ảnh bài viết :title',
+            'placeholder' => 'Tin tức FUTA',
+        ],
+
+        'futa_ecosystem' => [
+            'title'    => 'Kết nối FUTA Group',
+            'subtitle' => 'Kết nối đa dạng hệ sinh thái FUTA Group qua App FUTA: mua vé Xe Phương Trang, Xe Buýt, Xe Hợp Đồng, Giao Hàng,...',
+            'items'    => [
+                'contract_car' => 'Xe Hợp Đồng',
+                'buy_ticket'   => 'Mua vé Phương Trang',
+                'delivery'     => 'Giao Hàng',
+                'city_bus'     => 'Xe Buýt',
+            ],
+        ],
+
         'footer' => [
             'copyright' => 'FUTABUS. Mọi quyền được bảo lưu.',
         ],
