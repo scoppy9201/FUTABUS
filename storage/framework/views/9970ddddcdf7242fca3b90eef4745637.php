@@ -1,21 +1,22 @@
-{{-- Khuyến mãi nổi bật --}}
-@if($promotions->isNotEmpty())
+
+<?php if($promotions->isNotEmpty()): ?>
 <section class="bg-white py-10 sm:py-12">
     <div class="mx-auto w-full max-w-282 px-4 sm:px-6 lg:px-0">
-        {{-- Title --}}
+        
         <div class="mb-7 text-center sm:mb-8">
             <h2 class="text-2xl font-extrabold uppercase leading-tight text-[#00613d] xl:text-3xl">
-                {{ __('core::app.home.promotions.title') }}
+                <?php echo e(__('core::app.home.promotions.title')); ?>
+
             </h2>
         </div>
 
-        {{-- Carousel --}}
+        
         <div
             class="relative"
             x-data="{
                 active: 0,
                 perPage: 3,
-                total: {{ $promotions->count() }},
+                total: <?php echo e($promotions->count()); ?>,
                 totalPages: 1,
                 init() {
                     this.syncLayout();
@@ -28,53 +29,74 @@
             }"
             @resize.window.debounce.150ms="syncLayout()"
         >
-            {{-- Cards --}}
+            
             <div class="overflow-hidden">
                 <div
                     class="flex transition-transform duration-500 ease-in-out"
                     :style="`transform: translateX(-${active * 100}%)`"
                 >
-                    @foreach($promotions as $promo)
-                    @php
+                    <?php $__currentLoopData = $promotions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $promo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php
                         $promoImageExists = $promo->image
                             && Storage::disk('public')->exists($promo->image);
-                    @endphp
+                    ?>
                     <div class="w-full shrink-0 px-2.5 sm:w-1/2 lg:w-1/3">
                         <div class="group h-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-lg">
-                            <a href="{{ $promo->link ?? '#' }}" class="block">
+                            <a href="<?php echo e($promo->link ?? '#'); ?>" class="block">
                                 <div class="relative h-44 overflow-hidden bg-gray-100 sm:h-48">
-                                    @if($promoImageExists)
+                                    <?php if($promoImageExists): ?>
                                         <img
-                                            src="{{ asset('storage/' . $promo->image) }}"
-                                            alt="{{ $promo->title }}"
+                                            src="<?php echo e(asset('storage/' . $promo->image)); ?>"
+                                            alt="<?php echo e($promo->title); ?>"
                                             class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                                         >
-                                    @else
+                                    <?php else: ?>
                                         <div class="flex h-full w-full items-center justify-center bg-linear-to-br from-orange-100 to-orange-200">
                                             <span class="text-orange-400">
-                                                <x-heroicon-o-megaphone class="h-12 w-12" />
+                                                <?php if (isset($component)) { $__componentOriginal643fe1b47aec0b76658e1a0200b34b2c = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal643fe1b47aec0b76658e1a0200b34b2c = $attributes; } ?>
+<?php $component = BladeUI\Icons\Components\Svg::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('heroicon-o-megaphone'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\BladeUI\Icons\Components\Svg::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['class' => 'h-12 w-12']); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal643fe1b47aec0b76658e1a0200b34b2c)): ?>
+<?php $attributes = $__attributesOriginal643fe1b47aec0b76658e1a0200b34b2c; ?>
+<?php unset($__attributesOriginal643fe1b47aec0b76658e1a0200b34b2c); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal643fe1b47aec0b76658e1a0200b34b2c)): ?>
+<?php $component = $__componentOriginal643fe1b47aec0b76658e1a0200b34b2c; ?>
+<?php unset($__componentOriginal643fe1b47aec0b76658e1a0200b34b2c); ?>
+<?php endif; ?>
                                             </span>
                                         </div>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                                 <div class="p-4">
                                     <h3 class="line-clamp-2 text-sm font-bold text-gray-800 group-hover:text-orange-600 transition">
-                                        {{ $promo->title }}
+                                        <?php echo e($promo->title); ?>
+
                                     </h3>
-                                    @if($promo->description)
+                                    <?php if($promo->description): ?>
                                         <p class="mt-1.5 line-clamp-2 text-xs font-medium text-gray-600">
-                                            {{ $promo->description }}
+                                            <?php echo e($promo->description); ?>
+
                                         </p>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                             </a>
                         </div>
                     </div>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
             </div>
 
-            {{-- Dots --}}
+            
             <div class="mt-6 flex justify-center gap-2" x-show="totalPages > 1">
                 <template x-for="page in totalPages" :key="page">
                     <button
@@ -90,4 +112,5 @@
         </div>
     </div>
 </section>
-@endif
+<?php endif; ?>
+<?php /**PATH D:\laragon\www\FUTABUS\packages\FuteBus\Core\src\Providers/../resources/views/partials/home/promotions.blade.php ENDPATH**/ ?>
