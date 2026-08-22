@@ -150,6 +150,43 @@ return [
             . 'nhiều giải thưởng và tiếp tục khẳng định vị thế thương hiệu uy tín hàng đầu Việt Nam.',
         'read_more' => 'Xem thêm',
         'show_less' => 'Ẩn bớt',
+        'identity' => [
+            'vision' => [
+                'title' => 'Tầm nhìn và sứ mệnh',
+                'image_alt' => 'Đội ngũ cùng hướng tới mục tiêu phát triển',
+                'lead' => 'Báo đáp Tổ quốc vì một Việt Nam hùng cường.',
+                'introduction' => 'Trở thành Tập đoàn uy tín và chất lượng hàng đầu Việt Nam với cam kết:',
+                'commitments' => [
+                    'Tạo môi trường làm việc năng động, thân thiện.',
+                    'Phát triển từ lòng tin của khách hàng.',
+                    'Trở thành tập đoàn dẫn đầu chuyên nghiệp.',
+                ],
+                'conclusion' => 'luôn phấn đấu làm việc hiệu quả nhất, để luôn cống hiến, đóng góp hết sức mình '
+                    . 'vì một Việt Nam hùng cường.',
+            ],
+            'core_values' => [
+                'title' => 'Giá trị cốt lõi',
+                'image_alt' => 'Mầm cây tượng trưng cho sự phát triển bền vững',
+                'introduction' => 'Giá trị cốt lõi – Phương Trang',
+                'items' => [
+                    'Phương: chữ “Phương” trong tiếng Hán nghĩa là Vuông, vật gì hình thể ngay thẳng đều gọi '
+                        . 'là phương; thể hiện sự chính trực, phẩm chất đạo đức tốt đẹp và mối quan hệ bền vững.',
+                    'Trang: mang nghĩa To lớn, Tráng lệ. Hướng tới sự thành công vượt bậc, thể hiện ý chí, '
+                        . 'khát vọng thực hiện những mục tiêu lớn và đem lại giá trị lớn cho cộng đồng, xã hội.',
+                    'Phương Trang với hàm nghĩa càng phát triển, càng to lớn lại càng phải “CHÍNH TRỰC”; '
+                        . 'luôn là biểu tượng của sự phát triển dựa trên những giá trị đạo đức tốt đẹp nhất.',
+                ],
+            ],
+            'philosophy' => [
+                'title' => 'Triết lý',
+                'image_alt' => 'Minh họa triết lý tăng trưởng bền vững',
+                'description' => 'Hội nhập và phát triển góp phần vào sự thịnh vượng của đất nước. Nguồn nhân lực '
+                    . 'chính là tài sản lớn nhất của Công ty Phương Trang; vì vậy chúng tôi chú trọng xây dựng '
+                    . 'môi trường làm việc hiện đại, năng động, thân thiện và trao cơ hội phát triển nghề nghiệp '
+                    . 'cho mọi thành viên. Sự hài lòng của khách hàng là minh chứng cho chất lượng dịch vụ và '
+                    . 'là nền tảng để Phương Trang thấu hiểu nhu cầu, mang đến sản phẩm dịch vụ hoàn hảo.',
+            ],
+        ],
         'sections' => [
             'futabus' => [
                 'title' => 'FUTA Bus Lines',

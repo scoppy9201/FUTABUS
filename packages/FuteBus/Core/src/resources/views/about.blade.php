@@ -98,6 +98,82 @@
                     </div>
                 </div>
             </article>
+
+            <div class="mt-20 space-y-20 border-b border-gray-200 pb-16 text-gray-950">
+                <section class="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
+                    <img
+                        src="{{ asset('images/about/vision-mission-team.png') }}"
+                        alt="{{ __('core::app.about.identity.vision.image_alt') }}"
+                        class="mx-auto max-h-90 w-full object-contain"
+                        loading="lazy"
+                    >
+                    <div>
+                        <h2 class="text-[38px] font-extrabold uppercase leading-tight text-[#ef5222]">
+                            {{ __('core::app.about.identity.vision.title') }}
+                        </h2>
+                        <p class="mt-6 font-extrabold uppercase text-[#ef5222]">
+                            {{ __('core::app.about.identity.vision.lead') }}
+                        </p>
+                        <p class="mt-1 text-base font-semibold leading-6.5">
+                            {{ __('core::app.about.identity.vision.introduction') }}
+                        </p>
+                        <ul class="mt-5 space-y-4 text-base font-semibold leading-6.5">
+                            @foreach(__('core::app.about.identity.vision.commitments') as $commitment)
+                                <li class="flex gap-3">
+                                    <span class="mt-2.5 size-1.5 shrink-0 rounded-full bg-gray-950"></span>
+                                    <span>{{ $commitment }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                        <p class="mt-5 text-base font-semibold leading-6.5">
+                            <span class="font-extrabold text-[#ef5222]">Phương Trang</span>
+                            {{ __('core::app.about.identity.vision.conclusion') }}
+                        </p>
+                    </div>
+                </section>
+
+                <section class="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
+                    <div>
+                        <h2 class="text-[38px] font-extrabold uppercase leading-tight text-[#ef5222]">
+                            {{ __('core::app.about.identity.core_values.title') }}
+                        </h2>
+                        <p class="mt-6 text-base font-semibold leading-6.5">
+                            {{ __('core::app.about.identity.core_values.introduction') }}
+                        </p>
+                        <ul class="mt-5 space-y-4 text-base font-semibold leading-6.5">
+                            @foreach(__('core::app.about.identity.core_values.items') as $item)
+                                <li class="flex gap-3">
+                                    <span class="mt-2.5 size-1.5 shrink-0 rounded-full bg-gray-950"></span>
+                                    <span>{{ $item }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    <img
+                        src="{{ asset('images/about/core-values-growth.png') }}"
+                        alt="{{ __('core::app.about.identity.core_values.image_alt') }}"
+                        class="mx-auto max-h-90 w-full rounded-xl object-cover lg:order-2"
+                        loading="lazy"
+                    >
+                </section>
+
+                <section class="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
+                    <img
+                        src="{{ asset('images/about/philosophy-sustainable-growth.png') }}"
+                        alt="{{ __('core::app.about.identity.philosophy.image_alt') }}"
+                        class="mx-auto max-h-90 w-full object-contain"
+                        loading="lazy"
+                    >
+                    <div>
+                        <h2 class="text-[38px] font-extrabold uppercase leading-tight text-[#ef5222]">
+                            {{ __('core::app.about.identity.philosophy.title') }}
+                        </h2>
+                        <p class="mt-6 text-base font-semibold leading-6.5">
+                            {{ __('core::app.about.identity.philosophy.description') }}
+                        </p>
+                    </div>
+                </section>
+            </div>
         </main>
 
         @include('core::partials.home.footer')
