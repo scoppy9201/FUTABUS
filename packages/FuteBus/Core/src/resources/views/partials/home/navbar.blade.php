@@ -1,6 +1,6 @@
 <header class="futa-header-pattern relative z-20 text-white">
-    <div class="h-15.5">
-        <div class="relative mx-auto flex h-15.5 w-[calc(100%-24px)] max-w-282 items-center justify-between sm:w-[calc(100%-32px)]">
+    <div class="h-15.5 sm:h-18">
+        <div class="relative mx-auto flex h-15.5 w-[calc(100%-24px)] max-w-282 items-center justify-between sm:h-18 sm:w-[calc(100%-32px)]">
             <div class="flex items-center gap-3.5">
                 {{-- Language dropdown --}}
                 <div class="relative" x-data="{ open: false }" @click.away="open = false">
@@ -85,14 +85,22 @@
                 </div>
             </div>
 
-            <a href="{{ route('home') }}" class="absolute left-1/2 top-0 grid h-17 w-80 -translate-x-1/2 place-items-center max-lg:w-66 max-sm:w-47.5" aria-label="{{ __('core::app.home.navbar.home_aria') }}">
+            <a
+                href="{{ route('home') }}"
+                class="absolute left-1/2 top-0 grid h-17 w-80 -translate-x-1/2 place-items-center sm:h-19 max-lg:w-66 max-sm:w-47.5"
+                aria-label="{{ __('core::app.home.navbar.home_aria') }}"
+            >
                 <img
                     src="{{ asset('icons/illustrations/navbar-logo-panel.svg') }}"
                     alt=""
                     class="absolute inset-0 h-full w-full drop-shadow-[0_2px_1px_rgba(103,42,11,.08)]"
                     aria-hidden="true"
                 >
-                <img src="{{ asset('icons/futabus-logo.png') }}" alt="{{ __('core::app.home.navbar.logo_alt') }}" class="futa-brand-logo relative z-10 h-12 w-48.5 object-contain max-lg:scale-125 max-sm:w-33 max-sm:scale-110">
+                <img
+                    src="{{ asset('icons/futabus-logo.png') }}"
+                    alt="{{ __('core::app.home.navbar.logo_alt') }}"
+                    class="futa-brand-logo relative z-10 h-12 w-48.5 object-contain max-lg:scale-125 max-sm:w-33 max-sm:scale-110"
+                >
             </a>
 
             @auth
@@ -109,11 +117,11 @@
         </div>
     </div>
 
-    <nav class="h-17" aria-label="{{ __('core::app.home.navbar.primary_navigation') }}">
-        <div class="scrollbar-hidden mx-auto flex h-17 max-w-250 items-center justify-center gap-[clamp(28px,3.2vw,58px)] overflow-x-auto px-4 max-md:justify-start">
+    <nav class="h-16 sm:h-19.5" aria-label="{{ __('core::app.home.navbar.primary_navigation') }}">
+        <div class="scrollbar-hidden mx-auto flex h-16 max-w-250 items-center justify-center gap-[clamp(28px,3.2vw,58px)] overflow-x-auto px-4 sm:h-19.5 max-md:justify-start">
             <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'futa-nav-active relative' : '' }} py-5.75 text-sm font-extrabold whitespace-nowrap">{{ __('core::app.home.navbar.home') }}</a>
             <a href="#" class="py-5.75 text-sm font-extrabold whitespace-nowrap">{{ __('core::app.home.navbar.schedules') }}</a>
-            <a href="#" class="py-5.75 text-sm font-extrabold whitespace-nowrap">{{ __('core::app.home.navbar.lookup') }}</a>
+            <a href="{{ route('ticket-lookup') }}" class="{{ request()->routeIs('ticket-lookup') ? 'futa-nav-active relative' : '' }} py-5.75 text-sm font-extrabold whitespace-nowrap">{{ __('core::app.home.navbar.lookup') }}</a>
             <a href="#" class="py-5.75 text-sm font-extrabold whitespace-nowrap">{{ __('core::app.home.navbar.news') }}</a>
             <a href="#" class="py-5.75 text-sm font-extrabold whitespace-nowrap">{{ __('core::app.home.navbar.invoice') }}</a>
             <a href="#" class="py-5.75 text-sm font-extrabold whitespace-nowrap">{{ __('core::app.home.navbar.contact') }}</a>

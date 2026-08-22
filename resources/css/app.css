@@ -22,10 +22,16 @@
     }
 
     .futa-header-pattern {
+        overflow: visible;
         background:
-            linear-gradient(156deg, transparent 0 18%, rgb(255 190 63 / 20%) 18.2% 36%, transparent 36.2% 100%),
-            linear-gradient(24deg, transparent 0 57%, rgb(255 179 46 / 16%) 57.2% 77%, transparent 77.2% 100%),
-            linear-gradient(180deg, #ff981f 0%, #fa7a16 52%, #f2611c 100%);
+            linear-gradient(152deg, transparent 0 19%, rgb(255 184 49 / 18%) 19.2% 36%, transparent 36.2% 100%),
+            linear-gradient(28deg, transparent 0 61%, rgb(255 164 29 / 15%) 61.2% 78%, transparent 78.2% 100%),
+            linear-gradient(137deg, transparent 0 47%, rgb(231 65 8 / 15%) 47.2% 63%, transparent 63.2% 100%),
+            linear-gradient(42deg, transparent 0 28%, rgb(255 194 62 / 10%) 28.2% 43%, transparent 43.2% 100%),
+            linear-gradient(180deg, #ff8c16 0%, #f86d0e 48%, #ee500b 100%);
+        background-repeat: no-repeat;
+        background-size: 78% 100%, 74% 100%, 68% 100%, 62% 100%, 100% 100%;
+        background-position: left top, right top, center top, 28% top, center;
     }
 
     .futa-brand-logo {
@@ -45,12 +51,18 @@
     .futa-nav-active::after {
         position: absolute;
         right: 0;
-        bottom: 11px;
+        bottom: 9px;
         left: 0;
         height: 3px;
         border-radius: 999px;
         background: #fff;
         content: "";
+    }
+
+    @media (min-width: 640px) {
+        .futa-nav-active::after {
+            bottom: 13px;
+        }
     }
 }
 
