@@ -40,6 +40,13 @@ return [
             'title' => 'Featured Promotions',
         ],
 
+        'popular_routes' => [
+            'title'      => 'POPULAR ROUTES',
+            'subtitle'   => 'Trusted and chosen by customers',
+            'from_label' => 'Routes from',
+            'empty'      => 'No popular routes yet.',
+        ],
+
         'footer' => [
             'copyright' => 'FUTABUS. All rights reserved.',
         ],

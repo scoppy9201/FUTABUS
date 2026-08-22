@@ -40,6 +40,13 @@ return [
             'title' => 'Khuyến mãi nổi bật',
         ],
 
+        'popular_routes' => [
+            'title'      => 'Tuyến Phổ Biến',
+            'subtitle'   => 'Được khách hàng tin tưởng và lựa chọn',
+            'from_label' => 'Tuyến xe từ',
+            'empty'      => 'Chưa có tuyến phổ biến.',
+        ],
+
         'footer' => [
             'copyright' => 'FUTABUS. Mọi quyền được bảo lưu.',
         ],
