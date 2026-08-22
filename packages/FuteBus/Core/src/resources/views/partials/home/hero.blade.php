@@ -6,7 +6,7 @@
 </style>
 
 <section class="futa-hero-backdrop px-3 pt-2 pb-[58px] sm:px-4" x-data="{ roundTrip: false }">
-    <div class="mx-auto aspect-1128/310 w-full max-w-[1128px] overflow-hidden rounded-xl border border-white/60 bg-[#fff7f1] shadow-[0_6px_14px_rgba(67,31,18,.26)] max-sm:aspect-16/7">
+    <div class="mx-auto aspect-1128/310 w-full max-w-282 overflow-hidden rounded-xl border border-white/60 bg-[#fff7f1] shadow-[0_6px_14px_rgba(67,31,18,.26)] max-sm:aspect-16/7">
         <img
             src="{{ asset('images/banners/home-banner.jpg') }}"
             alt="{{ __('core::app.home.hero.banner_alt') }}"
@@ -14,7 +14,7 @@
         >
     </div>
 
-    <form class="relative mx-auto mt-8 w-full max-w-[1128px] rounded-[18px] bg-white px-6 pt-[26px] pb-[42px] hero-form-border max-sm:px-4" action="#" method="GET">
+    <form class="relative mx-auto mt-8 w-full max-w-282 rounded-[18px] bg-white px-6 pt-[26px] pb-[42px] hero-form-border max-sm:px-4" action="#" method="GET">
         <div class="mb-[21px] flex items-center justify-between gap-4">
             <div class="flex items-center gap-7 max-sm:gap-4">
                 <label class="flex cursor-pointer items-center gap-2 font-bold transition-colors duration-200" :class="!roundTrip ? 'text-[#ef5222]' : 'text-gray-400'">
@@ -35,7 +35,7 @@
             $dayOfWeek = $isoDay === 7 ? 'CN' : 'Thứ ' . ($isoDay + 1);
         @endphp
 
-        <div class="grid grid-cols-1 items-end gap-[15px] md:grid-cols-2 lg:grid-cols-[1fr_22px_1fr_1fr_1fr]">
+        <div class="grid grid-cols-1 items-end gap-[15px] md:grid-cols-2 xl:grid-cols-[1fr_22px_1fr_1fr_1fr]">
             <div>
                 <label class="mb-2 ml-4 block text-sm font-bold text-gray-900">{{ __('core::app.home.hero.from') }}</label>
                 <input
@@ -46,7 +46,7 @@
                 >
             </div>
 
-            <button type="button" class="z-10 mb-3.75 -mx-1.75 hidden size-9.25 place-items-center rounded-full border border-gray-200 bg-white text-[#ef5222] shadow-sm lg:grid" aria-label="{{ __('core::app.home.hero.swap_aria') }}">
+            <button type="button" class="z-10 mb-3.75 -mx-1.75 hidden size-9.25 place-items-center rounded-full border border-gray-200 bg-white text-[#ef5222] shadow-sm xl:grid" aria-label="{{ __('core::app.home.hero.swap_aria') }}">
                 <x-heroicon-o-arrows-right-left class="size-4.75" />
             </button>
 
@@ -117,7 +117,7 @@
             x-transition:leave="transition ease-in duration-200"
             x-transition:leave-start="opacity-100 translate-y-0"
             x-transition:leave-end="opacity-0 -translate-y-2"
-            class="mt-3.75 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1fr_22px_1fr]"
+            class="mt-3.75 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[1fr_22px_1fr]"
             x-cloak
         >
             <div></div>

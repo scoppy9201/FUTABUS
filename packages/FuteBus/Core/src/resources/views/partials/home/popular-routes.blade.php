@@ -1,7 +1,7 @@
-<section class="bg-[#fff7f3] py-12 sm:py-14">
+<section class="bg-[#fff8f5] py-10 sm:py-12">
     <div class="mx-auto w-full max-w-282 px-4 sm:px-6 lg:px-0">
-        <header class="mb-8 text-center">
-            <h2 class="text-[26px] font-extrabold uppercase leading-tight text-[#00613d] sm:text-[30px]">
+        <header class="mb-7 text-center sm:mb-8">
+            <h2 class="text-2xl font-extrabold uppercase leading-tight text-[#00613d] xl:text-3xl">
                 {{ __('core::app.home.popular_routes.title') }}
             </h2>
             <p class="mt-2 text-sm text-[#4a342e] sm:text-base">

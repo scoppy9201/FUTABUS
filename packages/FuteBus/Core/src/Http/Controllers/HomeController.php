@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FuteBus\Core\Http\Controllers;
 
+use FuteBus\Core\Models\NewsArticle;
 use FuteBus\Core\Models\Promotion;
 use FuteBus\Core\Services\HomeService;
 use Illuminate\Routing\Controller;
@@ -20,9 +21,15 @@ class HomeController extends Controller
 
         $popularRoutes = $this->homeService->getPopularRoutes();
 
+        $newsArticles = NewsArticle::published()
+            ->homepageOrder()
+            ->limit(6)
+            ->get();
+
         return view('core::home', [
             'promotions'    => $promotions,
             'popularRoutes' => $popularRoutes,
+            'newsArticles'   => $newsArticles,
         ]);
     }
 }

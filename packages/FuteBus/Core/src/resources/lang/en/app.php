@@ -70,6 +70,27 @@ return [
             'illustration_alt' => 'FUTA Bus Lines service quality commitment',
         ],
 
+        'latest_news' => [
+            'title'       => 'Latest news',
+            'subtitle'    => 'Trusted and chosen by customers',
+            'view_all'    => 'View all',
+            'details'     => 'Details',
+            'empty'       => 'No news is available yet.',
+            'image_alt'   => 'Article image: :title',
+            'placeholder' => 'FUTA News',
+        ],
+
+        'futa_ecosystem' => [
+            'title'    => 'Connect with FUTA Group',
+            'subtitle' => 'Explore the FUTA Group ecosystem through the FUTA App: coach tickets, city buses, contract cars, delivery services and more.',
+            'items'    => [
+                'contract_car' => 'Contract Car',
+                'buy_ticket'   => 'Buy FUTA Tickets',
+                'delivery'     => 'Delivery',
+                'city_bus'     => 'City Bus',
+            ],
+        ],
+
         'footer' => [
             'copyright' => 'FUTABUS. All rights reserved.',
         ],
