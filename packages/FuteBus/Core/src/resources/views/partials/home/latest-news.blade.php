@@ -70,7 +70,7 @@
                                     </h3>
 
                                     <div class="mt-2 flex items-center justify-between gap-4">
-                                        <time class="text-sm text-[#637083]" datetime="{{ $article->published_at->toDateString() }}">
+                                        <time class="text-sm font-medium text-[#4b5563]" datetime="{{ $article->published_at->toDateString() }}">
                                             {{ $article->published_at->format('d/m/Y') }}
                                         </time>
                                         <span class="inline-flex items-center gap-1 text-sm font-medium text-[#ef5222]">

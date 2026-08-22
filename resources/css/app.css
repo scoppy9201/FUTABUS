@@ -8,10 +8,15 @@
     --color-futa-green: #16a34a;
     --color-futa-green-dark: #15803d;
     --color-futa-red: #dc2626;
-    --font-family-sans: "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    --font-family-sans: Arial, Helvetica, sans-serif;
 }
 
 @layer components {
+    .home-page {
+        color: #111827;
+        font-weight: 500;
+    }
+
     .futa-header-pattern {
         background:
             linear-gradient(156deg, transparent 0 18%, rgb(255 190 63 / 20%) 18.2% 36%, transparent 36.2% 100%),

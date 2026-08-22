@@ -17,11 +17,11 @@
     <form class="relative mx-auto mt-8 w-full max-w-282 rounded-[18px] bg-white px-6 pt-[26px] pb-[42px] hero-form-border max-sm:px-4" action="#" method="GET">
         <div class="mb-[21px] flex items-center justify-between gap-4">
             <div class="flex items-center gap-7 max-sm:gap-4">
-                <label class="flex cursor-pointer items-center gap-2 font-bold transition-colors duration-200" :class="!roundTrip ? 'text-[#ef5222]' : 'text-gray-400'">
+                <label class="flex cursor-pointer items-center gap-2 font-bold transition-colors duration-200" :class="!roundTrip ? 'text-[#ef5222]' : 'text-gray-500'">
                     <input type="radio" name="trip_type" value="one_way" checked class="h-[17px] w-[17px] accent-[#ef5222]" @change="roundTrip = false">
                     <span>{{ __('core::app.home.hero.one_way') }}</span>
                 </label>
-                <label class="flex cursor-pointer items-center gap-2 font-bold transition-colors duration-200" :class="roundTrip ? 'text-[#ef5222]' : 'text-gray-400'">
+                <label class="flex cursor-pointer items-center gap-2 font-bold transition-colors duration-200" :class="roundTrip ? 'text-[#ef5222]' : 'text-gray-500'">
                     <input type="radio" name="trip_type" value="round_trip" class="h-[17px] w-[17px] accent-[#ef5222]" @change="roundTrip = true">
                     <span>{{ __('core::app.home.hero.round_trip') }}</span>
                 </label>
@@ -66,7 +66,7 @@
                 <div class="flex h-16.75 w-full items-center justify-between rounded-[10px] border border-gray-300 bg-white px-4.5 focus-within:border-[#ff8a65] focus-within:ring-3 focus-within:ring-[#ef5222]/10">
                     <div>
                         <span class="text-[22px] font-bold leading-tight text-gray-900">{{ $today->format('d/m/Y') }}</span>
-                        <span class="block text-[13px] leading-tight text-gray-500">{{ $dayOfWeek }}</span>
+                        <span class="block text-[13px] font-medium leading-tight text-gray-600">{{ $dayOfWeek }}</span>
                     </div>
                     <x-heroicon-o-calendar-days class="size-5 text-gray-400" />
                 </div>

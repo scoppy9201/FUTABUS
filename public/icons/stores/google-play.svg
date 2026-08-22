@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 136 40" role="img" aria-label="Get it on Google Play">
+    <rect width="136" height="40" rx="7" fill="#111"/>
+    <rect x=".5" y=".5" width="135" height="39" rx="6.5" fill="none" stroke="#a6a6a6"/>
+    <path fill="#00d4ff" d="m11 8 13 12-13 12Z"/>
+    <path fill="#00e676" d="m11 8 16 9-3 3Z"/>
+    <path fill="#ffea00" d="m24 20 3 3-16 9Z"/>
+    <path fill="#ff3d00" d="m27 17 4 2.3c.8.5.8 1 0 1.5L27 23l-3-3Z"/>
+    <text x="38" y="14" fill="#fff" font-family="Arial,sans-serif" font-size="7">TẢI ỨNG DỤNG TRÊN</text>
+    <text x="38" y="29" fill="#fff" font-family="Arial,sans-serif" font-size="15" font-weight="600">Google Play</text>
+</svg>
