@@ -47,6 +47,29 @@ return [
             'empty'      => 'No popular routes yet.',
         ],
 
+        'service_quality' => [
+            'title'    => 'FUTA Bus Lines - Quality is our honor',
+            'subtitle' => 'Trusted and chosen by customers',
+            'stats'    => [
+                [
+                    'value'       => 'Over 40 million',
+                    'label'       => 'Passengers',
+                    'description' => 'Serving more than 40 million passengers nationwide every year.',
+                ],
+                [
+                    'value'       => 'Over 350',
+                    'label'       => 'Ticket offices',
+                    'description' => 'More than 350 ticket offices, transfer stations and bus stations.',
+                ],
+                [
+                    'value'       => 'Over 6,500',
+                    'label'       => 'Daily trips',
+                    'description' => 'More than 6,500 long-distance and interprovincial trips every day.',
+                ],
+            ],
+            'illustration_alt' => 'FUTA Bus Lines service quality commitment',
+        ],
+
         'footer' => [
             'copyright' => 'FUTABUS. All rights reserved.',
         ],
