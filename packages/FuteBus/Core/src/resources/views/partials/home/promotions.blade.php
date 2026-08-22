@@ -21,7 +21,7 @@
                     <div class="w-full shrink-0 px-3 sm:w-1/2 lg:w-1/3">
                         <div class="group h-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-lg">
                             <a href="{{ $promo->link ?? '#' }}" class="block">
-                                <div class="relative aspect-16/9 overflow-hidden bg-gray-100">
+                                <div class="relative aspect-video overflow-hidden bg-gray-100">
                                     @if($promo->image)
                                         <img
                                             src="{{ asset('storage/' . $promo->image) }}"

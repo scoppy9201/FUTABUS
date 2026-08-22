@@ -5,6 +5,7 @@
     @include('core::partials.home.hero')
     @include('core::partials.home.promotions')
     @include('core::partials.home.popular-routes')
+    @include('core::partials.home.service-quality')
 
     {{-- Footer --}}
     <footer class="bg-gray-900 py-8">

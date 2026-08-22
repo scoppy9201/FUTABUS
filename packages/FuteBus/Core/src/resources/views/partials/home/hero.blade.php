@@ -38,40 +38,67 @@
         <div class="grid grid-cols-1 items-end gap-[15px] md:grid-cols-2 lg:grid-cols-[1fr_22px_1fr_1fr_1fr]">
             <div>
                 <label class="mb-2 ml-4 block text-sm font-bold text-gray-900">{{ __('core::app.home.hero.from') }}</label>
-                <input type="text" name="departure" placeholder="{{ __('core::app.home.hero.from_placeholder') }}" class="h-[67px] w-full rounded-[10px] border border-gray-300 bg-white px-[18px] text-base text-gray-900 outline-none placeholder:text-center placeholder:text-gray-400 focus:border-[#ff8a65] focus:ring-3 focus:ring-[#ef5222]/10">
+                <input
+                    type="text"
+                    name="departure"
+                    placeholder="{{ __('core::app.home.hero.from_placeholder') }}"
+                    class="h-16.75 w-full rounded-[10px] border border-gray-300 bg-white px-4.5 text-base text-gray-900 outline-none placeholder:text-center placeholder:text-gray-400 focus:border-[#ff8a65] focus:ring-3 focus:ring-[#ef5222]/10"
+                >
             </div>
 
-            <button type="button" class="z-10 mb-[15px] -mx-[7px] hidden h-[37px] w-[37px] place-items-center rounded-full border border-gray-200 bg-white text-[#ef5222] shadow-sm lg:grid" aria-label="{{ __('core::app.home.hero.swap_aria') }}">
-                <svg class="h-[19px] w-[19px] fill-none stroke-current stroke-[1.8]" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h12m0 0-3-3m3 3-3 3M17 17H5m0 0 3 3m-3-3 3-3" /></svg>
+            <button type="button" class="z-10 mb-3.75 -mx-1.75 hidden size-9.25 place-items-center rounded-full border border-gray-200 bg-white text-[#ef5222] shadow-sm lg:grid" aria-label="{{ __('core::app.home.hero.swap_aria') }}">
+                <x-heroicon-o-arrows-right-left class="size-4.75" />
             </button>
 
             <div>
                 <label class="mb-2 ml-4 block text-sm font-bold text-gray-900">{{ __('core::app.home.hero.to') }}</label>
-                <input type="text" name="destination" placeholder="{{ __('core::app.home.hero.to_placeholder') }}" class="h-[67px] w-full rounded-[10px] border border-gray-300 bg-white px-[18px] text-base text-gray-900 outline-none placeholder:text-center placeholder:text-gray-400 focus:border-[#ff8a65] focus:ring-3 focus:ring-[#ef5222]/10">
+                <input
+                    type="text"
+                    name="destination"
+                    placeholder="{{ __('core::app.home.hero.to_placeholder') }}"
+                    class="h-16.75 w-full rounded-[10px] border border-gray-300 bg-white px-4.5 text-base text-gray-900 outline-none placeholder:text-center placeholder:text-gray-400 focus:border-[#ff8a65] focus:ring-3 focus:ring-[#ef5222]/10"
+                >
             </div>
 
             <div>
                 <label class="mb-2 ml-4 block text-sm font-bold text-gray-900">{{ __('core::app.home.hero.date') }}</label>
                 <input type="hidden" name="departure_date" value="{{ $today->format('Y-m-d') }}">
-                <div class="flex h-[67px] w-full items-center justify-between rounded-[10px] border border-gray-300 bg-white px-[18px] focus-within:border-[#ff8a65] focus-within:ring-3 focus-within:ring-[#ef5222]/10">
+                <div class="flex h-16.75 w-full items-center justify-between rounded-[10px] border border-gray-300 bg-white px-4.5 focus-within:border-[#ff8a65] focus-within:ring-3 focus-within:ring-[#ef5222]/10">
                     <div>
                         <span class="text-[22px] font-bold leading-tight text-gray-900">{{ $today->format('d/m/Y') }}</span>
                         <span class="block text-[13px] leading-tight text-gray-500">{{ $dayOfWeek }}</span>
                     </div>
-                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+                    <x-heroicon-o-calendar-days class="size-5 text-gray-400" />
                 </div>
             </div>
 
             <div class="relative" x-data="{ open: false, selected: 1 }" @click.away="open = false">
                 <label class="mb-2 ml-4 block text-sm font-bold text-gray-900">{{ __('core::app.home.hero.quantity') }}</label>
                 <input type="hidden" name="quantity" :value="selected">
-                <button type="button" @click="open = !open" class="flex h-[67px] w-full items-center justify-between rounded-[10px] border border-gray-300 bg-white px-[18px] text-base text-gray-900 outline-none transition-colors hover:border-[#ff8a65] focus:border-[#ff8a65] focus:ring-3 focus:ring-[#ef5222]/10">
+                <button
+                    type="button"
+                    @click="open = !open"
+                    class="flex h-16.75 w-full items-center justify-between rounded-[10px] border border-gray-300 bg-white px-4.5 text-base text-gray-900 outline-none transition-colors hover:border-[#ff8a65] focus:border-[#ff8a65] focus:ring-3 focus:ring-[#ef5222]/10"
+                >
                     <span x-text="selected"></span>
                     <span class="flex h-[30px] w-[30px] items-center justify-center rounded-lg bg-gray-100">
-                        <svg class="h-4 w-4 text-gray-500 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        <x-heroicon-o-chevron-down
+                            class="size-4 text-gray-500 transition-transform duration-200"
+                            ::class="open ? 'rotate-180' : ''"
+                        />
                     </span>
                 </button>
-                <div x-show="open" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="absolute left-0 right-0 top-full z-30 mt-1 max-h-[200px] overflow-auto rounded-[10px] border border-gray-200 bg-white py-1 shadow-lg" style="display: none;">
+                <div
+                    x-show="open"
+                    x-transition:enter="transition ease-out duration-150"
+                    x-transition:enter-start="opacity-0 -translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    x-transition:leave="transition ease-in duration-100"
+                    x-transition:leave-start="opacity-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 -translate-y-1"
+                    class="absolute left-0 right-0 top-full z-30 mt-1 max-h-50 overflow-auto rounded-[10px] border border-gray-200 bg-white py-1 shadow-lg"
+                    style="display: none;"
+                >
                     @for($i = 1; $i <= 5; $i++)
                         <button type="button" @click="selected = {{ $i }}; open = false" class="flex w-full items-center px-4 py-2.5 text-left text-[15px] transition-colors" :class="selected === {{ $i }} ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-50'">
                             {{ $i }}
@@ -82,12 +109,22 @@
         </div>
 
         {{-- Ngày về - overlay bên dưới, không phá grid --}}
-        <div x-show="roundTrip" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" class="mt-[15px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1fr_22px_1fr]" x-cloak>
+        <div
+            x-show="roundTrip"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 -translate-y-2"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 -translate-y-2"
+            class="mt-3.75 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1fr_22px_1fr]"
+            x-cloak
+        >
             <div></div>
             <div></div>
             <div>
                 <label class="mb-2 ml-4 block text-sm font-bold text-gray-900">{{ __('core::app.home.hero.return_date') }}</label>
-                <input type="date" name="return_date" class="h-[67px] w-full rounded-[10px] border border-gray-300 bg-white px-[18px] text-base text-gray-900 outline-none focus:border-[#ff8a65] focus:ring-3 focus:ring-[#ef5222]/10">
+                <input type="date" name="return_date" class="h-16.75 w-full rounded-[10px] border border-gray-300 bg-white px-4.5 text-base text-gray-900 outline-none focus:border-[#ff8a65] focus:ring-3 focus:ring-[#ef5222]/10">
             </div>
         </div>
 

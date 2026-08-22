@@ -47,6 +47,29 @@ return [
             'empty'      => 'Chưa có tuyến phổ biến.',
         ],
 
+        'service_quality' => [
+            'title'    => 'FUTA Bus Lines - Chất lượng là danh dự',
+            'subtitle' => 'Được khách hàng tin tưởng và lựa chọn',
+            'stats'    => [
+                [
+                    'value'       => 'Hơn 40 triệu',
+                    'label'       => 'Lượt khách',
+                    'description' => 'Phương Trang phục vụ hơn 40 triệu lượt khách bình quân mỗi năm trên toàn quốc.',
+                ],
+                [
+                    'value'       => 'Hơn 350',
+                    'label'       => 'Phòng vé - Bưu cục',
+                    'description' => 'Hơn 350 phòng vé, trạm trung chuyển và bến xe trên toàn hệ thống.',
+                ],
+                [
+                    'value'       => 'Hơn 6.500',
+                    'label'       => 'Chuyến xe',
+                    'description' => 'Phục vụ hơn 6.500 chuyến xe đường dài và liên tỉnh mỗi ngày.',
+                ],
+            ],
+            'illustration_alt' => 'Cam kết chất lượng dịch vụ của FUTA Bus Lines',
+        ],
+
         'footer' => [
             'copyright' => 'FUTABUS. Mọi quyền được bảo lưu.',
         ],
