@@ -13,3 +13,7 @@ Route::get('/chinh-sach/chinh-sach-gia', [HomeController::class, 'pricing'])->na
 Route::get('/chinh-sach/chinh-sach-doi-ve-hoan-tien', [HomeController::class, 'refund'])->name('refund');
 Route::get('/tra-cuu-ve', [HomeController::class, 'ticketLookup'])->name('ticket-lookup');
 Route::get('/dieu-khoan-su-dung', [HomeController::class, 'terms'])->name('terms');
+Route::get('/chinh-sach/dieu-kien-giao-dich-chung', [HomeController::class, 'transactionConditions'])
+    ->name('transaction-conditions');
+Route::get('/chinh-sach/dieu-kien-cung-cap-dich-vu', [HomeController::class, 'serviceConditions'])
+    ->name('service-conditions');
