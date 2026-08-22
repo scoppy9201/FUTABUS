@@ -31,6 +31,7 @@ return [
             'date'             => 'Ngày đi',
             'quantity' => 'Số vé',
             'return_date' => 'Ngày về',
+            'return_placeholder' => 'Thêm ngày về',
             'search' => 'Tìm chuyến xe',
             'banner_alt'       => 'FUTA Group - Vững tin và phát triển',
             'swap_aria'        => 'Đổi điểm đi và điểm đến',
@@ -132,5 +133,21 @@ return [
             'copyright'  => 'Bản quyền thuộc về Công ty Cổ phần Xe khách Phương Trang - FUTA Bus Lines',
             'developed'  => 'Công ty Công nghệ Auonsofft chịu trách nhiệm phát triển',
         ],
+    ],
+
+    'about' => [
+        'title' => 'Về chúng tôi - FUTA Bus Lines',
+        'heading' => 'Phương Trang',
+        'slogan' => 'Chất lượng là danh dự',
+        'introduction' => 'Tập đoàn Phương Trang – FUTA Group được thành lập năm 2001. '
+            . 'Với hoạt động kinh doanh chính trong lĩnh vực mua bán xe ô tô, vận tải hành khách, '
+            . 'bất động sản và kinh doanh dịch vụ, Phương Trang dần trở thành cái tên quen thuộc '
+            . 'đồng hành cùng người Việt trên mọi lĩnh vực.',
+        'history' => 'Trải qua hơn 25 năm hình thành và phát triển, đặt khách hàng là trọng tâm, '
+            . 'chúng tôi tự hào trở thành doanh nghiệp vận tải nòng cốt đóng góp tích cực vào sự phát triển '
+            . 'chung của ngành vận tải nói riêng và nền kinh tế đất nước nói chung. Luôn cải tiến mang đến '
+            . 'chất lượng dịch vụ tối ưu nhất dành cho khách hàng, Công ty Phương Trang được ghi nhận qua '
+            . 'nhiều giải thưởng và tiếp tục khẳng định vị thế thương hiệu uy tín hàng đầu Việt Nam.',
+        'read_more' => 'Xem thêm',
     ],
 ];

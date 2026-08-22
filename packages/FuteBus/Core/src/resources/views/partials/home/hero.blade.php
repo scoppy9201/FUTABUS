@@ -3,9 +3,51 @@
         border: 2px solid #ff8a65;
         box-shadow: 0 8px 0 rgba(181,86,51,.14);
     }
+
+    .hero-return-field {
+        min-width: 0;
+        overflow: hidden;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 220ms ease, margin 300ms ease;
+    }
+
+    .hero-search-grid.is-round-trip .hero-return-field {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    @media (max-width: 1023px) {
+        .hero-search-grid:not(.is-round-trip) .hero-return-field {
+            display: none;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .hero-search-grid {
+            grid-template-columns:
+                minmax(0, 1fr) 22px minmax(0, 1fr)
+                minmax(0, 1fr) minmax(0, 0fr) minmax(0, 1fr);
+            transition: grid-template-columns 300ms ease;
+        }
+
+        .hero-search-grid .hero-return-field {
+            margin-inline: -7.5px;
+        }
+
+        .hero-search-grid.is-round-trip {
+            grid-template-columns:
+                minmax(0, 1fr) 22px minmax(0, 1fr)
+                minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+        }
+
+        .hero-search-grid.is-round-trip .hero-return-field {
+            margin-inline: 0;
+        }
+    }
 </style>
 
-<section class="futa-hero-backdrop px-3 pt-2 pb-[58px] sm:px-4" x-data="{ roundTrip: false }">
+<section class="futa-hero-backdrop px-3 pt-2 pb-[58px] sm:px-4" x-data="{ roundTrip: false, returnDate: '' }">
     <div class="mx-auto aspect-1128/310 w-full max-w-282 overflow-hidden rounded-xl border border-white/60 bg-[#fff7f1] shadow-[0_6px_14px_rgba(67,31,18,.26)] max-sm:aspect-16/7">
         <img
             src="{{ asset('images/banners/home-banner.jpg') }}"
@@ -35,7 +77,10 @@
             $dayOfWeek = $isoDay === 7 ? 'CN' : 'Thứ ' . ($isoDay + 1);
         @endphp
 
-        <div class="grid grid-cols-1 items-end gap-[15px] md:grid-cols-2 lg:grid-cols-[1fr_22px_1fr_1fr_1fr_1fr]">
+        <div
+            class="hero-search-grid grid grid-cols-1 items-end gap-[15px] md:grid-cols-2"
+            :class="{ 'is-round-trip': roundTrip }"
+        >
             <div>
                 <label class="mb-2 ml-4 block text-sm font-bold text-gray-900">{{ __('core::app.home.hero.from') }}</label>
                 <input
@@ -60,7 +105,7 @@
                 >
             </div>
 
-            <div :class="roundTrip ? '' : 'lg:col-span-2'">
+            <div>
                 <label class="mb-2 ml-4 block text-sm font-bold text-gray-900">{{ __('core::app.home.hero.date') }}</label>
                 <input type="hidden" name="departure_date" value="{{ $today->format('Y-m-d') }}">
                 <div class="flex h-16.75 w-full items-center justify-between rounded-[10px] border border-gray-300 bg-white px-4.5 focus-within:border-[#ff8a65] focus-within:ring-3 focus-within:ring-[#ef5222]/10">
@@ -72,15 +117,31 @@
                 </div>
             </div>
 
-            <div x-show="roundTrip" x-transition.opacity.duration.200ms x-cloak>
+            <div
+                class="hero-return-field"
+                :aria-hidden="(!roundTrip).toString()"
+                x-cloak
+            >
                 <label class="mb-2 ml-4 block text-sm font-bold text-gray-900">
                     {{ __('core::app.home.hero.return_date') }}
                 </label>
-                <input
-                    type="date"
-                    name="return_date"
-                    class="h-16.75 w-full rounded-[10px] border border-gray-300 bg-white px-4.5 text-base text-gray-900 outline-none focus:border-[#ff8a65] focus:ring-3 focus:ring-[#ef5222]/10"
-                >
+                <div class="relative h-16.75">
+                    <input
+                        type="date"
+                        name="return_date"
+                        x-model="returnDate"
+                        :disabled="!roundTrip"
+                        class="absolute inset-0 z-10 size-full cursor-pointer opacity-0"
+                    >
+                    <div class="flex size-full items-center justify-between rounded-[10px] border border-gray-300 bg-white px-4.5">
+                        <span
+                            class="truncate text-base font-semibold"
+                            :class="returnDate ? 'text-gray-900' : 'text-gray-400'"
+                            x-text="returnDate ? returnDate.split('-').reverse().join('/') : @js(__('core::app.home.hero.return_placeholder'))"
+                        ></span>
+                        <x-heroicon-o-calendar-days class="size-5 shrink-0 text-gray-400" />
+                    </div>
+                </div>
             </div>
 
             <div

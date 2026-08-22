@@ -31,6 +31,7 @@ return [
             'date'             => 'Departure date',
             'quantity' => 'Tickets',
             'return_date' => 'Return date',
+            'return_placeholder' => 'Add return date',
             'search' => 'Search trips',
             'banner_alt'       => 'FUTA Group - Confidence and development',
             'swap_aria'        => 'Swap departure and destination',
@@ -132,5 +133,19 @@ return [
             'copyright' => 'Copyright belongs to Phuong Trang Passenger Car Corporation - FUTA Bus Lines',
             'developed' => 'Developed by Auonsofft Technology Company',
         ],
+    ],
+
+    'about' => [
+        'title' => 'About us - FUTA Bus Lines',
+        'heading' => 'Phuong Trang',
+        'slogan' => 'Quality is our honor',
+        'introduction' => 'Phuong Trang Group – FUTA Group was established in 2001. With core operations '
+            . 'in automobile trading, passenger transport, real estate and services, Phuong Trang has grown '
+            . 'into a familiar brand accompanying Vietnamese people across many areas of life.',
+        'history' => 'After more than 25 years of development with customers at the center, we are proud '
+            . 'to be a key transport enterprise contributing positively to the transport industry and the national '
+            . 'economy. Through continuous improvement and a commitment to optimal service quality, Phuong Trang '
+            . 'has earned many prestigious awards and continues to affirm its position as one of Vietnam’s leading trusted brands.',
+        'read_more' => 'Read more',
     ],
 ];

@@ -32,4 +32,9 @@ class HomeController extends Controller
             'newsArticles'   => $newsArticles,
         ]);
     }
+
+    public function about()
+    {
+        return view('core::about');
+    }
 }
