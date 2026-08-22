@@ -11,3 +11,5 @@ Route::get('/chinh-sach/chinh-sach-bao-mat', [HomeController::class, 'privacy'])
 Route::get('/chinh-sach/chinh-sach-thanh-toan', [HomeController::class, 'payment'])->name('payment');
 Route::get('/chinh-sach/chinh-sach-gia', [HomeController::class, 'pricing'])->name('pricing');
 Route::get('/chinh-sach/chinh-sach-doi-ve-hoan-tien', [HomeController::class, 'refund'])->name('refund');
+Route::get('/tra-cuu-ve', [HomeController::class, 'ticketLookup'])->name('ticket-lookup');
+Route::get('/dieu-khoan-su-dung', [HomeController::class, 'terms'])->name('terms');

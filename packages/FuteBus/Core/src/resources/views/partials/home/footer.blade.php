@@ -28,6 +28,10 @@
         'pricing' => 'pricing',
         'refund' => 'refund',
     ];
+    $supportRoutes = [
+        'lookup' => 'ticket-lookup',
+        'terms' => 'terms',
+    ];
     $brandLogos = [
         ['icons/futabus-logo.png', 'FUTA Bus Lines'],
         ['icons/footer-brands/futa-express.png', 'FUTA Express'],
@@ -116,7 +120,10 @@
                     @foreach($supportLinks as $link)
                         <li class="flex gap-3">
                             <span class="mt-2 size-2 shrink-0 rounded-full bg-gray-300"></span>
-                            <a href="#" class="leading-5 transition-colors hover:text-[#ef5222]">
+                            <a
+                                href="{{ isset($supportRoutes[$link]) ? route($supportRoutes[$link]) : '#' }}"
+                                class="leading-5 transition-colors hover:text-[#ef5222]"
+                            >
                                 {{ __("core::app.home.footer.links.{$link}") }}
                             </a>
                         </li>
