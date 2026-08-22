@@ -31,6 +31,8 @@
     $supportRoutes = [
         'lookup' => 'ticket-lookup',
         'terms' => 'terms',
+        'transaction' => 'transaction-conditions',
+        'service' => 'service-conditions',
     ];
     $brandLogos = [
         ['icons/futabus-logo.png', 'FUTA Bus Lines'],

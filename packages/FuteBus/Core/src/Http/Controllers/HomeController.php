@@ -67,4 +67,14 @@ class HomeController extends Controller
     {
         return view('core::terms');
     }
+
+    public function transactionConditions()
+    {
+        return view('core::transaction-conditions');
+    }
+
+    public function serviceConditions()
+    {
+        return view('core::service-conditions');
+    }
 }
