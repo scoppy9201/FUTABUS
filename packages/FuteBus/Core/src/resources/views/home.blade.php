@@ -4,6 +4,7 @@
     @include('core::partials.home.navbar')
     @include('core::partials.home.hero')
     @include('core::partials.home.promotions')
+    @include('core::partials.home.popular-routes')
 
     {{-- Footer --}}
     <footer class="bg-gray-900 py-8">
