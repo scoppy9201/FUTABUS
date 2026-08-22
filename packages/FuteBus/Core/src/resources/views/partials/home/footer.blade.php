@@ -24,6 +24,9 @@
     $companyRoutes = [
         'about' => 'about',
         'privacy' => 'privacy',
+        'payment' => 'payment',
+        'pricing' => 'pricing',
+        'refund' => 'refund',
     ];
     $brandLogos = [
         ['icons/futabus-logo.png', 'FUTA Bus Lines'],

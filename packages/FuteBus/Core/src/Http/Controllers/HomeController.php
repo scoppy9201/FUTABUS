@@ -42,4 +42,19 @@ class HomeController extends Controller
     {
         return view('core::privacy');
     }
+
+    public function payment()
+    {
+        return view('core::payment');
+    }
+
+    public function pricing()
+    {
+        return view('core::pricing');
+    }
+
+    public function refund()
+    {
+        return view('core::refund');
+    }
 }
