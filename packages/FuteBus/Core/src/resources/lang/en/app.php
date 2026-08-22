@@ -147,5 +147,76 @@ return [
             . 'economy. Through continuous improvement and a commitment to optimal service quality, Phuong Trang '
             . 'has earned many prestigious awards and continues to affirm its position as one of Vietnam’s leading trusted brands.',
         'read_more' => 'Read more',
+        'show_less' => 'Show less',
+        'sections' => [
+            'futabus' => [
+                'title' => 'FUTA Bus Lines',
+                'image_alt' => 'FUTA Bus Lines coach fleet',
+                'paragraphs' => [
+                    'Following the motto “Quality is our honor”, FUTA Bus Lines operates an extensive network '
+                        . 'of ticket offices and transfer stations with a professional service team.',
+                    'Its modern fleet and nationwide routes serve millions of passengers every year while the '
+                        . 'company continuously improves safety, comfort and the overall travel experience.',
+                ],
+            ],
+            'land' => [
+                'title' => 'FUTA Land',
+                'image_alt' => 'Aerial view of Da Nang city',
+                'paragraphs' => [
+                    'FUTA Group develops high-quality real estate projects in Da Nang and other locations, '
+                        . 'creating modern living spaces and sustainable long-term value for communities.',
+                ],
+            ],
+            'express' => [
+                'title' => 'FUTA Express',
+                'image_alt' => 'FUTA Express delivery service',
+                'paragraphs' => [
+                    'Established in 2012, FUTA Express provides professional, safe and timely passenger and '
+                        . 'goods transportation services across Vietnam.',
+                    'Its growing network handles parcels, documents and freight while offering convenient '
+                        . 'services such as COD collection, door-to-door delivery and OTP verification.',
+                ],
+            ],
+            'city_bus' => [
+                'title' => 'FUTA City Bus',
+                'image_alt' => 'FUTA City Bus fleet',
+                'paragraphs' => [
+                    'FUTA City Bus is part of the group’s sustainable development strategy, delivering public '
+                        . 'transport through a high-quality fleet and a professional operating team.',
+                    'The expanding service helps reduce private vehicle use and supports modern, convenient '
+                        . 'and environmentally friendly urban transportation.',
+                ],
+            ],
+            'advertising' => [
+                'title' => 'FUTA Advertising',
+                'image_alt' => 'Advertising and communications concept',
+                'paragraphs' => [
+                    'FUTA Advertising manages media opportunities throughout the FUTA ecosystem, including '
+                        . 'coaches, taxis, goods transportation and digital channels.',
+                    'The company combines operational experience with modern digital technology to provide '
+                        . 'integrated and effective marketing solutions for businesses.',
+                ],
+            ],
+            'rest_stop' => [
+                'title' => 'FUTA Rest Stop',
+                'image_alt' => 'Phuc Loc rest stop',
+                'paragraphs' => [
+                    'The Phuc Loc rest-stop network gives passengers a comfortable place to recharge during '
+                        . 'long journeys, with attentive service at key locations.',
+                    'Open around the clock, each stop provides a varied menu and regional specialties for '
+                        . 'passengers who need to rest, dine or shop along the way.',
+                ],
+            ],
+            'application' => [
+                'title' => 'FUTA Application',
+                'image_alt' => 'FUTA application on a smartphone',
+                'paragraphs' => [
+                    'The FUTA application connects customers to the service ecosystem on one convenient '
+                        . 'platform, from ticket booking and transport to payment promotions.',
+                    'Customers can book trips, collect points and manage personal travel services directly '
+                        . 'from their phones, making every journey faster and more flexible.',
+                ],
+            ],
+        ],
     ],
 ];
