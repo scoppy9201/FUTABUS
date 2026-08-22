@@ -21,6 +21,10 @@
         'web_guide',
         'topup_guide',
     ];
+    $companyRoutes = [
+        'about' => 'about',
+        'privacy' => 'privacy',
+    ];
     $brandLogos = [
         ['icons/futabus-logo.png', 'FUTA Bus Lines'],
         ['icons/footer-brands/futa-express.png', 'FUTA Express'],
@@ -93,7 +97,7 @@
                         <li class="flex gap-3">
                             <span class="mt-2 size-2 shrink-0 rounded-full bg-gray-300"></span>
                             <a
-                                href="{{ $link === 'about' ? route('about') : '#' }}"
+                                href="{{ isset($companyRoutes[$link]) ? route($companyRoutes[$link]) : '#' }}"
                                 class="leading-5 transition-colors hover:text-[#ef5222]"
                             >
                                 {{ __("core::app.home.footer.links.{$link}") }}

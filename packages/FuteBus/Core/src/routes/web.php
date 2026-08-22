@@ -7,3 +7,4 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/ve-chung-toi', [HomeController::class, 'about'])->name('about');
+Route::get('/chinh-sach/chinh-sach-bao-mat', [HomeController::class, 'privacy'])->name('privacy');

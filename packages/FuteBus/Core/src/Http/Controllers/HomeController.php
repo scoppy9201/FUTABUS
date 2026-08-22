@@ -37,4 +37,9 @@ class HomeController extends Controller
     {
         return view('core::about');
     }
+
+    public function privacy()
+    {
+        return view('core::privacy');
+    }
 }
