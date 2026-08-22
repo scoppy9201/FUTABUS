@@ -148,6 +148,43 @@ return [
             . 'has earned many prestigious awards and continues to affirm its position as one of Vietnam’s leading trusted brands.',
         'read_more' => 'Read more',
         'show_less' => 'Show less',
+        'identity' => [
+            'vision' => [
+                'title' => 'Vision and mission',
+                'image_alt' => 'A team working toward shared growth goals',
+                'lead' => 'Contributing to a strong and prosperous Vietnam.',
+                'introduction' => 'To become one of Vietnam’s leading trusted and high-quality groups by committing to:',
+                'commitments' => [
+                    'Creating a dynamic and friendly working environment.',
+                    'Growing through the trust of our customers.',
+                    'Becoming a professional leading corporation.',
+                ],
+                'conclusion' => 'continually strives for effective work and meaningful contributions '
+                    . 'to the development of a strong and prosperous Vietnam.',
+            ],
+            'core_values' => [
+                'title' => 'Core values',
+                'image_alt' => 'A young plant symbolizing sustainable growth',
+                'introduction' => 'The core values behind Phuong Trang',
+                'items' => [
+                    'Phuong represents integrity and uprightness, reflecting ethical conduct and sustainable '
+                        . 'relationships with employees, customers and partners.',
+                    'Trang represents scale and distinction, expressing the ambition to achieve major goals '
+                        . 'and create lasting value for communities and society.',
+                    'As Phuong Trang grows, it must remain principled and continue developing on a foundation '
+                        . 'of strong and enduring ethical values.',
+                ],
+            ],
+            'philosophy' => [
+                'title' => 'Philosophy',
+                'image_alt' => 'Illustration of a sustainable growth philosophy',
+                'description' => 'Integration and development contribute to national prosperity. People are '
+                    . 'Phuong Trang’s greatest asset, so we foster a modern, dynamic and friendly workplace '
+                    . 'with professional growth opportunities for every team member. Customer satisfaction '
+                    . 'is the measure of our service quality and the foundation for understanding customer '
+                    . 'needs and delivering excellent products and services.',
+            ],
+        ],
         'sections' => [
             'futabus' => [
                 'title' => 'FUTA Bus Lines',
