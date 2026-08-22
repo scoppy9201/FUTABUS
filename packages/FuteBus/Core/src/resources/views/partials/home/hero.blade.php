@@ -35,7 +35,7 @@
             $dayOfWeek = $isoDay === 7 ? 'CN' : 'Thứ ' . ($isoDay + 1);
         @endphp
 
-        <div class="grid grid-cols-1 items-end gap-[15px] md:grid-cols-2 xl:grid-cols-[1fr_22px_1fr_1fr_1fr]">
+        <div class="grid grid-cols-1 items-end gap-[15px] md:grid-cols-2 lg:grid-cols-[1fr_22px_1fr_1fr_1fr_1fr]">
             <div>
                 <label class="mb-2 ml-4 block text-sm font-bold text-gray-900">{{ __('core::app.home.hero.from') }}</label>
                 <input
@@ -46,7 +46,7 @@
                 >
             </div>
 
-            <button type="button" class="z-10 mb-3.75 -mx-1.75 hidden size-9.25 place-items-center rounded-full border border-gray-200 bg-white text-[#ef5222] shadow-sm xl:grid" aria-label="{{ __('core::app.home.hero.swap_aria') }}">
+            <button type="button" class="z-10 mb-3.75 -mx-1.75 hidden size-9.25 place-items-center rounded-full border border-gray-200 bg-white text-[#ef5222] shadow-sm lg:grid" aria-label="{{ __('core::app.home.hero.swap_aria') }}">
                 <x-heroicon-o-arrows-right-left class="size-4.75" />
             </button>
 
@@ -60,7 +60,7 @@
                 >
             </div>
 
-            <div>
+            <div :class="roundTrip ? '' : 'lg:col-span-2'">
                 <label class="mb-2 ml-4 block text-sm font-bold text-gray-900">{{ __('core::app.home.hero.date') }}</label>
                 <input type="hidden" name="departure_date" value="{{ $today->format('Y-m-d') }}">
                 <div class="flex h-16.75 w-full items-center justify-between rounded-[10px] border border-gray-300 bg-white px-4.5 focus-within:border-[#ff8a65] focus-within:ring-3 focus-within:ring-[#ef5222]/10">
@@ -72,13 +72,31 @@
                 </div>
             </div>
 
-            <div class="relative" x-data="{ open: false, selected: 1 }" @click.away="open = false">
+            <div x-show="roundTrip" x-transition.opacity.duration.200ms x-cloak>
+                <label class="mb-2 ml-4 block text-sm font-bold text-gray-900">
+                    {{ __('core::app.home.hero.return_date') }}
+                </label>
+                <input
+                    type="date"
+                    name="return_date"
+                    class="h-16.75 w-full rounded-[10px] border border-gray-300 bg-white px-4.5 text-base text-gray-900 outline-none focus:border-[#ff8a65] focus:ring-3 focus:ring-[#ef5222]/10"
+                >
+            </div>
+
+            <div
+                class="relative"
+                x-data="{ open: false, selected: 1 }"
+                @click.away="open = false"
+                @keydown.escape.window="open = false"
+            >
                 <label class="mb-2 ml-4 block text-sm font-bold text-gray-900">{{ __('core::app.home.hero.quantity') }}</label>
                 <input type="hidden" name="quantity" :value="selected">
                 <button
                     type="button"
                     @click="open = !open"
-                    class="flex h-16.75 w-full items-center justify-between rounded-[10px] border border-gray-300 bg-white px-4.5 text-base text-gray-900 outline-none transition-colors hover:border-[#ff8a65] focus:border-[#ff8a65] focus:ring-3 focus:ring-[#ef5222]/10"
+                    :aria-expanded="open"
+                    aria-haspopup="listbox"
+                    class="flex h-16.75 w-full items-center justify-between rounded-[10px] border border-gray-300 bg-white px-4.5 text-lg font-medium text-gray-900 outline-none transition-colors hover:border-[#ff8a65] focus:border-[#ff8a65] focus:ring-3 focus:ring-[#ef5222]/10"
                 >
                     <span x-text="selected"></span>
                     <span class="flex h-[30px] w-[30px] items-center justify-center rounded-lg bg-gray-100">
@@ -96,35 +114,29 @@
                     x-transition:leave="transition ease-in duration-100"
                     x-transition:leave-start="opacity-100 translate-y-0"
                     x-transition:leave-end="opacity-0 -translate-y-1"
-                    class="absolute left-0 right-0 top-full z-30 mt-1 max-h-50 overflow-auto rounded-[10px] border border-gray-200 bg-white py-1 shadow-lg"
+                    role="listbox"
+                    class="scrollbar-hidden absolute left-0 right-0 top-full z-30 mt-2 max-h-60 overflow-auto rounded-[10px] border border-gray-200 bg-white py-1.5 shadow-[0_8px_20px_rgba(0,0,0,.14)]"
                     style="display: none;"
                 >
                     @for($i = 1; $i <= 5; $i++)
-                        <button type="button" @click="selected = {{ $i }}; open = false" class="flex w-full items-center px-4 py-2.5 text-left text-[15px] transition-colors" :class="selected === {{ $i }} ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-50'">
-                            {{ $i }}
+                        <button
+                            type="button"
+                            role="option"
+                            :aria-selected="selected === {{ $i }}"
+                            @click="selected = {{ $i }}; open = false"
+                            class="flex w-full items-center justify-between px-4 py-3 text-left text-lg transition-colors"
+                            :class="selected === {{ $i }} ? 'bg-[#fff6f1] font-semibold text-[#ef5222]' : 'text-gray-800 hover:bg-gray-50'"
+                        >
+                            <span>{{ $i }}</span>
+                            <span
+                                x-show="selected === {{ $i }}"
+                                class="grid size-5.5 place-items-center rounded-full bg-[#ef5222] text-white"
+                            >
+                                <x-heroicon-s-check class="size-3.5" />
+                            </span>
                         </button>
                     @endfor
                 </div>
-            </div>
-        </div>
-
-        {{-- Ngày về - overlay bên dưới, không phá grid --}}
-        <div
-            x-show="roundTrip"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 -translate-y-2"
-            x-transition:enter-end="opacity-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 translate-y-0"
-            x-transition:leave-end="opacity-0 -translate-y-2"
-            class="mt-3.75 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[1fr_22px_1fr]"
-            x-cloak
-        >
-            <div></div>
-            <div></div>
-            <div>
-                <label class="mb-2 ml-4 block text-sm font-bold text-gray-900">{{ __('core::app.home.hero.return_date') }}</label>
-                <input type="date" name="return_date" class="h-16.75 w-full rounded-[10px] border border-gray-300 bg-white px-4.5 text-base text-gray-900 outline-none focus:border-[#ff8a65] focus:ring-3 focus:ring-[#ef5222]/10">
             </div>
         </div>
 

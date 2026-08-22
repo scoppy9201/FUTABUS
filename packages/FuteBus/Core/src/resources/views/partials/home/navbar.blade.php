@@ -80,7 +80,7 @@
     </div>
 
     <nav class="h-17" aria-label="{{ __('core::app.home.navbar.primary_navigation') }}">
-        <div class="mx-auto flex h-17 max-w-250 items-center justify-center gap-[clamp(28px,3.2vw,58px)] overflow-x-auto px-4 max-md:justify-start">
+        <div class="scrollbar-hidden mx-auto flex h-17 max-w-250 items-center justify-center gap-[clamp(28px,3.2vw,58px)] overflow-x-auto px-4 max-md:justify-start">
             <a href="{{ route('home') }}" class="futa-nav-active relative py-5.75 text-sm font-extrabold whitespace-nowrap">{{ __('core::app.home.navbar.home') }}</a>
             <a href="#" class="py-5.75 text-sm font-extrabold whitespace-nowrap">{{ __('core::app.home.navbar.schedules') }}</a>
             <a href="#" class="py-5.75 text-sm font-extrabold whitespace-nowrap">{{ __('core::app.home.navbar.lookup') }}</a>
