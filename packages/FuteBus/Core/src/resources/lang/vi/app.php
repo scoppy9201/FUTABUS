@@ -149,5 +149,79 @@ return [
             . 'chất lượng dịch vụ tối ưu nhất dành cho khách hàng, Công ty Phương Trang được ghi nhận qua '
             . 'nhiều giải thưởng và tiếp tục khẳng định vị thế thương hiệu uy tín hàng đầu Việt Nam.',
         'read_more' => 'Xem thêm',
+        'show_less' => 'Ẩn bớt',
+        'sections' => [
+            'futabus' => [
+                'title' => 'FUTA Bus Lines',
+                'image_alt' => 'Đội xe khách FUTA Bus Lines',
+                'paragraphs' => [
+                    'Tuân thủ phương châm “Chất lượng là danh dự”, Công ty Cổ phần Xe khách '
+                        . 'Phương Trang – FUTA Bus Lines hiện khai thác hơn 350 phòng vé, trạm trung chuyển '
+                        . 'trên khắp cả nước với đội ngũ nhân sự vận hành chuyên nghiệp.',
+                    'Sở hữu hàng nghìn đầu xe chất lượng cao cùng mạng lưới tuyến rộng khắp, FUTA Bus Lines '
+                        . 'phục vụ hàng triệu lượt khách mỗi năm và không ngừng nâng cao trải nghiệm hành trình.',
+                ],
+            ],
+            'land' => [
+                'title' => 'FUTA Land',
+                'image_alt' => 'Toàn cảnh thành phố Đà Nẵng',
+                'paragraphs' => [
+                    'Trong lĩnh vực bất động sản, FUTA Group phát triển những sản phẩm chất lượng cao '
+                        . 'tại Đà Nẵng và nhiều địa phương, hướng đến không gian sống hiện đại, tiện nghi '
+                        . 'và giá trị bền vững cho cộng đồng.',
+                ],
+            ],
+            'express' => [
+                'title' => 'FUTA Express',
+                'image_alt' => 'Nhân viên giao nhận FUTA Express',
+                'paragraphs' => [
+                    'Được thành lập năm 2012, FUTA Express cung cấp dịch vụ vận tải hành khách và hàng hóa '
+                        . 'trên toàn quốc với quy trình chuyên nghiệp, an toàn và đúng thời gian.',
+                    'Mạng lưới hoạt động liên tục tại nhiều tỉnh thành đáp ứng đa dạng nhu cầu từ bưu phẩm, '
+                        . 'bưu kiện, thư tín đến hàng hóa; đồng thời cung cấp các tiện ích như thu hộ COD, '
+                        . 'giao nhận tận nơi và phát hàng bằng mã OTP.',
+                ],
+            ],
+            'city_bus' => [
+                'title' => 'FUTA City Bus',
+                'image_alt' => 'Đội xe buýt FUTA City Bus',
+                'paragraphs' => [
+                    'FUTA City Bus là một phần trong chiến lược phát triển bền vững của FUTA Group, tập trung '
+                        . 'vào vận tải hành khách công cộng với đội xe chất lượng cao và đội ngũ chuyên nghiệp.',
+                    'Dịch vụ đang mở rộng tại nhiều tỉnh thành, góp phần giảm phương tiện cá nhân và xây dựng '
+                        . 'hệ thống giao thông hiện đại, thuận tiện, thân thiện với môi trường.',
+                ],
+            ],
+            'advertising' => [
+                'title' => 'FUTA Advertising',
+                'image_alt' => 'Minh họa hoạt động quảng cáo và truyền thông',
+                'paragraphs' => [
+                    'FUTA Advertising khai thác quảng cáo trên hệ sinh thái FUTA Group với nhiều hình thức '
+                        . 'như quảng cáo xe tuyến đường dài, xe taxi, hàng hóa và các nền tảng số.',
+                    'Đơn vị hướng đến các giải pháp tiếp thị toàn diện, hiệu quả, kết hợp kinh nghiệm vận hành '
+                        . 'với công nghệ quảng cáo kỹ thuật số hiện đại.',
+                ],
+            ],
+            'rest_stop' => [
+                'title' => 'FUTA Rest Stop',
+                'image_alt' => 'Trạm dừng chân Phúc Lộc',
+                'paragraphs' => [
+                    'Hệ thống Trạm dừng Phúc Lộc được đầu tư tại các khu vực trọng điểm, phục vụ hành khách '
+                        . 'trên những hành trình dài với không gian nghỉ ngơi thoải mái và dịch vụ chu đáo.',
+                    'Trạm hoạt động 24/7, cung cấp thực đơn phong phú cùng nhiều sản vật địa phương, đáp ứng '
+                        . 'nhu cầu nghỉ ngơi, ăn uống và mua sắm của hành khách.',
+                ],
+            ],
+            'application' => [
+                'title' => 'FUTA Application',
+                'image_alt' => 'Ứng dụng FUTA trên điện thoại',
+                'paragraphs' => [
+                    'Ứng dụng FUTA kết nối khách hàng với hệ sinh thái dịch vụ trên một nền tảng thuận tiện, '
+                        . 'từ mua vé, đi lại, vận chuyển đến các chương trình ưu đãi thanh toán.',
+                    'Khách hàng có thể đặt xe, tích lũy điểm, đổi vé và theo dõi các tiện ích cá nhân ngay trên '
+                        . 'điện thoại, giúp mỗi hành trình trở nên nhanh chóng và chủ động hơn.',
+                ],
+            ],
+        ],
     ],
 ];
