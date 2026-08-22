@@ -29,13 +29,13 @@
                         class="absolute left-0 top-full z-50 mt-2 w-40 overflow-hidden rounded-lg border border-white/20 bg-white py-1 shadow-xl"
                         style="display: none;"
                     >
-                        <a href="{{ route('home') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold transition-colors {{ app()->getLocale() === 'vi' ? 'bg-orange-50 text-[#ef5222]' : 'text-gray-700 hover:bg-gray-50' }}">
+                        <a href="{{ request()->fullUrlWithQuery(['lang' => 'vi']) }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold transition-colors {{ app()->getLocale() === 'vi' ? 'bg-orange-50 text-[#ef5222]' : 'text-gray-700 hover:bg-gray-50' }}">
                             <span class="inline-flex size-5.5 items-center justify-center overflow-hidden rounded-full">
                                 <img src="{{ asset('icons/flags/vi.svg') }}" alt="" class="h-full w-full object-cover">
                             </span>
                             <span>Tiếng Việt</span>
                         </a>
-                        <a href="{{ route('home') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold transition-colors {{ app()->getLocale() === 'en' ? 'bg-orange-50 text-[#ef5222]' : 'text-gray-700 hover:bg-gray-50' }}">
+                        <a href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold transition-colors {{ app()->getLocale() === 'en' ? 'bg-orange-50 text-[#ef5222]' : 'text-gray-700 hover:bg-gray-50' }}">
                             <span class="inline-flex size-5.5 items-center justify-center overflow-hidden rounded-full">
                                 <img src="{{ asset('icons/flags/en.svg') }}" alt="" class="h-full w-full object-cover">
                             </span>
