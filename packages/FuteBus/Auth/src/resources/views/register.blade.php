@@ -3,7 +3,7 @@
 @section('title', __('Auth::app.register.page_title'))
 
 @section('form')
-    <div x-data="authRegistration(@js($step), @js($otpExpiresAt), @js($otpResendAt))">
+    <div x-data="authOtp(@js($otpExpiresAt), @js($otpResendAt))">
         <h1 id="auth-title" class="mb-4 text-center text-[22px] leading-tight font-semibold sm:mb-7 sm:text-[25px]">
             {{ match ($step) {
                 'email_otp' => __('Auth::app.otp.heading'),
@@ -32,7 +32,12 @@
                 <button type="submit" class="h-11 rounded-full bg-[#ef5222] text-sm font-bold text-white transition hover:bg-[#d94317]">{{ __('Auth::app.register.submit') }}</button>
             </form>
         @elseif($step === 'email_otp')
-            @include('Auth::partials.otp-form', ['registration' => true])
+            @include('Auth::partials.otp-form', [
+                'otpAction' => route('register.email.verify'),
+                'resendAction' => route('register.email.resend'),
+                'sentTo' => $registrationEmail,
+                'sentPrefix' => __('Auth::app.otp.sent_prefix'),
+            ])
         @elseif($step === 'password')
             <p class="mt-5 text-center text-sm text-gray-700">{{ __('Auth::app.registration_flow.verified_email') }} <strong class="text-[#007b59]">{{ $registrationEmail }}</strong></p>
             <form class="flex flex-col gap-4 pt-6" action="{{ route('register.password') }}" method="post">

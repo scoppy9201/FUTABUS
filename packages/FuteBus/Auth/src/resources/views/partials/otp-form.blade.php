@@ -1,14 +1,7 @@
-<form
-    @unless($registration ?? false) x-cloak x-show="step === 'otp'" @endunless
-    class="flex flex-col pt-5 sm:pt-4"
-    action="{{ ($registration ?? false) ? route('register.email.verify') : '#' }}"
-    method="post"
-    @if($registration ?? false) @submit="if (!submitOtp()) $event.preventDefault()" @else @submit.prevent="submitOtp" @endif
->
+<form class="flex flex-col pt-5 sm:pt-4" action="{{ $otpAction }}" method="post" @submit="if (!submitOtp()) $event.preventDefault()">
     @csrf
     <p class="text-center text-[13px] leading-5 text-gray-900">
-        {{ __('Auth::app.otp.sent_prefix') }}
-        <strong class="font-medium text-[#007b59]" x-text="email"></strong>
+        {{ $sentPrefix }} <strong class="font-medium text-[#007b59]">{{ $sentTo }}</strong>
     </p>
 
     <div class="mt-6 flex justify-center gap-3 sm:gap-4" @paste="handleOtpPaste">
@@ -27,7 +20,7 @@
             >
         </template>
     </div>
-    @if($registration ?? false)<input type="hidden" name="otp" :value="otp.join('')">@endif
+    <input type="hidden" name="otp" :value="otp.join('')">
 
     <button type="submit" class="mt-12 h-11 rounded-full bg-[#ef5222] text-sm font-bold text-white transition hover:bg-[#d94317] active:scale-[.99]">
         {{ __('Auth::app.otp.continue') }}
@@ -35,16 +28,14 @@
 
     <p class="mt-6 flex min-h-5 items-center justify-center gap-1 text-center text-[13px] text-[#8d8d9b]">
         <span>{{ __('Auth::app.otp.countdown') }}:</span>
-        <strong x-show="secondsRemaining > 0" class="font-semibold text-[#25324b]" x-text="formattedCountdown()">01:57</strong>
+        <strong x-show="secondsRemaining > 0" class="font-semibold text-[#25324b]" x-text="formattedCountdown()">00:00</strong>
         <button
             x-cloak
-            x-show="{{ ($registration ?? false) ? 'resendRemaining === 0' : 'secondsRemaining === 0' }}"
+            x-show="resendRemaining === 0"
             type="button"
             class="font-semibold text-[#ef5222] transition hover:text-[#d94317] hover:underline"
-            @click="{{ ($registration ?? false) ? '$refs.resendForm.submit()' : 'resendOtp()' }}"
+            @click="$refs.resendForm.submit()"
         >{{ __('Auth::app.otp.resend') }}</button>
     </p>
 </form>
-@if($registration ?? false)
-    <form x-ref="resendForm" action="{{ route('register.email.resend') }}" method="post">@csrf</form>
-@endif
+<form x-ref="resendForm" action="{{ $resendAction }}" method="post">@csrf</form>
