@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title'            => 'FUTAPay',
+    'balance'          => 'Số dư ví',
+    'transactions'     => 'Giao dịch',
+    'history'          => 'Lịch sử giao dịch',
+    'period'           => 'Thời gian',
+    'from_date'        => 'Từ ngày',
+    'to_date'          => 'Đến ngày',
+    'status'           => 'Trạng thái',
+    'choose_status'    => 'Chọn trạng thái',
+    'initialized'      => 'Khởi tạo',
+    'pending'          => 'Chờ duyệt',
+    'cancelled'        => 'Hủy bỏ',
+    'approved'         => 'Đã duyệt',
+    'previous_year'    => 'Năm trước',
+    'next_year'        => 'Năm sau',
+    'clear_dates'      => 'Xóa khoảng ngày',
+    'search'           => 'Tìm',
+    'transaction_code' => 'Mã giao dịch',
+    'amount'           => 'Số tiền',
+    'content'          => 'Nội dung',
+    'time'             => 'Thời gian',
+    'empty'            => 'Chưa có dữ liệu',
+    'notice_title'     => 'Thông báo FUTAPay',
+    'notice_message'   => 'Tính năng này chưa được hỗ trợ trên phiên bản hiện tại.',
+];

@@ -8,6 +8,7 @@ use FuteBus\Profile\Http\Controllers\TicketHistoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function (): void {
+    Route::view('/thong-tin-tai-khoan/futapay', 'Profile::futapay')->name('profile.futapay');
     Route::get('/thong-tin-tai-khoan/thong-tin-chung', [ProfileController::class, 'show'])->name('profile.show');
     Route::put('/thong-tin-tai-khoan/thong-tin-chung', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('/thong-tin-tai-khoan/anh-dai-dien', [ProfileController::class, 'avatar'])->name('profile.avatar');

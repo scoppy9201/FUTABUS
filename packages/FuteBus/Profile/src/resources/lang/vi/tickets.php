@@ -33,6 +33,17 @@ return [
         'payment'   => 'Thanh toán',
         'status'    => 'Trạng thái',
     ],
+    'filter_status' => [
+        'pending'           => 'Chờ xác nhận',
+        'confirmed'         => 'Đã xác nhận',
+        'completed'         => 'Hoàn tất',
+        'cancelled'         => 'Đã hủy',
+        'payment:unpaid'    => 'Chờ thanh toán',
+        'payment:pending'   => 'Giao dịch đang xử lý',
+        'payment:completed' => 'Thanh toán thành công',
+        'payment:failed'    => 'Thanh toán thất bại',
+        'payment:refunded'  => 'Vé đã hoàn tiền',
+    ],
     'booking_status' => [
         'pending'   => 'Chờ xác nhận',
         'confirmed' => 'Đã xác nhận',

@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title'            => 'FUTAPay',
+    'balance'          => 'Wallet balance',
+    'transactions'     => 'Transactions',
+    'history'          => 'Transaction history',
+    'period'           => 'Date range',
+    'from_date'        => 'From date',
+    'to_date'          => 'To date',
+    'status'           => 'Status',
+    'choose_status'    => 'Choose status',
+    'initialized'      => 'Initialized',
+    'pending'          => 'Pending approval',
+    'cancelled'        => 'Cancelled',
+    'approved'         => 'Approved',
+    'previous_year'    => 'Previous year',
+    'next_year'        => 'Next year',
+    'clear_dates'      => 'Clear dates',
+    'search'           => 'Search',
+    'transaction_code' => 'Transaction code',
+    'amount'           => 'Amount',
+    'content'          => 'Description',
+    'time'             => 'Time',
+    'empty'            => 'No data yet',
+    'notice_title'     => 'FUTAPay notice',
+    'notice_message'   => 'This feature is not supported in the current version.',
+];

@@ -23,6 +23,7 @@ class TicketHistoryTest extends TestCase
             ->assertSee('Bạn chưa có vé nào')
             ->assertSee('aria-current="page"', false)
             ->assertSee('data-profile-date-picker', false)
+            ->assertSee('data-ticket-status-picker', false)
             ->assertSee('colspan="8"', false)
             ->assertSee('href="'.route('home').'"', false);
     }
@@ -97,6 +98,35 @@ class TicketHistoryTest extends TestCase
             'date'   => 'not-a-date',
             'status' => 'admin',
         ]))->assertRedirect()->assertSessionHasErrors(['date', 'status']);
+    }
+
+    public function test_payment_status_filter_uses_the_latest_payment(): void
+    {
+        $user = User::factory()->create();
+        $paid = $this->createBooking($user, 'PAID-001');
+        $this->createBooking($user, 'OPEN-001');
+
+        foreach (['pending', 'completed'] as $index => $status) {
+            DB::table('payments')->insert([
+                'payment_code' => 'PAY-'.$index,
+                'booking_id'   => $paid['booking_id'],
+                'amount'       => 250000,
+                'method'       => 'mock',
+                'status'       => $status,
+            ]);
+        }
+
+        $this->actingAs($user)
+            ->get(route('profile.tickets.index', ['status' => 'payment:completed']))
+            ->assertOk()
+            ->assertSee('PAID-001')
+            ->assertDontSee('OPEN-001')
+            ->assertSee('data-ticket-status-option="payment:completed"', false);
+
+        $this->get(route('profile.tickets.index', ['status' => 'payment:unpaid']))
+            ->assertOk()
+            ->assertSee('OPEN-001')
+            ->assertDontSee('PAID-001');
     }
 
     public function test_booking_details_only_open_for_the_owner(): void

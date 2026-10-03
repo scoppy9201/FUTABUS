@@ -9,6 +9,18 @@ use Illuminate\Validation\Rule;
 
 class TicketHistoryRequest extends FormRequest
 {
+    public const STATUS_OPTIONS = [
+        'pending',
+        'confirmed',
+        'completed',
+        'cancelled',
+        'payment:unpaid',
+        'payment:pending',
+        'payment:completed',
+        'payment:failed',
+        'payment:refunded',
+    ];
+
     public function authorize(): bool
     {
         return $this->user() !== null;
@@ -20,7 +32,7 @@ class TicketHistoryRequest extends FormRequest
             'code'   => ['nullable', 'string', 'max:100'],
             'date'   => ['nullable', 'date_format:Y-m-d'],
             'route'  => ['nullable', 'string', 'max:100'],
-            'status' => ['nullable', Rule::in(['pending', 'confirmed', 'completed', 'cancelled'])],
+            'status' => ['nullable', Rule::in(self::STATUS_OPTIONS)],
         ];
     }
 
