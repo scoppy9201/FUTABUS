@@ -5,7 +5,7 @@
     <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="{{ __('Auth::app.meta_description') }}">
-    <title>@yield('title') | FUTA Bus Lines</title>
+    <title>@yield('title') | {{ __('Auth::app.site_name') }}</title>
     @vite([
         'resources/css/app.css',
         'resources/js/app.js',

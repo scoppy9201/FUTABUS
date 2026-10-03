@@ -5,6 +5,7 @@
         class="h-full min-w-0 flex-1 bg-transparent px-3 text-base text-gray-900 outline-none placeholder:text-[#b9b9b9]"
         type="email"
         name="email"
+        value="{{ old('email') }}"
         autocomplete="email"
         placeholder="{{ __('Auth::app.fields.email_placeholder') }}"
         @if($bindModel ?? false) x-model.trim="email" @endif

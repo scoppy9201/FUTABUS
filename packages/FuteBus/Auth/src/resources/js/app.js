@@ -1,11 +1,23 @@
-import '../css/app.css';
-
-const createOtpFlow = () => ({
-    step: 'email',
+const createOtpFlow = (step = 'email', expiresAt = 0, resendAt = 0) => ({
+    step,
     email: '',
     otp: Array(6).fill(''),
     secondsRemaining: 117,
     countdownTimer: null,
+    resendRemaining: Math.max(0, resendAt - Math.floor(Date.now() / 1000)),
+
+    init() {
+        if (step === 'email_otp') {
+            const tick = () => {
+                const now = Math.floor(Date.now() / 1000);
+                this.secondsRemaining = Math.max(0, expiresAt - now);
+                this.resendRemaining = Math.max(0, resendAt - now);
+            };
+            tick();
+            this.countdownTimer = window.setInterval(tick, 1000);
+            this.$nextTick(() => this.otpInputs()[0]?.focus());
+        }
+    },
 
     requestOtp() {
         this.step = 'otp';
@@ -81,7 +93,10 @@ const createOtpFlow = () => ({
 
         if (firstEmptyIndex !== -1) {
             this.otpInputs()[firstEmptyIndex]?.focus();
+            return false;
         }
+
+        return true;
     },
 
     otpInputs() {

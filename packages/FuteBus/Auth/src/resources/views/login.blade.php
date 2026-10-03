@@ -8,7 +8,9 @@
 
         @include('Auth::partials.auth-tabs', ['active' => 'login'])
 
-        <form class="flex flex-col gap-6 pt-7 sm:gap-7.5 sm:pt-10" action="#" method="post" @submit.prevent>
+        @if(session('status'))<p role="status" class="mt-5 rounded-md bg-green-50 px-3 py-2 text-sm text-green-800">{{ session('status') }}</p>@endif
+        @if($errors->any())<p role="alert" class="mt-5 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{{ $errors->first() }}</p>@endif
+        <form class="flex flex-col gap-6 pt-7 sm:gap-7.5 sm:pt-10" action="{{ route('login.store') }}" method="post">
             @csrf
             @include('Auth::partials.email-field')
 

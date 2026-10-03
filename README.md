@@ -297,6 +297,7 @@ CI (`.github/workflows/ci.yml`) runs lint, code-quality diff, tests, and a Docke
 | Guide | Purpose |
 | --- | --- |
 | [Deployment](docs/DEPLOYMENT.md) | Container architecture, deploy and rollback procedures |
+| [System analysis](docs/DAC-TA-HE-THONG-FUTEBUS.md) | Consolidated system analysis and specification for the FUTEBUS project report |
 
 ## License
 
