@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FuteBus\Profile\Providers;
 
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class ProfileServiceProvider extends ServiceProvider
@@ -15,7 +16,8 @@ class ProfileServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'Profile');
-        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'Profile');
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'Profile');
+        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'Profile');
+        Route::middleware('web')->group(__DIR__.'/../routes/web.php');
     }
 }

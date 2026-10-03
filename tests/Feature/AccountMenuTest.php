@@ -19,6 +19,7 @@ class AccountMenuTest extends TestCase
             ->assertOk()
             ->assertSee('Hung Manh')
             ->assertSee('id="account-menu"', false)
+            ->assertSee('href="'.route('profile.show').'"', false)
             ->assertDontSee('href="'.route('dashboard').'"', false)
             ->assertSee('action="'.route('logout').'"', false)
             ->assertSee('method="post"', false)

@@ -9,7 +9,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
         'name',
@@ -17,6 +17,10 @@ class User extends Authenticatable
         'password',
         'phone',
         'avatar',
+        'gender',
+        'date_of_birth',
+        'address',
+        'occupation',
         'role',
         'is_active',
     ];
@@ -27,9 +31,10 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password'          => 'hashed',
-        'is_active'         => 'boolean',
+        'email_verified_at'  => 'datetime',
+        'date_of_birth'      => 'date',
+        'password'           => 'hashed',
+        'is_active'          => 'boolean',
     ];
 
     public function isAdmin(): bool
