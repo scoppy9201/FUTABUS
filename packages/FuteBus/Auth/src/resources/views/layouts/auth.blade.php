@@ -43,5 +43,6 @@
 
     @include('core::partials.home.footer')
     @include('core::partials.floating-support')
+    <x-confirm-dialog />
 </body>
 </html>

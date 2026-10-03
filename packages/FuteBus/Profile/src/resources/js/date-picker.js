@@ -31,7 +31,9 @@ function initializeDatePicker(picker) {
     const previous = picker.querySelector('[data-profile-date-previous]');
     const next = picker.querySelector('[data-profile-date-next]');
     const clear = picker.querySelector('[data-profile-date-clear]');
-    const maximum = parseDate(picker.dataset.max) ?? new Date();
+    const maximum = picker.dataset.max ? parseDate(picker.dataset.max) : null;
+    const reference = maximum ?? new Date();
+    const today = new Date();
     const locale = document.documentElement.lang === 'vi' ? 'vi-VN' : 'en-US';
     const monthFormatter = new Intl.DateTimeFormat(locale, { month: 'long' });
     const dateFormatter = new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -39,8 +41,8 @@ function initializeDatePicker(picker) {
     const weekdayFormatter = new Intl.DateTimeFormat(locale, { weekday: 'short' });
     const placeholder = label.textContent.trim();
     let selected = parseDate(input.value);
-    let visibleYear = (selected ?? maximum).getFullYear();
-    let visibleMonth = (selected ?? maximum).getMonth();
+    let visibleYear = (selected ?? reference).getFullYear();
+    let visibleMonth = (selected ?? reference).getMonth();
 
     for (let day = 0; day < 7; day++) {
         const heading = document.createElement('span');
@@ -61,7 +63,9 @@ function initializeDatePicker(picker) {
         monthLabel.textContent = monthFormatter.format(new Date(visibleYear, visibleMonth, 1));
         yearInput.value = visibleYear;
         previous.disabled = visibleYear === 1000 && visibleMonth === 0;
-        next.disabled = new Date(visibleYear, visibleMonth + 1, 1) > maximum;
+        next.disabled = maximum !== null
+            ? new Date(visibleYear, visibleMonth + 1, 1) > maximum
+            : visibleYear === 2100 && visibleMonth === 11;
         days.replaceChildren();
 
         const firstWeekday = (new Date(visibleYear, visibleMonth, 1).getDay() + 6) % 7;
@@ -76,12 +80,12 @@ function initializeDatePicker(picker) {
             const date = new Date(visibleYear, visibleMonth, day);
             const button = document.createElement('button');
             const isSelected = selected && formatValue(date) === formatValue(selected);
-            const isToday = formatValue(date) === formatValue(maximum);
+            const isToday = formatValue(date) === formatValue(today);
 
             button.type = 'button';
             button.textContent = day;
             button.setAttribute('aria-label', fullDateFormatter.format(date));
-            button.disabled = date > maximum;
+            button.disabled = maximum !== null && date > maximum;
             button.className = 'grid size-9 place-items-center rounded-full text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#ef5222]';
 
             if (isSelected) {
@@ -125,9 +129,11 @@ function initializeDatePicker(picker) {
     yearInput.addEventListener('input', () => {
         const year = Number(yearInput.value);
 
-        if (yearInput.value.length === 4 && Number.isInteger(year) && year >= 1000 && year <= maximum.getFullYear()) {
+        const lastYear = maximum?.getFullYear() ?? 2100;
+
+        if (yearInput.value.length === 4 && Number.isInteger(year) && year >= 1000 && year <= lastYear) {
             visibleYear = year;
-            if (new Date(year, visibleMonth, 1) > maximum) visibleMonth = maximum.getMonth();
+            if (maximum !== null && new Date(year, visibleMonth, 1) > maximum) visibleMonth = maximum.getMonth();
             render();
         }
     });
@@ -154,8 +160,8 @@ function initializeDatePicker(picker) {
     });
     input.form.addEventListener('reset', () => queueMicrotask(() => {
         selected = parseDate(input.value);
-        visibleYear = (selected ?? maximum).getFullYear();
-        visibleMonth = (selected ?? maximum).getMonth();
+        visibleYear = (selected ?? reference).getFullYear();
+        visibleMonth = (selected ?? reference).getMonth();
         updateLabel();
         close();
     }));

@@ -1,0 +1,8 @@
+{
+    "version": 1.1,
+    "atDirectives": [
+        { "name": "@source", "description": "Tailwind CSS v4 source files" },
+        { "name": "@theme", "description": "Tailwind CSS v4 theme variables" },
+        { "name": "@utility", "description": "Tailwind CSS v4 custom utility" }
+    ]
+}
