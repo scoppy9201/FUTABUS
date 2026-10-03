@@ -106,10 +106,7 @@
             </a>
 
             @auth
-                <a href="{{ route('dashboard') }}" class="flex min-h-8.75 items-center gap-2 rounded-full bg-white px-4.5 text-sm font-bold text-gray-900 shadow-sm max-sm:h-9 max-sm:w-9 max-sm:justify-center max-sm:p-0">
-                    <x-heroicon-o-user-circle class="h-5 w-5" />
-                    <span class="max-sm:hidden">{{ Auth::user()->name }}</span>
-                </a>
+                @include('core::partials.home.account-menu')
             @else
                 <a href="{{ route('login') }}" class="flex min-h-8.75 items-center gap-2 rounded-full bg-white px-4.5 text-sm font-bold text-gray-900 shadow-sm max-sm:h-9 max-sm:w-9 max-sm:justify-center max-sm:p-0">
                     <x-heroicon-o-user-circle class="h-5 w-5" />
