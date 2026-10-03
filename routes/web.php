@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 */
 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', fn () => view('dashboard'))->name('dashboard');
+    Route::get('/dashboard', fn () => redirect()->route('home'))->name('dashboard');
 
     Route::post('/logout', function (Request $request) {
         Auth::logout();
