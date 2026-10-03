@@ -102,14 +102,44 @@
                             >
                         </div>
                     </div>
-                    <div class="min-w-0">
-                        <label for="ticket-status" class="mb-1.5 block text-sm font-semibold text-gray-900">{{ __('Profile::tickets.fields.status') }}</label>
-                        <select id="ticket-status" name="status" class="h-11 w-full min-w-0 rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-950 focus:border-[#ef5222] focus:outline-none focus:ring-2 focus:ring-[#ef5222]/10">
-                            <option value="">{{ __('Profile::tickets.placeholders.status') }}</option>
-                            @foreach(['pending', 'confirmed', 'completed', 'cancelled'] as $status)
-                                <option value="{{ $status }}" @selected(($filters['status'] ?? '') === $status)>{{ __('Profile::tickets.booking_status.'.$status) }}</option>
+                    <div data-ticket-status-picker class="relative min-w-0">
+                        <span id="ticket-status-label" class="mb-1.5 block text-sm font-semibold text-gray-900">{{ __('Profile::tickets.fields.status') }}</span>
+                        <input type="hidden" name="status" value="{{ $filters['status'] ?? '' }}" data-ticket-status-value>
+                        <button
+                            type="button"
+                            data-ticket-status-toggle
+                            aria-labelledby="ticket-status-label ticket-status-display"
+                            aria-haspopup="listbox"
+                            aria-controls="ticket-status-options"
+                            aria-expanded="false"
+                            class="flex h-11 w-full min-w-0 items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-3 text-left text-sm font-medium text-gray-950 hover:border-[#ef5222] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ef5222]"
+                        >
+                            <span id="ticket-status-display" data-ticket-status-label class="truncate">
+                                {{ filled($filters['status'] ?? null) ? __('Profile::tickets.filter_status.'.$filters['status']) : __('Profile::tickets.placeholders.status') }}
+                            </span>
+                            <x-heroicon-o-chevron-down class="size-4 shrink-0 text-slate-500" />
+                        </button>
+                        <div
+                            id="ticket-status-options"
+                            data-ticket-status-options
+                            role="listbox"
+                            aria-label="{{ __('Profile::tickets.fields.status') }}"
+                            hidden
+                            class="absolute left-0 top-full z-40 mt-2 max-h-64 w-full min-w-48 overflow-y-auto rounded-xl border border-gray-200 bg-white py-1 shadow-xl"
+                        >
+                            <button
+                                type="button" role="option" tabindex="-1" data-ticket-status-option=""
+                                aria-selected="{{ empty($filters['status']) ? 'true' : 'false' }}"
+                                class="block w-full px-3 py-2.5 text-left text-sm font-medium text-gray-900 hover:bg-orange-50 focus:bg-orange-50 focus:outline-none aria-selected:bg-orange-50 aria-selected:font-semibold aria-selected:text-[#ef5222]"
+                            >{{ __('Profile::tickets.placeholders.status') }}</button>
+                            @foreach(\FuteBus\Profile\Http\Requests\TicketHistoryRequest::STATUS_OPTIONS as $status)
+                                <button
+                                    type="button" role="option" tabindex="-1" data-ticket-status-option="{{ $status }}"
+                                    aria-selected="{{ ($filters['status'] ?? '') === $status ? 'true' : 'false' }}"
+                                    class="block w-full px-3 py-2.5 text-left text-sm font-medium text-gray-900 hover:bg-orange-50 focus:bg-orange-50 focus:outline-none aria-selected:bg-orange-50 aria-selected:font-semibold aria-selected:text-[#ef5222]"
+                                >{{ __('Profile::tickets.filter_status.'.$status) }}</button>
                             @endforeach
-                        </select>
+                        </div>
                     </div>
                     <button
                         type="submit"
@@ -135,7 +165,13 @@
                             <a href="{{ route('profile.tickets.index') }}" class="text-sm font-semibold text-[#ef5222] hover:underline">{{ __('Profile::tickets.clear') }}</a>
                         @endif
                     </div>
-                    <div class="overflow-x-auto">
+                    <div
+                        class="overflow-x-auto lg:[scrollbar-width:none] lg:hover:[scrollbar-width:thin]
+                            lg:hover:[scrollbar-color:#ef5222_#f3f4f6] lg:focus-within:[scrollbar-width:thin]
+                            lg:focus-within:[scrollbar-color:#ef5222_#f3f4f6]
+                            lg:[&::-webkit-scrollbar]:h-0 lg:hover:[&::-webkit-scrollbar]:h-2
+                            lg:focus-within:[&::-webkit-scrollbar]:h-2"
+                    >
                         <table class="w-full min-w-245 text-left text-sm">
                             <caption class="sr-only">{{ __('Profile::tickets.title') }}</caption>
                             <thead class="bg-gray-50 text-gray-700">

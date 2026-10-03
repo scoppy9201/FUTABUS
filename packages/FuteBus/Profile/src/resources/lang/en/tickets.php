@@ -33,6 +33,17 @@ return [
         'status'    => 'Status',
         'action'    => 'Action',
     ],
+    'filter_status' => [
+        'pending'           => 'Awaiting confirmation',
+        'confirmed'         => 'Confirmed',
+        'completed'         => 'Completed',
+        'cancelled'         => 'Cancelled',
+        'payment:unpaid'    => 'Awaiting payment',
+        'payment:pending'   => 'Payment processing',
+        'payment:completed' => 'Payment successful',
+        'payment:failed'    => 'Payment failed',
+        'payment:refunded'  => 'Ticket refunded',
+    ],
     'booking_status' => [
         'pending'   => 'Awaiting confirmation',
         'confirmed' => 'Confirmed',

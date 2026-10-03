@@ -42,7 +42,19 @@ class TicketHistoryService
         }
 
         if (! empty($filters['status'])) {
-            $query->where('bookings.status', $filters['status']);
+            $status = $filters['status'];
+
+            if ($status === 'payment:unpaid') {
+                $query->whereNotExists(function (Builder $payments): void {
+                    $payments->selectRaw('1')
+                        ->from('payments')
+                        ->whereColumn('payments.booking_id', 'bookings.id');
+                });
+            } elseif (str_starts_with($status, 'payment:')) {
+                $query->where($this->latestPaymentStatus(), '=', substr($status, 8));
+            } else {
+                $query->where('bookings.status', $status);
+            }
         }
 
         return $query->orderByDesc('bookings.created_at')
@@ -82,13 +94,15 @@ class TicketHistoryService
                 'routes.origin_city',
                 'routes.destination_city',
             ])
-            ->selectSub(
-                DB::table('payments')
-                    ->select('status')
-                    ->whereColumn('payments.booking_id', 'bookings.id')
-                    ->orderByDesc('payments.id')
-                    ->limit(1),
-                'payment_status',
-            );
+            ->selectSub($this->latestPaymentStatus(), 'payment_status');
+    }
+
+    private function latestPaymentStatus(): Builder
+    {
+        return DB::table('payments')
+            ->select('status')
+            ->whereColumn('payments.booking_id', 'bookings.id')
+            ->orderByDesc('payments.id')
+            ->limit(1);
     }
 }

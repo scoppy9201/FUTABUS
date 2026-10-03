@@ -29,10 +29,10 @@
         class="absolute right-0 top-full z-50 mt-2 w-68 overflow-hidden rounded-xl border border-gray-100 bg-white py-1.5 text-gray-900 shadow-2xl"
         aria-labelledby="account-menu-button"
     >
-        <div class="flex cursor-not-allowed items-center gap-3 px-3 py-2.5 text-base font-semibold text-gray-900" aria-disabled="true" title="{{ __('core::app.home.navbar.coming_soon') }}">
+        <a href="{{ route('profile.futapay') }}" class="flex items-center gap-3 px-3 py-2.5 text-base font-semibold text-gray-900 transition hover:bg-orange-50 focus-visible:bg-orange-50 focus-visible:outline-none">
             <span class="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-[#00613d]"><img src="{{ asset('images/auth/White%20Brushstroke%20F%20on%20Forest%20Green.png') }}" alt="" class="size-full scale-125 object-cover"></span>
             <span>{{ __('core::app.home.navbar.futapay') }}</span>
-        </div>
+        </a>
         <a href="{{ route('profile.show') }}" class="flex items-center gap-3 px-3 py-2.5 text-base font-semibold text-gray-900 transition hover:bg-orange-50 focus-visible:bg-orange-50 focus-visible:outline-none">
             <span class="grid size-9 shrink-0 place-items-center rounded-full bg-amber-400 text-white"><x-heroicon-s-user-circle class="size-7" /></span>
             <span>{{ __('core::app.home.navbar.account_information') }}</span>

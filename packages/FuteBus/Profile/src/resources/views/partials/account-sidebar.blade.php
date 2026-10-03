@@ -1,11 +1,19 @@
 <aside class="rounded-2xl border border-gray-200 bg-white p-2.5 lg:min-h-134" aria-label="{{ __('Profile::app.title') }}">
     <div class="space-y-1.5">
-        <div class="flex items-center gap-3 rounded-xl px-3 py-3 text-lg font-medium text-gray-900" aria-disabled="true" title="{{ __('Profile::app.coming_soon') }}">
+        <a
+            href="{{ route('profile.futapay') }}"
+            @if(request()->routeIs('profile.futapay')) aria-current="page" @endif
+            @class([
+                'flex items-center gap-3 rounded-xl px-3 py-3 text-lg hover:bg-orange-50',
+                'bg-orange-50 font-semibold text-gray-950' => request()->routeIs('profile.futapay'),
+                'font-medium text-gray-900' => ! request()->routeIs('profile.futapay'),
+            ])
+        >
             <span class="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-[#00613d]">
                 <img src="{{ asset('images/auth/White%20Brushstroke%20F%20on%20Forest%20Green.png') }}" alt="" class="size-full scale-125 object-cover">
             </span>
             <span>{{ __('Profile::app.futapay') }}</span>
-        </div>
+        </a>
         <a
             href="{{ route('profile.show') }}"
             @if(request()->routeIs('profile.show')) aria-current="page" @endif
