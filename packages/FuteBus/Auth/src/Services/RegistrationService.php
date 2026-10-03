@@ -16,7 +16,9 @@ use Throwable;
 
 class RegistrationService
 {
-    public function __construct(private readonly RegistrationOtpService $otp) {}
+    private const OTP_ERRORS = 'Auth::app.registration_flow.errors';
+
+    public function __construct(private readonly OtpChallengeService $otp) {}
 
     public function viewData(Request $request): array
     {
@@ -33,12 +35,12 @@ class RegistrationService
     public function startEmail(Request $request, string $email): void
     {
         $flow = $request->session()->get('registration', []);
-        $this->otp->assertUnlocked($flow);
+        $this->otp->assertUnlocked($flow, self::OTP_ERRORS);
         if (User::where('email', $email)->exists()) {
             throw ValidationException::withMessages(['email' => __('Auth::app.registration_flow.validation.email_taken')]);
         }
         if (($flow['email'] ?? null) === $email) {
-            $this->otp->assertResendAllowed($flow);
+            $this->otp->assertResendAllowed($flow, self::OTP_ERRORS);
         }
 
         $code = (string) random_int(100000, 999999);
@@ -64,7 +66,7 @@ class RegistrationService
     public function verifyEmail(Request $request, string $code): void
     {
         $flow = $this->requireStep($request, 'email_otp');
-        $this->otp->verify($request, $flow, $code);
+        $this->otp->verify($request, $flow, $code, 'registration', self::OTP_ERRORS);
         $flow = $this->otp->clear($flow);
         $flow['step'] = 'password';
         $request->session()->put('registration', $flow);

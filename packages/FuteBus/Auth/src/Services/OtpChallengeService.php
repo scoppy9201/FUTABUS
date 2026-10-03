@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
-class RegistrationOtpService
+class OtpChallengeService
 {
     private const LIFETIME_SECONDS = 300;
     private const RESEND_SECONDS = 60;
@@ -25,12 +25,12 @@ class RegistrationOtpService
         ]);
     }
 
-    public function verify(Request $request, array $flow, string $code): void
+    public function verify(Request $request, array $flow, string $code, string $sessionKey, string $errorPrefix): void
     {
-        $this->assertUnlocked($flow);
+        $this->assertUnlocked($flow, $errorPrefix);
 
         if (now()->timestamp > ($flow['otp_expires_at'] ?? 0)) {
-            throw ValidationException::withMessages(['otp' => __('Auth::app.registration_flow.errors.otp_expired')]);
+            throw ValidationException::withMessages(['otp' => __("{$errorPrefix}.otp_expired")]);
         }
 
         if (! Hash::check($code, $flow['otp_hash'] ?? '')) {
@@ -38,25 +38,25 @@ class RegistrationOtpService
             if ($flow['attempts'] >= 5) {
                 $flow['locked_until'] = now()->timestamp + self::LOCK_SECONDS;
             }
-            $request->session()->put('registration', $flow);
+            $request->session()->put($sessionKey, $flow);
 
             throw ValidationException::withMessages(['otp' => $flow['attempts'] >= 5
-                ? __('Auth::app.registration_flow.errors.otp_locked')
-                : __('Auth::app.registration_flow.errors.otp_invalid')]);
+                ? __("{$errorPrefix}.otp_locked")
+                : __("{$errorPrefix}.otp_invalid")]);
         }
     }
 
-    public function assertUnlocked(array $flow): void
+    public function assertUnlocked(array $flow, string $errorPrefix): void
     {
         if (($flow['locked_until'] ?? 0) > now()->timestamp) {
-            throw ValidationException::withMessages(['otp' => __('Auth::app.registration_flow.errors.otp_locked')]);
+            throw ValidationException::withMessages(['otp' => __("{$errorPrefix}.otp_locked")]);
         }
     }
 
-    public function assertResendAllowed(array $flow): void
+    public function assertResendAllowed(array $flow, string $errorPrefix): void
     {
         if (($flow['otp_resend_at'] ?? 0) > now()->timestamp) {
-            throw ValidationException::withMessages(['otp' => __('Auth::app.registration_flow.errors.resend_wait')]);
+            throw ValidationException::withMessages(['otp' => __("{$errorPrefix}.resend_wait")]);
         }
     }
 

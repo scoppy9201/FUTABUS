@@ -31,14 +31,13 @@ class AuthPagesTest extends TestCase
         $this->get('/register')->assertNotFound();
     }
 
-    public function test_forgot_password_page_uses_the_vietnamese_url_and_contains_the_otp_step(): void
+    public function test_forgot_password_page_uses_the_vietnamese_url(): void
     {
         $this->get('/quen-mat-khau?lang=vi')
             ->assertOk()
             ->assertSeeText('Quên mật khẩu')
             ->assertSeeText('Gửi mã xác thực')
-            ->assertSeeText('Gửi lại mã')
             ->assertSee('name="email"', false)
-            ->assertSee('data-otp-input', false);
+            ->assertSee(route('password.email'), false);
     }
 }

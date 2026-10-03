@@ -1,13 +1,11 @@
-const createOtpFlow = (step = 'email', expiresAt = 0, resendAt = 0) => ({
-    step,
-    email: '',
+const createOtpFlow = (expiresAt = 0, resendAt = 0) => ({
     otp: Array(6).fill(''),
-    secondsRemaining: 117,
+    secondsRemaining: 0,
     countdownTimer: null,
     resendRemaining: Math.max(0, resendAt - Math.floor(Date.now() / 1000)),
 
     init() {
-        if (step === 'email_otp') {
+        if (expiresAt > 0) {
             const tick = () => {
                 const now = Math.floor(Date.now() / 1000);
                 this.secondsRemaining = Math.max(0, expiresAt - now);
@@ -17,32 +15,6 @@ const createOtpFlow = (step = 'email', expiresAt = 0, resendAt = 0) => ({
             this.countdownTimer = window.setInterval(tick, 1000);
             this.$nextTick(() => this.otpInputs()[0]?.focus());
         }
-    },
-
-    requestOtp() {
-        this.step = 'otp';
-        this.startCountdown();
-        this.$nextTick(() => this.otpInputs()[0]?.focus());
-    },
-
-    startCountdown() {
-        window.clearInterval(this.countdownTimer);
-        this.secondsRemaining = 117;
-
-        this.countdownTimer = window.setInterval(() => {
-            if (this.secondsRemaining === 0) {
-                window.clearInterval(this.countdownTimer);
-                return;
-            }
-
-            this.secondsRemaining -= 1;
-        }, 1000);
-    },
-
-    resendOtp() {
-        this.otp = Array(6).fill('');
-        this.startCountdown();
-        this.$nextTick(() => this.otpInputs()[0]?.focus());
     },
 
     handleOtpInput(index, event) {
@@ -116,6 +88,5 @@ const createOtpFlow = (step = 'email', expiresAt = 0, resendAt = 0) => ({
 });
 
 document.addEventListener('alpine:init', () => {
-    Alpine.data('authRegistration', createOtpFlow);
-    Alpine.data('authPasswordRecovery', createOtpFlow);
+    Alpine.data('authOtp', createOtpFlow);
 });
