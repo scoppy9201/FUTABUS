@@ -9,7 +9,9 @@
 /.idea
 /.nova
 /.phpunit.cache
-/.vscode
+/.vscode/*
+!/.vscode/settings.json
+!/.vscode/tailwind.css-data.json
 /.zed
 /auth.json
 /node_modules

@@ -31,7 +31,7 @@
         @include('core::partials.home.navbar')
 
         <main
-            class="mx-auto min-h-[620px] w-full max-w-285 px-4 py-10 sm:px-6 lg:px-0"
+            class="mx-auto min-h-155 w-full max-w-285 px-4 py-10 sm:px-6 lg:px-0"
             x-data="{
                 query: '',
                 regions: @js($directory),

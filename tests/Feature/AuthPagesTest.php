@@ -20,10 +20,9 @@ class AuthPagesTest extends TestCase
         $this->get('/dang-ky?lang=vi')
             ->assertOk()
             ->assertSeeText('Tạo tài khoản')
-            ->assertSeeText('Mã xác thực đã được gửi về email')
             ->assertSee('name="email"', false)
             ->assertSee('name="terms"', false)
-            ->assertSee('data-otp-input', false);
+            ->assertSee(route('register.email'), false);
     }
 
     public function test_legacy_english_auth_urls_are_not_registered(): void

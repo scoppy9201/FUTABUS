@@ -1,10 +1,9 @@
 <form
-    x-cloak
-    x-show="step === 'otp'"
+    @unless($registration ?? false) x-cloak x-show="step === 'otp'" @endunless
     class="flex flex-col pt-5 sm:pt-4"
-    action="#"
+    action="{{ ($registration ?? false) ? route('register.email.verify') : '#' }}"
     method="post"
-    @submit.prevent="submitOtp"
+    @if($registration ?? false) @submit="if (!submitOtp()) $event.preventDefault()" @else @submit.prevent="submitOtp" @endif
 >
     @csrf
     <p class="text-center text-[13px] leading-5 text-gray-900">
@@ -28,6 +27,7 @@
             >
         </template>
     </div>
+    @if($registration ?? false)<input type="hidden" name="otp" :value="otp.join('')">@endif
 
     <button type="submit" class="mt-12 h-11 rounded-full bg-[#ef5222] text-sm font-bold text-white transition hover:bg-[#d94317] active:scale-[.99]">
         {{ __('Auth::app.otp.continue') }}
@@ -38,10 +38,13 @@
         <strong x-show="secondsRemaining > 0" class="font-semibold text-[#25324b]" x-text="formattedCountdown()">01:57</strong>
         <button
             x-cloak
-            x-show="secondsRemaining === 0"
+            x-show="{{ ($registration ?? false) ? 'resendRemaining === 0' : 'secondsRemaining === 0' }}"
             type="button"
             class="font-semibold text-[#ef5222] transition hover:text-[#d94317] hover:underline"
-            @click="resendOtp"
+            @click="{{ ($registration ?? false) ? '$refs.resendForm.submit()' : 'resendOtp()' }}"
         >{{ __('Auth::app.otp.resend') }}</button>
     </p>
 </form>
+@if($registration ?? false)
+    <form x-ref="resendForm" action="{{ route('register.email.resend') }}" method="post">@csrf</form>
+@endif
