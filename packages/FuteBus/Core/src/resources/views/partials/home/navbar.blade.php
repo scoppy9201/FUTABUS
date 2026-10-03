@@ -101,7 +101,7 @@
                 <img
                     src="{{ asset('icons/futabus-logo.png') }}"
                     alt="{{ __('core::app.home.navbar.logo_alt') }}"
-                    class="relative z-10 h-12 w-48.5 object-contain max-sm:w-33"
+                    class="relative z-10 h-14 w-60 -translate-y-0.5 scale-x-110 object-contain max-sm:h-11 max-sm:w-40 max-sm:scale-x-100"
                 >
             </a>
 

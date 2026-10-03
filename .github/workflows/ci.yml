@@ -31,7 +31,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.2"
+          php-version: "8.3"
           extensions: bcmath, ctype, curl, dom, fileinfo, gd, intl, json, mbstring, mysql, openssl, pdo_mysql, tokenizer, xml, zip
           coverage: none
 
@@ -90,7 +90,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.2"
+          php-version: "8.3"
           coverage: none
 
       - name: Run diff-only quality gate
@@ -167,7 +167,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.2"
+          php-version: "8.3"
           extensions: bcmath, ctype, curl, dom, fileinfo, gd, intl, json, mbstring, mysql, openssl, pdo_mysql, tokenizer, xml, zip
           coverage: none
 

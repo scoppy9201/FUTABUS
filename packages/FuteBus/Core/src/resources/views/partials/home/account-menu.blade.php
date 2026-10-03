@@ -41,10 +41,10 @@
             <span class="grid size-10 shrink-0 place-items-center rounded-full bg-sky-500 text-white"><x-heroicon-o-clock class="size-6" /></span>
             <span>{{ __('core::app.home.navbar.ticket_history') }}</span>
         </div>
-        <div class="flex cursor-not-allowed items-center gap-3 px-4 py-3 text-sm text-gray-700" aria-disabled="true" title="{{ __('core::app.home.navbar.coming_soon') }}">
+        <a href="{{ route('profile.password.edit') }}" class="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 transition hover:bg-orange-50 focus-visible:bg-orange-50 focus-visible:outline-none">
             <span class="grid size-10 shrink-0 place-items-center rounded-full bg-[#ef6b31] text-white"><x-heroicon-o-lock-closed class="size-6" /></span>
             <span>{{ __('core::app.home.navbar.reset_password') }}</span>
-        </div>
+        </a>
         <form action="{{ route('logout') }}" method="post" class="border-t border-gray-100 pt-1">
             @csrf
             <button type="submit" class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-gray-900 transition hover:bg-orange-50 focus-visible:bg-orange-50 focus-visible:outline-none">
