@@ -20,11 +20,25 @@ class AccountMenuTest extends TestCase
             ->assertSee('Hung Manh')
             ->assertSee('id="account-menu"', false)
             ->assertSee('href="'.route('profile.show').'"', false)
+            ->assertSee('href="'.route('profile.tickets.index').'"', false)
             ->assertSee('href="'.route('profile.password.edit').'"', false)
             ->assertDontSee('href="'.route('dashboard').'"', false)
             ->assertSee('action="'.route('logout').'"', false)
             ->assertSee('method="post"', false)
+            ->assertSee('id="global-confirm-dialog"', false)
+            ->assertSee('data-confirm-title="'.__('core::confirm.logout_title').'"', false)
+            ->assertSee('data-confirm-message="'.__('core::confirm.logout_message').'"', false)
             ->assertSeeText('Đăng xuất');
+    }
+
+    public function test_profile_sidebar_uses_the_same_logout_confirmation(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get(route('profile.show'))
+            ->assertOk()
+            ->assertSee('id="global-confirm-dialog"', false)
+            ->assertSee('data-confirm-title="'.__('core::confirm.logout_title').'"', false)
+            ->assertSee('action="'.route('logout').'"', false);
     }
 
     public function test_dashboard_route_redirects_to_a_real_page(): void
