@@ -21,6 +21,7 @@
 /storage/*.key
 /storage/pail
 /storage/framework/views/*
+/storage/framework/cache/blade/*
 /vendor
 Homestead.json
 Homestead.yaml
