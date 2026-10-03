@@ -2,6 +2,8 @@
 
 @source "../../packages/FuteBus/Core/src/resources/views/**/*.blade.php";
 @source "../../packages/FuteBus/Auth/src/resources/views/**/*.blade.php";
+@source "../../packages/FuteBus/Profile/src/resources/views/**/*.blade.php";
+@source "../../packages/FuteBus/Profile/src/resources/js/**/*.js";
 
 [x-cloak] {
     display: none !important;

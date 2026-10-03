@@ -149,6 +149,9 @@ FROM base AS development
 # Node for running Vite inside the dev container if desired.
 RUN apk add --no-cache nodejs npm git
 
+# Override production OPcache settings for bind-mounted application code.
+COPY docker/php/opcache.dev.ini /usr/local/etc/php/conf.d/zzz-opcache-dev.ini
+
 ENV APP_ENV=local \
     APP_DEBUG=true
 

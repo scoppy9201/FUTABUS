@@ -27,6 +27,9 @@ class ProfileTest extends TestCase
             ->assertSee('Hung Manh')
             ->assertSee('0568503606')
             ->assertSee('Joyful%20Victory%20Against%20Turquoise%20Wall.png')
+            ->assertSee('editing: false', false)
+            ->assertSee('x-show="!editing"', false)
+            ->assertSee(':disabled="!editing"', false)
             ->assertSee('action="'.route('profile.update').'"', false);
 
         $this->put(route('profile.update'), [
@@ -103,6 +106,10 @@ class ProfileTest extends TestCase
             'name'  => $user->name,
             'phone' => ['unexpected'],
         ])->assertSessionHasErrors('phone');
+
+        $this->get(route('profile.show'))
+            ->assertOk()
+            ->assertSee('editing: true', false);
     }
 
     public function test_avatar_endpoint_only_serves_profile_uploads(): void

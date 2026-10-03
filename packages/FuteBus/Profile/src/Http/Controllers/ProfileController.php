@@ -7,6 +7,7 @@ namespace FuteBus\Profile\Http\Controllers;
 use FuteBus\Profile\Http\Requests\UpdateProfileRequest;
 use FuteBus\Profile\Services\ProfileService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -30,8 +31,11 @@ class ProfileController extends Controller
     public function avatar(Request $request): StreamedResponse
     {
         $path = $request->user()->avatar;
-        abort_if(! is_string($path) || ! str_starts_with($path, 'avatars/') || ! Storage::disk('public')->exists($path), 404);
+        /** @var FilesystemAdapter $disk */
+        $disk = Storage::disk('public');
 
-        return Storage::disk('public')->response($path);
+        abort_if(! is_string($path) || ! str_starts_with($path, 'avatars/') || ! $disk->exists($path), 404);
+
+        return $disk->response($path);
     }
 }
