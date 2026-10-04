@@ -99,7 +99,7 @@
                     <span>{{ __('core::app.home.hero.round_trip') }}</span>
                 </label>
             </div>
-            <a href="#" class="text-sm font-medium text-[#ef5222]">{{ __('core::app.home.hero.guide') }}</a>
+            <a href="{{ route('booking-guide') }}" class="text-sm font-medium text-[#ef5222] hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ef5222]">{{ __('core::app.home.hero.guide') }}</a>
         </div>
 
         <div
