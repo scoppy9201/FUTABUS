@@ -10,8 +10,8 @@
     x-data="{
         calendarOpen: false,
         activeField: 'departure',
-        departureDate: @js($today),
-        returnDate: '',
+        departureDate: @js($initialSearch['departure_date'] ?? $today),
+        returnDate: @js($initialSearch['return_date'] ?? ''),
         today: @js($today),
         viewYear: {{ now()->year }},
         viewMonth: {{ now()->month - 1 }},

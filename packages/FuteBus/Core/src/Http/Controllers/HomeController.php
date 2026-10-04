@@ -12,6 +12,7 @@ use FuteBus\Core\Models\NewsArticle;
 use FuteBus\Core\Models\NewsCategory;
 use FuteBus\Core\Models\Promotion;
 use FuteBus\Core\Services\HomeService;
+use FuteBus\Core\Services\BookingLocationCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
@@ -19,6 +20,7 @@ class HomeController extends Controller
 {
     public function __construct(
         private readonly HomeService $homeService,
+        private readonly BookingLocationCatalog $bookingLocationCatalog,
     ) {}
 
     public function index()
@@ -27,12 +29,7 @@ class HomeController extends Controller
 
         $popularRoutes = $this->homeService->getPopularRoutes();
 
-        $bookingLocations = json_decode(
-            file_get_contents(app_path('Data/futa_booking_locations.json')),
-            true,
-            512,
-            JSON_THROW_ON_ERROR,
-        );
+        $bookingLocations = $this->bookingLocationCatalog->all();
 
         $newsArticles = NewsArticle::published()
             ->homepageOrder()

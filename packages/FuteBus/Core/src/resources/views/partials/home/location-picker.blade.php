@@ -101,7 +101,7 @@
                                 <span class="mt-1 block truncate text-xs text-slate-500" x-text="area.province"></span>
                             </span>
                             <span class="flex shrink-0 items-center gap-3 text-xs text-slate-500">
-                                <span x-text="area.office_count + ' ' + (area.office_count === 1 ? @js(__('core::app.home.hero.office_singular')) : @js(__('core::app.home.hero.office_plural')))"></span>
+                                <span x-show="area.office_count > 0" x-text="area.office_count + ' ' + (area.office_count === 1 ? @js(__('core::app.home.hero.office_singular')) : @js(__('core::app.home.hero.office_plural')))"></span>
                                 <svg x-show="area.offices.length > 0" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" class="size-4 text-gray-800 transition-transform" :class="expandedArea === area.name ? 'rotate-180' : ''" aria-hidden="true"><path d="m5 7.5 5 5 5-5" /></svg>
                             </span>
                         </button>
@@ -121,6 +121,24 @@
                             </template>
                         </div>
                     </div>
+                </template>
+            </div>
+
+            <div x-show="visibleOffices().length > 0" class="border-t-4 border-gray-100">
+                <p class="sticky top-0 z-10 border-b border-gray-200 bg-white px-2 py-2 text-sm font-semibold uppercase text-gray-900">{{ __('core::app.home.hero.office_directory') }}</p>
+                <template x-for="(office, index) in visibleOffices()" :key="office.name + office.address">
+                    <button
+                        type="button"
+                        @mouseenter="highlightedLocation = visibleProvinces().length + visibleAreas().length + index"
+                        @click="chooseLocation(office.name)"
+                        class="flex w-full items-start gap-3 border-b border-gray-200 px-2 py-3 text-left transition-colors hover:bg-[#fff7f2]"
+                    >
+                        <x-heroicon-o-home class="mt-0.5 size-5 shrink-0 text-[#f59b23]" />
+                        <span class="min-w-0">
+                            <span class="block truncate text-sm font-medium text-gray-900" x-text="office.name"></span>
+                            <span class="mt-0.5 block truncate text-xs text-slate-500" x-text="office.address"></span>
+                        </span>
+                    </button>
                 </template>
             </div>
 

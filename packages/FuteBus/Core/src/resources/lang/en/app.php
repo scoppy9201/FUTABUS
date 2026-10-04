@@ -40,6 +40,7 @@ return [
             'provinces_heading' => 'Province / City',
             'office_singular' => 'office',
             'office_plural' => 'offices',
+            'office_directory' => 'Office network',
             'date'             => 'Departure date',
             'quantity' => 'Tickets',
             'return_date' => 'Return date',
@@ -58,8 +59,9 @@ return [
 
         'popular_routes' => [
             'title'      => 'POPULAR ROUTES',
-            'subtitle'   => 'Trusted and chosen by customers',
+            'subtitle'   => 'Favorite destinations',
             'from_label' => 'Routes from',
+            'hours'      => 'hours',
             'empty'      => 'No popular routes yet.',
         ],
 

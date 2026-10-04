@@ -50,6 +50,12 @@
         background: transparent;
     }
 
+    @media (min-width: 640px) {
+        .trip-search-page .home-search-banner {
+            aspect-ratio: 1128 / 250;
+        }
+    }
+
     @media (max-width: 639px) {
         .home-landing {
             background-size: 100% 214px;
