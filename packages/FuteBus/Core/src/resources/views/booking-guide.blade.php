@@ -36,11 +36,13 @@
                         >
                     </div>
                     <div class="mt-7 flex items-center justify-center gap-8" aria-label="{{ __('core::booking-guide.app_heading') }}">
-                        <span class="inline-flex h-7 items-center gap-1 rounded-full bg-[#60b95e] px-2.5 text-xs font-medium text-white">
+                        <a href="https://play.google.com/store/apps/details?id=client.facecar.com" target="_blank" rel="noopener noreferrer" aria-label="{{ __('core::app.home.footer.google_play') }}" class="inline-flex h-7 items-center gap-1 rounded-full bg-[#60b95e] px-2.5 text-xs font-medium text-white">
                             <svg viewBox="0 0 16 16" aria-hidden="true" class="size-3.5 fill-current"><path d="M2.5 1.5a.8.8 0 0 0-.4.7v11.6a.8.8 0 0 0 1.2.7l10-5.8a.8.8 0 0 0 0-1.4l-10-5.8a.8.8 0 0 0-.8 0Z" /></svg>
                             CH Play
-                        </span>
-                        <img src="{{ asset('icons/stores/app-store.svg') }}" alt="App Store" class="h-7 w-auto">
+                        </a>
+                        <a href="https://apps.apple.com/vn/app/futa/id1126633800" target="_blank" rel="noopener noreferrer" aria-label="{{ __('core::app.home.footer.app_store') }}">
+                            <img src="{{ asset('icons/stores/app-store.svg') }}" alt="App Store" class="h-7 w-auto">
+                        </a>
                     </div>
                 </section>
 
@@ -149,11 +151,13 @@
                             <span class="text-[#ef5222]">Apple store</span>
                         </h3>
                         <div class="mt-4 flex items-center justify-center gap-8">
-                            <span class="inline-flex h-7 items-center gap-1 rounded-full bg-[#60b95e] px-2.5 text-xs font-medium text-white">
+                            <a href="https://play.google.com/store/apps/details?id=client.facecar.com" target="_blank" rel="noopener noreferrer" aria-label="{{ __('core::app.home.footer.google_play') }}" class="inline-flex h-7 items-center gap-1 rounded-full bg-[#60b95e] px-2.5 text-xs font-medium text-white">
                                 <svg viewBox="0 0 16 16" aria-hidden="true" class="size-3.5 fill-current"><path d="M2.5 1.5a.8.8 0 0 0-.4.7v11.6a.8.8 0 0 0 1.2.7l10-5.8a.8.8 0 0 0 0-1.4l-10-5.8a.8.8 0 0 0-.8 0Z" /></svg>
                                 CH Play
-                            </span>
-                            <img src="{{ asset('icons/stores/app-store.svg') }}" alt="App Store" class="h-7 w-auto">
+                            </a>
+                            <a href="https://apps.apple.com/vn/app/futa/id1126633800" target="_blank" rel="noopener noreferrer" aria-label="{{ __('core::app.home.footer.app_store') }}">
+                                <img src="{{ asset('icons/stores/app-store.svg') }}" alt="App Store" class="h-7 w-auto">
+                            </a>
                         </div>
                     </div>
 

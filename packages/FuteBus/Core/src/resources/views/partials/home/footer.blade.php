@@ -83,10 +83,10 @@
                     <div>
                         <h3 class="font-bold uppercase text-[#00613d]">{{ __('core::app.home.footer.download_app') }}</h3>
                         <div class="mt-3 flex flex-nowrap items-center gap-2.5">
-                            <a href="#" aria-label="{{ __('core::app.home.footer.google_play') }}" class="block shrink-0 transition-transform hover:-translate-y-0.5">
+                            <a href="https://play.google.com/store/apps/details?id=client.facecar.com" target="_blank" rel="noopener noreferrer" aria-label="{{ __('core::app.home.footer.google_play') }}" class="block shrink-0 transition-transform hover:-translate-y-0.5">
                                 <img src="{{ asset('icons/stores/google-play.svg') }}" alt="" class="h-8 w-auto">
                             </a>
-                            <a href="#" aria-label="{{ __('core::app.home.footer.app_store') }}" class="block shrink-0 transition-transform hover:-translate-y-0.5">
+                            <a href="https://apps.apple.com/vn/app/futa/id1126633800" target="_blank" rel="noopener noreferrer" aria-label="{{ __('core::app.home.footer.app_store') }}" class="block shrink-0 transition-transform hover:-translate-y-0.5">
                                 <img src="{{ asset('icons/stores/app-store.svg') }}" alt="" class="h-8 w-auto">
                             </a>
                         </div>

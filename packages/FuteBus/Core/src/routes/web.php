@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 use FuteBus\Core\Http\Controllers\HomeController;
 use FuteBus\Core\Http\Controllers\TicketLookupController;
+use FuteBus\Core\Http\Controllers\TripSearchController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/dat-ve', TripSearchController::class)->name('trip-search');
 Route::get('/huong-dan-dat-ve-tren-web', [HomeController::class, 'bookingGuide'])->name('booking-guide');
 Route::get('/ve-chung-toi', [HomeController::class, 'about'])->name('about');
 Route::get('/chinh-sach/chinh-sach-bao-mat', [HomeController::class, 'privacy'])->name('privacy');

@@ -15,13 +15,17 @@ class BookingGuideTest extends TestCase
 
         $this->get(route('home'))
             ->assertOk()
-            ->assertSee('href="'.route('booking-guide').'"', false);
+            ->assertSee('href="'.route('booking-guide').'"', false)
+            ->assertSee('href="https://apps.apple.com/vn/app/futa/id1126633800"', false)
+            ->assertSee('href="https://play.google.com/store/apps/details?id=client.facecar.com"', false);
 
         $this->get('/huong-dan-dat-ve-tren-web')
             ->assertOk()
             ->assertSee('Hướng dẫn mua vé xe trên website')
             ->assertSee('images/booking-guide/futa-logo.png', false)
             ->assertSee('images/booking-guide/futa-app-qr.png', false)
+            ->assertSee('href="https://apps.apple.com/vn/app/futa/id1126633800"', false)
+            ->assertSee('href="https://play.google.com/store/apps/details?id=client.facecar.com"', false)
             ->assertSee('1900 6067')
             ->assertSee('Bước 1: Những trải nghiệm nổi bật')
             ->assertSeeInOrder([

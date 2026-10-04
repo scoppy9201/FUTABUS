@@ -40,6 +40,7 @@ return [
             'provinces_heading' => 'Tỉnh/Thành phố',
             'office_singular' => 'văn phòng',
             'office_plural' => 'văn phòng',
+            'office_directory' => 'Mạng lưới văn phòng',
             'date'             => 'Ngày đi',
             'quantity' => 'Số vé',
             'return_date' => 'Ngày về',
@@ -58,8 +59,9 @@ return [
 
         'popular_routes' => [
             'title'      => 'Tuyến Phổ Biến',
-            'subtitle'   => 'Được khách hàng tin tưởng và lựa chọn',
+            'subtitle'   => 'Điểm đến được yêu thích',
             'from_label' => 'Tuyến xe từ',
+            'hours'      => 'giờ',
             'empty'      => 'Chưa có tuyến phổ biến.',
         ],
 

@@ -74,14 +74,15 @@
     $today = now();
     $isoDay = (int) $today->isoFormat('d');
     $dayOfWeek = $isoDay === 7 ? 'CN' : 'Thứ '.($isoDay + 1);
+    $initialSearch = $searchCriteria ?? [];
 @endphp
 
 <section
     class="px-3 pt-2 pb-14.5 sm:px-4"
     x-data="{
-        roundTrip: false,
-        departure: '',
-        destination: '',
+        roundTrip: @js(($initialSearch['trip_type'] ?? 'one_way') === 'round_trip'),
+        departure: @js($initialSearch['departure'] ?? ''),
+        destination: @js($initialSearch['destination'] ?? ''),
         recentSearches: [],
         locationOpen: null,
         locationQuery: '',
@@ -94,7 +95,7 @@
                 this.recentSearches = Array.isArray(saved)
                     ? saved.filter(search => search && typeof search.departure === 'string'
                         && typeof search.destination === 'string'
-                        && /^\d{4}-\d{2}-\d{2}$/.test(search.departureDate)).slice(0, 3)
+                        && /^\d{4}-\d{2}-\d{2}$/.test(search.departureDate))
                     : [];
             } catch (_) {
                 this.recentSearches = [];
@@ -115,6 +116,9 @@
             this.$nextTick(() => window.dispatchEvent(new CustomEvent('hero-restore-dates', {
                 detail: { departureDate, returnDate },
             })));
+            window.dispatchEvent(new CustomEvent('hero-restore-quantity', {
+                detail: { quantity: Number(search.quantity) >= 1 && Number(search.quantity) <= 5 ? Number(search.quantity) : 1 },
+            }));
         },
         submitSearch(event) {
             if (!this.departure || !this.destination) {
@@ -136,13 +140,14 @@
                 departureDate,
                 returnDate: this.roundTrip ? returnDate : '',
                 roundTrip: this.roundTrip,
+                quantity: Number(form.elements.namedItem('quantity').value),
             };
             this.recentSearches = [search, ...this.recentSearches.filter(previous =>
                 previous.departure !== search.departure
                 || previous.destination !== search.destination
                 || previous.departureDate !== search.departureDate
                 || previous.returnDate !== search.returnDate
-            )].slice(0, 3);
+            )];
             try {
                 localStorage.setItem('futabus.recent-trip-searches.v1', JSON.stringify(this.recentSearches));
             } catch (_) {
@@ -151,7 +156,8 @@
         },
         normalizeLocation(value) {
             return value.toLocaleLowerCase('vi').normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
+                .replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd')
+                .replace(/tp\.?\s*hcm/g, 'ho chi minh');
         },
         hasLocationQuery() {
             return this.normalizeLocation(this.locationQuery.trim()).length >= 2;
@@ -173,8 +179,15 @@
                 || area.offices.some(office => this.normalizeLocation(office.name).includes(query)
                     || this.normalizeLocation(office.address).includes(query)));
         },
+        visibleOffices() {
+            if (!this.hasLocationQuery()) return [];
+            const query = this.normalizeLocation(this.locationQuery.trim());
+            const offices = this.locationCatalog[this.locationOpen]?.directory_offices || [];
+            return offices.filter(office => this.normalizeLocation(office.name).includes(query)
+                || this.normalizeLocation(office.address).includes(query));
+        },
         locationRowCount() {
-            return this.visibleProvinces().length + this.visibleAreas().length;
+            return this.visibleProvinces().length + this.visibleAreas().length + this.visibleOffices().length;
         },
         onLocationQueryChange() {
             this.highlightedLocation = 0;
@@ -217,7 +230,12 @@
                 return;
             }
             const area = this.visibleAreas()[this.highlightedLocation - provinces.length];
-            if (area) this.toggleLocationArea(area);
+            if (area) {
+                this.toggleLocationArea(area);
+                return;
+            }
+            const office = this.visibleOffices()[this.highlightedLocation - provinces.length - this.visibleAreas().length];
+            if (office) this.chooseLocation(office.name);
         },
         swapLocations() {
             [this.departure, this.destination] = [this.destination, this.departure];
@@ -225,7 +243,7 @@
         },
     }"
 >
-    <div class="mx-auto aspect-1128/310 w-full max-w-282 overflow-hidden rounded-xl border border-white/60 bg-[#fff7f1] shadow-[0_6px_14px_rgba(67,31,18,.26)] max-sm:aspect-16/7">
+    <div class="home-search-banner mx-auto aspect-1128/310 w-full max-w-282 overflow-hidden rounded-xl border border-white/60 bg-[#fff7f1] shadow-[0_6px_14px_rgba(67,31,18,.26)] max-sm:aspect-16/7">
         <img
             src="{{ asset('images/banners/home-banner.jpg') }}"
             alt="{{ __('core::app.home.hero.banner_alt') }}"
@@ -233,7 +251,7 @@
         >
     </div>
 
-    <form class="relative mx-auto mt-8 w-full max-w-282 rounded-[18px] bg-white px-6 pt-6.5 pb-10.5 hero-form-border max-sm:px-4" action="#" method="GET" @submit="submitSearch($event)">
+    <form class="relative mx-auto mt-8 w-full max-w-282 rounded-[18px] bg-white px-6 pt-6.5 pb-10.5 hero-form-border max-sm:px-4" action="{{ route('trip-search') }}" method="GET" @submit="submitSearch($event)">
         <div class="mb-5.25 flex items-center justify-between gap-4">
             <div class="flex items-center gap-7 max-sm:gap-4">
                 <label class="flex cursor-pointer items-center gap-2 font-bold transition-colors duration-200" :class="!roundTrip ? 'text-[#ef5222]' : 'text-gray-500'">
@@ -293,7 +311,8 @@
 
             <div
                 class="relative"
-                x-data="{ open: false, selected: 1 }"
+                x-data="{ open: false, selected: @js((int) ($initialSearch['quantity'] ?? 1)) }"
+                @hero-restore-quantity.window="selected = $event.detail.quantity"
                 @click.away="open = false"
                 @keydown.escape.window="open = false"
             >
@@ -350,12 +369,12 @@
 
         <div x-show="recentSearches.length > 0" x-cloak class="mt-5">
             <p class="mb-3 ml-4 text-sm font-bold text-gray-900">{{ __('core::app.home.hero.recent_searches') }}</p>
-            <div class="flex flex-wrap gap-3 sm:gap-5">
+            <div class="hero-location-results flex gap-3 overflow-x-auto pb-1 sm:gap-5">
                 <template x-for="(search, index) in recentSearches" :key="index">
                     <button
                         type="button"
                         @click="applyRecentSearch(search)"
-                        class="min-w-0 rounded-lg border border-gray-200 bg-[#fafafa] px-4 py-2.5 text-left transition hover:border-[#ef5222] hover:bg-[#fff7f2] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ef5222]"
+                        class="min-w-0 shrink-0 rounded-lg border border-gray-200 bg-[#fafafa] px-4 py-2.5 text-left transition hover:border-[#ef5222] hover:bg-[#fff7f2] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ef5222]"
                     >
                         <span class="block max-w-57 truncate text-sm font-semibold text-gray-950" x-text="search.departure + ' - ' + search.destination"></span>
                         <span class="mt-1 block text-xs text-slate-500" x-text="formatRecentDate(search.departureDate)"></span>
