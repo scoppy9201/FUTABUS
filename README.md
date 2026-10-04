@@ -177,6 +177,11 @@ DB_PORT=3306
 DB_DATABASE=futabus
 DB_USERNAME=root
 DB_PASSWORD=
+
+# Choose a unique password of at least 12 characters before seeding.
+FUTABUS_ADMIN_NAME="Quản trị FUTA"
+FUTABUS_ADMIN_EMAIL=admin@futabus.vn
+FUTABUS_ADMIN_PASSWORD=
 ```
 
 ### 4. Run migrations and seeders
@@ -185,6 +190,17 @@ DB_PASSWORD=
 php artisan migrate --seed
 php artisan storage:link
 ```
+
+The admin account receives the `admin` role during `migrate --seed` when
+`FUTABUS_ADMIN_PASSWORD` is set. To create or update only this account on an
+existing database, run:
+
+```bash
+php artisan db:seed --class=AdminAccountSeeder
+```
+
+Sign in with `FUTABUS_ADMIN_EMAIL` and `FUTABUS_ADMIN_PASSWORD` to open the
+owner dashboard. Keep the password in your local `.env`; never commit it.
 
 ### 5. Start development servers
 

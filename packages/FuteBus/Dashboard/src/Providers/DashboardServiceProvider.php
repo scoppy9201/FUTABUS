@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FuteBus\Dashboard\Providers;
 
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class DashboardServiceProvider extends ServiceProvider
@@ -15,7 +16,8 @@ class DashboardServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'Dashboard');
-        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'Dashboard');
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'Dashboard');
+        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'Dashboard');
+        Route::middleware('web')->group(__DIR__.'/../routes/web.php');
     }
 }

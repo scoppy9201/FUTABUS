@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -21,7 +22,6 @@ class User extends Authenticatable
         'date_of_birth',
         'address',
         'occupation',
-        'role',
         'is_active',
     ];
 
@@ -39,22 +39,26 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->hasRole('admin');
     }
 
     public function isStaff(): bool
     {
-        return $this->role === 'staff';
+        return $this->hasRole('staff');
     }
 
     public function isCustomer(): bool
     {
-        return $this->role === 'customer';
+        return $this->hasRole('customer');
     }
 
     public function hasRole(string|array $roles): bool
     {
-        return in_array($this->role ?? '', (array) $roles, true);
+        return $this->exists && DB::table('role_user')
+            ->join('roles', 'roles.id', '=', 'role_user.role_id')
+            ->where('role_user.user_id', $this->getKey())
+            ->whereIn('roles.slug', (array) $roles)
+            ->exists();
     }
 
     public function getIsActiveAttribute(): bool
