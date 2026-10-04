@@ -1,7 +1,7 @@
 @extends('core::layouts.home')
 
 @section('content')
-    <div class="home-page">
+    <div class="home-page home-landing">
         @include('core::partials.home.navbar')
         @include('core::partials.home.hero')
         @include('core::partials.home.promotions')

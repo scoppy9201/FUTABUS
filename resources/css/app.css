@@ -25,6 +25,14 @@
         font-weight: 500;
     }
 
+    .home-landing {
+        background-color: #fff;
+        background-image: url("/images/banners/Abstract Orange Gradient Waves.png");
+        background-repeat: no-repeat;
+        background-position: center top;
+        background-size: 100% 222px;
+    }
+
     .futa-header-pattern {
         overflow: visible;
         background:
@@ -38,14 +46,14 @@
         background-position: left top, right top, center top, 28% top, center;
     }
 
-    .futa-hero-backdrop {
-        background-color: #fff;
-        background-image:
-            linear-gradient(154deg, transparent 0 18%, rgb(255 188 58 / 22%) 18.2% 38%, transparent 38.2% 100%),
-            linear-gradient(26deg, transparent 0 56%, rgb(255 176 42 / 18%) 56.2% 78%, transparent 78.2% 100%),
-            linear-gradient(180deg, #f87318 0%, #f55e1b 100%);
-        background-repeat: no-repeat;
-        background-size: 100% 88px, 100% 88px, 100% 88px;
+    .home-landing .futa-header-pattern {
+        background: transparent;
+    }
+
+    @media (max-width: 639px) {
+        .home-landing {
+            background-size: 100% 214px;
+        }
     }
 
     .futa-nav-active::after {
