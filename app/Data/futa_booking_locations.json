@@ -1,0 +1,210 @@
+{
+  "departure": {
+    "provinces": [
+      "Cà Mau",
+      "Hà Giang",
+      "Đắk Lắk",
+      "Bắc Ninh",
+      "Điện Biên",
+      "Hải Phòng",
+      "Hà Nam",
+      "Hà Tĩnh",
+      "TP. Hồ Chí Minh"
+    ],
+    "areas": [
+      {
+        "name": "Buôn Hồ",
+        "province": "Đắk Lắk",
+        "office_count": 1,
+        "offices": [
+          {
+            "name": "Buôn Hồ",
+            "address": "629 Hùng Vương, Phường An Lạc, Buôn Hồ, Đắk Lắk, Vietnam"
+          }
+        ]
+      },
+      {
+        "name": "Hồng Ngự",
+        "province": "Đồng Tháp",
+        "office_count": 1,
+        "offices": [
+          {
+            "name": "Bx Hồng Ngự",
+            "address": "Bình Thạnh, Hồng Ngự, Đồng Tháp, Vietnam"
+          }
+        ]
+      },
+      {
+        "name": "Quận 5",
+        "province": "TP. Hồ Chí Minh",
+        "office_count": 1,
+        "offices": [
+          {
+            "name": "231-233 Lê Hồng Phong",
+            "address": "231 Đ. Lê Hồng Phong, Phường 4, Quận 5, Thành phố Hồ Chí Minh, Vietnam"
+          }
+        ]
+      },
+      {
+        "name": "Quy Nhơn",
+        "province": "Bình Định",
+        "office_count": 1,
+        "offices": [
+          {
+            "name": "Bx Quy Nhơn",
+            "address": "Võ Liệu, Ghềnh Ráng, Quy Nhơn, Bình Định, Vietnam"
+          }
+        ]
+      },
+      {
+        "name": "Giá Rai",
+        "province": "Bạc Liêu",
+        "office_count": 1,
+        "offices": [
+          {
+            "name": "Bến xe Hộ Phòng",
+            "address": "6CHC+7FJ, Lê Hồng Nhi, Hộ Phòng, Giá Rai, Bạc Liêu, Vietnam"
+          }
+        ]
+      },
+      {
+        "name": "Quận 8",
+        "province": "TP. Hồ Chí Minh",
+        "office_count": 1,
+        "offices": [
+          {
+            "name": "43 Nguyễn Cư Trinh",
+            "address": "43 Đ. Nguyễn Cư Trinh, Phường Nguyễn Cư Trinh, Quận 1, Thành phố Hồ Chí Minh, Vietnam"
+          }
+        ]
+      },
+      {
+        "name": "Quận 10",
+        "province": "TP. Hồ Chí Minh",
+        "office_count": 1,
+        "offices": [
+          {
+            "name": "Thành Thái",
+            "address": "108 Đ. Thành Thái, Phường 14, Quận 10, Thành phố Hồ Chí Minh, Vietnam"
+          }
+        ]
+      },
+      {
+        "name": "Quận 4",
+        "province": "TP. Hồ Chí Minh",
+        "office_count": 1,
+        "offices": [
+          {
+            "name": "Xa Lộ Hà Nội",
+            "address": "798 Song Hành Xa Lộ Hà Nội, Hiệp Phú, Quận 9, Thành phố Hồ Chí Minh, Vietnam"
+          }
+        ]
+      },
+      {
+        "name": "Bình Thạnh",
+        "province": "TP. Hồ Chí Minh",
+        "office_count": 2,
+        "offices": [
+          {
+            "name": "Bệnh Viện Ung Bướu Bình Thạnh",
+            "address": "3 Nơ Trang Long, Phường 7, Bình Thạnh, Thành phố Hồ Chí Minh, Vietnam"
+          },
+          {
+            "name": "Bx Miền Đông Cũ",
+            "address": "292 Đinh Bộ Lĩnh, P.26, Q.Bình Thạnh, TP HCM"
+          }
+        ]
+      },
+      {
+        "name": "Hóc Môn",
+        "province": "TP. Hồ Chí Minh",
+        "office_count": 1,
+        "offices": [
+          {
+            "name": "Bx An Sương",
+            "address": "Quốc Lộ 22, Ấp Đông Lân, Bà Điểm, Hóc Môn, TP Hồ Chí Minh"
+          }
+        ]
+      },
+      {
+        "name": "Quận 12",
+        "province": "TP. Hồ Chí Minh",
+        "office_count": 1,
+        "offices": [
+          {
+            "name": "Bx N4 Ga",
+            "address": "720, QL1A, Thạnh Lộc, Quận 12, Thành phố Hồ Chí Minh, Vietnam"
+          }
+        ]
+      },
+      {
+        "name": "Bình Tân",
+        "province": "TP. Hồ Chí Minh",
+        "office_count": 1,
+        "offices": [
+          {
+            "name": "Bx Miền Tây",
+            "address": "395 Kinh Dương Vương , P.An Lạc , Q.Bình Tân , TP.HCM"
+          }
+        ]
+      },
+      {
+        "name": "Quận 9",
+        "province": "TP. Hồ Chí Minh",
+        "office_count": 1,
+        "offices": [
+          {
+            "name": "Bến xe Miền Đông Mới",
+            "address": "39448 Xa Lộ Hà Nội, Phường Long Bình, TP Thủ Đức"
+          }
+        ]
+      }
+    ]
+  },
+  "destination": {
+    "provinces": [
+      "An Giang",
+      "Bà Rịa - Vũng Tàu",
+      "Bắc Giang",
+      "Lâm Đồng",
+      "Bắc Ninh"
+    ],
+    "areas": [
+      {
+        "name": "Hàm Thuận Nam",
+        "province": "Bình Thuận",
+        "office_count": 1,
+        "offices": [
+          {
+            "name": "Phương Lâm",
+            "address": "2421 QL20, Phú Lâm, Tân Phú, Đồng Nai, Vietnam"
+          }
+        ]
+      },
+      {
+        "name": "Di Linh",
+        "province": "Lâm Đồng",
+        "office_count": 1,
+        "offices": []
+      },
+      {
+        "name": "Bảo Lộc",
+        "province": "Lâm Đồng",
+        "office_count": 1,
+        "offices": []
+      },
+      {
+        "name": "Tuy Hoà",
+        "province": "Phú Yên",
+        "office_count": 1,
+        "offices": []
+      },
+      {
+        "name": "Đà Lạt",
+        "province": "Lâm Đồng",
+        "office_count": 2,
+        "offices": []
+      }
+    ]
+  }
+}
