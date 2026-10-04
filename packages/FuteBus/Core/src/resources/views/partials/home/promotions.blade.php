@@ -10,10 +10,19 @@
                 perPage: 3,
                 total: {{ $promotions->count() }},
                 totalPages: 1,
-                init() { this.syncLayout(); },
+                timer: null,
+                init() { this.syncLayout(); this.start(); },
+                destroy() { clearInterval(this.timer); },
+                start() {
+                    clearInterval(this.timer);
+                    if (this.totalPages > 1) {
+                        this.timer = setInterval(() => { this.active = (this.active + 1) % this.totalPages; }, 5000);
+                    }
+                },
+                goTo(page) { this.active = page; this.start(); },
                 syncLayout() {
                     this.perPage = window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1;
-                    this.totalPages = Math.ceil(this.total / this.perPage);
+                    this.totalPages = Math.max(1, Math.ceil(this.total / this.perPage));
                     this.active = Math.min(this.active, this.totalPages - 1);
                 },
             }"
@@ -46,7 +55,7 @@
                         type="button"
                         class="h-2.5 rounded-full transition-all duration-300"
                         :class="active === page - 1 ? 'w-7 bg-[#ef5222]' : 'w-2.5 bg-gray-300'"
-                        @click="active = page - 1"
+                        @click="goTo(page - 1)"
                         :aria-label="`Trang ${page}`"
                         :aria-current="active === page - 1 ? 'page' : null"
                     ></button>

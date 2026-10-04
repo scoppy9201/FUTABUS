@@ -64,4 +64,17 @@ class FeaturedPromotionsTest extends TestCase
                 'images/promotions/app-booking-step-05.png',
             ], false);
     }
+
+    public function test_promotion_article_shows_four_other_related_promotions(): void
+    {
+        $slug = 'nguoi-dan-dong-thap-di-kham-benh-cong-ty-phuong-trang-lo-tron-tung-chang-duong';
+
+        $this->get(route('promotion-article', $slug))
+            ->assertOk()
+            ->assertSee('Tin tức liên quan')
+            ->assertSee('href="'.route('news').'"', false)
+            ->assertSee('images/news/nga-bay-free-shuttle.png', false)
+            ->assertViewHas('relatedArticles', fn ($articles) => $articles->count() === 4
+                && $articles->every(fn ($article) => $article['slug'] !== $slug));
+    }
 }

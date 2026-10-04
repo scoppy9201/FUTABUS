@@ -90,12 +90,15 @@ return [
 
         'latest_news' => [
             'title'       => 'Tin tức mới',
-            'subtitle'    => 'Được khách hàng tin tưởng và lựa chọn',
+            'related_title' => 'Tin tức liên quan',
+            'subtitle'    => 'Cập nhật những thông tin mới từ Phương Trang',
             'view_all'    => 'Xem tất cả',
             'details'     => 'Chi tiết',
             'empty'       => 'Chưa có tin tức mới.',
             'image_alt'   => 'Ảnh bài viết :title',
             'placeholder' => 'Tin tức FUTA',
+            'pages'       => 'Các trang tin tức',
+            'page'        => 'Trang :number',
         ],
 
         'futa_ecosystem' => [

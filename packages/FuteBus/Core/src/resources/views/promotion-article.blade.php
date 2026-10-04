@@ -30,6 +30,7 @@
                     @include($promotion['content_view'])
                 @endif
             </article>
+            @include('core::partials.home.related-articles')
         </main>
 
         @include('core::partials.home.footer')
