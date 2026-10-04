@@ -33,7 +33,7 @@
                             <span class="font-black text-xl tracking-tight text-[#F26522]">FUTA</span>
                             <span class="text-sm font-bold text-gray-700 tracking-wider">BUS LINES</span>
                         </div>
-                        <p class="text-[10px] text-[#E31B23] font-semibold uppercase tracking-widest hidden sm:block">Chất lượng là danh dự</p>
+                        <p class="text-[10px] text-[#E31B23] font-semibold uppercase tracking-widest hidden sm:block">{{ __('Dashboard::app.slogan') }}</p>
                     </div>
                 </a>
                 <div class="hidden md:block h-6 w-px bg-gray-200 mx-2"></div>
@@ -60,7 +60,7 @@
                     </span>
                     <div class="hidden sm:block text-left">
                         <p class="text-sm font-bold text-gray-800 leading-tight">{{ Auth::user()->name }}</p>
-                        <p class="text-xs text-gray-500">Đối tác Chính thức</p>
+                        <p class="text-xs text-gray-500">{{ __('Dashboard::app.official_partner') }}</p>
                     </div>
                     <form action="{{ route('logout') }}" method="post" data-confirm data-confirm-title="{{ __('core::confirm.logout_title') }}" data-confirm-message="{{ __('core::confirm.logout_message') }}" class="inline-block">
                         @csrf
@@ -85,14 +85,14 @@
                     @foreach([
                         ['key' => 'overview', 'icon' => 'squares-2x2', 'route' => route('dashboard')],
                         ['key' => 'buses', 'icon' => 'truck', 'route' => route('dashboard.section', 'buses'), 'submenu' => [
-                            ['title' => 'Loại phương tiện', 'route' => '#'],
-                            ['title' => 'Thông tin xe', 'route' => '#'],
-                            ['title' => 'Loại giấy tờ', 'route' => '#'],
-                            ['title' => 'Hồ sơ giấy tờ xe', 'route' => '#'],
+                            ['key' => 'vehicle_types', 'route' => '#'],
+                            ['key' => 'bus_info',      'route' => '#'],
+                            ['key' => 'document_types','route' => '#'],
+                            ['key' => 'bus_documents', 'route' => '#'],
                         ]],
-                        ['key' => 'trips', 'icon' => 'map-pin', 'route' => route('dashboard.section', 'trips')],
-                        ['key' => 'routes', 'icon' => 'calendar-days', 'route' => route('dashboard.section', 'routes')],
-                        ['key' => 'reports', 'icon' => 'chart-bar', 'route' => route('dashboard.section', 'reports')],
+                        ['key' => 'trips',   'icon' => 'map-pin',      'route' => route('dashboard.section', 'trips')],
+                        ['key' => 'routes',  'icon' => 'calendar-days', 'route' => route('dashboard.section', 'routes')],
+                        ['key' => 'reports', 'icon' => 'chart-bar',     'route' => route('dashboard.section', 'reports')],
                     ] as $item)
                         @php($active = $item['key'] === ($section ?? 'overview'))
                         <div class="group relative">
@@ -109,14 +109,14 @@
                                     <x-heroicon-o-chevron-down class="w-4 h-4 text-gray-400 group-hover:text-[#F26522] transition-transform duration-200 group-hover:rotate-180" />
                                 @endif
                             </a>
-                            
+
                             @if(isset($item['submenu']))
                                 <div class="hidden group-hover:block bg-orange-50/50 pb-2">
                                     <ul class="flex flex-col space-y-1">
                                         @foreach($item['submenu'] as $sub)
                                             <li>
                                                 <a href="{{ $sub['route'] }}" class="block pl-12 pr-4 py-2 text-sm text-gray-600 hover:text-[#F26522] hover:bg-orange-50 transition">
-                                                    {{ $sub['title'] }}
+                                                    {{ __('Dashboard::app.'.$sub['key']) }}
                                                 </a>
                                             </li>
                                         @endforeach
@@ -138,7 +138,7 @@
 
             <div class="p-4 m-4 bg-orange-50 rounded-xl border border-orange-100 text-center">
                 <x-heroicon-o-phone class="w-8 h-8 text-[#F26522] mx-auto mb-2" />
-                <p class="text-xs font-bold text-gray-800">Tổng đài hỗ trợ đối tác</p>
+                <p class="text-xs font-bold text-gray-800">{{ __('Dashboard::app.support_call_center') }}</p>
                 <p class="text-sm font-extrabold text-[#F26522] mt-1">1900 6067</p>
             </div>
         </aside>
