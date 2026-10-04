@@ -27,6 +27,13 @@ class HomeController extends Controller
 
         $popularRoutes = $this->homeService->getPopularRoutes();
 
+        $bookingLocations = json_decode(
+            file_get_contents(app_path('Data/futa_booking_locations.json')),
+            true,
+            512,
+            JSON_THROW_ON_ERROR,
+        );
+
         $newsArticles = NewsArticle::published()
             ->homepageOrder()
             ->limit(6)
@@ -35,6 +42,7 @@ class HomeController extends Controller
         return view('core::home', [
             'promotions'     => $promotions,
             'popularRoutes'  => $popularRoutes,
+            'bookingLocations' => $bookingLocations,
             'newsArticles'   => $newsArticles,
         ]);
     }
