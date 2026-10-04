@@ -44,6 +44,11 @@ class HomeController extends Controller
         return view('core::about');
     }
 
+    public function bookingGuide()
+    {
+        return view('core::booking-guide');
+    }
+
     public function privacy()
     {
         return view('core::privacy');
