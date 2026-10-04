@@ -90,12 +90,15 @@ return [
 
         'latest_news' => [
             'title'       => 'Latest news',
-            'subtitle'    => 'Trusted and chosen by customers',
+            'related_title' => 'Related news',
+            'subtitle'    => 'Latest updates from FUTA Bus Lines',
             'view_all'    => 'View all',
             'details'     => 'Details',
             'empty'       => 'No news is available yet.',
             'image_alt'   => 'Article image: :title',
             'placeholder' => 'FUTA News',
+            'pages'       => 'News pages',
+            'page'        => 'Page :number',
         ],
 
         'futa_ecosystem' => [

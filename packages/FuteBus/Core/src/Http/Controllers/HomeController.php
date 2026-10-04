@@ -8,13 +8,14 @@ use FuteBus\Core\Models\BranchRegion;
 use FuteBus\Core\Models\BusRoute;
 use FuteBus\Core\Models\ContactMessage;
 use FuteBus\Core\Models\FaqCategory;
-use FuteBus\Core\Models\NewsArticle;
-use FuteBus\Core\Models\NewsCategory;
 use FuteBus\Core\Services\HomeService;
 use FuteBus\Core\Services\BookingLocationCatalog;
 use FuteBus\Core\Services\FeaturedPromotionCatalog;
+use FuteBus\Core\Services\FeaturedNewsCatalog;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Str;
 
 class HomeController extends Controller
 {
@@ -22,6 +23,7 @@ class HomeController extends Controller
         private readonly HomeService $homeService,
         private readonly BookingLocationCatalog $bookingLocationCatalog,
         private readonly FeaturedPromotionCatalog $featuredPromotionCatalog,
+        private readonly FeaturedNewsCatalog $featuredNewsCatalog,
     ) {}
 
     public function index()
@@ -32,10 +34,7 @@ class HomeController extends Controller
 
         $bookingLocations = $this->bookingLocationCatalog->all();
 
-        $newsArticles = NewsArticle::published()
-            ->homepageOrder()
-            ->limit(6)
-            ->get();
+        $newsArticles = $this->featuredNewsCatalog->all();
 
         return view('core::home', [
             'promotions'     => $promotions,
@@ -57,11 +56,20 @@ class HomeController extends Controller
 
     public function promotionArticle(string $slug)
     {
-        $promotion = $this->featuredPromotionCatalog->find($slug);
+        $promotion = $this->featuredPromotionCatalog->find($slug)
+            ?? $this->featuredNewsCatalog->find($slug);
 
         abort_unless($promotion, 404);
 
-        return view('core::promotion-article', compact('promotion'));
+        $relatedArticles = $this->featuredNewsCatalog->all()
+            ->slice(2)
+            ->reject(fn (array $article) => $article['slug'] === $slug)
+            ->take(4)
+            ->values();
+
+        $relatedViewAllUrl = route('news');
+
+        return view('core::promotion-article', compact('promotion', 'relatedArticles', 'relatedViewAllUrl'));
     }
 
     public function privacy()
@@ -164,49 +172,33 @@ class HomeController extends Controller
 
     public function news(Request $request)
     {
-        $category = $request->string('category')->trim()->toString();
         $search = $request->string('q')->trim()->toString();
+        $category = $request->string('category')->trim()->toString();
+        $allArticles = $this->featuredNewsCatalog->all();
+        $featuredArticles = $allArticles->take(5);
+        $spotlightArticles = $allArticles->where('category', 'futa-city-bus')->take(3);
+        $categories = collect(['futa-bus-lines', 'futa-city-bus', 'khuyen-mai', 'giai-thuong', 'tram-dung']);
 
-        $categories = NewsCategory::active()->orderBy('sort_order')->get();
-        $query = NewsArticle::published()
-            ->with('category')
-            ->when($category, fn ($builder) => $builder->whereHas(
-                'category',
-                fn ($categoryQuery) => $categoryQuery->where('slug', $category)->where('is_active', true),
+        $filteredArticles = $allArticles
+            ->when($category !== '', fn ($articles) => $articles->where('category', $category))
+            ->when($search !== '', fn ($articles) => $articles->filter(
+                fn (array $article) => Str::contains(
+                    Str::lower($article['title'].' '.$article['intro']),
+                    Str::lower($search),
+                ),
             ))
-            ->when($search, fn ($builder) => $builder->where(function ($searchQuery) use ($search) {
-                $searchQuery->where('title', 'like', "%{$search}%")
-                    ->orWhere('summary', 'like', "%{$search}%");
-            }));
+            ->values();
 
-        $featuredArticles = (clone $query)
-            ->where('is_featured', true)
-            ->homepageOrder()
-            ->limit(5)
-            ->get();
+        $page = LengthAwarePaginator::resolveCurrentPage();
+        $articles = new LengthAwarePaginator(
+            $filteredArticles->forPage($page, 4)->values(),
+            $filteredArticles->count(),
+            4,
+            $page,
+            ['path' => route('news'), 'query' => array_filter(['q' => $search, 'category' => $category])],
+        );
 
-        $spotlightArticles = NewsArticle::published()
-            ->with('category')
-            ->whereHas('category', fn ($categoryQuery) => $categoryQuery
-                ->where('slug', 'futa-city-bus')
-                ->where('is_active', true))
-            ->orderByDesc('published_at')
-            ->limit(3)
-            ->get();
-
-        $articles = $query
-            ->orderByDesc('published_at')
-            ->paginate(6)
-            ->withQueryString();
-
-        return view('core::news', compact(
-            'articles',
-            'categories',
-            'category',
-            'featuredArticles',
-            'search',
-            'spotlightArticles',
-        ));
+        return view('core::news', compact('articles', 'categories', 'category', 'featuredArticles', 'search', 'spotlightArticles'));
     }
 
     public function contact()
