@@ -41,11 +41,11 @@ class AccountMenuTest extends TestCase
             ->assertSee('action="'.route('logout').'"', false);
     }
 
-    public function test_dashboard_route_redirects_to_a_real_page(): void
+    public function test_customer_cannot_open_owner_dashboard(): void
     {
         $this->actingAs(User::factory()->create())
             ->get(route('dashboard'))
-            ->assertRedirect(route('home'));
+            ->assertForbidden();
     }
 
     public function test_logout_invalidates_session_and_prevents_reusing_authenticated_page(): void

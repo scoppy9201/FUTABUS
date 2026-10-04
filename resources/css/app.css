@@ -4,6 +4,7 @@
 @source "../../packages/FuteBus/Auth/src/resources/views/**/*.blade.php";
 @source "../../packages/FuteBus/Profile/src/resources/views/**/*.blade.php";
 @source "../../packages/FuteBus/Profile/src/resources/js/**/*.js";
+@source "../../packages/FuteBus/Dashboard/src/resources/views/**/*.blade.php";
 
 [x-cloak] {
     display: none !important;

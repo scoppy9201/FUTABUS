@@ -2,38 +2,31 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use App\Models\User;
 
 class DemoDataSeeder extends Seeder
 {
     public function run(): void
     {
+        if (! app()->environment(['local', 'testing'])) {
+            return;
+        }
 
-        $admin = User::factory()->admin()->create();
-        $staff = User::factory()->staff()->create();
-        $customer = User::factory()->customer()->create();
+        $customerRoleId = DB::table('roles')->where('slug', 'customer')->value('id');
 
-        $roles = DB::table('roles')->pluck('id', 'slug');
-        DB::table('role_user')->insert([
-            ['user_id' => $admin->id, 'role_id' => $roles['admin']],
-            ['user_id' => $staff->id, 'role_id' => $roles['staff']],
-            ['user_id' => $customer->id, 'role_id' => $roles['customer']],
-        ]);
-
-
-        foreach (range(1, 20) as $i) {
+        for ($i = 0; $i < 20; $i++) {
             $u = User::factory()->create();
             DB::table('role_user')->insert([
                 'user_id' => $u->id,
-                'role_id' => $roles['customer'],
+                'role_id' => $customerRoleId,
             ]);
             DB::table('customers')->insert([
-                'user_id'  => $u->id,
-                'full_name'=> $u->name,
-                'email'    => $u->email,
-                'phone'    => $u->phone,
+                'user_id'    => $u->id,
+                'full_name'  => $u->name,
+                'email'      => $u->email,
+                'phone'      => $u->phone,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
