@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use FuteBus\Core\Http\Controllers\HomeController;
+use FuteBus\Core\Http\Controllers\TicketLookupController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -11,7 +12,10 @@ Route::get('/chinh-sach/chinh-sach-bao-mat', [HomeController::class, 'privacy'])
 Route::get('/chinh-sach/chinh-sach-thanh-toan', [HomeController::class, 'payment'])->name('payment');
 Route::get('/chinh-sach/chinh-sach-gia', [HomeController::class, 'pricing'])->name('pricing');
 Route::get('/chinh-sach/chinh-sach-doi-ve-hoan-tien', [HomeController::class, 'refund'])->name('refund');
-Route::get('/tra-cuu-ve', [HomeController::class, 'ticketLookup'])->name('ticket-lookup');
+Route::get('/tra-cuu-ve', [TicketLookupController::class, 'index'])->name('ticket-lookup');
+Route::post('/tra-cuu-ve', [TicketLookupController::class, 'search'])
+    ->middleware('throttle:10,1')
+    ->name('ticket-lookup.search');
 Route::get('/hoa-don', [HomeController::class, 'invoice'])->name('invoice');
 Route::get('/dieu-khoan-su-dung', [HomeController::class, 'terms'])->name('terms');
 Route::get('/chinh-sach/dieu-kien-giao-dich-chung', [HomeController::class, 'transactionConditions'])

@@ -9,6 +9,7 @@
 
 <div
     class="relative"
+    :class="open ? 'z-50' : 'z-auto'"
     x-data="{
         open: false,
         value: @js($initialValue),
@@ -24,11 +25,16 @@
             return `${year}-${month}-${day}`;
         },
         openPicker() {
+            if (this.open) {
+                this.open = false;
+                return;
+            }
             const source = this.value || this.minDate;
             const [year, month] = source.split('-').map(Number);
             this.viewYear = year;
             this.viewMonth = month - 1;
-            this.open = !this.open;
+            this.open = true;
+            this.$nextTick(() => this.$refs.calendar.focus({ preventScroll: true }));
         },
         moveMonth(offset) {
             const date = new Date(this.viewYear, this.viewMonth + offset, 1);
@@ -59,6 +65,7 @@
             if (day.iso < this.minDate) return;
             this.value = day.iso;
             this.open = false;
+            this.$nextTick(() => this.$refs.trigger.focus({ preventScroll: true }));
             if (@js(!$isReturnDate)) this.$dispatch('hero-departure-date', day.iso);
         },
         format(value) {
@@ -81,7 +88,7 @@
         "
     @endif
     @click.outside="open = false"
-    @keydown.escape.window="open = false"
+    @keydown.escape.window="if (open) { open = false; $refs.trigger.focus({ preventScroll: true }); }"
 >
     <label class="mb-2 ml-4 block text-sm font-bold text-gray-900">{{ $label }}</label>
     <input
@@ -91,6 +98,7 @@
         @if($isReturnDate) :disabled="!roundTrip" @endif
     >
     <button
+        x-ref="trigger"
         type="button"
         @click="openPicker"
         :aria-expanded="open"
@@ -113,20 +121,23 @@
     </button>
 
     <div
+        x-ref="calendar"
         x-cloak
         x-show="open"
-        x-transition:enter="transition ease-out duration-180"
-        x-transition:enter-start="opacity-0 -translate-y-1 scale-[.98]"
+        x-transition:enter="transition-[opacity,transform] duration-220 ease-out"
+        x-transition:enter-start="opacity-0 -translate-y-2 scale-[.96]"
         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-        x-transition:leave="transition ease-in duration-120"
+        x-transition:leave="transition-[opacity,transform] duration-150 ease-in"
         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
         x-transition:leave-end="opacity-0 -translate-y-1 scale-[.98]"
         role="dialog"
-        class="absolute {{ $isReturnDate ? 'right-0' : 'left-0' }} top-full z-50 mt-2 w-96 max-w-[calc(100vw-32px)] rounded-xl border border-gray-200 bg-white p-3 shadow-[0_14px_36px_rgba(15,23,42,.2)]"
+        aria-label="{{ $label }}"
+        tabindex="-1"
+        class="absolute {{ $isReturnDate ? 'right-0 origin-top-right' : 'left-0 origin-top-left' }} top-0 z-50 w-96 max-w-[calc(100vw-32px)] rounded-xl border border-gray-200 bg-white p-3 shadow-[0_18px_42px_rgba(15,23,42,.22)] outline-none"
     >
         <div class="rounded-lg border border-[#ff8a65] bg-[#fffaf7] px-4 py-3 ring-3 ring-[#ef5222]/10">
             <span class="text-xs font-bold text-gray-600">{{ $label }}</span>
-            <span class="mt-1 block text-base font-semibold text-gray-950" x-text="format(value)"></span>
+            <span class="mt-1 block text-base font-semibold" :class="value ? 'text-gray-950' : 'text-gray-400'" x-text="value ? format(value) : @js($placeholder)"></span>
         </div>
 
         <div class="mt-4 flex items-center justify-between px-2">

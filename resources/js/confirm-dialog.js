@@ -79,10 +79,11 @@ if (dialog) {
         accept.textContent = source.dataset.noticeLabel || source.dataset.confirmLabel || dialog.dataset.defaultConfirm;
         cancel.hidden = isNotice;
         accept.disabled = false;
-        warningIcon.classList.toggle('grid', !isNotice);
-        warningIcon.classList.toggle('hidden', isNotice);
-        infoIcon.classList.toggle('grid', isNotice);
-        infoIcon.classList.toggle('hidden', !isNotice);
+        const showWarning = !isNotice || source.dataset.noticeTone === 'warning';
+        warningIcon.classList.toggle('grid', showWarning);
+        warningIcon.classList.toggle('hidden', !showWarning);
+        infoIcon.classList.toggle('grid', !showWarning);
+        infoIcon.classList.toggle('hidden', showWarning);
 
         dialog.showModal();
         (isNotice ? accept : cancel).focus();

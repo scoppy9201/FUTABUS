@@ -64,11 +64,6 @@ class HomeController extends Controller
         return view('core::refund');
     }
 
-    public function ticketLookup()
-    {
-        return view('core::ticket-lookup');
-    }
-
     public function terms()
     {
         return view('core::terms');
