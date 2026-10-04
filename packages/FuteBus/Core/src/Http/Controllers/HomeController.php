@@ -10,9 +10,9 @@ use FuteBus\Core\Models\ContactMessage;
 use FuteBus\Core\Models\FaqCategory;
 use FuteBus\Core\Models\NewsArticle;
 use FuteBus\Core\Models\NewsCategory;
-use FuteBus\Core\Models\Promotion;
 use FuteBus\Core\Services\HomeService;
 use FuteBus\Core\Services\BookingLocationCatalog;
+use FuteBus\Core\Services\FeaturedPromotionCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
@@ -21,11 +21,12 @@ class HomeController extends Controller
     public function __construct(
         private readonly HomeService $homeService,
         private readonly BookingLocationCatalog $bookingLocationCatalog,
+        private readonly FeaturedPromotionCatalog $featuredPromotionCatalog,
     ) {}
 
     public function index()
     {
-        $promotions = Promotion::active()->ordered()->get();
+        $promotions = $this->featuredPromotionCatalog->all();
 
         $popularRoutes = $this->homeService->getPopularRoutes();
 
@@ -52,6 +53,15 @@ class HomeController extends Controller
     public function bookingGuide()
     {
         return view('core::booking-guide');
+    }
+
+    public function promotionArticle(string $slug)
+    {
+        $promotion = $this->featuredPromotionCatalog->find($slug);
+
+        abort_unless($promotion, 404);
+
+        return view('core::promotion-article', compact('promotion'));
     }
 
     public function privacy()
