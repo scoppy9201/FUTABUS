@@ -15,8 +15,8 @@
                             @endif
                         </span>
                         <span>{{ strtoupper(app()->getLocale()) }}</span>
-                        <x-heroicon-o-chevron-down
-                            class="h-3 w-3 transition-transform duration-200"
+                        <x-heroicon-s-chevron-down
+                            class="size-3.5 transition-transform duration-200"
                             ::class="open ? 'rotate-180' : ''"
                         />
                     </button>
@@ -60,8 +60,8 @@
                             <x-heroicon-o-device-phone-mobile class="h-4 w-4" />
                         </span>
                         <span>{{ __('core::app.home.navbar.download_app') }}</span>
-                        <x-heroicon-o-chevron-down
-                            class="h-3 w-3 transition-transform duration-200"
+                        <x-heroicon-s-chevron-down
+                            class="size-3.5 transition-transform duration-200"
                             ::class="open ? 'rotate-180' : ''"
                         />
                     </button>
@@ -117,7 +117,7 @@
     </div>
 
     <nav @class(['hidden' => $compact, 'h-16 sm:h-19.5' => ! $compact]) aria-label="{{ __('core::app.home.navbar.primary_navigation') }}">
-        <div class="scrollbar-hidden mx-auto flex h-16 max-w-282 items-center justify-between gap-6 overflow-x-auto px-4 sm:h-19.5 max-md:justify-start">
+        <div class="scrollbar-hidden mx-auto flex h-16 max-w-282 items-center justify-center gap-6 overflow-x-auto px-4 sm:h-19.5 lg:gap-10 xl:gap-14 max-lg:justify-start">
             <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'futa-nav-active relative' : '' }} shrink-0 py-5.75 text-sm font-extrabold whitespace-nowrap">{{ __('core::app.home.navbar.home') }}</a>
             <a href="{{ route('schedules') }}" class="{{ request()->routeIs('schedules') ? 'futa-nav-active relative' : '' }} shrink-0 py-5.75 text-sm font-extrabold whitespace-nowrap">{{ __('core::app.home.navbar.schedules') }}</a>
             <a href="{{ route('ticket-lookup') }}" class="{{ request()->routeIs('ticket-lookup') ? 'futa-nav-active relative' : '' }} shrink-0 py-5.75 text-sm font-extrabold whitespace-nowrap">{{ __('core::app.home.navbar.lookup') }}</a>

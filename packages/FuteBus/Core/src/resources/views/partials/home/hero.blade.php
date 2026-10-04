@@ -55,7 +55,7 @@
 @endphp
 
 <section
-    class="futa-hero-backdrop px-3 pt-2 pb-14.5 sm:px-4"
+    class="px-3 pt-2 pb-14.5 sm:px-4"
     x-data="{
         roundTrip: false,
         returnDate: '',
