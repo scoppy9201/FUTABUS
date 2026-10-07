@@ -41,14 +41,14 @@ class OwnerDashboardService
                     'bookings.created_at', 'customers.full_name', 'routes.origin_city', 'routes.destination_city')
                 ->orderByDesc('bookings.created_at')->orderByDesc('bookings.id')->limit(5)->get(),
             'upcoming_trips' => DB::table('trips')
-                ->join('routes', 'routes.id', '=', 'trips.route_id')
-                ->join('buses', 'buses.id', '=', 'trips.bus_id')
-                ->where('trips.bus_company_id', $companyId)
-                ->where('trips.departure_time', '>=', now())
-                ->where('trips.status', 'scheduled')
-                ->select('trips.departure_time', 'trips.available_seats', 'routes.origin_city',
-                    'routes.destination_city', 'buses.license_plate')
-                ->orderBy('trips.departure_time')->limit(5)->get(),
+            ->join('routes', 'routes.id', '=', 'trips.route_id')
+            ->join('buses', 'buses.id', '=', 'trips.bus_id')
+            ->where('trips.bus_company_id', $companyId)
+            ->where('trips.departure_time', '>=', now())
+            ->where('trips.status', 'scheduled')
+            ->select('trips.departure_time', 'trips.available_seats', 'routes.origin_city',
+                'routes.destination_city', 'buses.license_plate')
+            ->orderBy('trips.departure_time')->limit(5)->get(),
         ];
     }
 
@@ -57,7 +57,7 @@ class OwnerDashboardService
         $query = match ($section) {
             'trips' => DB::table('trips')
                 ->join('routes', 'routes.id', '=', 'trips.route_id')
-                ->join('buses', 'buses.id', '=', 'trips.bus_id')
+                ->leftJoin('buses', 'buses.id', '=', 'trips.bus_id')
                 ->where('trips.bus_company_id', $companyId)
                 ->select('trips.id', 'trips.departure_time', 'trips.price', 'trips.status',
                     'trips.available_seats', 'routes.origin_city', 'routes.destination_city', 'buses.license_plate')

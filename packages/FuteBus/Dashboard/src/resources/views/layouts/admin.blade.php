@@ -3,107 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0b2733">
     <title>@yield('title') · FUTABUS</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #f2652255; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #F26522; }
+    </style>
 </head>
-<body class="bg-[#f5f7f8] font-sans text-slate-900 antialiased" x-data="{ sidebarOpen: false }">
-    <div class="min-h-screen lg:flex">
-        <div x-cloak x-show="sidebarOpen" x-transition.opacity class="fixed inset-0 z-40 bg-slate-950/50 lg:hidden" @click="sidebarOpen = false"></div>
+<body class="bg-[#F8F9FA] text-gray-800 antialiased min-h-screen flex flex-col" x-data="{ sidebarOpen: false }">
 
-        <aside
-            id="owner-navigation"
-            class="fixed inset-y-0 left-0 z-50 flex w-66 -translate-x-full flex-col bg-[#0b2733] text-white transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0"
-            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-            aria-label="{{ __('Dashboard::app.navigation') }}"
-        >
-            <div class="flex h-22 items-center justify-between border-b border-white/10 px-5">
-                <a href="{{ route('dashboard') }}" class="flex min-w-0 items-center gap-3" aria-label="{{ __('Dashboard::app.overview') }}">
-                    <span class="grid h-12 w-18 shrink-0 place-items-center rounded-xl bg-white p-1.5">
-                        <img src="{{ asset('icons/futabus-logo.png') }}" alt="" class="max-h-10 max-w-full object-contain">
-                    </span>
-                    <span class="min-w-0">
-                        <span class="block truncate text-base font-extrabold tracking-wide">FUTA Bus Lines</span>
-                        <span class="block text-xs font-semibold text-white/60">{{ __('Dashboard::app.owner_portal') }}</span>
-                    </span>
-                </a>
-                <button type="button" class="rounded-lg p-2 text-white/75 hover:bg-white/10 lg:hidden" @click="sidebarOpen = false" aria-label="{{ __('Dashboard::app.close_menu') }}">
-                    <x-heroicon-o-x-mark class="size-5" />
+    <!-- HEADER -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
+        <div class="px-4 lg:px-6 py-2.5 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <button @click="sidebarOpen = true" class="lg:hidden text-gray-600 hover:text-[#F26522] focus:outline-none">
+                    <x-heroicon-o-bars-3 class="w-6 h-6" />
                 </button>
+                <a href="{{ route('dashboard') }}" class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-r from-[#F26522] to-[#E31B23] p-2 rounded-xl text-white shadow-md flex items-center justify-center">
+                        <x-heroicon-o-truck class="w-6 h-6" />
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-black text-xl tracking-tight text-[#F26522]">FUTA</span>
+                            <span class="text-sm font-bold text-gray-700 tracking-wider">BUS LINES</span>
+                        </div>
+                        <p class="text-[10px] text-[#E31B23] font-semibold uppercase tracking-widest hidden sm:block">{{ __('Dashboard::app.slogan') }}</p>
+                    </div>
+                </a>
+                <div class="hidden md:block h-6 w-px bg-gray-200 mx-2"></div>
+                <span class="hidden md:block text-xs md:text-sm font-semibold text-gray-600 bg-orange-50 text-[#F26522] px-3 py-1 rounded-full border border-orange-100">
+                    {{ __('Dashboard::app.owner_portal') }}
+                </span>
             </div>
 
-            <nav class="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 py-6" aria-label="{{ __('Dashboard::app.navigation') }}">
-                <p class="px-3 pb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white/45">{{ __('Dashboard::app.operations') }}</p>
-                @foreach([
-                    ['key' => 'overview', 'icon' => 'squares-2x2', 'route' => route('dashboard')],
-                    ['key' => 'trips', 'icon' => 'calendar-days', 'route' => route('dashboard.section', 'trips')],
-                    ['key' => 'routes', 'icon' => 'map', 'route' => route('dashboard.section', 'routes')],
-                    ['key' => 'buses', 'icon' => 'truck', 'route' => route('dashboard.section', 'buses')],
-                    ['key' => 'bookings', 'icon' => 'ticket', 'route' => route('dashboard.section', 'bookings')],
-                    ['key' => 'customers', 'icon' => 'users', 'route' => route('dashboard.section', 'customers')],
-                    ['key' => 'reports', 'icon' => 'chart-bar', 'route' => route('dashboard.section', 'reports')],
-                ] as $item)
-                    @php($active = $item['key'] === ($section ?? 'overview'))
-                    <a
-                        href="{{ $item['route'] }}"
-                        @if($active) aria-current="page" @endif
-                        @class([
-                            'group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors',
-                            'bg-[#ef5222] text-white shadow-lg shadow-orange-950/15' => $active,
-                            'text-white/75 hover:bg-white/10 hover:text-white' => ! $active,
-                        ])
-                    >
-                        <x-dynamic-component :component="'heroicon-o-'.$item['icon']" class="size-5 shrink-0" />
-                        <span>{{ __('Dashboard::app.'.$item['key']) }}</span>
-                    </a>
-                @endforeach
-            </nav>
-
-            <div class="border-t border-white/10 p-4">
-                <a href="{{ route('home') }}" class="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-white/75 hover:bg-white/10 hover:text-white">
-                    <x-heroicon-o-arrow-top-right-on-square class="size-5" />
-                    {{ __('Dashboard::app.public_site') }}
+            <div class="flex items-center space-x-3 sm:space-x-4">
+                <a href="{{ request()->fullUrlWithQuery(['lang' => app()->getLocale() === 'vi' ? 'en' : 'vi']) }}" class="text-xs font-bold text-gray-600 hover:text-[#F26522]">
+                    {{ strtoupper(app()->getLocale()) }}
                 </a>
-                <form
-                    action="{{ route('logout') }}" method="post" data-confirm
-                    data-confirm-title="{{ __('core::confirm.logout_title') }}"
-                    data-confirm-message="{{ __('core::confirm.logout_message') }}"
-                >
-                    @csrf
-                    <button type="submit" class="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-white/75 hover:bg-white/10 hover:text-white">
-                        <x-heroicon-o-arrow-right-on-rectangle class="size-5" />
-                        {{ __('Dashboard::app.logout') }}
-                    </button>
-                </form>
+
+                <button class="relative p-2 text-gray-500 hover:text-[#F26522] hover:bg-orange-50 rounded-full transition">
+                    <x-heroicon-o-bell class="w-5 h-5" />
+                    <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-[#E31B23] rounded-full ring-2 ring-white"></span>
+                </button>
+
+                <div class="h-6 w-px bg-gray-200"></div>
+
+                <div class="flex items-center space-x-3">
+                    <span class="grid size-9 place-items-center rounded-full bg-orange-100 font-bold text-[#d7461a] border-2 border-[#F26522]">
+                        {{ mb_strtoupper(mb_substr(Auth::user()->name, 0, 1)) }}
+                    </span>
+                    <div class="hidden sm:block text-left">
+                        <p class="text-sm font-bold text-gray-800 leading-tight">{{ Auth::user()->name }}</p>
+                        <p class="text-xs text-gray-500">{{ __('Dashboard::app.official_partner') }}</p>
+                    </div>
+                    <form action="{{ route('logout') }}" method="post" data-confirm data-confirm-title="{{ __('core::confirm.logout_title') }}" data-confirm-message="{{ __('core::confirm.logout_message') }}" class="inline-block">
+                        @csrf
+                        <button type="submit" class="text-gray-400 hover:text-[#E31B23] transition p-1" title="{{ __('Dashboard::app.logout') }}">
+                            <x-heroicon-o-arrow-right-on-rectangle class="w-5 h-5" />
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden relative">
+        <div x-cloak x-show="sidebarOpen" x-transition.opacity class="fixed inset-0 z-40 bg-gray-900/50 lg:hidden" @click="sidebarOpen = false"></div>
+
+        <!-- SIDEBAR -->
+        <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform lg:translate-x-0 lg:static transition-transform duration-200 ease-in-out flex flex-col justify-between"
+            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
+            <div class="py-4 overflow-y-auto">
+                <div class="px-4 mb-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider">{{ __('Dashboard::app.operations') }}</div>
+
+                @php
+                    $isBusSection = request()->routeIs('bus-management.*')
+                        || (isset($section) && $section === 'buses');
+
+                    $navItems = [
+                        ['key' => 'overview', 'icon' => 'squares-2x2', 'route' => route('dashboard')],
+                        ['key' => 'buses',    'icon' => 'truck',        'route' => '#', 'submenu' => [
+                            ['key' => 'vehicle_types',  'route' => route('bus-management.vehicle-types.index')],
+                            ['key' => 'bus_info', 'route' => route('bus-management.buses.index')],
+                            ['key' => 'document_types', 'route' => '#'],
+                            ['key' => 'bus_documents',  'route' => '#'],
+                        ]],
+                        ['key' => 'trips', 'icon' => 'map-pin', 'route' => route('trip-management.trips.index')],
+                       ['key' => 'routes', 'icon' => 'calendar-days', 'route' => route('trip-management.schedules.index')],
+                        ['key' => 'reports', 'icon' => 'chart-bar',     'route' => route('dashboard.section', 'reports')],
+                    ];
+                @endphp
+
+                <nav class="space-y-1">
+                    @foreach($navItems as $item)
+                        @php
+                            $active = $item['key'] === ($section ?? 'overview')
+                                || ($item['key'] === 'buses' && $isBusSection)
+                                || ($item['key'] === 'trips' && request()->routeIs('trip-management.trips*'))
+                                || ($item['key'] === 'routes' && request()->routeIs('trip-management.schedules*'));
+                            $hasSubmenu  = isset($item['submenu']);
+                            $openDefault = ($item['key'] === 'buses' && $isBusSection) ? 'true' : 'false';
+                        @endphp
+
+                        <div x-data="{ open: {{ $openDefault }} }">
+
+                            @if($hasSubmenu)
+                                {{-- Parent item with submenu: render as <button> --}}
+                                <button type="button" @click="open = !open" @class([
+                                    'w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition',
+                                    'bg-[#fff3ed] text-[#F26522] border-r-4 border-[#F26522] font-semibold' => $active,
+                                    'text-gray-600 hover:bg-[#fff3ed] hover:text-[#F26522]' => !$active,
+                                ])>
+                                    <div class="flex items-center space-x-3">
+                                        {{-- SVG inline avoids :component binding on Blade component --}}
+                                        <x-heroicon-o-truck class="w-5 h-5" />
+                                        <span>{{ __('Dashboard::app.'.$item['key']) }}</span>
+                                    </div>
+                                    {{-- Chevron in plain span so Alpine :class works without Blade interference --}}
+                                    <span class="inline-flex w-4 h-4 text-gray-400 transition-transform duration-200"
+                                          :class="open ? 'rotate-180 text-[#F26522]' : ''">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </span>
+                                </button>
+
+                                {{-- Submenu --}}
+                                <div x-show="open"
+                                    x-transition:enter="transition ease-out duration-150"
+                                    x-transition:enter-start="opacity-0 -translate-y-1"
+                                    x-transition:enter-end="opacity-100 translate-y-0"
+                                    x-transition:leave="transition ease-in duration-100"
+                                    x-transition:leave-start="opacity-100 translate-y-0"
+                                    x-transition:leave-end="opacity-0 -translate-y-1"
+                                    class="bg-orange-50/50 pb-1">
+                                    <ul class="flex flex-col space-y-0.5 pt-1">
+                                        @foreach($item['submenu'] as $sub)
+                                            @php
+                                                $subActive = ($sub['key'] === 'vehicle_types' 
+                                                && request()->routeIs('bus-management.vehicle-types*'))
+                                                || ($sub['key'] === 'bus_info' && request()->routeIs('bus-management.buses*'));
+                                            @endphp
+                                            <li>
+                                                <a href="{{ $sub['route'] }}" @class([
+                                                    'block pl-12 pr-4 py-2 text-sm transition rounded-r-lg',
+                                                    'text-[#F26522] font-bold bg-orange-100/60 border-r-2 border-[#F26522]' => $subActive,
+                                                    'text-gray-600 hover:text-[#F26522] hover:bg-orange-50' => !$subActive,
+                                                ])>
+                                                    {{ __('Dashboard::app.'.$sub['key']) }}
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+
+                            @else
+                                {{-- Regular nav item: render as <a> --}}
+                                <a href="{{ $item['route'] }}" @class([
+                                    'w-full flex items-center space-x-3 px-4 py-3 text-sm font-medium transition',
+                                    'bg-[#fff3ed] text-[#F26522] border-r-4 border-[#F26522] font-semibold' => $active,
+                                    'text-gray-600 hover:bg-[#fff3ed] hover:text-[#F26522]' => !$active,
+                                ])>
+                                    <x-dynamic-component :component="'heroicon-o-'.$item['icon']" class="w-5 h-5" />
+                                    <span>{{ __('Dashboard::app.'.$item['key']) }}</span>
+                                </a>
+                            @endif
+
+                        </div>
+                    @endforeach
+                </nav>
+
+                <div class="px-4 mt-8 mb-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider">{{ __('Dashboard::app.system') }}</div>
+                <nav class="space-y-1">
+                    <a href="#" class="w-full flex items-center space-x-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-[#fff3ed] hover:text-[#F26522] transition border-r-4 border-transparent">
+                        <x-heroicon-o-cog-8-tooth class="w-5 h-5" />
+                        <span>{{ __('Dashboard::app.settings') }}</span>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="p-4 m-4 bg-orange-50 rounded-xl border border-orange-100 text-center">
+                <x-heroicon-o-phone class="w-8 h-8 text-[#F26522] mx-auto mb-2" />
+                <p class="text-xs font-bold text-gray-800">{{ __('Dashboard::app.support_call_center') }}</p>
+                <p class="text-sm font-extrabold text-[#F26522] mt-1">1900 6067</p>
             </div>
         </aside>
 
-        <div class="min-w-0 flex-1">
-            <header class="sticky top-0 z-30 flex h-18 items-center justify-between gap-3 border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-7 lg:px-10">
-                <div class="flex min-w-0 items-center gap-3">
-                    <button type="button" class="rounded-lg border border-slate-200 p-2 text-slate-700 lg:hidden" @click="sidebarOpen = true" :aria-expanded="sidebarOpen.toString()" aria-controls="owner-navigation" aria-label="{{ __('Dashboard::app.open_menu') }}">
-                        <x-heroicon-o-bars-3 class="size-6" />
-                    </button>
-                    <div class="min-w-0">
-                        <p class="text-xs font-bold uppercase tracking-[0.14em] text-[#ef5222]">{{ __('Dashboard::app.owner_portal') }}</p>
-                        <p class="truncate text-base font-bold text-slate-900 sm:text-lg">@yield('page_title')</p>
-                    </div>
-                </div>
-                <div class="flex shrink-0 items-center gap-2 sm:gap-4">
-                    <a href="{{ request()->fullUrlWithQuery(['lang' => app()->getLocale() === 'vi' ? 'en' : 'vi']) }}" class="rounded-lg border border-slate-200 px-2.5 py-2 text-xs font-bold text-slate-600 hover:border-[#ef5222] hover:text-[#ef5222]">
-                        {{ strtoupper(app()->getLocale()) }}
-                    </a>
-                    <span class="hidden text-sm font-medium text-slate-500 sm:block">{{ now()->translatedFormat('d/m/Y') }}</span>
-                    <span class="grid size-9 place-items-center rounded-full bg-orange-100 font-bold text-[#d7461a]">{{ mb_strtoupper(mb_substr(Auth::user()->name, 0, 1)) }}</span>
-                    <span class="hidden max-w-38 truncate text-sm font-semibold text-slate-800 xl:block">{{ Auth::user()->name }}</span>
-                </div>
-            </header>
-
-            <main class="mx-auto w-full max-w-392 px-4 py-6 sm:px-7 sm:py-8 lg:px-10">
-                @yield('content')
-            </main>
-        </div>
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-[#F8F9FA]">
+            @yield('content')
+        </main>
     </div>
     <x-confirm-dialog />
 </body>
