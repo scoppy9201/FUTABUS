@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FuteBus\BusManagement\Providers;
 
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class BusManagementServiceProvider extends ServiceProvider
@@ -17,5 +18,6 @@ class BusManagementServiceProvider extends ServiceProvider
     {
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'BusManagement');
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'BusManagement');
+        Route::middleware('web')->group(__DIR__ . '/../routes/web.php');
     }
 }

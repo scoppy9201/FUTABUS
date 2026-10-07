@@ -81,48 +81,100 @@
             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
             <div class="py-4 overflow-y-auto">
                 <div class="px-4 mb-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider">{{ __('Dashboard::app.operations') }}</div>
-                <nav class="space-y-1">
-                    @foreach([
-                        ['key' => 'overview', 'icon' => 'squares-2x2', 'route' => route('dashboard')],
-                        ['key' => 'buses', 'icon' => 'truck', 'route' => route('dashboard.section', 'buses'), 'submenu' => [
-                            ['key' => 'vehicle_types', 'route' => '#'],
-                            ['key' => 'bus_info',      'route' => '#'],
-                            ['key' => 'document_types','route' => '#'],
-                            ['key' => 'bus_documents', 'route' => '#'],
-                        ]],
-                        ['key' => 'trips',   'icon' => 'map-pin',      'route' => route('dashboard.section', 'trips')],
-                        ['key' => 'routes',  'icon' => 'calendar-days', 'route' => route('dashboard.section', 'routes')],
-                        ['key' => 'reports', 'icon' => 'chart-bar',     'route' => route('dashboard.section', 'reports')],
-                    ] as $item)
-                        @php($active = $item['key'] === ($section ?? 'overview'))
-                        <div class="group relative">
-                            <a href="{{ $item['route'] }}" @class([
-                                'w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition',
-                                'bg-[#fff3ed] text-[#F26522] border-r-4 border-[#F26522] font-semibold' => $active,
-                                'text-gray-600 group-hover:bg-[#fff3ed] group-hover:text-[#F26522]' => !$active
-                            ])>
-                                <div class="flex items-center space-x-3">
-                                    <x-dynamic-component :component="'heroicon-o-'.$item['icon']" class="w-5 h-5" />
-                                    <span>{{ __('Dashboard::app.'.$item['key']) }}</span>
-                                </div>
-                                @if(isset($item['submenu']))
-                                    <x-heroicon-o-chevron-down class="w-4 h-4 text-gray-400 group-hover:text-[#F26522] transition-transform duration-200 group-hover:rotate-180" />
-                                @endif
-                            </a>
 
-                            @if(isset($item['submenu']))
-                                <div class="hidden group-hover:block bg-orange-50/50 pb-2">
-                                    <ul class="flex flex-col space-y-1">
+                @php
+                    $isBusSection = request()->routeIs('bus-management.*')
+                        || (isset($section) && $section === 'buses');
+
+                    $navItems = [
+                        ['key' => 'overview', 'icon' => 'squares-2x2', 'route' => route('dashboard')],
+                        ['key' => 'buses',    'icon' => 'truck',        'route' => '#', 'submenu' => [
+                            ['key' => 'vehicle_types',  'route' => route('bus-management.vehicle-types.index')],
+                            ['key' => 'bus_info', 'route' => route('bus-management.buses.index')],
+                            ['key' => 'document_types', 'route' => '#'],
+                            ['key' => 'bus_documents',  'route' => '#'],
+                        ]],
+                        ['key' => 'trips', 'icon' => 'map-pin', 'route' => route('trip-management.trips.index')],
+                       ['key' => 'routes', 'icon' => 'calendar-days', 'route' => route('trip-management.schedules.index')],
+                        ['key' => 'reports', 'icon' => 'chart-bar',     'route' => route('dashboard.section', 'reports')],
+                    ];
+                @endphp
+
+                <nav class="space-y-1">
+                    @foreach($navItems as $item)
+                        @php
+                            $active = $item['key'] === ($section ?? 'overview')
+                                || ($item['key'] === 'buses' && $isBusSection)
+                                || ($item['key'] === 'trips' && request()->routeIs('trip-management.trips*'))
+                                || ($item['key'] === 'routes' && request()->routeIs('trip-management.schedules*'));
+                            $hasSubmenu  = isset($item['submenu']);
+                            $openDefault = ($item['key'] === 'buses' && $isBusSection) ? 'true' : 'false';
+                        @endphp
+
+                        <div x-data="{ open: {{ $openDefault }} }">
+
+                            @if($hasSubmenu)
+                                {{-- Parent item with submenu: render as <button> --}}
+                                <button type="button" @click="open = !open" @class([
+                                    'w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition',
+                                    'bg-[#fff3ed] text-[#F26522] border-r-4 border-[#F26522] font-semibold' => $active,
+                                    'text-gray-600 hover:bg-[#fff3ed] hover:text-[#F26522]' => !$active,
+                                ])>
+                                    <div class="flex items-center space-x-3">
+                                        {{-- SVG inline avoids :component binding on Blade component --}}
+                                        <x-heroicon-o-truck class="w-5 h-5" />
+                                        <span>{{ __('Dashboard::app.'.$item['key']) }}</span>
+                                    </div>
+                                    {{-- Chevron in plain span so Alpine :class works without Blade interference --}}
+                                    <span class="inline-flex w-4 h-4 text-gray-400 transition-transform duration-200"
+                                          :class="open ? 'rotate-180 text-[#F26522]' : ''">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </span>
+                                </button>
+
+                                {{-- Submenu --}}
+                                <div x-show="open"
+                                    x-transition:enter="transition ease-out duration-150"
+                                    x-transition:enter-start="opacity-0 -translate-y-1"
+                                    x-transition:enter-end="opacity-100 translate-y-0"
+                                    x-transition:leave="transition ease-in duration-100"
+                                    x-transition:leave-start="opacity-100 translate-y-0"
+                                    x-transition:leave-end="opacity-0 -translate-y-1"
+                                    class="bg-orange-50/50 pb-1">
+                                    <ul class="flex flex-col space-y-0.5 pt-1">
                                         @foreach($item['submenu'] as $sub)
+                                            @php
+                                                $subActive = ($sub['key'] === 'vehicle_types' 
+                                                && request()->routeIs('bus-management.vehicle-types*'))
+                                                || ($sub['key'] === 'bus_info' && request()->routeIs('bus-management.buses*'));
+                                            @endphp
                                             <li>
-                                                <a href="{{ $sub['route'] }}" class="block pl-12 pr-4 py-2 text-sm text-gray-600 hover:text-[#F26522] hover:bg-orange-50 transition">
+                                                <a href="{{ $sub['route'] }}" @class([
+                                                    'block pl-12 pr-4 py-2 text-sm transition rounded-r-lg',
+                                                    'text-[#F26522] font-bold bg-orange-100/60 border-r-2 border-[#F26522]' => $subActive,
+                                                    'text-gray-600 hover:text-[#F26522] hover:bg-orange-50' => !$subActive,
+                                                ])>
                                                     {{ __('Dashboard::app.'.$sub['key']) }}
                                                 </a>
                                             </li>
                                         @endforeach
                                     </ul>
                                 </div>
+
+                            @else
+                                {{-- Regular nav item: render as <a> --}}
+                                <a href="{{ $item['route'] }}" @class([
+                                    'w-full flex items-center space-x-3 px-4 py-3 text-sm font-medium transition',
+                                    'bg-[#fff3ed] text-[#F26522] border-r-4 border-[#F26522] font-semibold' => $active,
+                                    'text-gray-600 hover:bg-[#fff3ed] hover:text-[#F26522]' => !$active,
+                                ])>
+                                    <x-dynamic-component :component="'heroicon-o-'.$item['icon']" class="w-5 h-5" />
+                                    <span>{{ __('Dashboard::app.'.$item['key']) }}</span>
+                                </a>
                             @endif
+
                         </div>
                     @endforeach
                 </nav>

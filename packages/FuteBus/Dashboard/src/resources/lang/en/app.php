@@ -110,6 +110,7 @@ return [
         'confirmed'   => 'Confirmed',
         'completed'   => 'Completed',
         'cancelled'   => 'Cancelled',
+        'unassigned' => 'Unassigned',
     ],
     'bus_types' => [
         'limousine' => 'Limousine',

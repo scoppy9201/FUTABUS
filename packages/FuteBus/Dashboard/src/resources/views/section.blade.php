@@ -44,7 +44,7 @@
                                 @case('trips')
                                     <td class="px-5 py-4 font-bold text-slate-900">{{ $row->origin_city }} → {{ $row->destination_city }}</td>
                                     <td class="whitespace-nowrap px-5 py-4">{{ \Illuminate\Support\Carbon::parse($row->departure_time)->format('H:i · d/m/Y') }}</td>
-                                    <td class="px-5 py-4">{{ $row->license_plate }}</td>
+                                    <td class="px-5 py-4">{{ $row->license_plate ?? '—' }}</td>
                                     <td class="px-5 py-4">{{ $row->available_seats ?? '—' }}</td>
                                     <td class="whitespace-nowrap px-5 py-4">{{ number_format($row->price, 0, ',', '.') }} ₫</td>
                                     <td class="px-5 py-4">@include('Dashboard::partials.status', ['value' => $row->status])</td>
