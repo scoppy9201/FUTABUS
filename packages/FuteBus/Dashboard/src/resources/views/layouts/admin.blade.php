@@ -91,8 +91,8 @@
                         ['key' => 'buses',    'icon' => 'truck',        'route' => '#', 'submenu' => [
                             ['key' => 'vehicle_types',  'route' => route('bus-management.vehicle-types.index')],
                             ['key' => 'bus_info', 'route' => route('bus-management.buses.index')],
-                            ['key' => 'document_types', 'route' => '#'],
-                            ['key' => 'bus_documents',  'route' => '#'],
+                            ['key' => 'document_types', 'route' => route('bus-management.document-types.index')],
+                            ['key' => 'bus_documents',  'route' => route('bus-management.vehicle-documents.index')],
                         ]],
                         ['key' => 'trips', 'icon' => 'map-pin', 'route' => route('trip-management.trips.index')],
                        ['key' => 'routes', 'icon' => 'calendar-days', 'route' => route('trip-management.schedules.index')],
@@ -146,9 +146,10 @@
                                     <ul class="flex flex-col space-y-0.5 pt-1">
                                         @foreach($item['submenu'] as $sub)
                                             @php
-                                                $subActive = ($sub['key'] === 'vehicle_types' 
-                                                && request()->routeIs('bus-management.vehicle-types*'))
-                                                || ($sub['key'] === 'bus_info' && request()->routeIs('bus-management.buses*'));
+                                                $subActive = ($sub['key'] === 'vehicle_types' && request()->routeIs('bus-management.vehicle-types*'))
+                                                || ($sub['key'] === 'bus_info' && request()->routeIs('bus-management.buses*'))
+                                                || ($sub['key'] === 'document_types' && request()->routeIs('bus-management.document-types*'))
+                                                || ($sub['key'] === 'bus_documents' && request()->routeIs('bus-management.vehicle-documents*'));
                                             @endphp
                                             <li>
                                                 <a href="{{ $sub['route'] }}" @class([
