@@ -15,7 +15,7 @@ class LoginController extends Controller
 {
     public function store(LoginRequest $request): RedirectResponse
     {
-        if (! Auth::attempt($request->validated())) {
+        if (! Auth::attempt([...$request->validated(), 'is_active' => true])) {
             throw ValidationException::withMessages(['email' => __('Auth::app.registration_flow.errors.invalid_credentials')]);
         }
 

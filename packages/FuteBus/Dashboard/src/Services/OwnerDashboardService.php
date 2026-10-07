@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FuteBus\Dashboard\Services;
 
+use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -11,8 +12,18 @@ use stdClass;
 
 class OwnerDashboardService
 {
-    public function company(): ?stdClass
+    public function company(?User $user = null): ?stdClass
     {
+        if ($user?->hasRole(['bus-company', 'staff'])) {
+            if ($user->bus_company_id) {
+                return DB::table('bus_companies')->where('id', $user->bus_company_id)->first();
+            }
+
+            return DB::table('bus_companies')
+                ->whereRaw('LOWER(email) = ?', [mb_strtolower($user->email)])
+                ->first();
+        }
+
         return DB::table('bus_companies')->where('code', 'FUTA')->first();
     }
 
