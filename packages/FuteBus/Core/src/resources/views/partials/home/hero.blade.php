@@ -92,33 +92,62 @@
         init() {
             try {
                 const saved = JSON.parse(localStorage.getItem('futabus.recent-trip-searches.v1') || '[]');
-                this.recentSearches = Array.isArray(saved)
+                const valid = Array.isArray(saved)
                     ? saved.filter(search => search && typeof search.departure === 'string'
                         && typeof search.destination === 'string'
                         && /^\d{4}-\d{2}-\d{2}$/.test(search.departureDate))
                     : [];
+                this.recentSearches = this.uniqueRecentSearches(valid);
+                try {
+                    localStorage.setItem('futabus.recent-trip-searches.v1', JSON.stringify(this.recentSearches));
+                } catch (_) {
+                    // Recent searches still work for this page when storage is unavailable.
+                }
             } catch (_) {
                 this.recentSearches = [];
             }
+        },
+        recentSearchKey(search) {
+            return this.normalizeLocation(search.departure.trim()) + '|' + this.normalizeLocation(search.destination.trim());
+        },
+        uniqueRecentSearches(searches) {
+            const seen = new Set();
+            return searches.filter(search => {
+                const key = this.recentSearchKey(search);
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            });
         },
         formatRecentDate(value) {
             const [year, month, day] = value.split('-');
             return day + '/' + month + '/' + year;
         },
         applyRecentSearch(search) {
-            this.departure = search.departure;
-            this.destination = search.destination;
-            this.roundTrip = !!search.roundTrip;
-            this.locationOpen = null;
             const today = @js(now()->format('Y-m-d'));
             const departureDate = search.departureDate < today ? today : search.departureDate;
-            const returnDate = this.roundTrip && search.returnDate >= departureDate ? search.returnDate : '';
-            this.$nextTick(() => window.dispatchEvent(new CustomEvent('hero-restore-dates', {
-                detail: { departureDate, returnDate },
-            })));
-            window.dispatchEvent(new CustomEvent('hero-restore-quantity', {
-                detail: { quantity: Number(search.quantity) >= 1 && Number(search.quantity) <= 5 ? Number(search.quantity) : 1 },
-            }));
+            const roundTrip = !!search.roundTrip;
+            const returnDate = roundTrip && search.returnDate >= departureDate
+                ? search.returnDate : departureDate;
+            const quantity = Number(search.quantity);
+            const url = new URL(@js(route('trip-search')), window.location.href);
+            url.searchParams.set('trip_type', roundTrip ? 'round_trip' : 'one_way');
+            url.searchParams.set('departure', search.departure);
+            url.searchParams.set('destination', search.destination);
+            url.searchParams.set('departure_date', departureDate);
+            if (roundTrip) url.searchParams.set('return_date', returnDate);
+            const validQuantity = Number.isInteger(quantity) && quantity >= 1 && quantity <= 5 ? quantity : 1;
+            url.searchParams.set('quantity', validQuantity);
+
+            const latestSearch = { ...search, departureDate, returnDate: roundTrip ? returnDate : '', quantity: validQuantity };
+            this.recentSearches = this.uniqueRecentSearches([latestSearch, ...this.recentSearches]);
+            try {
+                localStorage.setItem('futabus.recent-trip-searches.v1', JSON.stringify(this.recentSearches));
+            } catch (_) {
+                // Navigation still works if browser storage is unavailable.
+            }
+            window.FutaLoader?.show(0);
+            window.setTimeout(() => window.location.assign(url.toString()), 30);
         },
         submitSearch(event) {
             if (!this.departure || !this.destination) {
@@ -142,12 +171,7 @@
                 roundTrip: this.roundTrip,
                 quantity: Number(form.elements.namedItem('quantity').value),
             };
-            this.recentSearches = [search, ...this.recentSearches.filter(previous =>
-                previous.departure !== search.departure
-                || previous.destination !== search.destination
-                || previous.departureDate !== search.departureDate
-                || previous.returnDate !== search.returnDate
-            )];
+            this.recentSearches = this.uniqueRecentSearches([search, ...this.recentSearches]);
             try {
                 localStorage.setItem('futabus.recent-trip-searches.v1', JSON.stringify(this.recentSearches));
             } catch (_) {

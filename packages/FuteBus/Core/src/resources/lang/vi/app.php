@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'loading' => 'Đang tải...',
     'home' => [
         'title' => 'FUTA Bus Lines',
 

@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'loading' => 'Loading...',
     'home' => [
         'title' => 'FUTA Bus Lines',
 

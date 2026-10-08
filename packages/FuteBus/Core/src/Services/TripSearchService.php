@@ -27,7 +27,7 @@ class TripSearchService
             ->select(
                 'trips.id', 'trips.departure_time', 'trips.arrival_time', 'trips.price', 'trips.available_seats',
                 'routes.origin_city', 'routes.origin_station', 'routes.destination_city', 'routes.destination_station',
-                'routes.distance_km', 'buses.id as bus_id', 'buses.capacity', 'buses.bus_type', 'buses.seat_rows',
+                'routes.distance_km', 'routes.code as route_code', 'buses.id as bus_id', 'buses.capacity', 'buses.bus_type', 'buses.seat_rows',
             )
             ->get();
 
@@ -41,8 +41,9 @@ class TripSearchService
 
         $seatLayouts = DB::table('seat_layouts')
             ->whereIn('bus_id', $trips->pluck('bus_id'))
-            ->where('is_available', true)
-            ->select('id', 'bus_id', 'row_number', 'deck')
+            ->orderBy('row_number')
+            ->orderBy('column_number')
+            ->select('id', 'bus_id', 'seat_code', 'row_number', 'column_number', 'deck', 'is_available')
             ->get()
             ->groupBy('bus_id');
 
@@ -70,8 +71,37 @@ class TripSearchService
                 $remaining = max(0, (int) $trip->capacity - count($occupied));
                 $departure = Carbon::parse($trip->departure_time);
                 $arrival = Carbon::parse($trip->arrival_time);
-                $availableLayouts = collect($seatLayouts[$trip->bus_id] ?? [])
-                    ->reject(fn ($seat) => in_array($seat->id, $occupied, true));
+                $layouts = collect($seatLayouts[$trip->bus_id] ?? []);
+                $availableLayouts = $layouts->filter(fn ($seat) => $seat->is_available
+                    && ! in_array($seat->id, $occupied, true));
+                $isDemo = str_starts_with($trip->route_code, 'DEMO-');
+                $demoLayouts = $layouts->take(34)->values();
+                $demoSelectedIds = $isDemo
+                    ? $demoLayouts->only([2, 6])->pluck('id')->values()->all()
+                    : [];
+                $seats = $isDemo
+                    ? $demoLayouts->map(function ($seat, int $index) use ($occupied): array {
+                        $number = ($index % 17) + 1;
+                        return [
+                            'id' => (int) $seat->id,
+                            'code' => ($index < 17 ? 'A' : 'B').str_pad((string) $number, 2, '0', STR_PAD_LEFT),
+                            'row' => $number <= 2 ? 1 : intdiv($number - 3, 3) + 2,
+                            'column' => $number === 1 ? 1 : ($number === 2 ? 3 : (($number - 3) % 3) + 1),
+                            'deck' => $index < 17 ? 'lower' : 'upper',
+                            'sold' => ! (bool) $seat->is_available
+                                || in_array($seat->id, $occupied, true)
+                                || ($index < 17 && $number <= 2)
+                                || ($index >= 17 && $number === 2),
+                        ];
+                    })->all()
+                    : $layouts->map(fn ($seat): array => [
+                        'id' => (int) $seat->id,
+                        'code' => $seat->seat_code,
+                        'row' => (int) $seat->row_number,
+                        'column' => (int) $seat->column_number,
+                        'deck' => $seat->deck,
+                        'sold' => ! (bool) $seat->is_available || in_array($seat->id, $occupied, true),
+                    ])->values()->all();
                 $rowOptions = $availableLayouts->map(function ($seat) use ($trip): string {
                     $rowCount = max(1, (int) $trip->seat_rows);
                     if ($seat->row_number <= (int) ceil($rowCount / 3)) return 'front';
@@ -94,6 +124,10 @@ class TripSearchService
                     'available_seats' => $trip->available_seats === null ? $remaining : min((int) $trip->available_seats, $remaining),
                     'row_options' => $rowOptions,
                     'deck_options' => $availableLayouts->pluck('deck')->unique()->values()->all(),
+                    'seat_decks' => collect($seats)->pluck('deck')->unique()->values()->all(),
+                    'demo_seat_map' => $isDemo,
+                    'seats' => $seats,
+                    'demo_selected_seat_ids' => $demoSelectedIds,
                     'price' => (int) $trip->price,
                 ];
             })

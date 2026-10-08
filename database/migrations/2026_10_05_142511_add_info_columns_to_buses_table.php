@@ -12,10 +12,6 @@ return new class extends Migration
     public function up(): void
 {
     Schema::table('buses', function (Blueprint $table) {
-        if (! Schema::hasColumn('buses', 'vehicle_type_id')) {
-            $table->foreignId('vehicle_type_id')->nullable()->after('bus_company_id')
-                  ->constrained('vehicle_types')->nullOnDelete();
-        }
         $table->string('color', 50)->nullable()->after('license_plate');
         $table->string('chassis_number', 50)->nullable()->unique()->after('color');
         $table->string('brand', 100)->nullable()->after('chassis_number');
