@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "644382360fed79e1e3851f60ddbbfbc6",
+    "content-hash": "aa905867828aecc15bbc39dd91fe0ff8",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1350,7 +1350,7 @@
             "version": "1.0.0",
             "dist": {
                 "type": "path",
-                "url": "packages/futebus/AiAssistant",
+                "url": "packages/FuteBus/AiAssistant",
                 "reference": "6d3debe41c6033ef99a55bfe9607741940970e6d"
             },
             "require": {
@@ -1383,7 +1383,7 @@
             "version": "1.0.0",
             "dist": {
                 "type": "path",
-                "url": "packages/futebus/Auth",
+                "url": "packages/FuteBus/Auth",
                 "reference": "d34196154f103d1c9142ba479190d0876385cfe0"
             },
             "require": {
@@ -1449,7 +1449,7 @@
             "version": "1.0.0",
             "dist": {
                 "type": "path",
-                "url": "packages/futebus/BusCompanyManagement",
+                "url": "packages/FuteBus/BusCompanyManagement",
                 "reference": "eb0656810770b6a68e06670abd2603b5fb2ae505"
             },
             "require": {
@@ -1482,7 +1482,7 @@
             "version": "1.0.0",
             "dist": {
                 "type": "path",
-                "url": "packages/futebus/BusManagement",
+                "url": "packages/FuteBus/BusManagement",
                 "reference": "a3a35514aa3f1176a94dfd31dc9bdcc5ea9de8e0"
             },
             "require": {
@@ -1548,7 +1548,7 @@
             "version": "1.0.0",
             "dist": {
                 "type": "path",
-                "url": "packages/futebus/Core",
+                "url": "packages/FuteBus/Core",
                 "reference": "029063f7b15ec11d3748426c001323b873fbc251"
             },
             "require": {
@@ -1581,7 +1581,7 @@
             "version": "1.0.0",
             "dist": {
                 "type": "path",
-                "url": "packages/futebus/CustomerManagement",
+                "url": "packages/FuteBus/CustomerManagement",
                 "reference": "c99f87968640683f9bcf9e12d7974a2d7ed4505b"
             },
             "require": {
@@ -1614,7 +1614,7 @@
             "version": "1.0.0",
             "dist": {
                 "type": "path",
-                "url": "packages/futebus/Dashboard",
+                "url": "packages/FuteBus/Dashboard",
                 "reference": "2f8659175d9f8b543c4c0515254692cf7b34114b"
             },
             "require": {
@@ -1647,7 +1647,7 @@
             "version": "1.0.0",
             "dist": {
                 "type": "path",
-                "url": "packages/futebus/Notification",
+                "url": "packages/FuteBus/Notification",
                 "reference": "585e8bda15aa9249a1243d1d5adee788ce80642a"
             },
             "require": {
@@ -1680,7 +1680,7 @@
             "version": "1.0.0",
             "dist": {
                 "type": "path",
-                "url": "packages/futebus/Payment",
+                "url": "packages/FuteBus/Payment",
                 "reference": "d9069c15a387cd7ecfdc807b47340f9062f77192"
             },
             "require": {
@@ -1713,7 +1713,7 @@
             "version": "1.0.0",
             "dist": {
                 "type": "path",
-                "url": "packages/futebus/Profile",
+                "url": "packages/FuteBus/Profile",
                 "reference": "bd50ed557642260cc00d5c7f6b1ec00ab503e14a"
             },
             "require": {
@@ -1746,7 +1746,7 @@
             "version": "1.0.0",
             "dist": {
                 "type": "path",
-                "url": "packages/futebus/Reporting",
+                "url": "packages/FuteBus/Reporting",
                 "reference": "73a40dedf0cb4d6737ed94105f73408d6be6df7b"
             },
             "require": {
@@ -1779,7 +1779,7 @@
             "version": "1.0.0",
             "dist": {
                 "type": "path",
-                "url": "packages/futebus/RolePermission",
+                "url": "packages/FuteBus/RolePermission",
                 "reference": "17f46022b477ae9880cc1c418070e38962cfea3c"
             },
             "require": {
@@ -1812,7 +1812,7 @@
             "version": "1.0.0",
             "dist": {
                 "type": "path",
-                "url": "packages/futebus/RouteManagement",
+                "url": "packages/FuteBus/RouteManagement",
                 "reference": "d0a144cbae2a7aa613a62b92dabc4949e6170d46"
             },
             "require": {
@@ -1878,7 +1878,7 @@
             "version": "1.0.0",
             "dist": {
                 "type": "path",
-                "url": "packages/futebus/SeatManagement",
+                "url": "packages/FuteBus/SeatManagement",
                 "reference": "c17a6bec276334a80e2a2cd6c766b9ba300ae283"
             },
             "require": {
@@ -1911,7 +1911,7 @@
             "version": "1.0.0",
             "dist": {
                 "type": "path",
-                "url": "packages/futebus/SystemSetting",
+                "url": "packages/FuteBus/SystemSetting",
                 "reference": "406bd8e09c389b6f16ff9a53d7766034976d1353"
             },
             "require": {
@@ -1977,7 +1977,7 @@
             "version": "1.0.0",
             "dist": {
                 "type": "path",
-                "url": "packages/futebus/TripManagement",
+                "url": "packages/FuteBus/TripManagement",
                 "reference": "d1e2b4adfa6735cc18659351dc8d9fd33d93b2a5"
             },
             "require": {
@@ -2043,7 +2043,7 @@
             "version": "1.0.0",
             "dist": {
                 "type": "path",
-                "url": "packages/futebus/UserManagement",
+                "url": "packages/FuteBus/UserManagement",
                 "reference": "4448b452ce4850978623960ad45ed7578500b989"
             },
             "require": {

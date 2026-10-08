@@ -170,7 +170,11 @@
             <h3 class="mb-3 text-sm font-semibold">{{ __('core::trip-search.departure_time') }}</h3>
             @foreach (['early', 'morning', 'afternoon', 'evening'] as $slot)
                 <label class="mb-2 flex cursor-pointer items-center gap-2 text-sm text-gray-700 last:mb-0" :class="trips.length === 0 ? 'cursor-not-allowed opacity-40' : ''">
-                    <input type="checkbox" value="{{ $slot }}" @change="toggleFilter('timeFilters', '{{ $slot }}')" :checked="timeFilters.includes('{{ $slot }}')" :disabled="trips.length === 0" class="trip-filter-time-checkbox size-4 appearance-none rounded-full border border-gray-300 bg-white align-middle transition checked:border-[#ef5222] checked:bg-[#ef5222] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ef5222]">
+                    <input type="checkbox" value="{{ $slot }}"
+                        @change="toggleFilter('timeFilters', '{{ $slot }}')"
+                        :checked="timeFilters.includes('{{ $slot }}')"
+                        :disabled="trips.length === 0"
+                        class="trip-filter-time-checkbox size-4 appearance-none rounded-full border border-gray-300 bg-white align-middle transition checked:border-[#ef5222] checked:bg-[#ef5222] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ef5222]">
                     <span>{{ __('core::trip-search.time_'.$slot) }}</span>
                 </label>
             @endforeach
@@ -179,7 +183,12 @@
             <h3 class="mb-3 text-sm font-semibold">{{ __('core::trip-search.vehicle') }}</h3>
             <div class="flex flex-wrap gap-2">
                 @foreach (['seat', 'sleeper', 'limousine'] as $vehicle)
-                    <button type="button" @click="toggleFilter('vehicleFilters', '{{ $vehicle }}')" :disabled="trips.length === 0" :aria-pressed="vehicleFilters.includes('{{ $vehicle }}')" :class="vehicleFilters.includes('{{ $vehicle }}') ? 'border-[#ef5222] bg-[#fff3ed] text-[#ef5222]' : 'border-gray-200 bg-white text-gray-800'" class="rounded-md border px-3 py-2 text-sm transition hover:border-[#ef5222] disabled:cursor-not-allowed disabled:opacity-40">{{ __('core::trip-search.'.$vehicle) }}</button>
+                    <button type="button"
+                        @click="toggleFilter('vehicleFilters', '{{ $vehicle }}')"
+                        :disabled="trips.length === 0"
+                        :aria-pressed="vehicleFilters.includes('{{ $vehicle }}')"
+                        :class="vehicleFilters.includes('{{ $vehicle }}') ? 'border-[#ef5222] bg-[#fff3ed] text-[#ef5222]' : 'border-gray-200 bg-white text-gray-800'"
+                        class="rounded-md border px-3 py-2 text-sm transition hover:border-[#ef5222] disabled:cursor-not-allowed disabled:opacity-40">{{ __('core::trip-search.'.$vehicle) }}</button>
                 @endforeach
             </div>
         </div>
@@ -187,7 +196,12 @@
             <h3 class="mb-3 text-sm font-semibold">{{ __('core::trip-search.seat_row') }}</h3>
             <div class="flex flex-wrap gap-2">
                 @foreach (['front', 'middle', 'back'] as $row)
-                    <button type="button" @click="toggleFilter('rowFilters', '{{ $row }}')" :disabled="!hasOption('row_options', '{{ $row }}')" :aria-pressed="rowFilters.includes('{{ $row }}')" :class="rowFilters.includes('{{ $row }}') ? 'border-[#ef5222] bg-[#fff3ed] text-[#ef5222]' : 'border-gray-200 bg-white text-gray-800'" class="rounded-md border px-3 py-2 text-sm transition hover:border-[#ef5222] disabled:cursor-not-allowed disabled:opacity-40">{{ __('core::trip-search.row_'.$row) }}</button>
+                    <button type="button"
+                        @click="toggleFilter('rowFilters', '{{ $row }}')"
+                        :disabled="!hasOption('row_options', '{{ $row }}')"
+                        :aria-pressed="rowFilters.includes('{{ $row }}')"
+                        :class="rowFilters.includes('{{ $row }}') ? 'border-[#ef5222] bg-[#fff3ed] text-[#ef5222]' : 'border-gray-200 bg-white text-gray-800'"
+                        class="rounded-md border px-3 py-2 text-sm transition hover:border-[#ef5222] disabled:cursor-not-allowed disabled:opacity-40">{{ __('core::trip-search.row_'.$row) }}</button>
                 @endforeach
             </div>
         </div>
@@ -195,7 +209,12 @@
             <h3 class="mb-3 text-sm font-semibold">{{ __('core::trip-search.deck') }}</h3>
             <div class="flex flex-wrap gap-2">
                 @foreach (['upper', 'lower'] as $deck)
-                    <button type="button" @click="toggleFilter('deckFilters', '{{ $deck }}')" :disabled="!hasOption('deck_options', '{{ $deck }}')" :aria-pressed="deckFilters.includes('{{ $deck }}')" :class="deckFilters.includes('{{ $deck }}') ? 'border-[#ef5222] bg-[#fff3ed] text-[#ef5222]' : 'border-gray-200 bg-white text-gray-800'" class="rounded-md border px-3 py-2 text-sm transition hover:border-[#ef5222] disabled:cursor-not-allowed disabled:opacity-40">{{ __('core::trip-search.deck_'.$deck) }}</button>
+                    <button type="button"
+                        @click="toggleFilter('deckFilters', '{{ $deck }}')"
+                        :disabled="!hasOption('deck_options', '{{ $deck }}')"
+                        :aria-pressed="deckFilters.includes('{{ $deck }}')"
+                        :class="deckFilters.includes('{{ $deck }}') ? 'border-[#ef5222] bg-[#fff3ed] text-[#ef5222]' : 'border-gray-200 bg-white text-gray-800'"
+                        class="rounded-md border px-3 py-2 text-sm transition hover:border-[#ef5222] disabled:cursor-not-allowed disabled:opacity-40">{{ __('core::trip-search.deck_'.$deck) }}</button>
                 @endforeach
             </div>
         </div>
@@ -206,7 +225,11 @@
         <h2 class="mb-3 text-xl font-semibold text-gray-950">{{ $from }} - {{ $to }}</h2>
         <div class="mb-6 flex flex-wrap gap-2.5">
             @foreach (['price', 'departure', 'seats'] as $sort)
-                <button type="button" @click="toggleSort('{{ $sort }}')" :aria-pressed="sortHighlights['{{ $sort }}']" :class="sortHighlights['{{ $sort }}'] ? 'border-[#ffd8c8] bg-[#fff6f2] text-[#ef5222]' : 'border-gray-200 bg-white text-gray-900'" class="inline-flex items-center gap-2 rounded-md border px-3.5 py-2 text-sm font-medium transition hover:border-[#ef5222]">
+                <button type="button"
+                    @click="toggleSort('{{ $sort }}')"
+                    :aria-pressed="sortHighlights['{{ $sort }}']"
+                    :class="sortHighlights['{{ $sort }}'] ? 'border-[#ffd8c8] bg-[#fff6f2] text-[#ef5222]' : 'border-gray-200 bg-white text-gray-900'"
+                    class="inline-flex items-center gap-2 rounded-md border px-3.5 py-2 text-sm font-medium transition hover:border-[#ef5222]">
                     @if ($sort === 'price')
                         <x-heroicon-o-banknotes class="size-5 shrink-0" aria-hidden="true" />
                     @elseif ($sort === 'departure')
@@ -264,7 +287,12 @@
                             <button type="button" @click="togglePanel(trip.id, 'transfer')" :aria-expanded="openTripId === trip.id && openPanel === 'transfer'" :class="{ 'is-active': openTripId === trip.id && openPanel === 'transfer' }">{{ __('core::trip-search.transfer') }}</button>
                             <button type="button" @click="togglePanel(trip.id, 'policy')" :aria-expanded="openTripId === trip.id && openPanel === 'policy'" :class="{ 'is-active': openTripId === trip.id && openPanel === 'policy' }">{{ __('core::trip-search.policy') }}</button>
                         </div>
-                        <button type="button" @click="selectedTrip = selectedTrip === trip.id ? null : trip.id" :aria-pressed="selectedTrip === trip.id" :class="selectedTrip === trip.id || openTripId === trip.id ? 'is-selected' : ''" class="trip-card__select" x-text="selectedTrip === trip.id ? @js(__('core::trip-search.selected')) : @js(__('core::trip-search.select_trip'))"></button>
+                        <button type="button"
+                            @click="selectedTrip = selectedTrip === trip.id ? null : trip.id"
+                            :aria-pressed="selectedTrip === trip.id"
+                            :class="selectedTrip === trip.id || openTripId === trip.id ? 'is-selected' : ''"
+                            class="trip-card__select"
+                            x-text="selectedTrip === trip.id ? @js(__('core::trip-search.selected')) : @js(__('core::trip-search.select_trip'))"></button>
                     </div>
                     <div class="trip-card__detail" :class="{ 'is-seats': openPanel === 'seats' }" x-show="openTripId === trip.id && openPanel !== null" x-cloak>
                         <div x-show="openPanel === 'seats'" class="trip-card__seat-panel">
@@ -279,7 +307,14 @@
                                         <h3 x-text="deck === 'lower' ? @js(__('core::trip-search.deck_lower')) : @js(__('core::trip-search.deck_upper'))"></h3>
                                         <div class="trip-card__seat-grid">
                                             <template x-for="seat in deckSeats(trip, deck)" :key="seat.id">
-                                                <button type="button" class="trip-card__seat" :style="trip.demo_seat_map ? { gridColumn: seat.column, gridRow: seat.row } : {}" :class="seat.sold ? 'is-sold' : (seatSelected(trip, seat) ? 'is-chosen' : 'is-free')" :disabled="seat.sold" :aria-pressed="seatSelected(trip, seat)" :aria-label="seat.code + ', ' + (seat.sold ? @js(__('core::trip-search.seat_sold')) : (seatSelected(trip, seat) ? @js(__('core::trip-search.seat_choosing')) : @js(__('core::trip-search.seat_free'))))" @click="toggleSeat(trip, seat)">
+                                                <button type="button"
+                                                    class="trip-card__seat"
+                                                    :style="trip.demo_seat_map ? { gridColumn: seat.column, gridRow: seat.row } : {}"
+                                                    :class="seat.sold ? 'is-sold' : (seatSelected(trip, seat) ? 'is-chosen' : 'is-free')"
+                                                    :disabled="seat.sold"
+                                                    :aria-pressed="seatSelected(trip, seat)"
+                                                    :aria-label="seat.code + ', ' + (seat.sold ? @js(__('core::trip-search.seat_sold')) : (seatSelected(trip, seat) ? @js(__('core::trip-search.seat_choosing')) : @js(__('core::trip-search.seat_free'))))"
+                                                    @click="toggleSeat(trip, seat)">
                                                     <span class="trip-card__seat-code" x-text="seat.code"></span>
                                                     <span class="trip-card__seat-foot" aria-hidden="true"></span>
                                                 </button>
