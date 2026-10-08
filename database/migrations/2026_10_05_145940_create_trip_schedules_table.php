@@ -23,7 +23,7 @@ return new class extends Migration
 
         Schema::table('trips', function (Blueprint $table) {
             $table->foreignId('trip_schedule_id')->nullable()->after('id')
-                  ->constrained('trip_schedules')->nullOnDelete();
+                ->constrained('trip_schedules')->nullOnDelete();
             $table->unique(['trip_schedule_id', 'departure_time']);
             $table->unsignedBigInteger('bus_id')->nullable()->change();
             $table->string('status', 20)->default('scheduled')->change();

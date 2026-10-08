@@ -21,10 +21,10 @@ class TripSearchDemoSeeder extends Seeder
             $companyId = DB::table('bus_companies')->where('code', 'FUTA')->value('id');
             if (! $companyId) {
                 $companyId = DB::table('bus_companies')->insertGetId([
-                    'name' => 'FUTA Bus Lines',
-                    'code' => 'FUTA',
-                    'hotline' => '1900 6067',
-                    'is_active' => true,
+                    'name'       => 'FUTA Bus Lines',
+                    'code'       => 'FUTA',
+                    'hotline'    => '1900 6067',
+                    'is_active'  => true,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -46,39 +46,39 @@ class TripSearchDemoSeeder extends Seeder
                 $routeId = DB::table('routes')->where('code', $code)->value('id');
                 if (! $routeId) {
                     $routeId = DB::table('routes')->insertGetId([
-                        'bus_company_id' => $companyId,
-                        'code' => $code,
-                        'name' => '[Demo] '.$from.' - '.$to,
-                        'origin_city' => $from,
-                        'origin_station' => $fromStation,
-                        'destination_city' => $to,
+                        'bus_company_id'      => $companyId,
+                        'code'                => $code,
+                        'name'                => '[Demo] '.$from.' - '.$to,
+                        'origin_city'         => $from,
+                        'origin_station'      => $fromStation,
+                        'destination_city'    => $to,
                         'destination_station' => $toStation,
-                        'distance_km' => $distance,
-                        'duration_minutes' => $duration,
-                        'base_price' => $price,
-                        'is_active' => true,
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'distance_km'         => $distance,
+                        'duration_minutes'    => $duration,
+                        'base_price'          => $price,
+                        'is_active'           => true,
+                        'created_at'          => now(),
+                        'updated_at'          => now(),
                     ]);
                 }
 
                 $busId = DB::table('buses')->where('license_plate', $code)->value('id');
                 if (! $busId) {
                     $busId = DB::table('buses')->insertGetId([
-                        'bus_company_id' => $companyId,
-                        'license_plate' => $code,
-                        'name' => '[Demo] '.ucfirst($type),
-                        'capacity' => $rows * $columns,
-                        'bus_type' => $type,
-                        'status' => 'active',
-                        'seat_rows' => $rows,
-                        'seat_columns' => $columns,
-                        'color' => 'Cam FUTABUS',
-                        'chassis_number' => $code,
-                        'brand' => 'FUTABUS Demo',
+                        'bus_company_id'   => $companyId,
+                        'license_plate'    => $code,
+                        'name'             => '[Demo] '.ucfirst($type),
+                        'capacity'         => $rows * $columns,
+                        'bus_type'         => $type,
+                        'status'           => 'active',
+                        'seat_rows'        => $rows,
+                        'seat_columns'     => $columns,
+                        'color'            => 'Cam FUTABUS',
+                        'chassis_number'   => $code,
+                        'brand'            => 'FUTABUS Demo',
                         'manufacture_year' => (int) now()->year,
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'created_at'       => now(),
+                        'updated_at'       => now(),
                     ]);
                 }
 
@@ -89,16 +89,16 @@ class TripSearchDemoSeeder extends Seeder
                             continue;
                         }
                         DB::table('seat_layouts')->insert([
-                            'bus_id' => $busId,
-                            'seat_code' => $seatCode,
-                            'row_number' => $row,
-                            'column_number' => $column,
-                            'seat_type' => $type === 'standard' ? 'seat' : 'sleeper',
-                            'deck' => $type === 'standard' || $row <= (int) ceil($rows / 2) ? 'lower' : 'upper',
+                            'bus_id'           => $busId,
+                            'seat_code'        => $seatCode,
+                            'row_number'       => $row,
+                            'column_number'    => $column,
+                            'seat_type'        => $type === 'standard' ? 'seat' : 'sleeper',
+                            'deck'             => $type === 'standard' || $row <= (int) ceil($rows / 2) ? 'lower' : 'upper',
                             'price_multiplier' => 1,
-                            'is_available' => true,
-                            'created_at' => now(),
-                            'updated_at' => now(),
+                            'is_available'     => true,
+                            'created_at'       => now(),
+                            'updated_at'       => now(),
                         ]);
                     }
                 }
@@ -113,16 +113,16 @@ class TripSearchDemoSeeder extends Seeder
                         continue;
                     }
                     DB::table('trips')->insert([
-                        'route_id' => $routeId,
-                        'bus_id' => $busId,
-                        'bus_company_id' => $companyId,
-                        'departure_time' => $departureTime,
-                        'arrival_time' => $departure->copy()->addMinutes($duration)->toDateTimeString(),
-                        'price' => $price,
-                        'status' => 'scheduled',
+                        'route_id'        => $routeId,
+                        'bus_id'          => $busId,
+                        'bus_company_id'  => $companyId,
+                        'departure_time'  => $departureTime,
+                        'arrival_time'    => $departure->copy()->addMinutes($duration)->toDateTimeString(),
+                        'price'           => $price,
+                        'status'          => 'scheduled',
                         'available_seats' => $available,
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'created_at'      => now(),
+                        'updated_at'      => now(),
                     ]);
                 }
             }

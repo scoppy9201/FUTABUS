@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace FuteBus\Core\Services;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Support\Carbon;
 
 class TripSearchService
 {
@@ -49,7 +49,7 @@ class TripSearchService
 
         $catalog = $this->locations->all();
         $allLocations = [
-            'areas' => array_merge($catalog['departure']['areas'], $catalog['destination']['areas']),
+            'areas'             => array_merge($catalog['departure']['areas'], $catalog['destination']['areas']),
             'directory_offices' => $catalog['departure']['directory_offices'],
         ];
         $fromLocation = $this->describeLocation($from, $allLocations);
@@ -82,53 +82,58 @@ class TripSearchService
                 $seats = $isDemo
                     ? $demoLayouts->map(function ($seat, int $index) use ($occupied): array {
                         $number = ($index % 17) + 1;
+
                         return [
-                            'id' => (int) $seat->id,
-                            'code' => ($index < 17 ? 'A' : 'B').str_pad((string) $number, 2, '0', STR_PAD_LEFT),
-                            'row' => $number <= 2 ? 1 : intdiv($number - 3, 3) + 2,
+                            'id'     => (int) $seat->id,
+                            'code'   => ($index < 17 ? 'A' : 'B').str_pad((string) $number, 2, '0', STR_PAD_LEFT),
+                            'row'    => $number <= 2 ? 1 : intdiv($number - 3, 3) + 2,
                             'column' => $number === 1 ? 1 : ($number === 2 ? 3 : (($number - 3) % 3) + 1),
-                            'deck' => $index < 17 ? 'lower' : 'upper',
-                            'sold' => ! (bool) $seat->is_available
+                            'deck'   => $index < 17 ? 'lower' : 'upper',
+                            'sold'   => ! (bool) $seat->is_available
                                 || in_array($seat->id, $occupied, true)
                                 || ($index < 17 && $number <= 2)
                                 || ($index >= 17 && $number === 2),
                         ];
                     })->all()
                     : $layouts->map(fn ($seat): array => [
-                        'id' => (int) $seat->id,
-                        'code' => $seat->seat_code,
-                        'row' => (int) $seat->row_number,
+                        'id'     => (int) $seat->id,
+                        'code'   => $seat->seat_code,
+                        'row'    => (int) $seat->row_number,
                         'column' => (int) $seat->column_number,
-                        'deck' => $seat->deck,
-                        'sold' => ! (bool) $seat->is_available || in_array($seat->id, $occupied, true),
+                        'deck'   => $seat->deck,
+                        'sold'   => ! (bool) $seat->is_available || in_array($seat->id, $occupied, true),
                     ])->values()->all();
                 $rowOptions = $availableLayouts->map(function ($seat) use ($trip): string {
                     $rowCount = max(1, (int) $trip->seat_rows);
-                    if ($seat->row_number <= (int) ceil($rowCount / 3)) return 'front';
-                    if ($seat->row_number > (int) floor($rowCount * 2 / 3)) return 'back';
+                    if ($seat->row_number <= (int) ceil($rowCount / 3)) {
+                        return 'front';
+                    }
+                    if ($seat->row_number > (int) floor($rowCount * 2 / 3)) {
+                        return 'back';
+                    }
 
                     return 'middle';
                 })->unique()->values()->all();
 
                 return [
-                    'id' => (int) $trip->id,
-                    'departure_time' => $trip->departure_time,
-                    'arrival_time' => $trip->arrival_time,
-                    'departure_hour' => $departure->format('H:i'),
-                    'arrival_hour' => $arrival->format('H:i'),
-                    'duration_minutes' => $departure->diffInMinutes($arrival),
-                    'origin' => $trip->origin_station ?: $trip->origin_city,
-                    'destination' => $trip->destination_station ?: $trip->destination_city,
-                    'distance_km' => $trip->distance_km,
-                    'vehicle_type' => $trip->bus_type,
-                    'available_seats' => $trip->available_seats === null ? $remaining : min((int) $trip->available_seats, $remaining),
-                    'row_options' => $rowOptions,
-                    'deck_options' => $availableLayouts->pluck('deck')->unique()->values()->all(),
-                    'seat_decks' => collect($seats)->pluck('deck')->unique()->values()->all(),
-                    'demo_seat_map' => $isDemo,
-                    'seats' => $seats,
+                    'id'                     => (int) $trip->id,
+                    'departure_time'         => $trip->departure_time,
+                    'arrival_time'           => $trip->arrival_time,
+                    'departure_hour'         => $departure->format('H:i'),
+                    'arrival_hour'           => $arrival->format('H:i'),
+                    'duration_minutes'       => $departure->diffInMinutes($arrival),
+                    'origin'                 => $trip->origin_station ?: $trip->origin_city,
+                    'destination'            => $trip->destination_station ?: $trip->destination_city,
+                    'distance_km'            => $trip->distance_km,
+                    'vehicle_type'           => $trip->bus_type,
+                    'available_seats'        => $trip->available_seats === null ? $remaining : min((int) $trip->available_seats, $remaining),
+                    'row_options'            => $rowOptions,
+                    'deck_options'           => $availableLayouts->pluck('deck')->unique()->values()->all(),
+                    'seat_decks'             => collect($seats)->pluck('deck')->unique()->values()->all(),
+                    'demo_seat_map'          => $isDemo,
+                    'seats'                  => $seats,
                     'demo_selected_seat_ids' => $demoSelectedIds,
-                    'price' => (int) $trip->price,
+                    'price'                  => (int) $trip->price,
                 ];
             })
             ->values()
@@ -159,6 +164,7 @@ class TripSearchService
                 if (($area['kind'] ?? null) === 'station') {
                     return ['kind' => 'office', 'names' => [$selected]];
                 }
+
                 return ['kind' => 'specific', 'names' => [$this->normalize($selected)]];
             }
         }

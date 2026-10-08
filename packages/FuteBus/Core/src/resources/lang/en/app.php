@@ -2,56 +2,56 @@
 
 return [
     'loading' => 'Loading...',
-    'home' => [
+    'home'    => [
         'title' => 'FUTA Bus Lines',
 
         'navbar' => [
-            'home'               => 'HOME',
-            'schedules'          => 'SCHEDULES',
-            'lookup'             => 'TICKET LOOKUP',
-            'news'               => 'NEWS',
-            'invoice'            => 'INVOICE',
-            'contact'            => 'CONTACT',
-            'about'              => 'ABOUT US',
-            'login'              => 'Login/Register',
-            'account_menu'       => 'Open account menu for :name',
-            'futapay'            => 'FUTAPay',
+            'home'                => 'HOME',
+            'schedules'           => 'SCHEDULES',
+            'lookup'              => 'TICKET LOOKUP',
+            'news'                => 'NEWS',
+            'invoice'             => 'INVOICE',
+            'contact'             => 'CONTACT',
+            'about'               => 'ABOUT US',
+            'login'               => 'Login/Register',
+            'account_menu'        => 'Open account menu for :name',
+            'futapay'             => 'FUTAPay',
             'account_information' => 'Account information',
-            'ticket_history'     => 'Ticket history',
-            'reset_password'     => 'Reset password',
-            'logout'             => 'Log out',
-            'coming_soon'        => 'This feature is coming soon',
-            'download_app'       => 'Download app',
-            'language_selector'  => 'Select language',
-            'home_aria'          => 'FUTA Bus Lines - Home',
-            'logo_alt'           => 'FUTA Bus Lines',
-            'primary_navigation' => 'Primary navigation',
+            'ticket_history'      => 'Ticket history',
+            'reset_password'      => 'Reset password',
+            'logout'              => 'Log out',
+            'coming_soon'         => 'This feature is coming soon',
+            'download_app'        => 'Download app',
+            'language_selector'   => 'Select language',
+            'home_aria'           => 'FUTA Bus Lines - Home',
+            'logo_alt'            => 'FUTA Bus Lines',
+            'primary_navigation'  => 'Primary navigation',
         ],
 
         'hero' => [
-            'one_way'          => 'One way',
-            'round_trip'       => 'Round trip',
-            'guide'            => 'Booking guide',
-            'from'             => 'Departure',
-            'from_placeholder' => 'Select departure',
-            'to'               => 'Destination',
-            'to_placeholder'   => 'Select destination',
-            'location_not_found' => 'No locations found',
-            'clear_location' => 'Clear location search',
-            'provinces_heading' => 'Province / City',
-            'office_singular' => 'office',
-            'office_plural' => 'offices',
-            'office_directory' => 'Office network',
-            'date'             => 'Departure date',
-            'quantity' => 'Tickets',
-            'return_date' => 'Return date',
-            'return_placeholder' => 'Add return date',
+            'one_way'                 => 'One way',
+            'round_trip'              => 'Round trip',
+            'guide'                   => 'Booking guide',
+            'from'                    => 'Departure',
+            'from_placeholder'        => 'Select departure',
+            'to'                      => 'Destination',
+            'to_placeholder'          => 'Select destination',
+            'location_not_found'      => 'No locations found',
+            'clear_location'          => 'Clear location search',
+            'provinces_heading'       => 'Province / City',
+            'office_singular'         => 'office',
+            'office_plural'           => 'offices',
+            'office_directory'        => 'Office network',
+            'date'                    => 'Departure date',
+            'quantity'                => 'Tickets',
+            'return_date'             => 'Return date',
+            'return_placeholder'      => 'Add return date',
             'calendar_previous_month' => 'Previous month',
-            'calendar_next_month' => 'Next month',
-            'search' => 'Search trips',
-            'recent_searches' => 'Recent searches',
-            'banner_alt'       => 'FUTA Group - Confidence and development',
-            'swap_aria'        => 'Swap departure and destination',
+            'calendar_next_month'     => 'Next month',
+            'search'                  => 'Search trips',
+            'recent_searches'         => 'Recent searches',
+            'banner_alt'              => 'FUTA Group - Confidence and development',
+            'swap_aria'               => 'Swap departure and destination',
         ],
 
         'promotions' => [
@@ -90,16 +90,16 @@ return [
         ],
 
         'latest_news' => [
-            'title'       => 'Latest news',
+            'title'         => 'Latest news',
             'related_title' => 'Related news',
-            'subtitle'    => 'Latest updates from FUTA Bus Lines',
-            'view_all'    => 'View all',
-            'details'     => 'Details',
-            'empty'       => 'No news is available yet.',
-            'image_alt'   => 'Article image: :title',
-            'placeholder' => 'FUTA News',
-            'pages'       => 'News pages',
-            'page'        => 'Page :number',
+            'subtitle'      => 'Latest updates from FUTA Bus Lines',
+            'view_all'      => 'View all',
+            'details'       => 'Details',
+            'empty'         => 'No news is available yet.',
+            'image_alt'     => 'Article image: :title',
+            'placeholder'   => 'FUTA News',
+            'pages'         => 'News pages',
+            'page'          => 'Page :number',
         ],
 
         'futa_ecosystem' => [
@@ -157,122 +157,122 @@ return [
     ],
 
     'about' => [
-        'title' => 'About us - FUTA Bus Lines',
-        'heading' => 'Phuong Trang',
-        'slogan' => 'Quality is our honor',
+        'title'        => 'About us - FUTA Bus Lines',
+        'heading'      => 'Phuong Trang',
+        'slogan'       => 'Quality is our honor',
         'introduction' => 'Phuong Trang Group – FUTA Group was established in 2001. With core operations '
-            . 'in automobile trading, passenger transport, real estate and services, Phuong Trang has grown '
-            . 'into a familiar brand accompanying Vietnamese people across many areas of life.',
+            .'in automobile trading, passenger transport, real estate and services, Phuong Trang has grown '
+            .'into a familiar brand accompanying Vietnamese people across many areas of life.',
         'history' => 'After more than 25 years of development with customers at the center, we are proud '
-            . 'to be a key transport enterprise contributing positively to the transport industry and the national '
-            . 'economy. Through continuous improvement and a commitment to optimal service quality, Phuong Trang '
-            . 'has earned many prestigious awards and continues to affirm its position as one of Vietnam’s leading trusted brands.',
+            .'to be a key transport enterprise contributing positively to the transport industry and the national '
+            .'economy. Through continuous improvement and a commitment to optimal service quality, Phuong Trang '
+            .'has earned many prestigious awards and continues to affirm its position as one of Vietnam’s leading trusted brands.',
         'read_more' => 'Read more',
         'show_less' => 'Show less',
-        'identity' => [
+        'identity'  => [
             'vision' => [
-                'title' => 'Vision and mission',
-                'image_alt' => 'A team working toward shared growth goals',
-                'lead' => 'Contributing to a strong and prosperous Vietnam.',
+                'title'        => 'Vision and mission',
+                'image_alt'    => 'A team working toward shared growth goals',
+                'lead'         => 'Contributing to a strong and prosperous Vietnam.',
                 'introduction' => 'To become one of Vietnam’s leading trusted and high-quality groups by committing to:',
-                'commitments' => [
+                'commitments'  => [
                     'Creating a dynamic and friendly working environment.',
                     'Growing through the trust of our customers.',
                     'Becoming a professional leading corporation.',
                 ],
                 'conclusion' => 'continually strives for effective work and meaningful contributions '
-                    . 'to the development of a strong and prosperous Vietnam.',
+                    .'to the development of a strong and prosperous Vietnam.',
             ],
             'core_values' => [
-                'title' => 'Core values',
-                'image_alt' => 'A young plant symbolizing sustainable growth',
+                'title'        => 'Core values',
+                'image_alt'    => 'A young plant symbolizing sustainable growth',
                 'introduction' => 'The core values behind Phuong Trang',
-                'items' => [
+                'items'        => [
                     'Phuong represents integrity and uprightness, reflecting ethical conduct and sustainable '
-                        . 'relationships with employees, customers and partners.',
+                        .'relationships with employees, customers and partners.',
                     'Trang represents scale and distinction, expressing the ambition to achieve major goals '
-                        . 'and create lasting value for communities and society.',
+                        .'and create lasting value for communities and society.',
                     'As Phuong Trang grows, it must remain principled and continue developing on a foundation '
-                        . 'of strong and enduring ethical values.',
+                        .'of strong and enduring ethical values.',
                 ],
             ],
             'philosophy' => [
-                'title' => 'Philosophy',
-                'image_alt' => 'Illustration of a sustainable growth philosophy',
+                'title'       => 'Philosophy',
+                'image_alt'   => 'Illustration of a sustainable growth philosophy',
                 'description' => 'Integration and development contribute to national prosperity. People are '
-                    . 'Phuong Trang’s greatest asset, so we foster a modern, dynamic and friendly workplace '
-                    . 'with professional growth opportunities for every team member. Customer satisfaction '
-                    . 'is the measure of our service quality and the foundation for understanding customer '
-                    . 'needs and delivering excellent products and services.',
+                    .'Phuong Trang’s greatest asset, so we foster a modern, dynamic and friendly workplace '
+                    .'with professional growth opportunities for every team member. Customer satisfaction '
+                    .'is the measure of our service quality and the foundation for understanding customer '
+                    .'needs and delivering excellent products and services.',
             ],
         ],
         'sections' => [
             'futabus' => [
-                'title' => 'FUTA Bus Lines',
-                'image_alt' => 'FUTA Bus Lines coach fleet',
+                'title'      => 'FUTA Bus Lines',
+                'image_alt'  => 'FUTA Bus Lines coach fleet',
                 'paragraphs' => [
                     'Following the motto “Quality is our honor”, FUTA Bus Lines operates an extensive network '
-                        . 'of ticket offices and transfer stations with a professional service team.',
+                        .'of ticket offices and transfer stations with a professional service team.',
                     'Its modern fleet and nationwide routes serve millions of passengers every year while the '
-                        . 'company continuously improves safety, comfort and the overall travel experience.',
+                        .'company continuously improves safety, comfort and the overall travel experience.',
                 ],
             ],
             'land' => [
-                'title' => 'FUTA Land',
-                'image_alt' => 'Aerial view of Da Nang city',
+                'title'      => 'FUTA Land',
+                'image_alt'  => 'Aerial view of Da Nang city',
                 'paragraphs' => [
                     'FUTA Group develops high-quality real estate projects in Da Nang and other locations, '
-                        . 'creating modern living spaces and sustainable long-term value for communities.',
+                        .'creating modern living spaces and sustainable long-term value for communities.',
                 ],
             ],
             'express' => [
-                'title' => 'FUTA Express',
-                'image_alt' => 'FUTA Express delivery service',
+                'title'      => 'FUTA Express',
+                'image_alt'  => 'FUTA Express delivery service',
                 'paragraphs' => [
                     'Established in 2012, FUTA Express provides professional, safe and timely passenger and '
-                        . 'goods transportation services across Vietnam.',
+                        .'goods transportation services across Vietnam.',
                     'Its growing network handles parcels, documents and freight while offering convenient '
-                        . 'services such as COD collection, door-to-door delivery and OTP verification.',
+                        .'services such as COD collection, door-to-door delivery and OTP verification.',
                 ],
             ],
             'city_bus' => [
-                'title' => 'FUTA City Bus',
-                'image_alt' => 'FUTA City Bus fleet',
+                'title'      => 'FUTA City Bus',
+                'image_alt'  => 'FUTA City Bus fleet',
                 'paragraphs' => [
                     'FUTA City Bus is part of the group’s sustainable development strategy, delivering public '
-                        . 'transport through a high-quality fleet and a professional operating team.',
+                        .'transport through a high-quality fleet and a professional operating team.',
                     'The expanding service helps reduce private vehicle use and supports modern, convenient '
-                        . 'and environmentally friendly urban transportation.',
+                        .'and environmentally friendly urban transportation.',
                 ],
             ],
             'advertising' => [
-                'title' => 'FUTA Advertising',
-                'image_alt' => 'Advertising and communications concept',
+                'title'      => 'FUTA Advertising',
+                'image_alt'  => 'Advertising and communications concept',
                 'paragraphs' => [
                     'FUTA Advertising manages media opportunities throughout the FUTA ecosystem, including '
-                        . 'coaches, taxis, goods transportation and digital channels.',
+                        .'coaches, taxis, goods transportation and digital channels.',
                     'The company combines operational experience with modern digital technology to provide '
-                        . 'integrated and effective marketing solutions for businesses.',
+                        .'integrated and effective marketing solutions for businesses.',
                 ],
             ],
             'rest_stop' => [
-                'title' => 'FUTA Rest Stop',
-                'image_alt' => 'Phuc Loc rest stop',
+                'title'      => 'FUTA Rest Stop',
+                'image_alt'  => 'Phuc Loc rest stop',
                 'paragraphs' => [
                     'The Phuc Loc rest-stop network gives passengers a comfortable place to recharge during '
-                        . 'long journeys, with attentive service at key locations.',
+                        .'long journeys, with attentive service at key locations.',
                     'Open around the clock, each stop provides a varied menu and regional specialties for '
-                        . 'passengers who need to rest, dine or shop along the way.',
+                        .'passengers who need to rest, dine or shop along the way.',
                 ],
             ],
             'application' => [
-                'title' => 'FUTA Application',
-                'image_alt' => 'FUTA application on a smartphone',
+                'title'      => 'FUTA Application',
+                'image_alt'  => 'FUTA application on a smartphone',
                 'paragraphs' => [
                     'The FUTA application connects customers to the service ecosystem on one convenient '
-                        . 'platform, from ticket booking and transport to payment promotions.',
+                        .'platform, from ticket booking and transport to payment promotions.',
                     'Customers can book trips, collect points and manage personal travel services directly '
-                        . 'from their phones, making every journey faster and more flexible.',
+                        .'from their phones, making every journey faster and more flexible.',
                 ],
             ],
         ],

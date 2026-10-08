@@ -2,56 +2,56 @@
 
 return [
     'loading' => 'Đang tải...',
-    'home' => [
+    'home'    => [
         'title' => 'FUTA Bus Lines',
 
         'navbar' => [
-            'home'               => 'TRANG CHỦ',
-            'schedules'          => 'LỊCH TRÌNH',
-            'lookup'             => 'TRA CỨU VÉ',
-            'news'               => 'TIN TỨC',
-            'invoice'            => 'HÓA ĐƠN',
-            'contact'            => 'LIÊN HỆ',
-            'about'              => 'VỀ CHÚNG TÔI',
-            'login'              => 'Đăng nhập/Đăng ký',
-            'account_menu'       => 'Mở menu tài khoản của :name',
-            'futapay'            => 'FUTAPay',
+            'home'                => 'TRANG CHỦ',
+            'schedules'           => 'LỊCH TRÌNH',
+            'lookup'              => 'TRA CỨU VÉ',
+            'news'                => 'TIN TỨC',
+            'invoice'             => 'HÓA ĐƠN',
+            'contact'             => 'LIÊN HỆ',
+            'about'               => 'VỀ CHÚNG TÔI',
+            'login'               => 'Đăng nhập/Đăng ký',
+            'account_menu'        => 'Mở menu tài khoản của :name',
+            'futapay'             => 'FUTAPay',
             'account_information' => 'Thông tin tài khoản',
-            'ticket_history'     => 'Lịch sử mua vé',
-            'reset_password'     => 'Đặt lại mật khẩu',
-            'logout'             => 'Đăng xuất',
-            'coming_soon'        => 'Tính năng đang được phát triển',
-            'download_app'       => 'Tải ứng dụng',
-            'language_selector'  => 'Chọn ngôn ngữ',
-            'home_aria'          => 'FUTA Bus Lines - Trang chủ',
-            'logo_alt'           => 'FUTA Bus Lines',
-            'primary_navigation' => 'Điều hướng chính',
+            'ticket_history'      => 'Lịch sử mua vé',
+            'reset_password'      => 'Đặt lại mật khẩu',
+            'logout'              => 'Đăng xuất',
+            'coming_soon'         => 'Tính năng đang được phát triển',
+            'download_app'        => 'Tải ứng dụng',
+            'language_selector'   => 'Chọn ngôn ngữ',
+            'home_aria'           => 'FUTA Bus Lines - Trang chủ',
+            'logo_alt'            => 'FUTA Bus Lines',
+            'primary_navigation'  => 'Điều hướng chính',
         ],
 
         'hero' => [
-            'one_way'          => 'Một chiều',
-            'round_trip'       => 'Khứ hồi',
-            'guide'            => 'Hướng dẫn mua vé',
-            'from'             => 'Điểm đi',
-            'from_placeholder' => 'Chọn điểm đi',
-            'to'               => 'Điểm đến',
-            'to_placeholder'   => 'Chọn điểm đến',
-            'location_not_found' => 'Không tìm thấy địa điểm',
-            'clear_location' => 'Xóa nội dung tìm kiếm',
-            'provinces_heading' => 'Tỉnh/Thành phố',
-            'office_singular' => 'văn phòng',
-            'office_plural' => 'văn phòng',
-            'office_directory' => 'Mạng lưới văn phòng',
-            'date'             => 'Ngày đi',
-            'quantity' => 'Số vé',
-            'return_date' => 'Ngày về',
-            'return_placeholder' => 'Thêm ngày về',
+            'one_way'                 => 'Một chiều',
+            'round_trip'              => 'Khứ hồi',
+            'guide'                   => 'Hướng dẫn mua vé',
+            'from'                    => 'Điểm đi',
+            'from_placeholder'        => 'Chọn điểm đi',
+            'to'                      => 'Điểm đến',
+            'to_placeholder'          => 'Chọn điểm đến',
+            'location_not_found'      => 'Không tìm thấy địa điểm',
+            'clear_location'          => 'Xóa nội dung tìm kiếm',
+            'provinces_heading'       => 'Tỉnh/Thành phố',
+            'office_singular'         => 'văn phòng',
+            'office_plural'           => 'văn phòng',
+            'office_directory'        => 'Mạng lưới văn phòng',
+            'date'                    => 'Ngày đi',
+            'quantity'                => 'Số vé',
+            'return_date'             => 'Ngày về',
+            'return_placeholder'      => 'Thêm ngày về',
             'calendar_previous_month' => 'Tháng trước',
-            'calendar_next_month' => 'Tháng sau',
-            'search' => 'Tìm chuyến xe',
-            'recent_searches' => 'Tìm kiếm gần đây',
-            'banner_alt'       => 'FUTA Group - Vững tin và phát triển',
-            'swap_aria'        => 'Đổi điểm đi và điểm đến',
+            'calendar_next_month'     => 'Tháng sau',
+            'search'                  => 'Tìm chuyến xe',
+            'recent_searches'         => 'Tìm kiếm gần đây',
+            'banner_alt'              => 'FUTA Group - Vững tin và phát triển',
+            'swap_aria'               => 'Đổi điểm đi và điểm đến',
         ],
 
         'promotions' => [
@@ -90,16 +90,16 @@ return [
         ],
 
         'latest_news' => [
-            'title'       => 'Tin tức mới',
+            'title'         => 'Tin tức mới',
             'related_title' => 'Tin tức liên quan',
-            'subtitle'    => 'Cập nhật những thông tin mới từ Phương Trang',
-            'view_all'    => 'Xem tất cả',
-            'details'     => 'Chi tiết',
-            'empty'       => 'Chưa có tin tức mới.',
-            'image_alt'   => 'Ảnh bài viết :title',
-            'placeholder' => 'Tin tức FUTA',
-            'pages'       => 'Các trang tin tức',
-            'page'        => 'Trang :number',
+            'subtitle'      => 'Cập nhật những thông tin mới từ Phương Trang',
+            'view_all'      => 'Xem tất cả',
+            'details'       => 'Chi tiết',
+            'empty'         => 'Chưa có tin tức mới.',
+            'image_alt'     => 'Ảnh bài viết :title',
+            'placeholder'   => 'Tin tức FUTA',
+            'pages'         => 'Các trang tin tức',
+            'page'          => 'Trang :number',
         ],
 
         'futa_ecosystem' => [
@@ -157,127 +157,127 @@ return [
     ],
 
     'about' => [
-        'title' => 'Về chúng tôi - FUTA Bus Lines',
-        'heading' => 'Phương Trang',
-        'slogan' => 'Chất lượng là danh dự',
+        'title'        => 'Về chúng tôi - FUTA Bus Lines',
+        'heading'      => 'Phương Trang',
+        'slogan'       => 'Chất lượng là danh dự',
         'introduction' => 'Tập đoàn Phương Trang – FUTA Group được thành lập năm 2001. '
-            . 'Với hoạt động kinh doanh chính trong lĩnh vực mua bán xe ô tô, vận tải hành khách, '
-            . 'bất động sản và kinh doanh dịch vụ, Phương Trang dần trở thành cái tên quen thuộc '
-            . 'đồng hành cùng người Việt trên mọi lĩnh vực.',
+            .'Với hoạt động kinh doanh chính trong lĩnh vực mua bán xe ô tô, vận tải hành khách, '
+            .'bất động sản và kinh doanh dịch vụ, Phương Trang dần trở thành cái tên quen thuộc '
+            .'đồng hành cùng người Việt trên mọi lĩnh vực.',
         'history' => 'Trải qua hơn 25 năm hình thành và phát triển, đặt khách hàng là trọng tâm, '
-            . 'chúng tôi tự hào trở thành doanh nghiệp vận tải nòng cốt đóng góp tích cực vào sự phát triển '
-            . 'chung của ngành vận tải nói riêng và nền kinh tế đất nước nói chung. Luôn cải tiến mang đến '
-            . 'chất lượng dịch vụ tối ưu nhất dành cho khách hàng, Công ty Phương Trang được ghi nhận qua '
-            . 'nhiều giải thưởng và tiếp tục khẳng định vị thế thương hiệu uy tín hàng đầu Việt Nam.',
+            .'chúng tôi tự hào trở thành doanh nghiệp vận tải nòng cốt đóng góp tích cực vào sự phát triển '
+            .'chung của ngành vận tải nói riêng và nền kinh tế đất nước nói chung. Luôn cải tiến mang đến '
+            .'chất lượng dịch vụ tối ưu nhất dành cho khách hàng, Công ty Phương Trang được ghi nhận qua '
+            .'nhiều giải thưởng và tiếp tục khẳng định vị thế thương hiệu uy tín hàng đầu Việt Nam.',
         'read_more' => 'Xem thêm',
         'show_less' => 'Ẩn bớt',
-        'identity' => [
+        'identity'  => [
             'vision' => [
-                'title' => 'Tầm nhìn và sứ mệnh',
-                'image_alt' => 'Đội ngũ cùng hướng tới mục tiêu phát triển',
-                'lead' => 'Báo đáp Tổ quốc vì một Việt Nam hùng cường.',
+                'title'        => 'Tầm nhìn và sứ mệnh',
+                'image_alt'    => 'Đội ngũ cùng hướng tới mục tiêu phát triển',
+                'lead'         => 'Báo đáp Tổ quốc vì một Việt Nam hùng cường.',
                 'introduction' => 'Trở thành Tập đoàn uy tín và chất lượng hàng đầu Việt Nam với cam kết:',
-                'commitments' => [
+                'commitments'  => [
                     'Tạo môi trường làm việc năng động, thân thiện.',
                     'Phát triển từ lòng tin của khách hàng.',
                     'Trở thành tập đoàn dẫn đầu chuyên nghiệp.',
                 ],
                 'conclusion' => 'luôn phấn đấu làm việc hiệu quả nhất, để luôn cống hiến, đóng góp hết sức mình '
-                    . 'vì một Việt Nam hùng cường.',
+                    .'vì một Việt Nam hùng cường.',
             ],
             'core_values' => [
-                'title' => 'Giá trị cốt lõi',
-                'image_alt' => 'Mầm cây tượng trưng cho sự phát triển bền vững',
+                'title'        => 'Giá trị cốt lõi',
+                'image_alt'    => 'Mầm cây tượng trưng cho sự phát triển bền vững',
                 'introduction' => 'Giá trị cốt lõi – Phương Trang',
-                'items' => [
+                'items'        => [
                     'Phương: chữ “Phương” trong tiếng Hán nghĩa là Vuông, vật gì hình thể ngay thẳng đều gọi '
-                        . 'là phương; thể hiện sự chính trực, phẩm chất đạo đức tốt đẹp và mối quan hệ bền vững.',
+                        .'là phương; thể hiện sự chính trực, phẩm chất đạo đức tốt đẹp và mối quan hệ bền vững.',
                     'Trang: mang nghĩa To lớn, Tráng lệ. Hướng tới sự thành công vượt bậc, thể hiện ý chí, '
-                        . 'khát vọng thực hiện những mục tiêu lớn và đem lại giá trị lớn cho cộng đồng, xã hội.',
+                        .'khát vọng thực hiện những mục tiêu lớn và đem lại giá trị lớn cho cộng đồng, xã hội.',
                     'Phương Trang với hàm nghĩa càng phát triển, càng to lớn lại càng phải “CHÍNH TRỰC”; '
-                        . 'luôn là biểu tượng của sự phát triển dựa trên những giá trị đạo đức tốt đẹp nhất.',
+                        .'luôn là biểu tượng của sự phát triển dựa trên những giá trị đạo đức tốt đẹp nhất.',
                 ],
             ],
             'philosophy' => [
-                'title' => 'Triết lý',
-                'image_alt' => 'Minh họa triết lý tăng trưởng bền vững',
+                'title'       => 'Triết lý',
+                'image_alt'   => 'Minh họa triết lý tăng trưởng bền vững',
                 'description' => 'Hội nhập và phát triển góp phần vào sự thịnh vượng của đất nước. Nguồn nhân lực '
-                    . 'chính là tài sản lớn nhất của Công ty Phương Trang; vì vậy chúng tôi chú trọng xây dựng '
-                    . 'môi trường làm việc hiện đại, năng động, thân thiện và trao cơ hội phát triển nghề nghiệp '
-                    . 'cho mọi thành viên. Sự hài lòng của khách hàng là minh chứng cho chất lượng dịch vụ và '
-                    . 'là nền tảng để Phương Trang thấu hiểu nhu cầu, mang đến sản phẩm dịch vụ hoàn hảo.',
+                    .'chính là tài sản lớn nhất của Công ty Phương Trang; vì vậy chúng tôi chú trọng xây dựng '
+                    .'môi trường làm việc hiện đại, năng động, thân thiện và trao cơ hội phát triển nghề nghiệp '
+                    .'cho mọi thành viên. Sự hài lòng của khách hàng là minh chứng cho chất lượng dịch vụ và '
+                    .'là nền tảng để Phương Trang thấu hiểu nhu cầu, mang đến sản phẩm dịch vụ hoàn hảo.',
             ],
         ],
         'sections' => [
             'futabus' => [
-                'title' => 'FUTA Bus Lines',
-                'image_alt' => 'Đội xe khách FUTA Bus Lines',
+                'title'      => 'FUTA Bus Lines',
+                'image_alt'  => 'Đội xe khách FUTA Bus Lines',
                 'paragraphs' => [
                     'Tuân thủ phương châm “Chất lượng là danh dự”, Công ty Cổ phần Xe khách '
-                        . 'Phương Trang – FUTA Bus Lines hiện khai thác hơn 350 phòng vé, trạm trung chuyển '
-                        . 'trên khắp cả nước với đội ngũ nhân sự vận hành chuyên nghiệp.',
+                        .'Phương Trang – FUTA Bus Lines hiện khai thác hơn 350 phòng vé, trạm trung chuyển '
+                        .'trên khắp cả nước với đội ngũ nhân sự vận hành chuyên nghiệp.',
                     'Sở hữu hàng nghìn đầu xe chất lượng cao cùng mạng lưới tuyến rộng khắp, FUTA Bus Lines '
-                        . 'phục vụ hàng triệu lượt khách mỗi năm và không ngừng nâng cao trải nghiệm hành trình.',
+                        .'phục vụ hàng triệu lượt khách mỗi năm và không ngừng nâng cao trải nghiệm hành trình.',
                 ],
             ],
             'land' => [
-                'title' => 'FUTA Land',
-                'image_alt' => 'Toàn cảnh thành phố Đà Nẵng',
+                'title'      => 'FUTA Land',
+                'image_alt'  => 'Toàn cảnh thành phố Đà Nẵng',
                 'paragraphs' => [
                     'Trong lĩnh vực bất động sản, FUTA Group phát triển những sản phẩm chất lượng cao '
-                        . 'tại Đà Nẵng và nhiều địa phương, hướng đến không gian sống hiện đại, tiện nghi '
-                        . 'và giá trị bền vững cho cộng đồng.',
+                        .'tại Đà Nẵng và nhiều địa phương, hướng đến không gian sống hiện đại, tiện nghi '
+                        .'và giá trị bền vững cho cộng đồng.',
                 ],
             ],
             'express' => [
-                'title' => 'FUTA Express',
-                'image_alt' => 'Nhân viên giao nhận FUTA Express',
+                'title'      => 'FUTA Express',
+                'image_alt'  => 'Nhân viên giao nhận FUTA Express',
                 'paragraphs' => [
                     'Được thành lập năm 2012, FUTA Express cung cấp dịch vụ vận tải hành khách và hàng hóa '
-                        . 'trên toàn quốc với quy trình chuyên nghiệp, an toàn và đúng thời gian.',
+                        .'trên toàn quốc với quy trình chuyên nghiệp, an toàn và đúng thời gian.',
                     'Mạng lưới hoạt động liên tục tại nhiều tỉnh thành đáp ứng đa dạng nhu cầu từ bưu phẩm, '
-                        . 'bưu kiện, thư tín đến hàng hóa; đồng thời cung cấp các tiện ích như thu hộ COD, '
-                        . 'giao nhận tận nơi và phát hàng bằng mã OTP.',
+                        .'bưu kiện, thư tín đến hàng hóa; đồng thời cung cấp các tiện ích như thu hộ COD, '
+                        .'giao nhận tận nơi và phát hàng bằng mã OTP.',
                 ],
             ],
             'city_bus' => [
-                'title' => 'FUTA City Bus',
-                'image_alt' => 'Đội xe buýt FUTA City Bus',
+                'title'      => 'FUTA City Bus',
+                'image_alt'  => 'Đội xe buýt FUTA City Bus',
                 'paragraphs' => [
                     'FUTA City Bus là một phần trong chiến lược phát triển bền vững của FUTA Group, tập trung '
-                        . 'vào vận tải hành khách công cộng với đội xe chất lượng cao và đội ngũ chuyên nghiệp.',
+                        .'vào vận tải hành khách công cộng với đội xe chất lượng cao và đội ngũ chuyên nghiệp.',
                     'Dịch vụ đang mở rộng tại nhiều tỉnh thành, góp phần giảm phương tiện cá nhân và xây dựng '
-                        . 'hệ thống giao thông hiện đại, thuận tiện, thân thiện với môi trường.',
+                        .'hệ thống giao thông hiện đại, thuận tiện, thân thiện với môi trường.',
                 ],
             ],
             'advertising' => [
-                'title' => 'FUTA Advertising',
-                'image_alt' => 'Minh họa hoạt động quảng cáo và truyền thông',
+                'title'      => 'FUTA Advertising',
+                'image_alt'  => 'Minh họa hoạt động quảng cáo và truyền thông',
                 'paragraphs' => [
                     'FUTA Advertising khai thác quảng cáo trên hệ sinh thái FUTA Group với nhiều hình thức '
-                        . 'như quảng cáo xe tuyến đường dài, xe taxi, hàng hóa và các nền tảng số.',
+                        .'như quảng cáo xe tuyến đường dài, xe taxi, hàng hóa và các nền tảng số.',
                     'Đơn vị hướng đến các giải pháp tiếp thị toàn diện, hiệu quả, kết hợp kinh nghiệm vận hành '
-                        . 'với công nghệ quảng cáo kỹ thuật số hiện đại.',
+                        .'với công nghệ quảng cáo kỹ thuật số hiện đại.',
                 ],
             ],
             'rest_stop' => [
-                'title' => 'FUTA Rest Stop',
-                'image_alt' => 'Trạm dừng chân Phúc Lộc',
+                'title'      => 'FUTA Rest Stop',
+                'image_alt'  => 'Trạm dừng chân Phúc Lộc',
                 'paragraphs' => [
                     'Hệ thống Trạm dừng Phúc Lộc được đầu tư tại các khu vực trọng điểm, phục vụ hành khách '
-                        . 'trên những hành trình dài với không gian nghỉ ngơi thoải mái và dịch vụ chu đáo.',
+                        .'trên những hành trình dài với không gian nghỉ ngơi thoải mái và dịch vụ chu đáo.',
                     'Trạm hoạt động 24/7, cung cấp thực đơn phong phú cùng nhiều sản vật địa phương, đáp ứng '
-                        . 'nhu cầu nghỉ ngơi, ăn uống và mua sắm của hành khách.',
+                        .'nhu cầu nghỉ ngơi, ăn uống và mua sắm của hành khách.',
                 ],
             ],
             'application' => [
-                'title' => 'FUTA Application',
-                'image_alt' => 'Ứng dụng FUTA trên điện thoại',
+                'title'      => 'FUTA Application',
+                'image_alt'  => 'Ứng dụng FUTA trên điện thoại',
                 'paragraphs' => [
                     'Ứng dụng FUTA kết nối khách hàng với hệ sinh thái dịch vụ trên một nền tảng thuận tiện, '
-                        . 'từ mua vé, đi lại, vận chuyển đến các chương trình ưu đãi thanh toán.',
+                        .'từ mua vé, đi lại, vận chuyển đến các chương trình ưu đãi thanh toán.',
                     'Khách hàng có thể đặt xe, tích lũy điểm, đổi vé và theo dõi các tiện ích cá nhân ngay trên '
-                        . 'điện thoại, giúp mỗi hành trình trở nên nhanh chóng và chủ động hơn.',
+                        .'điện thoại, giúp mỗi hành trình trở nên nhanh chóng và chủ động hơn.',
                 ],
             ],
         ],
