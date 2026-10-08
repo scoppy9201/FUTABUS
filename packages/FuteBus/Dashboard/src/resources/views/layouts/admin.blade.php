@@ -14,8 +14,10 @@
         ::-webkit-scrollbar-thumb { background: #f2652255; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #F26522; }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.13.0/lottie.min.js" defer></script>
 </head>
 <body class="bg-[#F8F9FA] text-gray-800 antialiased min-h-screen flex flex-col" x-data="{ sidebarOpen: false }">
+    @include('core::partials.global-loader')
 
     <!-- HEADER -->
     <header class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">

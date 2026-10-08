@@ -10,25 +10,21 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-{
-    Schema::table('buses', function (Blueprint $table) {
-        if (! Schema::hasColumn('buses', 'vehicle_type_id')) {
-            $table->foreignId('vehicle_type_id')->nullable()->after('bus_company_id')
-                  ->constrained('vehicle_types')->nullOnDelete();
-        }
-        $table->string('color', 50)->nullable()->after('license_plate');
-        $table->string('chassis_number', 50)->nullable()->unique()->after('color');
-        $table->string('brand', 100)->nullable()->after('chassis_number');
-        $table->unsignedSmallInteger('manufacture_year')->nullable()->after('brand');
-        $table->string('bus_type')->nullable()->change(); 
-    });
-}
+    {
+        Schema::table('buses', function (Blueprint $table) {
+            $table->string('color', 50)->nullable()->after('license_plate');
+            $table->string('chassis_number', 50)->nullable()->unique()->after('color');
+            $table->string('brand', 100)->nullable()->after('chassis_number');
+            $table->unsignedSmallInteger('manufacture_year')->nullable()->after('brand');
+            $table->string('bus_type')->nullable()->change();
+        });
+    }
 
-public function down(): void
-{
-    Schema::table('buses', function (Blueprint $table) {
-        $table->dropUnique(['chassis_number']);
-        $table->dropColumn(['color', 'chassis_number', 'brand', 'manufacture_year']);
-    });
-}
+    public function down(): void
+    {
+        Schema::table('buses', function (Blueprint $table) {
+            $table->dropUnique(['chassis_number']);
+            $table->dropColumn(['color', 'chassis_number', 'brand', 'manufacture_year']);
+        });
+    }
 };

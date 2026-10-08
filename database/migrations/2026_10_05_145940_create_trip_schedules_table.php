@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -24,21 +23,15 @@ return new class extends Migration
 
         Schema::table('trips', function (Blueprint $table) {
             $table->foreignId('trip_schedule_id')->nullable()->after('id')
-                  ->constrained('trip_schedules')->nullOnDelete();
+                ->constrained('trip_schedules')->nullOnDelete();
             $table->unique(['trip_schedule_id', 'departure_time']);
             $table->unsignedBigInteger('bus_id')->nullable()->change();
+            $table->string('status', 20)->default('scheduled')->change();
         });
-
-        DB::statement("ALTER TABLE trips MODIFY status
-            ENUM('unassigned','scheduled','departed','arrived','cancelled') NOT NULL DEFAULT 'scheduled'");
     }
 
     public function down(): void
     {
-        DB::table('trips')->where('status', 'unassigned')->delete();
-        DB::statement("ALTER TABLE trips MODIFY status
-            ENUM('scheduled','departed','arrived','cancelled') NOT NULL DEFAULT 'scheduled'");
-
         Schema::table('trips', function (Blueprint $table) {
             $table->dropUnique(['trip_schedule_id', 'departure_time']);
             $table->dropConstrainedForeignId('trip_schedule_id');

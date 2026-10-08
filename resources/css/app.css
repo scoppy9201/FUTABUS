@@ -1,4 +1,9 @@
 @import "tailwindcss";
+@import "./global-loader.css";
+@import "./trip-card.css";
+@import "./trip-search-sidebar.css";
+@import "./trip-seats.css";
+@import "./trip-login-prompt.css";
 
 @source "../../packages/FuteBus/Core/src/resources/views/**/*.blade.php";
 @source "../../packages/FuteBus/Auth/src/resources/views/**/*.blade.php";
