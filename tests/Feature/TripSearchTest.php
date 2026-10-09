@@ -92,6 +92,36 @@ class TripSearchTest extends TestCase
             ->assertViewHas('selectedSeatIds', $twoSeatIds)
             ->assertSee('limit: 5', false);
 
+        $paymentUrl = route('trip-booking.payment.store', ['trip' => $trips[0]['id'], ...$query]);
+        $paymentData = [
+            'name'         => 'Nguyen Van A',
+            'phone'        => '0912345678',
+            'email'        => 'customer@example.com',
+            'accept_terms' => '1',
+            'seats'        => [$twoSeatIds[0]],
+            'pickup_mode'  => 'station',
+            'dropoff_mode' => 'station',
+        ];
+        $paymentResponse = $this->post($paymentUrl, $paymentData)->assertRedirect();
+        $this->get($paymentResponse->headers->get('Location'))
+            ->assertOk()
+            ->assertSee('Chọn phương thức thanh toán')
+            ->assertSee('Mã SePay sẽ hiển thị khi cấu hình ngân hàng và tài khoản nhận tiền.')
+            ->assertSee('Thời gian tới điểm lên xe')
+            ->assertSee('Thời gian nhận khách')
+            ->assertSee('Chỉ được chuyển đổi vé 1 lần duy nhất')
+            ->assertSee('Nguyen Van A')
+            ->assertSee('300.000đ');
+        $this->travel(11)->minutes();
+        $this->get($paymentResponse->headers->get('Location'))
+            ->assertRedirect(route('home').'#trip-search');
+        $this->travelBack();
+        $this->post($paymentUrl, [...$paymentData, 'seats' => [999999]])
+            ->assertSessionHasErrors('seats');
+        $this->get(route('trip-payment-preview.show', ['draft' => 'unknown']))
+            ->assertRedirect(route('home').'#trip-search');
+        $this->assertDatabaseCount('bookings', 0);
+
         $this->get(route('trip-booking.show', ['trip' => 999999, ...$query]))->assertNotFound();
 
         $this->get(route('trip-search', [...$query, 'departure' => 'Hà Nội']))

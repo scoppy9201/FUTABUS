@@ -220,7 +220,7 @@
                 return;
             }
             if (!this.$refs.bookingForm.reportValidity()) return;
-            this.notify(@js(__('core::booking.payment_pending')));
+            this.$refs.bookingForm.submit();
         },
         continueBooking() {
             this.openCaptcha();
