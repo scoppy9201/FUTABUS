@@ -12,6 +12,9 @@
 @import "./trip-booking-modal.css";
 @import "./trip-booking-captcha.css";
 @import "./trip-booking-responsive.css";
+@import "./trip-payment-preview.css";
+@import "./trip-payment-methods.css";
+@import "./trip-payment-qr.css";
 @import "./brand-interactions.css";
 
 @source "../../packages/FuteBus/Core/src/resources/views/**/*.blade.php";

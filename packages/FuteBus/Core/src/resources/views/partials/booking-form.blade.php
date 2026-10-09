@@ -1,4 +1,10 @@
-<form class="booking-page__form" x-ref="bookingForm" novalidate @submit.prevent="continueBooking()">
+<form class="booking-page__form" x-ref="bookingForm" novalidate method="POST"
+    action="{{ route('trip-booking.payment.store', array_merge(['trip' => $trip['id']], $criteria, ['direction' => request('direction')])) }}"
+    @submit.prevent="continueBooking()">
+    @csrf
+    <template x-for="id in selectedIds" :key="id">
+        <input type="hidden" name="seats[]" :value="id">
+    </template>
     <section class="booking-panel" aria-labelledby="booking-customer-title">
         <div class="booking-page__customer-grid">
             <div class="booking-page__fields">
@@ -52,7 +58,7 @@
             </div>
         </div>
         <div class="booking-page__accept">
-            <input id="booking-accept-terms" type="checkbox" x-ref="acceptTerms" required>
+            <input id="booking-accept-terms" name="accept_terms" value="1" type="checkbox" x-ref="acceptTerms" required>
             <span>
                 <button type="button" class="booking-page__terms-link"
                     x-ref="termsModalTrigger" @click="openTermsModal()"
