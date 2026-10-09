@@ -8,12 +8,17 @@
         deckFilters: [],
         sortBy: 'departure',
         sortHighlights: { price: true, departure: true, seats: false },
-        selectedTrip: null,
         openTripId: null,
         openPanel: null,
         selectedSeatIds: {},
-        seatNotice: '',
-        seatNoticeTimer: null,
+        openBooking(trip) {
+            const url = new URL(@js(route('trip-booking.show', ['trip' => 0])), window.location.href);
+            url.pathname = url.pathname.replace(/\/0$/, '/' + trip.id);
+            url.search = window.location.search;
+            url.searchParams.set('direction', @js($direction));
+            url.searchParams.set('seats', this.selectedSeats(trip).map(seat => seat.id).join(','));
+            window.location.assign(url.toString());
+        },
         selectedSeats(trip) {
             const ids = this.selectedSeatIds[trip.id] ?? trip.demo_selected_seat_ids ?? [];
             return trip.seats.filter(seat => ids.includes(seat.id));
@@ -22,9 +27,7 @@
             return this.selectedSeats(trip).some(selected => selected.id === seat.id);
         },
         showSeatNotice(message) {
-            this.seatNotice = message;
-            clearTimeout(this.seatNoticeTimer);
-            this.seatNoticeTimer = setTimeout(() => this.seatNotice = '', 3500);
+            window.FutaNotify?.show(message, { tone: 'warning' });
         },
         toggleSeat(trip, seat) {
             if (seat.sold) return;
@@ -130,7 +133,6 @@
     }"
     class="trip-search-results grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]"
 >
-    <div class="trip-seat-notice" x-show="seatNotice" x-transition.opacity x-cloak role="alert" x-text="seatNotice"></div>
     <div class="trip-search-results__aside self-start space-y-4">
         <template x-if="activeTrip()">
             <div class="trip-selection-summary">
@@ -288,11 +290,9 @@
                             <button type="button" @click="togglePanel(trip.id, 'policy')" :aria-expanded="openTripId === trip.id && openPanel === 'policy'" :class="{ 'is-active': openTripId === trip.id && openPanel === 'policy' }">{{ __('core::trip-search.policy') }}</button>
                         </div>
                         <button type="button"
-                            @click="selectedTrip = selectedTrip === trip.id ? null : trip.id"
-                            :aria-pressed="selectedTrip === trip.id"
-                            :class="selectedTrip === trip.id || openTripId === trip.id ? 'is-selected' : ''"
-                            class="trip-card__select"
-                            x-text="selectedTrip === trip.id ? @js(__('core::trip-search.selected')) : @js(__('core::trip-search.select_trip'))"></button>
+                            @click="openBooking(trip)"
+                            :class="openTripId === trip.id ? 'is-selected' : ''"
+                            class="trip-card__select">{{ __('core::trip-search.select_trip') }}</button>
                     </div>
                     <div class="trip-card__detail" :class="{ 'is-seats': openPanel === 'seats' }" x-show="openTripId === trip.id && openPanel !== null" x-cloak>
                         <div x-show="openPanel === 'seats'" class="trip-card__seat-panel">
@@ -333,7 +333,7 @@
                                     <span>{{ __('core::trip-search.total_price') }}</span>
                                     <strong x-text="money(selectedSeats(trip).length * trip.price)"></strong>
                                 </div>
-                                <button type="button" @click="selectedSeats(trip).length ? selectedTrip = trip.id : showSeatNotice(@js(__('core::trip-search.select_seat_notice')))" :disabled="trip.seats.length === 0">{{ __('core::trip-search.confirm_seats') }}</button>
+                                <button type="button" @click="selectedSeats(trip).length ? openBooking(trip) : showSeatNotice(@js(__('core::trip-search.select_seat_notice')))" :disabled="trip.seats.length === 0">{{ __('core::trip-search.confirm_seats') }}</button>
                             </div>
                         </div>
                         <div x-show="openPanel === 'schedule'" class="trip-card__detail-content">

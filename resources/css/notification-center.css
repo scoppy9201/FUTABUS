@@ -1,0 +1,116 @@
+.futa-notifications {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9998;
+    display: grid;
+    gap: 12px;
+    width: min(384px, calc(100vw - 32px));
+    pointer-events: none;
+}
+
+.futa-notification {
+    position: relative;
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr) 18px;
+    align-items: start;
+    gap: 14px;
+    overflow: hidden;
+    padding: 20px 20px 22px 22px;
+    border: 1px solid #f1eee9;
+    border-radius: 9px;
+    background: #fff;
+    box-shadow: 0 6px 16px rgb(0 0 0 / 8%), 0 3px 6px -4px rgb(0 0 0 / 12%), 0 9px 28px 8px rgb(0 0 0 / 5%);
+    color: #202124;
+    pointer-events: auto;
+    animation: futa-notification-enter 220ms ease-out both;
+}
+
+.futa-notification.is-leaving {
+    animation: futa-notification-leave 180ms ease-in both;
+}
+
+.futa-notification__icon {
+    display: grid;
+    width: 22px;
+    height: 22px;
+    place-items: center;
+    margin-top: 1px;
+    border: 2px solid #ef5222;
+    border-radius: 50%;
+    color: #ef5222;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1;
+}
+.futa-notification.is-success .futa-notification__icon { font-size: 14px; }
+.futa-notification.is-error .futa-notification__icon { font-size: 18px; }
+
+.futa-notification__content { min-width: 0; }
+.futa-notification__title {
+    display: block;
+    color: #202124;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+}
+.futa-notification__message {
+    margin-top: 6px;
+    color: #4b5563;
+    font-size: 14px;
+    line-height: 22px;
+    overflow-wrap: anywhere;
+}
+.futa-notification__close {
+    display: grid;
+    width: 20px;
+    height: 20px;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #8c8c8c;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+.futa-notification__close:hover { color: #ef5222; }
+.futa-notification__close:focus-visible { outline: 2px solid #ef5222; outline-offset: 3px; }
+
+.futa-notification::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: #ef5222;
+    content: '';
+    transform-origin: left;
+    animation: futa-notification-progress var(--notification-duration) linear forwards;
+}
+
+@keyframes futa-notification-enter {
+    from { opacity: 0; transform: translateX(24px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes futa-notification-leave {
+    to { opacity: 0; transform: translateX(24px); }
+}
+@keyframes futa-notification-progress {
+    to { transform: scaleX(0); }
+}
+
+@media (max-width: 640px) {
+    .futa-notifications {
+        top: 12px;
+        right: 12px;
+        gap: 8px;
+    }
+    .futa-notification { padding: 16px 16px 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .futa-notification,
+    .futa-notification.is-leaving,
+    .futa-notification::after { animation: none; }
+}

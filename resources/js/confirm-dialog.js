@@ -5,8 +5,6 @@ if (dialog) {
     const message = dialog.querySelector('#global-confirm-message');
     const cancel = dialog.querySelector('[data-confirm-cancel]');
     const accept = dialog.querySelector('[data-confirm-accept]');
-    const warningIcon = dialog.querySelector('[data-dialog-warning-icon]');
-    const infoIcon = dialog.querySelector('[data-dialog-info-icon]');
     const allowedForms = new WeakSet();
 
     let pendingForm = null;
@@ -15,7 +13,6 @@ if (dialog) {
     let isClosing = false;
     let openAnimation = null;
     let openBackdropAnimation = null;
-    let noticeMode = false;
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -67,26 +64,19 @@ if (dialog) {
         isClosing = false;
     }
 
-    function openDialog(source, isNotice = false) {
+    function openDialog(source) {
         if (dialog.open || isClosing) {
             return;
         }
 
-        noticeMode = isNotice;
         previousFocus = document.activeElement;
-        title.textContent = source.dataset.noticeTitle || source.dataset.confirmTitle || dialog.dataset.defaultTitle;
-        message.textContent = source.dataset.noticeMessage || source.dataset.confirmMessage || dialog.dataset.defaultMessage;
-        accept.textContent = source.dataset.noticeLabel || source.dataset.confirmLabel || dialog.dataset.defaultConfirm;
-        cancel.hidden = isNotice;
+        title.textContent = source.dataset.confirmTitle || dialog.dataset.defaultTitle;
+        message.textContent = source.dataset.confirmMessage || dialog.dataset.defaultMessage;
+        accept.textContent = source.dataset.confirmLabel || dialog.dataset.defaultConfirm;
         accept.disabled = false;
-        const showWarning = !isNotice || source.dataset.noticeTone === 'warning';
-        warningIcon.classList.toggle('grid', showWarning);
-        warningIcon.classList.toggle('hidden', !showWarning);
-        infoIcon.classList.toggle('grid', !showWarning);
-        infoIcon.classList.toggle('hidden', showWarning);
 
         dialog.showModal();
-        (isNotice ? accept : cancel).focus();
+        cancel.focus();
 
         if (!reducedMotion.matches) {
             openAnimation = dialog.animate(
@@ -100,6 +90,17 @@ if (dialog) {
             );
             openBackdropAnimation = animateBackdrop([{ opacity: 0 }, { opacity: 1 }], 260);
         }
+    }
+
+    function showNotice(source) {
+        window.FutaNotify?.show(
+            source.dataset.noticeMessage || source.dataset.confirmMessage || dialog.dataset.defaultMessage,
+            {
+                title: source.dataset.noticeTitle || source.dataset.confirmTitle || dialog.dataset.defaultTitle,
+                tone: source.dataset.noticeTone || 'info',
+                duration: source.dataset.noticeDuration,
+            },
+        );
     }
 
     document.addEventListener('submit', (event) => {
@@ -126,24 +127,24 @@ if (dialog) {
 
         if (trigger) {
             event.preventDefault();
-            openDialog(trigger, true);
+            showNotice(trigger);
         }
     });
 
     const initialNotice = document.querySelector('[data-notice-on-load]');
     if (initialNotice) {
-        requestAnimationFrame(() => openDialog(initialNotice, true));
+        requestAnimationFrame(() => showNotice(initialNotice));
     }
 
     cancel.addEventListener('click', () => void closeDialog());
     dialog.addEventListener('click', (event) => {
-        if (event.target === dialog && !noticeMode) {
+        if (event.target === dialog) {
             void closeDialog();
         }
     });
     dialog.addEventListener('cancel', (event) => {
         event.preventDefault();
-        if (!noticeMode) void closeDialog();
+        void closeDialog();
     });
 
     dialog.addEventListener('close', () => {
@@ -152,16 +153,9 @@ if (dialog) {
         accept.disabled = false;
         previousFocus?.focus();
         previousFocus = null;
-        noticeMode = false;
     });
 
     accept.addEventListener('click', async () => {
-        if (noticeMode) {
-            accept.disabled = true;
-            await closeDialog();
-            return;
-        }
-
         const form = pendingForm;
         const submitter = pendingSubmitter;
 

@@ -77,20 +77,6 @@
     white-space: nowrap;
 }
 
-.trip-seat-notice {
-    position: fixed;
-    top: 24px;
-    right: 24px;
-    z-index: 10000;
-    max-width: min(360px, calc(100vw - 32px));
-    padding: 12px 16px;
-    border-left: 4px solid #ef5222;
-    border-radius: 9px;
-    background: #fff;
-    box-shadow: 0 12px 32px rgb(15 23 42 / 22%);
-    color: #020617;
-    font-size: 14px;
-}
 
 .trip-filter-time-checkbox:checked {
     background-image: radial-gradient(circle, white 0 3px, transparent 3.5px);
@@ -105,7 +91,6 @@
     }
     .trip-card__seat-checkout button { padding: 7px 10px; }
     .trip-card__seat-payment strong { font-size: 12px; }
-    .trip-seat-notice { top: 12px; right: 12px; }
 }
 
 .trip-card__seat-legend {
