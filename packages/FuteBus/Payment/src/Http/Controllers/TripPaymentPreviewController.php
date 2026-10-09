@@ -2,16 +2,19 @@
 
 declare(strict_types=1);
 
-namespace FuteBus\Core\Http\Controllers;
+namespace FuteBus\Payment\Http\Controllers;
 
 use FuteBus\Core\Http\Requests\TripSearchRequest;
 use FuteBus\Core\Services\BookingLocationCatalog;
-use FuteBus\Core\Services\SePayQrService;
 use FuteBus\Core\Services\TripSearchService;
+use FuteBus\Payment\Services\SePayPaymentService;
+use FuteBus\Payment\Services\SePayQrService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -23,6 +26,7 @@ class TripPaymentPreviewController extends Controller
         TripSearchRequest $request,
         TripSearchService $search,
         BookingLocationCatalog $locations,
+        SePayPaymentService $payments,
         int $trip
     ): RedirectResponse {
         $criteria = $request->validated();
@@ -70,7 +74,8 @@ class TripPaymentPreviewController extends Controller
             : $this->addressFor($selectedTrip['destination'], $catalog);
 
         $token = (string) Str::uuid();
-        $request->session()->put('trip_payment_preview', [
+        $preview = [
+            'user_id'    => $request->user()?->id,
             'token'      => $token,
             'created_at' => now()->timestamp,
             'trip'       => [
@@ -98,38 +103,72 @@ class TripPaymentPreviewController extends Controller
                 'name'    => $dropoffName,
                 'address' => $dropoffAddress,
             ],
-        ]);
+        ];
+
+        if ($payments->ready()) {
+            $payments->createIntent($preview);
+        }
+        $request->session()->put('trip_payment_preview', $preview);
 
         return redirect()->route('trip-payment-preview.show', ['draft' => $token]);
     }
 
-    public function show(Request $request, SePayQrService $sePay, string $draft): View|RedirectResponse
+    public function show(Request $request, SePayQrService $sePay, SePayPaymentService $payments, string $draft): View|RedirectResponse
     {
+        $intent = DB::table('sepay_payment_intents')->where('token', $draft)->first();
+        if ($intent?->status === 'paid') {
+            return view('Payment::trip-payment-success', [
+                'bookingCode' => DB::table('bookings')->where('id', $intent->booking_id)->value('booking_code'),
+                'preview'     => json_decode($intent->snapshot, true),
+            ]);
+        }
+        if ($intent?->status === 'needs_review') {
+            return view('Payment::trip-payment-review', ['paymentCode' => $intent->code]);
+        }
+
         $preview = $request->session()->get('trip_payment_preview');
         if (! is_array($preview) || ($preview['token'] ?? null) !== $draft) {
             return redirect()->to(route('home').'#trip-search');
         }
 
-        if (($preview['created_at'] ?? 0) + 600 <= now()->timestamp) {
+        if (($preview['created_at'] ?? 0) + 600 <= now()->timestamp
+            || ($intent !== null && $intent->expires_at <= now()->toDateTimeString())) {
+            if ($intent !== null && $intent->status === 'pending') {
+                DB::table('sepay_payment_intents')->where('id', $intent->id)
+                    ->update(['status' => 'expired', 'updated_at' => now()]);
+            }
             $request->session()->forget('trip_payment_preview');
 
             return redirect()->to(route('home').'#trip-search');
         }
 
-        $qrUrl = $preview['sepay_qr_url'] ?? null;
-        if ($qrUrl === null && $sePay->configured()) {
-            $reference = 'FUTA'.substr(str_replace('-', '', $draft), 0, 16);
-            $amount = count($preview['seats']) * $preview['trip']['fare'];
-            $qrUrl = $sePay->generate($amount, $reference);
-            if ($qrUrl !== null) {
-                $request->session()->put('trip_payment_preview.sepay_qr_url', $qrUrl);
-            }
+        $qrUrl = $intent !== null && $intent->status === 'pending' && $payments->ready()
+            ? $sePay->generate((int) $intent->amount, $intent->code)
+            : null;
+
+        return view('Payment::trip-payment-preview', [
+            'preview'        => $preview,
+            'sePayQrUrl'     => $qrUrl,
+            'paymentEnabled' => $qrUrl !== null,
+        ]);
+    }
+
+    public function status(Request $request, string $draft): JsonResponse
+    {
+        $preview = $request->session()->get('trip_payment_preview');
+        if (! is_array($preview) || ($preview['token'] ?? null) !== $draft) {
+            return response()->json(['status' => 'expired'], 200)->header('Cache-Control', 'no-store');
         }
 
-        return view('core::trip-payment-preview', [
-            'preview'       => $preview,
-            'sePayQrUrl'    => $qrUrl,
-        ]);
+        $intent = DB::table('sepay_payment_intents')->where('token', $draft)->first();
+        $status = $intent?->status ?? 'preview';
+        if ($status === 'pending' && $intent->expires_at <= now()->toDateTimeString()) {
+            DB::table('sepay_payment_intents')->where('id', $intent->id)
+                ->update(['status' => 'expired', 'updated_at' => now()]);
+            $status = 'expired';
+        }
+
+        return response()->json(['status' => $status])->header('Cache-Control', 'no-store');
     }
 
     private function addressFor(string $station, array $catalog): ?string

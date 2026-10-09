@@ -16,25 +16,25 @@
         <dd class="payment-page__green">{{ implode(', ', $preview['seats']) }}</dd>
     </div>
     <div>
-        <dt>{{ __('core::booking.payment_pickup') }}</dt>
+        <dt>{{ __('Payment::payment.payment_pickup') }}</dt>
         <dd>{{ $preview['pickup']['name'] }}</dd>
     </div>
     <div class="payment-page__address-row">
-        <dd>{{ $preview['pickup']['address'] ?: __('core::booking.payment_address_pending') }}</dd>
+        <dd>{{ $preview['pickup']['address'] ?: __('Payment::payment.payment_address_pending') }}</dd>
     </div>
     <div>
-        <dt>{{ __('core::booking.payment_boarding_time') }}</dt>
+        <dt>{{ __('Payment::payment.payment_boarding_time') }}</dt>
         <dd class="payment-page__boarding-time">
             {{ __('core::booking.before_time') }}
             {{ \Illuminate\Support\Carbon::parse($preview['pickup']['arrival_time'])->format('H:i d/m/Y') }}
         </dd>
     </div>
     <div>
-        <dt>{{ __('core::booking.payment_dropoff') }}</dt>
+        <dt>{{ __('Payment::payment.payment_dropoff') }}</dt>
         <dd>{{ $preview['dropoff']['name'] }}</dd>
     </div>
     <div class="payment-page__address-row">
-        <dd>{{ $preview['dropoff']['address'] ?: __('core::booking.payment_address_pending') }}</dd>
+        <dd>{{ $preview['dropoff']['address'] ?: __('Payment::payment.payment_address_pending') }}</dd>
     </div>
     <div class="payment-page__total-row payment-page__trip-total">
         <dt>{{ __('core::booking.trip_total') }}</dt>

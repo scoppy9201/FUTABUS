@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use FuteBus\Core\Services\SePayQrService;
+use FuteBus\Payment\Services\SePayQrService;
 use Tests\TestCase;
 
 class SePayQrServiceTest extends TestCase
