@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FuteBus\Payment\Http\Controllers;
 
 use FuteBus\Payment\Services\SePayPaymentService;
+use FuteBus\Payment\Services\SePayWebhookAuthenticator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -12,14 +13,16 @@ use Illuminate\Support\Facades\Validator;
 
 class SePayWebhookController extends Controller
 {
-    public function __invoke(Request $request, SePayPaymentService $payments): JsonResponse
-    {
-        $key = config('services.sepay.webhook_key');
+    public function __invoke(
+        Request $request,
+        SePayPaymentService $payments,
+        SePayWebhookAuthenticator $authenticator
+    ): JsonResponse {
         if (! $payments->ready()) {
             return response()->json(['success' => false], 503);
         }
 
-        if (! hash_equals('Apikey '.$key, (string) $request->header('Authorization'))) {
+        if (! $authenticator->verify($request)) {
             return response()->json(['success' => false], 401);
         }
 

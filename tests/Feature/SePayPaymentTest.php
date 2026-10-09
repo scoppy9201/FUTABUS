@@ -22,10 +22,12 @@ class SePayPaymentTest extends TestCase
         parent::setUp();
 
         config()->set('services.sepay', [
-            'enabled'     => true,
-            'bank'        => 'VCB',
-            'account_no'  => '1234567890',
-            'webhook_key' => 'test-secret',
+            'enabled'        => true,
+            'bank'           => 'VCB',
+            'account_no'     => '1234567890',
+            'webhook_auth'   => 'hmac',
+            'webhook_secret' => 'test-secret',
+            'webhook_key'    => 'legacy-key',
         ]);
 
         $companyId = DB::table('bus_companies')->insertGetId([
@@ -94,9 +96,8 @@ class SePayPaymentTest extends TestCase
         ) === []);
 
         $event = $this->event($intent->code);
-        $this->withHeader('Authorization', 'Apikey test-secret')
-            ->postJson(route('sepay.webhook'), $event)->assertOk()->assertJson(['success' => true]);
-        $this->postJson(route('sepay.webhook'), $event)->assertOk()->assertJson(['success' => true]);
+        $this->signedWebhook($event)->assertOk()->assertJson(['success' => true]);
+        $this->signedWebhook($event)->assertOk()->assertJson(['success' => true]);
 
         $this->assertDatabaseCount('bookings', 1);
         $this->assertDatabaseCount('booked_seats', 1);
@@ -111,7 +112,7 @@ class SePayPaymentTest extends TestCase
 
     public function test_payment_does_not_show_a_transfer_qr_without_webhook_authentication(): void
     {
-        config()->set('services.sepay.webhook_key', null);
+        config()->set('services.sepay.webhook_secret', null);
         $url = $this->createIntent();
 
         $this->assertDatabaseCount('sepay_payment_intents', 0);
@@ -120,7 +121,25 @@ class SePayPaymentTest extends TestCase
             ->assertDontSee('vietqr.app/img');
     }
 
-    public function test_webhook_rejects_wrong_key_and_does_not_create_a_booking(): void
+    public function test_existing_preview_can_create_a_payment_code_after_sepay_is_enabled(): void
+    {
+        config()->set('services.sepay.enabled', false);
+        $url = $this->createIntent();
+        $this->assertDatabaseCount('sepay_payment_intents', 0);
+
+        config()->set('services.sepay.enabled', true);
+        $draft = basename(parse_url($url, PHP_URL_PATH));
+        $this->get($url)->assertOk()->assertSee('Tạo mã SePay');
+        $this->post(route('trip-payment-preview.activate', ['draft' => $draft]))
+            ->assertRedirect($url);
+
+        $this->assertDatabaseCount('sepay_payment_intents', 1);
+        $this->get($url)->assertOk()
+            ->assertSee('Thời gian giữ chỗ còn lại')
+            ->assertSee('vietqr.app/img');
+    }
+
+    public function test_webhook_rejects_missing_signature_and_does_not_create_a_booking(): void
     {
         $this->createIntent();
         $intent = DB::table('sepay_payment_intents')->first();
@@ -138,8 +157,7 @@ class SePayPaymentTest extends TestCase
         $event = $this->event($intent->code);
         $event['transferAmount'] = 100000;
 
-        $this->withHeader('Authorization', 'Apikey test-secret')
-            ->postJson(route('sepay.webhook'), $event)->assertOk();
+        $this->signedWebhook($event)->assertOk();
         $this->assertDatabaseHas('sepay_payment_intents', ['id' => $intent->id, 'status' => 'needs_review']);
         $this->assertDatabaseCount('bookings', 0);
         $this->get($url)->assertOk()->assertSee('Giao dịch cần được kiểm tra');
@@ -151,8 +169,7 @@ class SePayPaymentTest extends TestCase
         $intent = DB::table('sepay_payment_intents')->first();
 
         $this->travel(11)->minutes();
-        $this->withHeader('Authorization', 'Apikey test-secret')
-            ->postJson(route('sepay.webhook'), $this->event($intent->code))->assertOk();
+        $this->signedWebhook($this->event($intent->code))->assertOk();
         $this->assertDatabaseHas('sepay_payment_intents', ['id' => $intent->id, 'status' => 'needs_review']);
         $this->assertDatabaseCount('bookings', 0);
         $this->assertNotEmpty(app(TripSearchService::class)->search(
@@ -161,6 +178,59 @@ class SePayPaymentTest extends TestCase
             $this->criteria['departure_date'],
             1
         ));
+    }
+
+    public function test_hmac_rejects_modified_payload_and_old_timestamp(): void
+    {
+        $this->createIntent();
+        $intent = DB::table('sepay_payment_intents')->first();
+        $event = $this->event($intent->code);
+        $modified = $event;
+        $modified['transferAmount'] = 1;
+
+        $this->signedWebhook($modified, null, json_encode($event, JSON_THROW_ON_ERROR))
+            ->assertUnauthorized();
+        $this->signedWebhook($event, now()->subMinutes(6)->timestamp)
+            ->assertUnauthorized();
+        $this->assertDatabaseCount('sepay_transactions', 0);
+        $this->assertDatabaseCount('bookings', 0);
+    }
+
+    public function test_hmac_mode_does_not_accept_an_api_key_as_fallback(): void
+    {
+        $this->createIntent();
+        $intent = DB::table('sepay_payment_intents')->first();
+
+        $this->withHeader('Authorization', 'Apikey legacy-key')
+            ->postJson(route('sepay.webhook'), $this->event($intent->code))
+            ->assertUnauthorized();
+        $this->assertDatabaseCount('sepay_transactions', 0);
+    }
+
+    public function test_explicit_api_key_mode_keeps_existing_webhooks_compatible(): void
+    {
+        config()->set('services.sepay.webhook_auth', 'api_key');
+        $this->createIntent();
+        $intent = DB::table('sepay_payment_intents')->first();
+
+        $this->withHeader('Authorization', 'Apikey legacy-key')
+            ->postJson(route('sepay.webhook'), $this->event($intent->code))
+            ->assertOk()->assertJson(['success' => true]);
+        $this->assertDatabaseCount('bookings', 1);
+    }
+
+    private function signedWebhook(array $event, ?int $timestamp = null, ?string $signedBody = null)
+    {
+        $timestamp ??= now()->timestamp;
+        $body = json_encode($event, JSON_THROW_ON_ERROR);
+        $signature = hash_hmac('sha256', $timestamp.'.'.($signedBody ?? $body), 'test-secret');
+
+        return $this->call('POST', route('sepay.webhook'), [], [], [], [
+            'CONTENT_TYPE'           => 'application/json',
+            'HTTP_ACCEPT'            => 'application/json',
+            'HTTP_X_SEPAY_TIMESTAMP' => (string) $timestamp,
+            'HTTP_X_SEPAY_SIGNATURE' => 'sha256='.$signature,
+        ], $body);
     }
 
     private function createIntent(): string

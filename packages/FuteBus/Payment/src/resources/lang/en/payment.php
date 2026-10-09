@@ -26,6 +26,8 @@ return [
     'payment_hold_time'           => 'Seat hold time remaining',
     'payment_expired'             => 'This preview has expired. Please return to seat selection.',
     'payment_sepay_qr_alt'        => 'SePay bank transfer code',
+    'payment_create_qr_prompt'    => 'The receiving account is ready. Create a payment code for this booking.',
+    'payment_create_qr'           => 'Create SePay code',
     'payment_sepay_unavailable'   => 'The SePay code will appear after the receiving account and webhook are configured.',
     'payment_futapay_unavailable' => 'The FUTAPay code will appear when the service is connected.',
     'payment_scan_before'         => 'Use the',

@@ -13,6 +13,8 @@ class TripSearchTest extends TestCase
 
     public function test_search_shows_only_available_futa_trips_on_the_requested_route_and_date(): void
     {
+        config()->set('services.sepay.enabled', false);
+
         $companyId = DB::table('bus_companies')->insertGetId([
             'name' => 'FUTA Bus Lines', 'code' => 'FUTA', 'created_at' => now(), 'updated_at' => now(),
         ]);
