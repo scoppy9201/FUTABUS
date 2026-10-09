@@ -1,0 +1,18 @@
+::selection {
+    background: #ef5222;
+    color: #fff;
+}
+
+::-moz-selection {
+    background: #ef5222;
+    color: #fff;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background-color: #ef5222;
+}
+
+.trip-card__detail::-webkit-scrollbar-thumb:hover,
+.booking-page__vehicle-content::-webkit-scrollbar-thumb:hover {
+    background-color: #ef5222;
+}

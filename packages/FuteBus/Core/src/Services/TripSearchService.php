@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace FuteBus\Core\Services;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Support\Carbon;
 
 class TripSearchService
 {
@@ -27,28 +27,44 @@ class TripSearchService
             ->select(
                 'trips.id', 'trips.route_id', 'trips.departure_time', 'trips.arrival_time', 'trips.price', 'trips.available_seats',
                 'routes.origin_city', 'routes.origin_station', 'routes.destination_city', 'routes.destination_station',
-                'routes.distance_km', 'buses.id as bus_id', 'buses.capacity', 'buses.bus_type', 'buses.seat_rows',
+                'routes.distance_km', 'routes.code as route_code', 'buses.id as bus_id', 'buses.capacity', 'buses.bus_type', 'buses.seat_rows',
             )
             ->get();
 
-        $bookedSeats = DB::table('booked_seats')
+        $occupiedSeatRows = DB::table('booked_seats')
             ->join('bookings', 'bookings.id', '=', 'booked_seats.booking_id')
             ->whereIn('bookings.status', ['pending', 'confirmed', 'completed'])
             ->whereIn('booked_seats.trip_id', $trips->pluck('id'))
             ->select('booked_seats.trip_id', 'booked_seats.seat_layout_id')
-            ->get()
-            ->groupBy('trip_id');
+            ->get();
+
+        $reservedSeatRows = DB::table('sepay_payment_intents')
+            ->whereIn('trip_id', $trips->pluck('id'))
+            ->where('status', 'pending')
+            ->where('expires_at', '>', now())
+            ->get(['trip_id', 'seat_ids'])
+            ->flatMap(function ($intent): array {
+                return array_map(
+                    fn ($seatId): object => (object) [
+                        'trip_id'        => $intent->trip_id,
+                        'seat_layout_id' => (int) $seatId,
+                    ],
+                    json_decode($intent->seat_ids, true) ?: []
+                );
+            });
+        $bookedSeats = $occupiedSeatRows->concat($reservedSeatRows)->groupBy('trip_id');
 
         $seatLayouts = DB::table('seat_layouts')
             ->whereIn('bus_id', $trips->pluck('bus_id'))
-            ->where('is_available', true)
-            ->select('id', 'bus_id', 'row_number', 'deck')
+            ->orderBy('row_number')
+            ->orderBy('column_number')
+            ->select('id', 'bus_id', 'seat_code', 'row_number', 'column_number', 'deck', 'is_available')
             ->get()
             ->groupBy('bus_id');
 
         $catalog = $this->locations->all();
         $allLocations = [
-            'areas' => array_merge($catalog['departure']['areas'], $catalog['destination']['areas']),
+            'areas'             => array_merge($catalog['departure']['areas'], $catalog['destination']['areas']),
             'directory_offices' => $catalog['departure']['directory_offices'],
         ];
         $fromLocation = $this->describeLocation($from, $allLocations);
@@ -70,33 +86,72 @@ class TripSearchService
                 $remaining = max(0, (int) $trip->capacity - count($occupied));
                 $departure = Carbon::parse($trip->departure_time);
                 $arrival = Carbon::parse($trip->arrival_time);
-                $availableLayouts = collect($seatLayouts[$trip->bus_id] ?? [])
-                    ->reject(fn ($seat) => in_array($seat->id, $occupied, true));
+                $layouts = collect($seatLayouts[$trip->bus_id] ?? []);
+                $availableLayouts = $layouts->filter(fn ($seat) => $seat->is_available
+                    && ! in_array($seat->id, $occupied, true));
+                $isDemo = str_starts_with($trip->route_code, 'DEMO-');
+                $demoLayouts = $layouts->take(34)->values();
+                $demoSelectedIds = $isDemo
+                    ? $demoLayouts->only([2, 6])->pluck('id')->values()->all()
+                    : [];
+                $seats = $isDemo
+                    ? $demoLayouts->map(function ($seat, int $index) use ($occupied): array {
+                        $number = ($index % 17) + 1;
+
+                        return [
+                            'id'     => (int) $seat->id,
+                            'code'   => ($index < 17 ? 'A' : 'B').str_pad((string) $number, 2, '0', STR_PAD_LEFT),
+                            'row'    => $number <= 2 ? 1 : intdiv($number - 3, 3) + 2,
+                            'column' => $number === 1 ? 1 : ($number === 2 ? 3 : (($number - 3) % 3) + 1),
+                            'deck'   => $index < 17 ? 'lower' : 'upper',
+                            'sold'   => ! (bool) $seat->is_available
+                                || in_array($seat->id, $occupied, true)
+                                || ($index < 17 && $number <= 2)
+                                || ($index >= 17 && $number === 2),
+                        ];
+                    })->all()
+                    : $layouts->map(fn ($seat): array => [
+                        'id'     => (int) $seat->id,
+                        'code'   => $seat->seat_code,
+                        'row'    => (int) $seat->row_number,
+                        'column' => (int) $seat->column_number,
+                        'deck'   => $seat->deck,
+                        'sold'   => ! (bool) $seat->is_available || in_array($seat->id, $occupied, true),
+                    ])->values()->all();
                 $rowOptions = $availableLayouts->map(function ($seat) use ($trip): string {
                     $rowCount = max(1, (int) $trip->seat_rows);
-                    if ($seat->row_number <= (int) ceil($rowCount / 3)) return 'front';
-                    if ($seat->row_number > (int) floor($rowCount * 2 / 3)) return 'back';
+                    if ($seat->row_number <= (int) ceil($rowCount / 3)) {
+                        return 'front';
+                    }
+                    if ($seat->row_number > (int) floor($rowCount * 2 / 3)) {
+                        return 'back';
+                    }
 
                     return 'middle';
                 })->unique()->values()->all();
 
                 return [
-                    'id' => (int) $trip->id,
-                    'departure_time' => $trip->departure_time,
-                    'arrival_time' => $trip->arrival_time,
-                    'departure_hour' => $departure->format('H:i'),
-                    'arrival_hour' => $arrival->format('H:i'),
-                    'duration_minutes' => $departure->diffInMinutes($arrival),
-                    'origin' => $trip->origin_station ?: $trip->origin_city,
-                    'destination' => $trip->destination_station ?: $trip->destination_city,
-                    'distance_km' => $trip->distance_km,
-                    'vehicle_type' => $trip->bus_type,
-                    'available_seats' => $trip->available_seats === null ? $remaining : min((int) $trip->available_seats, $remaining),
-                    'row_options' => $rowOptions,
-                    'deck_options' => $availableLayouts->pluck('deck')->unique()->values()->all(),
-                    'price' => (int) $trip->price,
+                    'id'                     => (int) $trip->id,
+                    'departure_time'         => $trip->departure_time,
+                    'arrival_time'           => $trip->arrival_time,
+                    'departure_hour'         => $departure->format('H:i'),
+                    'arrival_hour'           => $arrival->format('H:i'),
+                    'duration_minutes'       => $departure->diffInMinutes($arrival),
+                    'origin'                 => $trip->origin_station ?: $trip->origin_city,
+                    'destination'            => $trip->destination_station ?: $trip->destination_city,
+                    'distance_km'            => $trip->distance_km,
+                    'vehicle_type'           => $trip->bus_type,
+                    'available_seats'        => $trip->available_seats === null ? $remaining : min((int) $trip->available_seats, $remaining),
+                    'row_options'            => $rowOptions,
+                    'deck_options'           => $availableLayouts->pluck('deck')->unique()->values()->all(),
+                    'seat_decks'             => collect($seats)->pluck('deck')->unique()->values()->all(),
+                    'demo_seat_map'          => $isDemo,
+                    'seats'                  => $seats,
+                    'demo_selected_seat_ids' => $demoSelectedIds,
+                    'price'                  => (int) $trip->price,
                 ];
             })
+            ->filter(fn (array $trip): bool => collect($trip['seats'])->where('sold', false)->count() >= $quantity)
             ->values()
             ->all();
     }
@@ -125,6 +180,7 @@ class TripSearchService
                 if (($area['kind'] ?? null) === 'station') {
                     return ['kind' => 'office', 'names' => [$selected]];
                 }
+
                 return ['kind' => 'specific', 'names' => [$this->normalize($selected)]];
             }
         }

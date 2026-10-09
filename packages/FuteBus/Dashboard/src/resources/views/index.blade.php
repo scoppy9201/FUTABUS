@@ -5,6 +5,14 @@
 
 @section('content')
     <div class="space-y-6">
+        @if (!$company)
+            <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900" role="status">
+                {{ __('Dashboard::app.company_unavailable_hint') }}
+            </div>
+        @endif
+
+        <h2 class="text-xl font-bold text-[#111827]">{{ __('Dashboard::app.at_a_glance') }}</h2>
+
         {{-- ===== STAT CARDS ===== --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {{-- Tổng số phương tiện --}}

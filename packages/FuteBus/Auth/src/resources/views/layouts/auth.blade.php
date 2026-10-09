@@ -12,8 +12,10 @@
         'packages/FuteBus/Auth/src/resources/js/app.js',
     ])
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.13.0/lottie.min.js" defer></script>
 </head>
 <body class="min-h-screen overflow-x-hidden bg-white text-gray-900 antialiased">
+    @include('core::partials.global-loader')
     @include('core::partials.home.navbar', ['compact' => true])
 
     <main class="bg-[linear-gradient(to_bottom,#ef4f0b_0_110px,#fff_110px)] px-3 pb-7 sm:px-4">

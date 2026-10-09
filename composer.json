@@ -111,87 +111,87 @@
         },
         {
             "type": "path",
-            "url": "packages/futebus/AiAssistant",
+            "url": "packages/FuteBus/AiAssistant",
             "options": { "symlink": true }
         },
         {
             "type": "path",
-            "url": "packages/futebus/Auth",
+            "url": "packages/FuteBus/Auth",
             "options": { "symlink": true }
         },
         {
             "type": "path",
-            "url": "packages/futebus/BusCompanyManagement",
+            "url": "packages/FuteBus/BusCompanyManagement",
             "options": { "symlink": true }
         },
         {
             "type": "path",
-            "url": "packages/futebus/BusManagement",
+            "url": "packages/FuteBus/BusManagement",
             "options": { "symlink": true }
         },
         {
             "type": "path",
-            "url": "packages/futebus/Core",
+            "url": "packages/FuteBus/Core",
             "options": { "symlink": true }
         },
         {
             "type": "path",
-            "url": "packages/futebus/CustomerManagement",
+            "url": "packages/FuteBus/CustomerManagement",
             "options": { "symlink": true }
         },
         {
             "type": "path",
-            "url": "packages/futebus/Dashboard",
+            "url": "packages/FuteBus/Dashboard",
             "options": { "symlink": true }
         },
         {
             "type": "path",
-            "url": "packages/futebus/Notification",
+            "url": "packages/FuteBus/Notification",
             "options": { "symlink": true }
         },
         {
             "type": "path",
-            "url": "packages/futebus/Payment",
+            "url": "packages/FuteBus/Payment",
             "options": { "symlink": true }
         },
         {
             "type": "path",
-            "url": "packages/futebus/Profile",
+            "url": "packages/FuteBus/Profile",
             "options": { "symlink": true }
         },
         {
             "type": "path",
-            "url": "packages/futebus/Reporting",
+            "url": "packages/FuteBus/Reporting",
             "options": { "symlink": true }
         },
         {
             "type": "path",
-            "url": "packages/futebus/RolePermission",
+            "url": "packages/FuteBus/RolePermission",
             "options": { "symlink": true }
         },
         {
             "type": "path",
-            "url": "packages/futebus/RouteManagement",
+            "url": "packages/FuteBus/RouteManagement",
             "options": { "symlink": true }
         },
         {
             "type": "path",
-            "url": "packages/futebus/SeatManagement",
+            "url": "packages/FuteBus/SeatManagement",
             "options": { "symlink": true }
         },
         {
             "type": "path",
-            "url": "packages/futebus/SystemSetting",
+            "url": "packages/FuteBus/SystemSetting",
             "options": { "symlink": true }
         },
         {
             "type": "path",
-            "url": "packages/futebus/TripManagement",
+            "url": "packages/FuteBus/TripManagement",
             "options": { "symlink": true }
         },
         {
             "type": "path",
-            "url": "packages/futebus/UserManagement",
+            "url": "packages/FuteBus/UserManagement",
             "options": { "symlink": true }
         }
     ],

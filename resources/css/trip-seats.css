@@ -1,0 +1,248 @@
+.trip-card__seat-panel {
+    position: relative;
+    min-height: 100%;
+    padding: 7px 22px 58px;
+}
+
+.trip-card__detail.is-seats {
+    overflow: hidden;
+}
+
+.trip-card__seat-checkout {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    min-height: 48px;
+    grid-template-columns: minmax(0, 1fr) max-content 150px;
+    align-items: center;
+    gap: 12px;
+    padding: 5px 20px;
+    border-top: 1px solid #dedfe2;
+    background: #fafafa;
+    font-size: 13px;
+    line-height: 17px;
+}
+
+.trip-card__seat-order,
+.trip-card__seat-payment {
+    display: grid;
+    min-width: 0;
+}
+
+.trip-card__seat-order strong {
+    overflow: hidden;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.trip-card__seat-payment {
+    color: #020617;
+    text-align: right;
+}
+
+.trip-card__seat-payment strong {
+    color: #ef5222;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.trip-card__seat-checkout button {
+    align-self: center;
+    padding: 8px 15px;
+    border-radius: 999px;
+    background: #ef5222;
+    color: white;
+    font-weight: 600;
+}
+
+.trip-card__seat-checkout button:disabled {
+    cursor: not-allowed;
+    opacity: .45;
+}
+
+.trip-card__seat-checkout button:focus-visible {
+    outline: 2px solid #ef5222;
+    outline-offset: 3px;
+}
+
+.trip-selection-summary__seats {
+    overflow: hidden;
+    margin: 5px 0 0;
+    color: #526783;
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.trip-filter-time-checkbox:checked {
+    background-image: radial-gradient(circle, white 0 3px, transparent 3.5px);
+}
+
+@media (max-width: 640px) {
+    .trip-card__seat-checkout {
+        grid-template-columns: minmax(0, 1fr) max-content 64px;
+        gap: 7px;
+        padding: 5px 10px;
+        font-size: 11px;
+    }
+    .trip-card__seat-checkout button { padding: 7px 10px; }
+    .trip-card__seat-payment strong { font-size: 12px; }
+}
+
+.trip-card__seat-legend {
+    display: flex;
+    justify-content: center;
+    gap: clamp(18px, 7vw, 70px);
+    color: #020617;
+    font-size: 12px;
+}
+
+.trip-card__seat-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+}
+
+.trip-card__seat-key {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+}
+
+.trip-card__seat-key.is-sold { background: #d2d6da; }
+.trip-card__seat-key.is-free { background: #dff2ff; }
+.trip-card__seat-key.is-chosen { background: #ffebe5; }
+
+.trip-card__decks {
+    display: flex;
+    justify-content: center;
+    gap: 34px;
+    margin: 22px auto 0;
+}
+
+.trip-card__deck {
+    min-width: 0;
+}
+
+.trip-card__deck h3 {
+    margin: 0 0 12px;
+    color: #020617;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.trip-card__seat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 32px);
+    gap: 8px 35px;
+}
+
+.trip-card__seat {
+    position: relative;
+    display: grid;
+    width: 32px;
+    height: 32px;
+    place-items: center;
+    border: 1px solid #8dc5ff;
+    border-radius: 5px 5px 7px 7px;
+    background: linear-gradient(#f4faff, #ddecff);
+    box-shadow: inset 0 3px 0 rgb(255 255 255 / 68%), inset 0 -3px 0 rgb(135 192 250 / 20%);
+    color: #5a9de9;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 120ms ease, transform 120ms ease;
+}
+
+.trip-card__seat::before,
+.trip-card__seat::after {
+    position: absolute;
+    top: 8px;
+    width: 4px;
+    height: 16px;
+    border: 1px solid #8dc5ff;
+    border-radius: 3px;
+    background: #e6f3ff;
+    content: '';
+}
+
+.trip-card__seat::before { left: -4px; }
+.trip-card__seat::after { right: -4px; }
+
+.trip-card__seat-code {
+    position: relative;
+    z-index: 1;
+}
+
+.trip-card__seat-foot {
+    position: absolute;
+    right: 2px;
+    bottom: -4px;
+    left: 2px;
+    height: 5px;
+    border: 1px solid #8dc5ff;
+    border-top: 0;
+    border-radius: 0 0 4px 4px;
+    background: #e2f0ff;
+}
+
+.trip-card__seat.is-free:hover {
+    background: #d5ebff;
+    transform: translateY(-2px);
+}
+
+.trip-card__seat.is-sold {
+    border-color: #c2c8ce;
+    background: linear-gradient(#e3e6e8, #cfd4d9);
+    box-shadow: inset 0 3px 0 rgb(255 255 255 / 35%);
+    color: #9aa6b2;
+    cursor: not-allowed;
+}
+
+.trip-card__seat.is-sold::before,
+.trip-card__seat.is-sold::after,
+.trip-card__seat.is-sold .trip-card__seat-foot {
+    border-color: #c2c8ce;
+    background: #d4d9dd;
+}
+
+.trip-card__seat.is-chosen {
+    border-color: #ef9b81;
+    background: linear-gradient(#fff5f1, #ffe4da);
+    box-shadow: inset 0 3px 0 rgb(255 255 255 / 65%);
+    color: #ef5222;
+}
+
+.trip-card__seat.is-chosen::before,
+.trip-card__seat.is-chosen::after,
+.trip-card__seat.is-chosen .trip-card__seat-foot {
+    border-color: #ef9b81;
+    background: #ffebe4;
+}
+
+.trip-card__seat:focus-visible {
+    outline: 2px solid #ef5222;
+    outline-offset: 4px;
+}
+
+.trip-card__seat-empty {
+    margin: 30px 0 0;
+    color: #64748b;
+    text-align: center;
+}
+
+@media (max-width: 640px) {
+    .trip-card__seat-panel { padding: 10px 16px 58px; }
+    .trip-card__seat-legend { gap: 12px; font-size: 11px; }
+    .trip-card__decks { gap: 16px; }
+    .trip-card__seat-grid { grid-template-columns: repeat(3, 26px); gap: 8px 10px; }
+    .trip-card__seat { width: 26px; height: 28px; font-size: 9px; }
+}

@@ -13,8 +13,10 @@
     <meta property="og:type" content="website">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.13.0/lottie.min.js" defer></script>
 </head>
 <body class="overflow-x-hidden bg-white text-gray-900">
+    @include('core::partials.global-loader')
     @yield('content')
     @include('core::partials.floating-support')
     <x-confirm-dialog />

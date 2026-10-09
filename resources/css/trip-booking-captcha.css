@@ -1,0 +1,139 @@
+.booking-page__captcha-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 56px 16px 24px;
+    background: rgb(0 0 0 / 48%);
+}
+
+.booking-page__captcha-dialog {
+    position: relative;
+    width: min(400px, 100%);
+    padding: 20px;
+    border-radius: 9px;
+    background: #fff;
+    box-shadow: 0 14px 32px rgb(0 0 0 / 18%);
+}
+
+.booking-page__captcha-refresh {
+    position: absolute;
+    z-index: 3;
+    top: 8px;
+    right: 8px;
+    display: grid;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 94%);
+    color: #ef5222;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 20%);
+    cursor: pointer;
+}
+
+.booking-page__captcha-refresh:hover {
+    background: #fff1eb;
+}
+
+.booking-page__captcha-refresh:focus-visible {
+    outline: 2px solid #ef5222;
+    outline-offset: 2px;
+}
+
+.booking-page__captcha-image {
+    position: relative;
+    width: 100%;
+    height: 160px;
+    overflow: hidden;
+    background: #d9e6e9;
+}
+
+.booking-page__captcha-scene {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.booking-page__captcha-hole,
+.booking-page__captcha-piece {
+    position: absolute;
+    width: 52px;
+    height: 52px;
+}
+
+.booking-page__captcha-hole {
+    z-index: 1;
+    filter: drop-shadow(0 1px 2px rgb(0 0 0 / 25%));
+}
+
+.booking-page__captcha-piece {
+    z-index: 2;
+    overflow: hidden;
+    clip-path: path("M1 1H20C17 6 18 13 25 13S33 6 30 1H51V19C46 16 40 18 40 25S46 34 51 31V51H32C35 46 33 40 26 40S17 46 20 51H1V32C6 35 12 33 12 26S6 17 1 20Z");
+    filter: drop-shadow(0 1px 3px rgb(0 0 0 / 35%));
+}
+
+.booking-page__captcha-piece img {
+    position: absolute;
+    max-width: none;
+    object-fit: cover;
+}
+
+.booking-page__captcha-track {
+    position: relative;
+    display: grid;
+    height: 42px;
+    margin-top: 14px;
+    padding-left: 42px;
+    place-items: center;
+    border: 1px solid #d5dce2;
+    background: #f7f9fb;
+    color: #425163;
+    font-size: 13px;
+}
+
+.booking-page__captcha-track.is-complete {
+    border-color: #5aa46a;
+    background: #eff9f0;
+    color: #216a35;
+}
+
+.booking-page__captcha-handle {
+    position: absolute;
+    top: -1px;
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border: 1px solid #cfd6dd;
+    background: #fff;
+    color: #ef5222;
+    cursor: grab;
+    touch-action: none;
+}
+
+.booking-page__captcha-handle:active {
+    cursor: grabbing;
+}
+
+.booking-page__captcha-handle:focus-visible {
+    outline: 2px solid #ef5222;
+    outline-offset: 2px;
+}
+
+.booking-page__captcha-error {
+    margin: 8px 0 0;
+    color: #d4471c;
+    font-size: 12px;
+}
+
+@media (max-width: 640px) {
+    .booking-page__captcha-backdrop {
+        padding-top: 24px;
+    }
+}
