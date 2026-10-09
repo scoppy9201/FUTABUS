@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FuteBus\Core\Services;
+namespace FuteBus\Payment\Services;
 
 class SePayQrService
 {

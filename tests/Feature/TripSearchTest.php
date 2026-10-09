@@ -106,7 +106,7 @@ class TripSearchTest extends TestCase
         $this->get($paymentResponse->headers->get('Location'))
             ->assertOk()
             ->assertSee('Chọn phương thức thanh toán')
-            ->assertSee('Mã SePay sẽ hiển thị khi cấu hình ngân hàng và tài khoản nhận tiền.')
+            ->assertSee('Mã SePay sẽ hiển thị khi cấu hình tài khoản nhận tiền và webhook.')
             ->assertSee('Thời gian tới điểm lên xe')
             ->assertSee('Thời gian nhận khách')
             ->assertSee('Chỉ được chuyển đổi vé 1 lần duy nhất')

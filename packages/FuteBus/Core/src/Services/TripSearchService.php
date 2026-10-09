@@ -31,13 +31,28 @@ class TripSearchService
             )
             ->get();
 
-        $bookedSeats = DB::table('booked_seats')
+        $occupiedSeatRows = DB::table('booked_seats')
             ->join('bookings', 'bookings.id', '=', 'booked_seats.booking_id')
             ->whereIn('bookings.status', ['pending', 'confirmed', 'completed'])
             ->whereIn('booked_seats.trip_id', $trips->pluck('id'))
             ->select('booked_seats.trip_id', 'booked_seats.seat_layout_id')
-            ->get()
-            ->groupBy('trip_id');
+            ->get();
+
+        $reservedSeatRows = DB::table('sepay_payment_intents')
+            ->whereIn('trip_id', $trips->pluck('id'))
+            ->where('status', 'pending')
+            ->where('expires_at', '>', now())
+            ->get(['trip_id', 'seat_ids'])
+            ->flatMap(function ($intent): array {
+                return array_map(
+                    fn ($seatId): object => (object) [
+                        'trip_id'        => $intent->trip_id,
+                        'seat_layout_id' => (int) $seatId,
+                    ],
+                    json_decode($intent->seat_ids, true) ?: []
+                );
+            });
+        $bookedSeats = $occupiedSeatRows->concat($reservedSeatRows)->groupBy('trip_id');
 
         $seatLayouts = DB::table('seat_layouts')
             ->whereIn('bus_id', $trips->pluck('bus_id'))
@@ -136,6 +151,7 @@ class TripSearchService
                     'price'                  => (int) $trip->price,
                 ];
             })
+            ->filter(fn (array $trip): bool => collect($trip['seats'])->where('sold', false)->count() >= $quantity)
             ->values()
             ->all();
     }

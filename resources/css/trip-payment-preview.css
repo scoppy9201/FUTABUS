@@ -236,3 +236,63 @@
 .payment-page__tooltip::-webkit-scrollbar-thumb:hover {
     background: #ef5222;
 }
+
+.payment-page__result {
+    width: min(560px, calc(100% - 32px));
+    margin: 48px auto 72px;
+    padding: 32px;
+    border: 1px solid #dce1e7;
+    border-radius: 16px;
+    background: #fff;
+    text-align: center;
+}
+
+.payment-page__result > img {
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 16px;
+}
+
+.payment-page__result h2 {
+    color: #172033;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.payment-page__result p {
+    margin-top: 10px;
+    color: #475569;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.payment-page__result dl {
+    display: grid;
+    gap: 12px;
+    margin: 24px 0;
+    text-align: left;
+}
+
+.payment-page__result dl > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.payment-page__result dd {
+    color: #172033;
+    font-weight: 700;
+    text-align: right;
+}
+
+.payment-page__result > a {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 22px;
+    border-radius: 999px;
+    background: #ef5222;
+    color: #fff;
+    font-weight: 700;
+}

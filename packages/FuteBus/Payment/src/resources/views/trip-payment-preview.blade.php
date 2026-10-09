@@ -1,6 +1,6 @@
 @extends('core::layouts.home')
 
-@section('title', __('core::booking.payment_page_title'))
+@section('title', __('Payment::payment.payment_page_title'))
 
 @section('content')
     @php
@@ -14,7 +14,7 @@
             ['direction' => $preview['direction'], 'seats' => implode(',', $preview['seat_ids'])]
         );
         $methods = [
-            ['name' => __('core::booking.payment_sepay'), 'image' => 'images/sepay.png', 'class' => 'sepay'],
+            ['name' => __('Payment::payment.payment_sepay'), 'image' => 'images/sepay.png', 'class' => 'sepay'],
             ['name' => 'FUTAPay', 'image' => 'images/auth/White Brushstroke F on Forest Green.png', 'class' => 'futapay'],
             ['name' => 'ZaloPay', 'image' => 'images/zalopay.png', 'class' => 'zalopay', 'has_note' => true],
             ['name' => 'VNPay', 'image' => 'images/vnpay.png', 'class' => 'vnpay', 'has_note' => true],
@@ -22,8 +22,8 @@
             ['name' => 'MoMo', 'image' => 'images/momo.png', 'class' => 'momo', 'has_note' => true],
             ['name' => 'Viettel Money', 'image' => 'images/vettelmoney.png', 'class' => 'viettel'],
             ['name' => 'MB Bank', 'image' => 'images/mbbank.png', 'class' => 'mbbank', 'has_note' => true],
-            ['name' => __('core::booking.payment_atm'), 'image' => 'images/napas.png', 'class' => 'atm'],
-            ['name' => __('core::booking.payment_card'), 'image' => 'images/visa.png', 'class' => 'card'],
+            ['name' => __('Payment::payment.payment_atm'), 'image' => 'images/napas.png', 'class' => 'atm'],
+            ['name' => __('Payment::payment.payment_card'), 'image' => 'images/visa.png', 'class' => 'card'],
         ];
     @endphp
     <div class="payment-page" x-data="{
@@ -31,8 +31,10 @@
         tripTooltipOpen: false,
         priceTooltipOpen: false,
         paymentMethod: 'sepay',
+        paymentEnabled: @js($paymentEnabled),
         remainingSeconds: @js(max(0, $preview['created_at'] + 600 - now()->timestamp)),
         countdown: null,
+        statusTimer: null,
         savedPageOverflow: null,
         openTripDetail() {
             if (this.detailOpen) return;
@@ -53,21 +55,52 @@
             this.savedPageOverflow = null;
             this.$nextTick(() => this.$refs.tripDetailTrigger.focus());
         },
+        async refreshPaymentState() {
+            if (!this.paymentEnabled) return false;
+            try {
+                const response = await fetch(@js(route('trip-payment-preview.status', ['draft' => $preview['token']])), {
+                    credentials: 'same-origin',
+                    headers: { Accept: 'application/json' },
+                    cache: 'no-store',
+                });
+                if (!response.ok) return false;
+                const result = await response.json();
+                if (result.status === 'paid' || result.status === 'needs_review') {
+                    window.location.replace(@js(route('trip-payment-preview.show', ['draft' => $preview['token']])));
+                    return true;
+                }
+                if (result.status === 'expired') {
+                    window.location.replace(@js(route('home').'#trip-search'));
+                    return true;
+                }
+            } catch (error) {
+                return false;
+            }
+            return false;
+        },
         init() {
+            if (this.paymentEnabled) {
+                this.statusTimer = setInterval(() => this.refreshPaymentState(), 3000);
+            }
             if (this.remainingSeconds <= 0) {
-                window.location.replace(@js(route('home').'#trip-search'));
+                this.refreshPaymentState().then((handled) => {
+                    if (!handled) window.location.replace(@js(route('home').'#trip-search'));
+                });
                 return;
             }
-            this.countdown = setInterval(() => {
+            this.countdown = setInterval(async () => {
                 this.remainingSeconds = Math.max(0, this.remainingSeconds - 1);
                 if (this.remainingSeconds === 0) {
                     clearInterval(this.countdown);
-                    window.location.replace(@js(route('home').'#trip-search'));
+                    clearInterval(this.statusTimer);
+                    const handled = await this.refreshPaymentState();
+                    if (!handled) window.location.replace(@js(route('home').'#trip-search'));
                 }
             }, 1000);
         },
         destroy() {
             clearInterval(this.countdown);
+            clearInterval(this.statusTimer);
             if (this.detailOpen) {
                 document.documentElement.style.overflow = this.savedPageOverflow?.html ?? '';
                 document.body.style.overflow = this.savedPageOverflow?.body ?? '';
@@ -86,7 +119,7 @@
                     <span class="booking-page__back-icon">
                         <x-heroicon-o-arrow-left class="size-4" aria-hidden="true" />
                     </span>
-                    {{ __('core::booking.payment_back') }}
+                    {{ __('Payment::payment.payment_back') }}
                 </a>
                 <div class="booking-page__heading">
                     <h1 class="booking-page__route">
@@ -103,7 +136,7 @@
 
         <main class="payment-page__layout">
             <section class="payment-page__methods" aria-labelledby="payment-methods-title">
-                <h2 id="payment-methods-title">{{ __('core::booking.payment_methods_title') }}</h2>
+                <h2 id="payment-methods-title">{{ __('Payment::payment.payment_methods_title') }}</h2>
                 <div class="payment-page__method-list">
                     @foreach ($methods as $method)
                         @if (in_array($method['class'], ['sepay', 'futapay'], true))
@@ -118,14 +151,14 @@
                             </button>
                         @else
                             <button type="button" class="payment-page__method {{ $method['class'] === 'atm' ? 'is-separated' : '' }}"
-                                @click="window.FutaNotify?.show(@js(__('core::booking.payment_unsupported')), { tone: 'info' })">
+                                @click="window.FutaNotify?.show(@js(__('Payment::payment.payment_unsupported')), { tone: 'info' })">
                                 <span class="payment-page__radio" aria-hidden="true"></span>
                                 <img class="payment-page__method-logo is-{{ $method['class'] }}"
                                     src="{{ asset($method['image']) }}" alt="" aria-hidden="true">
                                 <span class="payment-page__method-copy">
                                     <strong>{{ $method['name'] }}</strong>
                                     @if ($method['has_note'] ?? false)
-                                        <small>{{ __('core::booking.payment_unsupported') }}</small>
+                                        <small>{{ __('Payment::payment.payment_unsupported') }}</small>
                                     @endif
                                 </span>
                             </button>
@@ -134,11 +167,11 @@
                 </div>
             </section>
 
-            @include('core::partials.payment-preview-qr')
+            @include('Payment::partials.payment-preview-qr')
 
             <aside class="payment-page__aside">
                 <section class="payment-page__summary-card">
-                    <h2>{{ __('core::booking.payment_customer_title') }}</h2>
+                    <h2>{{ __('Payment::payment.payment_customer_title') }}</h2>
                     <dl>
                         <div><dt>{{ __('core::booking.full_name') }}</dt><dd>{{ $preview['customer']['name'] }}</dd></div>
                         <div><dt>{{ __('core::booking.phone') }}</dt><dd>{{ $preview['customer']['phone'] }}</dd></div>
@@ -148,17 +181,17 @@
                 <section class="payment-page__summary-card">
                     <div class="payment-page__card-heading">
                         <h2>{{ __('core::booking.trip_info') }}</h2>
-                        @include('core::partials.payment-preview-trip-tooltip')
+                        @include('Payment::partials.payment-preview-trip-tooltip')
                         <button type="button" class="payment-page__detail-link" x-ref="tripDetailTrigger" @click="openTripDetail()">
                             {{ __('core::booking.detail') }}
                         </button>
                     </div>
-                    @include('core::partials.payment-preview-trip-summary')
+                    @include('Payment::partials.payment-preview-trip-summary')
                 </section>
                 <section class="payment-page__summary-card">
                     <div class="payment-page__card-heading">
                         <h2>{{ __('core::booking.price_detail') }}</h2>
-                        @include('core::partials.payment-preview-price-tooltip')
+                        @include('Payment::partials.payment-preview-price-tooltip')
                     </div>
                     <dl>
                         <div><dt>{{ __('core::booking.fare') }}</dt><dd>{{ $formattedTotal }}</dd></div>
@@ -183,7 +216,7 @@
                     </button>
                 </div>
                 <div class="payment-page__modal-content">
-                    @include('core::partials.payment-preview-trip-summary')
+                    @include('Payment::partials.payment-preview-trip-summary')
                 </div>
             </div>
         </div>
