@@ -25,7 +25,7 @@ class TripSearchService
             ->where('trips.departure_time', '>=', now())
             ->orderBy('trips.departure_time')
             ->select(
-                'trips.id', 'trips.departure_time', 'trips.arrival_time', 'trips.price', 'trips.available_seats',
+                'trips.id', 'trips.route_id', 'trips.departure_time', 'trips.arrival_time', 'trips.price', 'trips.available_seats',
                 'routes.origin_city', 'routes.origin_station', 'routes.destination_city', 'routes.destination_station',
                 'routes.distance_km', 'buses.id as bus_id', 'buses.capacity', 'buses.bus_type', 'buses.seat_rows',
             )

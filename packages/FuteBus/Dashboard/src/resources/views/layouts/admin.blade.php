@@ -11,8 +11,8 @@
         body { font-family: 'Inter', sans-serif; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #f2652255; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #F26522; }
+        ::-webkit-scrollbar-thumb { background: #EF5222; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #EF5222; }
     </style>
 </head>
 <body class="bg-[#F8F9FA] text-gray-800 antialiased min-h-screen flex flex-col" x-data="{ sidebarOpen: false }">
@@ -21,33 +21,33 @@
     <header class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
         <div class="px-4 lg:px-6 py-2.5 flex items-center justify-between">
             <div class="flex items-center space-x-4">
-                <button @click="sidebarOpen = true" class="lg:hidden text-gray-600 hover:text-[#F26522] focus:outline-none">
+                <button @click="sidebarOpen = true" class="lg:hidden text-gray-600 hover:text-[#EF5222] focus:outline-none">
                     <x-heroicon-o-bars-3 class="w-6 h-6" />
                 </button>
                 <a href="{{ route('dashboard') }}" class="flex items-center space-x-3">
-                    <div class="bg-gradient-to-r from-[#F26522] to-[#E31B23] p-2 rounded-xl text-white shadow-md flex items-center justify-center">
-                        <x-heroicon-o-truck class="w-6 h-6" />
-                    </div>
+                    <img src="{{ asset('favicon.png') }}"
+                    alt="FUTA BUS LINES"
+                    class="w-10 h-10 object-contain rounded-xl">
                     <div>
                         <div class="flex items-center space-x-2">
-                            <span class="font-black text-xl tracking-tight text-[#F26522]">FUTA</span>
+                            <span class="font-black text-xl tracking-tight text-[#EF5222]">FUTA</span>
                             <span class="text-sm font-bold text-gray-700 tracking-wider">BUS LINES</span>
                         </div>
                         <p class="text-[10px] text-[#E31B23] font-semibold uppercase tracking-widest hidden sm:block">{{ __('Dashboard::app.slogan') }}</p>
                     </div>
                 </a>
                 <div class="hidden md:block h-6 w-px bg-gray-200 mx-2"></div>
-                <span class="hidden md:block text-xs md:text-sm font-semibold text-gray-600 bg-orange-50 text-[#F26522] px-3 py-1 rounded-full border border-orange-100">
+                <span class="hidden md:block text-xs md:text-sm font-semibold text-gray-600 bg-orange-50 text-[#EF5222] px-3 py-1 rounded-full border border-orange-100">
                     {{ __('Dashboard::app.owner_portal') }}
                 </span>
             </div>
 
             <div class="flex items-center space-x-3 sm:space-x-4">
-                <a href="{{ request()->fullUrlWithQuery(['lang' => app()->getLocale() === 'vi' ? 'en' : 'vi']) }}" class="text-xs font-bold text-gray-600 hover:text-[#F26522]">
+                <a href="{{ request()->fullUrlWithQuery(['lang' => app()->getLocale() === 'vi' ? 'en' : 'vi']) }}" class="text-xs font-bold text-gray-600 hover:text-[#EF5222]">
                     {{ strtoupper(app()->getLocale()) }}
                 </a>
 
-                <button class="relative p-2 text-gray-500 hover:text-[#F26522] hover:bg-orange-50 rounded-full transition">
+                <button class="relative p-2 text-gray-500 hover:text-[#EF5222] hover:bg-orange-50 rounded-full transition">
                     <x-heroicon-o-bell class="w-5 h-5" />
                     <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-[#E31B23] rounded-full ring-2 ring-white"></span>
                 </button>
@@ -55,7 +55,7 @@
                 <div class="h-6 w-px bg-gray-200"></div>
 
                 <div class="flex items-center space-x-3">
-                    <span class="grid size-9 place-items-center rounded-full bg-orange-100 font-bold text-[#d7461a] border-2 border-[#F26522]">
+                    <span class="grid size-9 place-items-center rounded-full bg-orange-100 font-bold text-[#d7461a] border-2 border-[#EF5222]">
                         {{ mb_strtoupper(mb_substr(Auth::user()->name, 0, 1)) }}
                     </span>
                     <div class="hidden sm:block text-left">
@@ -117,8 +117,8 @@
                                 {{-- Parent item with submenu: render as <button> --}}
                                 <button type="button" @click="open = !open" @class([
                                     'w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition',
-                                    'bg-[#fff3ed] text-[#F26522] border-r-4 border-[#F26522] font-semibold' => $active,
-                                    'text-gray-600 hover:bg-[#fff3ed] hover:text-[#F26522]' => !$active,
+                                    'bg-[#fff3ed] text-[#EF5222] border-r-4 border-[#EF5222] font-semibold' => $active,
+                                    'text-gray-600 hover:bg-[#fff3ed] hover:text-[#EF5222]' => !$active,
                                 ])>
                                     <div class="flex items-center space-x-3">
                                         {{-- SVG inline avoids :component binding on Blade component --}}
@@ -127,7 +127,7 @@
                                     </div>
                                     {{-- Chevron in plain span so Alpine :class works without Blade interference --}}
                                     <span class="inline-flex w-4 h-4 text-gray-400 transition-transform duration-200"
-                                          :class="open ? 'rotate-180 text-[#F26522]' : ''">
+                                          :class="open ? 'rotate-180 text-[#EF5222]' : ''">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                         </svg>
@@ -154,8 +154,8 @@
                                             <li>
                                                 <a href="{{ $sub['route'] }}" @class([
                                                     'block pl-12 pr-4 py-2 text-sm transition rounded-r-lg',
-                                                    'text-[#F26522] font-bold bg-orange-100/60 border-r-2 border-[#F26522]' => $subActive,
-                                                    'text-gray-600 hover:text-[#F26522] hover:bg-orange-50' => !$subActive,
+                                                    'text-[#EF5222] font-bold bg-orange-100/60 border-r-2 border-[#EF5222]' => $subActive,
+                                                    'text-gray-600 hover:text-[#EF5222] hover:bg-orange-50' => !$subActive,
                                                 ])>
                                                     {{ __('Dashboard::app.'.$sub['key']) }}
                                                 </a>
@@ -168,8 +168,8 @@
                                 {{-- Regular nav item: render as <a> --}}
                                 <a href="{{ $item['route'] }}" @class([
                                     'w-full flex items-center space-x-3 px-4 py-3 text-sm font-medium transition',
-                                    'bg-[#fff3ed] text-[#F26522] border-r-4 border-[#F26522] font-semibold' => $active,
-                                    'text-gray-600 hover:bg-[#fff3ed] hover:text-[#F26522]' => !$active,
+                                    'bg-[#fff3ed] text-[#EF5222] border-r-4 border-[#EF5222] font-semibold' => $active,
+                                    'text-gray-600 hover:bg-[#fff3ed] hover:text-[#EF5222]' => !$active,
                                 ])>
                                     <x-dynamic-component :component="'heroicon-o-'.$item['icon']" class="w-5 h-5" />
                                     <span>{{ __('Dashboard::app.'.$item['key']) }}</span>
@@ -182,7 +182,7 @@
 
                 <div class="px-4 mt-8 mb-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider">{{ __('Dashboard::app.system') }}</div>
                 <nav class="space-y-1">
-                    <a href="#" class="w-full flex items-center space-x-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-[#fff3ed] hover:text-[#F26522] transition border-r-4 border-transparent">
+                    <a href="#" class="w-full flex items-center space-x-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-[#fff3ed] hover:text-[#EF5222] transition border-r-4 border-transparent">
                         <x-heroicon-o-cog-8-tooth class="w-5 h-5" />
                         <span>{{ __('Dashboard::app.settings') }}</span>
                     </a>
@@ -190,9 +190,9 @@
             </div>
 
             <div class="p-4 m-4 bg-orange-50 rounded-xl border border-orange-100 text-center">
-                <x-heroicon-o-phone class="w-8 h-8 text-[#F26522] mx-auto mb-2" />
+                <x-heroicon-o-phone class="w-8 h-8 text-[#EF5222] mx-auto mb-2" />
                 <p class="text-xs font-bold text-gray-800">{{ __('Dashboard::app.support_call_center') }}</p>
-                <p class="text-sm font-extrabold text-[#F26522] mt-1">1900 6067</p>
+                <p class="text-sm font-extrabold text-[#EF5222] mt-1">1900 6067</p>
             </div>
         </aside>
 

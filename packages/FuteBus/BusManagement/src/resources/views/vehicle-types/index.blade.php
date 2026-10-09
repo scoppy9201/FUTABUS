@@ -4,8 +4,6 @@
 
 @section('content')
 <div x-data="vehicleTypeManager()">
-
-    {{-- ── Page Header ──────────────────────────────────────────── --}}
     <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
             <p class="text-sm font-bold uppercase tracking-[0.16em] text-[#ef5222]">
@@ -48,7 +46,7 @@
         </div>
     @endif
 
-    {{-- ── Toolbar: Search + Add ────────────────────────────────── --}}
+    {{-- ── Toolbar: Search + Add  --}}
     <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
         <form method="GET" action="{{ route('bus-management.vehicle-types.index') }}" class="flex items-center gap-2">
             <div class="relative">
@@ -83,7 +81,7 @@
         </button>
     </div>
 
-    {{-- ── Table ────────────────────────────────────────────────── --}}
+    {{-- ── Table  --}}
     <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div class="overflow-x-auto">
             <table class="w-full min-w-[640px] text-left text-sm">
@@ -164,9 +162,7 @@
         @endif
     </div>
 
-    {{-- ══════════════════════════════════════════════════════════ --}}
-    {{-- ADD MODAL                                                  --}}
-    {{-- ══════════════════════════════════════════════════════════ --}}
+    {{-- ADD MODAL--}}
     <div
         x-show="showAdd"
         x-transition:enter="transition ease-out duration-200"
@@ -271,10 +267,7 @@
             </form>
         </div>
     </div>
-
-    {{-- ══════════════════════════════════════════════════════════ --}}
-    {{-- EDIT MODAL                                                 --}}
-    {{-- ══════════════════════════════════════════════════════════ --}}
+    {{-- EDIT MODAL --}}
     <div
         x-show="showEdit"
         x-transition:enter="transition ease-out duration-200"
@@ -381,10 +374,8 @@
             </form>
         </div>
     </div>
-
-    {{-- ══════════════════════════════════════════════════════════ --}}
+    
     {{-- DELETE CONFIRM MODAL                                       --}}
-    {{-- ══════════════════════════════════════════════════════════ --}}
     <div
         x-show="showDelete"
         x-transition:enter="transition ease-out duration-200"

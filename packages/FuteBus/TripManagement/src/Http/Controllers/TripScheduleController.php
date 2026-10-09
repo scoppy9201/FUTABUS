@@ -8,6 +8,7 @@ use FuteBus\TripManagement\Services\TripGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -45,6 +46,12 @@ class TripScheduleController extends Controller
         abort_unless($request->user()?->isAdmin(), 403);
 
         $data = $this->validated($request);
+
+        //  tuyến phải có >= 2 điểm dừng đang hoạt động
+        if (! TripGenerator::hasStops((int) $data['route_id'])) {
+            return back()->withInput()->withErrors(['schedule' => __('TripManagement::app.sch_err_stops')]);
+        }
+
         if ($msg = $this->conflict($data)) {
             return back()->withInput()->withErrors(['schedule' => $msg]);
         }
@@ -77,6 +84,12 @@ class TripScheduleController extends Controller
         }
 
         $data = $this->validated($request);
+
+        // tuyến phải có >= 2 điểm dừng đang hoạt động
+        if (! TripGenerator::hasStops((int) $data['route_id'])) {
+            return back()->withInput()->withErrors(['schedule' => __('TripManagement::app.sch_err_stops')]);
+        }
+
         if ($msg = $this->conflict($data, $id)) {
             return back()->withInput()->withErrors(['schedule' => $msg]);
         }
@@ -117,17 +130,22 @@ class TripScheduleController extends Controller
     private function validated(Request $request): array
     {
         return $request->validate([
-            'route_id'         => ['required', 'exists:routes,id'],
-            'departure_time'   => ['required', 'date_format:H:i'],
-            'duration_minutes' => ['required', 'integer', 'min:0', 'max:2880'],
-            'days_of_week'     => ['required', 'array', 'min:1'],
-            'days_of_week.*'   => ['integer', 'between:1,7'],
-            'start_date'       => ['required', 'date'],
-            'end_date' => ['required', 'date', 'after_or_equal:start_date', 'after_or_equal:today'],
-            'price'            => ['required', 'integer', 'min:0'],
+            'route_id'       => ['required', 'exists:routes,id'],
+            'departure_time' => ['required', 'date_format:H:i'],
+            'days_of_week'   => ['required', 'array', 'min:1'],
+            'days_of_week.*' => ['integer', 'between:1,7'],
+            'start_date'     => ['required', 'date'],
+            'end_date'       => [
+                'required', 'date', 'after_or_equal:start_date',
+                function ($attribute, $value, $fail) {
+                    if (Carbon::parse($value)->lt(today())) {
+                        $fail(__('TripManagement::app.sch_err_past'));
+                    }
+                },
+            ],
+            'price'          => ['required', 'integer', 'min:0'],
         ], [
             'end_date.after_or_equal' => __('TripManagement::app.sch_err_date'),
-            'end_date.after_or_equal:today' => __('TripManagement::app.sch_err_past'),
         ]);
     }
 
@@ -137,13 +155,12 @@ class TripScheduleController extends Controller
         sort($days);
 
         return [
-            'route_id'         => $d['route_id'],
-            'departure_time'   => $d['departure_time'],
-            'duration_minutes' => $d['duration_minutes'],
-            'days_of_week'     => json_encode($days),
-            'start_date'       => $d['start_date'],
-            'end_date'         => $d['end_date'],
-            'price'            => $d['price'],
+            'route_id'       => $d['route_id'],
+            'departure_time' => $d['departure_time'],
+            'days_of_week'   => json_encode($days),
+            'start_date'     => $d['start_date'],
+            'end_date'       => $d['end_date'],
+            'price'          => $d['price'],
         ];
     }
 

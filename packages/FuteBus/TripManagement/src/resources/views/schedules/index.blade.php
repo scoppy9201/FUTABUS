@@ -11,9 +11,15 @@
             <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">{{ __('TripManagement::app.sch_title') }}</h1>
             <p class="mt-2 max-w-3xl text-sm font-medium text-slate-500">{{ __('TripManagement::app.sch_subtitle') }}</p>
         </div>
-        <span class="rounded-full bg-orange-50 px-4 py-2 text-sm font-bold text-[#d7461a]">
-            {{ number_format($schedules->total()) }} {{ __('Dashboard::app.records') }}
-        </span>
+        <div class="flex items-center gap-3">
+            <a href="{{ route('trip-management.stops.index') }}"
+               class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">
+                {{ __('TripManagement::app.rs_title') }} →
+            </a>
+            <span class="rounded-full bg-orange-50 px-4 py-2 text-sm font-bold text-[#d7461a]">
+                {{ number_format($schedules->total()) }} {{ __('Dashboard::app.records') }}
+            </span>
+        </div>
     </div>
 
     @if(session('success'))
@@ -94,7 +100,6 @@
                                     <button @click="openEdit({{ json_encode([
                                         'id' => $s->id, 'route_id' => $s->route_id,
                                         'departure_time' => substr($s->departure_time, 0, 5),
-                                        'duration_minutes' => $s->duration_minutes,
                                         'days_of_week' => $days,
                                         'start_date' => $s->start_date, 'end_date' => $s->end_date,
                                         'price' => (int) $s->price,
@@ -145,6 +150,7 @@
                                 <option value="{{ $r->id }}">{{ $r->code }} — {{ $r->origin_city }} → {{ $r->destination_city }}</option>
                             @endforeach
                         </select>
+                        <p class="mt-1 text-xs text-slate-400">{{ __('TripManagement::app.sch_hint_stops') }}</p>
                     </div>
                     <div>
                         <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_time') }} <span class="text-rose-500">*</span></label>
@@ -152,8 +158,8 @@
                                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-[#F26522] focus:outline-none focus:ring-2 focus:ring-[#F26522]/20" />
                     </div>
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_duration') }} <span class="text-rose-500">*</span></label>
-                        <input type="number" name="duration_minutes" x-model="form.duration_minutes" required min="0" max="2880"
+                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_price') }} <span class="text-rose-500">*</span></label>
+                        <input type="number" name="price" x-model="form.price" required min="0" step="any"
                                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-[#F26522] focus:outline-none focus:ring-2 focus:ring-[#F26522]/20" />
                     </div>
                     <div>
@@ -164,11 +170,6 @@
                     <div>
                         <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_to') }} <span class="text-rose-500">*</span></label>
                         <input type="date" name="end_date" x-model="form.end_date" required
-                               class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-[#F26522] focus:outline-none focus:ring-2 focus:ring-[#F26522]/20" />
-                    </div>
-                    <div class="sm:col-span-2">
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_price') }} <span class="text-rose-500">*</span></label>
-                        <input type="number" name="price" x-model="form.price" required min="0"
                                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-[#F26522] focus:outline-none focus:ring-2 focus:ring-[#F26522]/20" />
                     </div>
                     <div class="sm:col-span-2">
@@ -218,7 +219,7 @@
 
 <script>
 function scheduleManager() {
-    const blank = { route_id:'', departure_time:'', duration_minutes:0, days_of_week:[],
+    const blank = { route_id:'', departure_time:'', days_of_week:[],
                     start_date:'', end_date:'', price:'' };
     const base = `{{ url('quan-tri/chuyen-xe/lich-trinh') }}`;
     return {

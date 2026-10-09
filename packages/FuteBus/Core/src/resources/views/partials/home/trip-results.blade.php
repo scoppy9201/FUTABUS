@@ -8,6 +8,7 @@
         deckFilters: [],
         sortBy: 'departure',
         selectedTrip: null,
+        expandedTrip: null,
         toggleFilter(group, value) {
             this[group] = this[group].includes(value)
                 ? this[group].filter(item => item !== value)
