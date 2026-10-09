@@ -27,7 +27,7 @@ class AdminAccountSeeder extends Seeder
         }
 
         DB::transaction(function () use ($email, $password): void {
-            $roleId = DB::table('roles')->where('slug', 'admin')->value('id');
+            $roleId = DB::table('roles')->whereNull('bus_company_id')->where('slug', 'admin')->value('id');
 
             if ($roleId === null) {
                 $roleId = DB::table('roles')->insertGetId([

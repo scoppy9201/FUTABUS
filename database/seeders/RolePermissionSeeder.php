@@ -16,47 +16,44 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'Khách hàng', 'slug' => 'customer'],
         ];
 
-        $permissionGroups = [
-            'bus_company' => ['view', 'create', 'update', 'delete'],
-            'bus'         => ['view', 'create', 'update', 'delete'],
-            'route'       => ['view', 'create', 'update', 'delete'],
-            'trip'        => ['view', 'create', 'update', 'delete', 'cancel'],
-            'seat_layout' => ['view', 'create', 'update', 'delete'],
-            'booking'     => ['view', 'create', 'update', 'cancel'],
-            'payment'     => ['view', 'create', 'refund'],
-            'ticket'      => ['view', 'create', 'verify'],
-            'customer'    => ['view', 'create', 'update', 'delete'],
-            'report'      => ['view'],
-            'user'        => ['view', 'create', 'update', 'delete'],
-            'setting'     => ['view', 'update'],
-        ];
+        $permissionGroups = config('permission_catalog', []);
 
         $roleIds = [];
         foreach ($roles as $r) {
-            $roleIds[$r['slug']] = DB::table('roles')->insertGetId($r);
+            $roleId = DB::table('roles')->whereNull('bus_company_id')->where('slug', $r['slug'])->value('id');
+            if ($roleId === null) {
+                $roleId = DB::table('roles')->insertGetId($r + ['created_at' => now(), 'updated_at' => now()]);
+            }
+            $roleIds[$r['slug']] = $roleId;
         }
 
         $permIds = [];
         foreach ($permissionGroups as $group => $actions) {
             foreach ($actions as $action) {
                 $slug = $group . '.' . $action;
-                $permIds[$slug] = DB::table('permissions')->insertGetId([
-                    'name'  => ucfirst($group) . ' ' . $action,
-                    'slug'  => $slug,
-                    'group' => $group,
-                ]);
+                $permissionId = DB::table('permissions')->where('slug', $slug)->value('id');
+                if ($permissionId === null) {
+                    $permissionId = DB::table('permissions')->insertGetId([
+                        'name' => ucfirst($group).' '.$action,
+                        'slug' => $slug,
+                        'group' => $group,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+                $permIds[$slug] = $permissionId;
             }
         }
 
         // Admin: mọi quyền
         foreach ($permIds as $pid) {
-            DB::table('permission_role')->insert([
+            DB::table('permission_role')->insertOrIgnore([
                 'permission_id' => $pid,
                 'role_id'       => $roleIds['admin'],
             ]);
         }
 
-        // Nhà xe + Nhân viên: quyền nghiệp vụ
+        // Quản lý nhà xe: quyền nghiệp vụ và quản lý phân quyền trong phạm vi nhà xe.
         $business = [
             'bus_company.view', 'bus_company.update',
             'bus.view', 'bus.create', 'bus.update', 'bus.delete',
@@ -68,16 +65,15 @@ class RolePermissionSeeder extends Seeder
             'ticket.view', 'ticket.create', 'ticket.verify',
             'customer.view', 'customer.create', 'customer.update',
             'report.view',
+            'user.view', 'user.create', 'user.update', 'user.delete',
+            'role.view', 'role.create', 'role.update', 'role.delete',
+            'dashboard.view',
         ];
         foreach ($business as $slug) {
             if (isset($permIds[$slug])) {
-                DB::table('permission_role')->insert([
+                DB::table('permission_role')->insertOrIgnore([
                     'permission_id' => $permIds[$slug],
                     'role_id'       => $roleIds['bus-company'],
-                ]);
-                DB::table('permission_role')->insert([
-                    'permission_id' => $permIds[$slug],
-                    'role_id'       => $roleIds['staff'],
                 ]);
             }
         }
@@ -89,7 +85,7 @@ class RolePermissionSeeder extends Seeder
         ];
         foreach ($customer as $slug) {
             if (isset($permIds[$slug])) {
-                DB::table('permission_role')->insert([
+                DB::table('permission_role')->insertOrIgnore([
                     'permission_id' => $permIds[$slug],
                     'role_id'       => $roleIds['customer'],
                 ]);

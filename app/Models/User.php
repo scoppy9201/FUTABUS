@@ -23,6 +23,7 @@ class User extends Authenticatable
         'address',
         'occupation',
         'is_active',
+        'bus_company_id',
     ];
 
     protected $hidden = [
@@ -47,6 +48,11 @@ class User extends Authenticatable
         return $this->hasRole('staff');
     }
 
+    public function isBusCompany(): bool
+    {
+        return $this->hasRole('bus-company');
+    }
+
     public function isCustomer(): bool
     {
         return $this->hasRole('customer');
@@ -61,8 +67,36 @@ class User extends Authenticatable
             ->exists();
     }
 
+    public function hasPermissionTo(string|array $permissions): bool
+    {
+        if (! $this->exists) {
+            return false;
+        }
+
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        return DB::table('role_user')
+            ->join('roles', 'roles.id', '=', 'role_user.role_id')
+            ->join('permission_role', 'permission_role.role_id', '=', 'roles.id')
+            ->join('permissions', 'permissions.id', '=', 'permission_role.permission_id')
+            ->where('role_user.user_id', $this->getKey())
+            ->whereIn('permissions.slug', (array) $permissions)
+            ->where('permissions.is_active', true)
+            ->where(function ($query): void {
+                $query->where('roles.slug', '!=', 'staff')
+                    ->orWhereNotNull('roles.bus_company_id');
+            })
+            ->where(function ($query): void {
+                $query->whereNull('roles.bus_company_id')
+                    ->orWhere('roles.bus_company_id', $this->bus_company_id);
+            })
+            ->exists();
+    }
+
     public function getIsActiveAttribute(): bool
     {
-        return (bool) $this->is_active;
+        return (bool) ($this->attributes['is_active'] ?? false);
     }
 }

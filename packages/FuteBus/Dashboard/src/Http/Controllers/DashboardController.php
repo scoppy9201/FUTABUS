@@ -13,9 +13,9 @@ class DashboardController extends Controller
 {
     public function index(Request $request, OwnerDashboardService $dashboard): View
     {
-        abort_unless($request->user()?->isAdmin(), 403);
+        abort_unless($request->user()?->hasPermissionTo('dashboard.view'), 403);
 
-        $company = $dashboard->company();
+        $company = $dashboard->company($request->user());
 
         return view('Dashboard::index', [
             'company'  => $company,
@@ -25,9 +25,17 @@ class DashboardController extends Controller
 
     public function section(Request $request, OwnerDashboardService $dashboard, string $section): View
     {
-        abort_unless($request->user()?->isAdmin(), 403);
+        $permission = match ($section) {
+            'trips' => 'trip.view',
+            'routes' => 'route.view',
+            'buses' => 'bus.view',
+            'bookings' => 'booking.view',
+            'customers' => 'customer.view',
+            'reports' => 'report.view',
+        };
+        abort_unless($request->user()?->hasPermissionTo($permission), 403);
 
-        $company = $dashboard->company();
+        $company = $dashboard->company($request->user());
 
         return view('Dashboard::section', [
             'company' => $company,
