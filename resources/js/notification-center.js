@@ -38,10 +38,11 @@ function showNotification(message, options = {}) {
     toast.setAttribute('role', tone === 'warning' || tone === 'error' ? 'alert' : 'status');
     toast.style.setProperty('--notification-duration', duration + 'ms');
 
-    const icon = document.createElement('span');
+    const icon = document.createElement('img');
     icon.className = 'futa-notification__icon';
     icon.setAttribute('aria-hidden', 'true');
-    icon.textContent = { info: 'i', success: '✓', warning: '!', error: '×' }[tone];
+    icon.src = '/icons/notifications/' + tone + '.svg';
+    icon.alt = '';
 
     const content = document.createElement('div');
     content.className = 'futa-notification__content';
@@ -57,7 +58,11 @@ function showNotification(message, options = {}) {
     closeButton.type = 'button';
     closeButton.className = 'futa-notification__close';
     closeButton.setAttribute('aria-label', closeLabel);
-    closeButton.textContent = '×';
+    const closeIcon = document.createElement('img');
+    closeIcon.src = '/icons/notifications/close.svg';
+    closeIcon.alt = '';
+    closeIcon.setAttribute('aria-hidden', 'true');
+    closeButton.append(closeIcon);
 
     let timeout;
     let removalTimeout;

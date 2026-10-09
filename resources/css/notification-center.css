@@ -31,20 +31,10 @@
 }
 
 .futa-notification__icon {
-    display: grid;
-    width: 22px;
-    height: 22px;
-    place-items: center;
+    width: 24px;
+    height: 24px;
     margin-top: 1px;
-    border: 2px solid #ef5222;
-    border-radius: 50%;
-    color: #ef5222;
-    font-size: 15px;
-    font-weight: 700;
-    line-height: 1;
 }
-.futa-notification.is-success .futa-notification__icon { font-size: 14px; }
-.futa-notification.is-error .futa-notification__icon { font-size: 18px; }
 
 .futa-notification__content { min-width: 0; }
 .futa-notification__title {
@@ -74,7 +64,8 @@
     line-height: 1;
     cursor: pointer;
 }
-.futa-notification__close:hover { color: #ef5222; }
+.futa-notification__close img { width: 16px; height: 16px; }
+.futa-notification__close:hover img { filter: sepia(1) saturate(8) hue-rotate(328deg); }
 .futa-notification__close:focus-visible { outline: 2px solid #ef5222; outline-offset: 3px; }
 
 .futa-notification::after {

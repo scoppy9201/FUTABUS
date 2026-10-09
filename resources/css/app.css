@@ -6,9 +6,11 @@
 @import "./trip-seats.css";
 @import "./trip-login-prompt.css";
 @import "./trip-booking.css";
+@import "./trip-booking-form.css";
 @import "./trip-booking-summary.css";
 @import "./trip-booking-vehicle.css";
 @import "./trip-booking-modal.css";
+@import "./trip-booking-captcha.css";
 @import "./trip-booking-responsive.css";
 @import "./brand-interactions.css";
 

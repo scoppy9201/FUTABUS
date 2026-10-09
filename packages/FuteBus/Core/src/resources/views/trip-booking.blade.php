@@ -32,6 +32,25 @@
         termsModalOpen: false,
         termsScrolling: false,
         termsScrollTimer: null,
+        captchaOpen: false,
+        captchaDragging: false,
+        captchaVerified: false,
+        captchaError: false,
+        captchaSliderOffset: 0,
+        captchaSliderStart: 0,
+        captchaPointerStart: 0,
+        captchaOffset: 0,
+        captchaTarget: 180,
+        captchaTop: 52,
+        captchaImageWidth: 360,
+        captchaImageHeight: 160,
+        captchaSuccessTimer: null,
+        captchaImages: @js([
+            asset('images/popular-routes/da-lat.png'),
+            asset('images/popular-routes/da-nang.png'),
+            asset('images/popular-routes/ho-chi-minh-city.png'),
+        ]),
+        captchaImageIndex: -1,
         savedPageOverflow: null,
         openTripDetail() {
             if (this.tripDetailOpen) return;
@@ -100,13 +119,111 @@
         money(amount) {
             return new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
         },
-        continueBooking() {
+        openCaptcha() {
+            if (this.captchaOpen) return;
+            this.savedPageOverflow = {
+                html: document.documentElement.style.overflow,
+                body: document.body.style.overflow,
+            };
+            document.documentElement.style.overflow = 'hidden';
+            document.body.style.overflow = 'hidden';
+            this.captchaOpen = true;
+            this.$nextTick(() => {
+                this.resetCaptcha();
+                this.$refs.captchaHandle.focus();
+            });
+        },
+        resetCaptcha() {
+            clearTimeout(this.captchaSuccessTimer);
+            this.captchaDragging = false;
+            this.captchaVerified = false;
+            this.captchaError = false;
+            this.captchaSliderOffset = 0;
+            this.captchaOffset = 0;
+            this.captchaImageIndex = (this.captchaImageIndex + 1) % this.captchaImages.length;
+            this.captchaImageWidth = this.$refs.captchaImage.clientWidth;
+            this.captchaImageHeight = this.$refs.captchaImage.clientHeight;
+            const travel = this.captchaImageWidth - 52;
+            this.captchaTarget = Math.round(travel * (0.55 + Math.random() * 0.25));
+            this.captchaTop = Math.round(24 + Math.random() * (this.captchaImageHeight - 86));
+            this.$refs.captchaHandle.focus();
+        },
+        closeCaptcha() {
+            if (!this.captchaOpen) return;
+            clearTimeout(this.captchaSuccessTimer);
+            this.captchaDragging = false;
+            this.captchaOpen = false;
+            document.documentElement.style.overflow = this.savedPageOverflow?.html ?? '';
+            document.body.style.overflow = this.savedPageOverflow?.body ?? '';
+            this.savedPageOverflow = null;
+            this.$nextTick(() => this.$refs.captchaTrigger.focus());
+        },
+        setCaptchaSlider(offset) {
+            const travel = Math.max(1, this.$refs.captchaTrack.clientWidth - this.$refs.captchaHandle.clientWidth);
+            this.captchaSliderOffset = Math.max(0, Math.min(travel, offset));
+            this.captchaOffset = Math.round(this.captchaSliderOffset / travel * (this.captchaImageWidth - 52));
+            this.captchaError = false;
+        },
+        startCaptcha(event) {
+            if (this.captchaVerified) return;
+            this.captchaDragging = true;
+            this.captchaPointerStart = event.clientX;
+            this.captchaSliderStart = this.captchaSliderOffset;
+            event.currentTarget.setPointerCapture(event.pointerId);
+        },
+        moveCaptcha(event) {
+            if (!this.captchaDragging) return;
+            this.setCaptchaSlider(this.captchaSliderStart + event.clientX - this.captchaPointerStart);
+        },
+        finishCaptcha() {
+            if (!this.captchaDragging) return;
+            this.captchaDragging = false;
+            this.verifyCaptcha();
+        },
+        verifyCaptcha() {
+            if (this.captchaVerified) return;
+            if (Math.abs(this.captchaOffset - this.captchaTarget) > 8) {
+                this.setCaptchaSlider(0);
+                this.captchaError = true;
+                return;
+            }
+            this.captchaVerified = true;
+            this.captchaError = false;
+            this.captchaSuccessTimer = setTimeout(() => {
+                this.closeCaptcha();
+                this.$nextTick(() => this.validateBookingAfterCaptcha());
+            }, 500);
+        },
+        phoneError() {
+            const value = this.customerPhone.trim();
+            return value !== '' && !/^(?:0[35789]\d{8}|\+84[35789]\d{8})$/.test(value);
+        },
+        emailError() {
+            const value = this.customerEmail.trim();
+            return value !== '' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+        },
+        validateBookingAfterCaptcha() {
+            if (!this.$refs.acceptTerms.checked) {
+                this.notify(@js(__('core::booking.accept_terms_required')));
+                return;
+            }
             if (!this.selectedIds.length) {
                 this.notify(@js(__('core::booking.select_seat')));
                 return;
             }
+            if (this.phoneError()) {
+                this.$refs.customerPhoneInput.focus();
+                return;
+            }
+            if (this.emailError()) {
+                this.$refs.customerEmailInput.focus();
+                return;
+            }
             if (!this.$refs.bookingForm.reportValidity()) return;
             this.notify(@js(__('core::booking.payment_pending')));
+        },
+        continueBooking() {
+            this.openCaptcha();
         },
     }">
         <div class="booking-page__banner">
@@ -216,121 +333,7 @@
                     </div>
                 </section>
 
-                <form class="booking-page__form" x-ref="bookingForm" @submit.prevent="continueBooking()">
-                    <section class="booking-panel" aria-labelledby="booking-customer-title">
-                        <div class="booking-page__customer-grid">
-                            <div class="booking-page__fields">
-                                <h2 id="booking-customer-title">{{ __('core::booking.customer_info') }}</h2>
-                                @foreach ([
-                                    ['key' => 'full_name', 'name' => 'name', 'model' => 'customerName', 'ref' => 'customerNameInput', 'type' => 'text', 'autocomplete' => 'name'],
-                                    ['key' => 'phone', 'name' => 'phone', 'model' => 'customerPhone', 'ref' => 'customerPhoneInput', 'type' => 'tel', 'autocomplete' => 'tel'],
-                                    ['key' => 'email', 'name' => 'email', 'model' => 'customerEmail', 'ref' => 'customerEmailInput', 'type' => 'email', 'autocomplete' => 'email'],
-                                ] as $field)
-                                    <div class="booking-page__field">
-                                        <label for="booking-customer-{{ $field['name'] }}">
-                                            {{ __('core::booking.'.$field['key']) }} <b>*</b>
-                                        </label>
-                                        <div class="booking-page__input-wrap">
-                                            <input id="booking-customer-{{ $field['name'] }}"
-                                                name="{{ $field['name'] }}" type="{{ $field['type'] }}"
-                                                autocomplete="{{ $field['autocomplete'] }}" required
-                                                x-model="{{ $field['model'] }}" x-ref="{{ $field['ref'] }}">
-                                            <button type="button" class="booking-page__clear-input"
-                                                x-show="{{ $field['model'] }}.length > 0" x-cloak
-                                                @click="{{ $field['model'] }} = ''; $refs.{{ $field['ref'] }}.focus()"
-                                                aria-label="{{ __('core::booking.clear_field', ['field' => __('core::booking.'.$field['key'])]) }}">
-                                                <x-heroicon-o-x-mark class="size-4" aria-hidden="true" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                            <div class="booking-page__terms">
-                                <h3>{{ __('core::booking.terms_title') }}</h3>
-                                <p class="booking-page__member-note">{{ __('core::booking.member_note') }}</p>
-                                @foreach (__('core::booking.terms_notes') as $note)
-                                    <p class="booking-page__terms-note"><span>(*) </span>@include('core::partials.booking-linked-text', ['text' => $note])</p>
-                                @endforeach
-                            </div>
-                        </div>
-                        <div class="booking-page__accept">
-                            <input id="booking-accept-terms" type="checkbox" required>
-                            <span>
-                                <button type="button" class="booking-page__terms-link"
-                                    x-ref="termsModalTrigger" @click="openTermsModal()"
-                                    aria-haspopup="dialog" aria-controls="booking-terms-modal">
-                                    {{ __('core::booking.terms_accept_link') }}
-                                </button>
-                                <label for="booking-accept-terms">{{ __('core::booking.terms_accept_rest') }}</label>
-                            </span>
-                        </div>
-                    </section>
-
-                    <section class="booking-panel" aria-labelledby="booking-pickup-title">
-                        <div class="booking-panel__header">
-                            <h2 id="booking-pickup-title">{{ __('core::booking.pickup_title') }}</h2>
-                            <img class="booking-page__info-icon" src="{{ asset('icons/booking-info.png') }}" alt="" aria-hidden="true">
-                        </div>
-                        <div class="booking-page__pickup-grid">
-                            <fieldset>
-                                <legend>{{ __('core::booking.pickup') }}</legend>
-                                <div class="booking-page__radio-row">
-                                    <label><input type="radio" name="pickup_mode" value="station" x-model="pickupMode"> {{ __('core::booking.station') }}</label>
-                                    <label><input type="radio" name="pickup_mode" value="transfer" x-model="pickupMode"> {{ __('core::booking.transfer') }}</label>
-                                </div>
-                                <div x-show="pickupMode === 'station'" class="booking-page__select-wrap">
-                                    <select name="pickup_station" aria-label="{{ __('core::booking.pickup') }}">
-                                        <option>{{ $origin }}</option>
-                                    </select>
-                                </div>
-                                <div x-show="pickupMode === 'transfer'" class="booking-page__input-wrap">
-                                    <input :required="pickupMode === 'transfer'" name="pickup_address"
-                                        x-model="pickupAddress" x-ref="pickupAddressInput"
-                                        placeholder="{{ __('core::booking.transfer_address') }}">
-                                    <button type="button" class="booking-page__clear-input"
-                                        x-show="pickupAddress.length > 0" x-cloak
-                                        @click="pickupAddress = ''; $refs.pickupAddressInput.focus()"
-                                        aria-label="{{ __('core::booking.clear_field', ['field' => __('core::booking.transfer_address')]) }}">
-                                        <x-heroicon-o-x-mark class="size-4" aria-hidden="true" />
-                                    </button>
-                                </div>
-                                <p x-show="pickupMode === 'station'" class="booking-page__boarding-reminder">
-                                    {{ __('core::booking.arrive_at') }} <strong>{{ $origin }}</strong>
-                                    <em>{{ __('core::booking.before_time') }} {{ $departure->copy()->subMinutes(15)->format('H:i d/m/Y') }}</em>
-                                    {{ __('core::booking.boarding_help') }}
-                                </p>
-                            </fieldset>
-                            <fieldset>
-                                <legend>{{ __('core::booking.dropoff') }}</legend>
-                                <div class="booking-page__radio-row">
-                                    <label><input type="radio" name="dropoff_mode" value="station" x-model="dropoffMode"> {{ __('core::booking.station') }}</label>
-                                    <label><input type="radio" name="dropoff_mode" value="transfer" x-model="dropoffMode"> {{ __('core::booking.transfer') }}</label>
-                                </div>
-                                <div x-show="dropoffMode === 'station'" class="booking-page__select-wrap">
-                                    <select name="dropoff_station" aria-label="{{ __('core::booking.dropoff') }}">
-                                        <option>{{ $destination }}</option>
-                                    </select>
-                                </div>
-                                <div x-show="dropoffMode === 'transfer'" class="booking-page__input-wrap">
-                                    <input :required="dropoffMode === 'transfer'" name="dropoff_address"
-                                        x-model="dropoffAddress" x-ref="dropoffAddressInput"
-                                        placeholder="{{ __('core::booking.transfer_address') }}">
-                                    <button type="button" class="booking-page__clear-input"
-                                        x-show="dropoffAddress.length > 0" x-cloak
-                                        @click="dropoffAddress = ''; $refs.dropoffAddressInput.focus()"
-                                        aria-label="{{ __('core::booking.clear_field', ['field' => __('core::booking.transfer_address')]) }}">
-                                        <x-heroicon-o-x-mark class="size-4" aria-hidden="true" />
-                                    </button>
-                                </div>
-                            </fieldset>
-                        </div>
-                    </section>
-                    <div class="booking-page__actions">
-                        <div><span>FUTAPAY</span><strong x-text="money(selectedIds.length * fare)"></strong></div>
-                        <a href="{{ route('trip-search', $criteria) }}">{{ __('core::booking.cancel') }}</a>
-                        <button type="submit">{{ __('core::booking.pay') }}</button>
-                    </div>
-                </form>
+                @include('core::partials.booking-form')
             </div>
 
             <aside class="booking-page__aside" aria-label="{{ __('core::booking.trip_info') }}">
@@ -375,71 +378,9 @@
                 </section>
             </aside>
         </main>
-        <div id="booking-trip-detail-modal" class="booking-page__modal-backdrop"
-            x-show="tripDetailOpen" x-transition.opacity x-cloak
-            @click.self="closeTripDetail()" @keydown.escape.window="if (tripDetailOpen) closeTripDetail()"
-            role="presentation">
-            <div class="booking-page__modal" role="dialog" aria-modal="true"
-                aria-labelledby="booking-trip-detail-title">
-                <div class="booking-page__modal-heading">
-                    <h2 id="booking-trip-detail-title">
-                        {{ __('core::booking.trip_details_title', ['count' => 1]) }}
-                    </h2>
-                    <button type="button" class="booking-page__info-button"
-                        @click.stop="policyTooltipOpen = !policyTooltipOpen"
-                        :aria-expanded="policyTooltipOpen" aria-controls="booking-policy-tooltip"
-                        aria-label="{{ __('core::trip-search.cancellation_policy') }}">
-                        <img class="booking-page__info-icon" src="{{ asset('icons/booking-info.png') }}"
-                            alt="" aria-hidden="true">
-                    </button>
-                    <div id="booking-policy-tooltip" class="booking-page__policy-tooltip"
-                        x-show="policyTooltipOpen" x-transition.opacity x-cloak
-                        @click.outside="policyTooltipOpen = false" role="tooltip">
-                        <h3>{{ __('core::trip-search.cancellation_policy') }}</h3>
-                        <ul>
-                            @foreach (__('core::trip-search.cancellation_items') as $item)
-                                <li>@include('core::partials.booking-linked-text', ['text' => $item])</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                    <button type="button" class="booking-page__modal-close" x-ref="tripDetailClose"
-                        @click="closeTripDetail()" aria-label="{{ __('core::booking.close') }}">
-                        <x-heroicon-o-x-mark class="size-5" aria-hidden="true" />
-                    </button>
-                </div>
-                <div class="booking-panel booking-page__summary booking-page__modal-summary">
-                    @include('core::partials.booking-trip-summary')
-                </div>
-            </div>
-        </div>
-        <div id="booking-terms-modal" class="booking-page__modal-backdrop booking-page__terms-backdrop"
-            x-show="termsModalOpen" x-transition.opacity x-cloak
-            @click.self="closeTermsModal()" @keydown.escape.window="if (termsModalOpen) closeTermsModal()"
-            role="presentation">
-            <div class="booking-page__terms-dialog" role="dialog" aria-modal="true"
-                aria-labelledby="booking-terms-title">
-                <div class="booking-page__terms-dialog-heading">
-                    <h2 id="booking-terms-title">{{ __('core::booking.customer_rights_title') }}</h2>
-                    <button type="button" class="booking-page__modal-close" x-ref="termsModalClose"
-                        @click="closeTermsModal()" aria-label="{{ __('core::booking.close') }}">
-                        <x-heroicon-o-x-mark class="size-5" aria-hidden="true" />
-                    </button>
-                </div>
-                <div class="booking-page__terms-dialog-body" tabindex="0"
-                    :class="{ 'is-scrolling': termsScrolling }" @scroll.passive="showTermsScrollbar()">
-                    <ol>
-                        @foreach (__('core::booking.customer_rights') as $clause)
-                            <li>
-                                @include('core::partials.booking-linked-text', ['text' => $clause['body']])
-                                @if (!empty($clause['note']))
-                                    <p>@include('core::partials.booking-linked-text', ['text' => $clause['note']])</p>
-                                @endif
-                            </li>
-                        @endforeach
-                    </ol>
-                </div>
-            </div>
-        </div>
+        @include('core::partials.booking-trip-detail-modal')
+        @include('core::partials.booking-terms-modal')
+        @include('core::partials.booking-captcha-modal')
         @include('core::partials.home.footer')
     </div>
 @endsection
