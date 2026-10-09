@@ -26,6 +26,8 @@ return [
     'payment_hold_time'           => 'Thời gian giữ chỗ còn lại',
     'payment_expired'             => 'Bản xem trước đã hết hạn. Vui lòng quay lại chọn ghế.',
     'payment_sepay_qr_alt'        => 'Mã SePay để chuyển khoản',
+    'payment_create_qr_prompt'    => 'Tài khoản nhận tiền đã sẵn sàng. Tạo mã thanh toán cho lượt đặt này.',
+    'payment_create_qr'           => 'Tạo mã SePay',
     'payment_sepay_unavailable'   => 'Mã SePay sẽ hiển thị khi cấu hình tài khoản nhận tiền và webhook.',
     'payment_futapay_unavailable' => 'Mã FUTAPay sẽ hiển thị khi kết nối dịch vụ.',
     'payment_scan_before'         => 'Dùng biểu tượng',

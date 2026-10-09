@@ -9,5 +9,7 @@ Route::post('/dat-ve/chon-chuyen/{trip}/thanh-toan', [TripPaymentPreviewControll
     ->whereNumber('trip')->name('trip-booking.payment.store');
 Route::get('/thanh-toan/{draft}', [TripPaymentPreviewController::class, 'show'])
     ->name('trip-payment-preview.show');
+Route::post('/thanh-toan/{draft}/tao-ma', [TripPaymentPreviewController::class, 'activate'])
+    ->name('trip-payment-preview.activate');
 Route::get('/thanh-toan/{draft}/trang-thai', [TripPaymentPreviewController::class, 'status'])
     ->middleware('throttle:60,1')->name('trip-payment-preview.status');

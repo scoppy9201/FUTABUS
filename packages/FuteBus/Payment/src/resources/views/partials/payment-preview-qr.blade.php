@@ -17,7 +17,17 @@
                 @else
                     <div class="payment-page__qr-empty" role="status">
                         <img class="payment-page__sepay-logo" src="{{ asset('images/sepay.png') }}" alt="" aria-hidden="true">
-                        <strong>{{ __('Payment::payment.payment_sepay_unavailable') }}</strong>
+                        <strong>{{ __($paymentCanActivate
+                            ? 'Payment::payment.payment_create_qr_prompt'
+                            : 'Payment::payment.payment_sepay_unavailable') }}</strong>
+                        @if ($paymentCanActivate)
+                            <form method="POST" action="{{ route('trip-payment-preview.activate', ['draft' => $preview['token']]) }}">
+                                @csrf
+                                <button class="payment-page__activate" type="submit">
+                                    {{ __('Payment::payment.payment_create_qr') }}
+                                </button>
+                            </form>
+                        @endif
                     </div>
                 @endif
             </div>

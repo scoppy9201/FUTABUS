@@ -161,3 +161,19 @@
     margin: 0 3px;
     vertical-align: -4px;
 }
+
+.payment-page__activate {
+    padding: 10px 18px;
+    border: 0;
+    border-radius: 8px;
+    background: #e95a24;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.payment-page__activate:hover,
+.payment-page__activate:focus-visible {
+    background: #c94716;
+}

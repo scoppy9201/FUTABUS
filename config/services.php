@@ -36,10 +36,12 @@ return [
     ],
 
     'sepay' => [
-        'enabled'     => env('SEPAY_ENABLED', false),
-        'bank'        => env('SEPAY_BANK'),
-        'account_no'  => env('SEPAY_ACCOUNT_NO'),
-        'webhook_key' => env('SEPAY_WEBHOOK_KEY'),
+        'enabled'         => env('SEPAY_ENABLED', false),
+        'bank'            => env('SEPAY_BANK'),
+        'account_no'      => env('SEPAY_ACCOUNT_NO'),
+        'webhook_auth'    => env('SEPAY_WEBHOOK_AUTH', 'hmac'),
+        'webhook_secret'  => env('SEPAY_WEBHOOK_SECRET'),
+        'webhook_key'     => env('SEPAY_WEBHOOK_KEY'),
     ],
 
     'google' => [

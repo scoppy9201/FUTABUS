@@ -113,6 +113,21 @@ class TripPaymentPreviewController extends Controller
         return redirect()->route('trip-payment-preview.show', ['draft' => $token]);
     }
 
+    public function activate(Request $request, SePayPaymentService $payments, string $draft): RedirectResponse
+    {
+        $preview = $request->session()->get('trip_payment_preview');
+        if (! is_array($preview) || ($preview['token'] ?? null) !== $draft
+            || ($preview['created_at'] ?? 0) + 600 <= now()->timestamp) {
+            return redirect()->to(route('home').'#trip-search');
+        }
+
+        if ($payments->ready() && ! DB::table('sepay_payment_intents')->where('token', $draft)->exists()) {
+            $payments->createIntent($preview);
+        }
+
+        return redirect()->route('trip-payment-preview.show', ['draft' => $draft]);
+    }
+
     public function show(Request $request, SePayQrService $sePay, SePayPaymentService $payments, string $draft): View|RedirectResponse
     {
         $intent = DB::table('sepay_payment_intents')->where('token', $draft)->first();
@@ -147,9 +162,10 @@ class TripPaymentPreviewController extends Controller
             : null;
 
         return view('Payment::trip-payment-preview', [
-            'preview'        => $preview,
-            'sePayQrUrl'     => $qrUrl,
-            'paymentEnabled' => $qrUrl !== null,
+            'preview'            => $preview,
+            'sePayQrUrl'         => $qrUrl,
+            'paymentEnabled'     => $qrUrl !== null,
+            'paymentCanActivate' => $intent === null && $payments->ready(),
         ]);
     }
 
