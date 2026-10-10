@@ -23,6 +23,7 @@ if (loader) {
 
     function show(delay = 120) {
         window.clearTimeout(showTimer);
+        document.querySelectorAll('[popover]:popover-open').forEach((popover) => popover.hidePopover());
         const reveal = () => {
             mountAnimation();
             loader.classList.add('is-visible');

@@ -9,6 +9,10 @@ use FuteBus\Core\Http\Controllers\TripSearchController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/api/docs', fn () => view('core::api-docs'))->name('api.docs');
+Route::get('/api/openapi.json', fn () => response()->file(base_path('docs/api/openapi.json'), [
+    'Content-Type' => 'application/json; charset=utf-8',
+]))->name('api.openapi');
 Route::get('/dat-ve', TripSearchController::class)->name('trip-search');
 Route::get('/dat-ve/chon-chuyen/{trip}', TripBookingController::class)->whereNumber('trip')->name('trip-booking.show');
 Route::get('/huong-dan-dat-ve-tren-web', [HomeController::class, 'bookingGuide'])->name('booking-guide');

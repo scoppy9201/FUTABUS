@@ -39,6 +39,7 @@
         'faq' => 'faq',
         'complaint' => 'complaint',
         'customer' => 'customer-support',
+        'web_guide' => 'booking-guide',
     ];
     $brandLogos = [
         ['icons/futabus-logo.png', 'FUTA Bus Lines'],

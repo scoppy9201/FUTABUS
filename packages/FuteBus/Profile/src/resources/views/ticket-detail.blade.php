@@ -21,6 +21,9 @@
                     <div class="border-b border-futa-orange-soft bg-futa-orange-soft/50 px-6 py-5">
                         <p class="text-sm font-semibold text-slate-600">{{ __('Profile::tickets.columns.code') }}</p>
                         <p class="mt-1 text-xl font-bold text-futa-orange">{{ $booking->booking_code }}</p>
+                        @if(str_starts_with($booking->booking_code, 'DEMOHIST'))
+                            <p class="mt-1 text-sm font-medium text-slate-600">{{ __('Profile::tickets.demo_label') }}</p>
+                        @endif
                     </div>
                     <dl class="grid gap-x-8 gap-y-6 p-6 sm:grid-cols-2">
                         <div>
