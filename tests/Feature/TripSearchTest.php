@@ -147,7 +147,12 @@ class TripSearchTest extends TestCase
             ...$query, 'trip_type' => 'round_trip', 'return_date' => $returnDate->toDateString(),
         ]))
             ->assertOk()
-            ->assertViewHas('returnTrips', fn (array $returnTrips) => count($returnTrips) === 1);
+            ->assertViewHas('returnTrips', fn (array $returnTrips) => count($returnTrips) === 1)
+            ->assertSee('CHUYẾN ĐI')
+            ->assertSee('CHUYẾN VỀ')
+            ->assertSee('id="trip-return-tab"', false)
+            ->assertDontSee('NaN')
+            ->assertSee("direction: 'outbound'", false);
 
         $this->get(route('trip-search', [...$query, 'quantity' => 32]))
             ->assertSessionHasErrors('quantity');

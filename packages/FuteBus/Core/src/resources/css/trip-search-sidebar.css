@@ -18,7 +18,7 @@
 
 .trip-selection-summary__content {
     padding: 16px 15px 14px 16px;
-    border-left: 7px solid #ef5222;
+    border-left: 7px solid var(--color-futa-orange);
 }
 
 .trip-selection-summary__route {
@@ -49,7 +49,7 @@
     flex: none;
     place-items: center;
     border-radius: 5px;
-    background: #ef5222;
+    background: var(--color-futa-orange);
     color: white;
     font-size: 16px;
     font-weight: 700;

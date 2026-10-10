@@ -7,7 +7,7 @@
     <div class="mt-6 flex justify-center gap-3 sm:gap-4" @paste="handleOtpPaste">
         <template x-for="(_, index) in otp" :key="index">
             <input
-                class="size-10 rounded-md border border-[#ffab92] bg-[#fff7f5] text-center text-lg font-semibold text-gray-900 outline-none transition focus:border-[#ef5222] focus:ring-3 focus:ring-[#ef5222]/10"
+                class="size-10 rounded-md border border-futa-orange/40 bg-futa-orange-soft text-center text-lg font-semibold text-gray-900 outline-none transition focus:border-futa-orange focus:ring-3 focus:ring-futa-orange/10"
                 type="text"
                 inputmode="numeric"
                 autocomplete="one-time-code"
@@ -22,7 +22,7 @@
     </div>
     <input type="hidden" name="otp" :value="otp.join('')">
 
-    <button type="submit" class="mt-12 h-11 rounded-full bg-[#ef5222] text-sm font-bold text-white transition hover:bg-[#d94317] active:scale-[.99]">
+    <button type="submit" class="mt-12 h-11 rounded-full bg-futa-orange text-sm font-bold text-white transition hover:bg-futa-orange-dark active:scale-[.99]">
         {{ __('Auth::app.otp.continue') }}
     </button>
 
@@ -33,7 +33,7 @@
             x-cloak
             x-show="resendRemaining === 0"
             type="button"
-            class="font-semibold text-[#ef5222] transition hover:text-[#d94317] hover:underline"
+            class="font-semibold text-futa-orange transition hover:text-futa-orange-dark hover:underline"
             @click="$refs.resendForm.submit()"
         >{{ __('Auth::app.otp.resend') }}</button>
     </p>

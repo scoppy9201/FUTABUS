@@ -2,6 +2,18 @@
     aria-label="{{ $from }} - {{ $to }}"
     x-data="{
         trips: @js($trips),
+        outboundTrips: @js($trips),
+        returnTrips: @js($returnTrips),
+        roundTrip: @js($roundTrip),
+        direction: 'outbound',
+        changeDirection(value) {
+            if (this.direction === value) return;
+            this.direction = value;
+            this.trips = value === 'return' ? this.returnTrips : this.outboundTrips;
+            this.openTripId = null;
+            this.openPanel = null;
+            this.resetFilters();
+        },
         timeFilters: [],
         vehicleFilters: [],
         rowFilters: [],
@@ -15,7 +27,7 @@
             const url = new URL(@js(route('trip-booking.show', ['trip' => 0])), window.location.href);
             url.pathname = url.pathname.replace(/\/0$/, '/' + trip.id);
             url.search = window.location.search;
-            url.searchParams.set('direction', @js($direction));
+            url.searchParams.set('direction', this.direction);
             url.searchParams.set('seats', this.selectedSeats(trip).map(seat => seat.id).join(','));
             window.location.assign(url.toString());
         },
@@ -131,9 +143,9 @@
                 + date.getFullYear();
         },
     }"
-    class="trip-search-results grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]"
+    class="trip-search-results grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)] lg:items-start"
 >
-    <div class="trip-search-results__aside self-start space-y-4">
+    <div class="trip-search-results__aside self-start space-y-4 lg:sticky lg:top-4 lg:z-1">
         <template x-if="activeTrip()">
             <div class="trip-selection-summary">
                 <h2>{{ __('core::trip-search.your_trip') }}</h2>
@@ -163,7 +175,7 @@
         <aside class="overflow-hidden rounded-xl bg-white shadow-[0_2px_7px_rgba(15,23,42,.18)]">
         <div class="flex items-center justify-between px-4 py-4">
             <h2 class="text-sm font-bold uppercase text-gray-950">{{ __('core::trip-search.filters') }}</h2>
-            <button type="button" @click="resetFilters()" class="inline-flex items-center gap-1.5 text-sm font-medium text-[#ef5222] hover:underline">
+            <button type="button" @click="resetFilters()" class="inline-flex items-center gap-1.5 text-sm font-medium text-futa-orange hover:underline">
                 <span>{{ __('core::trip-search.clear_filters') }}</span>
                 <x-heroicon-o-trash class="size-5 shrink-0" aria-hidden="true" />
             </button>
@@ -176,7 +188,7 @@
                         @change="toggleFilter('timeFilters', '{{ $slot }}')"
                         :checked="timeFilters.includes('{{ $slot }}')"
                         :disabled="trips.length === 0"
-                        class="trip-filter-time-checkbox size-4 appearance-none rounded-full border border-gray-300 bg-white align-middle transition checked:border-[#ef5222] checked:bg-[#ef5222] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ef5222]">
+                        class="trip-filter-time-checkbox size-4 appearance-none rounded-full border border-gray-300 bg-white align-middle transition checked:border-futa-orange checked:bg-futa-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange">
                     <span>{{ __('core::trip-search.time_'.$slot) }}</span>
                 </label>
             @endforeach
@@ -189,8 +201,8 @@
                         @click="toggleFilter('vehicleFilters', '{{ $vehicle }}')"
                         :disabled="trips.length === 0"
                         :aria-pressed="vehicleFilters.includes('{{ $vehicle }}')"
-                        :class="vehicleFilters.includes('{{ $vehicle }}') ? 'border-[#ef5222] bg-[#fff3ed] text-[#ef5222]' : 'border-gray-200 bg-white text-gray-800'"
-                        class="rounded-md border px-3 py-2 text-sm transition hover:border-[#ef5222] disabled:cursor-not-allowed disabled:opacity-40">{{ __('core::trip-search.'.$vehicle) }}</button>
+                        :class="vehicleFilters.includes('{{ $vehicle }}') ? 'border-futa-orange bg-futa-orange-soft text-futa-orange' : 'border-gray-200 bg-white text-gray-800'"
+                        class="rounded-md border px-3 py-2 text-sm transition hover:border-futa-orange disabled:cursor-not-allowed disabled:opacity-40">{{ __('core::trip-search.'.$vehicle) }}</button>
                 @endforeach
             </div>
         </div>
@@ -202,8 +214,8 @@
                         @click="toggleFilter('rowFilters', '{{ $row }}')"
                         :disabled="!hasOption('row_options', '{{ $row }}')"
                         :aria-pressed="rowFilters.includes('{{ $row }}')"
-                        :class="rowFilters.includes('{{ $row }}') ? 'border-[#ef5222] bg-[#fff3ed] text-[#ef5222]' : 'border-gray-200 bg-white text-gray-800'"
-                        class="rounded-md border px-3 py-2 text-sm transition hover:border-[#ef5222] disabled:cursor-not-allowed disabled:opacity-40">{{ __('core::trip-search.row_'.$row) }}</button>
+                        :class="rowFilters.includes('{{ $row }}') ? 'border-futa-orange bg-futa-orange-soft text-futa-orange' : 'border-gray-200 bg-white text-gray-800'"
+                        class="rounded-md border px-3 py-2 text-sm transition hover:border-futa-orange disabled:cursor-not-allowed disabled:opacity-40">{{ __('core::trip-search.row_'.$row) }}</button>
                 @endforeach
             </div>
         </div>
@@ -215,8 +227,8 @@
                         @click="toggleFilter('deckFilters', '{{ $deck }}')"
                         :disabled="!hasOption('deck_options', '{{ $deck }}')"
                         :aria-pressed="deckFilters.includes('{{ $deck }}')"
-                        :class="deckFilters.includes('{{ $deck }}') ? 'border-[#ef5222] bg-[#fff3ed] text-[#ef5222]' : 'border-gray-200 bg-white text-gray-800'"
-                        class="rounded-md border px-3 py-2 text-sm transition hover:border-[#ef5222] disabled:cursor-not-allowed disabled:opacity-40">{{ __('core::trip-search.deck_'.$deck) }}</button>
+                        :class="deckFilters.includes('{{ $deck }}') ? 'border-futa-orange bg-futa-orange-soft text-futa-orange' : 'border-gray-200 bg-white text-gray-800'"
+                        class="rounded-md border px-3 py-2 text-sm transition hover:border-futa-orange disabled:cursor-not-allowed disabled:opacity-40">{{ __('core::trip-search.deck_'.$deck) }}</button>
                 @endforeach
             </div>
         </div>
@@ -224,14 +236,14 @@
     </div>
 
     <div class="trip-search-results__list min-w-0">
-        <h2 class="mb-3 text-xl font-semibold text-gray-950">{{ $from }} - {{ $to }}</h2>
+        <h2 class="mb-3 text-xl font-semibold text-gray-950" x-text="direction === 'outbound' ? @js($from.' - '.$to) : @js($to.' - '.$from)"></h2>
         <div class="mb-6 flex flex-wrap gap-2.5">
             @foreach (['price', 'departure', 'seats'] as $sort)
                 <button type="button"
                     @click="toggleSort('{{ $sort }}')"
                     :aria-pressed="sortHighlights['{{ $sort }}']"
-                    :class="sortHighlights['{{ $sort }}'] ? 'border-[#ffd8c8] bg-[#fff6f2] text-[#ef5222]' : 'border-gray-200 bg-white text-gray-900'"
-                    class="inline-flex items-center gap-2 rounded-md border px-3.5 py-2 text-sm font-medium transition hover:border-[#ef5222]">
+                    :class="sortHighlights['{{ $sort }}'] ? 'border-[#ffd8c8] bg-futa-orange-soft text-futa-orange' : 'border-gray-200 bg-white text-gray-900'"
+                    class="inline-flex items-center gap-2 rounded-md border px-3.5 py-2 text-sm font-medium transition hover:border-futa-orange">
                     @if ($sort === 'price')
                         <x-heroicon-o-banknotes class="size-5 shrink-0" aria-hidden="true" />
                     @elseif ($sort === 'departure')
@@ -244,6 +256,26 @@
             @endforeach
         </div>
 
+        @if ($roundTrip)
+            <div class="my-6 grid grid-cols-2 border-b border-[#e4e7eb] bg-white" role="tablist" aria-label="{{ __('core::trip-search.direction_tabs') }}">
+                <button type="button" role="tab" id="trip-outbound-tab" class="min-h-11.5 cursor-pointer border-b-4 border-transparent px-3 py-2.5 text-center text-[15px] font-semibold text-gray-950
+                    hover:text-futa-orange focus-visible:outline-3 focus-visible:-outline-offset-3 focus-visible:outline-futa-orange max-sm:px-1
+                    max-sm:py-2.25 max-sm:text-xs"
+                    :class="direction === 'outbound' ? 'border-futa-orange text-futa-orange' : ''"
+                    :aria-selected="direction === 'outbound'"
+                    aria-controls="trip-direction-results" @click="changeDirection('outbound')">
+                    {{ __('core::trip-search.outbound_tab') }} - {{ \Illuminate\Support\Carbon::parse($departureDate)->locale(app()->getLocale())->translatedFormat('l, d/m') }}
+                </button>
+                <button type="button" role="tab" id="trip-return-tab" class="trip-direction-tabs__tab"
+                    :class="direction === 'return' ? 'border-futa-orange text-futa-orange' : ''"
+                    :aria-selected="direction === 'return'"
+                    aria-controls="trip-direction-results" @click="changeDirection('return')">
+                    {{ __('core::trip-search.return_tab') }} - {{ \Illuminate\Support\Carbon::parse($returnDate)->locale(app()->getLocale())->translatedFormat('l, d/m') }}
+                </button>
+            </div>
+        @endif
+
+        <div id="trip-direction-results" @if ($roundTrip) role="tabpanel" :aria-labelledby="direction === 'return' ? 'trip-return-tab' : 'trip-outbound-tab'" @endif>
         <div x-show="visibleTrips().length === 0" class="min-h-96 rounded-xl bg-transparent py-16 text-center text-gray-500">
             <p class="text-lg font-semibold">{{ __('core::trip-search.no_results') }}</p>
             <p class="mt-2 text-sm">{{ __('core::trip-search.try_another') }}</p>
@@ -341,9 +373,9 @@
                             <p x-text="stationLabel(trip.origin) + ' ' + trip.departure_hour + ' → ' + stationLabel(trip.destination) + ' ' + trip.arrival_hour + ' · ' + clockDuration(trip.duration_minutes)"></p>
                         </div>
                         <div x-show="openPanel === 'transfer'" class="trip-card__detail-content trip-card__transfer-content">
-                            <h3>{{ __('core::trip-search.transfer_information') }}</h3>
+                            <h3 class="mb-0! text-base! leading-6! font-bold!">{{ __('core::trip-search.transfer_information') }}</h3>
                             @foreach (__('core::trip-search.transfer_items') as $item)
-                                <p class="trip-card__transfer-item">- {{ $item['label'] }} : <em>{{ $item['detail'] }}</em></p>
+                                <p class="text-[15px] leading-6 text-slate-950">- {{ $item['label'] }} : <em class="italic">{{ $item['detail'] }}</em></p>
                             @endforeach
                         </div>
                         <div x-show="openPanel === 'policy'" class="trip-card__detail-content">
@@ -380,20 +412,20 @@
                         </div>
                     </div>
                 </article>
-                @if ($direction === 'outbound')
-                    @guest
-                    <aside class="trip-login-prompt" x-show="trip.id === visibleTrips()[0]?.id">
-                        <div class="trip-login-prompt__copy">
-                            <h3>{{ __('core::trip-search.login_prompt_title') }}</h3>
-                            <p>{{ __('core::trip-search.login_prompt_description') }}</p>
-                            <a href="{{ route('login') }}">{{ __('core::trip-search.login_prompt_action') }}</a>
+                @guest
+                    <aside class="flex min-h-37.5 items-center justify-between gap-5 rounded-[11px] border border-gray-200 bg-white px-6 py-5.5 shadow-[0_3px_7px_#0f172a2b] max-sm:gap-2.5 max-sm:px-4 max-sm:py-4.5" x-show="direction === 'outbound' && trip.id === visibleTrips()[0]?.id">
+                        <div class="min-w-0">
+                            <h3 class="mb-1.25 text-[15px] leading-5.5 font-bold text-gray-900 max-sm:text-sm">{{ __('core::trip-search.login_prompt_title') }}</h3>
+                            <p class="max-w-127.5 text-[13px] leading-5.25 text-slate-500">{{ __('core::trip-search.login_prompt_description') }}</p>
+                            <a class="mt-3.75 inline-block text-sm font-bold text-[#6495eb] underline underline-offset-2 hover:text-[#3269ca]
+                                focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-futa-orange" href="{{ route('login') }}">{{ __('core::trip-search.login_prompt_action') }}</a>
                         </div>
-                        <img src="{{ asset('images/auth/member-login-benefits.png') }}" alt="" loading="lazy">
+                        <img class="h-27.5 w-37.5 shrink-0 object-contain max-sm:h-21.5 max-sm:w-22" src="{{ asset('images/auth/member-login-benefits.png') }}" alt="" loading="lazy">
                     </aside>
                     @endguest
-                @endif
                 </div>
             </template>
+        </div>
         </div>
     </div>
 </section>

@@ -12,6 +12,8 @@ class AuthPagesTest extends TestCase
             ->assertOk()
             ->assertSeeText('Đăng nhập tài khoản')
             ->assertSee('name="email"', false)
+            ->assertSee('data-auth-email-input', false)
+            ->assertSee('id="auth-email-error"', false)
             ->assertSee('name="password"', false);
     }
 
@@ -21,6 +23,8 @@ class AuthPagesTest extends TestCase
             ->assertOk()
             ->assertSeeText('Tạo tài khoản')
             ->assertSee('name="email"', false)
+            ->assertSee('data-auth-email-input', false)
+            ->assertSee('id="auth-email-error"', false)
             ->assertSee('name="terms"', false)
             ->assertSee(route('register.email'), false);
     }

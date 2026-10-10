@@ -3,8 +3,8 @@
         href="{{ route('login') }}"
         @class([
             'flex h-14 items-center justify-center gap-2.5 text-[15px] font-semibold transition-colors',
-            'relative text-[#ef5222] after:absolute after:right-0 after:bottom-[-1px] after:left-0 after:h-0.5 after:bg-[#ef5222]' => $active === 'login',
-            'text-gray-950 hover:text-[#ef5222]' => $active !== 'login',
+            'relative text-futa-orange after:absolute after:right-0 after:bottom-[-1px] after:left-0 after:h-0.5 after:bg-futa-orange' => $active === 'login',
+            'text-gray-950 hover:text-futa-orange' => $active !== 'login',
         ])
         @if($active === 'login') aria-current="page" @endif
     >
@@ -16,8 +16,8 @@
         href="{{ route('register') }}"
         @class([
             'flex h-14 items-center justify-center text-[15px] font-semibold transition-colors',
-            'relative text-[#ef5222] after:absolute after:right-0 after:bottom-[-1px] after:left-0 after:h-0.5 after:bg-[#ef5222]' => $active === 'register',
-            'text-gray-950 hover:text-[#ef5222]' => $active !== 'register',
+            'relative text-futa-orange after:absolute after:right-0 after:bottom-[-1px] after:left-0 after:h-0.5 after:bg-futa-orange' => $active === 'register',
+            'text-gray-950 hover:text-futa-orange' => $active !== 'register',
         ])
         @if($active === 'register') aria-current="page" @endif
     >

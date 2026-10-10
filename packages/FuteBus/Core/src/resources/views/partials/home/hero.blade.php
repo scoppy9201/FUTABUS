@@ -1,6 +1,6 @@
 <style>
     .hero-form-border {
-        border: 2px solid #ff8a65;
+        border: 2px solid color-mix(in srgb, var(--color-futa-orange) 60%, white);
         box-shadow: 0 8px 0 rgba(181,86,51,.14);
     }
 
@@ -278,7 +278,7 @@
     <form id="trip-search" class="relative mx-auto mt-8 w-full max-w-282 rounded-[18px] bg-white px-6 pt-6.5 pb-10.5 hero-form-border max-sm:px-4" action="{{ route('trip-search') }}" method="GET" @submit="submitSearch($event)">
         <div class="mb-5.25 flex items-center justify-between gap-4">
             <div class="flex items-center gap-7 max-sm:gap-4">
-                <label class="flex cursor-pointer items-center gap-2 font-bold transition-colors duration-200" :class="!roundTrip ? 'text-[#ef5222]' : 'text-gray-500'">
+                <label class="flex cursor-pointer items-center gap-2 font-bold transition-colors duration-200" :class="!roundTrip ? 'text-futa-orange' : 'text-gray-500'">
                     <input
                         type="radio"
                         name="trip_type"
@@ -289,7 +289,7 @@
                     >
                     <span>{{ __('core::app.home.hero.one_way') }}</span>
                 </label>
-                <label class="flex cursor-pointer items-center gap-2 font-bold transition-colors duration-200" :class="roundTrip ? 'text-[#ef5222]' : 'text-gray-500'">
+                <label class="flex cursor-pointer items-center gap-2 font-bold transition-colors duration-200" :class="roundTrip ? 'text-futa-orange' : 'text-gray-500'">
                     <input
                         type="radio"
                         name="trip_type"
@@ -301,7 +301,7 @@
                     <span>{{ __('core::app.home.hero.round_trip') }}</span>
                 </label>
             </div>
-            <a href="{{ route('booking-guide') }}" class="text-sm font-medium text-[#ef5222] hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ef5222]">{{ __('core::app.home.hero.guide') }}</a>
+            <a href="{{ route('booking-guide') }}" class="text-sm font-medium text-futa-orange hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange">{{ __('core::app.home.hero.guide') }}</a>
         </div>
 
         <div
@@ -317,7 +317,7 @@
             <button
                 type="button"
                 @click="swapLocations"
-                class="group z-10 mb-3.75 -mx-1.75 hidden size-9.25 place-items-center rounded-full border border-gray-200 bg-white text-[#ef5222] shadow-sm transition hover:border-[#ef5222] hover:shadow-md lg:grid"
+                class="group z-10 mb-3.75 -mx-1.75 hidden size-9.25 place-items-center rounded-full border border-gray-200 bg-white text-futa-orange shadow-sm transition hover:border-futa-orange hover:shadow-md lg:grid"
                 aria-label="{{ __('core::app.home.hero.swap_aria') }}"
             >
                 <x-heroicon-o-arrows-right-left
@@ -347,7 +347,7 @@
                     @click="open = !open"
                     :aria-expanded="open"
                     aria-haspopup="listbox"
-                    class="flex h-16.75 w-full items-center justify-between rounded-[10px] border border-gray-300 bg-white px-4.5 text-lg font-medium text-gray-900 outline-none transition-colors hover:border-[#ff8a65] focus:border-[#ff8a65] focus:ring-3 focus:ring-[#ef5222]/10"
+                    class="flex h-16.75 w-full items-center justify-between rounded-[10px] border border-gray-300 bg-white px-4.5 text-lg font-medium text-gray-900 outline-none transition-colors hover:border-futa-orange/60 focus:border-futa-orange/60 focus:ring-3 focus:ring-futa-orange/10"
                 >
                     <span x-text="selected"></span>
                     <span class="flex size-7.5 items-center justify-center rounded-lg bg-gray-100">
@@ -376,12 +376,12 @@
                             :aria-selected="selected === {{ $i }}"
                             @click="selected = {{ $i }}; open = false"
                             class="flex w-full items-center justify-between px-4 py-3 text-left text-lg transition-colors"
-                            :class="selected === {{ $i }} ? 'bg-[#fff6f1] font-semibold text-[#ef5222]' : 'text-gray-800 hover:bg-gray-50'"
+                            :class="selected === {{ $i }} ? 'bg-futa-orange-soft font-semibold text-futa-orange' : 'text-gray-800 hover:bg-gray-50'"
                         >
                             <span>{{ $i }}</span>
                             <span
                                 x-show="selected === {{ $i }}"
-                                class="grid size-5.5 place-items-center rounded-full bg-[#ef5222] text-white"
+                                class="grid size-5.5 place-items-center rounded-full bg-futa-orange text-white"
                             >
                                 <x-heroicon-s-check class="size-3.5" />
                             </span>
@@ -398,7 +398,7 @@
                     <button
                         type="button"
                         @click="applyRecentSearch(search)"
-                        class="min-w-0 shrink-0 rounded-lg border border-gray-200 bg-[#fafafa] px-4 py-2.5 text-left transition hover:border-[#ef5222] hover:bg-[#fff7f2] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ef5222]"
+                        class="min-w-0 shrink-0 rounded-lg border border-gray-200 bg-[#fafafa] px-4 py-2.5 text-left transition hover:border-futa-orange hover:bg-[#fff7f2] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
                     >
                         <span class="block max-w-57 truncate text-sm font-semibold text-gray-950" x-text="search.departure + ' - ' + search.destination"></span>
                         <span class="mt-1 block text-xs text-slate-500" x-text="formatRecentDate(search.departureDate)"></span>
@@ -407,7 +407,7 @@
             </div>
         </div>
 
-        <button type="submit" class="absolute -bottom-6 left-1/2 h-12.25 w-[calc(100%-48px)] max-w-66 -translate-x-1/2 rounded-full bg-[#ef5222] text-base font-extrabold text-white shadow-[0_8px_18px_rgba(239,82,34,.28)] transition hover:-translate-y-0.5 hover:bg-[#e94512]">
+        <button type="submit" class="absolute -bottom-6 left-1/2 h-12.25 w-[calc(100%-48px)] max-w-66 -translate-x-1/2 rounded-full bg-futa-orange text-base font-extrabold text-white shadow-[0_8px_18px_rgba(239,82,34,.28)] transition hover:-translate-y-0.5 hover:bg-[#e94512]">
             {{ __('core::app.home.hero.search') }}
         </button>
     </form>

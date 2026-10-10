@@ -10,7 +10,7 @@
         <main class="mx-auto w-full max-w-285 px-4 py-10 sm:px-6 lg:px-0">
             <article class="text-[15px] font-semibold leading-7 text-gray-950 sm:text-base">
                 <header class="mb-8 text-center">
-                    <p class="text-[30px] font-extrabold uppercase leading-tight text-[#ef5222] sm:text-[34px]">
+                    <p class="text-[30px] font-extrabold uppercase leading-tight text-futa-orange sm:text-[34px]">
                         {{ __('core::terms.brand') }}
                     </p>
                     <h1 class="mt-3 text-2xl font-extrabold uppercase leading-tight sm:text-[30px]">
@@ -69,7 +69,7 @@
                 <div class="flex items-center gap-5">
                     <span class="h-px flex-1 bg-gray-200" aria-hidden="true"></span>
                     <h2 id="terms-quality-heading"
-                        class="shrink-0 text-center text-[28px] font-extrabold uppercase leading-tight text-[#e9521d] sm:text-[40px]">
+                        class="shrink-0 text-center text-[28px] font-extrabold uppercase leading-tight text-futa-orange sm:text-[40px]">
                         {{ __('core::terms.quality.title') }}
                     </h2>
                     <span class="h-px flex-1 bg-gray-200" aria-hidden="true"></span>
@@ -79,11 +79,11 @@
                         <article class="grid grid-cols-[52px_1fr] gap-x-5 gap-y-4">
                             <img src="{{ asset($stat['image']) }}" alt="{{ $stat['image_alt'] }}"
                                 class="size-12 rounded-full object-contain">
-                            <p class="self-center whitespace-nowrap text-[32px] font-extrabold leading-none text-[#e9521d] sm:text-[44px]">
+                            <p class="self-center whitespace-nowrap text-[32px] font-extrabold leading-none text-futa-orange sm:text-[44px]">
                                 {{ $stat['value'] }}
                             </p>
                             <div class="col-start-2">
-                                <h3 class="font-extrabold text-[#00613d]">{{ $stat['label'] }}</h3>
+                                <h3 class="font-extrabold text-futa-green">{{ $stat['label'] }}</h3>
                                 <p class="mt-1.5 max-w-64 font-medium leading-6 text-slate-600">{{ $stat['description'] }}</p>
                             </div>
                         </article>

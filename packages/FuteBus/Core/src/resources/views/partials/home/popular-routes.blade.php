@@ -1,7 +1,7 @@
 <section class="bg-[#fff8f5] px-4 pt-6 pb-8 sm:px-6 sm:pt-7 sm:pb-9" aria-labelledby="popular-routes-heading">
     <div class="mx-auto w-full max-w-282">
         <header class="mb-8 text-center">
-            <h2 id="popular-routes-heading" class="text-[28px] font-extrabold uppercase leading-tight text-[#00613d] sm:text-[30px]">
+            <h2 id="popular-routes-heading" class="text-[28px] font-extrabold uppercase leading-tight text-futa-green sm:text-[30px]">
                 {{ __('core::app.home.popular_routes.title') }}
             </h2>
             <p class="mt-1.5 text-base text-gray-950">
@@ -30,7 +30,7 @@
                         @foreach ($group['routes'] as $route)
                             <div class="flex min-h-21.25 items-center justify-between gap-4 px-4 py-3">
                                 <div class="min-w-0">
-                                    <p class="truncate text-lg font-medium leading-6 text-[#00613d]">{{ $route['destination'] }}</p>
+                                    <p class="truncate text-lg font-medium leading-6 text-futa-green">{{ $route['destination'] }}</p>
                                     <p class="mt-1 text-sm font-medium leading-5 text-[#64748b]">{{ $route['distance'] }}km - {{ $route['hours'] }} {{ __('core::app.home.popular_routes.hours') }}</p>
                                 </div>
                                 <p class="shrink-0 self-start pt-1 text-right text-[15px] font-semibold text-gray-950">{{ number_format($route['price'], 0, ',', '.') }}đ</p>

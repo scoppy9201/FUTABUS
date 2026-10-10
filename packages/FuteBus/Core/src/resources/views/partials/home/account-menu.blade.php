@@ -9,7 +9,7 @@
         aria-controls="account-menu"
         aria-label="{{ __('core::app.home.navbar.account_menu', ['name' => Auth::user()->name]) }}"
     >
-        <span class="grid size-9 shrink-0 place-items-center rounded-full bg-[#414e62] text-[#ff8228] ring-2 ring-white/30">
+        <span class="grid size-9 shrink-0 place-items-center rounded-full bg-[#414e62] text-futa-orange ring-2 ring-white/30">
             <x-heroicon-s-user-circle class="size-8" />
         </span>
         <span class="hidden truncate sm:block">{{ Auth::user()->name }}</span>
@@ -30,25 +30,25 @@
         aria-labelledby="account-menu-button"
     >
         @if(Auth::user()->isAdmin())
-            <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 text-base font-semibold text-gray-900 transition hover:bg-orange-50 focus-visible:bg-orange-50 focus-visible:outline-none">
+            <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 text-base font-semibold text-gray-900 transition hover:bg-futa-orange-soft focus-visible:bg-futa-orange-soft focus-visible:outline-none">
                 <span class="grid size-9 shrink-0 place-items-center rounded-full bg-[#0b2733] text-white"><x-heroicon-o-squares-2x2 class="size-5" /></span>
                 <span>{{ __('Dashboard::app.owner_portal') }}</span>
             </a>
         @endif
-        <a href="{{ route('profile.futapay') }}" class="flex items-center gap-3 px-3 py-2.5 text-base font-semibold text-gray-900 transition hover:bg-orange-50 focus-visible:bg-orange-50 focus-visible:outline-none">
-            <span class="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-[#00613d]"><img src="{{ asset('images/auth/White%20Brushstroke%20F%20on%20Forest%20Green.png') }}" alt="" class="size-full scale-125 object-cover"></span>
+        <a href="{{ route('profile.futapay') }}" class="flex items-center gap-3 px-3 py-2.5 text-base font-semibold text-gray-900 transition hover:bg-futa-orange-soft focus-visible:bg-futa-orange-soft focus-visible:outline-none">
+            <span class="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-futa-green"><img src="{{ asset('images/auth/White%20Brushstroke%20F%20on%20Forest%20Green.png') }}" alt="" class="size-full scale-125 object-cover"></span>
             <span>{{ __('core::app.home.navbar.futapay') }}</span>
         </a>
-        <a href="{{ route('profile.show') }}" class="flex items-center gap-3 px-3 py-2.5 text-base font-semibold text-gray-900 transition hover:bg-orange-50 focus-visible:bg-orange-50 focus-visible:outline-none">
+        <a href="{{ route('profile.show') }}" class="flex items-center gap-3 px-3 py-2.5 text-base font-semibold text-gray-900 transition hover:bg-futa-orange-soft focus-visible:bg-futa-orange-soft focus-visible:outline-none">
             <span class="grid size-9 shrink-0 place-items-center rounded-full bg-amber-400 text-white"><x-heroicon-s-user-circle class="size-7" /></span>
             <span>{{ __('core::app.home.navbar.account_information') }}</span>
         </a>
-        <a href="{{ route('profile.tickets.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-base font-semibold text-gray-900 transition hover:bg-orange-50 focus-visible:bg-orange-50 focus-visible:outline-none">
+        <a href="{{ route('profile.tickets.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-base font-semibold text-gray-900 transition hover:bg-futa-orange-soft focus-visible:bg-futa-orange-soft focus-visible:outline-none">
             <span class="grid size-9 shrink-0 place-items-center rounded-full bg-sky-500 text-white"><x-heroicon-o-clock class="size-6" /></span>
             <span>{{ __('core::app.home.navbar.ticket_history') }}</span>
         </a>
-        <a href="{{ route('profile.password.edit') }}" class="flex items-center gap-3 px-3 py-2.5 text-base font-semibold text-gray-900 transition hover:bg-orange-50 focus-visible:bg-orange-50 focus-visible:outline-none">
-            <span class="grid size-9 shrink-0 place-items-center rounded-full bg-[#ef6b31] text-white"><x-heroicon-o-lock-closed class="size-6" /></span>
+        <a href="{{ route('profile.password.edit') }}" class="flex items-center gap-3 px-3 py-2.5 text-base font-semibold text-gray-900 transition hover:bg-futa-orange-soft focus-visible:bg-futa-orange-soft focus-visible:outline-none">
+            <span class="grid size-9 shrink-0 place-items-center rounded-full bg-futa-orange text-white"><x-heroicon-o-lock-closed class="size-6" /></span>
             <span>{{ __('core::app.home.navbar.reset_password') }}</span>
         </a>
         <form
@@ -60,7 +60,7 @@
             class="border-t border-gray-100 pt-1"
         >
             @csrf
-            <button type="submit" class="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-semibold text-gray-900 transition hover:bg-orange-50 focus-visible:bg-orange-50 focus-visible:outline-none">
+            <button type="submit" class="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-semibold text-gray-900 transition hover:bg-futa-orange-soft focus-visible:bg-futa-orange-soft focus-visible:outline-none">
                 <span class="grid size-9 shrink-0 place-items-center rounded-full bg-red-600 text-white"><x-heroicon-o-arrow-right-on-rectangle class="size-6" /></span>
                 <span>{{ __('core::app.home.navbar.logout') }}</span>
             </button>

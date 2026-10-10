@@ -66,7 +66,7 @@
 }
 .futa-notification__close img { width: 16px; height: 16px; }
 .futa-notification__close:hover img { filter: sepia(1) saturate(8) hue-rotate(328deg); }
-.futa-notification__close:focus-visible { outline: 2px solid #ef5222; outline-offset: 3px; }
+.futa-notification__close:focus-visible { outline: 2px solid var(--color-futa-orange); outline-offset: 3px; }
 
 .futa-notification::after {
     position: absolute;
@@ -74,7 +74,7 @@
     bottom: 0;
     left: 0;
     height: 2px;
-    background: #ef5222;
+    background: var(--color-futa-orange);
     content: '';
     transform-origin: left;
     animation: futa-notification-progress var(--notification-duration) linear forwards;

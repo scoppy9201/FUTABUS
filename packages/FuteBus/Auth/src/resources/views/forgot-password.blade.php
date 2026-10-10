@@ -26,10 +26,10 @@
             <form class="flex flex-col gap-6" action="{{ route('password.email') }}" method="post">
                 @csrf
                 @include('Auth::partials.email-field')
-                <button type="submit" class="h-11 rounded-full bg-[#ef5222] text-sm font-bold text-white transition hover:bg-[#d94317]">
+                <button type="submit" class="h-11 rounded-full bg-futa-orange text-sm font-bold text-white transition hover:bg-futa-orange-dark">
                     {{ __('Auth::app.forgot_password.send_code') }}
                 </button>
-                <a href="{{ route('login') }}" class="-mt-3 self-end text-[13px] font-medium text-gray-900 transition hover:text-[#ef5222]">
+                <a href="{{ route('login') }}" class="-mt-3 self-end text-[13px] font-medium text-gray-900 transition hover:text-futa-orange">
                     {{ __('Auth::app.forgot_password.back') }}
                 </a>
             </form>
@@ -45,10 +45,10 @@
             <form class="flex flex-col gap-4" action="{{ route('password.update') }}" method="post">
                 @csrf
                 <label class="text-sm font-medium" for="new-password">{{ __('Auth::app.password_recovery.new_password') }}</label>
-                <input id="new-password" class="h-10 rounded-md border border-[#ffab92] bg-[#fff7f5] px-3" type="password" name="password" autocomplete="new-password" minlength="8" required>
+                <input id="new-password" class="h-10 rounded-md border border-futa-orange/40 bg-futa-orange-soft px-3" type="password" name="password" autocomplete="new-password" minlength="8" required>
                 <label class="text-sm font-medium" for="confirm-new-password">{{ __('Auth::app.password_recovery.confirm_password') }}</label>
-                <input id="confirm-new-password" class="h-10 rounded-md border border-[#ffab92] bg-[#fff7f5] px-3" type="password" name="password_confirmation" autocomplete="new-password" minlength="8" required>
-                <button type="submit" class="mt-3 h-11 rounded-full bg-[#ef5222] text-sm font-bold text-white transition hover:bg-[#d94317]">
+                <input id="confirm-new-password" class="h-10 rounded-md border border-futa-orange/40 bg-futa-orange-soft px-3" type="password" name="password_confirmation" autocomplete="new-password" minlength="8" required>
+                <button type="submit" class="mt-3 h-11 rounded-full bg-futa-orange text-sm font-bold text-white transition hover:bg-futa-orange-dark">
                     {{ __('Auth::app.password_recovery.reset_button') }}
                 </button>
             </form>

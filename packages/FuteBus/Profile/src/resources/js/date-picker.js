@@ -86,17 +86,17 @@ function initializeDatePicker(picker) {
             button.textContent = day;
             button.setAttribute('aria-label', fullDateFormatter.format(date));
             button.disabled = maximum !== null && date > maximum;
-            button.className = 'grid size-9 place-items-center rounded-full text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#ef5222]';
+            button.className = 'grid size-9 place-items-center rounded-full text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-futa-orange';
 
             if (isSelected) {
-                button.className += ' bg-[#ef5222] font-semibold text-white hover:bg-[#d94317]';
+                button.className += ' bg-futa-orange font-semibold text-white hover:bg-futa-orange-dark';
                 button.setAttribute('aria-pressed', 'true');
             } else if (button.disabled) {
                 button.className += ' cursor-not-allowed text-gray-300';
             } else if (isToday) {
-                button.className += ' text-[#ef5222] ring-1 ring-[#ef5222] hover:bg-orange-50';
+                button.className += ' text-futa-orange ring-1 ring-futa-orange hover:bg-futa-orange-soft';
             } else {
-                button.className += ' text-gray-900 hover:bg-orange-50 hover:text-[#ef5222]';
+                button.className += ' text-gray-900 hover:bg-futa-orange-soft hover:text-futa-orange';
             }
 
             button.addEventListener('click', () => {

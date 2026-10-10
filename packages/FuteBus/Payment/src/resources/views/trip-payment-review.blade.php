@@ -1,5 +1,13 @@
 @extends('core::layouts.home')
 
+@push('styles')
+    @vite('packages/FuteBus/Payment/src/resources/css/app.css')
+@endpush
+
+@push('scripts')
+    @vite('packages/FuteBus/Payment/src/resources/js/app.js')
+@endpush
+
 @section('title', __('Payment::payment.sepay_review_title'))
 
 @section('content')

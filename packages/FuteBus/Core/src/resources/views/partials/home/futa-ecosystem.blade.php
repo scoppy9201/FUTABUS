@@ -28,7 +28,7 @@
 <section @class(['bg-white', 'py-9 sm:py-10' => $compact, 'py-10 sm:py-12' => ! $compact])>
     <div class="mx-auto w-full max-w-282 px-4 sm:px-6 lg:px-0">
         <header class="text-center">
-            <h2 @class(['text-2xl font-extrabold leading-tight text-[#00613d] xl:text-3xl', 'uppercase' => ! $compact])>
+            <h2 @class(['text-2xl font-extrabold leading-tight text-futa-green xl:text-3xl', 'uppercase' => ! $compact])>
                 {{ __('core::app.home.futa_ecosystem.title') }}
             </h2>
             <p class="mx-auto mt-2 max-w-2xl text-sm leading-5 text-[#4a342e] sm:text-base sm:leading-6">
@@ -39,7 +39,7 @@
         <div class="mx-auto mt-8 grid max-w-4xl grid-cols-2 gap-x-5 gap-y-8 sm:mt-10 sm:grid-cols-4 sm:gap-6">
             @foreach($ecosystemItems as $item)
                 <a href="#" class="group flex min-w-0 flex-col items-center text-center">
-                    <span class="size-24 overflow-hidden rounded-full bg-[#fff0eb] ring-1 ring-[#fae4dc] transition-transform duration-300 group-hover:-translate-y-1 sm:size-25">
+                    <span class="size-24 overflow-hidden rounded-full bg-futa-orange-soft ring-1 ring-[#fae4dc] transition-transform duration-300 group-hover:-translate-y-1 sm:size-25">
                         <img
                             src="{{ asset($item['image']) }}"
                             alt=""
@@ -49,8 +49,8 @@
                     </span>
                     <span @class([
                         'mt-4 text-lg font-medium leading-6 transition-colors sm:text-xl',
-                        'text-[#ef5222]' => $item['featured'],
-                        'text-[#4b4b4b] group-hover:text-[#ef5222]' => ! $item['featured'],
+                        'text-futa-orange' => $item['featured'],
+                        'text-[#4b4b4b] group-hover:text-futa-orange' => ! $item['featured'],
                     ])>
                         {{ $item['label'] }}
                     </span>

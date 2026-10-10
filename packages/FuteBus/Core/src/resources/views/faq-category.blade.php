@@ -30,7 +30,7 @@
                 }"
             >
                 <header class="grid items-center gap-4 bg-[#f1f1f4] px-4 py-4 md:grid-cols-[1fr_1.5fr]">
-                    <a href="{{ route('faq') }}" class="text-lg font-extrabold text-gray-950 hover:text-[#ef5222]">
+                    <a href="{{ route('faq') }}" class="text-lg font-extrabold text-gray-950 hover:text-futa-orange">
                         {{ __('core::faq-category.back', ['category' => $category->localized('name')]) }}
                     </a>
                     <label class="relative block">
@@ -42,9 +42,9 @@
                             type="search"
                             x-model="query"
                             placeholder="{{ __('core::faq-category.search_placeholder', ['category' => $category->localized('name')]) }}"
-                            class="h-12 w-full rounded-2xl border border-[#ef5222]/70 bg-white pl-10 pr-4 text-sm
+                            class="h-12 w-full rounded-2xl border border-futa-orange/70 bg-white pl-10 pr-4 text-sm
                                 font-semibold text-gray-950 outline-none transition placeholder:text-gray-400
-                                focus:border-[#ef5222] focus:ring-3 focus:ring-[#ef5222]/10"
+                                focus:border-futa-orange focus:ring-3 focus:ring-futa-orange/10"
                         >
                     </label>
                 </header>
@@ -55,7 +55,7 @@
                             type="button"
                             @click="sidebarOpen = !sidebarOpen"
                             class="flex w-full items-center justify-between border-b border-slate-100 px-6 py-4
-                                text-left text-xl font-extrabold uppercase text-[#ef5222]"
+                                text-left text-xl font-extrabold uppercase text-futa-orange"
                             :aria-expanded="sidebarOpen"
                         >
                             <span>{{ __('core::faq-category.heading') }}</span>
@@ -78,9 +78,9 @@
                                     type="button"
                                     @click="selectQuestion(question.originalIndex)"
                                     class="block w-full truncate border-r-2 px-12 py-3.5 text-left text-sm font-semibold
-                                        transition hover:bg-orange-50 hover:text-[#ef5222]"
+                                        transition hover:bg-futa-orange-soft hover:text-futa-orange"
                                     :class="active === question.originalIndex
-                                        ? 'border-[#ef5222] bg-[#fff6f2] text-[#ef5222]'
+                                        ? 'border-futa-orange bg-futa-orange-soft text-futa-orange'
                                         : 'border-transparent text-gray-950'"
                                     x-text="question.question"
                                 ></button>

@@ -29,7 +29,7 @@
                 @csrf
                 @include('Auth::partials.email-field')
                 @include('Auth::partials.terms-consent')
-                <button type="submit" class="h-11 rounded-full bg-[#ef5222] text-sm font-bold text-white transition hover:bg-[#d94317]">{{ __('Auth::app.register.submit') }}</button>
+                <button type="submit" class="h-11 rounded-full bg-futa-orange text-sm font-bold text-white transition hover:bg-futa-orange-dark">{{ __('Auth::app.register.submit') }}</button>
             </form>
         @elseif($step === 'email_otp')
             @include('Auth::partials.otp-form', [
@@ -43,19 +43,19 @@
             <form class="flex flex-col gap-4 pt-6" action="{{ route('register.password') }}" method="post">
                 @csrf
                 <label class="text-sm font-medium" for="registration-password">{{ __('Auth::app.fields.password') }}</label>
-                <input id="registration-password" class="h-10 rounded-md border border-[#ffab92] bg-[#fff7f5] px-3" type="password" name="password" autocomplete="new-password" minlength="8" required>
+                <input id="registration-password" class="h-10 rounded-md border border-futa-orange/40 bg-futa-orange-soft px-3" type="password" name="password" autocomplete="new-password" minlength="8" required>
                 <label class="text-sm font-medium" for="registration-password-confirmation">{{ __('Auth::app.registration_flow.password_confirmation') }}</label>
-                <input id="registration-password-confirmation" class="h-10 rounded-md border border-[#ffab92] bg-[#fff7f5] px-3" type="password" name="password_confirmation" autocomplete="new-password" minlength="8" required>
-                <button type="submit" class="mt-3 h-11 rounded-full bg-[#ef5222] text-sm font-bold text-white transition hover:bg-[#d94317]">{{ __('Auth::app.otp.continue') }}</button>
+                <input id="registration-password-confirmation" class="h-10 rounded-md border border-futa-orange/40 bg-futa-orange-soft px-3" type="password" name="password_confirmation" autocomplete="new-password" minlength="8" required>
+                <button type="submit" class="mt-3 h-11 rounded-full bg-futa-orange text-sm font-bold text-white transition hover:bg-futa-orange-dark">{{ __('Auth::app.otp.continue') }}</button>
             </form>
         @else
             <form class="flex flex-col gap-4 pt-6" action="{{ route('register.profile') }}" method="post">
                 @csrf
                 <label class="text-sm font-medium" for="registration-name">{{ __('Auth::app.registration_flow.name') }}</label>
-                <input id="registration-name" class="h-10 rounded-md border border-[#ffab92] bg-[#fff7f5] px-3" type="text" name="name" value="{{ old('name') }}" autocomplete="name" required>
+                <input id="registration-name" class="h-10 rounded-md border border-futa-orange/40 bg-futa-orange-soft px-3" type="text" name="name" value="{{ old('name') }}" autocomplete="name" required>
                 <label class="text-sm font-medium" for="registration-phone">{{ __('Auth::app.registration_flow.phone') }}</label>
-                <input id="registration-phone" class="h-10 rounded-md border border-[#ffab92] bg-[#fff7f5] px-3" type="tel" name="phone" value="{{ old('phone') }}" autocomplete="tel" placeholder="{{ __('Auth::app.registration_flow.phone_example') }}" required>
-                <button type="submit" class="mt-3 h-11 rounded-full bg-[#ef5222] text-sm font-bold text-white transition hover:bg-[#d94317]">{{ __('Auth::app.registration_flow.finish') }}</button>
+                <input id="registration-phone" class="h-10 rounded-md border border-futa-orange/40 bg-futa-orange-soft px-3" type="tel" name="phone" value="{{ old('phone') }}" autocomplete="tel" placeholder="{{ __('Auth::app.registration_flow.phone_example') }}" required>
+                <button type="submit" class="mt-3 h-11 rounded-full bg-futa-orange text-sm font-bold text-white transition hover:bg-futa-orange-dark">{{ __('Auth::app.registration_flow.finish') }}</button>
             </form>
         @endif
     </div>

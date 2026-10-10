@@ -76,7 +76,7 @@
                             @input="fromOpen = true"
                             @keydown.escape="fromOpen = false"
                             placeholder="{{ __('core::schedules.from_placeholder') }}"
-                            class="h-11 w-full rounded-full border border-gray-300 bg-white pl-13 pr-5 text-base font-semibold text-gray-900 outline-none transition placeholder:font-medium placeholder:text-gray-400 focus:border-[#ef5222] focus:ring-3 focus:ring-[#ef5222]/10"
+                            class="h-11 w-full rounded-full border border-gray-300 bg-white pl-13 pr-5 text-base font-semibold text-gray-900 outline-none transition placeholder:font-medium placeholder:text-gray-400 focus:border-futa-orange focus:ring-3 focus:ring-futa-orange/10"
                         >
                         <div
                             x-cloak
@@ -88,9 +88,9 @@
                                 <button
                                     type="button"
                                     @click="choosePoint('from', point)"
-                                    class="flex w-full items-center gap-3 px-5 py-3 text-left text-sm font-semibold text-gray-800 transition hover:bg-orange-50 hover:text-[#ef5222]"
+                                    class="flex w-full items-center gap-3 px-5 py-3 text-left text-sm font-semibold text-gray-800 transition hover:bg-futa-orange-soft hover:text-futa-orange"
                                 >
-                                    <x-heroicon-o-map-pin class="size-4.5 shrink-0 text-[#00613d]" />
+                                    <x-heroicon-o-map-pin class="size-4.5 shrink-0 text-futa-green" />
                                     <span x-text="point"></span>
                                 </button>
                             </template>
@@ -102,7 +102,7 @@
                         @click="swap"
                         title="{{ __('core::schedules.swap') }}"
                         aria-label="{{ __('core::schedules.swap') }}"
-                        class="group absolute left-1/2 top-1/2 z-10 grid size-9 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-gray-200 bg-white text-[#ef5222] shadow-sm transition hover:border-[#ef5222] hover:shadow-md max-sm:hidden"
+                        class="group absolute left-1/2 top-1/2 z-10 grid size-9 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-gray-200 bg-white text-futa-orange shadow-sm transition hover:border-futa-orange hover:shadow-md max-sm:hidden"
                     >
                         <x-heroicon-o-arrows-right-left
                             class="size-4 transition-transform duration-300 ease-out group-hover:rotate-180"
@@ -121,7 +121,7 @@
                             @input="toOpen = true"
                             @keydown.escape="toOpen = false"
                             placeholder="{{ __('core::schedules.to_placeholder') }}"
-                            class="h-11 w-full rounded-full border border-gray-300 bg-white pl-13 pr-5 text-base font-semibold text-gray-900 outline-none transition placeholder:font-medium placeholder:text-gray-400 focus:border-[#ef5222] focus:ring-3 focus:ring-[#ef5222]/10"
+                            class="h-11 w-full rounded-full border border-gray-300 bg-white pl-13 pr-5 text-base font-semibold text-gray-900 outline-none transition placeholder:font-medium placeholder:text-gray-400 focus:border-futa-orange focus:ring-3 focus:ring-futa-orange/10"
                         >
                         <div
                             x-cloak
@@ -133,9 +133,9 @@
                                 <button
                                     type="button"
                                     @click="choosePoint('to', point)"
-                                    class="flex w-full items-center gap-3 px-5 py-3 text-left text-sm font-semibold text-gray-800 transition hover:bg-orange-50 hover:text-[#ef5222]"
+                                    class="flex w-full items-center gap-3 px-5 py-3 text-left text-sm font-semibold text-gray-800 transition hover:bg-futa-orange-soft hover:text-futa-orange"
                                 >
-                                    <x-heroicon-o-map-pin class="size-4.5 shrink-0 text-[#00613d]" />
+                                    <x-heroicon-o-map-pin class="size-4.5 shrink-0 text-futa-green" />
                                     <span x-text="point"></span>
                                 </button>
                             </template>
@@ -159,9 +159,9 @@
                         >
                             <template x-for="(route, routeIndex) in filtered(group)" :key="`${groupIndex}-${routeIndex}`">
                                 <article
-                                    class="grid gap-3 border-b border-gray-100 px-4 py-4 transition-colors last:border-b-0 hover:bg-orange-50/60 md:grid-cols-[minmax(0,1fr)_130px_130px_175px] md:items-center md:gap-4 md:px-5 md:py-3"
+                                    class="grid gap-3 border-b border-gray-100 px-4 py-4 transition-colors last:border-b-0 hover:bg-futa-orange-soft/60 md:grid-cols-[minmax(0,1fr)_130px_130px_175px] md:items-center md:gap-4 md:px-5 md:py-3"
                                 >
-                                    <h2 class="text-base font-bold text-[#ef5222]">
+                                    <h2 class="text-base font-bold text-futa-orange">
                                         <span x-text="route.from"></span>
                                         <span aria-hidden="true"> – </span>
                                         <span x-text="route.to"></span>

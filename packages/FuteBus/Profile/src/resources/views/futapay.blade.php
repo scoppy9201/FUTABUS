@@ -16,10 +16,10 @@
                 data-notice-title="{{ __('Profile::futapay.notice_title') }}"
                 data-notice-message="{{ __('Profile::futapay.notice_message') }}"
             >
-                <div class="flex items-center justify-between gap-5 rounded-3xl border border-gray-200 bg-orange-50/50 px-6 py-6 sm:px-8">
+                <div class="flex items-center justify-between gap-5 rounded-3xl border border-gray-200 bg-futa-orange-soft/50 px-6 py-6 sm:px-8">
                     <div>
                         <p class="text-base font-medium text-gray-700">{{ __('Profile::futapay.balance') }}</p>
-                        <p class="mt-1 text-5xl font-semibold leading-none text-[#ef5222]">0 ₫</p>
+                        <p class="mt-1 text-5xl font-semibold leading-none text-futa-orange">0 ₫</p>
                     </div>
                     <div class="flex shrink-0 flex-col items-center gap-2 text-center">
                         <span class="grid size-15 place-items-center rounded-full bg-sky-400 text-white">
@@ -43,7 +43,7 @@
                             aria-haspopup="dialog"
                             aria-controls="futapay-range-calendar"
                             aria-expanded="false"
-                            class="flex h-11 w-full items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-900 hover:border-[#ef5222] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ef5222]"
+                            class="flex h-11 w-full items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-900 hover:border-futa-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
                         >
                             <span data-range-start-label class="min-w-0 flex-1 truncate text-slate-400">{{ __('Profile::futapay.from_date') }}</span>
                             <span aria-hidden="true" class="shrink-0 text-slate-400">→</span>
@@ -60,20 +60,24 @@
                         >
                             <div class="grid items-center gap-4 border-b border-gray-100 pb-3 sm:grid-cols-2">
                                 <div class="flex items-center gap-1">
-                                    <button type="button" data-range-prev-year aria-label="{{ __('Profile::futapay.previous_year') }}" class="grid size-8 place-items-center rounded-full text-slate-500 hover:bg-orange-50 hover:text-[#ef5222] focus-visible:outline-2 focus-visible:outline-[#ef5222]">
+                                    <button type="button" data-range-prev-year aria-label="{{ __('Profile::futapay.previous_year') }}" class="grid size-8 place-items-center rounded-full text-slate-500 hover:bg-futa-orange-soft hover:text-futa-orange
+                                        focus-visible:outline-2 focus-visible:outline-futa-orange">
                                         <x-heroicon-o-chevron-double-left class="size-4" />
                                     </button>
-                                    <button type="button" data-range-prev-month aria-label="{{ __('Profile::app.previous_month') }}" class="grid size-8 place-items-center rounded-full text-slate-500 hover:bg-orange-50 hover:text-[#ef5222] focus-visible:outline-2 focus-visible:outline-[#ef5222]">
+                                    <button type="button" data-range-prev-month aria-label="{{ __('Profile::app.previous_month') }}" class="grid size-8 place-items-center rounded-full text-slate-500 hover:bg-futa-orange-soft hover:text-futa-orange
+                                        focus-visible:outline-2 focus-visible:outline-futa-orange">
                                         <x-heroicon-o-chevron-left class="size-4" />
                                     </button>
                                     <span data-range-first-month class="flex-1 text-center text-base font-semibold text-gray-950"></span>
                                 </div>
                                 <div class="flex items-center gap-1">
                                     <span data-range-second-month class="flex-1 text-center text-base font-semibold text-gray-950"></span>
-                                    <button type="button" data-range-next-month aria-label="{{ __('Profile::app.next_month') }}" class="grid size-8 place-items-center rounded-full text-slate-500 hover:bg-orange-50 hover:text-[#ef5222] focus-visible:outline-2 focus-visible:outline-[#ef5222]">
+                                    <button type="button" data-range-next-month aria-label="{{ __('Profile::app.next_month') }}" class="grid size-8 place-items-center rounded-full text-slate-500 hover:bg-futa-orange-soft hover:text-futa-orange
+                                        focus-visible:outline-2 focus-visible:outline-futa-orange">
                                         <x-heroicon-o-chevron-right class="size-4" />
                                     </button>
-                                    <button type="button" data-range-next-year aria-label="{{ __('Profile::futapay.next_year') }}" class="grid size-8 place-items-center rounded-full text-slate-500 hover:bg-orange-50 hover:text-[#ef5222] focus-visible:outline-2 focus-visible:outline-[#ef5222]">
+                                    <button type="button" data-range-next-year aria-label="{{ __('Profile::futapay.next_year') }}" class="grid size-8 place-items-center rounded-full text-slate-500 hover:bg-futa-orange-soft hover:text-futa-orange
+                                        focus-visible:outline-2 focus-visible:outline-futa-orange">
                                         <x-heroicon-o-chevron-double-right class="size-4" />
                                     </button>
                                 </div>
@@ -86,7 +90,7 @@
                                     </div>
                                 @endforeach
                             </div>
-                            <button type="button" data-range-clear class="mt-4 rounded-lg px-3 py-2 text-sm font-semibold text-[#ef5222] hover:bg-orange-50 focus-visible:outline-2 focus-visible:outline-[#ef5222]">
+                            <button type="button" data-range-clear class="mt-4 rounded-lg px-3 py-2 text-sm font-semibold text-futa-orange hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-futa-orange">
                                 {{ __('Profile::futapay.clear_dates') }}
                             </button>
                         </div>
@@ -101,7 +105,7 @@
                             aria-haspopup="listbox"
                             aria-controls="futapay-status-options"
                             aria-expanded="false"
-                            class="flex h-11 w-full items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-3 text-left text-sm font-medium text-gray-950 hover:border-[#ef5222] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ef5222]"
+                            class="flex h-11 w-full items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-3 text-left text-sm font-medium text-gray-950 hover:border-futa-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
                         >
                             <span id="futapay-status-display" data-ticket-status-label class="truncate">{{ __('Profile::futapay.choose_status') }}</span>
                             <x-heroicon-o-chevron-down class="size-4 shrink-0 text-slate-500" />
@@ -124,7 +128,7 @@
                                 <button
                                     type="button" role="option" tabindex="-1" data-ticket-status-option="{{ $value }}"
                                     aria-selected="{{ $value === '' ? 'true' : 'false' }}"
-                                    class="block w-full px-3 py-2.5 text-left text-sm font-medium text-gray-900 hover:bg-orange-50 focus:bg-orange-50 focus:outline-none aria-selected:bg-orange-50 aria-selected:font-semibold aria-selected:text-[#ef5222]"
+                                    class="block w-full px-3 py-2.5 text-left text-sm font-medium text-gray-900 hover:bg-futa-orange-soft focus:bg-futa-orange-soft focus:outline-none aria-selected:bg-futa-orange-soft aria-selected:font-semibold aria-selected:text-futa-orange"
                                 >{{ __('Profile::futapay.'.$label) }}</button>
                             @endforeach
                         </div>
@@ -136,8 +140,8 @@
                         data-notice-message="{{ __('Profile::futapay.notice_message') }}"
                         class="inline-flex h-11 min-w-25 items-center justify-center gap-2 rounded-full border
                             border-gray-200 bg-white px-5 text-sm font-semibold text-gray-900 shadow-sm transition
-                            hover:border-[#ef5222] hover:text-[#ef5222] focus-visible:outline-2
-                            focus-visible:outline-offset-2 focus-visible:outline-[#ef5222]"
+                            hover:border-futa-orange hover:text-futa-orange focus-visible:outline-2
+                            focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
                     >
                         <x-heroicon-o-funnel class="size-4" />
                         {{ __('Profile::futapay.search') }}

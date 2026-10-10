@@ -2,13 +2,28 @@
 
 namespace Tests\Feature;
 
+use Database\Seeders\FeaturedArticleBodySeeder;
+use FuteBus\Core\Services\FeaturedArticleBodyRepository;
 use FuteBus\Core\Services\FeaturedNewsCatalog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class FeaturedNewsTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_featured_article_body_is_seeded_with_its_original_content(): void
+    {
+        $slug = 'ket-noi-can-tho-nang-tam-trai-nghiem-cung-dong-xe-kim-long-hien-dai';
+
+        $this->seed(FeaturedArticleBodySeeder::class);
+
+        $body = DB::table('featured_article_bodies')->where('slug', $slug)->value('body_html');
+        $pointingFinger = mb_chr(0x1F449);
+        $this->assertStringContainsString($pointingFinger, $body);
+        $this->get(route('promotion-article', $slug))->assertOk()->assertSee($pointingFinger);
+    }
 
     public function test_homepage_shows_five_complete_news_pages(): void
     {
@@ -123,7 +138,11 @@ class FeaturedNewsTest extends TestCase
         $this->assertCount(15, $catalog);
         foreach ($catalog as $article) {
             $this->assertFileExists(public_path($article['image']));
-            $this->assertTrue(view()->exists($article['content_view']));
+            $this->assertTrue(
+                isset($article['content_view'])
+                    ? view()->exists($article['content_view'])
+                    : app(FeaturedArticleBodyRepository::class)->find($article['slug']) !== null,
+            );
         }
 
         foreach ([1 => 4, 2 => 4, 3 => 4, 4 => 3] as $page => $expectedCount) {

@@ -107,7 +107,55 @@ class SePayPaymentTest extends TestCase
         $this->assertDatabaseHas('sepay_payment_intents', ['id' => $intent->id, 'status' => 'paid']);
         $this->get(route('trip-payment-preview.status', ['draft' => $intent->token]))
             ->assertOk()->assertJson(['status' => 'paid']);
-        $this->get($url)->assertOk()->assertSee('Thanh toán thành công');
+        $response = $this->get($url)->assertOk()
+            ->assertSee('Mua vé xe thành công')
+            ->assertSee('Mã vé ')
+            ->assertSee('data:image/svg+xml;base64,', false);
+        preg_match('/src="data:image\/svg\+xml;base64,([^"]+)"/', $response->getContent(), $matches);
+        $qrSvg = base64_decode($matches[1] ?? '', true);
+        $this->assertIsString($qrSvg);
+        $this->assertStringContainsString('data:image/png;base64,', $qrSvg);
+        $this->assertStringContainsString('<image ', $qrSvg);
+    }
+
+    public function test_webhook_matches_payment_code_from_content_when_sepay_code_is_null(): void
+    {
+        $this->createIntent();
+        $intent = DB::table('sepay_payment_intents')->first();
+        $event = $this->event($intent->code);
+        $event['code'] = null;
+        $event['content'] = 'Chuyen tien '.$intent->code.' thanh toan ve';
+
+        $this->signedWebhook($event)->assertOk()->assertJson(['success' => true]);
+        $this->assertDatabaseHas('sepay_transactions', [
+            'sepay_id' => $event['id'], 'code' => $intent->code, 'status' => 'matched',
+        ]);
+        $this->assertDatabaseHas('sepay_payment_intents', ['id' => $intent->id, 'status' => 'paid']);
+    }
+
+    public function test_previously_unmatched_webhook_can_be_reconciled_once(): void
+    {
+        $this->createIntent();
+        $intent = DB::table('sepay_payment_intents')->first();
+        $event = $this->event($intent->code);
+        $event['code'] = null;
+        DB::table('sepay_transactions')->insert([
+            'sepay_id'       => $event['id'],
+            'code'           => null,
+            'account_number' => $event['accountNumber'],
+            'amount'         => $event['transferAmount'],
+            'status'         => 'unmatched',
+            'payload'        => json_encode($event, JSON_UNESCAPED_UNICODE),
+            'created_at'     => now(),
+            'updated_at'     => now(),
+        ]);
+
+        $this->signedWebhook($event)->assertOk();
+        $this->signedWebhook($event)->assertOk();
+        $this->assertDatabaseHas('sepay_payment_intents', ['id' => $intent->id, 'status' => 'paid']);
+        $this->assertDatabaseHas('sepay_transactions', ['sepay_id' => $event['id'], 'status' => 'matched']);
+        $this->assertDatabaseCount('bookings', 1);
+        $this->assertDatabaseCount('tickets', 1);
     }
 
     public function test_payment_does_not_show_a_transfer_qr_without_webhook_authentication(): void
@@ -178,6 +226,48 @@ class SePayPaymentTest extends TestCase
             $this->criteria['departure_date'],
             1
         ));
+    }
+
+    public function test_confirmed_return_cancels_the_hold_and_late_transfer_needs_review(): void
+    {
+        $url = $this->createIntent();
+        $intent = DB::table('sepay_payment_intents')->first();
+        $this->get($url)->assertOk()
+            ->assertSee('Xác nhận quay lại')
+            ->assertSee(route('trip-payment-preview.cancel', ['draft' => $intent->token]));
+
+        $this->post(route('trip-payment-preview.cancel', ['draft' => $intent->token]))
+            ->assertRedirect(route('trip-booking.show', [
+                'trip' => $this->tripId,
+                ...$this->criteria,
+                'direction' => 'outbound',
+                'seats'     => (string) $this->seatId,
+            ]));
+        $this->assertDatabaseHas('sepay_payment_intents', ['id' => $intent->id, 'status' => 'expired']);
+        $this->assertNotEmpty(app(TripSearchService::class)->search(
+            $this->criteria['departure'],
+            $this->criteria['destination'],
+            $this->criteria['departure_date'],
+            1
+        ));
+        $this->get(route('trip-payment-preview.status', ['draft' => $intent->token]))
+            ->assertOk()->assertJson(['status' => 'expired']);
+
+        $this->signedWebhook($this->event($intent->code))->assertOk();
+        $this->assertDatabaseHas('sepay_payment_intents', ['id' => $intent->id, 'status' => 'needs_review']);
+        $this->assertDatabaseCount('bookings', 0);
+    }
+
+    public function test_return_cannot_cancel_a_completed_payment(): void
+    {
+        $this->createIntent();
+        $intent = DB::table('sepay_payment_intents')->first();
+        $this->signedWebhook($this->event($intent->code))->assertOk();
+
+        $this->post(route('trip-payment-preview.cancel', ['draft' => $intent->token]))
+            ->assertRedirect(route('trip-payment-preview.show', ['draft' => $intent->token]));
+        $this->assertDatabaseHas('sepay_payment_intents', ['id' => $intent->id, 'status' => 'paid']);
+        $this->assertDatabaseCount('bookings', 1);
     }
 
     public function test_hmac_rejects_modified_payload_and_old_timestamp(): void

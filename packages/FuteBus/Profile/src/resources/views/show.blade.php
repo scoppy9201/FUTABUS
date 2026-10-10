@@ -23,7 +23,9 @@
                 <p class="mt-2 text-base font-medium text-slate-600">{{ __('Profile::app.description') }}</p>
 
                 @if(session('status'))
-                    <p role="status" class="mt-5 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800">{{ session('status') }}</p>
+                    <div hidden data-notice-on-load data-notice-tone="success"
+                        data-notice-title="{{ __('Profile::app.title') }}"
+                        data-notice-message="{{ session('status') }}"></div>
                 @endif
                 @if($errors->any())
                     <div role="alert" class="mt-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -45,7 +47,7 @@
                     @method('PUT')
 
                     <div class="flex flex-col items-center text-center">
-                        <div class="grid size-44 place-items-center overflow-hidden rounded-full bg-orange-50 text-[#ef5222] sm:size-48">
+                        <div class="grid size-44 place-items-center overflow-hidden rounded-full bg-futa-orange-soft text-futa-orange sm:size-48">
                             <img x-cloak x-show="preview" :src="preview" alt="" class="h-full w-full object-cover">
                             @if($user->avatar)
                                 <img x-show="!preview" src="{{ route('profile.avatar') }}" alt="" class="h-full w-full object-cover">
@@ -61,7 +63,7 @@
                         >
                             {{ __('Profile::app.choose_photo') }}
                         </button>
-                        <label for="avatar" x-cloak x-show="editing" class="mt-5 inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white px-8 text-base font-medium text-gray-950 transition hover:border-[#ef5222] hover:text-[#ef5222]">
+                        <label for="avatar" x-cloak x-show="editing" class="mt-5 inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white px-8 text-base font-medium text-gray-950 transition hover:border-futa-orange hover:text-futa-orange">
                             {{ __('Profile::app.choose_photo') }}
                         </label>
                         <input
@@ -89,7 +91,7 @@
                                     x-ref="name" :disabled="!editing"
                                     name="name" type="text" value="{{ $profileFieldValue('name', $user->name) }}"
                                     required maxlength="100"
-                                    class="h-10 w-full min-w-0 rounded-lg border border-transparent px-3 pr-11 text-base font-semibold text-gray-950 hover:border-gray-200 focus:border-[#ef5222] focus:outline-none"
+                                    class="h-10 w-full min-w-0 rounded-lg border border-transparent px-3 pr-11 text-base font-semibold text-gray-950 hover:border-gray-200 focus:border-futa-orange focus:outline-none"
                                 >
                                 <x-heroicon-o-pencil-square class="pointer-events-none absolute right-3 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
                             </div>
@@ -104,7 +106,7 @@
                                     :disabled="!editing"
                                     name="phone" type="tel" value="{{ $profileFieldValue('phone', $phone) }}"
                                     required autocomplete="tel"
-                                    class="h-10 w-full min-w-0 rounded-lg border border-transparent px-3 pr-11 text-base font-semibold text-gray-950 hover:border-gray-200 focus:border-[#ef5222] focus:outline-none"
+                                    class="h-10 w-full min-w-0 rounded-lg border border-transparent px-3 pr-11 text-base font-semibold text-gray-950 hover:border-gray-200 focus:border-futa-orange focus:outline-none"
                                 >
                                 <x-heroicon-o-pencil-square class="pointer-events-none absolute right-3 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
                             </div>
@@ -116,7 +118,7 @@
                                 id="profile-gender"
                                 name="gender"
                                 :disabled="!editing"
-                                class="h-10 min-w-0 rounded-lg border border-gray-200 bg-white px-3 text-base font-medium text-gray-950 disabled:opacity-100 focus:border-[#ef5222] focus:outline-none sm:max-w-40"
+                                class="h-10 min-w-0 rounded-lg border border-gray-200 bg-white px-3 text-base font-medium text-gray-950 disabled:opacity-100 focus:border-futa-orange focus:outline-none sm:max-w-40"
                             >
                                 <option value=""></option>
                                 @foreach(['male', 'female', 'other'] as $gender)
@@ -148,7 +150,9 @@
                                     aria-haspopup="dialog"
                                     aria-controls="profile-birth-date-calendar"
                                     aria-expanded="false"
-                                    class="flex h-10 w-full items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-3 text-left text-base font-medium text-gray-950 hover:border-[#ef5222] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ef5222]"
+                                    class="flex h-10 w-full items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-3 text-left text-base
+                                        font-medium text-gray-950 hover:border-futa-orange focus-visible:outline-2 focus-visible:outline-offset-2
+                                        focus-visible:outline-futa-orange"
                                 >
                                     <span data-profile-date-label>{{ __('Profile::app.choose_date') }}</span>
                                     <x-heroicon-o-calendar-days class="size-5 shrink-0 text-slate-400" />
@@ -162,7 +166,7 @@
                                     class="absolute right-0 top-full z-30 mt-2 w-72 rounded-xl border border-gray-200 bg-white p-3 text-gray-900 shadow-xl sm:right-auto sm:left-0"
                                 >
                                     <div class="mb-3 flex items-center justify-between gap-2">
-                                        <button type="button" data-profile-date-previous aria-label="{{ __('Profile::app.previous_month') }}" class="grid size-8 place-items-center rounded-full text-[#ef5222] hover:bg-orange-50 focus-visible:outline-2 focus-visible:outline-[#ef5222]">
+                                        <button type="button" data-profile-date-previous aria-label="{{ __('Profile::app.previous_month') }}" class="grid size-8 place-items-center rounded-full text-futa-orange hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-futa-orange">
                                             <x-heroicon-o-chevron-left class="size-4" />
                                         </button>
                                         <span data-profile-date-month class="text-sm font-semibold text-gray-950"></span>
@@ -172,15 +176,15 @@
                                             aria-label="{{ __('Profile::app.year') }}"
                                             min="1000"
                                             max="{{ now()->year }}"
-                                            class="w-17 rounded-md border border-gray-200 px-1 py-1 text-center text-sm font-semibold text-gray-950 focus:border-[#ef5222] focus:outline-none"
+                                            class="w-17 rounded-md border border-gray-200 px-1 py-1 text-center text-sm font-semibold text-gray-950 focus:border-futa-orange focus:outline-none"
                                         >
-                                        <button type="button" data-profile-date-next aria-label="{{ __('Profile::app.next_month') }}" class="grid size-8 place-items-center rounded-full text-[#ef5222] hover:bg-orange-50 focus-visible:outline-2 focus-visible:outline-[#ef5222]">
+                                        <button type="button" data-profile-date-next aria-label="{{ __('Profile::app.next_month') }}" class="grid size-8 place-items-center rounded-full text-futa-orange hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-futa-orange">
                                             <x-heroicon-o-chevron-right class="size-4" />
                                         </button>
                                     </div>
                                     <div data-profile-date-weekdays class="grid grid-cols-7 text-center text-xs font-semibold text-slate-500"></div>
                                     <div data-profile-date-days class="mt-1 grid grid-cols-7 gap-0.5"></div>
-                                    <button type="button" data-profile-date-clear class="mt-3 w-full rounded-lg py-1.5 text-sm font-semibold text-[#ef5222] hover:bg-orange-50 focus-visible:outline-2 focus-visible:outline-[#ef5222]">
+                                    <button type="button" data-profile-date-clear class="mt-3 w-full rounded-lg py-1.5 text-sm font-semibold text-futa-orange hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-futa-orange">
                                         {{ __('Profile::app.clear_date') }}
                                     </button>
                                 </div>
@@ -196,7 +200,7 @@
                                     :disabled="!editing"
                                     name="address" type="text" value="{{ $profileFieldValue('address', $user->address) }}"
                                     maxlength="255"
-                                    class="h-10 w-full min-w-0 rounded-lg border border-transparent px-3 pr-11 text-base font-semibold text-gray-950 hover:border-gray-200 focus:border-[#ef5222] focus:outline-none"
+                                    class="h-10 w-full min-w-0 rounded-lg border border-transparent px-3 pr-11 text-base font-semibold text-gray-950 hover:border-gray-200 focus:border-futa-orange focus:outline-none"
                                 >
                                 <x-heroicon-o-pencil-square class="pointer-events-none absolute right-3 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
                             </div>
@@ -211,7 +215,7 @@
                                     :disabled="!editing"
                                     name="occupation" type="text" value="{{ $profileFieldValue('occupation', $user->occupation) }}"
                                     maxlength="255"
-                                    class="h-10 w-full min-w-0 rounded-lg border border-transparent px-3 pr-11 text-base font-semibold text-gray-950 hover:border-gray-200 focus:border-[#ef5222] focus:outline-none"
+                                    class="h-10 w-full min-w-0 rounded-lg border border-transparent px-3 pr-11 text-base font-semibold text-gray-950 hover:border-gray-200 focus:border-futa-orange focus:outline-none"
                                 >
                                 <x-heroicon-o-pencil-square class="pointer-events-none absolute right-3 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
                             </div>
@@ -221,7 +225,7 @@
                                 x-show="!editing"
                                 type="button"
                                 @click="editing = true; $nextTick(() => $refs.name.focus())"
-                                class="inline-flex min-h-11 min-w-44 items-center justify-center rounded-full bg-[#ef5222] px-8 text-base font-semibold text-white transition hover:bg-[#d94317] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ef5222]"
+                                class="inline-flex min-h-11 min-w-44 items-center justify-center rounded-full bg-futa-orange px-8 text-base font-semibold text-white transition hover:bg-futa-orange-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
                             >
                                 {{ __('Profile::app.update') }}
                             </button>
@@ -236,7 +240,7 @@
                             <button
                                 x-cloak x-show="editing"
                                 type="submit"
-                                class="inline-flex min-h-11 min-w-44 items-center justify-center gap-2 rounded-full bg-[#ef5222] px-8 text-base font-semibold text-white transition hover:bg-[#d94317] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ef5222]"
+                                class="inline-flex min-h-11 min-w-44 items-center justify-center gap-2 rounded-full bg-futa-orange px-8 text-base font-semibold text-white transition hover:bg-futa-orange-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
                             >
                                 <x-heroicon-o-pencil-square class="size-5" />
                                 {{ __('Profile::app.update') }}

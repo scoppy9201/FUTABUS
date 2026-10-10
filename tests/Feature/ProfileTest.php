@@ -42,6 +42,13 @@ class ProfileTest extends TestCase
             'occupation'    => 'Developer',
         ])->assertRedirect(route('profile.show'));
 
+        $this->actingAs($user)->get(route('profile.show'))
+            ->assertOk()
+            ->assertSee('data-notice-on-load', false)
+            ->assertSee('data-notice-tone="success"', false)
+            ->assertSee('Thông tin tài khoản đã được cập nhật.')
+            ->assertDontSee('mt-5 rounded-lg bg-green-50', false);
+
         $user->refresh();
         $this->assertSame('Bui Manh Hung', $user->name);
         $this->assertSame('+84568503606', $user->phone);

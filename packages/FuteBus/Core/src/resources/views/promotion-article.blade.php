@@ -26,7 +26,9 @@
                     class="mx-auto mt-10 h-auto w-full max-w-262.5"
                 >
 
-                @if (!empty($promotion['content_view']))
+                @if ($bodyHtml !== null)
+                    {!! $bodyHtml !!}
+                @elseif (!empty($promotion['content_view']))
                     @include($promotion['content_view'])
                 @endif
             </article>

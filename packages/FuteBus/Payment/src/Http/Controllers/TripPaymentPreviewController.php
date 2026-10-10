@@ -9,6 +9,7 @@ use FuteBus\Core\Services\BookingLocationCatalog;
 use FuteBus\Core\Services\TripSearchService;
 use FuteBus\Payment\Services\SePayPaymentService;
 use FuteBus\Payment\Services\SePayQrService;
+use FuteBus\Payment\Services\TicketQrService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -128,13 +129,24 @@ class TripPaymentPreviewController extends Controller
         return redirect()->route('trip-payment-preview.show', ['draft' => $draft]);
     }
 
-    public function show(Request $request, SePayQrService $sePay, SePayPaymentService $payments, string $draft): View|RedirectResponse
+    public function show(Request $request, SePayQrService $sePay, SePayPaymentService $payments, TicketQrService $ticketQr, string $draft): View|RedirectResponse
     {
         $intent = DB::table('sepay_payment_intents')->where('token', $draft)->first();
         if ($intent?->status === 'paid') {
+            $tickets = DB::table('tickets')->where('booking_id', $intent->booking_id)
+                ->orderBy('id')->get(['ticket_code', 'seat_code', 'price'])
+                ->map(fn (object $ticket): array => [
+                    'code'      => $ticket->ticket_code,
+                    'seat'      => $ticket->seat_code,
+                    'price'     => $ticket->price,
+                    'qr'        => $ticketQr->dataUri($ticket->ticket_code),
+                ]);
+
             return view('Payment::trip-payment-success', [
                 'bookingCode' => DB::table('bookings')->where('id', $intent->booking_id)->value('booking_code'),
                 'preview'     => json_decode($intent->snapshot, true),
+                'total'       => $intent->amount,
+                'tickets'     => $tickets,
             ]);
         }
         if ($intent?->status === 'needs_review') {
@@ -167,6 +179,39 @@ class TripPaymentPreviewController extends Controller
             'paymentEnabled'     => $qrUrl !== null,
             'paymentCanActivate' => $intent === null && $payments->ready(),
         ]);
+    }
+
+    public function cancel(Request $request, string $draft): RedirectResponse
+    {
+        $preview = $request->session()->get('trip_payment_preview');
+        if (! is_array($preview) || ($preview['token'] ?? null) !== $draft) {
+            return redirect()->to(route('home').'#trip-search');
+        }
+
+        $paymentStatus = DB::transaction(function () use ($draft): ?string {
+            $intent = DB::table('sepay_payment_intents')->where('token', $draft)->lockForUpdate()->first();
+            if ($intent === null) {
+                return null;
+            }
+            if ($intent->status === 'pending') {
+                DB::table('sepay_payment_intents')->where('id', $intent->id)
+                    ->update(['status' => 'expired', 'updated_at' => now()]);
+            }
+
+            return $intent->status;
+        });
+
+        if (in_array($paymentStatus, ['paid', 'needs_review'], true)) {
+            return redirect()->route('trip-payment-preview.show', ['draft' => $draft]);
+        }
+
+        $request->session()->forget('trip_payment_preview');
+
+        return redirect()->route('trip-booking.show', array_merge(
+            ['trip' => $preview['trip']['id']],
+            $preview['criteria'],
+            ['direction' => $preview['direction'], 'seats' => implode(',', $preview['seat_ids'])]
+        ));
     }
 
     public function status(Request $request, string $draft): JsonResponse

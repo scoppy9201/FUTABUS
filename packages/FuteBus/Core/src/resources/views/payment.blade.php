@@ -10,7 +10,7 @@
         <main class="mx-auto w-full max-w-285 px-4 py-10 sm:px-6 lg:px-0">
             <article class="min-h-110 text-base font-semibold leading-6.5 text-gray-950">
                 <header class="mb-7 text-center">
-                    <p class="text-[34px] font-extrabold uppercase leading-tight text-[#ef5222]">
+                    <p class="text-[34px] font-extrabold uppercase leading-tight text-futa-orange">
                         {{ __('core::payment.brand') }}
                     </p>
                     <h1 class="mt-3 text-[30px] font-extrabold uppercase leading-tight">

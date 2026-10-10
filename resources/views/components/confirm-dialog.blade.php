@@ -22,14 +22,14 @@
             <button
                 type="button"
                 data-confirm-cancel
-                class="min-w-22 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 transition hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ef5222]"
+                class="min-w-22 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 transition hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
             >
                 {{ __('core::confirm.cancel') }}
             </button>
             <button
                 type="button"
                 data-confirm-accept
-                class="min-w-26 rounded-lg bg-[#ef5222] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#d94316] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ef5222]"
+                class="min-w-26 rounded-lg bg-futa-orange px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-futa-orange-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
             ></button>
         </div>
     </div>

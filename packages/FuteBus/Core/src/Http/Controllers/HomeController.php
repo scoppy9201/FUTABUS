@@ -8,12 +8,13 @@ use FuteBus\Core\Models\BranchRegion;
 use FuteBus\Core\Models\BusRoute;
 use FuteBus\Core\Models\ContactMessage;
 use FuteBus\Core\Models\FaqCategory;
-use FuteBus\Core\Services\HomeService;
 use FuteBus\Core\Services\BookingLocationCatalog;
-use FuteBus\Core\Services\FeaturedPromotionCatalog;
+use FuteBus\Core\Services\FeaturedArticleBodyRepository;
 use FuteBus\Core\Services\FeaturedNewsCatalog;
-use Illuminate\Pagination\LengthAwarePaginator;
+use FuteBus\Core\Services\FeaturedPromotionCatalog;
+use FuteBus\Core\Services\HomeService;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
 
@@ -24,6 +25,7 @@ class HomeController extends Controller
         private readonly BookingLocationCatalog $bookingLocationCatalog,
         private readonly FeaturedPromotionCatalog $featuredPromotionCatalog,
         private readonly FeaturedNewsCatalog $featuredNewsCatalog,
+        private readonly FeaturedArticleBodyRepository $featuredArticleBodyRepository,
     ) {}
 
     public function index()
@@ -37,10 +39,10 @@ class HomeController extends Controller
         $newsArticles = $this->featuredNewsCatalog->all();
 
         return view('core::home', [
-            'promotions'     => $promotions,
-            'popularRoutes'  => $popularRoutes,
+            'promotions'       => $promotions,
+            'popularRoutes'    => $popularRoutes,
             'bookingLocations' => $bookingLocations,
-            'newsArticles'   => $newsArticles,
+            'newsArticles'     => $newsArticles,
         ]);
     }
 
@@ -61,6 +63,8 @@ class HomeController extends Controller
 
         abort_unless($promotion, 404);
 
+        $bodyHtml = $this->featuredArticleBodyRepository->find($slug);
+
         $relatedArticles = $this->featuredNewsCatalog->all()
             ->slice(2)
             ->reject(fn (array $article) => $article['slug'] === $slug)
@@ -69,7 +73,7 @@ class HomeController extends Controller
 
         $relatedViewAllUrl = route('news');
 
-        return view('core::promotion-article', compact('promotion', 'relatedArticles', 'relatedViewAllUrl'));
+        return view('core::promotion-article', compact('promotion', 'bodyHtml', 'relatedArticles', 'relatedViewAllUrl'));
     }
 
     public function privacy()

@@ -1,6 +1,6 @@
 <section class="bg-white py-10 sm:py-12" aria-labelledby="featured-promotions-heading">
     <div class="mx-auto w-full max-w-282 px-4 sm:px-6 lg:px-0">
-        <h2 id="featured-promotions-heading" class="mb-7 text-center text-2xl font-extrabold uppercase leading-tight text-[#00613d] sm:mb-8 xl:text-3xl">
+        <h2 id="featured-promotions-heading" class="mb-7 text-center text-2xl font-extrabold uppercase leading-tight text-futa-green sm:mb-8 xl:text-3xl">
             {{ __('core::app.home.promotions.title') }}
         </h2>
 
@@ -35,7 +35,7 @@
                             <a
                                 href="{{ route('promotion-article', $promotion['slug']) }}"
                                 aria-label="{{ $promotion['title'] }}"
-                                class="block overflow-hidden rounded-xl bg-white shadow-[0_3px_7px_rgba(0,0,0,.3)] transition-shadow hover:shadow-[0_5px_12px_rgba(0,0,0,.3)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ef5222]"
+                                class="block overflow-hidden rounded-xl bg-white shadow-[0_3px_7px_rgba(0,0,0,.3)] transition-shadow hover:shadow-[0_5px_12px_rgba(0,0,0,.3)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
                             >
                                 <img
                                     src="{{ asset($promotion['image']) }}"
@@ -54,7 +54,7 @@
                     <button
                         type="button"
                         class="h-2.5 rounded-full transition-all duration-300"
-                        :class="active === page - 1 ? 'w-7 bg-[#ef5222]' : 'w-2.5 bg-gray-300'"
+                        :class="active === page - 1 ? 'w-7 bg-futa-orange' : 'w-2.5 bg-gray-300'"
                         @click="goTo(page - 1)"
                         :aria-label="`Trang ${page}`"
                         :aria-current="active === page - 1 ? 'page' : null"

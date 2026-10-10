@@ -6,7 +6,7 @@
 <div x-data="vehicleTypeManager()">
     <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
-            <p class="text-sm font-bold uppercase tracking-[0.16em] text-[#ef5222]">
+            <p class="text-sm font-bold uppercase tracking-[0.16em] text-futa-orange">
                 {{ $company?->name ?? 'FUTA Bus Lines' }}
             </p>
             <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">
@@ -16,7 +16,7 @@
                 {{ __('BusManagement::app.vehicle_types_subtitle') }}
             </p>
         </div>
-        <span class="rounded-full bg-orange-50 px-4 py-2 text-sm font-bold text-[#d7461a]">
+        <span class="rounded-full bg-futa-orange-soft px-4 py-2 text-sm font-bold text-futa-orange-dark">
             {{ number_format($vehicleTypes->total()) }} {{ __('Dashboard::app.records') }}
         </span>
     </div>
@@ -57,7 +57,7 @@
                     name="search"
                     value="{{ $search }}"
                     placeholder="{{ __('BusManagement::app.search_placeholder') }}"
-                    class="w-72 rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm text-slate-700 placeholder-slate-400 shadow-sm transition focus:border-[#F26522] focus:outline-none focus:ring-2 focus:ring-[#F26522]/20"
+                    class="w-72 rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm text-slate-700 placeholder-slate-400 shadow-sm transition focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20"
                 />
             </div>
             <button type="submit" class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200">
@@ -74,7 +74,7 @@
         <button
             id="btn-add-vehicle-type"
             @click="openAdd()"
-            class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#F26522] to-[#E31B23] px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all duration-200 hover:opacity-90 hover:shadow-lg"
+            class="inline-flex items-center gap-2 rounded-xl bg-futa-orange px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all duration-200 hover:opacity-90 hover:shadow-lg"
         >
             <x-heroicon-o-plus class="size-4" />
             {{ __('BusManagement::app.btn_add') }}
@@ -84,7 +84,7 @@
     {{-- ── Table  --}}
     <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[640px] text-left text-sm">
+            <table class="w-full min-w-160 text-left text-sm">
                 <caption class="sr-only">{{ __('BusManagement::app.vehicle_types_title') }}</caption>
                 <thead class="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500">
                     <tr>
@@ -98,7 +98,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($vehicleTypes as $type)
-                        <tr class="transition-colors duration-100 hover:bg-orange-50/30">
+                        <tr class="transition-colors duration-100 hover:bg-futa-orange-soft/30">
                             <td class="px-5 py-4 text-slate-500">{{ $vehicleTypes->firstItem() + $loop->index }}</td>
                             <td class="px-5 py-4 font-bold text-slate-900">{{ $type->name }}</td>
                             <td class="max-w-xs truncate px-5 py-4 text-slate-600" title="{{ $type->description }}">
@@ -123,7 +123,7 @@
                                     <button
                                         id="btn-edit-{{ $type->id }}"
                                         @click="openEdit({{ json_encode(['id' => $type->id, 'name' => $type->name, 'description' => $type->description, 'default_capacity' => $type->default_capacity, 'status' => $type->status]) }})"
-                                        class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-[#F26522] hover:bg-orange-50 hover:text-[#F26522]"
+                                        class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-futa-orange hover:bg-futa-orange-soft hover:text-futa-orange"
                                     >
                                         <x-heroicon-o-pencil-square class="size-3.5" />
                                         {{ __('BusManagement::app.btn_edit') }}
@@ -148,7 +148,7 @@
                                     <x-heroicon-o-inbox class="size-8" />
                                 </span>
                                 <p class="mt-3 text-sm font-semibold text-slate-500">{{ __('BusManagement::app.empty') }}</p>
-                                <button @click="openAdd()" class="mt-3 text-sm font-medium text-[#F26522] hover:underline">
+                                <button @click="openAdd()" class="mt-3 text-sm font-medium text-futa-orange hover:underline">
                                     {{ __('BusManagement::app.btn_add_now') }}
                                 </button>
                             </td>
@@ -186,7 +186,7 @@
             class="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
         >
             {{-- Modal Header --}}
-            <div class="flex items-center justify-between bg-gradient-to-r from-[#F26522] to-[#E31B23] px-5 py-3">
+            <div class="flex items-center justify-between bg-futa-orange px-5 py-3">
                 <div class="flex items-center gap-2">
                     <span class="rounded-lg bg-white/20 p-1.5">
                         <x-heroicon-o-plus class="size-4 text-white" />
@@ -213,7 +213,7 @@
                         required
                         maxlength="100"
                         placeholder="{{ __('BusManagement::app.field_name_placeholder') }}"
-                        class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 transition focus:border-[#F26522] focus:outline-none focus:ring-2 focus:ring-[#F26522]/20"
+                        class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 transition focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20"
                     />
                     <p class="mt-0.5 text-xs text-slate-400">{{ __('BusManagement::app.field_name_hint') }}</p>
                 </div>
@@ -228,7 +228,7 @@
                         rows="2"
                         maxlength="500"
                         placeholder="{{ __('BusManagement::app.field_description_placeholder') }}"
-                        class="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 transition focus:border-[#F26522] focus:outline-none focus:ring-2 focus:ring-[#F26522]/20"
+                        class="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 transition focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20"
                     ></textarea>
                 </div>
 
@@ -246,7 +246,7 @@
                             max="255"
                             value="45"
                             required
-                            class="w-full rounded-lg border border-slate-200 py-2 pl-3 pr-14 text-sm text-slate-800 transition focus:border-[#F26522] focus:outline-none focus:ring-2 focus:ring-[#F26522]/20"
+                            class="w-full rounded-lg border border-slate-200 py-2 pl-3 pr-14 text-sm text-slate-800 transition focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20"
                         />
                         <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">
                             {{ __('BusManagement::app.field_capacity_unit') }}
@@ -260,7 +260,7 @@
                         {{ __('BusManagement::app.btn_cancel') }}
                     </button>
                     <button type="submit"
-                        class="rounded-lg bg-[#F26522] px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[#d9561d]">
+                        class="rounded-lg bg-futa-orange px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-futa-orange-dark">
                         {{ __('BusManagement::app.btn_store') }}
                     </button>
                 </div>
@@ -320,7 +320,7 @@
                         :value="editData.name"
                         required
                         maxlength="100"
-                        class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 transition focus:border-[#F26522] focus:outline-none focus:ring-2 focus:ring-[#F26522]/20"
+                        class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 transition focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20"
                     />
                     <p class="mt-0.5 text-xs text-slate-400">{{ __('BusManagement::app.field_name_hint') }}</p>
                 </div>
@@ -335,7 +335,7 @@
                         rows="2"
                         maxlength="500"
                         x-text="editData.description"
-                        class="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 transition focus:border-[#F26522] focus:outline-none focus:ring-2 focus:ring-[#F26522]/20"
+                        class="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 transition focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20"
                     ></textarea>
                 </div>
 
@@ -353,7 +353,7 @@
                             min="1"
                             max="255"
                             required
-                            class="w-full rounded-lg border border-slate-200 py-2 pl-3 pr-14 text-sm text-slate-800 transition focus:border-[#F26522] focus:outline-none focus:ring-2 focus:ring-[#F26522]/20"
+                            class="w-full rounded-lg border border-slate-200 py-2 pl-3 pr-14 text-sm text-slate-800 transition focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20"
                         />
                         <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">
                             {{ __('BusManagement::app.field_capacity_unit') }}
@@ -374,7 +374,7 @@
             </form>
         </div>
     </div>
-    
+
     {{-- DELETE CONFIRM MODAL                                       --}}
     <div
         x-show="showDelete"

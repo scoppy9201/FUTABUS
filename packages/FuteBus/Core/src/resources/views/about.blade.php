@@ -30,7 +30,7 @@
         >
             <article x-ref="aboutTop" class="mx-auto scroll-mt-4 text-gray-950">
                 <header class="text-center">
-                    <h1 class="text-[36px] font-extrabold uppercase leading-tight text-[#ef5222]">
+                    <h1 class="text-[36px] font-extrabold uppercase leading-tight text-futa-orange">
                         {{ __('core::app.about.heading') }}
                     </h1>
                     <p class="mt-3 text-2xl font-extrabold">
@@ -47,7 +47,7 @@
                     type="button"
                     x-show="!expanded"
                     @click="expanded = true"
-                    class="mx-auto mt-12 flex items-center gap-2 text-base font-semibold text-gray-400 transition-colors hover:text-[#ef5222]"
+                    class="mx-auto mt-12 flex items-center gap-2 text-base font-semibold text-gray-400 transition-colors hover:text-futa-orange"
                 >
                     <span>{{ __('core::app.about.read_more') }}</span>
                     <x-heroicon-o-chevron-down class="size-5" />
@@ -74,7 +74,7 @@
                                         >
                                     </div>
                                     <div class="{{ $imagePosition === 'right' ? 'lg:order-1' : '' }}">
-                                        <h2 class="text-[38px] font-extrabold uppercase leading-tight text-[#ef5222]">
+                                        <h2 class="text-[38px] font-extrabold uppercase leading-tight text-futa-orange">
                                             {{ __('core::app.about.sections.' . $key . '.title') }}
                                         </h2>
                                         <div class="mt-5 space-y-4 text-base font-semibold leading-6.5">
@@ -89,7 +89,7 @@
                             <button
                                 type="button"
                                 @click="collapse()"
-                                class="mx-auto flex items-center gap-2 text-base font-semibold text-gray-400 transition-colors hover:text-[#ef5222]"
+                                class="mx-auto flex items-center gap-2 text-base font-semibold text-gray-400 transition-colors hover:text-futa-orange"
                             >
                                 <span>{{ __('core::app.about.show_less') }}</span>
                                 <x-heroicon-o-chevron-up class="size-5" />
@@ -108,10 +108,10 @@
                         loading="lazy"
                     >
                     <div>
-                        <h2 class="text-[38px] font-extrabold uppercase leading-tight text-[#ef5222]">
+                        <h2 class="text-[38px] font-extrabold uppercase leading-tight text-futa-orange">
                             {{ __('core::app.about.identity.vision.title') }}
                         </h2>
-                        <p class="mt-6 font-extrabold uppercase text-[#ef5222]">
+                        <p class="mt-6 font-extrabold uppercase text-futa-orange">
                             {{ __('core::app.about.identity.vision.lead') }}
                         </p>
                         <p class="mt-1 text-base font-semibold leading-6.5">
@@ -126,7 +126,7 @@
                             @endforeach
                         </ul>
                         <p class="mt-5 text-base font-semibold leading-6.5">
-                            <span class="font-extrabold text-[#ef5222]">Phương Trang</span>
+                            <span class="font-extrabold text-futa-orange">Phương Trang</span>
                             {{ __('core::app.about.identity.vision.conclusion') }}
                         </p>
                     </div>
@@ -134,7 +134,7 @@
 
                 <section class="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
                     <div>
-                        <h2 class="text-[38px] font-extrabold uppercase leading-tight text-[#ef5222]">
+                        <h2 class="text-[38px] font-extrabold uppercase leading-tight text-futa-orange">
                             {{ __('core::app.about.identity.core_values.title') }}
                         </h2>
                         <p class="mt-6 text-base font-semibold leading-6.5">
@@ -165,7 +165,7 @@
                         loading="lazy"
                     >
                     <div>
-                        <h2 class="text-[38px] font-extrabold uppercase leading-tight text-[#ef5222]">
+                        <h2 class="text-[38px] font-extrabold uppercase leading-tight text-futa-orange">
                             {{ __('core::app.about.identity.philosophy.title') }}
                         </h2>
                         <p class="mt-6 text-base font-semibold leading-6.5">

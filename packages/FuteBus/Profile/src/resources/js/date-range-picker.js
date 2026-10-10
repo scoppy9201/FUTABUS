@@ -76,18 +76,18 @@ function initializeDateRangePicker(picker) {
             button.textContent = String(date.getDate());
             button.setAttribute('aria-label', fullDate.format(date));
             button.setAttribute('aria-pressed', String(Boolean(endpoint)));
-            button.className = 'grid size-9 place-items-center rounded-lg text-sm focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#ef5222]';
+            button.className = 'grid size-9 place-items-center rounded-lg text-sm focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-futa-orange';
 
             if (endpoint) {
-                button.className += ' bg-[#ef5222] font-semibold text-white hover:bg-[#d94317]';
+                button.className += ' bg-futa-orange font-semibold text-white hover:bg-futa-orange-dark';
             } else if (inRange) {
-                button.className += ' bg-orange-100 font-medium text-[#b93814] hover:bg-orange-200';
+                button.className += ' bg-futa-orange-soft font-medium text-futa-orange-dark hover:bg-futa-orange/20';
             } else if (date.getMonth() !== month.getMonth()) {
-                button.className += ' text-gray-300 hover:bg-orange-50 hover:text-[#ef5222]';
+                button.className += ' text-gray-300 hover:bg-futa-orange-soft hover:text-futa-orange';
             } else if (sameDay(date, today)) {
-                button.className += ' font-semibold text-[#ef5222] ring-1 ring-[#ef5222] hover:bg-orange-50';
+                button.className += ' font-semibold text-futa-orange ring-1 ring-futa-orange hover:bg-futa-orange-soft';
             } else {
-                button.className += ' text-gray-900 hover:bg-orange-50 hover:text-[#ef5222]';
+                button.className += ' text-gray-900 hover:bg-futa-orange-soft hover:text-futa-orange';
             }
 
             button.addEventListener('click', () => choose(date));

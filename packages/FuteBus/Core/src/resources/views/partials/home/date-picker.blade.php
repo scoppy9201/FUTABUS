@@ -133,7 +133,7 @@
             @click="openCalendar('departure')"
             :aria-expanded="calendarOpen && activeField === 'departure'"
             aria-haspopup="dialog"
-            class="flex h-16.75 w-full items-center justify-between rounded-[10px] border border-gray-300 bg-white px-4.5 text-left outline-none transition hover:border-[#ff8a65] focus:border-[#ff8a65] focus:ring-3 focus:ring-[#ef5222]/10"
+            class="flex h-16.75 w-full items-center justify-between rounded-[10px] border border-gray-300 bg-white px-4.5 text-left outline-none transition hover:border-futa-orange/60 focus:border-futa-orange/60 focus:ring-3 focus:ring-futa-orange/10"
         >
             <span class="min-w-0">
                 <span class="block truncate text-[22px] font-bold leading-tight text-gray-900" x-text="format(departureDate)"></span>
@@ -156,14 +156,14 @@
             :aria-label="activeField === 'return' ? @js(__('core::app.home.hero.return_date')) : @js(__('core::app.home.hero.date'))"
             tabindex="-1"
             class="absolute left-0 top-0 z-50 max-w-[calc(100vw-32px)] origin-top-left rounded-xl border border-gray-200 bg-white p-3 shadow-[0_18px_42px_rgba(15,23,42,.22)] outline-none"
-            :class="roundTrip ? 'w-[430px]' : 'w-96'"
+            :class="roundTrip ? 'w-107.5' : 'w-96'"
         >
             <div class="grid gap-3" :class="roundTrip ? 'grid-cols-2' : 'grid-cols-1'">
                 <button
                     type="button"
                     @click="selectField('departure')"
                     class="min-w-0 rounded-lg border px-3 py-3 text-left transition-colors"
-                    :class="activeField === 'departure' ? 'border-[#ff8a65] bg-[#fffaf7] ring-3 ring-[#ef5222]/10' : 'border-gray-200 bg-white hover:border-[#ff8a65]'"
+                    :class="activeField === 'departure' ? 'border-futa-orange/60 bg-[#fffaf7] ring-3 ring-futa-orange/10' : 'border-gray-200 bg-white hover:border-futa-orange/60'"
                 >
                     <span class="block text-xs font-bold text-gray-700">{{ __('core::app.home.hero.date') }}</span>
                     <span class="mt-1 block truncate text-sm font-semibold" :class="departureDate ? 'text-gray-950' : 'text-gray-400'" x-text="departureDate ? format(departureDate) : @js(__('core::app.home.hero.date'))"></span>
@@ -173,7 +173,7 @@
                     type="button"
                     @click="selectField('return')"
                     class="min-w-0 rounded-lg border px-3 py-3 text-left transition-colors"
-                    :class="activeField === 'return' ? 'border-[#ff8a65] bg-[#fffaf7] ring-3 ring-[#ef5222]/10' : 'border-gray-200 bg-white hover:border-[#ff8a65]'"
+                    :class="activeField === 'return' ? 'border-futa-orange/60 bg-[#fffaf7] ring-3 ring-futa-orange/10' : 'border-gray-200 bg-white hover:border-futa-orange/60'"
                 >
                     <span class="block text-xs font-bold text-gray-700">{{ __('core::app.home.hero.return_date') }}</span>
                     <span class="mt-1 block truncate text-sm font-semibold" :class="returnDate ? 'text-gray-950' : 'text-gray-400'" x-text="returnDate ? format(returnDate) : @js(__('core::app.home.hero.return_placeholder'))"></span>
@@ -181,11 +181,11 @@
             </div>
 
             <div class="mt-4 flex items-center justify-between px-2">
-                <button type="button" @click="moveMonth(-1)" class="grid size-9 place-items-center rounded-full text-gray-500 transition hover:bg-orange-50 hover:text-[#ef5222]" aria-label="{{ __('core::app.home.hero.calendar_previous_month') }}">
+                <button type="button" @click="moveMonth(-1)" class="grid size-9 place-items-center rounded-full text-gray-500 transition hover:bg-futa-orange-soft hover:text-futa-orange" aria-label="{{ __('core::app.home.hero.calendar_previous_month') }}">
                     <x-heroicon-o-chevron-left class="size-5" />
                 </button>
                 <p class="font-extrabold uppercase text-gray-800" x-text="title()"></p>
-                <button type="button" @click="moveMonth(1)" class="grid size-9 place-items-center rounded-full text-gray-500 transition hover:bg-orange-50 hover:text-[#ef5222]" aria-label="{{ __('core::app.home.hero.calendar_next_month') }}">
+                <button type="button" @click="moveMonth(1)" class="grid size-9 place-items-center rounded-full text-gray-500 transition hover:bg-futa-orange-soft hover:text-futa-orange" aria-label="{{ __('core::app.home.hero.calendar_next_month') }}">
                     <x-heroicon-o-chevron-right class="size-5" />
                 </button>
             </div>
@@ -204,9 +204,9 @@
                         :disabled="day.iso < minimumDate()"
                         class="relative grid aspect-square place-items-center border-b border-r border-gray-200 text-sm font-semibold transition"
                         :class="{
-                            'bg-[#fff3ed] font-extrabold text-[#ef5222]': day.iso === selectedDate(),
-                            'bg-orange-50 text-[#ef5222]': roundTrip && day.iso === departureDate && activeField === 'return',
-                            'text-gray-900 hover:bg-orange-50 hover:text-[#ef5222]': day.current && day.iso >= minimumDate() && day.iso !== selectedDate(),
+                            'bg-futa-orange-soft font-extrabold text-futa-orange': day.iso === selectedDate(),
+                            'bg-futa-orange-soft text-futa-orange': roundTrip && day.iso === departureDate && activeField === 'return',
+                            'text-gray-900 hover:bg-futa-orange-soft hover:text-futa-orange': day.current && day.iso >= minimumDate() && day.iso !== selectedDate(),
                             'text-gray-300': !day.current || day.iso < minimumDate(),
                             'cursor-not-allowed bg-gray-50/70': day.iso < minimumDate(),
                         }"
@@ -228,7 +228,7 @@
             :aria-expanded="calendarOpen && activeField === 'return'"
             :tabindex="roundTrip ? 0 : -1"
             aria-haspopup="dialog"
-            class="flex h-16.75 w-full items-center justify-between rounded-[10px] border border-gray-300 bg-white px-4.5 text-left outline-none transition hover:border-[#ff8a65] focus:border-[#ff8a65] focus:ring-3 focus:ring-[#ef5222]/10"
+            class="flex h-16.75 w-full items-center justify-between rounded-[10px] border border-gray-300 bg-white px-4.5 text-left outline-none transition hover:border-futa-orange/60 focus:border-futa-orange/60 focus:ring-3 focus:ring-futa-orange/10"
         >
             <span class="min-w-0">
                 <span class="block truncate font-bold leading-tight" :class="returnDate ? 'text-[22px] text-gray-900' : 'text-base text-gray-400'" x-text="returnDate ? format(returnDate) : @js(__('core::app.home.hero.return_placeholder'))"></span>
