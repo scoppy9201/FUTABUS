@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace FuteBus\Auth\Services;
 
 use App\Models\User;
-use FuteBus\Auth\Mail\PasswordResetOtpMail;
 use FuteBus\Auth\Mail\PasswordChangedMail;
+use FuteBus\Auth\Mail\PasswordResetOtpMail;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -17,7 +17,9 @@ use Throwable;
 class PasswordRecoveryService
 {
     private const SESSION_KEY = 'password_recovery';
+
     private const OTP_ERRORS = 'Auth::app.password_recovery.errors';
+
     private const VERIFIED_LIFETIME_SECONDS = 900;
 
     public function __construct(private readonly OtpChallengeService $otp) {}
@@ -27,10 +29,10 @@ class PasswordRecoveryService
         $flow = $request->session()->get(self::SESSION_KEY, []);
 
         return [
-            'step' => $flow['step'] ?? 'email',
+            'step'          => $flow['step'] ?? 'email',
             'recoveryEmail' => $flow['email'] ?? '',
-            'otpExpiresAt' => $flow['otp_expires_at'] ?? 0,
-            'otpResendAt' => $flow['otp_resend_at'] ?? 0,
+            'otpExpiresAt'  => $flow['otp_expires_at'] ?? 0,
+            'otpResendAt'   => $flow['otp_resend_at'] ?? 0,
         ];
     }
 
@@ -45,6 +47,7 @@ class PasswordRecoveryService
         $user = User::where('email', $email)->first();
         if ($user === null) {
             $request->session()->forget(self::SESSION_KEY);
+
             return;
         }
 
@@ -57,9 +60,9 @@ class PasswordRecoveryService
         }
 
         $request->session()->put(self::SESSION_KEY, $this->otp->issue([
-            'step' => 'otp',
+            'step'    => 'otp',
             'user_id' => $user->getKey(),
-            'email' => $user->email,
+            'email'   => $user->email,
         ], $code));
     }
 
