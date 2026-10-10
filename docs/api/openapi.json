@@ -2048,6 +2048,415 @@
           }
         }
       }
+    },
+    "/api/v1/registration-challenges": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "startRegistration",
+        "summary": "Start email registration challenge",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "terms"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "terms": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "challenge",
+                    "expires_in"
+                  ],
+                  "properties": {
+                    "challenge": {
+                      "type": "string",
+                      "minLength": 64,
+                      "maxLength": 64,
+                      "description": "Opaque one-time challenge token. Store only in the client until the flow finishes."
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "example": 300
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input, expired challenge, or incorrect code"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        }
+      }
+    },
+    "/api/v1/registration-challenges/resend": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "resendRegistration",
+        "summary": "Resend registration code",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "challenge"
+                ],
+                "properties": {
+                  "challenge": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 64
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Completed"
+          },
+          "422": {
+            "description": "Invalid input, expired challenge, or incorrect code"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        }
+      }
+    },
+    "/api/v1/registration-challenges/verify": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "verifyRegistration",
+        "summary": "Verify registration code",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "challenge",
+                  "otp"
+                ],
+                "properties": {
+                  "challenge": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 64
+                  },
+                  "otp": {
+                    "type": "string",
+                    "pattern": "^[0-9]{6}$"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Completed"
+          },
+          "422": {
+            "description": "Invalid input, expired challenge, or incorrect code"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        }
+      }
+    },
+    "/api/v1/registrations": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "completeRegistration",
+        "summary": "Create verified customer account",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "challenge",
+                  "name",
+                  "phone",
+                  "password",
+                  "password_confirmation"
+                ],
+                "properties": {
+                  "challenge": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 64
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password"
+                  },
+                  "password_confirmation": {
+                    "type": "string",
+                    "format": "password"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "422": {
+            "description": "Invalid input, expired challenge, or incorrect code"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "description": "Requires a verified registration challenge. The challenge is consumed after account creation; obtain a Bearer token through POST /api/v1/tokens."
+      }
+    },
+    "/api/v1/password-recovery-challenges": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "startPasswordRecovery",
+        "summary": "Start password recovery without disclosing account existence",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "challenge",
+                    "expires_in"
+                  ],
+                  "properties": {
+                    "challenge": {
+                      "type": "string",
+                      "minLength": 64,
+                      "maxLength": 64,
+                      "description": "Opaque one-time challenge token. Store only in the client until the flow finishes."
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "example": 300
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input, expired challenge, or incorrect code"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "description": "Returns the same response shape whether or not the email belongs to an account. An OTP is mailed only for an existing account."
+      }
+    },
+    "/api/v1/password-recovery-challenges/resend": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "resendPasswordRecovery",
+        "summary": "Resend password recovery code",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "challenge"
+                ],
+                "properties": {
+                  "challenge": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 64
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Completed"
+          },
+          "422": {
+            "description": "Invalid input, expired challenge, or incorrect code"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        }
+      }
+    },
+    "/api/v1/password-recovery-challenges/verify": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "verifyPasswordRecovery",
+        "summary": "Verify password recovery code",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "challenge",
+                  "otp"
+                ],
+                "properties": {
+                  "challenge": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 64
+                  },
+                  "otp": {
+                    "type": "string",
+                    "pattern": "^[0-9]{6}$"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Completed"
+          },
+          "422": {
+            "description": "Invalid input, expired challenge, or incorrect code"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        }
+      }
+    },
+    "/api/v1/password-resets": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "resetPassword",
+        "summary": "Reset password and revoke existing tokens",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "challenge",
+                  "password",
+                  "password_confirmation"
+                ],
+                "properties": {
+                  "challenge": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 64
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password"
+                  },
+                  "password_confirmation": {
+                    "type": "string",
+                    "format": "password"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Completed"
+          },
+          "422": {
+            "description": "Invalid input, expired challenge, or incorrect code"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "description": "Requires a verified recovery challenge. The challenge is consumed and all existing Bearer tokens are revoked."
+      }
     }
   },
   "components": {
