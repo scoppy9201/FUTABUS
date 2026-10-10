@@ -11,6 +11,20 @@ class BusApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_bus_api_does_not_expose_other_company_buses_without_a_futa_company(): void
+    {
+        $admin = User::factory()->create(['is_active' => true]);
+        $roleId = DB::table('roles')->insertGetId(['name' => 'Admin', 'slug' => 'admin']);
+        DB::table('role_user')->insert(['user_id' => $admin->id, 'role_id' => $roleId]);
+        $otherCompany = DB::table('bus_companies')->insertGetId(['name' => 'Other', 'code' => 'OTHER']);
+        DB::table('buses')->insert([
+            'bus_company_id' => $otherCompany, 'license_plate' => 'OTHER-001',
+        ]);
+
+        $this->withToken($admin->createToken('admin', ['api'])->plainTextToken)
+            ->getJson(route('api.v1.admin.buses.index'))->assertStatus(503);
+    }
+
     public function test_admin_can_create_bus_and_active_trip_prevents_changes(): void
     {
         $admin = User::factory()->create(['is_active' => true]);

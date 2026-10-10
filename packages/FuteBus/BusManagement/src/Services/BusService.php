@@ -45,7 +45,6 @@ class BusService
     public function create(array $data): int
     {
         $companyId = $this->futaCompanyId();
-        abort_if($companyId === null, 503);
 
         return DB::table('buses')->insertGetId([
             ...$this->payload($data),
@@ -111,8 +110,11 @@ class BusService
         ];
     }
 
-    private function futaCompanyId(): ?int
+    private function futaCompanyId(): int
     {
-        return DB::table('bus_companies')->where('code', 'FUTA')->value('id');
+        $id = DB::table('bus_companies')->where('code', 'FUTA')->value('id');
+        abort_if($id === null, 503);
+
+        return (int) $id;
     }
 }
