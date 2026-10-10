@@ -1754,6 +1754,300 @@
           }
         }
       }
+    },
+    "/api/v1/admin/buses": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "listBuses",
+        "summary": "List buses",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated buses"
+          },
+          "403": {
+            "description": "Administrator token required"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "createBus",
+        "summary": "Create a bus",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "license_plate",
+                  "chassis_number",
+                  "color",
+                  "brand",
+                  "manufacture_year",
+                  "vehicle_type_id",
+                  "seat_rows",
+                  "seat_columns"
+                ],
+                "properties": {
+                  "license_plate": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "chassis_number": {
+                    "type": "string",
+                    "maxLength": 50
+                  },
+                  "color": {
+                    "type": "string",
+                    "maxLength": 50
+                  },
+                  "brand": {
+                    "type": "string",
+                    "maxLength": 100
+                  },
+                  "manufacture_year": {
+                    "type": "integer",
+                    "minimum": 1990
+                  },
+                  "vehicle_type_id": {
+                    "type": "integer"
+                  },
+                  "seat_rows": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 30
+                  },
+                  "seat_columns": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10
+                  },
+                  "description": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 500
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "active",
+                      "inactive"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Bus created"
+          },
+          "403": {
+            "description": "Administrator token required"
+          },
+          "422": {
+            "description": "Validation failed"
+          },
+          "503": {
+            "description": "FUTA bus company unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/buses/{bus}": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "getBus",
+        "summary": "Get a bus",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bus",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bus details"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "updateBus",
+        "summary": "Update a bus not assigned to an active trip",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bus",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "license_plate",
+                  "chassis_number",
+                  "color",
+                  "brand",
+                  "manufacture_year",
+                  "vehicle_type_id",
+                  "seat_rows",
+                  "seat_columns"
+                ],
+                "properties": {
+                  "license_plate": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "chassis_number": {
+                    "type": "string",
+                    "maxLength": 50
+                  },
+                  "color": {
+                    "type": "string",
+                    "maxLength": 50
+                  },
+                  "brand": {
+                    "type": "string",
+                    "maxLength": 100
+                  },
+                  "manufacture_year": {
+                    "type": "integer",
+                    "minimum": 1990
+                  },
+                  "vehicle_type_id": {
+                    "type": "integer"
+                  },
+                  "seat_rows": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 30
+                  },
+                  "seat_columns": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10
+                  },
+                  "description": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 500
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "active",
+                      "inactive"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bus updated"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "422": {
+            "description": "Validation failed or active trip prevents changes"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "deactivateBus",
+        "summary": "Deactivate a bus not assigned to an active trip",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bus",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bus deactivated"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "422": {
+            "description": "Active trip prevents changes"
+          }
+        }
+      }
     }
   },
   "components": {

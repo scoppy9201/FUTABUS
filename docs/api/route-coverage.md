@@ -10,7 +10,7 @@ The Blade routes remain in place so existing customer and admin pages work. API 
 | Authentication | Issue and revoke Sanctum tokens | Registration and password recovery OTP state machines |
 | Account | Profile, avatar and password update | Profile page presentation |
 | Payment | Own SePay intent creation, status and cancellation; webhook | Guest session checkout and payment page presentation |
-| Admin | Vehicle type CRUD | Trip and schedule management, buses, documents, staff, roles and permissions, dashboard data |
+| Admin | Bus and vehicle type CRUD | Trip and schedule management, documents, staff, roles and permissions, dashboard data |
 
 The SePay webhook retains its configured `/api/sepay/webhook` URL. Moving it would interrupt external delivery. The API never marks a booking paid from a QR scan or client response; payment completion requires an authenticated webhook.
 
