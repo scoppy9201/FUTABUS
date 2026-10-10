@@ -215,19 +215,43 @@
                                         <td class="whitespace-nowrap px-4 py-4"><span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {{ $bookingColor }}">{{ __('Profile::tickets.booking_status.'.$booking->status) }}</span></td>
                                         <td class="whitespace-nowrap px-4 py-4 text-center">
                                             <button type="button" data-ticket-history-actions aria-controls="ticket-actions-{{ $booking->id }}" aria-expanded="false"
-                                                class="inline-flex size-9 items-center justify-center rounded-full border border-gray-200 text-futa-orange transition hover:border-futa-orange hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
+                                                class="inline-flex size-9 items-center justify-center rounded-full border border-gray-200
+                                                    text-futa-orange transition hover:border-futa-orange hover:bg-futa-orange-soft
+                                                    focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
                                                 aria-label="{{ __('Profile::tickets.actions') }}: {{ $booking->booking_code }}">
                                                 <x-heroicon-o-ellipsis-horizontal class="size-6" />
                                             </button>
                                             <div id="ticket-actions-{{ $booking->id }}" popover="auto"
                                                 class="fixed z-50 m-0 w-52 rounded-xl border border-gray-200 bg-white p-1.5 text-left shadow-xl">
-                                                <a href="{{ route('profile.tickets.show', $booking->id) }}" class="block whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-semibold text-gray-900 hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-futa-orange">{{ __('Profile::tickets.view_details') }}</a>
+                                                <a href="{{ route('profile.tickets.show', $booking->id) }}"
+                                                    class="block whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-semibold
+                                                        text-gray-900 hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-futa-orange">
+                                                    {{ __('Profile::tickets.view_details') }}
+                                                </a>
                                                 @if($booking->can_contact_for_change)
-                                                    <a href="tel:19006067" data-history-sensitive data-departure="{{ \Illuminate\Support\Carbon::parse($booking->departure_time)->timestamp }}" class="block whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-medium text-gray-900 hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-futa-orange">{{ __('Profile::tickets.cancel_ticket') }}</a>
-                                                    <a href="tel:19006067" data-history-sensitive data-departure="{{ \Illuminate\Support\Carbon::parse($booking->departure_time)->timestamp }}" class="block whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-medium text-gray-900 hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-futa-orange">{{ __('Profile::tickets.change_ticket') }}</a>
+                                                    <a href="tel:19006067" data-history-sensitive
+                                                        data-departure="{{ \Illuminate\Support\Carbon::parse($booking->departure_time)->timestamp }}"
+                                                        class="block whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-medium
+                                                            text-gray-900 hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-futa-orange">
+                                                        {{ __('Profile::tickets.cancel_ticket') }}
+                                                    </a>
+                                                    <a href="tel:19006067" data-history-sensitive
+                                                        data-departure="{{ \Illuminate\Support\Carbon::parse($booking->departure_time)->timestamp }}"
+                                                        class="block whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-medium
+                                                            text-gray-900 hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-futa-orange">
+                                                        {{ __('Profile::tickets.change_ticket') }}
+                                                    </a>
                                                 @else
-                                                    <button type="button" disabled title="{{ __('Profile::tickets.change_unavailable') }}" class="block w-full cursor-not-allowed whitespace-nowrap rounded-lg px-3 py-2.5 text-left text-sm text-slate-400">{{ __('Profile::tickets.cancel_ticket') }}</button>
-                                                    <button type="button" disabled title="{{ __('Profile::tickets.change_unavailable') }}" class="block w-full cursor-not-allowed whitespace-nowrap rounded-lg px-3 py-2.5 text-left text-sm text-slate-400">{{ __('Profile::tickets.change_ticket') }}</button>
+                                                    <button type="button" disabled title="{{ __('Profile::tickets.change_unavailable') }}"
+                                                        class="block w-full cursor-not-allowed whitespace-nowrap rounded-lg
+                                                            px-3 py-2.5 text-left text-sm text-slate-400">
+                                                        {{ __('Profile::tickets.cancel_ticket') }}
+                                                    </button>
+                                                    <button type="button" disabled title="{{ __('Profile::tickets.change_unavailable') }}"
+                                                        class="block w-full cursor-not-allowed whitespace-nowrap rounded-lg
+                                                            px-3 py-2.5 text-left text-sm text-slate-400">
+                                                        {{ __('Profile::tickets.change_ticket') }}
+                                                    </button>
                                                 @endif
                                             </div>
                                         </td>

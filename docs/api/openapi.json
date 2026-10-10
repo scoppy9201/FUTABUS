@@ -1,0 +1,136 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "FUTABUS HTTP API",
+    "version": "1.0.0",
+    "description": "Current public HTTP API. Booking and account pages use web routes and are not represented as REST endpoints. The SePay webhook is called by SePay, not by customers."
+  },
+  "servers": [
+    { "url": "/", "description": "Current FUTABUS host" }
+  ],
+  "tags": [
+    { "name": "System" },
+    { "name": "Payment webhooks" }
+  ],
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "tags": ["System"],
+        "operationId": "getHealth",
+        "summary": "Check API availability",
+        "responses": {
+          "200": {
+            "description": "API is available",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HealthResponse" },
+                "example": { "status": "ok" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sepay/webhook": {
+      "post": {
+        "tags": ["Payment webhooks"],
+        "operationId": "receiveSePayWebhook",
+        "summary": "Receive a SePay bank transfer event",
+        "description": "SePay calls this endpoint. Authentication mode is selected by server configuration: HMAC-SHA256 or API key. A successful HTTP response acknowledges receipt; it does not guarantee a booking was issued. Duplicate and unmatched transactions are handled by payment processing. Do not send test payments to a production account.",
+        "security": [
+          { "SePayHmac": [] },
+          { "SePayApiKey": [] }
+        ],
+        "parameters": [
+          {
+            "name": "X-SePay-Timestamp",
+            "in": "header",
+            "description": "Unix timestamp in seconds, accepted within five minutes when HMAC mode is active.",
+            "schema": { "type": "string", "pattern": "^[0-9]{10,12}$" }
+          },
+          {
+            "name": "X-SePay-Signature",
+            "in": "header",
+            "description": "HMAC-SHA256 of timestamp + '.' + raw request body, prefixed with sha256=, when HMAC mode is active.",
+            "schema": { "type": "string", "pattern": "^sha256=[a-f0-9]{64}$" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SePayEvent" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event accepted for processing",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WebhookResponse" }, "example": { "success": true } } }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WebhookResponse" }, "example": { "success": false } } }
+          },
+          "422": {
+            "description": "Event payload failed validation",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "503": {
+            "description": "Payment integration is not configured",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WebhookResponse" }, "example": { "success": false } } }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "SePayHmac": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-SePay-Signature",
+        "description": "Requires X-SePay-Timestamp too. The signature covers the raw body and timestamp; a static key entered in Swagger UI cannot generate it."
+      },
+      "SePayApiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Exact value: Apikey <configured webhook key>. Used only when API-key mode is configured."
+      }
+    },
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "required": ["status"],
+        "properties": { "status": { "type": "string", "const": "ok" } }
+      },
+      "WebhookResponse": {
+        "type": "object",
+        "required": ["success"],
+        "properties": { "success": { "type": "boolean" } }
+      },
+      "SePayEvent": {
+        "type": "object",
+        "required": ["id", "transferType", "transferAmount", "accountNumber"],
+        "properties": {
+          "id": { "type": "integer", "minimum": 1, "description": "SePay transaction ID" },
+          "transferType": { "type": "string", "enum": ["in", "out"] },
+          "transferAmount": { "type": "integer", "minimum": 0 },
+          "accountNumber": { "type": "string", "maxLength": 32 },
+          "code": { "type": ["string", "null"], "maxLength": 64 },
+          "content": { "type": "string", "description": "Transfer memo; may contain the FUTA payment code." }
+        },
+        "additionalProperties": true
+      },
+      "ValidationError": {
+        "type": "object",
+        "required": ["message", "errors"],
+        "properties": {
+          "message": { "type": "string" },
+          "errors": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string" } } }
+        }
+      }
+    }
+  }
+}
