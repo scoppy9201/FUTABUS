@@ -20,5 +20,6 @@ class AuthServiceProvider extends ServiceProvider
         $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'Auth');
 
         Route::middleware('web')->group(__DIR__.'/../routes/web.php');
+        Route::prefix('api')->middleware('api')->group(__DIR__.'/../routes/api.php');
     }
 }

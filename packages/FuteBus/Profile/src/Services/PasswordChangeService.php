@@ -17,6 +17,7 @@ class PasswordChangeService
         $user->password = $password;
         $user->remember_token = Str::random(60);
         $user->save();
+        $user->tokens()->delete();
 
         try {
             Mail::to($user->email)->send(new PasswordChangedMail);

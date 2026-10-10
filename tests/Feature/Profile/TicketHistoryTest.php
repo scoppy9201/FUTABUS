@@ -37,6 +37,15 @@ class TicketHistoryTest extends TestCase
         $this->createBooking($user, 'LINKED-001', ['booking_user_id' => null]);
         $this->createBooking($user, 'MISMATCH-001', ['booking_user_id' => $other->id]);
 
+        $this->getJson(route('api.v1.me.bookings.index'))->assertUnauthorized();
+        $this->withToken($user->createToken('history test', ['api'])->plainTextToken)
+            ->getJson(route('api.v1.me.bookings.index'))
+            ->assertOk()
+            ->assertJsonFragment(['booking_code' => 'OWN-001'])
+            ->assertJsonFragment(['booking_code' => 'LINKED-001'])
+            ->assertJsonMissing(['booking_code' => 'OTHER-001'])
+            ->assertJsonMissing(['booking_code' => 'MISMATCH-001']);
+
         $this->actingAs($user)->get(route('profile.tickets.index'))
             ->assertOk()
             ->assertSee('OWN-001')
@@ -139,6 +148,10 @@ class TicketHistoryTest extends TestCase
         $this->get(route('profile.tickets.show', $ownBooking['booking_id']))
             ->assertRedirect(route('login'));
 
+        $this->withToken($owner->createToken('detail test', ['api'])->plainTextToken)
+            ->getJson(route('api.v1.me.bookings.show', $otherBooking['booking_id']))
+            ->assertNotFound();
+
         $this->actingAs($owner)
             ->get(route('profile.tickets.show', $ownBooking['booking_id']))
             ->assertOk()
@@ -147,6 +160,7 @@ class TicketHistoryTest extends TestCase
 
         $this->get(route('profile.tickets.show', $otherBooking['booking_id']))
             ->assertNotFound();
+
     }
 
     public function test_change_and_cancel_menu_only_contacts_support_for_eligible_paid_booking(): void

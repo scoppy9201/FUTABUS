@@ -75,6 +75,7 @@ class PasswordChangeTest extends TestCase
             'password'       => 'OldPassword123',
             'remember_token' => 'old-remember-token',
         ]);
+        $user->createToken('old-phone', ['api']);
 
         $this->actingAs($user)->put(route('profile.password.update'), [
             'current_password'      => 'OldPassword123',
@@ -86,6 +87,7 @@ class PasswordChangeTest extends TestCase
         $this->assertTrue(Hash::check('NewPassword123', $user->password));
         $this->assertFalse(Hash::check('OldPassword123', $user->password));
         $this->assertNotSame('old-remember-token', $user->remember_token);
+        $this->assertSame(0, $user->tokens()->count());
         $this->assertAuthenticatedAs($user);
         Mail::assertSent(PasswordChangedMail::class, fn (PasswordChangedMail $mail) => $mail->hasTo('customer@example.com'));
     }

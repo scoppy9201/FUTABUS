@@ -6,16 +6,134 @@
     "description": "Current public HTTP API. Booking and account pages use web routes and are not represented as REST endpoints. The SePay webhook is called by SePay, not by customers."
   },
   "servers": [
-    { "url": "/", "description": "Current FUTABUS host" }
+    {
+      "url": "/",
+      "description": "Current FUTABUS host"
+    }
   ],
   "tags": [
-    { "name": "System" },
-    { "name": "Payment webhooks" }
+    {
+      "name": "System"
+    },
+    {
+      "name": "Trips"
+    },
+    {
+      "name": "Payment webhooks"
+    },
+    {
+      "name": "Content"
+    },
+    {
+      "name": "Authentication"
+    },
+    {
+      "name": "Account"
+    },
+    {
+      "name": "Bookings"
+    },
+    {
+      "name": "Ticket lookup"
+    }
   ],
   "paths": {
+    "/api/v1/trips": {
+      "get": {
+        "tags": [
+          "Trips"
+        ],
+        "operationId": "listTrips",
+        "summary": "Find available FUTA trips",
+        "parameters": [
+          {
+            "name": "departure",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "destination",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "departure_date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "return_date",
+            "in": "query",
+            "description": "Required for a round trip.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "trip_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "one_way",
+                "round_trip"
+              ]
+            }
+          },
+          {
+            "name": "quantity",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trips grouped by travel direction",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TripSearchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid search criteria",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/health": {
       "get": {
-        "tags": ["System"],
+        "tags": [
+          "System"
+        ],
         "operationId": "getHealth",
         "summary": "Check API availability",
         "responses": {
@@ -23,8 +141,12 @@
             "description": "API is available",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/HealthResponse" },
-                "example": { "status": "ok" }
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "example": {
+                  "status": "ok"
+                }
               }
             }
           }
@@ -33,52 +155,1896 @@
     },
     "/api/sepay/webhook": {
       "post": {
-        "tags": ["Payment webhooks"],
+        "tags": [
+          "Payment webhooks"
+        ],
         "operationId": "receiveSePayWebhook",
         "summary": "Receive a SePay bank transfer event",
         "description": "SePay calls this endpoint. Authentication mode is selected by server configuration: HMAC-SHA256 or API key. A successful HTTP response acknowledges receipt; it does not guarantee a booking was issued. Duplicate and unmatched transactions are handled by payment processing. Do not send test payments to a production account.",
         "security": [
-          { "SePayHmac": [] },
-          { "SePayApiKey": [] }
+          {
+            "SePayHmac": []
+          },
+          {
+            "SePayApiKey": []
+          }
         ],
         "parameters": [
           {
             "name": "X-SePay-Timestamp",
             "in": "header",
             "description": "Unix timestamp in seconds, accepted within five minutes when HMAC mode is active.",
-            "schema": { "type": "string", "pattern": "^[0-9]{10,12}$" }
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{10,12}$"
+            }
           },
           {
             "name": "X-SePay-Signature",
             "in": "header",
             "description": "HMAC-SHA256 of timestamp + '.' + raw request body, prefixed with sha256=, when HMAC mode is active.",
-            "schema": { "type": "string", "pattern": "^sha256=[a-f0-9]{64}$" }
+            "schema": {
+              "type": "string",
+              "pattern": "^sha256=[a-f0-9]{64}$"
+            }
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/SePayEvent" }
+              "schema": {
+                "$ref": "#/components/schemas/SePayEvent"
+              }
             }
           }
         },
         "responses": {
           "200": {
             "description": "Event accepted for processing",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WebhookResponse" }, "example": { "success": true } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookResponse"
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
           },
           "401": {
             "description": "Authentication failed",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WebhookResponse" }, "example": { "success": false } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookResponse"
+                },
+                "example": {
+                  "success": false
+                }
+              }
+            }
           },
           "422": {
             "description": "Event payload failed validation",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
           },
           "503": {
             "description": "Payment integration is not configured",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WebhookResponse" }, "example": { "success": false } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookResponse"
+                },
+                "example": {
+                  "success": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/news": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "operationId": "listNews",
+        "summary": "List news articles",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid search filters"
+          }
+        },
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/news/{slug}": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "operationId": "getArticle",
+        "summary": "Get an article",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found"
+          }
+        },
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/faq-categories": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "operationId": "listFaqCategories",
+        "summary": "List FAQ categories",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "slug",
+                          "name"
+                        ],
+                        "properties": {
+                          "slug": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "image": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/branches": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "operationId": "listBranches",
+        "summary": "List active branch offices",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedules": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "operationId": "listSchedules",
+        "summary": "List public route schedules",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/faq-categories/{category}": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "operationId": "getFaqCategory",
+        "summary": "Get FAQ category and questions",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found"
+          }
+        },
+        "parameters": [
+          {
+            "name": "category",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/tokens": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "createToken",
+        "summary": "Issue a 30-day API token",
+        "description": "Only active users with verified email can obtain a token. Rate-limited to 10 requests per minute.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "password",
+                  "device_name"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password"
+                  },
+                  "device_name": {
+                    "type": "string",
+                    "maxLength": 100
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Token issued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "token_type",
+                    "access_token",
+                    "expires_at"
+                  ],
+                  "properties": {
+                    "token_type": {
+                      "type": "string",
+                      "const": "Bearer"
+                    },
+                    "access_token": {
+                      "type": "string"
+                    },
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation or credential error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        }
+      }
+    },
+    "/api/v1/tokens/current": {
+      "delete": {
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "revokeCurrentToken",
+        "summary": "Revoke the current Bearer token",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Token revoked"
+          },
+          "401": {
+            "description": "Bearer token required"
+          }
+        }
+      }
+    },
+    "/api/v1/me": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "operationId": "getCurrentAccount",
+        "summary": "Get current account",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Account"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Account"
+        ],
+        "operationId": "updateCurrentAccount",
+        "summary": "Update current account",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "phone"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "gender": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "date_of_birth": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "address": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "occupation": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Account"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "422": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/avatar": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "operationId": "getCurrentAvatar",
+        "summary": "Download current avatar",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image bytes",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "404": {
+            "description": "Avatar not found"
+          }
+        }
+      }
+    },
+    "/api/v1/me/bookings": {
+      "get": {
+        "tags": [
+          "Bookings"
+        ],
+        "operationId": "listMyBookings",
+        "summary": "List bookings owned by current account",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "route",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated booking summaries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "current_page",
+                    "last_page",
+                    "total"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BookingSummary"
+                      }
+                    },
+                    "current_page": {
+                      "type": "integer"
+                    },
+                    "last_page": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "422": {
+            "description": "Invalid filters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/bookings/{booking}": {
+      "get": {
+        "tags": [
+          "Bookings"
+        ],
+        "operationId": "getMyBooking",
+        "summary": "Get a booking owned by current account",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "booking",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Booking summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/BookingSummary"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "404": {
+            "description": "Booking not found or not owned by account"
+          }
+        }
+      }
+    },
+    "/api/v1/contact-messages": {
+      "post": {
+        "tags": [
+          "Content"
+        ],
+        "operationId": "createContactMessage",
+        "summary": "Submit a contact message",
+        "description": "Public endpoint limited to five submissions per minute.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "department",
+                  "name",
+                  "email",
+                  "phone",
+                  "subject",
+                  "message"
+                ],
+                "properties": {
+                  "department": {
+                    "type": "string",
+                    "const": "futabus"
+                  },
+                  "name": {
+                    "type": "string",
+                    "maxLength": 120
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "maxLength": 255
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "subject": {
+                    "type": "string",
+                    "maxLength": 255
+                  },
+                  "message": {
+                    "type": "string",
+                    "maxLength": 5000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Message saved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "id"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        }
+      }
+    },
+    "/api/v1/ticket-lookups": {
+      "post": {
+        "tags": [
+          "Ticket lookup"
+        ],
+        "operationId": "lookupTicket",
+        "summary": "Look up a ticket by phone and code",
+        "description": "Rate-limited public lookup. Phone and code are supplied in the request body to avoid placing them in URLs or logs. Responses must not be cached.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "phone",
+                  "ticket_code"
+                ],
+                "properties": {
+                  "phone": {
+                    "type": "string"
+                  },
+                  "ticket_code": {
+                    "type": "string",
+                    "maxLength": 100
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Matching booking and tickets",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "no-store"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "booking",
+                        "tickets",
+                        "payment_status"
+                      ],
+                      "properties": {
+                        "booking": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "tickets": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        },
+                        "payment_status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No matching booking or ticket"
+          },
+          "422": {
+            "description": "Invalid phone or code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        }
+      }
+    },
+    "/api/v1/me/password": {
+      "put": {
+        "tags": [
+          "Account"
+        ],
+        "operationId": "changeCurrentAccountPassword",
+        "summary": "Change password and revoke all Bearer tokens",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "current_password",
+                  "password",
+                  "password_confirmation"
+                ],
+                "properties": {
+                  "current_password": {
+                    "type": "string",
+                    "format": "password"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "minLength": 8
+                  },
+                  "password_confirmation": {
+                    "type": "string",
+                    "format": "password"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password changed; all existing Bearer tokens revoked"
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "403": {
+            "description": "Inactive, unverified, or unsupported token"
+          },
+          "422": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trips/{trip}": {
+      "get": {
+        "tags": [
+          "Trips"
+        ],
+        "operationId": "showTrip",
+        "summary": "Get a trip and its current seat availability",
+        "parameters": [
+          {
+            "name": "trip",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "departure",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "destination",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "departure_date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "return_date",
+            "in": "query",
+            "description": "Required for a round trip.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "trip_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "one_way",
+                "round_trip"
+              ]
+            }
+          },
+          {
+            "name": "quantity",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "outbound",
+                "return"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trip details and seats with availability"
+          },
+          "404": {
+            "description": "No matching available trip"
+          },
+          "422": {
+            "description": "Invalid search criteria or direction",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trips/{trip}/payment-intents": {
+      "post": {
+        "tags": [
+          "Payments"
+        ],
+        "operationId": "createPaymentIntent",
+        "summary": "Reserve seats and create a SePay payment intent",
+        "description": "Requires an active, verified account. A QR is not proof of payment; only a verified SePay webhook can mark an intent paid.",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "trip",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "trip_type",
+                  "departure",
+                  "destination",
+                  "departure_date",
+                  "quantity",
+                  "name",
+                  "phone",
+                  "email",
+                  "accept_terms",
+                  "seats",
+                  "pickup_mode",
+                  "dropoff_mode"
+                ],
+                "properties": {
+                  "departure": {
+                    "type": "string",
+                    "maxLength": 120
+                  },
+                  "destination": {
+                    "type": "string",
+                    "maxLength": 120
+                  },
+                  "departure_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "return_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "trip_type": {
+                    "type": "string",
+                    "enum": [
+                      "one_way",
+                      "round_trip"
+                    ]
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5
+                  },
+                  "direction": {
+                    "type": "string",
+                    "enum": [
+                      "outbound",
+                      "return"
+                    ]
+                  },
+                  "name": {
+                    "type": "string",
+                    "maxLength": 120
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "accept_terms": {
+                    "type": "boolean"
+                  },
+                  "seats": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 5,
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  "pickup_mode": {
+                    "type": "string",
+                    "enum": [
+                      "station",
+                      "transfer"
+                    ]
+                  },
+                  "dropoff_mode": {
+                    "type": "string",
+                    "enum": [
+                      "station",
+                      "transfer"
+                    ]
+                  },
+                  "pickup_address": {
+                    "type": "string"
+                  },
+                  "dropoff_address": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Intent created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PaymentIntent"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "403": {
+            "description": "Inactive or unverified account"
+          },
+          "404": {
+            "description": "Trip unavailable"
+          },
+          "422": {
+            "description": "Invalid request or seats unavailable"
+          },
+          "503": {
+            "description": "SePay configuration unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/payment-intents/{intent}": {
+      "get": {
+        "tags": [
+          "Payments"
+        ],
+        "operationId": "getPaymentIntent",
+        "summary": "Get own payment intent status",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "intent",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current intent status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PaymentIntent"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Intent not found or not owned by token holder"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Payments"
+        ],
+        "operationId": "cancelPaymentIntent",
+        "summary": "Cancel own pending payment intent",
+        "description": "Paid or under-review intents cannot be cancelled by the client.",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "intent",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Intent expired"
+          },
+          "404": {
+            "description": "Intent not found or not owned by token holder"
+          },
+          "409": {
+            "description": "Intent already paid or under review"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/vehicle-types": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "listVehicleTypes",
+        "summary": "List vehicle types",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated vehicle types"
+          },
+          "403": {
+            "description": "Administrator token required"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "createVehicleType",
+        "summary": "Create vehicle type",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "default_capacity"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 100
+                  },
+                  "description": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 500
+                  },
+                  "default_capacity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 255
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Vehicle type created"
+          },
+          "403": {
+            "description": "Administrator token required"
+          },
+          "422": {
+            "description": "Validation failed"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/vehicle-types/{vehicleType}": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "getVehicleType",
+        "summary": "Get vehicle type",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "vehicleType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vehicle type details"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "updateVehicleType",
+        "summary": "Update vehicle type",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "vehicleType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "default_capacity"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 100
+                  },
+                  "description": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 500
+                  },
+                  "default_capacity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 255
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Vehicle type updated"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "422": {
+            "description": "Validation failed"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "removeVehicleType",
+        "summary": "Delete unused type or deactivate a type assigned to buses",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "vehicleType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted or deactivated"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/buses": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "listBuses",
+        "summary": "List buses",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated buses"
+          },
+          "403": {
+            "description": "Administrator token required"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "createBus",
+        "summary": "Create a bus",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "license_plate",
+                  "chassis_number",
+                  "color",
+                  "brand",
+                  "manufacture_year",
+                  "vehicle_type_id",
+                  "seat_rows",
+                  "seat_columns"
+                ],
+                "properties": {
+                  "license_plate": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "chassis_number": {
+                    "type": "string",
+                    "maxLength": 50
+                  },
+                  "color": {
+                    "type": "string",
+                    "maxLength": 50
+                  },
+                  "brand": {
+                    "type": "string",
+                    "maxLength": 100
+                  },
+                  "manufacture_year": {
+                    "type": "integer",
+                    "minimum": 1990
+                  },
+                  "vehicle_type_id": {
+                    "type": "integer"
+                  },
+                  "seat_rows": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 30
+                  },
+                  "seat_columns": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10
+                  },
+                  "description": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 500
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "active",
+                      "inactive"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Bus created"
+          },
+          "403": {
+            "description": "Administrator token required"
+          },
+          "422": {
+            "description": "Validation failed"
+          },
+          "503": {
+            "description": "FUTA bus company unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/buses/{bus}": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "getBus",
+        "summary": "Get a bus",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bus",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bus details"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "updateBus",
+        "summary": "Update a bus not assigned to an active trip",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bus",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "license_plate",
+                  "chassis_number",
+                  "color",
+                  "brand",
+                  "manufacture_year",
+                  "vehicle_type_id",
+                  "seat_rows",
+                  "seat_columns"
+                ],
+                "properties": {
+                  "license_plate": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "chassis_number": {
+                    "type": "string",
+                    "maxLength": 50
+                  },
+                  "color": {
+                    "type": "string",
+                    "maxLength": 50
+                  },
+                  "brand": {
+                    "type": "string",
+                    "maxLength": 100
+                  },
+                  "manufacture_year": {
+                    "type": "integer",
+                    "minimum": 1990
+                  },
+                  "vehicle_type_id": {
+                    "type": "integer"
+                  },
+                  "seat_rows": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 30
+                  },
+                  "seat_columns": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10
+                  },
+                  "description": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 500
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "active",
+                      "inactive"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bus updated"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "422": {
+            "description": "Validation failed or active trip prevents changes"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "deactivateBus",
+        "summary": "Deactivate a bus not assigned to an active trip",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bus",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bus deactivated"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "422": {
+            "description": "Active trip prevents changes"
           }
         }
       }
@@ -97,38 +2063,348 @@
         "in": "header",
         "name": "Authorization",
         "description": "Exact value: Apikey <configured webhook key>. Used only when API-key mode is configured."
+      },
+      "BearerToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "Sanctum personal access token"
       }
     },
     "schemas": {
+      "TripSearchResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "outbound",
+              "return"
+            ],
+            "properties": {
+              "outbound": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/TripSummary"
+                }
+              },
+              "return": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/TripSummary"
+                }
+              }
+            }
+          }
+        }
+      },
+      "TripSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "departure_time",
+          "arrival_time",
+          "origin",
+          "destination",
+          "vehicle_type",
+          "available_seats",
+          "price"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "departure_time": {
+            "type": "string",
+            "description": "Departure time in the server time zone."
+          },
+          "arrival_time": {
+            "type": "string",
+            "description": "Arrival time in the server time zone."
+          },
+          "origin": {
+            "type": "string"
+          },
+          "destination": {
+            "type": "string"
+          },
+          "vehicle_type": {
+            "type": "string"
+          },
+          "available_seats": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "price": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Vietnamese dong."
+          }
+        }
+      },
       "HealthResponse": {
         "type": "object",
-        "required": ["status"],
-        "properties": { "status": { "type": "string", "const": "ok" } }
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "ok"
+          }
+        }
       },
       "WebhookResponse": {
         "type": "object",
-        "required": ["success"],
-        "properties": { "success": { "type": "boolean" } }
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        }
       },
       "SePayEvent": {
         "type": "object",
-        "required": ["id", "transferType", "transferAmount", "accountNumber"],
+        "required": [
+          "id",
+          "transferType",
+          "transferAmount",
+          "accountNumber"
+        ],
         "properties": {
-          "id": { "type": "integer", "minimum": 1, "description": "SePay transaction ID" },
-          "transferType": { "type": "string", "enum": ["in", "out"] },
-          "transferAmount": { "type": "integer", "minimum": 0 },
-          "accountNumber": { "type": "string", "maxLength": 32 },
-          "code": { "type": ["string", "null"], "maxLength": 64 },
-          "content": { "type": "string", "description": "Transfer memo; may contain the FUTA payment code." }
+          "id": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "SePay transaction ID"
+          },
+          "transferType": {
+            "type": "string",
+            "enum": [
+              "in",
+              "out"
+            ]
+          },
+          "transferAmount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "accountNumber": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "code": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 64
+          },
+          "content": {
+            "type": "string",
+            "description": "Transfer memo; may contain the FUTA payment code."
+          }
         },
         "additionalProperties": true
       },
       "ValidationError": {
         "type": "object",
-        "required": ["message", "errors"],
+        "required": [
+          "message",
+          "errors"
+        ],
         "properties": {
-          "message": { "type": "string" },
-          "errors": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string" } } }
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "Account": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "email",
+          "phone",
+          "has_avatar"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "gender": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "date_of_birth": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "address": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "occupation": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "has_avatar": {
+            "type": "boolean"
+          }
+        }
+      },
+      "BookingSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "booking_code",
+          "seat_count",
+          "total_amount",
+          "status",
+          "departure_time",
+          "origin",
+          "destination"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "booking_code": {
+            "type": "string"
+          },
+          "seat_count": {
+            "type": "integer"
+          },
+          "total_amount": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "payment_status": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "departure_time": {
+            "type": "string"
+          },
+          "origin": {
+            "type": "string"
+          },
+          "destination": {
+            "type": "string"
+          },
+          "can_contact_for_change": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PaymentIntent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "paid",
+              "expired",
+              "needs_review"
+            ]
+          },
+          "amount": {
+            "type": "integer"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "qr_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri"
+          },
+          "reference": {
+            "type": "string",
+            "description": "Returned only when creating an intent."
+          },
+          "booking": {
+            "type": "object",
+            "description": "Available only when the verified webhook has paid and issued a booking.",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "booking_code": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "VehicleType": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "default_capacity": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive"
+            ]
+          }
         }
       }
     }

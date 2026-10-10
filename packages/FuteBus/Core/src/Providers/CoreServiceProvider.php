@@ -16,10 +16,11 @@ class CoreServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'core');
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'core');
 
-        Route::middleware('web')->group(__DIR__ . '/../routes/web.php');
+        Route::middleware('web')->group(__DIR__.'/../routes/web.php');
+        Route::prefix('api')->middleware('api')->group(__DIR__.'/../routes/api.php');
 
-        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'core');
+        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'core');
     }
 }

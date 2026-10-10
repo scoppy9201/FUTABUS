@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FuteBus\Core\Http\Controllers;
 
+use FuteBus\Core\Http\Requests\ContactRequest;
 use FuteBus\Core\Models\BranchRegion;
 use FuteBus\Core\Models\BusRoute;
 use FuteBus\Core\Models\ContactMessage;
@@ -215,22 +216,9 @@ class HomeController extends Controller
         return view('Payment::invoice');
     }
 
-    public function submitContact(Request $request)
+    public function submitContact(ContactRequest $request)
     {
-        $validated = $request->validate(
-            [
-                'department' => ['required', 'in:futabus'],
-                'name'       => ['required', 'string', 'max:120'],
-                'email'      => ['required', 'email', 'max:255'],
-                'phone'      => ['required', 'regex:/^[0-9+\s.()-]{8,20}$/'],
-                'subject'    => ['required', 'string', 'max:255'],
-                'message'    => ['required', 'string', 'max:5000'],
-            ],
-            __('core::contact.validation'),
-            __('core::contact.attributes'),
-        );
-
-        ContactMessage::create($validated);
+        ContactMessage::create($request->validated());
 
         return back()->with('contact_success', __('core::contact.success'));
     }

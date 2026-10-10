@@ -10,6 +10,25 @@ class TicketLookupTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_api_lookup_returns_only_a_matching_booking_and_disables_caching(): void
+    {
+        $this->createBooking();
+
+        $this->postJson(route('api.v1.ticket-lookups.store'), [
+            'phone'       => '0568503606',
+            'ticket_code' => 'TICKET-001',
+        ])->assertOk()
+            ->assertHeader('Cache-Control', 'no-store, private')
+            ->assertJsonPath('data.booking.booking_code', 'BOOKING-001')
+            ->assertJsonCount(1, 'data.tickets')
+            ->assertJsonPath('data.tickets.0.ticket_code', 'TICKET-001');
+
+        $this->postJson(route('api.v1.ticket-lookups.store'), [
+            'phone'       => '0568503607',
+            'ticket_code' => 'TICKET-001',
+        ])->assertNotFound();
+    }
+
     public function test_guest_can_look_up_a_booking_with_the_original_phone_and_booking_code(): void
     {
         app()->setLocale('vi');
