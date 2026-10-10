@@ -21,13 +21,12 @@ class FeaturedArticleBodyRepository
             }
         }
 
-        // The bundled seed source keeps article pages available before the seeder is run.
-        $articles = json_decode(
-            file_get_contents(database_path('seeders/data/featured-article-bodies.json')),
-            true,
-            flags: JSON_THROW_ON_ERROR,
-        );
+        if (! preg_match('/^[a-z0-9-]+$/', $slug)) {
+            return null;
+        }
 
-        return $articles[$slug] ?? null;
+        $file = database_path('seeders/data/featured-article-bodies/'.$slug.'.html');
+
+        return is_file($file) ? trim(file_get_contents($file)) : null;
     }
 }

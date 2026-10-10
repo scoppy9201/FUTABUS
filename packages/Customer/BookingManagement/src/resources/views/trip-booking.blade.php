@@ -1,5 +1,9 @@
 @extends('core::layouts.home')
 
+@push('styles')
+    @vite('packages/Customer/BookingManagement/src/resources/css/app.css')
+@endpush
+
 @section('title', __('core::booking.page_title'))
 
 @section('content')
@@ -319,7 +323,7 @@
                                         <h3>{{ __('core::trip-search.'.$title) }}</h3>
                                         <ul>
                                             @foreach (__('core::trip-search.'.$items) as $item)
-                                                <li>@include('core::partials.booking-linked-text', ['text' => $item])</li>
+                                                <li>@include('BookingManagement::partials.booking-linked-text', ['text' => $item])</li>
                                             @endforeach
                                         </ul>
                                     </section>
@@ -333,7 +337,7 @@
                     </div>
                 </section>
 
-                @include('core::partials.booking-form')
+                @include('BookingManagement::partials.booking-form')
             </div>
 
             <aside class="booking-page__aside" aria-label="{{ __('core::booking.trip_info') }}">
@@ -346,7 +350,7 @@
                             {{ __('core::booking.detail') }}
                         </button>
                     </div>
-                    @include('core::partials.booking-trip-summary')
+                    @include('BookingManagement::partials.booking-trip-summary')
                 </section>
                 <section class="booking-panel booking-page__summary booking-page__price-summary">
                     <div class="booking-panel__header">
@@ -366,7 +370,7 @@
                         <h3>{{ __('core::trip-search.cancellation_policy') }}</h3>
                         <ul>
                             @foreach (__('core::trip-search.cancellation_items') as $item)
-                                <li>@include('core::partials.booking-linked-text', ['text' => $item])</li>
+                                <li>@include('BookingManagement::partials.booking-linked-text', ['text' => $item])</li>
                             @endforeach
                         </ul>
                     </div>
@@ -378,9 +382,9 @@
                 </section>
             </aside>
         </main>
-        @include('core::partials.booking-trip-detail-modal')
-        @include('core::partials.booking-terms-modal')
-        @include('core::partials.booking-captcha-modal')
+        @include('BookingManagement::partials.booking-trip-detail-modal')
+        @include('BookingManagement::partials.booking-terms-modal')
+        @include('BookingManagement::partials.booking-captcha-modal')
         @include('core::partials.home.footer')
     </div>
 @endsection

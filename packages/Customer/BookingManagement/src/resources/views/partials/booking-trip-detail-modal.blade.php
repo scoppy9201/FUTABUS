@@ -21,7 +21,7 @@
                 <h3>{{ __('core::trip-search.cancellation_policy') }}</h3>
                 <ul>
                     @foreach (__('core::trip-search.cancellation_items') as $item)
-                        <li>@include('core::partials.booking-linked-text', ['text' => $item])</li>
+                        <li>@include('BookingManagement::partials.booking-linked-text', ['text' => $item])</li>
                     @endforeach
                 </ul>
             </div>
@@ -31,7 +31,7 @@
             </button>
         </div>
         <div class="booking-panel booking-page__summary booking-page__modal-summary">
-            @include('core::partials.booking-trip-summary')
+            @include('BookingManagement::partials.booking-trip-summary')
         </div>
     </div>
 </div>

@@ -53,7 +53,7 @@
                 <h3>{{ __('core::booking.terms_title') }}</h3>
                 <p class="booking-page__member-note">{{ __('core::booking.member_note') }}</p>
                 @foreach (__('core::booking.terms_notes') as $note)
-                    <p class="booking-page__terms-note"><span>(*) </span>@include('core::partials.booking-linked-text', ['text' => $note])</p>
+                    <p class="booking-page__terms-note"><span>(*) </span>@include('BookingManagement::partials.booking-linked-text', ['text' => $note])</p>
                 @endforeach
             </div>
         </div>

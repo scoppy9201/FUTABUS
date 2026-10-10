@@ -28,8 +28,6 @@
 
                 @if ($bodyHtml !== null)
                     {!! $bodyHtml !!}
-                @elseif (!empty($promotion['content_view']))
-                    @include($promotion['content_view'])
                 @endif
             </article>
             @include('core::partials.home.related-articles')

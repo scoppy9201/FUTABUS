@@ -13,7 +13,7 @@ class TicketLookupController extends Controller
 {
     public function index(): View
     {
-        return view('core::ticket-lookup');
+        return view('TicketManagement::ticket-lookup');
     }
 
     public function search(TicketLookupRequest $request, TicketLookupService $lookup): View
@@ -21,7 +21,7 @@ class TicketLookupController extends Controller
         $input = $request->validated();
         $result = $lookup->find($input['phone'], $input['ticket_code']);
 
-        return view('core::ticket-lookup', [
+        return view('TicketManagement::ticket-lookup', [
             'input'    => $input,
             'result'   => $result,
             'notFound' => $result === null,

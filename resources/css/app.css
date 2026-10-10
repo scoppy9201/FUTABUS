@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
 @source "../../packages/FuteBus/Core/src/resources/views/**/*.blade.php";
+@source "../../packages/Customer/TripSearch/src/resources/views/**/*.blade.php";
+@source "../../packages/Customer/BookingManagement/src/resources/views/**/*.blade.php";
+@source "../../packages/Customer/TicketManagement/src/resources/views/**/*.blade.php";
+@source "../../packages/Customer/Cancellation/src/resources/views/**/*.blade.php";
 @source "../../packages/FuteBus/Payment/src/resources/views/**/*.blade.php";
 @source "../../packages/FuteBus/Auth/src/resources/views/**/*.blade.php";
 @source "../../packages/FuteBus/Auth/src/resources/js/**/*.js";
