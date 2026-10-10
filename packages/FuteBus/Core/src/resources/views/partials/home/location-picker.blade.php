@@ -12,7 +12,7 @@
         @click="openLocation('{{ $field }}')"
         :aria-expanded="locationOpen === '{{ $field }}'"
         aria-haspopup="dialog"
-        class="flex h-16.75 w-full items-center rounded-[10px] border border-gray-300 bg-white px-4.5 text-base text-gray-900 outline-none transition hover:border-[#ff8a65] focus:border-[#ff8a65] focus:ring-3 focus:ring-[#ef5222]/10"
+        class="flex h-16.75 w-full items-center rounded-[10px] border border-gray-300 bg-white px-4.5 text-base text-gray-900 outline-none transition hover:border-futa-orange/60 focus:border-futa-orange/60 focus:ring-3 focus:ring-futa-orange/10"
     >
         <span
             class="w-full truncate"
@@ -50,7 +50,7 @@
                 aria-autocomplete="list"
                 aria-controls="hero-{{ $field }}-options"
                 :aria-expanded="locationRowCount() > 0"
-                class="h-16.75 w-full rounded-[10px] border border-[#ff8a65] bg-white px-4.5 pr-10 text-base text-gray-900 outline-none ring-3 ring-[#ef5222]/10 placeholder:text-gray-400"
+                class="h-16.75 w-full rounded-[10px] border border-futa-orange/60 bg-white px-4.5 pr-10 text-base text-gray-900 outline-none ring-3 ring-futa-orange/10 placeholder:text-gray-400"
             >
             <button
                 x-show="locationQuery.length > 0"
@@ -79,7 +79,7 @@
                             @mouseenter="highlightedLocation = index"
                             @click="chooseLocation(province)"
                             class="block w-full border-b border-gray-200 px-2 py-3 text-left text-sm transition-colors"
-                            :class="highlightedLocation === index ? 'bg-[#fff3ed] text-[#ef5222]' : 'text-gray-900 hover:bg-orange-50'"
+                            :class="highlightedLocation === index ? 'bg-futa-orange-soft text-futa-orange' : 'text-gray-900 hover:bg-futa-orange-soft'"
                             x-text="province"
                         ></button>
                     </template>
@@ -93,7 +93,7 @@
                             type="button"
                             @mouseenter="highlightedLocation = visibleProvinces().length + index"
                             @click="toggleLocationArea(area)"
-                            class="flex w-full items-center justify-between gap-2 px-2 py-3 text-left transition-colors hover:bg-orange-50"
+                            class="flex w-full items-center justify-between gap-2 px-2 py-3 text-left transition-colors hover:bg-futa-orange-soft"
                             :class="highlightedLocation === visibleProvinces().length + index ? 'bg-[#fffaf7]' : ''"
                         >
                             <span class="min-w-0">

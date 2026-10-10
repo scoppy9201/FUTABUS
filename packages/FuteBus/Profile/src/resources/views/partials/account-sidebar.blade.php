@@ -4,12 +4,12 @@
             href="{{ route('profile.futapay') }}"
             @if(request()->routeIs('profile.futapay')) aria-current="page" @endif
             @class([
-                'flex items-center gap-3 rounded-xl px-3 py-3 text-lg hover:bg-orange-50',
-                'bg-orange-50 font-semibold text-gray-950' => request()->routeIs('profile.futapay'),
+                'flex items-center gap-3 rounded-xl px-3 py-3 text-lg hover:bg-futa-orange-soft',
+                'bg-futa-orange-soft font-semibold text-gray-950' => request()->routeIs('profile.futapay'),
                 'font-medium text-gray-900' => ! request()->routeIs('profile.futapay'),
             ])
         >
-            <span class="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-[#00613d]">
+            <span class="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-futa-green">
                 <img src="{{ asset('images/auth/White%20Brushstroke%20F%20on%20Forest%20Green.png') }}" alt="" class="size-full scale-125 object-cover">
             </span>
             <span>{{ __('Profile::app.futapay') }}</span>
@@ -18,8 +18,8 @@
             href="{{ route('profile.show') }}"
             @if(request()->routeIs('profile.show')) aria-current="page" @endif
             @class([
-                'flex items-center gap-3 rounded-xl px-3 py-3 text-lg hover:bg-orange-50',
-                'bg-orange-50 font-semibold text-gray-950' => request()->routeIs('profile.show'),
+                'flex items-center gap-3 rounded-xl px-3 py-3 text-lg hover:bg-futa-orange-soft',
+                'bg-futa-orange-soft font-semibold text-gray-950' => request()->routeIs('profile.show'),
                 'font-medium text-gray-900' => ! request()->routeIs('profile.show'),
             ])
         >
@@ -27,8 +27,8 @@
             <span>{{ __('Profile::app.title') }}</span>
         </a>
         <a href="{{ route('profile.tickets.index') }}" @if(request()->routeIs('profile.tickets.*')) aria-current="page" @endif @class([
-            'flex items-center gap-3 rounded-xl px-3 py-3 text-lg hover:bg-orange-50',
-            'bg-orange-50 font-semibold text-gray-950' => request()->routeIs('profile.tickets.*'),
+            'flex items-center gap-3 rounded-xl px-3 py-3 text-lg hover:bg-futa-orange-soft',
+            'bg-futa-orange-soft font-semibold text-gray-950' => request()->routeIs('profile.tickets.*'),
             'font-medium text-gray-900' => ! request()->routeIs('profile.tickets.*'),
         ])>
             <span class="grid size-9 shrink-0 place-items-center rounded-full bg-sky-500 text-white"><x-heroicon-o-clock class="size-6" /></span>
@@ -38,12 +38,12 @@
             href="{{ route('profile.password.edit') }}"
             @if(request()->routeIs('profile.password.edit')) aria-current="page" @endif
             @class([
-                'flex items-center gap-3 rounded-xl px-3 py-3 text-lg hover:bg-orange-50',
-                'bg-orange-50 font-semibold text-gray-950' => request()->routeIs('profile.password.edit'),
+                'flex items-center gap-3 rounded-xl px-3 py-3 text-lg hover:bg-futa-orange-soft',
+                'bg-futa-orange-soft font-semibold text-gray-950' => request()->routeIs('profile.password.edit'),
                 'font-medium text-gray-900' => ! request()->routeIs('profile.password.edit'),
             ])
         >
-            <span class="grid size-9 shrink-0 place-items-center rounded-full bg-[#ef6b31] text-white"><x-heroicon-o-lock-closed class="size-6" /></span>
+            <span class="grid size-9 shrink-0 place-items-center rounded-full bg-futa-orange text-white"><x-heroicon-o-lock-closed class="size-6" /></span>
             <span>{{ __('Profile::app.reset_password') }}</span>
         </a>
         <form
@@ -54,7 +54,7 @@
             data-confirm-message="{{ __('core::confirm.logout_message') }}"
         >
             @csrf
-            <button type="submit" class="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-lg font-medium text-gray-900 transition hover:bg-orange-50">
+            <button type="submit" class="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-lg font-medium text-gray-900 transition hover:bg-futa-orange-soft">
                 <span class="grid size-9 shrink-0 place-items-center rounded-full bg-red-600 text-white"><x-heroicon-o-arrow-right-on-rectangle class="size-6" /></span>
                 <span>{{ __('Profile::app.logout') }}</span>
             </button>

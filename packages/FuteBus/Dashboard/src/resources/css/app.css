@@ -1,1 +1,17 @@
-/* Dashboard package styles */
+.dashboard-page::-webkit-scrollbar,
+.dashboard-page *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.dashboard-page::-webkit-scrollbar-track,
+.dashboard-page *::-webkit-scrollbar-track { background: #f1f1f1; }
+
+.dashboard-page::-webkit-scrollbar-thumb,
+.dashboard-page *::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--color-futa-orange) 33%, transparent);
+}
+
+.dashboard-page::-webkit-scrollbar-thumb:hover,
+.dashboard-page *::-webkit-scrollbar-thumb:hover { background: var(--color-futa-orange); }

@@ -31,13 +31,13 @@
                         class="absolute left-0 top-full z-50 mt-2 w-40 overflow-hidden rounded-lg border border-white/20 bg-white py-1 shadow-xl"
                         style="display: none;"
                     >
-                        <a href="{{ request()->fullUrlWithQuery(['lang' => 'vi']) }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold transition-colors {{ app()->getLocale() === 'vi' ? 'bg-orange-50 text-[#ef5222]' : 'text-gray-700 hover:bg-gray-50' }}">
+                        <a href="{{ request()->fullUrlWithQuery(['lang' => 'vi']) }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold transition-colors {{ app()->getLocale() === 'vi' ? 'bg-futa-orange-soft text-futa-orange' : 'text-gray-700 hover:bg-gray-50' }}">
                             <span class="inline-flex size-5.5 items-center justify-center overflow-hidden rounded-full">
                                 <img src="{{ asset('icons/flags/vi.svg') }}" alt="" class="h-full w-full object-cover">
                             </span>
                             <span>Tiếng Việt</span>
                         </a>
-                        <a href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold transition-colors {{ app()->getLocale() === 'en' ? 'bg-orange-50 text-[#ef5222]' : 'text-gray-700 hover:bg-gray-50' }}">
+                        <a href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold transition-colors {{ app()->getLocale() === 'en' ? 'bg-futa-orange-soft text-futa-orange' : 'text-gray-700 hover:bg-gray-50' }}">
                             <span class="inline-flex size-5.5 items-center justify-center overflow-hidden rounded-full">
                                 <img src="{{ asset('icons/flags/en.svg') }}" alt="" class="h-full w-full object-cover">
                             </span>
@@ -77,10 +77,10 @@
                         class="absolute left-0 top-full z-50 mt-2 w-40 overflow-hidden rounded-lg border border-white/20 bg-white py-1 shadow-xl"
                         style="display: none;"
                     >
-                        <a href="https://play.google.com/store/apps/details?id=client.facecar.com" target="_blank" rel="noopener noreferrer" role="menuitem" aria-label="{{ __('core::app.home.footer.google_play') }}" class="flex items-center gap-2.5 bg-orange-50 px-3 py-2.5 text-[#ef5222] transition-colors hover:bg-orange-100">
+                        <a href="https://play.google.com/store/apps/details?id=client.facecar.com" target="_blank" rel="noopener noreferrer" role="menuitem" aria-label="{{ __('core::app.home.footer.google_play') }}" class="flex items-center gap-2.5 bg-futa-orange-soft px-3 py-2.5 text-futa-orange transition-colors hover:bg-futa-orange-soft">
                             <img src="{{ asset('icons/stores/google-play.svg') }}" alt="" class="h-7 w-auto max-w-full">
                         </a>
-                        <a href="https://apps.apple.com/vn/app/futa/id1126633800" target="_blank" rel="noopener noreferrer" role="menuitem" aria-label="{{ __('core::app.home.footer.app_store') }}" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-700 transition-colors hover:bg-orange-50 hover:text-[#ef5222]">
+                        <a href="https://apps.apple.com/vn/app/futa/id1126633800" target="_blank" rel="noopener noreferrer" role="menuitem" aria-label="{{ __('core::app.home.footer.app_store') }}" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-700 transition-colors hover:bg-futa-orange-soft hover:text-futa-orange">
                             <img src="{{ asset('icons/stores/app-store.svg') }}" alt="" class="h-7 w-auto max-w-full">
                         </a>
                     </div>

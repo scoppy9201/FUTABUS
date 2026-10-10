@@ -10,7 +10,7 @@
         <main class="mx-auto w-full max-w-285 px-4 py-10 sm:px-6 lg:px-0">
             <article class="text-[15px] font-semibold leading-7 text-gray-950 sm:text-base">
                 <header class="mb-7 text-center">
-                    <p class="text-[30px] font-extrabold uppercase leading-tight text-[#ef5222] sm:text-[34px]">
+                    <p class="text-[30px] font-extrabold uppercase leading-tight text-futa-orange sm:text-[34px]">
                         {{ __('core::service-conditions.brand') }}
                     </p>
                     <h1 class="mt-3 text-2xl font-extrabold uppercase leading-tight sm:text-[30px]">

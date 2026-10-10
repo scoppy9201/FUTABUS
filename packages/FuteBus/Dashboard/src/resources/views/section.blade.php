@@ -17,11 +17,11 @@
 
     <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
-            <p class="text-sm font-bold uppercase tracking-[0.16em] text-[#ef5222]">{{ $company?->name ?? 'FUTA Bus Lines' }}</p>
+            <p class="text-sm font-bold uppercase tracking-[0.16em] text-futa-orange">{{ $company?->name ?? 'FUTA Bus Lines' }}</p>
             <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">{{ __('Dashboard::app.'.$section) }}</h1>
             <p class="mt-2 max-w-3xl text-sm font-medium text-slate-500 sm:text-base">{{ __('Dashboard::app.section_hint.'.$section) }}</p>
         </div>
-        <span class="rounded-full bg-orange-50 px-4 py-2 text-sm font-bold text-[#d7461a]">
+        <span class="rounded-full bg-futa-orange-soft px-4 py-2 text-sm font-bold text-futa-orange-dark">
             {{ number_format($rows->total()) }} {{ __('Dashboard::app.records') }}
         </span>
     </div>
@@ -39,7 +39,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($rows as $row)
-                        <tr class="hover:bg-orange-50/30">
+                        <tr class="hover:bg-futa-orange-soft/30">
                             @switch($section)
                                 @case('trips')
                                     <td class="px-5 py-4 font-bold text-slate-900">{{ $row->origin_city }} → {{ $row->destination_city }}</td>

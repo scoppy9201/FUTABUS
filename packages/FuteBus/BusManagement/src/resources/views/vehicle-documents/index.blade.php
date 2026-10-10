@@ -3,16 +3,16 @@
 @section('title', __('BusManagement::app.vd_title'))
 
 @section('content')
-@php $inp = 'w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-[#F26522] focus:outline-none focus:ring-2 focus:ring-[#F26522]/20'; @endphp
+@php $inp = 'w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20'; @endphp
 <div x-data="vehicleDocManager()">
 
     <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
-            <p class="text-sm font-bold uppercase tracking-[0.16em] text-[#ef5222]">{{ $company?->name ?? 'FUTA Bus Lines' }}</p>
+            <p class="text-sm font-bold uppercase tracking-[0.16em] text-futa-orange">{{ $company?->name ?? 'FUTA Bus Lines' }}</p>
             <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">{{ __('BusManagement::app.vd_title') }}</h1>
             <p class="mt-2 max-w-3xl text-sm font-medium text-slate-500">{{ __('BusManagement::app.vd_subtitle') }}</p>
         </div>
-        <span class="rounded-full bg-orange-50 px-4 py-2 text-sm font-bold text-[#d7461a]">
+        <span class="rounded-full bg-futa-orange-soft px-4 py-2 text-sm font-bold text-futa-orange-dark">
             {{ number_format($docs->total()) }} {{ __('Dashboard::app.records') }}
         </span>
     </div>
@@ -38,7 +38,7 @@
     <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
         <form method="GET" action="{{ route('bus-management.vehicle-documents.index') }}" class="flex flex-wrap items-center gap-2">
             <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('BusManagement::app.vd_search_ph') }}"
-                class="w-56 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm shadow-sm focus:border-[#F26522] focus:outline-none focus:ring-2 focus:ring-[#F26522]/20" />
+                class="w-56 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm shadow-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
             <select name="bus_id" class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:outline-none">
                 <option value="">{{ __('BusManagement::app.vd_filter_bus_all') }}</option>
                 @foreach($buses as $b)
@@ -56,14 +56,14 @@
                 <a href="{{ route('bus-management.vehicle-documents.index') }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-500">{{ __('BusManagement::app.btn_clear_filter') }}</a>
             @endif
         </form>
-        <button @click="openAdd()" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#F26522] to-[#E31B23] px-5 py-2.5 text-sm font-bold text-white shadow-md hover:opacity-90">
+        <button @click="openAdd()" class="inline-flex items-center gap-2 rounded-xl bg-futa-orange px-5 py-2.5 text-sm font-bold text-white shadow-md hover:opacity-90">
             <x-heroicon-o-plus class="size-4" /> {{ __('BusManagement::app.vd_btn_add') }}
         </button>
     </div>
 
     <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[1000px] text-left text-sm">
+            <table class="w-full min-w-250 text-left text-sm">
                 <thead class="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500">
                     <tr>
                         <th class="px-5 py-4">{{ __('BusManagement::app.col_stt') }}</th>
@@ -85,7 +85,7 @@
                             $current  = $d->status === 'active' && ! $d->superseded;
                             $snap     = json_decode($d->field_values ?? '[]', true) ?: [];
                         @endphp
-                        <tr class="hover:bg-orange-50/30 {{ $current ? '' : 'opacity-60' }}">
+                        <tr class="hover:bg-futa-orange-soft/30 {{ $current ? '' : 'opacity-60' }}">
                             <td class="px-5 py-4 text-slate-500">{{ $docs->firstItem() + $loop->index }}</td>
                             <td class="px-5 py-4 font-bold text-slate-900">{{ $d->license_plate }}</td>
                             <td class="px-5 py-4">{{ $d->type_name }}</td>
@@ -114,7 +114,7 @@
                                         'bus' => $d->license_plate, 'type' => $d->type_name,
                                         'issued' => \Illuminate\Support\Carbon::parse($d->issued_date)->format('d/m/Y'),
                                         'expiry' => $expiry->format('d/m/Y'), 'values' => $snap,
-                                    ]) }})" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-[#F26522] hover:text-[#F26522]">
+                                    ]) }})" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-futa-orange hover:text-futa-orange">
                                         <x-heroicon-o-eye class="size-3.5" /> {{ __('BusManagement::app.vd_btn_view') }}
                                     </button>
                                     @if($current && $stateKey === 'expired')
@@ -151,7 +151,7 @@
          class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
         <div class="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
             <div class="flex items-center justify-between px-5 py-3"
-                 :class="mode === 'renew' ? 'bg-slate-800' : 'bg-gradient-to-r from-[#F26522] to-[#E31B23]'">
+                 :class="mode === 'renew' ? 'bg-slate-800' : 'bg-futa-orange'">
                 <h2 class="text-base font-bold text-white"
                     x-text="mode === 'renew' ? @js(__('BusManagement::app.vd_modal_renew')) : @js(__('BusManagement::app.vd_modal_add'))"></h2>
                 <button type="button" @click="showForm = false" class="text-white/70 hover:text-white"><x-heroicon-o-x-mark class="size-4" /></button>
@@ -220,7 +220,7 @@
 
                 <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
                     <button type="button" @click="showForm = false" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('BusManagement::app.btn_cancel') }}</button>
-                    <button type="submit" class="rounded-lg bg-[#F26522] px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#d9561d]"
+                    <button type="submit" class="rounded-lg bg-futa-orange px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-futa-orange-dark"
                             x-text="mode === 'renew' ? @js(__('BusManagement::app.vd_btn_renew')) : @js(__('BusManagement::app.btn_store'))"></button>
                 </div>
             </form>

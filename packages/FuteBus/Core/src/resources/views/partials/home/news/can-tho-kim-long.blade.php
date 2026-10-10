@@ -12,7 +12,7 @@
         <p>Châu Đốc ⇆ Cần Thơ (18/09/2026)</p>
     </div>
     <p>Với việc bổ sung dòng xe KimLong thế hệ mới của Công Ty Phương Trang nhằm mang đến thêm lựa chọn phù hợp cho Quý khách ưu tiên không gian rộng rãi, tiện nghi và sự thuận tiện khi di chuyển từ Cần Thơ.</p>
-    <p>👉 ĐẶT VÉ NGAY trên app FUTA hoặc truy cập <a href="https://futabus.vn/" target="_blank" rel="noopener noreferrer" class="text-[#ef5222] underline">futabus.vn</a> để trải nghiệm dòng xe KimLong cùng Công Ty Phương Trang!</p>
+    <p>👉 ĐẶT VÉ NGAY trên app FUTA hoặc truy cập <a href="https://futabus.vn/" target="_blank" rel="noopener noreferrer" class="text-futa-orange underline">futabus.vn</a> để trải nghiệm dòng xe KimLong cùng Công Ty Phương Trang!</p>
     <div class="space-y-1 font-semibold">
         <p>♥️ Công Ty Phương Trang hân hạnh được phục vụ Quý Khách!</p>
         <p>📌 Thông tin chi tiết xin vui lòng liên hệ:</p>

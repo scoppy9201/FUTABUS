@@ -10,7 +10,7 @@
         <main class="mx-auto w-full max-w-285 px-4 py-9 sm:px-6 lg:px-0">
             <article class="text-base font-medium leading-7 text-gray-950">
                 <header class="text-center">
-                    <p class="text-[30px] font-extrabold uppercase leading-tight text-[#ef5222] sm:text-[36px]">
+                    <p class="text-[30px] font-extrabold uppercase leading-tight text-futa-orange sm:text-[36px]">
                         {{ __('core::customer-support.brand') }}
                     </p>
                     <h1 class="mt-3 text-2xl font-extrabold uppercase leading-tight sm:text-[30px]">
@@ -33,7 +33,7 @@
                             {{ $channel['label'] }}:
                             <a
                                 href="{{ $channel['route'] ? route($channel['route']) : '#' }}"
-                                class="text-[#ef5222] hover:underline"
+                                class="text-futa-orange hover:underline"
                             >
                                 {{ $channel['link'] }}
                             </a>
@@ -44,7 +44,7 @@
                         {{ __('core::customer-support.questions.label') }}
                         <ul class="mt-3 list-disc space-y-3 pl-5">
                             <li>
-                                <a href="#" class="text-[#ef5222] hover:underline">
+                                <a href="#" class="text-futa-orange hover:underline">
                                     {{ __('core::customer-support.questions.form_link') }}
                                 </a>.
                                 {{ __('core::customer-support.questions.form_description') }}
@@ -56,7 +56,7 @@
 
                 <p class="mt-4 font-bold italic">
                     {{ __('core::customer-support.hotline.prefix') }}
-                    <a href="tel:19006067" class="font-extrabold text-[#ef5222] hover:underline">1900 6067</a>.
+                    <a href="tel:19006067" class="font-extrabold text-futa-orange hover:underline">1900 6067</a>.
                 </p>
             </article>
         </main>

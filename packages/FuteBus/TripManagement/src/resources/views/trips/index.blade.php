@@ -7,11 +7,11 @@
 
     <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
-            <p class="text-sm font-bold uppercase tracking-[0.16em] text-[#ef5222]">{{ $company?->name ?? 'FUTA Bus Lines' }}</p>
+            <p class="text-sm font-bold uppercase tracking-[0.16em] text-futa-orange">{{ $company?->name ?? 'FUTA Bus Lines' }}</p>
             <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">{{ __('TripManagement::app.tr_title') }}</h1>
             <p class="mt-2 max-w-3xl text-sm font-medium text-slate-500">{{ __('TripManagement::app.tr_subtitle') }}</p>
         </div>
-        <span class="rounded-full bg-orange-50 px-4 py-2 text-sm font-bold text-[#d7461a]">
+        <span class="rounded-full bg-futa-orange-soft px-4 py-2 text-sm font-bold text-futa-orange-dark">
             {{ number_format($trips->total()) }} {{ __('Dashboard::app.records') }}
         </span>
     </div>
@@ -37,10 +37,10 @@
     <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
         <form method="GET" action="{{ route('trip-management.trips.index') }}" class="flex flex-wrap items-center gap-2">
             <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('TripManagement::app.tr_search_ph') }}"
-                class="w-64 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm shadow-sm focus:border-[#F26522] focus:outline-none focus:ring-2 focus:ring-[#F26522]/20" />
+                class="w-64 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm shadow-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
             <input type="date" name="date" value="{{ $date }}"
-                class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-[#F26522] focus:outline-none" />
-            <select name="status" class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-[#F26522] focus:outline-none">
+                class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-futa-orange focus:outline-none" />
+            <select name="status" class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-futa-orange focus:outline-none">
                 <option value="">{{ __('TripManagement::app.tr_filter_all') }}</option>
                 @foreach(['unassigned','scheduled','departed','arrived','cancelled'] as $st)
                     <option value="{{ $st }}" @selected($status === $st)>{{ __('Dashboard::app.status.'.$st) }}</option>
@@ -51,14 +51,14 @@
                 <a href="{{ route('trip-management.trips.index') }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-500">{{ __('TripManagement::app.btn_clear_filter') }}</a>
             @endif
         </form>
-        <button @click="openAdd()" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#F26522] to-[#E31B23] px-5 py-2.5 text-sm font-bold text-white shadow-md hover:opacity-90">
+        <button @click="openAdd()" class="inline-flex items-center gap-2 rounded-xl bg-futa-orange px-5 py-2.5 text-sm font-bold text-white shadow-md hover:opacity-90">
             <x-heroicon-o-plus class="size-4" /> {{ __('TripManagement::app.tr_btn_add') }}
         </button>
     </div>
 
     <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[1000px] text-left text-sm">
+            <table class="w-full min-w-250 text-left text-sm">
                 <thead class="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500">
                     <tr>
                         <th class="px-5 py-4">{{ __('TripManagement::app.col_stt') }}</th>
@@ -75,7 +75,7 @@
                 <tbody class="divide-y divide-slate-100">
                     @forelse($trips as $t)
                         @php $open = in_array($t->status, ['unassigned', 'scheduled'], true); @endphp
-                        <tr class="hover:bg-orange-50/30">
+                        <tr class="hover:bg-futa-orange-soft/30">
                             <td class="px-5 py-4 text-slate-500">{{ $trips->firstItem() + $loop->index }}</td>
                             <td class="px-5 py-4 font-bold text-slate-900">
                                 {{ $t->origin_city }} → {{ $t->destination_city }}
@@ -98,7 +98,7 @@
                                         'departure_time' => \Illuminate\Support\Carbon::parse($t->departure_time)->format('Y-m-d\TH:i'),
                                         'arrival_time' => \Illuminate\Support\Carbon::parse($t->arrival_time)->format('Y-m-d\TH:i'),
                                         'price' => (int) $t->price, 'from_schedule' => $t->trip_schedule_id !== null,
-                                    ]) }})" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-[#F26522] hover:text-[#F26522]">
+                                    ]) }})" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-futa-orange hover:text-futa-orange">
                                         <x-heroicon-o-pencil-square class="size-3.5" /> {{ __('TripManagement::app.tr_btn_edit') }}
                                     </button>
                                     @endif
@@ -127,7 +127,7 @@
          class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
         <div class="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
             <div class="flex items-center justify-between px-5 py-3"
-                 :class="isEdit ? 'bg-slate-800' : 'bg-gradient-to-r from-[#F26522] to-[#E31B23]'">
+                 :class="isEdit ? 'bg-slate-800' : 'bg-futa-orange'">
                 <h2 class="text-base font-bold text-white"
                     x-text="isEdit ? @js(__('TripManagement::app.tr_modal_edit')) : @js(__('TripManagement::app.tr_modal_add'))"></h2>
                 <button type="button" @click="showForm = false" class="text-white/70 hover:text-white"><x-heroicon-o-x-mark class="size-4" /></button>
@@ -144,7 +144,7 @@
                 <div>
                     <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_route') }} <span class="text-rose-500">*</span></label>
                     <select name="route_id" x-model="form.route_id" :disabled="locked" required
-                            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:bg-slate-100 focus:border-[#F26522] focus:outline-none focus:ring-2 focus:ring-[#F26522]/20">
+                            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:bg-slate-100 focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20">
                         <option value="">{{ __('TripManagement::app.sch_f_route_select') }}</option>
                         @foreach($routes as $r)
                             <option value="{{ $r->id }}">{{ $r->code }} — {{ $r->origin_city }} → {{ $r->destination_city }}</option>
@@ -156,19 +156,19 @@
                     <div>
                         <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.tr_f_departure') }} <span class="text-rose-500">*</span></label>
                         <input type="datetime-local" name="departure_time" x-model="form.departure_time" :disabled="locked" required
-                               class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:bg-slate-100 focus:border-[#F26522] focus:outline-none focus:ring-2 focus:ring-[#F26522]/20" />
+                               class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:bg-slate-100 focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
                     </div>
                     <div>
                         <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.tr_f_arrival') }} <span class="text-rose-500">*</span></label>
                         <input type="datetime-local" name="arrival_time" x-model="form.arrival_time" :disabled="locked" required
-                               class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:bg-slate-100 focus:border-[#F26522] focus:outline-none focus:ring-2 focus:ring-[#F26522]/20" />
+                               class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:bg-slate-100 focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
                     </div>
                     <div>
                         <label class="mb-1 block text-xs font-semibold text-slate-700">
                             {{ __('TripManagement::app.tr_f_bus') }} <span x-show="!isEdit" class="text-rose-500">*</span>
                         </label>
                         <select name="bus_id" x-model="form.bus_id" :required="!isEdit"
-                                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-[#F26522] focus:outline-none focus:ring-2 focus:ring-[#F26522]/20">
+                                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20">
                             <option value="">{{ __('TripManagement::app.tr_f_bus_select') }}</option>
                             @foreach($buses as $b)
                                 <option value="{{ $b->id }}">{{ $b->license_plate }} ({{ $b->capacity }} {{ __('BusManagement::app.field_capacity_unit') }})</option>
@@ -178,13 +178,13 @@
                     <div>
                         <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.tr_f_price') }} <span class="text-rose-500">*</span></label>
                         <input type="number" name="price" x-model="form.price" required min="1" step="any"
-                               class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-[#F26522] focus:outline-none focus:ring-2 focus:ring-[#F26522]/20" />
+                               class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
                     </div>
                 </div>
 
                 <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
                     <button type="button" @click="showForm = false" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('TripManagement::app.btn_cancel') }}</button>
-                    <button type="submit" class="rounded-lg bg-[#F26522] px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#d9561d]"
+                    <button type="submit" class="rounded-lg bg-futa-orange px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-futa-orange-dark"
                             x-text="isEdit ? @js(__('TripManagement::app.btn_save')) : @js(__('TripManagement::app.btn_store'))"></button>
                 </div>
             </form>

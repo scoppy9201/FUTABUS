@@ -2,10 +2,10 @@
     <p class="font-bold">Quý khách có thể dễ dàng lựa chọn chuyến xe phù hợp, đặt vé nhanh chóng và nhận vé điện tử ngay lập tức, thuận tiện cho mọi hành trình, dù là đi công tác hay về thăm gia đình.</p>
 
     <div class="space-y-3 font-bold">
-        <p>👉 Các bước đặt vé nhanh chóng trên website <a href="https://futabus.vn/" target="_blank" rel="noopener noreferrer" class="text-[#ef5222] underline">futabus.vn</a>:</p>
+        <p>👉 Các bước đặt vé nhanh chóng trên website <a href="https://futabus.vn/" target="_blank" rel="noopener noreferrer" class="text-futa-orange underline">futabus.vn</a>:</p>
         <div>
             <h2>🔸 Bước 1: Truy cập website</h2>
-            <p>Vào địa chỉ: <a href="https://futabus.vn/" target="_blank" rel="noopener noreferrer" class="text-[#ef5222] underline">futabus.vn</a></p>
+            <p>Vào địa chỉ: <a href="https://futabus.vn/" target="_blank" rel="noopener noreferrer" class="text-futa-orange underline">futabus.vn</a></p>
         </div>
         <div>
             <h2>🔸 Bước 2: Chọn thông tin hành trình</h2>

@@ -14,7 +14,7 @@
             @csrf
             @include('Auth::partials.email-field')
 
-            <label class="flex h-10 items-center rounded-md border border-[#ffab92] bg-[#fff7f5] text-[#999] transition focus-within:border-[#ef5222] focus-within:ring-3 focus-within:ring-[#ef5222]/10">
+            <label class="flex h-10 items-center rounded-md border border-futa-orange/40 bg-futa-orange-soft text-[#999] transition focus-within:border-futa-orange focus-within:ring-3 focus-within:ring-futa-orange/10">
                 <span class="sr-only">{{ __('Auth::app.fields.password') }}</span>
                 <x-heroicon-o-lock-closed class="ml-3 size-5.25 shrink-0" />
                 <input class="h-full min-w-0 flex-1 bg-transparent px-3 text-base text-gray-900 outline-none placeholder:text-[#b9b9b9]" :type="showPassword ? 'text' : 'password'" name="password" autocomplete="current-password" placeholder="{{ __('Auth::app.fields.password_placeholder') }}" required>
@@ -24,8 +24,8 @@
                 </button>
             </label>
 
-            <button type="submit" class="h-11 rounded-full bg-[#ef5222] text-sm font-bold text-white transition hover:bg-[#d94317] active:scale-[.99]">{{ __('Auth::app.login.submit') }}</button>
-            <a href="{{ route('password.request') }}" class="-mt-2 text-[13px] text-[#ef5222]">{{ __('Auth::app.login.forgot_password') }}</a>
+            <button type="submit" class="h-11 rounded-full bg-futa-orange text-sm font-bold text-white transition hover:bg-futa-orange-dark active:scale-[.99]">{{ __('Auth::app.login.submit') }}</button>
+            <a href="{{ route('password.request') }}" class="-mt-2 text-[13px] text-futa-orange">{{ __('Auth::app.login.forgot_password') }}</a>
         </form>
     </div>
 @endsection

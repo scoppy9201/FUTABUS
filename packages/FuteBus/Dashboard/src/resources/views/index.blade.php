@@ -24,8 +24,8 @@
                         <x-heroicon-o-check-circle class="w-3 h-3 mr-1" /> {{ __('Dashboard::app.buses_active', ['count' => $overview['active_buses'] ?? 0]) }}
                     </span>
                 </div>
-                <div class="w-14 h-14 bg-[#fff3ed] rounded-xl flex items-center justify-center shrink-0">
-                    <x-heroicon-o-truck class="w-7 h-7 text-[#F26522]" />
+                <div class="w-14 h-14 bg-futa-orange-soft rounded-xl flex items-center justify-center shrink-0">
+                    <x-heroicon-o-truck class="w-7 h-7 text-futa-orange" />
                 </div>
             </div>
 
@@ -61,7 +61,7 @@
             <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between hover:shadow-md transition">
                 <div class="flex flex-col h-full justify-between">
                     <p class="text-sm text-gray-500 font-medium">{{ __('Dashboard::app.paid_amount') }}</p>
-                    <h3 class="text-3xl font-extrabold text-[#F26522] my-2">{{ number_format($overview['paid_amount'] ?? 0, 0, ',', '.') }} ₫</h3>
+                    <h3 class="text-3xl font-extrabold text-futa-orange my-2">{{ number_format($overview['paid_amount'] ?? 0, 0, ',', '.') }} ₫</h3>
                     <span class="text-xs font-semibold text-emerald-600 flex items-center">
                         <x-heroicon-o-currency-dollar class="w-3 h-3 mr-1" /> {{ __('Dashboard::app.paid') }}
                     </span>
@@ -112,7 +112,7 @@
                     </div>
                 </div>
                 <div class="mt-6 pt-5 border-t border-gray-100 text-center">
-                    <a href="{{ route('dashboard.section', 'buses') }}" class="text-[#F26522] text-sm font-bold hover:text-[#d95318] inline-flex items-center">
+                    <a href="{{ route('dashboard.section', 'buses') }}" class="text-futa-orange text-sm font-bold hover:text-futa-orange-dark inline-flex items-center">
                         {{ __('Dashboard::app.view_bus_list') }} <x-heroicon-o-arrow-right class="w-4 h-4 ml-1" />
                     </a>
                 </div>
@@ -125,7 +125,7 @@
             <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
                 <div class="p-6 border-b border-gray-100 flex items-center justify-between">
                     <h2 class="text-lg font-extrabold text-[#111827]">{{ __('Dashboard::app.recent_bookings') }}</h2>
-                    <a href="{{ route('dashboard.section', 'bookings') }}" class="text-[#F26522] hover:text-[#d95318] text-sm font-bold">{{ __('Dashboard::app.view_all') }}</a>
+                    <a href="{{ route('dashboard.section', 'bookings') }}" class="text-futa-orange hover:text-futa-orange-dark text-sm font-bold">{{ __('Dashboard::app.view_all') }}</a>
                 </div>
                 <div class="overflow-x-auto w-full">
                     <table class="w-full text-left text-sm text-[#4b5563]">
@@ -139,8 +139,8 @@
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             @forelse($overview['recent_bookings'] as $booking)
-                                <tr class="hover:bg-orange-50/40 transition">
-                                    <td class="px-5 py-4 font-bold text-[#F26522]">{{ $booking->booking_code }}</td>
+                                <tr class="hover:bg-futa-orange-soft/40 transition">
+                                    <td class="px-5 py-4 font-bold text-futa-orange">{{ $booking->booking_code }}</td>
                                     <td class="px-5 py-4 font-bold text-[#111827]">{{ $booking->full_name }}</td>
                                     <td class="px-5 py-4">{{ $booking->origin_city }} ➔ {{ $booking->destination_city }}</td>
                                     <td class="px-5 py-4 text-right">
@@ -164,7 +164,7 @@
             <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
                 <div class="p-6 border-b border-gray-100 flex items-center justify-between">
                     <h2 class="text-lg font-extrabold text-[#111827]">{{ __('Dashboard::app.upcoming_trips') }}</h2>
-                    <a href="{{ route('dashboard.section', 'trips') }}" class="text-[#F26522] hover:text-[#d95318] text-sm font-bold">{{ __('Dashboard::app.view_all') }}</a>
+                    <a href="{{ route('dashboard.section', 'trips') }}" class="text-futa-orange hover:text-futa-orange-dark text-sm font-bold">{{ __('Dashboard::app.view_all') }}</a>
                 </div>
                 <div class="overflow-x-auto w-full">
                     <table class="w-full text-left text-sm text-[#4b5563]">
@@ -178,7 +178,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             @forelse($overview['upcoming_trips'] as $trip)
-                                <tr class="hover:bg-orange-50/40 transition">
+                                <tr class="hover:bg-futa-orange-soft/40 transition">
                                     <td class="px-5 py-4 font-bold text-[#111827]">{{ $trip->origin_city }} ➔ {{ $trip->destination_city }}</td>
                                     <td class="px-5 py-4">{{ $trip->license_plate }}</td>
                                     <td class="px-5 py-4">{{ \Illuminate\Support\Carbon::parse($trip->departure_time)->format('H:i (d/m)') }}</td>
@@ -202,9 +202,10 @@
         document.addEventListener('DOMContentLoaded', function() {
             const ctx = document.getElementById('revenueChart').getContext('2d');
 
+            const brandOrange = getComputedStyle(document.documentElement).getPropertyValue('--color-futa-orange').trim();
             const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(242, 101, 34, 0.2)');
-            gradient.addColorStop(1, 'rgba(242, 101, 34, 0)');
+            gradient.addColorStop(0, `color-mix(in srgb, ${brandOrange} 20%, transparent)`);
+            gradient.addColorStop(1, `color-mix(in srgb, ${brandOrange} 0%, transparent)`);
 
             new Chart(ctx, {
                 type: 'line',
@@ -213,10 +214,10 @@
                     datasets: [{
                         label: '{{ __('Dashboard::app.revenue') }}',
                         data: [280, 310, 290, 350, 420, 480, 342.5],
-                        borderColor: '#F26522',
+                        borderColor: brandOrange,
                         backgroundColor: gradient,
                         borderWidth: 3,
-                        pointBackgroundColor: '#F26522',
+                        pointBackgroundColor: brandOrange,
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
                         pointRadius: 5,

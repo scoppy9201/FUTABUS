@@ -10,8 +10,8 @@
         <main class="mx-auto w-full max-w-285 px-4 py-10 sm:px-6 sm:py-12 lg:px-0">
             <article>
                 <header class="text-center">
-                    <h1 class="text-xl font-semibold uppercase leading-snug text-[#ef5222] sm:text-2xl">
-                        {{ __('core::booking-guide.heading') }} <span class="whitespace-nowrap text-[#00613d]">FUTABUS.VN</span>
+                    <h1 class="text-xl font-semibold uppercase leading-snug text-futa-orange sm:text-2xl">
+                        {{ __('core::booking-guide.heading') }} <span class="whitespace-nowrap text-futa-green">FUTABUS.VN</span>
                     </h1>
                 </header>
 
@@ -47,19 +47,19 @@
                 </section>
 
                 <section aria-labelledby="guide-commitment-heading" class="mt-11 bg-[#fff7f4] px-4 py-8">
-                    <h2 id="guide-commitment-heading" class="text-center text-lg font-medium uppercase text-[#ef5222] sm:text-xl">
+                    <h2 id="guide-commitment-heading" class="text-center text-lg font-medium uppercase text-futa-orange sm:text-xl">
                         {{ __('core::booking-guide.commitment') }}
                     </h2>
                     <div class="mt-4 space-y-2 text-[15px] leading-7 text-black sm:text-[17px]">
                         <p>{{ __('core::booking-guide.introduction.first') }}</p>
                         <p>
                             {{ __('core::booking-guide.introduction.second_before') }}
-                            <span class="text-[#ef5222]">{{ __('core::booking-guide.introduction.website_name') }}</span>
+                            <span class="text-futa-orange">{{ __('core::booking-guide.introduction.website_name') }}</span>
                             {{ __('core::booking-guide.introduction.second_after') }}
                         </p>
                         <p>
                             {{ __('core::booking-guide.introduction.third_before') }}
-                            <span class="text-[#ef5222]">{{ __('core::booking-guide.introduction.website_name') }}</span>
+                            <span class="text-futa-orange">{{ __('core::booking-guide.introduction.website_name') }}</span>
                             {{ __('core::booking-guide.introduction.third_after') }}
                         </p>
                     </div>
@@ -76,12 +76,12 @@
                     ];
                 @endphp
                 <section aria-labelledby="guide-benefits-heading" class="mt-12">
-                    <h2 id="guide-benefits-heading" class="mx-auto max-w-full text-center text-[25px] font-bold leading-9 text-[#00613d] sm:text-[28px]">
+                    <h2 id="guide-benefits-heading" class="mx-auto max-w-full text-center text-[25px] font-bold leading-9 text-futa-green sm:text-[28px]">
                         {{ __('core::booking-guide.benefits.heading_before') }}
-                        <span class="text-[#ef5222]">FUTA Bus</span>
+                        <span class="text-futa-orange">FUTA Bus</span>
                         <span class="whitespace-nowrap">{{ __('core::booking-guide.benefits.heading_middle') }}</span>
                         <br class="hidden lg:block">
-                        <span class="text-[#ef5222]">futabus.vn</span>
+                        <span class="text-futa-orange">futabus.vn</span>
                         {{ __('core::booking-guide.benefits.heading_after') }}
                     </h2>
 
@@ -104,13 +104,13 @@
                 </section>
 
                 <section aria-labelledby="guide-booking-steps-heading" class="mt-16 bg-[#fff7f4] px-4 pt-12 pb-14 sm:px-7">
-                    <h2 id="guide-booking-steps-heading" class="text-center text-[25px] font-bold leading-tight text-[#00613d] sm:text-[30px]">
+                    <h2 id="guide-booking-steps-heading" class="text-center text-[25px] font-bold leading-tight text-futa-green sm:text-[30px]">
                         {{ __('core::booking-guide.booking_steps.heading') }}
                     </h2>
 
                     <div class="mt-10 overflow-x-auto pb-2">
                         <div class="mx-auto w-full min-w-200 max-w-250">
-                            <div class="relative aspect-[2170/304] w-full overflow-hidden" aria-hidden="true">
+                            <div class="relative aspect-2170/304 w-full overflow-hidden" aria-hidden="true">
                                 <img
                                     src="{{ asset('images/booking-guide/booking-steps-timeline.png') }}"
                                     alt=""
@@ -129,7 +129,7 @@
 
                     <h3 class="mt-11 text-center text-[26px] font-bold leading-tight text-black sm:text-[30px]">
                         {{ __('core::booking-guide.booking_steps.first_step') }}
-                        <span class="text-[#ef5222]">futabus.vn</span>
+                        <span class="text-futa-orange">futabus.vn</span>
                     </h3>
                     <img
                         src="{{ asset('images/booking-guide/website-devices.png') }}"
@@ -143,12 +143,12 @@
                     <div class="mt-9 text-center">
                         <h3 class="text-[20px] font-bold leading-tight text-black sm:text-[24px]">
                             {{ __('core::booking-guide.journey_step.download_before') }}
-                            <span class="text-[#ef5222]">futabus.vn</span>
+                            <span class="text-futa-orange">futabus.vn</span>
                             {{ __('core::booking-guide.journey_step.download_after') }}<br>
                             {{ __('core::booking-guide.journey_step.download_second_line') }}
-                            <span class="text-[#ef5222]">Google Play</span>
+                            <span class="text-futa-orange">Google Play</span>
                             {{ __('core::booking-guide.journey_step.download_or') }}
-                            <span class="text-[#ef5222]">Apple store</span>
+                            <span class="text-futa-orange">Apple store</span>
                         </h3>
                         <div class="mt-4 flex items-center justify-center gap-8">
                             <a href="https://play.google.com/store/apps/details?id=client.facecar.com" target="_blank" rel="noopener noreferrer" aria-label="{{ __('core::app.home.footer.google_play') }}" class="inline-flex h-7 items-center gap-1 rounded-full bg-[#60b95e] px-2.5 text-xs font-medium text-white">
@@ -163,7 +163,7 @@
 
                     <div class="mt-10 overflow-x-auto pb-2">
                         <div class="mx-auto w-full min-w-200 max-w-250">
-                            <div class="relative aspect-[2169/316] w-full overflow-hidden" aria-hidden="true">
+                            <div class="relative aspect-2169/316 w-full overflow-hidden" aria-hidden="true">
                                 <img
                                     src="{{ asset('images/booking-guide/booking-steps-timeline-active-02.png') }}"
                                     alt=""
@@ -197,7 +197,7 @@
                     <ol class="mx-auto mt-10 grid w-full max-w-245 gap-x-8 gap-y-8 text-[18px] text-black sm:grid-cols-2 sm:text-[21px]">
                         @foreach(__('core::booking-guide.journey_step.fields') as $field)
                             <li class="flex items-center gap-4">
-                                <span class="grid size-16 shrink-0 place-items-center rounded-full border-2 border-dashed border-[#f2764d] text-[42px] font-bold leading-none text-[#ef744e]">
+                                <span class="grid size-16 shrink-0 place-items-center rounded-full border-2 border-dashed border-futa-orange text-[42px] font-bold leading-none text-futa-orange">
                                     {{ $loop->iteration }}
                                 </span>
                                 <span>{{ $field }}</span>
@@ -217,7 +217,7 @@
                     <ol class="mx-auto mt-12 grid w-full max-w-245 gap-x-8 gap-y-8 text-[18px] text-black sm:grid-cols-2 sm:text-[21px]">
                         @foreach(__('core::booking-guide.trip_selection_step.fields') as $field)
                             <li class="flex items-center gap-4">
-                                <span class="grid size-16 shrink-0 place-items-center rounded-full border-2 border-dashed border-[#f2764d] text-[42px] font-bold leading-none text-[#ef744e]">
+                                <span class="grid size-16 shrink-0 place-items-center rounded-full border-2 border-dashed border-futa-orange text-[42px] font-bold leading-none text-futa-orange">
                                     {{ $loop->iteration }}
                                 </span>
                                 <span>{{ $field }}</span>
@@ -227,7 +227,7 @@
 
                     <div class="mt-10 overflow-x-auto pb-2">
                         <div class="mx-auto w-full min-w-200 max-w-250">
-                            <div class="relative aspect-[2169/312] w-full overflow-hidden" aria-hidden="true">
+                            <div class="relative aspect-2169/312 w-full overflow-hidden" aria-hidden="true">
                                 <img
                                     src="{{ asset('images/booking-guide/booking-steps-timeline-active-03.png') }}"
                                     alt=""
@@ -260,7 +260,7 @@
 
                     <div class="mt-14 overflow-x-auto pb-2">
                         <div class="mx-auto w-full min-w-200 max-w-250">
-                            <div class="relative aspect-[2167/324] w-full overflow-hidden" aria-hidden="true">
+                            <div class="relative aspect-2167/324 w-full overflow-hidden" aria-hidden="true">
                                 <img
                                     src="{{ asset('images/booking-guide/booking-steps-timeline-active-04.png') }}"
                                     alt=""
@@ -293,7 +293,7 @@
 
                     <div class="mt-14 overflow-x-auto pb-2">
                         <div class="mx-auto w-full min-w-200 max-w-250">
-                            <div class="relative aspect-[2168/332] w-full overflow-hidden" aria-hidden="true">
+                            <div class="relative aspect-2168/332 w-full overflow-hidden" aria-hidden="true">
                                 <img
                                     src="{{ asset('images/booking-guide/booking-steps-timeline-active-05.png') }}"
                                     alt=""
@@ -326,7 +326,7 @@
                 </section>
 
                 <section aria-labelledby="guide-email-heading" class="mt-12 text-center">
-                    <h2 id="guide-email-heading" class="text-[25px] font-bold leading-tight text-[#00613d] sm:text-[29px]">
+                    <h2 id="guide-email-heading" class="text-[25px] font-bold leading-tight text-futa-green sm:text-[29px]">
                         {{ __('core::booking-guide.booking_success.email_heading') }}
                     </h2>
                     <img

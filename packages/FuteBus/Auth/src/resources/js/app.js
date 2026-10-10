@@ -1,3 +1,5 @@
+import './email-validation';
+
 const createOtpFlow = (expiresAt = 0, resendAt = 0) => ({
     otp: Array(6).fill(''),
     secondsRemaining: 0,

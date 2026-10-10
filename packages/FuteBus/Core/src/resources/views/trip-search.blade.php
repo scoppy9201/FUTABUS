@@ -10,21 +10,13 @@
         <main class="mx-auto w-full max-w-282 px-3 pb-16 sm:px-4">
             @include('core::partials.home.trip-results', [
                 'trips' => $outboundTrips,
+                'returnTrips' => $returnTrips,
                 'from' => $searchCriteria['departure'],
                 'to' => $searchCriteria['destination'],
-                'direction' => 'outbound',
+                'roundTrip' => $searchCriteria['trip_type'] === 'round_trip',
+                'departureDate' => $searchCriteria['departure_date'],
+                'returnDate' => $searchCriteria['return_date'] ?? null,
             ])
-
-            @if ($searchCriteria['trip_type'] === 'round_trip')
-                <div class="mt-10">
-                    @include('core::partials.home.trip-results', [
-                        'trips' => $returnTrips,
-                        'from' => $searchCriteria['destination'],
-                        'to' => $searchCriteria['departure'],
-                        'direction' => 'return',
-                    ])
-                </div>
-            @endif
         </main>
 
         @include('core::partials.home.footer')

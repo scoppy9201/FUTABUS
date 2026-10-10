@@ -10,7 +10,7 @@
 <section class="bg-white py-10 sm:py-12">
     <div class="mx-auto w-full max-w-282 px-4 sm:px-6 lg:px-0">
         <header class="text-center">
-            <h2 class="text-2xl font-extrabold uppercase leading-tight text-[#00613d] xl:text-3xl">
+            <h2 class="text-2xl font-extrabold uppercase leading-tight text-futa-green xl:text-3xl">
                 {{ __('core::app.home.service_quality.title') }}
             </h2>
             <p class="mt-2 text-sm text-[#4a342e] sm:text-base">
@@ -22,7 +22,7 @@
             <div class="space-y-5 sm:space-y-6">
                 @foreach($qualityStats as $stat)
                     <article class="flex items-center gap-4 sm:gap-5">
-                        <div class="size-20 shrink-0 overflow-hidden rounded-full border border-[#f9ded4] bg-[#fff0eb] shadow-sm sm:size-24">
+                        <div class="size-20 shrink-0 overflow-hidden rounded-full border border-[#f9ded4] bg-futa-orange-soft shadow-sm sm:size-24">
                             <img
                                 src="{{ asset($qualityImages[$loop->index]) }}"
                                 alt=""

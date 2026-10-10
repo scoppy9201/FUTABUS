@@ -11,7 +11,8 @@
     <meta property="og:description" content="@yield('og_description', __('core::app.home.title'))">
     <meta property="og:url" content="@yield('canonical', url()->current())">
     <meta property="og:type" content="website">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'packages/FuteBus/Core/src/resources/css/app.css', 'packages/FuteBus/Core/src/resources/js/app.js'])
+    @stack('styles')
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.13.0/lottie.min.js" defer></script>
 </head>
@@ -20,5 +21,6 @@
     @yield('content')
     @include('core::partials.floating-support')
     <x-confirm-dialog />
+    @stack('scripts')
 </body>
 </html>

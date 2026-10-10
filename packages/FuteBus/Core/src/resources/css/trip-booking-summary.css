@@ -22,7 +22,7 @@
     border-top: 1px solid #e6e9ee;
 }
 .booking-page__summary .booking-page__total dd {
-    color: #00613d;
+    color: var(--color-futa-green);
     font-size: 16px;
     font-weight: 800;
 }
@@ -34,10 +34,10 @@
     min-height: 171px;
 }
 .booking-page__aside .booking-panel:last-child dl > div:first-child dd {
-    color: #ef5222;
+    color: var(--color-futa-orange);
 }
 .booking-page__aside .booking-panel:last-child .booking-page__total dd {
-    color: #ef5222;
+    color: var(--color-futa-orange);
 }
 
 .booking-page__price-summary {
@@ -54,11 +54,11 @@
     max-height: calc(100vh - 120px);
     overflow-y: auto;
     padding: 16px 18px;
-    border: 1px solid #ffd1c1;
+    border: 1px solid color-mix(in srgb, var(--color-futa-orange) 32%, white);
     border-radius: 14px;
-    background: #fff1eb;
+    background: var(--color-futa-orange-soft);
     box-shadow: 0 12px 30px rgb(124 47 15 / 15%);
-    color: #c84b20;
+    color: var(--color-futa-orange-dark);
     font-size: 14px;
     line-height: 1.5;
 }

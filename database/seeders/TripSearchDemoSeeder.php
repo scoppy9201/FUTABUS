@@ -40,6 +40,10 @@ class TripSearchDemoSeeder extends Seeder
                 ['DEMO-HCM-LD-04', 'TP. Hồ Chí Minh', 'Bến xe Miền Tây', 'Lâm Đồng', 'Đà Lạt', 320, 510, 340000, '20:30', 'limousine', 5, 4, 12],
                 ['DEMO-LD-HCM-01', 'Lâm Đồng', 'Đà Lạt', 'TP. Hồ Chí Minh', 'Bến xe Miền Tây', 320, 510, 300000, '07:00', 'limousine', 5, 4, 17],
                 ['DEMO-LD-HCM-02', 'Lâm Đồng', 'Bảo Lộc', 'TP. Hồ Chí Minh', 'Bến xe An Sương', 210, 330, 230000, '16:00', 'sleeper', 10, 4, 32],
+                ['DEMO-HCM-LD-06', 'TP. Hồ Chí Minh', 'Bến xe Miền Tây', 'Lâm Đồng', 'Đà Lạt', 320, 510, 300000, '22:50', 'limousine', 5, 4, 18],
+                ['DEMO-LD-HCM-03', 'Lâm Đồng', 'Đà Lạt', 'TP. Hồ Chí Minh', 'Bến xe Miền Tây', 320, 510, 300000, '05:30', 'limousine', 5, 4, 18],
+                ['DEMO-LD-HCM-04', 'Lâm Đồng', 'Đà Lạt', 'TP. Hồ Chí Minh', 'Bến xe Miền Đông Mới', 320, 510, 280000, '12:30', 'sleeper', 10, 4, 32],
+                ['DEMO-LD-HCM-05', 'Lâm Đồng', 'Đà Lạt', 'TP. Hồ Chí Minh', 'Bến xe Miền Tây', 320, 510, 300000, '22:50', 'limousine', 5, 4, 16],
             ];
 
             foreach ($examples as [$code, $from, $fromStation, $to, $toStation, $distance, $duration, $price, $time, $type, $rows, $columns, $available]) {

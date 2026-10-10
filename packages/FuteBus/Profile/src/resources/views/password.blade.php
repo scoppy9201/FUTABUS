@@ -44,7 +44,7 @@
                                         autocomplete="{{ $field === 'current_password' ? 'current-password' : 'new-password' }}"
                                         placeholder="{{ __('Profile::app.password_change.placeholders.'.$field) }}"
                                         @class([
-                                            'h-11 w-full rounded-lg border bg-white px-3 pr-11 text-base text-gray-950 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-1 focus:outline-[#ef5222]',
+                                            'h-11 w-full rounded-lg border bg-white px-3 pr-11 text-base text-gray-950 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-1 focus:outline-futa-orange',
                                             'border-red-500' => $errors->has($field),
                                             'border-gray-200' => ! $errors->has($field),
                                         ])
@@ -53,7 +53,7 @@
                                         type="button"
                                         @click="visible = !visible"
                                         :aria-label="visible ? @js(__('Profile::app.password_change.hide_password')) : @js(__('Profile::app.password_change.show_password'))"
-                                        class="absolute inset-y-0 right-0 grid w-11 place-items-center text-gray-400 hover:text-[#ef5222] focus-visible:outline-2 focus-visible:outline-[#ef5222]"
+                                        class="absolute inset-y-0 right-0 grid w-11 place-items-center text-gray-400 hover:text-futa-orange focus-visible:outline-2 focus-visible:outline-futa-orange"
                                     >
                                         <x-heroicon-o-eye-slash x-show="!visible" class="size-5" />
                                         <x-heroicon-o-eye x-cloak x-show="visible" class="size-5" />
@@ -67,10 +67,10 @@
                     </div>
 
                     <div class="mt-12 flex justify-center gap-4">
-                        <a href="{{ route('profile.show') }}" class="inline-flex min-h-11 min-w-32 items-center justify-center rounded-full border border-gray-200 px-6 text-base font-medium text-gray-900 hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-[#ef5222]">
+                        <a href="{{ route('profile.show') }}" class="inline-flex min-h-11 min-w-32 items-center justify-center rounded-full border border-gray-200 px-6 text-base font-medium text-gray-900 hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-futa-orange">
                             {{ __('Profile::app.cancel') }}
                         </a>
-                        <button type="submit" class="inline-flex min-h-11 min-w-32 items-center justify-center rounded-full bg-[#ef5222] px-6 text-base font-semibold text-white hover:bg-[#d94317] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ef5222]">
+                        <button type="submit" class="inline-flex min-h-11 min-w-32 items-center justify-center rounded-full bg-futa-orange px-6 text-base font-semibold text-white hover:bg-futa-orange-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange">
                             {{ __('Profile::app.password_change.confirm') }}
                         </button>
                     </div>

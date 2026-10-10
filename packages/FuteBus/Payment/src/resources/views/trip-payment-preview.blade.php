@@ -1,5 +1,13 @@
 @extends('core::layouts.home')
 
+@push('styles')
+    @vite('packages/FuteBus/Payment/src/resources/css/app.css')
+@endpush
+
+@push('scripts')
+    @vite('packages/FuteBus/Payment/src/resources/js/app.js')
+@endpush
+
 @section('title', __('Payment::payment.payment_page_title'))
 
 @section('content')
@@ -8,11 +16,6 @@
         $departure = \Illuminate\Support\Carbon::parse($trip['departure_time']);
         $total = count($preview['seats']) * $trip['fare'];
         $formattedTotal = number_format($total, 0, ',', '.').'đ';
-        $bookingParams = array_merge(
-            ['trip' => $trip['id']],
-            $preview['criteria'],
-            ['direction' => $preview['direction'], 'seats' => implode(',', $preview['seat_ids'])]
-        );
         $methods = [
             ['name' => __('Payment::payment.payment_sepay'), 'image' => 'images/sepay.png', 'class' => 'sepay'],
             ['name' => 'FUTAPay', 'image' => 'images/auth/White Brushstroke F on Forest Green.png', 'class' => 'futapay'],
@@ -115,12 +118,18 @@
         <div class="booking-page__banner">
             @include('core::partials.home.navbar')
             <div class="booking-page__hero-inner">
-                <a class="booking-page__back" href="{{ route('trip-booking.show', $bookingParams) }}">
-                    <span class="booking-page__back-icon">
-                        <x-heroicon-o-arrow-left class="size-4" aria-hidden="true" />
-                    </span>
-                    {{ __('Payment::payment.payment_back') }}
-                </a>
+                <form method="POST" action="{{ route('trip-payment-preview.cancel', ['draft' => $preview['token']]) }}"
+                    data-confirm
+                    data-confirm-title="{{ __('Payment::payment.payment_back_confirm_title') }}"
+                    data-confirm-message="{{ __('Payment::payment.payment_back_confirm_message') }}">
+                    @csrf
+                    <button type="submit" class="booking-page__back cursor-pointer">
+                        <span class="booking-page__back-icon">
+                            <x-heroicon-o-arrow-left class="size-4" aria-hidden="true" />
+                        </span>
+                        {{ __('Payment::payment.payment_back') }}
+                    </button>
+                </form>
                 <div class="booking-page__heading">
                     <h1 class="booking-page__route">
                         <span>{{ $trip['origin'] }}</span>
@@ -136,29 +145,29 @@
 
         <main class="payment-page__layout">
             <section class="payment-page__methods" aria-labelledby="payment-methods-title">
-                <h2 id="payment-methods-title">{{ __('Payment::payment.payment_methods_title') }}</h2>
-                <div class="payment-page__method-list">
+                <h2 id="payment-methods-title" class="mb-5 text-[21px] font-semibold text-gray-900">{{ __('Payment::payment.payment_methods_title') }}</h2>
+                <div class="grid gap-1">
                     @foreach ($methods as $method)
                         @if (in_array($method['class'], ['sepay', 'futapay'], true))
-                            <button type="button" class="payment-page__method"
+                            <button type="button" class="payment-page__method group grid min-h-15.75 w-full cursor-pointer grid-cols-[24px_40px_minmax(0,1fr)] items-center gap-4 rounded-lg py-1.75 pr-0.5 text-left text-[#172033] hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
                                 :class="{ 'is-active': paymentMethod === '{{ $method['class'] }}' }"
                                 :aria-pressed="paymentMethod === '{{ $method['class'] }}'"
                                 @click="paymentMethod = '{{ $method['class'] }}'">
-                                <span class="payment-page__radio" aria-hidden="true"></span>
-                                <img class="payment-page__method-logo is-{{ $method['class'] }}"
+                                <span class="block size-4.25 rounded-full border border-[#cbd5df] group-[.is-active]:border-futa-orange group-[.is-active]:bg-futa-orange group-[.is-active]:shadow-[inset_0_0_0_4px_#fff]" aria-hidden="true"></span>
+                                <img @class(['block size-10 rounded-[5px] bg-white object-cover', 'ml-[-6px] w-13! object-contain' => $method['class'] === 'sepay', 'border border-[#e7eaf0] object-contain' => in_array($method['class'], ['atm', 'card'], true), 'object-[center_31%]' => $method['class'] === 'vnpay'])
                                     src="{{ asset($method['image']) }}" alt="" aria-hidden="true">
-                                <span class="payment-page__method-copy"><strong>{{ $method['name'] }}</strong></span>
+                                <span class="grid min-w-0 content-center gap-0.5"><strong class="text-base leading-[1.3] font-semibold text-gray-900">{{ $method['name'] }}</strong></span>
                             </button>
                         @else
-                            <button type="button" class="payment-page__method {{ $method['class'] === 'atm' ? 'is-separated' : '' }}"
+                            <button type="button" @class(['payment-page__method group grid min-h-15.75 w-full cursor-pointer grid-cols-[24px_40px_minmax(0,1fr)] items-center gap-4 rounded-lg py-1.75 pr-0.5 text-left text-[#172033] hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange', 'mt-3.5 border-t border-[#e2e6eb] pt-5.5 rounded-none' => $method['class'] === 'atm'])
                                 @click="window.FutaNotify?.show(@js(__('Payment::payment.payment_unsupported')), { tone: 'info' })">
-                                <span class="payment-page__radio" aria-hidden="true"></span>
-                                <img class="payment-page__method-logo is-{{ $method['class'] }}"
+                                <span class="block size-4.25 rounded-full border border-[#cbd5df] group-[.is-active]:border-futa-orange group-[.is-active]:bg-futa-orange group-[.is-active]:shadow-[inset_0_0_0_4px_#fff]" aria-hidden="true"></span>
+                                <img @class(['block size-10 rounded-[5px] bg-white object-cover', 'ml-[-6px] w-13! object-contain' => $method['class'] === 'sepay', 'border border-[#e7eaf0] object-contain' => in_array($method['class'], ['atm', 'card'], true), 'object-[center_31%]' => $method['class'] === 'vnpay'])
                                     src="{{ asset($method['image']) }}" alt="" aria-hidden="true">
-                                <span class="payment-page__method-copy">
-                                    <strong>{{ $method['name'] }}</strong>
+                                <span class="grid min-w-0 content-center gap-0.5">
+                                    <strong class="text-base leading-[1.3] font-semibold text-gray-900">{{ $method['name'] }}</strong>
                                     @if ($method['has_note'] ?? false)
-                                        <small>{{ __('Payment::payment.payment_unsupported') }}</small>
+                                        <small class="text-xs leading-[1.25] font-normal text-futa-orange">{{ __('Payment::payment.payment_unsupported') }}</small>
                                     @endif
                                 </span>
                             </button>

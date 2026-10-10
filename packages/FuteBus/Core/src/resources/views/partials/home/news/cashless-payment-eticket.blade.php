@@ -17,7 +17,7 @@
     </section>
 
     <p>✨ Đặt vé online – Thanh toán không tiền mặt – Sử dụng vé điện tử, từng bước số hóa trải nghiệm chuyến đi, giúp Quý khách chủ động hơn trong mỗi hành trình.</p>
-    <p>📲 Tải app FUTA hoặc truy cập <a href="https://futabus.vn/" target="_blank" rel="noopener noreferrer" class="text-[#ef5222] underline">futabus.vn</a> để trải nghiệm ngay hôm nay!</p>
+    <p>📲 Tải app FUTA hoặc truy cập <a href="https://futabus.vn/" target="_blank" rel="noopener noreferrer" class="text-futa-orange underline">futabus.vn</a> để trải nghiệm ngay hôm nay!</p>
 
     <div class="space-y-1 font-semibold">
         <p>♥️ Công Ty Phương Trang hân hạnh được phục vụ Quý Khách!</p>

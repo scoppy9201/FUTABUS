@@ -8,7 +8,7 @@
     cursor: pointer;
 }
 .booking-page__vehicle-link[aria-expanded="true"] {
-    color: #ef5222;
+    color: var(--color-futa-orange);
 }
 .booking-page__vehicle-popover {
     position: absolute;
@@ -46,12 +46,12 @@
     background: #ededed;
 }
 .booking-page__vehicle-tabs button.is-active {
-    background: #ef5222;
+    background: var(--color-futa-orange);
     color: #fff;
 }
 .booking-page__vehicle-tabs button:focus-visible,
 .booking-page__vehicle-link:focus-visible {
-    outline: 2px solid #ef5222;
+    outline: 2px solid var(--color-futa-orange);
     outline-offset: 3px;
 }
 .booking-page__vehicle-content {

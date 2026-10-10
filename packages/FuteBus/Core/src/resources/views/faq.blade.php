@@ -10,7 +10,7 @@
         <main class="px-3 py-6 sm:px-6">
             <section class="mx-auto w-full max-w-282 rounded-2xl border border-slate-300 px-4 pb-10 pt-5 sm:px-6">
                 <header class="text-center">
-                    <h1 class="text-2xl font-extrabold uppercase leading-tight text-[#ef5222] sm:text-[27px]">
+                    <h1 class="text-2xl font-extrabold uppercase leading-tight text-futa-orange sm:text-[27px]">
                         {{ __('core::faq.heading') }}
                     </h1>
                     <p class="mt-5 text-base font-semibold text-gray-950 sm:text-lg">
@@ -24,7 +24,7 @@
                     class="mx-auto mt-7 h-auto w-full max-w-155 object-contain sm:mt-9"
                 >
 
-                <h2 class="mt-8 text-center text-[28px] font-extrabold text-[#00613d] sm:text-[32px]">
+                <h2 class="mt-8 text-center text-[28px] font-extrabold text-futa-green sm:text-[32px]">
                     {{ __('core::faq.popular_topics') }}
                 </h2>
 
@@ -49,10 +49,10 @@
                             </p>
                             <a
                                 href="{{ route('faq-category', $category) }}"
-                                class="mt-auto inline-flex h-12 w-full items-center justify-center rounded-full bg-[#f2754b]
+                                class="mt-auto inline-flex h-12 w-full items-center justify-center rounded-full bg-futa-orange
                                     px-5 text-center text-base font-extrabold text-white shadow-sm transition duration-200
-                                    hover:-translate-y-0.5 hover:bg-[#ef5222] hover:shadow-md focus:outline-none
-                                    focus:ring-3 focus:ring-[#ef5222]/25"
+                                    hover:-translate-y-0.5 hover:bg-futa-orange hover:shadow-md focus:outline-none
+                                    focus:ring-3 focus:ring-futa-orange/25"
                             >
                                 {{ __('core::faq.view_all') }}
                             </a>

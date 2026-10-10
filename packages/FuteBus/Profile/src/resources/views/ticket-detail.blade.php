@@ -10,7 +10,7 @@
             @include('Profile::partials.account-sidebar')
 
             <section class="min-w-0" aria-labelledby="ticket-detail-title">
-                <a href="{{ route('profile.tickets.index') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-[#ef5222] hover:underline">
+                <a href="{{ route('profile.tickets.index') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-futa-orange hover:underline">
                     <x-heroicon-o-arrow-left class="size-4" />
                     {{ __('Profile::tickets.back_to_history') }}
                 </a>
@@ -18,9 +18,9 @@
                 <p class="mt-2 text-base font-medium text-slate-600">{{ __('Profile::tickets.detail_description') }}</p>
 
                 <div class="mt-7 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-                    <div class="border-b border-orange-100 bg-orange-50/50 px-6 py-5">
+                    <div class="border-b border-futa-orange-soft bg-futa-orange-soft/50 px-6 py-5">
                         <p class="text-sm font-semibold text-slate-600">{{ __('Profile::tickets.columns.code') }}</p>
-                        <p class="mt-1 text-xl font-bold text-[#ef5222]">{{ $booking->booking_code }}</p>
+                        <p class="mt-1 text-xl font-bold text-futa-orange">{{ $booking->booking_code }}</p>
                     </div>
                     <dl class="grid gap-x-8 gap-y-6 p-6 sm:grid-cols-2">
                         <div>

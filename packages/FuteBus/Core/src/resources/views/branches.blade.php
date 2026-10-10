@@ -54,7 +54,7 @@
                 },
             }"
         >
-            <h1 class="text-[25px] font-extrabold uppercase leading-tight text-[#ef5222]">
+            <h1 class="text-[25px] font-extrabold uppercase leading-tight text-futa-orange">
                 {{ __('core::branches.heading') }}
             </h1>
 
@@ -67,7 +67,7 @@
                     type="search"
                     x-model.debounce.180ms="query"
                     placeholder="{{ __('core::branches.search_placeholder') }}"
-                    class="h-11 w-full rounded-lg border border-gray-300 bg-white pl-12 pr-4 text-base font-medium text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#ef5222] focus:ring-2 focus:ring-[#ef5222]/15"
+                    class="h-11 w-full rounded-lg border border-gray-300 bg-white pl-12 pr-4 text-base font-medium text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-futa-orange focus:ring-2 focus:ring-futa-orange/15"
                 >
             </label>
 
@@ -80,7 +80,7 @@
                             <template x-for="office in filtered(region.offices)" :key="office.id">
                                 <article class="grid min-w-0 grid-rows-[40px_minmax(52px,auto)_36px_36px]">
                                     <h3
-                                        class="line-clamp-2 self-start text-base font-bold uppercase leading-5 text-[#ef5222]"
+                                        class="line-clamp-2 self-start text-base font-bold uppercase leading-5 text-futa-orange"
                                         x-text="office.name"
                                     ></h3>
 
@@ -90,9 +90,9 @@
                                         rel="noopener noreferrer"
                                         class="group flex items-start gap-2 py-1.5 text-[15px] font-medium leading-5 text-gray-950"
                                     >
-                                        <x-heroicon-o-map-pin class="mt-0.5 size-4.5 shrink-0 text-[#00613d]" />
+                                        <x-heroicon-o-map-pin class="mt-0.5 size-4.5 shrink-0 text-futa-green" />
                                         <span
-                                            class="transition-colors duration-150 group-hover:text-[#ef5222]"
+                                            class="transition-colors duration-150 group-hover:text-futa-orange"
                                             x-text="office.address"
                                         ></span>
                                     </a>
@@ -103,8 +103,8 @@
                                         rel="noopener noreferrer"
                                         class="group flex items-center gap-2 py-1.5 text-[15px] font-medium text-gray-950"
                                     >
-                                        <x-heroicon-o-arrow-turn-up-right class="size-4.5 shrink-0 text-[#00613d]" />
-                                        <span class="transition-colors duration-150 group-hover:text-[#ef5222]">
+                                        <x-heroicon-o-arrow-turn-up-right class="size-4.5 shrink-0 text-futa-green" />
+                                        <span class="transition-colors duration-150 group-hover:text-futa-orange">
                                             {{ __('core::branches.directions') }}
                                         </span>
                                     </a>
@@ -113,9 +113,9 @@
                                         :href="`tel:${office.phone_href}`"
                                         class="group flex items-center gap-2 py-1.5 text-[15px] font-medium text-gray-950"
                                     >
-                                        <x-heroicon-o-phone class="size-4.5 shrink-0 text-[#00613d]" />
+                                        <x-heroicon-o-phone class="size-4.5 shrink-0 text-futa-green" />
                                         <span
-                                            class="transition-colors duration-150 group-hover:text-[#ef5222]"
+                                            class="transition-colors duration-150 group-hover:text-futa-orange"
                                             x-text="office.phone"
                                         ></span>
                                     </a>

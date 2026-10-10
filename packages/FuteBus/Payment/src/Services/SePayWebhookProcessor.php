@@ -17,9 +17,10 @@ class SePayWebhookProcessor
     {
         DB::transaction(function () use ($event): void {
             $transactionId = (int) $event['id'];
+            $code = $this->paymentCode($event);
             $inserted = DB::table('sepay_transactions')->insertOrIgnore([
                 'sepay_id'       => $transactionId,
-                'code'           => $event['code'] ?? null,
+                'code'           => $code,
                 'account_number' => $event['accountNumber'] ?? null,
                 'amount'         => $event['transferAmount'],
                 'status'         => 'received',
@@ -28,10 +29,18 @@ class SePayWebhookProcessor
                 'updated_at'     => now(),
             ]);
             if ($inserted === 0) {
-                return;
+                $transaction = DB::table('sepay_transactions')
+                    ->where('sepay_id', $transactionId)->lockForUpdate()->first();
+                if ($transaction?->status !== 'unmatched') {
+                    return;
+                }
+                $event = json_decode($transaction->payload, true);
+                $code = $this->paymentCode($event);
+                DB::table('sepay_transactions')->where('sepay_id', $transactionId)
+                    ->update(['code' => $code, 'updated_at' => now()]);
             }
 
-            $code = (string) ($event['code'] ?? '');
+            $code = (string) $code;
             $intent = DB::table('sepay_payment_intents')->where('code', $code)->first();
             $trip = null;
             if ($intent !== null) {
@@ -99,6 +108,21 @@ class SePayWebhookProcessor
             ]);
             $this->markTransaction($transactionId, $intent->id, 'matched');
         });
+    }
+
+    private function paymentCode(array $event): ?string
+    {
+        $code = strtoupper(trim((string) ($event['code'] ?? '')));
+        if ($code !== '') {
+            return $code;
+        }
+
+        if (preg_match('/(?<![A-Z0-9])FUTA[A-F0-9]{10}(?![A-Z0-9])/i',
+            (string) ($event['content'] ?? ''), $matches) === 1) {
+            return strtoupper($matches[0]);
+        }
+
+        return null;
     }
 
     private function markTransaction(int $id, ?int $intentId, string $status): void

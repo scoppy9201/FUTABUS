@@ -131,7 +131,7 @@
 }
 .booking-page__detail-link {
     margin-left: auto;
-    color: #ef5222;
+    color: var(--color-futa-orange);
     font-size: 13px;
     text-decoration: underline;
 }
@@ -170,5 +170,5 @@
 .booking-page__info-icon {
     width: 20px;
     height: 20px;
-    color: #ef5222;
+    color: var(--color-futa-orange);
 }

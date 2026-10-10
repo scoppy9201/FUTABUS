@@ -84,10 +84,10 @@ class TicketLookupTest extends TestCase
         ] as $input) {
             $this->post(route('ticket-lookup.search'), $input)
                 ->assertOk()
-                ->assertSee('Không tìm thấy thông tin vé')
-                ->assertSee('data-notice-on-load', false)
-                ->assertSee('data-notice-tone="warning"', false)
-                ->assertSee('data-notice-label="OK"', false)
+                ->assertSee('id="ticket-lookup-not-found"', false)
+                ->assertSee('Tổng đài 1900 6067')
+                ->assertSee('data-lookup-dialog-ok', false)
+                ->assertDontSee('data-notice-on-load', false)
                 ->assertSee('value="'.$input['phone'].'"', false)
                 ->assertSee('value="'.$input['ticket_code'].'"', false)
                 ->assertDontSee('Đà Lạt');
