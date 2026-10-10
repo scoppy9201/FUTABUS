@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use Database\Seeders\AdminAccountSeeder;
@@ -47,7 +47,7 @@ class AdminAccountSeederTest extends TestCase
 
     public function test_seeder_does_not_promote_an_existing_customer_account(): void
     {
-        $customer = User::factory()->create(['email' => 'admin@example.test']);
+        $customer = $this->createTestUser(['email' => 'admin@example.test']);
         $roleId = DB::table('roles')->insertGetId(['name' => 'Customer', 'slug' => 'customer']);
         DB::table('role_user')->insert(['user_id' => $customer->id, 'role_id' => $roleId]);
         config()->set('seed.admin.email', 'admin@example.test');
@@ -59,7 +59,7 @@ class AdminAccountSeederTest extends TestCase
 
     public function test_seeder_does_not_promote_an_existing_account_without_a_role(): void
     {
-        User::factory()->create(['email' => 'admin@example.test']);
+        $this->createTestUser(['email' => 'admin@example.test']);
         config()->set('seed.admin.email', 'admin@example.test');
         config()->set('seed.admin.password', 'strong-test-password-2026');
 

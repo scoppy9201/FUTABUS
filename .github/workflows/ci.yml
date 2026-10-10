@@ -71,6 +71,9 @@ jobs:
           CI_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: php scripts/ci/validate-diff.php
 
+      - name: Validate test organization
+        run: php scripts/ci/validate-tests.php
+
       - name: Pint PHP style check
         env:
           CI_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
@@ -196,10 +199,8 @@ jobs:
       - name: Run migrations
         run: php artisan migrate --force
 
-      - name: Run impacted PHPUnit suite
-        env:
-          CI_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-        run: php scripts/ci/test-diff.php
+      - name: Run full PHPUnit suite
+        run: php artisan test
 
   frontend:
     name: Frontend Build

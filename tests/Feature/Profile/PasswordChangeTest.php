@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Profile;
 
 use App\Models\User;
 use FuteBus\Auth\Mail\PasswordChangedMail;
@@ -107,7 +107,7 @@ class PasswordChangeTest extends TestCase
     private function createUser(array $attributes = []): User
     {
         /** @var User $user */
-        $user = User::factory()->create($attributes);
+        $user = $this->createTestUser($attributes);
 
         return $user;
     }

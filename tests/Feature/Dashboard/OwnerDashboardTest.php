@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Dashboard;
 
 use App\Models\User;
 use App\Support\Auth\RoleRedirector;
@@ -16,7 +16,7 @@ class OwnerDashboardTest extends TestCase
     {
         $this->get(route('dashboard'))->assertRedirect(route('login'));
 
-        $customer = User::factory()->create();
+        $customer = $this->createTestUser();
         $this->actingAs($customer)
             ->get(route('dashboard'))
             ->assertForbidden();
@@ -81,7 +81,7 @@ class OwnerDashboardTest extends TestCase
 
     private function admin(): User
     {
-        $admin = User::factory()->create();
+        $admin = $this->createTestUser();
         $roleId = DB::table('roles')->insertGetId(['name' => 'Admin', 'slug' => 'admin']);
         DB::table('role_user')->insert(['user_id' => $admin->id, 'role_id' => $roleId]);
 

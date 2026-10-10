@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Profile;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,7 +17,7 @@ class TicketHistoryTest extends TestCase
     {
         $this->get(route('profile.tickets.index'))->assertRedirect(route('login'));
 
-        $user = User::factory()->create();
+        $user = $this->createTestUser();
         $this->actingAs($user)->get(route('profile.tickets.index'))
             ->assertOk()
             ->assertSee('Bạn chưa có vé nào')
@@ -30,8 +30,8 @@ class TicketHistoryTest extends TestCase
 
     public function test_history_only_shows_bookings_owned_by_the_account(): void
     {
-        $user = User::factory()->create();
-        $other = User::factory()->create();
+        $user = $this->createTestUser();
+        $other = $this->createTestUser();
         $this->createBooking($user, 'OWN-001');
         $this->createBooking($other, 'OTHER-001');
         $this->createBooking($user, 'LINKED-001', ['booking_user_id' => null]);
@@ -49,7 +49,7 @@ class TicketHistoryTest extends TestCase
 
     public function test_filters_ticket_code_departure_route_and_status(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createTestUser();
         $match = $this->createBooking($user, 'BOOK-001', [
             'departure_time' => '2026-10-10 08:00:00',
             'status'         => 'confirmed',
@@ -92,7 +92,7 @@ class TicketHistoryTest extends TestCase
 
     public function test_invalid_filter_is_rejected(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createTestUser();
 
         $this->actingAs($user)->get(route('profile.tickets.index', [
             'date'   => 'not-a-date',
@@ -102,7 +102,7 @@ class TicketHistoryTest extends TestCase
 
     public function test_payment_status_filter_uses_the_latest_payment(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createTestUser();
         $paid = $this->createBooking($user, 'PAID-001');
         $this->createBooking($user, 'OPEN-001');
 
@@ -131,8 +131,8 @@ class TicketHistoryTest extends TestCase
 
     public function test_booking_details_only_open_for_the_owner(): void
     {
-        $owner = User::factory()->create();
-        $other = User::factory()->create();
+        $owner = $this->createTestUser();
+        $other = $this->createTestUser();
         $ownBooking = $this->createBooking($owner, 'OWN-DETAIL');
         $otherBooking = $this->createBooking($other, 'OTHER-DETAIL');
 

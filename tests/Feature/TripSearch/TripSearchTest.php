@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\TripSearch;
 
 use FuteBus\Core\Services\TripSearchService;
 use Illuminate\Foundation\Testing\RefreshDatabase;

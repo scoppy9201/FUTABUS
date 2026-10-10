@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Core;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use FuteBus\Core\Services\BookingLocationCatalog;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -43,27 +43,27 @@ class HomeLocationPickerTest extends TestCase
         ]);
         $busId = DB::table('buses')->insertGetId([
             'bus_company_id' => $companyId, 'license_plate' => '51B-22222', 'capacity' => 34,
-            'created_at' => now(), 'updated_at' => now(),
+            'created_at'     => now(), 'updated_at' => now(),
         ]);
         $routeId = DB::table('routes')->insertGetId([
             'bus_company_id' => $companyId, 'code' => 'TEST-CANTHO', 'name' => 'Cần Thơ - Đà Lạt',
-            'origin_city' => 'Cần Thơ', 'destination_city' => 'Đà Lạt', 'origin_station' => 'Bến xe Cần Thơ',
-            'base_price' => 300000, 'created_at' => now(), 'updated_at' => now(),
+            'origin_city'    => 'Cần Thơ', 'destination_city' => 'Đà Lạt', 'origin_station' => 'Bến xe Cần Thơ',
+            'base_price'     => 300000, 'created_at' => now(), 'updated_at' => now(),
         ]);
         DB::table('trips')->insert([
-            'route_id' => $routeId, 'bus_id' => $busId, 'bus_company_id' => $companyId,
+            'route_id'       => $routeId, 'bus_id' => $busId, 'bus_company_id' => $companyId,
             'departure_time' => now()->addDay(), 'arrival_time' => now()->addDays(2),
-            'price' => 300000, 'available_seats' => 20, 'created_at' => now(), 'updated_at' => now(),
+            'price'          => 300000, 'available_seats' => 20, 'created_at' => now(), 'updated_at' => now(),
         ]);
         $regionId = DB::table('branch_regions')->insertGetId([
-            'name' => json_encode(['vi' => 'Miền Nam']), 'slug' => 'mien-nam',
+            'name'       => json_encode(['vi' => 'Miền Nam']), 'slug' => 'mien-nam',
             'created_at' => now(), 'updated_at' => now(),
         ]);
         DB::table('branch_offices')->insert([
             'branch_region_id' => $regionId,
-            'name' => json_encode(['vi' => 'Văn phòng Cần Thơ']),
-            'address' => json_encode(['vi' => 'Cần Thơ']),
-            'created_at' => now(), 'updated_at' => now(),
+            'name'             => json_encode(['vi' => 'Văn phòng Cần Thơ']),
+            'address'          => json_encode(['vi' => 'Cần Thơ']),
+            'created_at'       => now(), 'updated_at' => now(),
         ]);
 
         $catalog = app(BookingLocationCatalog::class)->all();
