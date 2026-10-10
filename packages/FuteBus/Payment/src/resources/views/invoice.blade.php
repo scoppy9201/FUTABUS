@@ -94,7 +94,7 @@
                                     </label>
                                 </div>
 
-                                @include('core::partials.invoice-captcha')
+                                @include('Payment::partials.invoice-captcha')
 
                                 <div class="pt-1 text-center">
                                     <button type="submit" class="inline-flex min-h-11 min-w-52 items-center justify-center gap-2 rounded-xl bg-futa-orange px-8 text-sm font-extrabold
@@ -135,7 +135,7 @@
                                     </label>
                                 </div>
 
-                                @include('core::partials.invoice-captcha')
+                                @include('Payment::partials.invoice-captcha')
 
                                 <div class="pt-1 text-center">
                                     <button type="submit" class="inline-flex min-h-11 min-w-52 items-center justify-center gap-2 rounded-xl bg-futa-orange px-8 text-sm font-extrabold

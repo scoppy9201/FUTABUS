@@ -284,7 +284,7 @@
                         name="trip_type"
                         value="one_way"
                         :checked="!roundTrip"
-                        class="h-4.25 w-4.25 accent-[#ef5222]"
+                        class="h-4.25 w-4.25 accent-futa-orange"
                         @change="roundTrip = false"
                     >
                     <span>{{ __('core::app.home.hero.one_way') }}</span>
@@ -295,7 +295,7 @@
                         name="trip_type"
                         value="round_trip"
                         :checked="roundTrip"
-                        class="h-4.25 w-4.25 accent-[#ef5222]"
+                        class="h-4.25 w-4.25 accent-futa-orange"
                         @change="roundTrip = true"
                     >
                     <span>{{ __('core::app.home.hero.round_trip') }}</span>
@@ -308,7 +308,7 @@
             class="hero-search-grid grid grid-cols-1 items-end gap-3.75 md:grid-cols-2"
             :class="{ 'is-round-trip': roundTrip }"
         >
-            @include('core::partials.home.location-picker', [
+            @include('TripSearch::partials.location-picker', [
                 'field' => 'departure',
                 'label' => __('core::app.home.hero.from'),
                 'placeholder' => __('core::app.home.hero.from_placeholder'),
@@ -325,13 +325,13 @@
                 />
             </button>
 
-            @include('core::partials.home.location-picker', [
+            @include('TripSearch::partials.location-picker', [
                 'field' => 'destination',
                 'label' => __('core::app.home.hero.to'),
                 'placeholder' => __('core::app.home.hero.to_placeholder'),
             ])
 
-            @include('core::partials.home.date-picker')
+            @include('TripSearch::partials.date-picker')
 
             <div
                 class="relative"

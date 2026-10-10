@@ -53,7 +53,7 @@ class HomeController extends Controller
 
     public function bookingGuide()
     {
-        return view('core::booking-guide');
+        return view('BookingManagement::booking-guide');
     }
 
     public function promotionArticle(string $slug)
@@ -83,17 +83,17 @@ class HomeController extends Controller
 
     public function payment()
     {
-        return view('core::payment');
+        return view('Payment::payment');
     }
 
     public function pricing()
     {
-        return view('core::pricing');
+        return view('Payment::pricing');
     }
 
     public function refund()
     {
-        return view('core::refund');
+        return view('Cancellation::refund');
     }
 
     public function terms()
@@ -171,7 +171,7 @@ class HomeController extends Controller
             ])->values())
             ->values();
 
-        return view('core::schedules', compact('scheduleGroups'));
+        return view('TripSearch::schedules', compact('scheduleGroups'));
     }
 
     public function news(Request $request)
@@ -212,7 +212,7 @@ class HomeController extends Controller
 
     public function invoice()
     {
-        return view('core::invoice');
+        return view('Payment::invoice');
     }
 
     public function submitContact(Request $request)

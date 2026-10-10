@@ -25,11 +25,11 @@ class TripSearchController extends Controller
             ? $search->search($criteria['destination'], $criteria['departure'], $criteria['return_date'], (int) $criteria['quantity'])
             : [];
 
-        return view('core::trip-search', [
-            'searchCriteria' => $criteria,
+        return view('TripSearch::trip-search', [
+            'searchCriteria'   => $criteria,
             'bookingLocations' => $locations->all(),
-            'outboundTrips' => $outboundTrips,
-            'returnTrips' => $returnTrips,
+            'outboundTrips'    => $outboundTrips,
+            'returnTrips'      => $returnTrips,
         ]);
     }
 }

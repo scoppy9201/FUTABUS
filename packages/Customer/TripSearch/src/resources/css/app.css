@@ -1,1 +1,3 @@
-/* TripSearch package styles */
+@import "./trip-card.css";
+@import "./trip-search-sidebar.css";
+@import "./trip-seats.css";

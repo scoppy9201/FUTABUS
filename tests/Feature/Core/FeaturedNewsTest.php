@@ -3,7 +3,7 @@
 namespace Tests\Feature\Core;
 
 use Database\Seeders\FeaturedArticleBodySeeder;
-use FuteBus\Core\Services\FeaturedArticleBodyRepository;
+use Database\Seeders\FeaturedArticleSeeder;
 use FuteBus\Core\Services\FeaturedNewsCatalog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -25,10 +25,41 @@ class FeaturedNewsTest extends TestCase
         $this->get(route('promotion-article', $slug))->assertOk()->assertSee($pointingFinger);
     }
 
+    public function test_article_seed_is_repeatable_and_database_content_takes_precedence(): void
+    {
+        $slug = 'trai-nghiem-xe-sang-cho-hanh-trinh-ket-noi-da-lat';
+
+        $this->seed(FeaturedArticleBodySeeder::class);
+        $this->assertSame(17, DB::table('featured_article_bodies')->count());
+
+        DB::table('featured_article_bodies')->where('slug', $slug)->update(['body_html' => '<p>Đã cập nhật nội dung bài viết</p>']);
+        $this->get(route('promotion-article', $slug))->assertOk()->assertSee('Đã cập nhật nội dung bài viết');
+
+        $this->seed(FeaturedArticleBodySeeder::class);
+        $this->assertSame(17, DB::table('featured_article_bodies')->count());
+        $this->get(route('promotion-article', $slug))->assertOk()->assertSee('Đà Lạt ↔ Nha Trang');
+    }
+
+    public function test_featured_article_metadata_is_seeded_and_database_edits_are_displayed(): void
+    {
+        $slug = 'trai-nghiem-xe-sang-cho-hanh-trinh-ket-noi-da-lat';
+
+        $this->seed(FeaturedArticleSeeder::class);
+        $this->assertSame(17, DB::table('featured_articles')->count());
+
+        DB::table('featured_articles')->where('slug', $slug)->update(['title' => 'Tiêu đề đã cập nhật']);
+        $this->get(route('promotion-article', $slug))->assertOk()->assertSee('Tiêu đề đã cập nhật');
+
+        $this->seed(FeaturedArticleSeeder::class);
+        $this->assertSame(17, DB::table('featured_articles')->count());
+        $this->get(route('promotion-article', $slug))->assertOk()->assertSee('TRẢI NGHIỆM XE SANG');
+    }
+
     public function test_homepage_shows_five_complete_news_pages(): void
     {
         $this->get(route('home'))
             ->assertOk()
+            ->assertSee('rel="icon" type="image/png" href="'.asset('favicon.png').'"', false)
             ->assertSee('Cập nhật những thông tin mới từ Phương Trang')
             ->assertSeeInOrder([
                 'images/news/da-lat-kim-long-limousine.png',
@@ -134,15 +165,13 @@ class FeaturedNewsTest extends TestCase
 
     public function test_all_news_uses_only_complete_articles_and_real_pagination(): void
     {
+        $this->seed(FeaturedArticleBodySeeder::class);
+
         $catalog = app(FeaturedNewsCatalog::class)->all();
         $this->assertCount(15, $catalog);
         foreach ($catalog as $article) {
             $this->assertFileExists(public_path($article['image']));
-            $this->assertTrue(
-                isset($article['content_view'])
-                    ? view()->exists($article['content_view'])
-                    : app(FeaturedArticleBodyRepository::class)->find($article['slug']) !== null,
-            );
+            $this->assertNotNull(DB::table('featured_article_bodies')->where('slug', $article['slug'])->value('body_html'));
         }
 
         foreach ([1 => 4, 2 => 4, 3 => 4, 4 => 3] as $page => $expectedCount) {

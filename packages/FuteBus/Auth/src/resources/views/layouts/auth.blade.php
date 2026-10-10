@@ -5,6 +5,7 @@
     <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="{{ __('Auth::app.meta_description') }}">
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <title>@yield('title') | {{ __('Auth::app.site_name') }}</title>
     @vite([
         'resources/css/app.css',
@@ -47,6 +48,6 @@
 
     @include('core::partials.home.footer')
     @include('core::partials.floating-support')
-    <x-confirm-dialog />
+    @include('core::components.confirm-dialog')
 </body>
 </html>

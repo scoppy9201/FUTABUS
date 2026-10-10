@@ -1,5 +1,9 @@
 @extends('core::layouts.home')
 
+@push('styles')
+    @vite('packages/Customer/TripSearch/src/resources/css/app.css')
+@endpush
+
 @section('content')
     <div class="home-page home-landing">
         @include('core::partials.home.navbar')

@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <title>@yield('title', __('core::app.home.title'))</title>
     <meta name="description" content="@yield('meta_description', __('core::app.home.title'))">
     <link rel="canonical" href="@yield('canonical', url()->current())">
@@ -20,7 +21,7 @@
     @include('core::partials.global-loader')
     @yield('content')
     @include('core::partials.floating-support')
-    <x-confirm-dialog />
+    @include('core::components.confirm-dialog')
     @stack('scripts')
 </body>
 </html>

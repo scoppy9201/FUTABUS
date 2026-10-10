@@ -183,7 +183,7 @@
                                 <span class="grid min-w-0 content-center gap-0.5">
                                     <strong class="text-base leading-[1.3] font-semibold text-gray-900">{{ $method['name'] }}</strong>
                                     @if ($method['has_note'] ?? false)
-                                        <small class="text-xs leading-[1.25] font-normal text-futa-orange">{{ __('Payment::payment.payment_unsupported') }}</small>
+                                        <small class="text-xs leading-tight font-normal text-futa-orange">{{ __('Payment::payment.payment_unsupported') }}</small>
                                     @endif
                                 </span>
                             </button>

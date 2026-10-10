@@ -16,9 +16,9 @@
             <ol>
                 @foreach (__('core::booking.customer_rights') as $clause)
                     <li>
-                        @include('core::partials.booking-linked-text', ['text' => $clause['body']])
+                        @include('BookingManagement::partials.booking-linked-text', ['text' => $clause['body']])
                         @if (!empty($clause['note']))
-                            <p>@include('core::partials.booking-linked-text', ['text' => $clause['note']])</p>
+                            <p>@include('BookingManagement::partials.booking-linked-text', ['text' => $clause['note']])</p>
                         @endif
                     </li>
                 @endforeach

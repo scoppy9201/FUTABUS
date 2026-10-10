@@ -6,8 +6,8 @@
             {{ __($paymentEnabled ? 'Payment::payment.payment_hold_time' : 'Payment::payment.payment_preview_time') }}
             <strong class="font-bold" x-text="countdownText()"></strong>
         </p>
-        <div class="mb-4 rounded-[10px] bg-white p-[14px] sm:min-h-86">
-            <div x-show="remainingSeconds === 0" class="flex min-h-67.5 flex-col items-center justify-center gap-4.5 rounded-[9px] border border-dashed border-[#bbcad5] p-[25px] text-center text-[#39576d] sm:min-h-79" role="status">
+        <div class="mb-4 rounded-[10px] bg-white p-3.5 sm:min-h-86">
+            <div x-show="remainingSeconds === 0" class="flex min-h-67.5 flex-col items-center justify-center gap-4.5 rounded-[9px] border border-dashed border-[#bbcad5] p-6.25 text-center text-[#39576d] sm:min-h-79" role="status">
                 <strong class="max-w-60 text-[15px] leading-normal">{{ __('Payment::payment.payment_expired') }}</strong>
             </div>
             <div x-show="remainingSeconds > 0 && paymentMethod === 'sepay'">
@@ -15,7 +15,7 @@
                     <img class="mx-auto block h-auto min-h-67.5 w-full max-w-80 object-contain sm:h-79" src="{{ $sePayQrUrl }}"
                         alt="{{ __('Payment::payment.payment_sepay_qr_alt') }}">
                 @else
-                    <div class="flex min-h-67.5 flex-col items-center justify-center gap-4.5 rounded-[9px] border border-dashed border-[#bbcad5] p-[25px] text-center text-[#39576d] sm:min-h-79" role="status">
+                    <div class="flex min-h-67.5 flex-col items-center justify-center gap-4.5 rounded-[9px] border border-dashed border-[#bbcad5] p-6.25 text-center text-[#39576d] sm:min-h-79" role="status">
                         <img class="h-15 w-24 rounded-xl object-contain" src="{{ asset('images/sepay.png') }}" alt="" aria-hidden="true">
                         <strong class="max-w-60 text-[15px] leading-normal">{{ __($paymentCanActivate
                             ? 'Payment::payment.payment_create_qr_prompt'
@@ -32,7 +32,7 @@
                 @endif
             </div>
             <div x-show="remainingSeconds > 0 && paymentMethod === 'futapay'" x-cloak>
-                <div class="flex min-h-67.5 flex-col items-center justify-center gap-4.5 rounded-[9px] border border-dashed border-[#bbcad5] p-[25px] text-center text-[#39576d] sm:min-h-79" role="status">
+                <div class="flex min-h-67.5 flex-col items-center justify-center gap-4.5 rounded-[9px] border border-dashed border-[#bbcad5] p-6.25 text-center text-[#39576d] sm:min-h-79" role="status">
                     <img class="size-15 rounded-xl object-cover" src="{{ asset('images/auth/White Brushstroke F on Forest Green.png') }}"
                         alt="" aria-hidden="true">
                     <strong class="max-w-60 text-[15px] leading-normal">{{ __('Payment::payment.payment_futapay_unavailable') }}</strong>

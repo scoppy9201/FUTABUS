@@ -1,0 +1,13 @@
+.ticket-success {
+    box-shadow: 0 18px 48px rgb(85 57 43 / 12%);
+}
+
+.ticket-success__scroll-button {
+    box-shadow: 0 2px 12px rgb(0 0 0 / 16%);
+}
+
+@media print {
+    .ticket-success {
+        box-shadow: none;
+    }
+}

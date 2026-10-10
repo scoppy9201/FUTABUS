@@ -2,12 +2,29 @@
 
 namespace Tests\Feature\Core;
 
+use Database\Seeders\FeaturedArticleBodySeeder;
+use FuteBus\Core\Services\FeaturedPromotionCatalog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class FeaturedPromotionsTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_all_promotions_render_seeded_database_content(): void
+    {
+        $this->seed(FeaturedArticleBodySeeder::class);
+
+        foreach (app(FeaturedPromotionCatalog::class)->all() as $article) {
+            $body = DB::table('featured_article_bodies')->where('slug', $article['slug'])->value('body_html');
+
+            $this->assertNotNull($body);
+            $this->get(route('promotion-article', $article['slug']))
+                ->assertOk()
+                ->assertSee($body, false);
+        }
+    }
 
     public function test_homepage_shows_six_image_only_promotions_in_the_requested_order(): void
     {

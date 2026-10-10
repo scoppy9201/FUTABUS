@@ -1,5 +1,9 @@
 @extends('core::layouts.home')
 
+@push('scripts')
+    @vite('packages/Customer/TicketManagement/src/resources/js/app.js')
+@endpush
+
 @section('title', __('core::ticket-lookup.meta.title'))
 @section('meta_description', __('core::ticket-lookup.meta.description'))
 

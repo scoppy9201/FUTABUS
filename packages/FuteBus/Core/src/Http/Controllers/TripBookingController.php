@@ -33,7 +33,7 @@ class TripBookingController extends Controller
             ->pluck('id')
             ->all();
 
-        return view('core::trip-booking', [
+        return view('BookingManagement::trip-booking', [
             'trip'            => $selectedTrip,
             'criteria'        => $criteria,
             'from'            => $from,

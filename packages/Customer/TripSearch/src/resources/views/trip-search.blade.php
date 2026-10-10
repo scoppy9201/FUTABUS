@@ -1,5 +1,9 @@
 @extends('core::layouts.home')
 
+@push('styles')
+    @vite('packages/Customer/TripSearch/src/resources/css/app.css')
+@endpush
+
 @section('title', __('core::trip-search.title'))
 
 @section('content')
@@ -8,7 +12,7 @@
         @include('core::partials.home.hero')
 
         <main class="mx-auto w-full max-w-282 px-3 pb-16 sm:px-4">
-            @include('core::partials.home.trip-results', [
+            @include('TripSearch::partials.trip-results', [
                 'trips' => $outboundTrips,
                 'returnTrips' => $returnTrips,
                 'from' => $searchCriteria['departure'],

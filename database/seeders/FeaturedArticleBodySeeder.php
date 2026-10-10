@@ -11,17 +11,22 @@ class FeaturedArticleBodySeeder extends Seeder
 {
     public function run(): void
     {
-        $articles = json_decode(
-            file_get_contents(database_path('seeders/data/featured-article-bodies.json')),
-            true,
-            flags: JSON_THROW_ON_ERROR,
-        );
+        $timestamp = now();
+        $rows = [];
 
-        foreach ($articles as $slug => $bodyHtml) {
-            DB::table('featured_article_bodies')->updateOrInsert(
-                ['slug' => $slug],
-                ['body_html' => $bodyHtml, 'updated_at' => now(), 'created_at' => now()],
-            );
+        foreach (glob(database_path('seeders/data/featured-article-bodies/*.html')) ?: [] as $file) {
+            $rows[] = [
+                'slug'       => pathinfo($file, PATHINFO_FILENAME),
+                'body_html'  => trim(file_get_contents($file)),
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ];
         }
+
+        if ($rows === []) {
+            throw new \RuntimeException('No featured article body seed files were found.');
+        }
+
+        DB::table('featured_article_bodies')->upsert($rows, ['slug'], ['body_html', 'updated_at']);
     }
 }

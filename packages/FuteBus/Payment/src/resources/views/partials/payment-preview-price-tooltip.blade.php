@@ -11,7 +11,7 @@
     <h3>{{ __('core::trip-search.cancellation_policy') }}</h3>
     <ul>
         @foreach (__('core::trip-search.cancellation_items') as $item)
-            <li>@include('core::partials.booking-linked-text', ['text' => $item])</li>
+            <li>@include('BookingManagement::partials.booking-linked-text', ['text' => $item])</li>
         @endforeach
     </ul>
 </div>

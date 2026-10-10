@@ -1,20 +1,36 @@
 <div class="mt-8 space-y-6 text-base leading-7 text-gray-950">
     <div class="flex flex-col items-center gap-6" aria-label="Năm bước đặt vé qua App FUTA">
-        @foreach ([
-            ['app-booking-step-01.png', 'Bước 1: Tải ứng dụng FUTA'],
-            ['app-booking-step-02.png', 'Bước 2: Đăng nhập ứng dụng FUTA'],
-            ['app-booking-step-03.png', 'Bước 3: Chọn hành trình'],
-            ['app-booking-step-04.png', 'Bước 4: Chọn chuyến xe và ghế'],
-            ['app-booking-step-05.png', 'Bước 5: Xác nhận và thanh toán'],
-        ] as [$file, $alt])
-            <img
-                src="{{ asset('images/promotions/'.$file) }}"
-                alt="{{ $alt }}"
+                    <img
+                src="/images/promotions/app-booking-step-01.png"
+                alt="Bước 1: Tải ứng dụng FUTA"
                 class="h-auto w-full max-w-216.5"
                 loading="lazy"
             >
-        @endforeach
-    </div>
+                    <img
+                src="/images/promotions/app-booking-step-02.png"
+                alt="Bước 2: Đăng nhập ứng dụng FUTA"
+                class="h-auto w-full max-w-216.5"
+                loading="lazy"
+            >
+                    <img
+                src="/images/promotions/app-booking-step-03.png"
+                alt="Bước 3: Chọn hành trình"
+                class="h-auto w-full max-w-216.5"
+                loading="lazy"
+            >
+                    <img
+                src="/images/promotions/app-booking-step-04.png"
+                alt="Bước 4: Chọn chuyến xe và ghế"
+                class="h-auto w-full max-w-216.5"
+                loading="lazy"
+            >
+                    <img
+                src="/images/promotions/app-booking-step-05.png"
+                alt="Bước 5: Xác nhận và thanh toán"
+                class="h-auto w-full max-w-216.5"
+                loading="lazy"
+            >
+            </div>
 
     <p class="font-bold">Với giao diện hiện đại cùng quy trình tối ưu hóa, App FUTA sẽ mang đến trải nghiệm đặt vé nhanh chóng và chuyên nghiệp, giúp mỗi chuyến đi của Quý khách thêm phần trọn vẹn.</p>
 
