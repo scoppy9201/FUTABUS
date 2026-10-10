@@ -97,6 +97,7 @@ class PasswordRecoveryService
         $user->password = $password;
         $user->remember_token = Str::random(60);
         $user->save();
+        $user->tokens()->delete();
         DB::table('password_reset_tokens')->where('email', $user->email)->delete();
         if (config('session.driver') === 'database') {
             DB::table('sessions')->where('user_id', $user->getKey())->delete();

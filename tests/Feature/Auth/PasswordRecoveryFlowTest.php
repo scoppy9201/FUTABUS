@@ -38,6 +38,7 @@ class PasswordRecoveryFlowTest extends TestCase
     {
         $user = $this->createTestUser(['email' => 'customer@example.com']);
         $oldHash = $user->password;
+        $user->createToken('old-device', ['api']);
         $code = $this->requestCode();
 
         $this->post(route('password.email.verify'), ['otp' => $code])->assertRedirect(route('password.request'));
@@ -49,6 +50,7 @@ class PasswordRecoveryFlowTest extends TestCase
         $user->refresh();
         $this->assertNotSame($oldHash, $user->password);
         $this->assertTrue(Hash::check('NewPassword123', $user->password));
+        $this->assertSame(0, $user->tokens()->count());
         Mail::assertSent(PasswordChangedMail::class);
         $this->post(route('password.update'), [
             'password' => 'ReplayPassword123', 'password_confirmation' => 'ReplayPassword123',
