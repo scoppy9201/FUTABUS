@@ -57,8 +57,7 @@ class BusService
 
     public function update(int $id, array $data): void
     {
-        $this->find($id);
-        $this->assertNotAssignedToActiveTrip($id);
+        $this->assertEditable($id);
         DB::table('buses')->where('id', $id)->update([
             ...$this->payload($data),
             'status'     => $data['status'],
@@ -68,8 +67,7 @@ class BusService
 
     public function deactivate(int $id): void
     {
-        $this->find($id);
-        $this->assertNotAssignedToActiveTrip($id);
+        $this->assertEditable($id);
         DB::table('buses')->where('id', $id)
             ->update(['status' => 'inactive', 'updated_at' => now()]);
     }
@@ -81,6 +79,12 @@ class BusService
         abort_if($bus === null, 404);
 
         return $bus;
+    }
+
+    public function assertEditable(int $id): void
+    {
+        $this->find($id);
+        $this->assertNotAssignedToActiveTrip($id);
     }
 
     private function assertNotAssignedToActiveTrip(int $id): void

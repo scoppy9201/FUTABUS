@@ -39,7 +39,7 @@ class BusController extends Controller
     public function update(Request $request, BusService $buses, int $id): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
-        $buses->find($id);
+        $buses->assertEditable($id);
         $buses->update($id, $request->validate($buses->rules($id)));
 
         return redirect()->route('bus-management.buses.index')

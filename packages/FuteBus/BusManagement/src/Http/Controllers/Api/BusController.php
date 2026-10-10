@@ -33,7 +33,7 @@ class BusController extends Controller
 
     public function update(Request $request, BusService $buses, int $bus): JsonResponse
     {
-        $buses->find($bus);
+        $buses->assertEditable($bus);
         $buses->update($bus, $request->validate($buses->rules($bus)));
 
         return response()->json(['data' => $buses->find($bus)]);

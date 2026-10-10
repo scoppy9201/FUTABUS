@@ -84,6 +84,8 @@ class BusApiTest extends TestCase
         $this->putJson(route('api.v1.admin.buses.update', ['bus' => $busId]), [
             ...$payload, 'status' => 'inactive',
         ])->assertUnprocessable()->assertJsonValidationErrors('bus');
+        $this->putJson(route('api.v1.admin.buses.update', ['bus' => $busId]), [])
+            ->assertUnprocessable()->assertJsonValidationErrors('bus');
         $this->deleteJson(route('api.v1.admin.buses.destroy', ['bus' => $busId]))
             ->assertUnprocessable()->assertJsonValidationErrors('bus');
         $this->assertDatabaseHas('buses', ['id' => $busId, 'status' => 'active']);
