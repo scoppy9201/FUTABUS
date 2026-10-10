@@ -67,6 +67,12 @@ class TripSearchTest extends TestCase
             $query['departure'], 'Di Linh', $query['departure_date'], 1,
         ));
 
+        $this->getJson(route('api.v1.trips.index', $query))
+            ->assertOk()
+            ->assertJsonPath('data.outbound.0.id', $trips[0]['id'])
+            ->assertJsonPath('data.outbound.0.available_seats', 31)
+            ->assertJsonPath('data.return', []);
+
         $this->get(route('trip-search', $query))
             ->assertOk()
             ->assertSee(asset('images/banners/home-banner.jpg'))
@@ -161,6 +167,19 @@ class TripSearchTest extends TestCase
         $this->assertSame([], app(TripSearchService::class)->search(
             $query['departure'], $query['destination'], $query['departure_date'], 1,
         ));
+    }
+
+    public function test_trip_api_rejects_invalid_search_criteria(): void
+    {
+        $this->getJson(route('api.v1.trips.index', [
+            'departure'      => 'TP. Hồ Chí Minh',
+            'destination'    => 'TP. Hồ Chí Minh',
+            'departure_date' => now()->subDay()->toDateString(),
+            'trip_type'      => 'round_trip',
+            'quantity'       => 6,
+        ]))->assertUnprocessable()->assertJsonValidationErrors([
+            'destination', 'departure_date', 'return_date', 'quantity',
+        ]);
     }
 
     public function test_search_rejects_past_dates_and_zero_tickets(): void
