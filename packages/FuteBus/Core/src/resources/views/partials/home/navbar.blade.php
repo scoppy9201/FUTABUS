@@ -77,10 +77,20 @@
                         class="absolute left-0 top-full z-50 mt-2 w-40 overflow-hidden rounded-lg border border-white/20 bg-white py-1 shadow-xl"
                         style="display: none;"
                     >
-                        <a href="https://play.google.com/store/apps/details?id=client.facecar.com" target="_blank" rel="noopener noreferrer" role="menuitem" aria-label="{{ __('core::app.home.footer.google_play') }}" class="flex items-center gap-2.5 bg-futa-orange-soft px-3 py-2.5 text-futa-orange transition-colors hover:bg-futa-orange-soft">
+                        <a href="https://play.google.com/store/apps/details?id=client.facecar.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            role="menuitem"
+                            aria-label="{{ __('core::app.home.footer.google_play') }}"
+                            class="flex items-center gap-2.5 bg-futa-orange-soft px-3 py-2.5 text-futa-orange transition-colors hover:bg-futa-orange-soft">
                             <img src="{{ asset('icons/stores/google-play.svg') }}" alt="" class="h-7 w-auto max-w-full">
                         </a>
-                        <a href="https://apps.apple.com/vn/app/futa/id1126633800" target="_blank" rel="noopener noreferrer" role="menuitem" aria-label="{{ __('core::app.home.footer.app_store') }}" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-700 transition-colors hover:bg-futa-orange-soft hover:text-futa-orange">
+                        <a href="https://apps.apple.com/vn/app/futa/id1126633800"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            role="menuitem"
+                            aria-label="{{ __('core::app.home.footer.app_store') }}"
+                            class="flex items-center gap-2.5 px-3 py-2.5 text-gray-700 transition-colors hover:bg-futa-orange-soft hover:text-futa-orange">
                             <img src="{{ asset('icons/stores/app-store.svg') }}" alt="" class="h-7 w-auto max-w-full">
                         </a>
                     </div>

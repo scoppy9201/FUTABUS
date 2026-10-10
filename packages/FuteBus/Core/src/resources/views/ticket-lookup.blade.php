@@ -34,7 +34,9 @@
                             aria-invalid="{{ $errors->has('phone') ? 'true' : 'false' }}"
                             aria-describedby="{{ $errors->has('phone') ? 'lookup-phone-error' : '' }}"
                         >
-                        <button type="button" class="absolute right-2.25 top-5 grid size-5.5 -translate-y-1/2 place-items-center rounded-full text-[#b4b8bd] hover:text-futa-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange [&[hidden]]:hidden" data-clear-for="lookup-phone"
+                        <button type="button" class="absolute right-2.25 top-5 not-[hidden]:grid size-5.5 -translate-y-1/2 place-items-center rounded-full text-[#b4b8bd]
+                            hover:text-futa-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
+                            data-clear-for="lookup-phone"
                             aria-label="{{ __('core::ticket-lookup.clear_phone') }}" hidden>
                             <x-heroicon-s-x-circle class="size-3.75" aria-hidden="true" />
                         </button>
@@ -103,7 +105,10 @@
             @if($notFound ?? false)
                 <dialog
                     id="ticket-lookup-not-found"
-                    class="fixed inset-x-0 top-[clamp(96px,11vh,140px)] bottom-auto mx-auto w-[min(520px,calc(100vw-32px))] min-h-56 max-h-[calc(100dvh-112px)] overflow-auto rounded-[18px] border border-gray-200 bg-white px-9.5 pt-9 pb-7 text-[#262626] shadow-[0_18px_42px_rgb(0_0_0_/_18%)] backdrop:bg-black/50 max-sm:top-20 max-sm:min-h-0 max-sm:max-h-[calc(100dvh-96px)] max-sm:px-5.5 max-sm:py-6.25"
+                    class="fixed inset-x-0 top-[clamp(96px,11vh,140px)] bottom-auto mx-auto w-[min(520px,calc(100vw-32px))] min-h-56
+                        max-h-[calc(100dvh-112px)] overflow-auto rounded-[18px] border border-gray-200 bg-white px-9.5 pt-9 pb-7 text-[#262626]
+                        shadow-[0_18px_42px_#0000002e] backdrop:bg-black/50 max-sm:top-20 max-sm:min-h-0 max-sm:max-h-[calc(100dvh-96px)]
+                        max-sm:px-5.5 max-sm:py-6.25"
                     aria-labelledby="ticket-lookup-dialog-title"
                     aria-describedby="ticket-lookup-dialog-message"
                 >

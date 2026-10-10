@@ -17,7 +17,8 @@
         $shareUrl = route('ticket-lookup');
     @endphp
     <div class="min-h-screen bg-[#fff8f5] px-6 pt-7 pb-12 text-[#252b2b] print:bg-white print:p-0 max-sm:p-3">
-        <main class="ticket-success mx-auto w-full max-w-375 rounded-[28px] bg-white px-16 pt-4.5 pb-7.5 shadow-[0_18px_48px_rgb(85_57_43_/_12%)] max-[900px]:px-5.5 max-[900px]:pt-5 max-sm:rounded-[18px] max-sm:px-2.5 max-sm:pt-4.5 print:p-0 print:shadow-none" aria-labelledby="ticket-success-title" data-link-copied="{{ __('Payment::payment.success_link_copied') }}">
+        <main class="ticket-success mx-auto w-full max-w-375 rounded-[28px] bg-white px-16 pt-4.5 pb-7.5 shadow-[0_18px_48px_rgb(85_57_43_/_12%)]
+            max-[900px]:px-5.5 max-[900px]:pt-5 max-sm:rounded-[18px] max-sm:px-2.5 max-sm:pt-4.5 print:p-0 print:shadow-none" aria-labelledby="ticket-success-title" data-link-copied="{{ __('Payment::payment.success_link_copied') }}">
             <div class="text-center">
                 <span class="mx-auto mb-3 grid size-23 place-items-center rounded-full bg-[#93ded3] text-white max-sm:size-17.5" aria-hidden="true">
                     <x-heroicon-o-check class="size-13.75 stroke-[2.5] max-sm:size-10.75" />
@@ -42,7 +43,9 @@
                 </div>
 
                 <div class="relative">
-                    <button type="button" class="absolute top-[45%] left-1.25 z-10 grid size-12 cursor-pointer place-items-center rounded-full bg-white text-[#5c666a] shadow-[0_2px_12px_rgb(0_0_0_/_16%)] hover:brightness-95 focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-futa-orange print:hidden [&_svg]:size-6.25" data-ticket-scroll="prev" aria-label="{{ __('Payment::payment.success_previous') }}">
+                    <button type="button" class="absolute top-[45%] left-1.25 z-10 grid size-12 cursor-pointer place-items-center rounded-full bg-white text-[#5c666a]
+                        shadow-[0_2px_12px_rgb(0_0_0_/_16%)] hover:brightness-95 focus-visible:outline-3 focus-visible:outline-offset-3
+                        focus-visible:outline-futa-orange print:hidden [&_svg]:size-6.25" data-ticket-scroll="prev" aria-label="{{ __('Payment::payment.success_previous') }}">
                         <x-heroicon-o-chevron-left aria-hidden="true" />
                     </button>
                     <div class="ticket-success__tickets flex snap-x snap-mandatory gap-4.5 overflow-x-auto px-7 pb-4.5 scroll-smooth [scrollbar-width:thin] max-sm:px-3 max-sm:pb-3.75 print:block print:overflow-visible" data-ticket-list>
@@ -50,16 +53,22 @@
                             @include('Payment::partials.payment-success-ticket', ['ticket' => $ticket, 'trip' => $trip, 'departure' => $departure, 'shareUrl' => $shareUrl])
                         @endforeach
                     </div>
-                    <button type="button" class="absolute top-[45%] right-1.25 z-10 grid size-12 cursor-pointer place-items-center rounded-full bg-white text-[#5c666a] shadow-[0_2px_12px_rgb(0_0_0_/_16%)] hover:brightness-95 focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-futa-orange print:hidden [&_svg]:size-6.25" data-ticket-scroll="next" aria-label="{{ __('Payment::payment.success_next') }}">
+                    <button type="button" class="absolute top-[45%] right-1.25 z-10 grid size-12 cursor-pointer place-items-center rounded-full bg-white text-[#5c666a]
+                        shadow-[0_2px_12px_rgb(0_0_0_/_16%)] hover:brightness-95 focus-visible:outline-3 focus-visible:outline-offset-3
+                        focus-visible:outline-futa-orange print:hidden [&_svg]:size-6.25" data-ticket-scroll="next" aria-label="{{ __('Payment::payment.success_next') }}">
                         <x-heroicon-o-chevron-right aria-hidden="true" />
                     </button>
                 </div>
 
                 <div class="flex justify-center gap-6.25 px-4 py-7 max-sm:gap-2.5 print:hidden">
-                    <button type="button" class="inline-flex min-w-43.75 cursor-pointer items-center justify-center gap-2.5 rounded-full bg-futa-orange-soft px-5.5 py-2.5 text-base font-bold text-futa-orange hover:brightness-95 focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-futa-orange max-sm:min-w-0 max-sm:text-sm [&_svg]:size-5" data-share-ticket data-share-url="{{ $shareUrl }}" data-share-text="{{ __('Payment::payment.success_share_text', ['code' => $bookingCode]) }}">
+                    <button type="button" class="inline-flex min-w-43.75 cursor-pointer items-center justify-center gap-2.5 rounded-full bg-futa-orange-soft px-5.5 py-2.5
+                        text-base font-bold text-futa-orange hover:brightness-95 focus-visible:outline-3 focus-visible:outline-offset-3
+                        focus-visible:outline-futa-orange max-sm:min-w-0 max-sm:text-sm [&_svg]:size-5" data-share-ticket data-share-url="{{ $shareUrl }}" data-share-text="{{ __('Payment::payment.success_share_text', ['code' => $bookingCode]) }}">
                         <x-heroicon-o-share aria-hidden="true" />{{ __('Payment::payment.success_share') }}
                     </button>
-                    <button type="button" class="inline-flex min-w-43.75 cursor-pointer items-center justify-center gap-2.5 rounded-full bg-futa-orange-soft px-5.5 py-2.5 text-base font-bold text-futa-orange hover:brightness-95 focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-futa-orange max-sm:min-w-0 max-sm:text-sm [&_svg]:size-5" data-print-tickets>
+                    <button type="button" class="inline-flex min-w-43.75 cursor-pointer items-center justify-center gap-2.5 rounded-full bg-futa-orange-soft px-5.5 py-2.5
+                        text-base font-bold text-futa-orange hover:brightness-95 focus-visible:outline-3 focus-visible:outline-offset-3
+                        focus-visible:outline-futa-orange max-sm:min-w-0 max-sm:text-sm [&_svg]:size-5" data-print-tickets>
                         <x-heroicon-o-arrow-down-tray aria-hidden="true" />{{ __('Payment::payment.success_download') }}
                     </button>
                 </div>

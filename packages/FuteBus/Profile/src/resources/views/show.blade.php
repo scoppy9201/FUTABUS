@@ -150,7 +150,9 @@
                                     aria-haspopup="dialog"
                                     aria-controls="profile-birth-date-calendar"
                                     aria-expanded="false"
-                                    class="flex h-10 w-full items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-3 text-left text-base font-medium text-gray-950 hover:border-futa-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
+                                    class="flex h-10 w-full items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-3 text-left text-base
+                                        font-medium text-gray-950 hover:border-futa-orange focus-visible:outline-2 focus-visible:outline-offset-2
+                                        focus-visible:outline-futa-orange"
                                 >
                                     <span data-profile-date-label>{{ __('Profile::app.choose_date') }}</span>
                                     <x-heroicon-o-calendar-days class="size-5 shrink-0 text-slate-400" />

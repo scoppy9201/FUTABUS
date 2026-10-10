@@ -60,20 +60,24 @@
                         >
                             <div class="grid items-center gap-4 border-b border-gray-100 pb-3 sm:grid-cols-2">
                                 <div class="flex items-center gap-1">
-                                    <button type="button" data-range-prev-year aria-label="{{ __('Profile::futapay.previous_year') }}" class="grid size-8 place-items-center rounded-full text-slate-500 hover:bg-futa-orange-soft hover:text-futa-orange focus-visible:outline-2 focus-visible:outline-futa-orange">
+                                    <button type="button" data-range-prev-year aria-label="{{ __('Profile::futapay.previous_year') }}" class="grid size-8 place-items-center rounded-full text-slate-500 hover:bg-futa-orange-soft hover:text-futa-orange
+                                        focus-visible:outline-2 focus-visible:outline-futa-orange">
                                         <x-heroicon-o-chevron-double-left class="size-4" />
                                     </button>
-                                    <button type="button" data-range-prev-month aria-label="{{ __('Profile::app.previous_month') }}" class="grid size-8 place-items-center rounded-full text-slate-500 hover:bg-futa-orange-soft hover:text-futa-orange focus-visible:outline-2 focus-visible:outline-futa-orange">
+                                    <button type="button" data-range-prev-month aria-label="{{ __('Profile::app.previous_month') }}" class="grid size-8 place-items-center rounded-full text-slate-500 hover:bg-futa-orange-soft hover:text-futa-orange
+                                        focus-visible:outline-2 focus-visible:outline-futa-orange">
                                         <x-heroicon-o-chevron-left class="size-4" />
                                     </button>
                                     <span data-range-first-month class="flex-1 text-center text-base font-semibold text-gray-950"></span>
                                 </div>
                                 <div class="flex items-center gap-1">
                                     <span data-range-second-month class="flex-1 text-center text-base font-semibold text-gray-950"></span>
-                                    <button type="button" data-range-next-month aria-label="{{ __('Profile::app.next_month') }}" class="grid size-8 place-items-center rounded-full text-slate-500 hover:bg-futa-orange-soft hover:text-futa-orange focus-visible:outline-2 focus-visible:outline-futa-orange">
+                                    <button type="button" data-range-next-month aria-label="{{ __('Profile::app.next_month') }}" class="grid size-8 place-items-center rounded-full text-slate-500 hover:bg-futa-orange-soft hover:text-futa-orange
+                                        focus-visible:outline-2 focus-visible:outline-futa-orange">
                                         <x-heroicon-o-chevron-right class="size-4" />
                                     </button>
-                                    <button type="button" data-range-next-year aria-label="{{ __('Profile::futapay.next_year') }}" class="grid size-8 place-items-center rounded-full text-slate-500 hover:bg-futa-orange-soft hover:text-futa-orange focus-visible:outline-2 focus-visible:outline-futa-orange">
+                                    <button type="button" data-range-next-year aria-label="{{ __('Profile::futapay.next_year') }}" class="grid size-8 place-items-center rounded-full text-slate-500 hover:bg-futa-orange-soft hover:text-futa-orange
+                                        focus-visible:outline-2 focus-visible:outline-futa-orange">
                                         <x-heroicon-o-chevron-double-right class="size-4" />
                                     </button>
                                 </div>

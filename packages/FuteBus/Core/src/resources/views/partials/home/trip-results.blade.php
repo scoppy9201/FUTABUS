@@ -258,7 +258,9 @@
 
         @if ($roundTrip)
             <div class="my-6 grid grid-cols-2 border-b border-[#e4e7eb] bg-white" role="tablist" aria-label="{{ __('core::trip-search.direction_tabs') }}">
-                <button type="button" role="tab" id="trip-outbound-tab" class="min-h-11.5 cursor-pointer border-b-4 border-transparent px-3 py-2.5 text-center text-[15px] font-semibold text-gray-950 hover:text-futa-orange focus-visible:outline-3 focus-visible:-outline-offset-3 focus-visible:outline-futa-orange max-sm:px-1 max-sm:py-2.25 max-sm:text-xs"
+                <button type="button" role="tab" id="trip-outbound-tab" class="min-h-11.5 cursor-pointer border-b-4 border-transparent px-3 py-2.5 text-center text-[15px] font-semibold text-gray-950
+                    hover:text-futa-orange focus-visible:outline-3 focus-visible:-outline-offset-3 focus-visible:outline-futa-orange max-sm:px-1
+                    max-sm:py-2.25 max-sm:text-xs"
                     :class="direction === 'outbound' ? 'border-futa-orange text-futa-orange' : ''"
                     :aria-selected="direction === 'outbound'"
                     aria-controls="trip-direction-results" @click="changeDirection('outbound')">
@@ -411,11 +413,12 @@
                     </div>
                 </article>
                 @guest
-                    <aside class="flex min-h-37.5 items-center justify-between gap-5 rounded-[11px] border border-gray-200 bg-white px-6 py-5.5 shadow-[0_3px_7px_rgb(15_23_42_/_17%)] max-sm:gap-2.5 max-sm:px-4 max-sm:py-4.5" x-show="direction === 'outbound' && trip.id === visibleTrips()[0]?.id">
+                    <aside class="flex min-h-37.5 items-center justify-between gap-5 rounded-[11px] border border-gray-200 bg-white px-6 py-5.5 shadow-[0_3px_7px_#0f172a2b] max-sm:gap-2.5 max-sm:px-4 max-sm:py-4.5" x-show="direction === 'outbound' && trip.id === visibleTrips()[0]?.id">
                         <div class="min-w-0">
                             <h3 class="mb-1.25 text-[15px] leading-5.5 font-bold text-gray-900 max-sm:text-sm">{{ __('core::trip-search.login_prompt_title') }}</h3>
                             <p class="max-w-127.5 text-[13px] leading-5.25 text-slate-500">{{ __('core::trip-search.login_prompt_description') }}</p>
-                            <a class="mt-3.75 inline-block text-sm font-bold text-[#6495eb] underline underline-offset-2 hover:text-[#3269ca] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-futa-orange" href="{{ route('login') }}">{{ __('core::trip-search.login_prompt_action') }}</a>
+                            <a class="mt-3.75 inline-block text-sm font-bold text-[#6495eb] underline underline-offset-2 hover:text-[#3269ca]
+                                focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-futa-orange" href="{{ route('login') }}">{{ __('core::trip-search.login_prompt_action') }}</a>
                         </div>
                         <img class="h-27.5 w-37.5 shrink-0 object-contain max-sm:h-21.5 max-sm:w-22" src="{{ asset('images/auth/member-login-benefits.png') }}" alt="" loading="lazy">
                     </aside>

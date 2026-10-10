@@ -23,7 +23,8 @@
                     <form action="{{ route('news') }}" method="GET" class="relative w-full lg:max-w-84">
                         @if($category !== '')<input type="hidden" name="category" value="{{ $category }}">@endif
                         <x-heroicon-o-magnifying-glass class="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-gray-400" />
-                        <input type="search" name="q" value="{{ $search }}" placeholder="{{ __('core::news.search') }}" aria-label="{{ __('core::news.search') }}" class="h-11 w-full rounded-full border border-gray-300 bg-white pl-12 pr-4 text-sm outline-none placeholder:text-gray-400 focus:border-futa-orange focus:ring-3 focus:ring-futa-orange/10">
+                        <input type="search" name="q" value="{{ $search }}" placeholder="{{ __('core::news.search') }}" aria-label="{{ __('core::news.search') }}" class="h-11 w-full rounded-full border border-gray-300 bg-white pl-12 pr-4 text-sm outline-none placeholder:text-gray-400
+                            focus:border-futa-orange focus:ring-3 focus:ring-futa-orange/10">
                     </form>
                 </div>
             </section>
@@ -124,13 +125,17 @@
                                 @if($articles->onFirstPage())
                                     <span class="grid size-8 place-items-center rounded border border-gray-200 text-gray-300"><x-heroicon-o-chevron-left class="size-3.5" /></span>
                                 @else
-                                    <a href="{{ $articles->previousPageUrl() }}" rel="prev" aria-label="{{ __('core::news.previous_page') }}" class="grid size-8 place-items-center rounded border border-gray-300 text-gray-700 hover:border-futa-orange"><x-heroicon-o-chevron-left class="size-3.5" /></a>
+                                    <a href="{{ $articles->previousPageUrl() }}"
+                                        rel="prev"
+                                        aria-label="{{ __('core::news.previous_page') }}"
+                                        class="grid size-8 place-items-center rounded border border-gray-300 text-gray-700 hover:border-futa-orange"><x-heroicon-o-chevron-left class="size-3.5" /></a>
                                 @endif
                                 @foreach($displayPages as $page)
                                     @if(! $loop->first && $page > $displayPages[$loop->index - 1] + 1)
                                         <span class="grid size-8 place-items-center text-gray-500">...</span>
                                     @endif
-                                    <a href="{{ $articles->url($page) }}" @if($page === $currentPage) aria-current="page" @endif class="grid size-8 place-items-center rounded border text-sm font-semibold {{ $page === $currentPage ? 'border-futa-orange bg-futa-orange text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-futa-orange' }}">{{ $page }}</a>
+                                    <a href="{{ $articles->url($page) }}" @if($page === $currentPage) aria-current="page" @endif class="grid size-8 place-items-center rounded border text-sm font-semibold {{ $page === $currentPage ? 'border-futa-orange
+                                        bg-futa-orange text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-futa-orange' }}">{{ $page }}</a>
                                 @endforeach
                                 @if($articles->hasMorePages())
                                     <a href="{{ $articles->nextPageUrl() }}" rel="next" aria-label="{{ __('core::news.next_page') }}" class="grid size-8 place-items-center rounded border border-gray-300 text-gray-700 hover:border-futa-orange"><x-heroicon-o-chevron-right class="size-3.5" /></a>

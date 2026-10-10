@@ -149,20 +149,36 @@
                 <div class="grid gap-1">
                     @foreach ($methods as $method)
                         @if (in_array($method['class'], ['sepay', 'futapay'], true))
-                            <button type="button" class="payment-page__method group grid min-h-15.75 w-full cursor-pointer grid-cols-[24px_40px_minmax(0,1fr)] items-center gap-4 rounded-lg py-1.75 pr-0.5 text-left text-[#172033] hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
+                            <button type="button" class="payment-page__method group grid min-h-15.75 w-full cursor-pointer grid-cols-[24px_40px_minmax(0,1fr)] items-center gap-4
+                                rounded-lg py-1.75 pr-0.5 text-left text-[#172033] hover:bg-futa-orange-soft focus-visible:outline-2
+                                focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
                                 :class="{ 'is-active': paymentMethod === '{{ $method['class'] }}' }"
                                 :aria-pressed="paymentMethod === '{{ $method['class'] }}'"
                                 @click="paymentMethod = '{{ $method['class'] }}'">
                                 <span class="block size-4.25 rounded-full border border-[#cbd5df] group-[.is-active]:border-futa-orange group-[.is-active]:bg-futa-orange group-[.is-active]:shadow-[inset_0_0_0_4px_#fff]" aria-hidden="true"></span>
-                                <img @class(['block size-10 rounded-[5px] bg-white object-cover', 'ml-[-6px] w-13! object-contain' => $method['class'] === 'sepay', 'border border-[#e7eaf0] object-contain' => in_array($method['class'], ['atm', 'card'], true), 'object-[center_31%]' => $method['class'] === 'vnpay'])
+                                <img
+                                    @class(['block size-10 rounded-[5px] bg-white object-cover',
+                                        'ml-[-6px] w-13! object-contain' => $method['class'] === 'sepay',
+                                        'border border-[#e7eaf0] object-contain' => in_array($method['class'], ['atm',
+                                        'card'], true),
+                                        'object-[center_31%]' => $method['class'] === 'vnpay'])
                                     src="{{ asset($method['image']) }}" alt="" aria-hidden="true">
                                 <span class="grid min-w-0 content-center gap-0.5"><strong class="text-base leading-[1.3] font-semibold text-gray-900">{{ $method['name'] }}</strong></span>
                             </button>
                         @else
-                            <button type="button" @class(['payment-page__method group grid min-h-15.75 w-full cursor-pointer grid-cols-[24px_40px_minmax(0,1fr)] items-center gap-4 rounded-lg py-1.75 pr-0.5 text-left text-[#172033] hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange', 'mt-3.5 border-t border-[#e2e6eb] pt-5.5 rounded-none' => $method['class'] === 'atm'])
+                            <button type="button"
+                                @class(['payment-page__method group grid min-h-15.75 w-full cursor-pointer grid-cols-[24px_40px_minmax(0,1fr)] items-center gap-4
+                                    rounded-lg py-1.75 pr-0.5 text-left text-[#172033] hover:bg-futa-orange-soft focus-visible:outline-2
+                                    focus-visible:outline-offset-2 focus-visible:outline-futa-orange',
+                                    'mt-3.5 border-t border-[#e2e6eb] pt-5.5 rounded-none' => $method['class'] === 'atm'])
                                 @click="window.FutaNotify?.show(@js(__('Payment::payment.payment_unsupported')), { tone: 'info' })">
                                 <span class="block size-4.25 rounded-full border border-[#cbd5df] group-[.is-active]:border-futa-orange group-[.is-active]:bg-futa-orange group-[.is-active]:shadow-[inset_0_0_0_4px_#fff]" aria-hidden="true"></span>
-                                <img @class(['block size-10 rounded-[5px] bg-white object-cover', 'ml-[-6px] w-13! object-contain' => $method['class'] === 'sepay', 'border border-[#e7eaf0] object-contain' => in_array($method['class'], ['atm', 'card'], true), 'object-[center_31%]' => $method['class'] === 'vnpay'])
+                                <img
+                                    @class(['block size-10 rounded-[5px] bg-white object-cover',
+                                        'ml-[-6px] w-13! object-contain' => $method['class'] === 'sepay',
+                                        'border border-[#e7eaf0] object-contain' => in_array($method['class'], ['atm',
+                                        'card'], true),
+                                        'object-[center_31%]' => $method['class'] === 'vnpay'])
                                     src="{{ asset($method['image']) }}" alt="" aria-hidden="true">
                                 <span class="grid min-w-0 content-center gap-0.5">
                                     <strong class="text-base leading-[1.3] font-semibold text-gray-900">{{ $method['name'] }}</strong>

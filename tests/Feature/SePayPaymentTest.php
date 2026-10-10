@@ -241,7 +241,7 @@ class SePayPaymentTest extends TestCase
                 'trip' => $this->tripId,
                 ...$this->criteria,
                 'direction' => 'outbound',
-                'seats' => (string) $this->seatId,
+                'seats'     => (string) $this->seatId,
             ]));
         $this->assertDatabaseHas('sepay_payment_intents', ['id' => $intent->id, 'status' => 'expired']);
         $this->assertNotEmpty(app(TripSearchService::class)->search(

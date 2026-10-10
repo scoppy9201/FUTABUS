@@ -79,14 +79,17 @@
                                         <span class="mb-2 block text-sm font-extrabold text-gray-800">{{ __('core::invoice.tax_code') }}</span>
                                         <span class="relative block">
                                             <x-heroicon-o-identification class="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-gray-400" />
-                                            <input type="text" inputmode="numeric" autocomplete="off" class="h-12 w-full rounded-xl border border-gray-300 bg-white pr-4 pl-12 text-sm font-semibold outline-none transition placeholder:text-gray-400 hover:border-gray-400 focus:border-futa-orange focus:ring-4 focus:ring-futa-orange/20" placeholder="0101234567" required>
+                                            <input type="text" inputmode="numeric" autocomplete="off" class="h-12 w-full rounded-xl border border-gray-300 bg-white pr-4 pl-12 text-sm font-semibold outline-none transition
+                                                placeholder:text-gray-400 hover:border-gray-400 focus:border-futa-orange focus:ring-4 focus:ring-futa-orange/20" placeholder="0101234567" required>
                                         </span>
                                     </label>
                                     <label class="block">
                                         <span class="mb-2 block text-sm font-extrabold text-gray-800">{{ __('core::invoice.invoice_code') }}</span>
                                         <span class="relative block">
                                             <x-heroicon-o-qr-code class="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-gray-400" />
-                                            <input type="text" autocomplete="off" class="h-12 w-full rounded-xl border border-gray-300 bg-white pr-4 pl-12 text-sm font-semibold uppercase outline-none transition placeholder:normal-case placeholder:text-gray-400 hover:border-gray-400 focus:border-futa-orange focus:ring-4 focus:ring-futa-orange/20" placeholder="FTB-XXXXXXXXX" required>
+                                            <input type="text" autocomplete="off" class="h-12 w-full rounded-xl border border-gray-300 bg-white pr-4 pl-12 text-sm font-semibold uppercase outline-none transition
+                                                placeholder:normal-case placeholder:text-gray-400 hover:border-gray-400 focus:border-futa-orange focus:ring-4
+                                                focus:ring-futa-orange/20" placeholder="FTB-XXXXXXXXX" required>
                                         </span>
                                     </label>
                                 </div>
@@ -94,7 +97,9 @@
                                 @include('core::partials.invoice-captcha')
 
                                 <div class="pt-1 text-center">
-                                    <button type="submit" class="inline-flex min-h-11 min-w-52 items-center justify-center gap-2 rounded-xl bg-futa-orange px-8 text-sm font-extrabold text-white shadow-[0_8px_20px_rgba(239,82,34,0.25)] transition hover:-translate-y-0.5 hover:bg-futa-orange-dark focus:outline-none focus:ring-4 focus:ring-futa-orange/25">
+                                    <button type="submit" class="inline-flex min-h-11 min-w-52 items-center justify-center gap-2 rounded-xl bg-futa-orange px-8 text-sm font-extrabold
+                                        text-white shadow-[0_8px_20px_rgba(239,82,34,0.25)] transition hover:-translate-y-0.5 hover:bg-futa-orange-dark
+                                        focus:outline-none focus:ring-4 focus:ring-futa-orange/25">
                                         <x-heroicon-o-magnifying-glass class="size-5" />
                                         {{ __('core::invoice.lookup_button') }}
                                     </button>
@@ -133,7 +138,9 @@
                                 @include('core::partials.invoice-captcha')
 
                                 <div class="pt-1 text-center">
-                                    <button type="submit" class="inline-flex min-h-11 min-w-52 items-center justify-center gap-2 rounded-xl bg-futa-orange px-8 text-sm font-extrabold text-white shadow-[0_8px_20px_rgba(239,82,34,0.25)] transition hover:-translate-y-0.5 hover:bg-futa-orange-dark focus:outline-none focus:ring-4 focus:ring-futa-orange/25">
+                                    <button type="submit" class="inline-flex min-h-11 min-w-52 items-center justify-center gap-2 rounded-xl bg-futa-orange px-8 text-sm font-extrabold
+                                        text-white shadow-[0_8px_20px_rgba(239,82,34,0.25)] transition hover:-translate-y-0.5 hover:bg-futa-orange-dark
+                                        focus:outline-none focus:ring-4 focus:ring-futa-orange/25">
                                         <x-heroicon-o-shield-check class="size-5" />
                                         {{ __('core::invoice.verify_button') }}
                                     </button>

@@ -90,7 +90,10 @@
 
                             <div>
                                 <label class="sr-only" for="contact-name">{{ __('core::contact.name') }}</label>
-                                <input id="contact-name" name="name" value="{{ old('name', auth()->user()?->name) }}" placeholder="{{ __('core::contact.name') }}" aria-describedby="contact-name-error" @class(['h-11 w-full rounded-lg border bg-white px-4 text-sm font-semibold outline-none transition placeholder:text-gray-400 focus:ring-3 focus:ring-futa-orange/10', 'border-red-500 focus:border-red-500' => $errors->has('name'), 'border-gray-300 focus:border-futa-orange' => !$errors->has('name')]) required>
+                                <input id="contact-name" name="name" value="{{ old('name', auth()->user()?->name) }}" placeholder="{{ __('core::contact.name') }}" aria-describedby="contact-name-error"
+                                    @class(['h-11 w-full rounded-lg border bg-white px-4 text-sm font-semibold outline-none transition placeholder:text-gray-400 focus:ring-3 focus:ring-futa-orange/10',
+                                        'border-red-500 focus:border-red-500' => $errors->has('name'),
+                                        'border-gray-300 focus:border-futa-orange' => !$errors->has('name')]) required>
                                 @error('name')
                                     <p id="contact-name-error" class="mt-1.5 text-xs font-semibold text-red-600" role="alert">{{ $message }}</p>
                                 @enderror
@@ -98,7 +101,10 @@
 
                             <div>
                                 <label class="sr-only" for="contact-email">{{ __('core::contact.email') }}</label>
-                                <input id="contact-email" type="email" name="email" value="{{ old('email', auth()->user()?->email) }}" placeholder="{{ __('core::contact.email') }}" aria-describedby="contact-email-error" @class(['h-11 w-full rounded-lg border bg-white px-4 text-sm font-semibold outline-none transition placeholder:text-gray-400 focus:ring-3 focus:ring-futa-orange/10', 'border-red-500 focus:border-red-500' => $errors->has('email'), 'border-gray-300 focus:border-futa-orange' => !$errors->has('email')]) required>
+                                <input id="contact-email" type="email" name="email" value="{{ old('email', auth()->user()?->email) }}" placeholder="{{ __('core::contact.email') }}" aria-describedby="contact-email-error"
+                                    @class(['h-11 w-full rounded-lg border bg-white px-4 text-sm font-semibold outline-none transition placeholder:text-gray-400 focus:ring-3 focus:ring-futa-orange/10',
+                                        'border-red-500 focus:border-red-500' => $errors->has('email'),
+                                        'border-gray-300 focus:border-futa-orange' => !$errors->has('email')]) required>
                                 @error('email')
                                     <p id="contact-email-error" class="mt-1.5 text-xs font-semibold text-red-600" role="alert">{{ $message }}</p>
                                 @enderror
@@ -106,7 +112,10 @@
 
                             <div>
                                 <label class="sr-only" for="contact-phone">{{ __('core::contact.phone') }}</label>
-                                <input id="contact-phone" type="tel" name="phone" value="{{ old('phone', auth()->user()?->phone) }}" placeholder="{{ __('core::contact.phone') }}" aria-describedby="contact-phone-error" @class(['h-11 w-full rounded-lg border bg-white px-4 text-sm font-semibold outline-none transition placeholder:text-gray-400 focus:ring-3 focus:ring-futa-orange/10', 'border-red-500 focus:border-red-500' => $errors->has('phone'), 'border-gray-300 focus:border-futa-orange' => !$errors->has('phone')]) required>
+                                <input id="contact-phone" type="tel" name="phone" value="{{ old('phone', auth()->user()?->phone) }}" placeholder="{{ __('core::contact.phone') }}" aria-describedby="contact-phone-error"
+                                    @class(['h-11 w-full rounded-lg border bg-white px-4 text-sm font-semibold outline-none transition placeholder:text-gray-400 focus:ring-3 focus:ring-futa-orange/10',
+                                        'border-red-500 focus:border-red-500' => $errors->has('phone'),
+                                        'border-gray-300 focus:border-futa-orange' => !$errors->has('phone')]) required>
                                 @error('phone')
                                     <p id="contact-phone-error" class="mt-1.5 text-xs font-semibold text-red-600" role="alert">{{ $message }}</p>
                                 @enderror
@@ -114,13 +123,19 @@
                         </div>
 
                         <label class="sr-only" for="contact-subject">{{ __('core::contact.subject') }}</label>
-                        <input id="contact-subject" name="subject" value="{{ old('subject') }}" placeholder="{{ __('core::contact.subject') }}" aria-describedby="contact-subject-error" @class(['mt-4 h-11 w-full rounded-lg border bg-white px-4 text-sm font-semibold outline-none transition placeholder:text-gray-400 focus:ring-3 focus:ring-futa-orange/10', 'border-red-500 focus:border-red-500' => $errors->has('subject'), 'border-gray-300 focus:border-futa-orange' => !$errors->has('subject')]) required>
+                        <input id="contact-subject" name="subject" value="{{ old('subject') }}" placeholder="{{ __('core::contact.subject') }}" aria-describedby="contact-subject-error"
+                            @class(['mt-4 h-11 w-full rounded-lg border bg-white px-4 text-sm font-semibold outline-none transition placeholder:text-gray-400 focus:ring-3 focus:ring-futa-orange/10',
+                                'border-red-500 focus:border-red-500' => $errors->has('subject'),
+                                'border-gray-300 focus:border-futa-orange' => !$errors->has('subject')]) required>
                         @error('subject')
                             <p id="contact-subject-error" class="mt-1.5 text-xs font-semibold text-red-600" role="alert">{{ $message }}</p>
                         @enderror
 
                         <label class="sr-only" for="contact-message">{{ __('core::contact.message') }}</label>
-                        <textarea id="contact-message" name="message" rows="5" placeholder="{{ __('core::contact.message') }}" aria-describedby="contact-message-error" @class(['mt-4 w-full resize-y rounded-lg border bg-white px-4 py-3 text-sm font-semibold outline-none transition placeholder:text-gray-400 focus:ring-3 focus:ring-futa-orange/10', 'border-red-500 focus:border-red-500' => $errors->has('message'), 'border-gray-300 focus:border-futa-orange' => !$errors->has('message')]) required>{{ old('message') }}</textarea>
+                        <textarea id="contact-message" name="message" rows="5" placeholder="{{ __('core::contact.message') }}" aria-describedby="contact-message-error"
+                            @class(['mt-4 w-full resize-y rounded-lg border bg-white px-4 py-3 text-sm font-semibold outline-none transition placeholder:text-gray-400 focus:ring-3 focus:ring-futa-orange/10',
+                                'border-red-500 focus:border-red-500' => $errors->has('message'),
+                                'border-gray-300 focus:border-futa-orange' => !$errors->has('message')]) required>{{ old('message') }}</textarea>
                         @error('message')
                             <p id="contact-message-error" class="mt-1.5 text-xs font-semibold text-red-600" role="alert">{{ $message }}</p>
                         @enderror

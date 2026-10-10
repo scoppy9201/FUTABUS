@@ -1,5 +1,8 @@
 <div data-auth-email-field>
-    <label class="auth-email-field flex h-10 items-center rounded-md border border-futa-orange/40 bg-futa-orange-soft text-[#999] transition focus-within:border-futa-orange focus-within:ring-3 focus-within:ring-futa-orange/10 data-[invalid=true]:border-[#ff3b30] data-[invalid=true]:bg-white data-[invalid=true]:focus-within:border-[#ff3b30] data-[invalid=true]:focus-within:ring-[#ff3b30]/10">
+    <label class="auth-email-field flex h-10 items-center rounded-md border border-futa-orange/40 bg-futa-orange-soft text-[#999] transition
+        focus-within:border-futa-orange focus-within:ring-3 focus-within:ring-futa-orange/10 data-[invalid=true]:border-[#ff3b30]
+        data-[invalid=true]:bg-white data-[invalid=true]:focus-within:border-[#ff3b30]
+        data-[invalid=true]:focus-within:ring-[#ff3b30]/10">
         <span class="sr-only">{{ __('Auth::app.fields.email') }}</span>
         <x-heroicon-o-envelope class="ml-3 size-5.25 shrink-0" />
         <input

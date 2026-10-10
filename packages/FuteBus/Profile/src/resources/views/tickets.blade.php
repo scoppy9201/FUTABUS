@@ -112,7 +112,9 @@
                             aria-haspopup="listbox"
                             aria-controls="ticket-status-options"
                             aria-expanded="false"
-                            class="flex h-11 w-full min-w-0 items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-3 text-left text-sm font-medium text-gray-950 hover:border-futa-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
+                            class="flex h-11 w-full min-w-0 items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-3 text-left text-sm
+                                font-medium text-gray-950 hover:border-futa-orange focus-visible:outline-2 focus-visible:outline-offset-2
+                                focus-visible:outline-futa-orange"
                         >
                             <span id="ticket-status-display" data-ticket-status-label class="truncate">
                                 {{ filled($filters['status'] ?? null) ? __('Profile::tickets.filter_status.'.$filters['status']) : __('Profile::tickets.placeholders.status') }}
