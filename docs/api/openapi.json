@@ -1128,6 +1128,632 @@
           }
         }
       }
+    },
+    "/api/v1/me/password": {
+      "put": {
+        "tags": [
+          "Account"
+        ],
+        "operationId": "changeCurrentAccountPassword",
+        "summary": "Change password and revoke all Bearer tokens",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "current_password",
+                  "password",
+                  "password_confirmation"
+                ],
+                "properties": {
+                  "current_password": {
+                    "type": "string",
+                    "format": "password"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "minLength": 8
+                  },
+                  "password_confirmation": {
+                    "type": "string",
+                    "format": "password"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password changed; all existing Bearer tokens revoked"
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "403": {
+            "description": "Inactive, unverified, or unsupported token"
+          },
+          "422": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trips/{trip}": {
+      "get": {
+        "tags": [
+          "Trips"
+        ],
+        "operationId": "showTrip",
+        "summary": "Get a trip and its current seat availability",
+        "parameters": [
+          {
+            "name": "trip",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "departure",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "destination",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "departure_date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "return_date",
+            "in": "query",
+            "description": "Required for a round trip.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "trip_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "one_way",
+                "round_trip"
+              ]
+            }
+          },
+          {
+            "name": "quantity",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "outbound",
+                "return"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trip details and seats with availability"
+          },
+          "404": {
+            "description": "No matching available trip"
+          },
+          "422": {
+            "description": "Invalid search criteria or direction",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trips/{trip}/payment-intents": {
+      "post": {
+        "tags": [
+          "Payments"
+        ],
+        "operationId": "createPaymentIntent",
+        "summary": "Reserve seats and create a SePay payment intent",
+        "description": "Requires an active, verified account. A QR is not proof of payment; only a verified SePay webhook can mark an intent paid.",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "trip",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "trip_type",
+                  "departure",
+                  "destination",
+                  "departure_date",
+                  "quantity",
+                  "name",
+                  "phone",
+                  "email",
+                  "accept_terms",
+                  "seats",
+                  "pickup_mode",
+                  "dropoff_mode"
+                ],
+                "properties": {
+                  "departure": {
+                    "type": "string",
+                    "maxLength": 120
+                  },
+                  "destination": {
+                    "type": "string",
+                    "maxLength": 120
+                  },
+                  "departure_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "return_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "trip_type": {
+                    "type": "string",
+                    "enum": [
+                      "one_way",
+                      "round_trip"
+                    ]
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5
+                  },
+                  "direction": {
+                    "type": "string",
+                    "enum": [
+                      "outbound",
+                      "return"
+                    ]
+                  },
+                  "name": {
+                    "type": "string",
+                    "maxLength": 120
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "accept_terms": {
+                    "type": "boolean"
+                  },
+                  "seats": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 5,
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  "pickup_mode": {
+                    "type": "string",
+                    "enum": [
+                      "station",
+                      "transfer"
+                    ]
+                  },
+                  "dropoff_mode": {
+                    "type": "string",
+                    "enum": [
+                      "station",
+                      "transfer"
+                    ]
+                  },
+                  "pickup_address": {
+                    "type": "string"
+                  },
+                  "dropoff_address": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Intent created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PaymentIntent"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "403": {
+            "description": "Inactive or unverified account"
+          },
+          "404": {
+            "description": "Trip unavailable"
+          },
+          "422": {
+            "description": "Invalid request or seats unavailable"
+          },
+          "503": {
+            "description": "SePay configuration unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/payment-intents/{intent}": {
+      "get": {
+        "tags": [
+          "Payments"
+        ],
+        "operationId": "getPaymentIntent",
+        "summary": "Get own payment intent status",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "intent",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current intent status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PaymentIntent"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Intent not found or not owned by token holder"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Payments"
+        ],
+        "operationId": "cancelPaymentIntent",
+        "summary": "Cancel own pending payment intent",
+        "description": "Paid or under-review intents cannot be cancelled by the client.",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "intent",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Intent expired"
+          },
+          "404": {
+            "description": "Intent not found or not owned by token holder"
+          },
+          "409": {
+            "description": "Intent already paid or under review"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/vehicle-types": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "listVehicleTypes",
+        "summary": "List vehicle types",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated vehicle types"
+          },
+          "403": {
+            "description": "Administrator token required"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "createVehicleType",
+        "summary": "Create vehicle type",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "default_capacity"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 100
+                  },
+                  "description": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 500
+                  },
+                  "default_capacity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 255
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Vehicle type created"
+          },
+          "403": {
+            "description": "Administrator token required"
+          },
+          "422": {
+            "description": "Validation failed"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/vehicle-types/{vehicleType}": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "getVehicleType",
+        "summary": "Get vehicle type",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "vehicleType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vehicle type details"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "updateVehicleType",
+        "summary": "Update vehicle type",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "vehicleType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "default_capacity"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 100
+                  },
+                  "description": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 500
+                  },
+                  "default_capacity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 255
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Vehicle type updated"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "422": {
+            "description": "Validation failed"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "removeVehicleType",
+        "summary": "Delete unused type or deactivate a type assigned to buses",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "vehicleType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted or deactivated"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1409,6 +2035,81 @@
           },
           "can_contact_for_change": {
             "type": "boolean"
+          }
+        }
+      },
+      "PaymentIntent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "paid",
+              "expired",
+              "needs_review"
+            ]
+          },
+          "amount": {
+            "type": "integer"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "qr_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri"
+          },
+          "reference": {
+            "type": "string",
+            "description": "Returned only when creating an intent."
+          },
+          "booking": {
+            "type": "object",
+            "description": "Available only when the verified webhook has paid and issued a booking.",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "booking_code": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "VehicleType": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "default_capacity": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive"
+            ]
           }
         }
       }

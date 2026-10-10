@@ -73,6 +73,16 @@ class TripSearchTest extends TestCase
             ->assertJsonPath('data.outbound.0.available_seats', 31)
             ->assertJsonPath('data.return', []);
 
+        $this->getJson(route('api.v1.trips.show', ['trip' => $trips[0]['id'], ...$query, 'direction' => 'outbound']))
+            ->assertOk()
+            ->assertJsonPath('data.id', $trips[0]['id'])
+            ->assertJsonPath('data.seats.0.available', true)
+            ->assertJsonMissingPath('data.row_options');
+        $this->getJson(route('api.v1.trips.show', ['trip' => 999999, ...$query, 'direction' => 'outbound']))
+            ->assertNotFound();
+        $this->getJson(route('api.v1.trips.show', ['trip' => $trips[0]['id'], ...$query, 'direction' => 'return']))
+            ->assertUnprocessable()->assertJsonValidationErrors('direction');
+
         $this->get(route('trip-search', $query))
             ->assertOk()
             ->assertSee(asset('images/banners/home-banner.jpg'))

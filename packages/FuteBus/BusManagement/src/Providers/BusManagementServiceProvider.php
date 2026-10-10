@@ -16,8 +16,9 @@ class BusManagementServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'BusManagement');
-        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'BusManagement');
-        Route::middleware('web')->group(__DIR__ . '/../routes/web.php');
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'BusManagement');
+        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'BusManagement');
+        Route::middleware('web')->group(__DIR__.'/../routes/web.php');
+        Route::middleware('api')->prefix('api')->group(__DIR__.'/../routes/api.php');
     }
 }

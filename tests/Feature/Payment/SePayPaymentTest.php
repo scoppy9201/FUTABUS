@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Payment;
 
+use App\Models\User;
 use FuteBus\Core\Services\TripSearchService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -116,6 +117,84 @@ class SePayPaymentTest extends TestCase
         $this->assertIsString($qrSvg);
         $this->assertStringContainsString('data:image/png;base64,', $qrSvg);
         $this->assertStringContainsString('<image ', $qrSvg);
+    }
+
+    public function test_bearer_api_creates_and_cancels_only_its_own_pending_intent(): void
+    {
+        $owner = User::factory()->create(['is_active' => true]);
+        $other = User::factory()->create(['is_active' => true]);
+        $url = route('api.v1.payment-intents.store', ['trip' => $this->tripId]);
+        $payload = [
+            ...$this->criteria,
+            'direction'    => 'outbound',
+            'name'         => 'Nguyen Van A',
+            'phone'        => '0912345678',
+            'email'        => 'customer@example.com',
+            'accept_terms' => true,
+            'seats'        => [$this->seatId],
+            'pickup_mode'  => 'station',
+            'dropoff_mode' => 'station',
+        ];
+
+        $this->postJson($url, $payload)->assertUnauthorized();
+        $this->withToken($owner->createToken('owner', ['api'])->plainTextToken)
+            ->postJson($url, $payload)
+            ->assertCreated()
+            ->assertJsonPath('data.amount', 300000)
+            ->assertJsonPath('data.status', 'pending');
+
+        $intent = DB::table('sepay_payment_intents')->first();
+        $this->assertDatabaseCount('bookings', 0);
+        $this->assertSame($owner->id, json_decode($intent->snapshot, true)['user_id']);
+        $this->postJson($url, $payload)->assertNotFound();
+
+        app('auth')->forgetGuards();
+        $this->withToken($other->createToken('other', ['api'])->plainTextToken)
+            ->getJson(route('api.v1.payment-intents.show', ['intent' => $intent->token]))
+            ->assertNotFound();
+        $this->deleteJson(route('api.v1.payment-intents.destroy', ['intent' => $intent->token]))
+            ->assertNotFound();
+
+        app('auth')->forgetGuards();
+        $this->withToken($owner->createToken('owner-again', ['api'])->plainTextToken)
+            ->getJson(route('api.v1.payment-intents.show', ['intent' => $intent->token]))
+            ->assertOk()->assertJsonPath('data.status', 'pending');
+        $this->deleteJson(route('api.v1.payment-intents.destroy', ['intent' => $intent->token]))
+            ->assertOk()->assertJsonPath('data.status', 'expired');
+
+        $this->assertDatabaseHas('sepay_payment_intents', ['id' => $intent->id, 'status' => 'expired']);
+        $this->assertDatabaseCount('tickets', 0);
+    }
+
+    public function test_verified_webhook_is_required_before_api_reports_a_paid_intent(): void
+    {
+        $owner = User::factory()->create(['is_active' => true]);
+        $this->withToken($owner->createToken('owner', ['api'])->plainTextToken)
+            ->postJson(route('api.v1.payment-intents.store', ['trip' => $this->tripId]), [
+                ...$this->criteria,
+                'name'         => 'Nguyen Van A',
+                'phone'        => '0912345678',
+                'email'        => 'customer@example.com',
+                'accept_terms' => true,
+                'seats'        => [$this->seatId],
+                'pickup_mode'  => 'station',
+                'dropoff_mode' => 'station',
+            ])->assertCreated();
+
+        $intent = DB::table('sepay_payment_intents')->first();
+        $statusUrl = route('api.v1.payment-intents.show', ['intent' => $intent->token]);
+        $this->getJson($statusUrl)->assertJsonPath('data.status', 'pending');
+        $this->assertDatabaseCount('tickets', 0);
+
+        $this->signedWebhook($this->event($intent->code))->assertOk();
+        $this->getJson($statusUrl)->assertOk()
+            ->assertJsonPath('data.status', 'paid')
+            ->assertJsonPath('data.booking.id', DB::table('bookings')->value('id'));
+        $this->deleteJson(route('api.v1.payment-intents.destroy', ['intent' => $intent->token]))
+            ->assertStatus(409);
+
+        $this->assertDatabaseCount('bookings', 1);
+        $this->assertDatabaseCount('tickets', 1);
     }
 
     public function test_webhook_matches_payment_code_from_content_when_sepay_code_is_null(): void
