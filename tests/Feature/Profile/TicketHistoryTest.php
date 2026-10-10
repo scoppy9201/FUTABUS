@@ -149,6 +149,45 @@ class TicketHistoryTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_change_and_cancel_menu_only_contacts_support_for_eligible_paid_booking(): void
+    {
+        $user = $this->createTestUser();
+        $eligible = $this->createBooking($user, 'ELIGIBLE-001', [
+            'departure_time' => now()->addDays(3)->toDateTimeString(),
+        ]);
+        $tooLate = $this->createBooking($user, 'TOO-LATE-001', [
+            'departure_time' => now()->addHours(6)->toDateTimeString(),
+        ]);
+
+        DB::table('payments')->insert([
+            'payment_code' => 'PAID-MENU-001',
+            'booking_id'   => $eligible['booking_id'],
+            'amount'       => 250000,
+            'method'       => 'mock',
+            'status'       => 'completed',
+        ]);
+        DB::table('payments')->insert([
+            'payment_code' => 'PAID-MENU-002',
+            'booking_id'   => $tooLate['booking_id'],
+            'amount'       => 250000,
+            'method'       => 'mock',
+            'status'       => 'completed',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('profile.tickets.index'));
+        $response
+            ->assertOk()
+            ->assertSee('aria-controls="ticket-actions-'.$eligible['booking_id'].'"', false)
+            ->assertSee('href="tel:19006067"', false)
+            ->assertSee('TOO-LATE-001')
+            ->assertSee('disabled title=', false);
+
+        $this->assertSame(2, substr_count(
+            $response->getContent(),
+            'data-history-sensitive'
+        ));
+    }
+
     private function createBooking(User $owner, string $code, array $options = []): array
     {
         $number = ++$this->sequence;

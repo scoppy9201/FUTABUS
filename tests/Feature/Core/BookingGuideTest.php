@@ -80,4 +80,16 @@ class BookingGuideTest extends TestCase
             ->assertOk()
             ->assertSee('How to book bus tickets on');
     }
+
+    public function test_footer_web_booking_guide_link_opens_the_guide_page(): void
+    {
+        app()->setLocale('vi');
+
+        $response = $this->get(route('home'))->assertOk();
+
+        $this->assertMatchesRegularExpression(
+            '/<a\s+href="'.preg_quote(route('booking-guide'), '/').'"[^>]*>\s*Hướng dẫn đặt vé trên Web\s*<\/a>/u',
+            $response->getContent(),
+        );
+    }
 }

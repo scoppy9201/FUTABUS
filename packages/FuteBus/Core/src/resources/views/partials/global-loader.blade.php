@@ -6,10 +6,10 @@
     aria-live="polite"
     aria-hidden="true"
 >
-    <div class="global-page-loader__card">
+    <div class="global-page-loader__content">
         <div class="global-page-loader__visual" aria-hidden="true">
             <div class="global-page-loader__animation"></div>
-            <div class="global-page-loader__fallback"></div>
+            <img class="global-page-loader__fallback" src="{{ asset('icons/futabus-logo.png') }}" alt="">
         </div>
         <p class="global-page-loader__label">{{ __('core::app.loading') }}</p>
     </div>

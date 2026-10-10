@@ -9,7 +9,7 @@
         <main class="mx-auto grid w-full max-w-282 gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[255px_minmax(0,1fr)] lg:px-0">
             @include('Profile::partials.account-sidebar')
 
-            <section class="min-w-0" aria-labelledby="ticket-history-title">
+            <section class="min-w-0 lg:flex lg:min-h-134 lg:flex-col" aria-labelledby="ticket-history-title">
                 <div class="flex flex-wrap items-start justify-between gap-5">
                     <div>
                         <h1 id="ticket-history-title" class="text-3xl font-semibold text-gray-950">{{ __('Profile::tickets.title') }}</h1>
@@ -160,23 +160,26 @@
                     </div>
                 @endif
 
-                <div class="mt-7 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+                <div class="mt-5 rounded-2xl border border-gray-200 bg-white shadow-sm lg:flex lg:flex-1 lg:flex-col">
                     <div class="flex items-center justify-between gap-4 border-b border-gray-100 px-5 py-4">
-                        <p class="text-sm font-semibold text-slate-600">{{ __('Profile::tickets.results', ['count' => $bookings->total()]) }}</p>
+                        <div>
+                            <p class="text-sm font-semibold text-futa-green">{{ __('Profile::tickets.results', ['count' => $bookings->total()]) }}</p>
+                            @if($bookings->count() > 0)
+                                <p class="mt-1 text-xs leading-5 text-slate-500">{{ __('Profile::tickets.change_policy_note') }}</p>
+                            @endif
+                        </div>
                         @if($hasFilters)
                             <a href="{{ route('profile.tickets.index') }}" class="text-sm font-semibold text-futa-orange hover:underline">{{ __('Profile::tickets.clear') }}</a>
                         @endif
                     </div>
                     <div
-                        class="overflow-x-auto lg:[scrollbar-width:none] lg:hover:[scrollbar-width:thin]
-                            lg:hover:[scrollbar-color:#ef5222_#f3f4f6] lg:focus-within:[scrollbar-width:thin]
-                            lg:focus-within:[scrollbar-color:#ef5222_#f3f4f6]
-                            lg:[&::-webkit-scrollbar]:h-0 lg:hover:[&::-webkit-scrollbar]:h-2
-                            lg:focus-within:[&::-webkit-scrollbar]:h-2"
+                        class="overflow-x-auto [scrollbar-width:thin] [scrollbar-color:#ef5222_#f3f4f6] lg:flex-1
+                            [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:rounded-full
+                            [&::-webkit-scrollbar-thumb]:bg-futa-orange [&::-webkit-scrollbar-track]:bg-gray-100"
                     >
                         <table class="w-full min-w-245 text-left text-sm">
                             <caption class="sr-only">{{ __('Profile::tickets.title') }}</caption>
-                            <thead class="bg-gray-50 text-gray-700">
+                            <thead class="bg-futa-orange-soft/40 text-gray-700">
                                 <tr>
                                     @foreach(['code', 'count', 'route', 'departure', 'amount', 'payment', 'status', 'action'] as $column)
                                         <th scope="col" class="whitespace-nowrap px-4 py-3.5 font-semibold">{{ __('Profile::tickets.columns.'.$column) }}</th>
@@ -197,18 +200,36 @@
                                             default => 'text-slate-600',
                                         };
                                     @endphp
-                                    <tr class="align-top hover:bg-futa-orange-soft/30">
-                                        <td class="px-4 py-4 font-semibold text-futa-orange">{{ $booking->booking_code }}</td>
-                                        <td class="px-4 py-4 text-gray-900">{{ $booking->seat_count }}</td>
-                                        <td class="px-4 py-4 font-medium text-gray-950">{{ $booking->origin_city }} <span aria-hidden="true">→</span> {{ $booking->destination_city }}</td>
+                                    <tr class="align-middle transition-colors hover:bg-futa-orange-soft/30">
+                                        <td class="whitespace-nowrap px-4 py-4 font-semibold text-futa-orange">
+                                            <span>{{ $booking->booking_code }}</span>
+                                            @if(str_starts_with($booking->booking_code, 'DEMOHIST'))
+                                                <span class="ml-1 inline-flex rounded-full bg-slate-100 px-2 py-0.5 align-middle text-[11px] font-semibold text-slate-600">{{ __('Profile::tickets.demo_label') }}</span>
+                                            @endif
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-gray-900">{{ $booking->seat_count }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 font-medium text-gray-950">{{ $booking->origin_city }} <span aria-hidden="true">→</span> {{ $booking->destination_city }}</td>
                                         <td class="whitespace-nowrap px-4 py-4 text-gray-800">{{ \Illuminate\Support\Carbon::parse($booking->departure_time)->format('d/m/Y H:i') }}</td>
                                         <td class="whitespace-nowrap px-4 py-4 font-semibold text-gray-950">{{ __('Profile::tickets.currency', ['amount' => number_format((float) $booking->total_amount, 0, ',', '.')]) }}</td>
                                         <td class="whitespace-nowrap px-4 py-4 font-medium {{ $paymentColor }}">{{ __('Profile::tickets.payment_status.'.($booking->payment_status ?? 'unpaid')) }}</td>
                                         <td class="whitespace-nowrap px-4 py-4"><span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {{ $bookingColor }}">{{ __('Profile::tickets.booking_status.'.$booking->status) }}</span></td>
-                                        <td class="whitespace-nowrap px-4 py-4">
-                                            <a href="{{ route('profile.tickets.show', $booking->id) }}" class="font-semibold text-futa-orange hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange">
-                                                {{ __('Profile::tickets.view_details') }}
-                                            </a>
+                                        <td class="whitespace-nowrap px-4 py-4 text-center">
+                                            <button type="button" data-ticket-history-actions aria-controls="ticket-actions-{{ $booking->id }}" aria-expanded="false"
+                                                class="inline-flex size-9 items-center justify-center rounded-full border border-gray-200 text-futa-orange transition hover:border-futa-orange hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
+                                                aria-label="{{ __('Profile::tickets.actions') }}: {{ $booking->booking_code }}">
+                                                <x-heroicon-o-ellipsis-horizontal class="size-6" />
+                                            </button>
+                                            <div id="ticket-actions-{{ $booking->id }}" popover="auto"
+                                                class="fixed z-50 m-0 w-52 rounded-xl border border-gray-200 bg-white p-1.5 text-left shadow-xl">
+                                                <a href="{{ route('profile.tickets.show', $booking->id) }}" class="block whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-semibold text-gray-900 hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-futa-orange">{{ __('Profile::tickets.view_details') }}</a>
+                                                @if($booking->can_contact_for_change)
+                                                    <a href="tel:19006067" data-history-sensitive data-departure="{{ \Illuminate\Support\Carbon::parse($booking->departure_time)->timestamp }}" class="block whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-medium text-gray-900 hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-futa-orange">{{ __('Profile::tickets.cancel_ticket') }}</a>
+                                                    <a href="tel:19006067" data-history-sensitive data-departure="{{ \Illuminate\Support\Carbon::parse($booking->departure_time)->timestamp }}" class="block whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-medium text-gray-900 hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-futa-orange">{{ __('Profile::tickets.change_ticket') }}</a>
+                                                @else
+                                                    <button type="button" disabled title="{{ __('Profile::tickets.change_unavailable') }}" class="block w-full cursor-not-allowed whitespace-nowrap rounded-lg px-3 py-2.5 text-left text-sm text-slate-400">{{ __('Profile::tickets.cancel_ticket') }}</button>
+                                                    <button type="button" disabled title="{{ __('Profile::tickets.change_unavailable') }}" class="block w-full cursor-not-allowed whitespace-nowrap rounded-lg px-3 py-2.5 text-left text-sm text-slate-400">{{ __('Profile::tickets.change_ticket') }}</button>
+                                                @endif
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
@@ -217,6 +238,10 @@
                                             <div class="mx-auto grid size-14 place-items-center rounded-full bg-futa-orange-soft text-futa-orange"><x-heroicon-o-ticket class="size-7" /></div>
                                             <p class="mt-4 text-lg font-semibold text-gray-950">{{ __($hasFilters ? 'Profile::tickets.filtered_empty_title' : 'Profile::tickets.empty_title') }}</p>
                                             <p class="mt-1 text-sm text-slate-600">{{ __($hasFilters ? 'Profile::tickets.filtered_empty_description' : 'Profile::tickets.empty_description') }}</p>
+                                            @unless($hasFilters)
+                                                <p class="mx-auto mt-3 max-w-lg text-sm text-slate-600">{{ __('Profile::tickets.guest_lookup') }}</p>
+                                                <a href="{{ route('ticket-lookup') }}" class="mt-2 inline-block text-sm font-semibold text-futa-orange hover:underline">{{ __('Profile::tickets.guest_lookup_action') }}</a>
+                                            @endunless
                                         </td>
                                     </tr>
                                 @endforelse
