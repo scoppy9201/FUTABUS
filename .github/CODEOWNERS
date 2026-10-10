@@ -1,0 +1,7 @@
+# Replace or extend the repository owner as maintainers change.
+* @scoppy9201
+/AGENTS.md @scoppy9201
+/.agents/ @scoppy9201
+/.github/ @scoppy9201
+/packages/FuteBus/Payment/ @scoppy9201
+/database/migrations/ @scoppy9201
