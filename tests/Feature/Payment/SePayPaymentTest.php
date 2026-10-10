@@ -158,7 +158,9 @@ class SePayPaymentTest extends TestCase
         app('auth')->forgetGuards();
         $this->withToken($owner->createToken('owner-again', ['api'])->plainTextToken)
             ->getJson(route('api.v1.payment-intents.show', ['intent' => $intent->token]))
-            ->assertOk()->assertJsonPath('data.status', 'pending');
+            ->assertOk()->assertJsonPath('data.status', 'pending')
+            ->assertJsonMissingPath('data.reference')
+            ->assertJsonMissingPath('data.snapshot');
         $this->deleteJson(route('api.v1.payment-intents.destroy', ['intent' => $intent->token]))
             ->assertOk()->assertJsonPath('data.status', 'expired');
 
