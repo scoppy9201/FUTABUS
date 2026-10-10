@@ -14,9 +14,7 @@ if ($changedFilesInput === '') {
 
 $changedFiles = array_values(array_filter(preg_split('/\R/', trim($changedFilesInput)) ?: []));
 
-$testTargets = [
-    'tests/Unit/BasicTest.php',
-];
+$testTargets = [];
 
 $addTarget = function (string $target) use (&$testTargets): void {
     if (is_file($target) || is_dir($target)) {
@@ -40,7 +38,7 @@ $mappedModules = [
     'CustomerManagement'   => ['tests/Feature/CustomerManagement'],
     'Dashboard'            => ['tests/Feature/Dashboard'],
     'Notification'         => ['tests/Unit/Notification', 'tests/Feature/Notification'],
-    'Payment'              => ['tests/Feature/Payment'],
+    'Payment'              => ['tests/Unit/Payment', 'tests/Feature/Payment'],
     'Profile'              => ['tests/Unit/Profile', 'tests/Feature/Profile'],
     'Reporting'            => ['tests/Feature/Reporting'],
     'RolePermission'       => ['tests/Unit/RolePermission', 'tests/Feature/RolePermission'],
@@ -54,15 +52,21 @@ $mappedModules = [
     'UserManagement'       => ['tests/Feature/UserManagement'],
 ];
 
-$addModuleTests = function (string $module) use ($addTarget, $addAllKnownModuleTests, $mappedModules): void {
+$addModuleTests = function (string $module) use (&$testTargets, $addTarget, $addAllKnownModuleTests, $mappedModules): void {
     if (! array_key_exists($module, $mappedModules)) {
         $addAllKnownModuleTests();
 
         return;
     }
 
+    $initialCount = count($testTargets);
+
     foreach ($mappedModules[$module] as $target) {
         $addTarget($target);
+    }
+
+    if (count($testTargets) === $initialCount) {
+        $addAllKnownModuleTests();
     }
 };
 
@@ -108,6 +112,10 @@ foreach ($changedFiles as $file) {
 
         continue;
     }
+}
+
+if ($testTargets === []) {
+    $addAllKnownModuleTests();
 }
 
 $testTargets = array_values(array_unique($testTargets));

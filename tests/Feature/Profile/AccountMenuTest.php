@@ -1,8 +1,7 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Profile;
 
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -12,7 +11,7 @@ class AccountMenuTest extends TestCase
 
     public function test_authenticated_customer_sees_account_menu_and_logout_form(): void
     {
-        $user = User::factory()->create(['name' => 'Hung Manh']);
+        $user = $this->createTestUser(['name' => 'Hung Manh']);
 
         $this->actingAs($user)
             ->get('/')
@@ -33,7 +32,7 @@ class AccountMenuTest extends TestCase
 
     public function test_profile_sidebar_uses_the_same_logout_confirmation(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($this->createTestUser())
             ->get(route('profile.show'))
             ->assertOk()
             ->assertSee('id="global-confirm-dialog"', false)
@@ -43,14 +42,14 @@ class AccountMenuTest extends TestCase
 
     public function test_customer_cannot_open_owner_dashboard(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($this->createTestUser())
             ->get(route('dashboard'))
             ->assertForbidden();
     }
 
     public function test_logout_invalidates_session_and_prevents_reusing_authenticated_page(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createTestUser();
 
         $this->actingAs($user)
             ->withSession(['account_menu_test' => 'secret'])

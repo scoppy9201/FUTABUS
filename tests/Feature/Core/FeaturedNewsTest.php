@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Core;
 
 use Database\Seeders\FeaturedArticleBodySeeder;
 use FuteBus\Core\Services\FeaturedArticleBodyRepository;

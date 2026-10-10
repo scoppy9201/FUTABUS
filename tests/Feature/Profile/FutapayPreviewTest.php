@@ -1,8 +1,7 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Profile;
 
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,7 +16,7 @@ class FutapayPreviewTest extends TestCase
 
     public function test_customer_sees_preview_and_unsupported_feature_notice(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($this->createTestUser())
             ->get(route('profile.futapay'))
             ->assertOk()
             ->assertSee('data-notice-on-load', false)
@@ -38,7 +37,7 @@ class FutapayPreviewTest extends TestCase
 
     public function test_account_menu_links_to_futapay_preview(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($this->createTestUser())
             ->get(route('home'))
             ->assertOk()
             ->assertSee('href="'.route('profile.futapay').'"', false);

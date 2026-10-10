@@ -1,10 +1,9 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Auth;
 
-use App\Models\User;
-use FuteBus\Auth\Mail\PasswordResetOtpMail;
 use FuteBus\Auth\Mail\PasswordChangedMail;
+use FuteBus\Auth\Mail\PasswordResetOtpMail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -28,6 +27,7 @@ class PasswordRecoveryFlowTest extends TestCase
         $code = '';
         Mail::assertSent(PasswordResetOtpMail::class, function (PasswordResetOtpMail $mail) use (&$code): bool {
             $code = $mail->code;
+
             return true;
         });
 
@@ -36,7 +36,7 @@ class PasswordRecoveryFlowTest extends TestCase
 
     public function test_customer_can_reset_password_after_email_otp_and_log_in(): void
     {
-        $user = User::factory()->create(['email' => 'customer@example.com']);
+        $user = $this->createTestUser(['email' => 'customer@example.com']);
         $oldHash = $user->password;
         $code = $this->requestCode();
 
@@ -69,7 +69,7 @@ class PasswordRecoveryFlowTest extends TestCase
 
     public function test_five_wrong_codes_lock_recovery_and_resend(): void
     {
-        User::factory()->create(['email' => 'customer@example.com']);
+        $this->createTestUser(['email' => 'customer@example.com']);
         $code = $this->requestCode();
         $wrong = $code === '000000' ? '111111' : '000000';
         for ($attempt = 0; $attempt < 5; $attempt++) {
@@ -83,7 +83,7 @@ class PasswordRecoveryFlowTest extends TestCase
 
     public function test_expired_code_and_expired_verified_session_cannot_reset_password(): void
     {
-        $user = User::factory()->create(['email' => 'customer@example.com']);
+        $user = $this->createTestUser(['email' => 'customer@example.com']);
         $code = $this->requestCode();
         $this->travel(301)->seconds();
         $this->post(route('password.email.verify'), ['otp' => $code])->assertSessionHasErrors('otp');
@@ -92,6 +92,7 @@ class PasswordRecoveryFlowTest extends TestCase
         $newCode = '';
         Mail::assertSent(PasswordResetOtpMail::class, function (PasswordResetOtpMail $mail) use (&$newCode): bool {
             $newCode = $mail->code;
+
             return true;
         });
         $this->post(route('password.email.verify'), ['otp' => $newCode])->assertRedirect(route('password.request'));
@@ -104,7 +105,7 @@ class PasswordRecoveryFlowTest extends TestCase
 
     public function test_password_cannot_be_reset_before_code_verification(): void
     {
-        User::factory()->create(['email' => 'customer@example.com']);
+        $this->createTestUser(['email' => 'customer@example.com']);
         $this->requestCode();
         $this->post(route('password.update'), [
             'password' => 'NewPassword123', 'password_confirmation' => 'NewPassword123',

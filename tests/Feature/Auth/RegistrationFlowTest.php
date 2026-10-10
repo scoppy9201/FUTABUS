@@ -1,13 +1,13 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use FuteBus\Auth\Mail\AccountActivatedMail;
 use FuteBus\Auth\Mail\RegistrationOtpMail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class RegistrationFlowTest extends TestCase
@@ -29,6 +29,7 @@ class RegistrationFlowTest extends TestCase
         $code = '';
         Mail::assertSent(RegistrationOtpMail::class, function (RegistrationOtpMail $mail) use (&$code): bool {
             $code = $mail->code;
+
             return true;
         });
 
@@ -47,7 +48,7 @@ class RegistrationFlowTest extends TestCase
         ])->assertRedirect(route('register'));
         $this->get(route('register'))->assertSee('Thông tin cá nhân');
         $this->post(route('register.profile'), [
-            'name' => 'Nguyen Van A',
+            'name'  => 'Nguyen Van A',
             'phone' => '0912345678',
         ])->assertRedirect(route('login'));
 
@@ -63,7 +64,7 @@ class RegistrationFlowTest extends TestCase
 
     public function test_duplicate_email_and_phone_are_rejected(): void
     {
-        User::factory()->create(['email' => 'used@example.com', 'phone' => '0912345678']);
+        $this->createTestUser(['email' => 'used@example.com', 'phone' => '0912345678']);
         $this->post(route('register.email'), ['email' => 'used@example.com', 'terms' => '1'])
             ->assertSessionHasErrors('email');
         Mail::assertNothingSent();

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\Payment;
 
 use FuteBus\Payment\Services\SePayQrService;
 use Tests\TestCase;
