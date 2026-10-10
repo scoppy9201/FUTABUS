@@ -14,7 +14,7 @@ class DemoDataSeeder extends Seeder
             return;
         }
 
-        $customerRoleId = DB::table('roles')->where('slug', 'customer')->value('id');
+        $customerRoleId = DB::table('roles')->whereNull('bus_company_id')->where('slug', 'customer')->value('id');
 
         for ($i = 0; $i < 20; $i++) {
             $u = User::factory()->create();

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use FuteBus\TripManagement\Http\Controllers\TripScheduleController;
 use Illuminate\Support\Facades\Route;
 use FuteBus\TripManagement\Http\Controllers\TripController;
+use FuteBus\TripManagement\Http\Controllers\RouteStopController;
 
 Route::middleware(['web', 'auth'])->prefix('quan-tri/chuyen-xe')->group(function () {
     Route::get('/lich-trinh', [TripScheduleController::class, 'index'])->name('trip-management.schedules.index');
@@ -16,4 +17,9 @@ Route::middleware(['web', 'auth'])->prefix('quan-tri/chuyen-xe')->group(function
     Route::post('/', [TripController::class, 'store'])->name('trip-management.trips.store');
     Route::put('/{id}', [TripController::class, 'update'])->whereNumber('id')->name('trip-management.trips.update');
     Route::delete('/{id}', [TripController::class, 'destroy'])->whereNumber('id')->name('trip-management.trips.destroy');
+
+    Route::get('/diem-dung', [RouteStopController::class, 'index'])->name('trip-management.stops.index');
+    Route::post('/diem-dung', [RouteStopController::class, 'store'])->name('trip-management.stops.store');
+    Route::put('/diem-dung/{id}', [RouteStopController::class, 'update'])->whereNumber('id')->name('trip-management.stops.update');
+    Route::delete('/diem-dung/{id}', [RouteStopController::class, 'destroy'])->whereNumber('id')->name('trip-management.stops.destroy');
 });
