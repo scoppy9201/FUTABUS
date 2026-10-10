@@ -2,6 +2,8 @@
 
 These rules apply to every agent and subagent working in this repository. Read the relevant skill under `.agents/skills/` before changing code. User instructions define the task scope; these rules define repository boundaries and review requirements.
 
+The task-specific handbook is in [.agents/README.md](.agents/README.md). Its `rules/`, `workflows/`, and `checklists/` expand these requirements; this file takes precedence if wording differs. Do not create duplicate role instructions when an existing skill covers the task.
+
 ## Protected branches and authority
 
 - Agents must never execute a merge into `dev`, `staging`, or `main`, run `gh pr merge`, push directly to a protected branch, or bypass branch protection. The existing GitHub Actions auto-merge job may merge a PR into `dev` after all required gates pass; agents must not trigger or override that merge manually.
@@ -9,6 +11,7 @@ These rules apply to every agent and subagent working in this repository. Read t
 - Push only the working branch when the user has requested a PR update or a remote fix. Do not force-push or delete remote branches without an explicit, task-specific request.
 - Preserve the existing CI auto-merge workflow. Do not weaken or bypass its lint, code-quality, test, or frontend build dependencies. Tighten gates through reviewable tests and checks when a gap is demonstrated.
 - Never commit secrets, `.env`, payment credentials, customer data, or generated build output. Do not print secret values in logs or chat.
+- Use Conventional Commits when committing. A PR should describe the owning module, affected callers, verification, and deployment risks. GitHub CODEOWNERS and CI complement, but do not replace, server-side branch rules.
 
 ## Repository architecture
 
@@ -21,6 +24,7 @@ These rules apply to every agent and subagent working in this repository. Read t
 ## Required quality checks
 
 - Inspect the current diff and affected call sites before editing. Preserve unrelated user changes. Keep code readable and do not bypass quality checks with suppression comments.
+- Reuse existing shared loaders, notifications, and confirmation dialogs. Do not duplicate UI patterns or remove tests without preserving their intended coverage.
 - For PHP/Blade changes, run relevant PHPUnit tests and Pint on changed PHP files. For frontend changes, run `npm run build` (`npm.cmd run build` in PowerShell). Run `php artisan view:cache` when Blade structure changes.
 - For PR work, run `php scripts/ci/validate-diff.php`, `php scripts/ci/pint-diff.php`, and `php scripts/ci/code-quality-diff.php` with the PR base SHA when available. Fix hard failures before pushing. Report warnings and checks that could not run.
 - A passing test suite does not prove payment settlement, webhook delivery, or exact browser layout. State what was actually verified.

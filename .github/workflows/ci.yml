@@ -199,6 +199,9 @@ jobs:
       - name: Run migrations
         run: php artisan migrate --force
 
+      - name: Compile Blade views
+        run: php artisan view:cache
+
       - name: Run full PHPUnit suite
         run: php artisan test
 
