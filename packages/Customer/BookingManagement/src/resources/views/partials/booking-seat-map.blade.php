@@ -1,0 +1,30 @@
+<div class="booking-page__seat-area">
+    <div class="booking-page__seat-map">
+        <template x-for="deck in @js($seatTrip['seat_decks'])" :key="deck">
+            <div class="booking-page__deck">
+                <h3 x-text="deck === 'lower' ? @js(__('core::booking.lower_deck')) : @js(__('core::booking.upper_deck'))"></h3>
+                <div class="trip-card__seat-grid">
+                    <template x-for="seat in deckSeats(deck, @js($leg))" :key="seat.id">
+                        <button type="button" class="trip-card__seat"
+                            :style="@js($seatTrip['demo_seat_map']) ? { gridColumn: seat.column, gridRow: seat.row } : {}"
+                            :class="seat.sold ? 'is-sold' : (seatSelected(seat, @js($leg)) ? 'is-chosen' : 'is-free')"
+                            :disabled="seat.sold"
+                            :aria-pressed="seatSelected(seat, @js($leg))"
+                            :aria-label="seat.code + ', ' + (seat.sold ? @js(__('core::booking.sold')) : (seatSelected(seat, @js($leg)) ? @js(__('core::booking.selected')) : @js(__('core::booking.available'))))"
+                            @click="toggleSeat(seat, @js($leg))">
+                            <span class="trip-card__seat-code" x-text="seat.code"></span>
+                            <span class="trip-card__seat-foot" aria-hidden="true"></span>
+                        </button>
+                    </template>
+                </div>
+            </div>
+        </template>
+        <p x-show="deckSeats('lower', @js($leg)).length + deckSeats('upper', @js($leg)).length === 0"
+            class="text-sm text-slate-500">{{ __('core::trip-search.no_seat_map') }}</p>
+    </div>
+    <div class="booking-page__legend" aria-label="{{ __('core::trip-search.seat_status') }}">
+        <span><i class="trip-card__seat-key is-sold"></i>{{ __('core::booking.sold') }}</span>
+        <span><i class="trip-card__seat-key is-free"></i>{{ __('core::booking.available') }}</span>
+        <span><i class="trip-card__seat-key is-chosen"></i>{{ __('core::booking.selected') }}</span>
+    </div>
+</div>

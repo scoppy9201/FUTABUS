@@ -119,6 +119,80 @@ class SePayPaymentTest extends TestCase
         $this->assertStringContainsString('<image ', $qrSvg);
     }
 
+    public function test_round_trip_holds_both_legs_and_issues_two_bookings_only_after_exact_payment(): void
+    {
+        $outbound = DB::table('trips')->where('id', $this->tripId)->first();
+        $returnRouteId = DB::table('routes')->insertGetId([
+            'bus_company_id'   => $outbound->bus_company_id,
+            'code'             => 'DALAT-HCM',
+            'name'             => 'Đà Lạt - Hồ Chí Minh',
+            'origin_city'      => 'Đà Lạt',
+            'destination_city' => 'Hồ Chí Minh',
+            'base_price'       => 230000,
+            'is_active'        => true,
+        ]);
+        $returnDeparture = now()->addDays(3)->setTime(15, 0);
+        $returnTripId = DB::table('trips')->insertGetId([
+            'route_id'        => $returnRouteId,
+            'bus_id'          => $outbound->bus_id,
+            'bus_company_id'  => $outbound->bus_company_id,
+            'departure_time'  => $returnDeparture,
+            'arrival_time'    => $returnDeparture->copy()->addHours(8),
+            'price'           => 230000,
+            'status'          => 'scheduled',
+            'available_seats' => 34,
+        ]);
+        $criteria = [
+            ...$this->criteria,
+            'trip_type'     => 'round_trip',
+            'return_date'   => $returnDeparture->toDateString(),
+            'direction'     => 'return',
+            'outbound_trip' => $this->tripId,
+        ];
+
+        $this->get(route('trip-booking.show', ['trip' => $returnTripId, ...$criteria]))
+            ->assertOk()->assertSee('booking-outbound-seats-title')
+            ->assertSee('Giá vé lượt về');
+
+        $payload = [
+            'name'           => 'Nguyen Van A',
+            'phone'          => '0912345678',
+            'email'          => 'customer@example.com',
+            'accept_terms'   => '1',
+            'seats'          => [$this->seatId],
+            'outbound_seats' => [$this->seatId],
+            'pickup_mode'    => 'station',
+            'dropoff_mode'   => 'station',
+        ];
+        $url = route('trip-booking.payment.store', ['trip' => $returnTripId, ...$criteria]);
+        $this->post($url, [...$payload, 'outbound_seats' => []])
+            ->assertSessionHasErrors('outbound_seats');
+        $response = $this->post($url, $payload)->assertRedirect();
+        $intent = DB::table('sepay_payment_intents')->first();
+        $this->assertSame(530000, (int) $intent->amount);
+        $this->assertSame($this->tripId, (int) $intent->secondary_trip_id);
+        $this->assertDatabaseCount('bookings', 0);
+        $this->assertSame([], app(TripSearchService::class)->search(
+            $this->criteria['departure'], $this->criteria['destination'], $this->criteria['departure_date'], 1,
+        ));
+        $this->assertSame([], app(TripSearchService::class)->search(
+            $this->criteria['destination'], $this->criteria['departure'], $returnDeparture->toDateString(), 1,
+        ));
+        $this->get($response->headers->get('Location'))
+            ->assertOk()->assertSee('530.000đ')->assertSee('Giá vé lượt về');
+
+        $event = $this->event($intent->code);
+        $event['transferAmount'] = 530000;
+        $this->signedWebhook($event)->assertOk();
+        $this->signedWebhook($event)->assertOk();
+        $this->assertDatabaseCount('bookings', 2);
+        $this->assertDatabaseCount('tickets', 2);
+        $this->assertDatabaseHas('bookings', ['trip_id' => $this->tripId, 'total_amount' => 300000]);
+        $this->assertDatabaseHas('bookings', ['trip_id' => $returnTripId, 'total_amount' => 230000]);
+        $this->assertDatabaseHas('sepay_payment_intents', ['id' => $intent->id, 'status' => 'paid']);
+        $this->get($response->headers->get('Location'))->assertOk()->assertSee('Mua vé xe thành công');
+    }
+
     public function test_bearer_api_creates_and_cancels_only_its_own_pending_intent(): void
     {
         $owner = User::factory()->create(['is_active' => true]);

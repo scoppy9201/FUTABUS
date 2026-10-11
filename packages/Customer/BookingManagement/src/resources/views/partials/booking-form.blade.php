@@ -1,10 +1,15 @@
 <form class="booking-page__form" x-ref="bookingForm" novalidate method="POST"
-    action="{{ route('trip-booking.payment.store', array_merge(['trip' => $trip['id']], $criteria, ['direction' => request('direction')])) }}"
+    action="{{ route('trip-booking.payment.store', array_merge(['trip' => $trip['id']], $criteria, ['direction' => request('direction')], $outboundTrip ? ['outbound_trip' => $outboundTrip['id']] : [])) }}"
     @submit.prevent="continueBooking()">
     @csrf
     <template x-for="id in selectedIds" :key="id">
         <input type="hidden" name="seats[]" :value="id">
     </template>
+    @if ($outboundTrip)
+        <template x-for="id in outboundSelectedIds" :key="id">
+            <input type="hidden" name="outbound_seats[]" :value="id">
+        </template>
+    @endif
     <section class="booking-panel" aria-labelledby="booking-customer-title">
         <div class="booking-page__customer-grid">
             <div class="booking-page__fields">
@@ -130,7 +135,7 @@
         </div>
     </section>
     <div class="booking-page__actions">
-        <div><span>FUTAPAY</span><strong x-text="money(selectedIds.length * fare)"></strong></div>
+        <div><span>FUTAPAY</span><strong x-text="money(total())"></strong></div>
         <a href="{{ route('trip-search', $criteria) }}">{{ __('core::booking.cancel') }}</a>
         <button type="submit" x-ref="captchaTrigger">{{ __('core::booking.pay') }}</button>
     </div>

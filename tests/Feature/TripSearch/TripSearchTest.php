@@ -176,11 +176,13 @@ class TripSearchTest extends TestCase
         $this->get(route('trip-booking.show', [
             'trip' => $returnTripId,
             ...$query,
-            'trip_type'   => 'round_trip',
-            'return_date' => $returnDate->toDateString(),
-            'direction'   => 'return',
+            'trip_type'     => 'round_trip',
+            'return_date'   => $returnDate->toDateString(),
+            'direction'     => 'return',
+            'outbound_trip' => $trips[0]['id'],
         ]))->assertOk()
-            ->assertViewHas('trip', fn (array $trip): bool => $trip['id'] === $returnTripId);
+            ->assertViewHas('trip', fn (array $trip): bool => $trip['id'] === $returnTripId)
+            ->assertViewHas('outboundTrip', fn (array $trip): bool => $trip['id'] === $trips[0]['id']);
 
         $this->get(route('trip-search', [...$query, 'quantity' => 32]))
             ->assertSessionHasErrors('quantity');

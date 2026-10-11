@@ -8,8 +8,11 @@ use Illuminate\Support\Facades\DB;
 
 class TicketIssuer
 {
-    public function issue(object $intent, array $preview, array $seatIds): int
+    public function issue(object $intent, array $preview, array $seatIds, bool $outbound = false): int
     {
+        $trip = $outbound ? $preview['outbound_trip'] : $preview['trip'];
+        $seatCodes = $outbound ? $preview['outbound_seats'] : $preview['seats'];
+        $tripId = (int) $trip['id'];
         $phone = $preview['customer']['phone'];
         $customerId = DB::table('customers')->where('phone', $phone)->value('id');
         if ($customerId === null) {
@@ -23,43 +26,43 @@ class TicketIssuer
             ]);
         }
 
-        $bookingCode = 'SP'.$intent->code;
+        $bookingCode = 'SP'.$intent->code.($outbound ? 'O' : '');
         $bookingId = DB::table('bookings')->insertGetId([
             'booking_code' => $bookingCode,
-            'trip_id'      => $intent->trip_id,
+            'trip_id'      => $tripId,
             'customer_id'  => $customerId,
             'user_id'      => $preview['user_id'] ?? null,
             'seat_count'   => count($seatIds),
-            'total_amount' => $intent->amount,
+            'total_amount' => count($seatIds) * (int) $trip['fare'],
             'status'       => 'confirmed',
             'notes'        => json_encode([
-                'pickup'  => $preview['pickup'],
-                'dropoff' => $preview['dropoff'],
+                'pickup'  => $outbound ? ['name' => $trip['origin']] : $preview['pickup'],
+                'dropoff' => $outbound ? ['name' => $trip['destination']] : $preview['dropoff'],
             ], JSON_UNESCAPED_UNICODE),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         foreach ($seatIds as $index => $seatId) {
-            $seatCode = $preview['seats'][$index];
+            $seatCode = $seatCodes[$index];
             DB::table('booked_seats')->insert([
                 'booking_id'     => $bookingId,
-                'trip_id'        => $intent->trip_id,
+                'trip_id'        => $tripId,
                 'seat_layout_id' => $seatId,
                 'seat_code'      => $seatCode,
-                'price'          => $preview['trip']['fare'],
+                'price'          => $trip['fare'],
                 'created_at'     => now(),
                 'updated_at'     => now(),
             ]);
             DB::table('tickets')->insert([
                 'ticket_code'     => $bookingCode.str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT),
                 'booking_id'      => $bookingId,
-                'trip_id'         => $intent->trip_id,
+                'trip_id'         => $tripId,
                 'seat_layout_id'  => $seatId,
                 'passenger_name'  => $preview['customer']['name'],
                 'passenger_phone' => $phone,
                 'seat_code'       => $seatCode,
-                'price'           => $preview['trip']['fare'],
+                'price'           => $trip['fare'],
                 'created_at'      => now(),
                 'updated_at'      => now(),
             ]);

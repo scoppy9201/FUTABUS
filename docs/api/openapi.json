@@ -1308,7 +1308,7 @@
         ],
         "operationId": "createPaymentIntent",
         "summary": "Reserve seats and create a SePay payment intent",
-        "description": "Requires an active, verified account. A QR is not proof of payment; only a verified SePay webhook can mark an intent paid.",
+        "description": "Requires an active, verified account. For round_trip, the path trip is the return trip; provide return_date, direction=return, outbound_trip, and outbound_seats. Both legs share one intent. Only a verified SePay webhook marks it paid.",
         "security": [
           {
             "BearerToken": []
@@ -1379,6 +1379,19 @@
                       "outbound",
                       "return"
                     ]
+                  },
+                  "outbound_trip": {
+                    "type": "integer",
+                    "description": "Required for round_trip; selected outbound trip ID."
+                  },
+                  "outbound_seats": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 5,
+                    "description": "Required for round_trip; outbound seat layout IDs.",
+                    "items": {
+                      "type": "integer"
+                    }
                   },
                   "name": {
                     "type": "string",
@@ -2778,6 +2791,18 @@
           "booking": {
             "type": "object",
             "description": "Available only when the verified webhook has paid and issued a booking.",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "booking_code": {
+                "type": "string"
+              }
+            }
+          },
+          "outbound_booking": {
+            "type": "object",
+            "description": "Available after a verified round-trip payment issues both bookings.",
             "properties": {
               "id": {
                 "type": "integer"

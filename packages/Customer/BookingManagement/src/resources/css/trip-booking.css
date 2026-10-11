@@ -143,6 +143,67 @@
     min-height: 305px;
     padding: 12px 24px 25px;
 }
+
+.booking-page__round-trip-legs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-width: 0;
+}
+
+.booking-page__round-trip-legs > .booking-page__seats {
+    min-width: 0;
+    border-radius: 0;
+}
+
+.booking-page__round-trip-legs > .booking-page__seats:first-child {
+    border-radius: 12px 0 0 0;
+}
+
+.booking-page__round-trip-legs > .booking-page__seats:last-child {
+    border-left: 0;
+    border-radius: 0 12px 0 0;
+}
+
+.booking-page__round-trip-legs .booking-panel__header {
+    min-height: 78px;
+    align-items: flex-start;
+    padding: 14px 12px;
+}
+
+.booking-page__round-trip-legs .booking-panel__header p {
+    margin-top: 3px;
+    font-size: 12px;
+}
+
+.booking-page__round-trip-legs .booking-page__seat-area {
+    min-height: 310px;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 8px 18px;
+}
+
+.booking-page__round-trip-legs .booking-page__seat-map {
+    gap: 14px;
+}
+
+.booking-page__round-trip-legs .trip-card__seat-grid {
+    grid-template-columns: repeat(3, 27px);
+    gap: 7px 10px;
+}
+
+.booking-page__round-trip-legs .trip-card__seat {
+    width: 27px;
+    height: 29px;
+}
+
+.booking-page__round-trip-legs .booking-page__legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin: 0;
+}
 .booking-page__seat-map {
     display: flex;
     justify-content: center;

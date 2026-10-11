@@ -6,7 +6,7 @@
         aria-labelledby="booking-trip-detail-title">
         <div class="booking-page__modal-heading">
             <h2 id="booking-trip-detail-title">
-                {{ __('core::booking.trip_details_title', ['count' => 1]) }}
+                {{ __('core::booking.trip_details_title', ['count' => $outboundTrip ? 2 : 1]) }}
             </h2>
             <button type="button" class="booking-page__info-button"
                 @click.stop="policyTooltipOpen = !policyTooltipOpen"
@@ -30,6 +30,11 @@
                 <x-heroicon-o-x-mark class="size-5" aria-hidden="true" />
             </button>
         </div>
+        @if ($outboundTrip)
+            <div class="booking-panel booking-page__summary booking-page__modal-summary">
+                @include('BookingManagement::partials.booking-trip-summary', ['summaryTrip' => $outboundTrip, 'summaryLeg' => 'outbound'])
+            </div>
+        @endif
         <div class="booking-panel booking-page__summary booking-page__modal-summary">
             @include('BookingManagement::partials.booking-trip-summary')
         </div>

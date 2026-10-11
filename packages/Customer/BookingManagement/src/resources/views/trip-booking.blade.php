@@ -11,17 +11,22 @@
         $origin = $trip['origin'];
         $destination = $trip['destination'];
         $departure = \Illuminate\Support\Carbon::parse($trip['departure_time']);
+        $outboundDeparture = $outboundTrip ? \Illuminate\Support\Carbon::parse($outboundTrip['departure_time']) : null;
         $seatLimit = 5;
     @endphp
     <div class="booking-page" x-data="{
         seats: @js($trip['seats']),
         selectedIds: @js($selectedSeatIds),
+        outboundSeats: @js($outboundTrip['seats'] ?? []),
+        outboundSelectedIds: @js($outboundSeatIds),
         customerName: @js(auth()->user()?->name ?? ''),
         customerPhone: @js(auth()->user()?->phone ?? ''),
         customerEmail: @js(auth()->user()?->email ?? ''),
         pickupAddress: '',
         dropoffAddress: '',
         fare: @js($trip['price']),
+        outboundFare: @js($outboundTrip['price'] ?? 0),
+        roundTrip: @js($outboundTrip !== null),
         limit: @js($seatLimit),
         pickupMode: 'station',
         dropoffMode: 'station',
@@ -105,20 +110,33 @@
         selectedSeats() {
             return this.seats.filter(seat => this.selectedIds.includes(seat.id));
         },
-        deckSeats(deck) {
-            return this.seats.filter(seat => seat.deck === deck);
+        selectedOutboundSeats() {
+            return this.outboundSeats.filter(seat => this.outboundSelectedIds.includes(seat.id));
         },
-        toggleSeat(seat) {
+        deckSeats(deck, leg = 'return') {
+            const seats = leg === 'outbound' ? this.outboundSeats : this.seats;
+            return seats.filter(seat => seat.deck === deck);
+        },
+        seatSelected(seat, leg = 'return') {
+            return (leg === 'outbound' ? this.outboundSelectedIds : this.selectedIds).includes(seat.id);
+        },
+        toggleSeat(seat, leg = 'return') {
             if (seat.sold) return;
-            if (this.selectedIds.includes(seat.id)) {
-                this.selectedIds = this.selectedIds.filter(id => id !== seat.id);
+            const selected = leg === 'outbound' ? this.outboundSelectedIds : this.selectedIds;
+            if (selected.includes(seat.id)) {
+                if (leg === 'outbound') this.outboundSelectedIds = selected.filter(id => id !== seat.id);
+                else this.selectedIds = selected.filter(id => id !== seat.id);
                 return;
             }
-            if (this.selectedIds.length >= this.limit) {
+            if (selected.length >= this.limit) {
                 this.notify(@js(__('core::booking.seat_limit', ['count' => $seatLimit])));
                 return;
             }
-            this.selectedIds = [...this.selectedIds, seat.id];
+            if (leg === 'outbound') this.outboundSelectedIds = [...selected, seat.id];
+            else this.selectedIds = [...selected, seat.id];
+        },
+        total() {
+            return this.selectedIds.length * this.fare + this.outboundSelectedIds.length * this.outboundFare;
         },
         money(amount) {
             return new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
@@ -211,7 +229,7 @@
                 this.notify(@js(__('core::booking.accept_terms_required')));
                 return;
             }
-            if (!this.selectedIds.length) {
+            if (!this.selectedIds.length || (this.roundTrip && !this.outboundSelectedIds.length)) {
                 this.notify(@js(__('core::booking.select_seat')));
                 return;
             }
@@ -239,54 +257,48 @@
                 </a>
                 <div class="booking-page__heading">
                     <h1 class="booking-page__route">
-                        <span>{{ $origin }}</span>
+                        <span>{{ $outboundTrip['origin'] ?? $origin }}</span>
                         <span class="booking-page__route-separator" aria-hidden="true">–</span>
-                        <span>{{ $destination }}</span>
+                        <span>{{ $outboundTrip['destination'] ?? $destination }}</span>
                     </h1>
-                    <p class="booking-page__departure">{{ $departure->locale(app()->getLocale())->translatedFormat('l, d/m') }}</p>
+                    <p class="booking-page__departure">
+                        @if ($outboundDeparture)
+                            {{ $outboundDeparture->locale(app()->getLocale())->translatedFormat('l, d/m') }} -
+                        @endif
+                        {{ $departure->locale(app()->getLocale())->translatedFormat('l, d/m') }}
+                    </p>
                 </div>
             </div>
         </div>
 
         <main class="booking-page__layout">
             <div class="booking-page__primary">
+                @if ($outboundTrip)
+                    <div class="booking-page__round-trip-legs">
+                        <section class="booking-panel booking-page__seats" aria-labelledby="booking-outbound-seats-title">
+                            <div class="booking-panel__header booking-page__leg-header">
+                                <div>
+                                    <h2 id="booking-outbound-seats-title">{{ __('core::booking.choose_seats') }}</h2>
+                                    <p>{{ __('core::booking.outbound_leg') }} - {{ \Illuminate\Support\Carbon::parse($outboundTrip['departure_time'])->locale(app()->getLocale())->translatedFormat('l, d/m') }}</p>
+                                </div>
+                            </div>
+                            @include('BookingManagement::partials.booking-seat-map', ['seatTrip' => $outboundTrip, 'leg' => 'outbound'])
+                        </section>
+                @endif
                 <section class="booking-panel booking-page__seats" aria-labelledby="booking-seats-title">
                     <div class="booking-panel__header">
-                        <h2 id="booking-seats-title">{{ __('core::booking.choose_seats') }}</h2>
+                        <div>
+                            <h2 id="booking-seats-title">{{ __('core::booking.choose_seats') }}</h2>
+                            @if ($outboundTrip)
+                                <p>{{ __('core::booking.return_leg') }} - {{ $departure->locale(app()->getLocale())->translatedFormat('l, d/m') }}</p>
+                            @endif
+                        </div>
                         <button type="button" class="booking-page__vehicle-link"
                             @click.stop="vehicleInfoOpen = !vehicleInfoOpen; vehicleInfoTab = 'schedule'"
                             :aria-expanded="vehicleInfoOpen" aria-controls="booking-vehicle-info"
                             aria-haspopup="dialog">{{ __('core::booking.vehicle_info') }}</button>
                     </div>
-                    <div class="booking-page__seat-area">
-                        <div class="booking-page__seat-map">
-                            <template x-for="deck in @js($trip['seat_decks'])" :key="deck">
-                                <div class="booking-page__deck">
-                                    <h3 x-text="deck === 'lower' ? @js(__('core::booking.lower_deck')) : @js(__('core::booking.upper_deck'))"></h3>
-                                    <div class="trip-card__seat-grid">
-                                        <template x-for="seat in deckSeats(deck)" :key="seat.id">
-                                            <button type="button" class="trip-card__seat"
-                                                :style="@js($trip['demo_seat_map']) ? { gridColumn: seat.column, gridRow: seat.row } : {}"
-                                                :class="seat.sold ? 'is-sold' : (selectedIds.includes(seat.id) ? 'is-chosen' : 'is-free')"
-                                                :disabled="seat.sold"
-                                                :aria-pressed="selectedIds.includes(seat.id)"
-                                                :aria-label="seat.code + ', ' + (seat.sold ? @js(__('core::booking.sold')) : (selectedIds.includes(seat.id) ? @js(__('core::booking.selected')) : @js(__('core::booking.available'))))"
-                                                @click="toggleSeat(seat)">
-                                                <span class="trip-card__seat-code" x-text="seat.code"></span>
-                                                <span class="trip-card__seat-foot" aria-hidden="true"></span>
-                                            </button>
-                                        </template>
-                                    </div>
-                                </div>
-                            </template>
-                            <p x-show="seats.length === 0" class="text-sm text-slate-500">{{ __('core::trip-search.no_seat_map') }}</p>
-                        </div>
-                        <div class="booking-page__legend" aria-label="{{ __('core::trip-search.seat_status') }}">
-                            <span><i class="trip-card__seat-key is-sold"></i>{{ __('core::booking.sold') }}</span>
-                            <span><i class="trip-card__seat-key is-free"></i>{{ __('core::booking.available') }}</span>
-                            <span><i class="trip-card__seat-key is-chosen"></i>{{ __('core::booking.selected') }}</span>
-                        </div>
-                    </div>
+                    @include('BookingManagement::partials.booking-seat-map', ['seatTrip' => $trip, 'leg' => 'return'])
                     <div id="booking-vehicle-info" class="booking-page__vehicle-popover"
                         x-show="vehicleInfoOpen" x-transition.opacity x-cloak
                         @click.outside="vehicleInfoOpen = false" @keydown.escape.window="vehicleInfoOpen = false"
@@ -336,14 +348,28 @@
                         </div>
                     </div>
                 </section>
+                @if ($outboundTrip)
+                    </div>
+                @endif
 
                 @include('BookingManagement::partials.booking-form')
             </div>
 
             <aside class="booking-page__aside" aria-label="{{ __('core::booking.trip_info') }}">
+                @if ($outboundTrip)
+                    <section class="booking-panel booking-page__summary">
+                        <div class="booking-panel__header">
+                            <h2>{{ __('core::booking.trip_info') }} · {{ __('core::booking.outbound_leg') }}</h2>
+                            <button type="button" class="booking-page__detail-link" @click="openTripDetail()">
+                                {{ __('core::booking.detail') }}
+                            </button>
+                        </div>
+                        @include('BookingManagement::partials.booking-trip-summary', ['summaryTrip' => $outboundTrip, 'summaryLeg' => 'outbound'])
+                    </section>
+                @endif
                 <section id="booking-trip-info" class="booking-panel booking-page__summary">
                     <div class="booking-panel__header">
-                        <h2>{{ __('core::booking.trip_info') }}</h2>
+                        <h2>{{ __('core::booking.trip_info') }}@if ($outboundTrip) · {{ __('core::booking.return_leg') }}@endif</h2>
                         <button type="button" class="booking-page__detail-link" x-ref="tripDetailTrigger"
                             @click="openTripDetail()" aria-haspopup="dialog"
                             :aria-expanded="tripDetailOpen" aria-controls="booking-trip-detail-modal">
@@ -375,9 +401,14 @@
                         </ul>
                     </div>
                     <dl>
-                        <div><dt>{{ __('core::booking.fare') }}</dt><dd x-text="money(selectedIds.length * fare)"></dd></div>
+                        @if ($outboundTrip)
+                            <div><dt>{{ __('core::booking.outbound_fare') }}</dt><dd x-text="money(outboundSelectedIds.length * outboundFare)"></dd></div>
+                            <div><dt>{{ __('core::booking.return_fare') }}</dt><dd x-text="money(selectedIds.length * fare)"></dd></div>
+                        @else
+                            <div><dt>{{ __('core::booking.fare') }}</dt><dd x-text="money(selectedIds.length * fare)"></dd></div>
+                        @endif
                         <div><dt>{{ __('core::booking.payment_fee') }}</dt><dd>0đ</dd></div>
-                        <div class="booking-page__total"><dt>{{ __('core::booking.total') }}</dt><dd x-text="money(selectedIds.length * fare)"></dd></div>
+                        <div class="booking-page__total"><dt>{{ __('core::booking.total') }}</dt><dd x-text="money(total())"></dd></div>
                     </dl>
                 </section>
             </aside>
