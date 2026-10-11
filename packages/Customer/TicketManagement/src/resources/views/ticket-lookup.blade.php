@@ -137,41 +137,7 @@
             @endif
 
             @if($result ?? null)
-                @php($booking = $result['booking'])
-                <section aria-labelledby="lookup-result-title" class="mx-auto mt-10 max-w-225 overflow-hidden rounded-2xl border border-futa-orange-soft bg-white shadow-[0_8px_28px_rgba(83,50,29,.08)]">
-                    <div class="border-b border-futa-orange-soft bg-[#fff5ef] px-6 py-5 sm:px-8">
-                        <p class="text-xs font-bold uppercase tracking-wider text-futa-green">{{ __('core::ticket-lookup.result_eyebrow') }}</p>
-                        <h2 id="lookup-result-title" class="mt-1 text-2xl font-bold text-gray-950">{{ $booking->origin_city }} → {{ $booking->destination_city }}</h2>
-                        <p class="mt-2 text-sm font-medium text-gray-600">{{ __('core::ticket-lookup.booking_code') }}: <span class="font-bold text-futa-orange">{{ $booking->booking_code }}</span></p>
-                    </div>
-
-                    <dl class="grid gap-x-8 gap-y-5 px-6 py-6 sm:grid-cols-2 sm:px-8">
-                        <div><dt class="text-sm text-gray-500">{{ __('core::ticket-lookup.departure') }}</dt><dd class="mt-1 font-semibold text-gray-950">{{ \Illuminate\Support\Carbon::parse($booking->departure_time)->format('d/m/Y H:i') }}</dd></div>
-                        <div><dt class="text-sm text-gray-500">{{ __('core::ticket-lookup.arrival') }}</dt><dd class="mt-1 font-semibold text-gray-950">{{ \Illuminate\Support\Carbon::parse($booking->arrival_time)->format('d/m/Y H:i') }}</dd></div>
-                        <div><dt class="text-sm text-gray-500">{{ __('core::ticket-lookup.pickup') }}</dt><dd class="mt-1 font-semibold text-gray-950">{{ $booking->origin_station ?: $booking->origin_city }}</dd></div>
-                        <div><dt class="text-sm text-gray-500">{{ __('core::ticket-lookup.dropoff') }}</dt><dd class="mt-1 font-semibold text-gray-950">{{ $booking->destination_station ?: $booking->destination_city }}</dd></div>
-                        <div><dt class="text-sm text-gray-500">{{ __('core::ticket-lookup.vehicle') }}</dt><dd class="mt-1 font-semibold text-gray-950">{{ __('core::ticket-lookup.bus_type.'.$booking->bus_type) }}</dd></div>
-                        <div><dt class="text-sm text-gray-500">{{ __('core::ticket-lookup.seat_count') }}</dt><dd class="mt-1 font-semibold text-gray-950">{{ $booking->seat_count }}</dd></div>
-                        <div><dt class="text-sm text-gray-500">{{ __('core::ticket-lookup.booking_status_label') }}</dt><dd class="mt-1 font-semibold text-gray-950">{{ __('core::ticket-lookup.booking_status.'.$booking->status) }}</dd></div>
-                        <div><dt class="text-sm text-gray-500">{{ __('core::ticket-lookup.payment_status_label') }}</dt><dd class="mt-1 font-semibold text-gray-950">{{ __('core::ticket-lookup.payment_status.'.$result['paymentStatus']) }}</dd></div>
-                        <div><dt class="text-sm text-gray-500">{{ __('core::ticket-lookup.total_amount') }}</dt><dd class="mt-1 font-bold text-futa-orange">{{ number_format((float) $booking->total_amount, 0, ',', '.') }} đ</dd></div>
-                    </dl>
-
-                    @if($result['tickets']->isNotEmpty())
-                        <div class="border-t border-gray-100 px-6 py-5 sm:px-8">
-                            <h3 class="font-bold text-gray-950">{{ __('core::ticket-lookup.ticket_details') }}</h3>
-                            <ul class="mt-3 grid gap-3 sm:grid-cols-2">
-                                @foreach($result['tickets'] as $ticket)
-                                    <li class="rounded-xl border border-gray-200 px-4 py-3">
-                                        <p class="font-bold text-futa-orange">{{ $ticket->ticket_code }}</p>
-                                        <p class="mt-1 text-sm text-gray-600">{{ __('core::ticket-lookup.seat') }}: {{ $ticket->seat_code ?: __('core::ticket-lookup.unassigned') }}</p>
-                                        <p class="text-sm text-gray-600">{{ __('core::ticket-lookup.ticket_status.'.$ticket->status) }}</p>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-                </section>
+                @include('TicketManagement::partials.ticket-lookup-result')
             @endif
         </main>
 

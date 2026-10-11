@@ -15,6 +15,7 @@ class TicketLookupService
             ->join('trips', 'trips.id', '=', 'bookings.trip_id')
             ->join('routes', 'routes.id', '=', 'trips.route_id')
             ->join('buses', 'buses.id', '=', 'trips.bus_id')
+            ->join('bus_companies', 'bus_companies.id', '=', 'trips.bus_company_id')
             ->whereIn('customers.phone', [
                 $phone,
                 '+84'.substr($phone, 1),
@@ -35,6 +36,9 @@ class TicketLookupService
                 'bookings.seat_count',
                 'bookings.total_amount',
                 'bookings.status',
+                'customers.full_name as customer_name',
+                'customers.phone as customer_phone',
+                'customers.email as customer_email',
                 'trips.departure_time',
                 'trips.arrival_time',
                 'routes.origin_city',
@@ -42,6 +46,10 @@ class TicketLookupService
                 'routes.origin_station',
                 'routes.destination_station',
                 'buses.bus_type',
+                'buses.license_plate',
+                'bus_companies.name as company_name',
+                'bus_companies.code as company_code',
+                'bus_companies.hotline as company_hotline',
             ])
             ->first();
 
@@ -53,13 +61,15 @@ class TicketLookupService
             ->where('booking_id', $booking->id)
             ->when($booking->booking_code !== $code, fn ($query) => $query->where('ticket_code', $code))
             ->orderBy('id')
-            ->get(['ticket_code', 'seat_code', 'status']);
+            ->get(['ticket_code', 'passenger_name', 'passenger_phone', 'seat_code', 'price', 'status']);
 
-        $paymentStatus = DB::table('payments')
+        $payment = DB::table('payments')
             ->where('booking_id', $booking->id)
             ->orderByDesc('id')
-            ->value('status') ?? 'unpaid';
+            ->first(['method', 'status']);
+        $paymentStatus = $payment?->status ?? 'unpaid';
+        $paymentMethod = $payment?->method;
 
-        return compact('booking', 'tickets', 'paymentStatus');
+        return compact('booking', 'tickets', 'paymentStatus', 'paymentMethod');
     }
 }

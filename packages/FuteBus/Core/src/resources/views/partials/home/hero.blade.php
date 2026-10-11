@@ -89,6 +89,13 @@
         highlightedLocation: 0,
         expandedArea: null,
         locationCatalog: @js($bookingLocations),
+        voiceOpen: false,
+        voiceListening: false,
+        voiceTranscript: '',
+        voicePreview: null,
+        voiceError: '',
+        voiceSubmitting: false,
+        voiceErrors: @js(__('core::app.home.hero.voice_errors')),
         init() {
             try {
                 const saved = JSON.parse(localStorage.getItem('futabus.recent-trip-searches.v1') || '[]');
@@ -265,7 +272,66 @@
             [this.departure, this.destination] = [this.destination, this.departure];
             this.locationOpen = null;
         },
+        startVoiceSearch() {
+            this.voiceOpen = true;
+            this.voiceError = '';
+            if (!this.voiceListening) {
+                this.voiceTranscript = '';
+                this.voicePreview = null;
+                this.voiceSubmitting = false;
+            }
+            window.FutaVoiceSearch?.start();
+        },
+        interpretVoice() {
+            this.voicePreview = null;
+            if (!this.voiceTranscript.trim()) return;
+            this.voicePreview = window.FutaVoiceSearch?.parse(
+                this.voiceTranscript, this.locationCatalog, @js(now()->format('Y-m-d')),
+            ) || null;
+            this.voiceError = this.voicePreview?.error
+                ? (this.voiceErrors[this.voicePreview.error] || this.voiceErrors.default) : '';
+        },
+        applyVoiceSearch() {
+            if (!this.voicePreview || this.voicePreview.error || this.voiceSubmitting) return;
+            this.voiceSubmitting = true;
+            const result = this.voicePreview;
+            this.departure = result.departure;
+            this.destination = result.destination;
+            this.roundTrip = result.roundTrip;
+            this.locationOpen = null;
+            window.FutaVoiceSearch?.stop();
+            this.$nextTick(() => {
+                const departureDate = result.departureDate
+                    || this.$el.querySelector('[name=departure_date]')?.value;
+                window.dispatchEvent(new CustomEvent('hero-restore-dates', {
+                    detail: { departureDate, returnDate: result.roundTrip ? result.returnDate : '' },
+                }));
+                if (result.quantity) window.dispatchEvent(new CustomEvent('hero-restore-quantity', {
+                    detail: { quantity: result.quantity },
+                }));
+                const submitWhenReady = (attempts = 0) => {
+                    const form = this.$el.querySelector('#trip-search');
+                    const dateReady = form.elements.namedItem('departure_date').value === departureDate
+                        && (!result.roundTrip || form.elements.namedItem('return_date').value === result.returnDate);
+                    const quantityReady = !result.quantity
+                        || Number(form.elements.namedItem('quantity').value) === result.quantity;
+                    if (dateReady && quantityReady) {
+                        this.voiceOpen = false;
+                        form.requestSubmit();
+                    } else if (attempts < 3) {
+                        window.requestAnimationFrame(() => submitWhenReady(attempts + 1));
+                    } else {
+                        this.voiceSubmitting = false;
+                        this.voiceError = this.voiceErrors.default;
+                    }
+                };
+                this.$nextTick(() => window.requestAnimationFrame(() => submitWhenReady()));
+            });
+        },
     }"
+    @hero-voice-state.window="voiceListening = $event.detail.listening"
+    @hero-voice-result.window="voiceTranscript = $event.detail.transcript; voicePreview = null; if ($event.detail.final) { interpretVoice(); applyVoiceSearch() }"
+    @hero-voice-error.window="voiceListening = false; voiceError = voiceErrors[$event.detail.code] || voiceErrors.default"
 >
     <div class="home-search-banner mx-auto aspect-1128/310 w-full max-w-282 overflow-hidden rounded-xl border border-white/60 bg-[#fff7f1] shadow-[0_6px_14px_rgba(67,31,18,.26)] max-sm:aspect-16/7">
         <img
@@ -276,7 +342,7 @@
     </div>
 
     <form id="trip-search" class="relative mx-auto mt-8 w-full max-w-282 rounded-[18px] bg-white px-6 pt-6.5 pb-10.5 hero-form-border max-sm:px-4" action="{{ route('trip-search') }}" method="GET" @submit="submitSearch($event)">
-        <div class="mb-5.25 flex items-center justify-between gap-4">
+        <div class="mb-5.25 flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center gap-7 max-sm:gap-4">
                 <label class="flex cursor-pointer items-center gap-2 font-bold transition-colors duration-200" :class="!roundTrip ? 'text-futa-orange' : 'text-gray-500'">
                     <input
@@ -301,7 +367,70 @@
                     <span>{{ __('core::app.home.hero.round_trip') }}</span>
                 </label>
             </div>
-            <a href="{{ route('booking-guide') }}" class="text-sm font-medium text-futa-orange hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange">{{ __('core::app.home.hero.guide') }}</a>
+            <div class="flex items-center gap-3">
+                <button
+                    type="button"
+                    @click="startVoiceSearch()"
+                    :aria-pressed="voiceListening"
+                    class="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-futa-orange/30 bg-futa-orange-soft px-3 text-sm font-bold text-futa-orange transition hover:border-futa-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
+                    aria-label="{{ __('core::app.home.hero.voice_label') }}"
+                >
+                    <x-heroicon-s-microphone class="size-4" aria-hidden="true" />
+                    <span class="hidden sm:inline">{{ __('core::app.home.hero.voice_label') }}</span>
+                </button>
+                <a href="{{ route('booking-guide') }}" class="text-sm font-medium text-futa-orange hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange">{{ __('core::app.home.hero.guide') }}</a>
+            </div>
+        </div>
+
+        <div x-show="voiceOpen" x-cloak class="mb-5 rounded-xl border border-futa-orange/25 bg-futa-orange-soft p-4" aria-label="{{ __('core::app.home.hero.voice_label') }}">
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <p class="text-sm font-extrabold text-futa-green">{{ __('core::app.home.hero.voice_label') }}</p>
+                    <p class="mt-1 text-xs leading-5 text-gray-600">{{ __('core::app.home.hero.voice_example') }}</p>
+                </div>
+                <button
+                    type="button"
+                    @click="voiceOpen = false; window.FutaVoiceSearch?.stop()"
+                    class="grid size-8 shrink-0 place-items-center rounded-full text-gray-500 hover:bg-white focus-visible:outline-2 focus-visible:outline-futa-orange"
+                    aria-label="{{ __('core::app.home.hero.voice_close') }}"
+                ><x-heroicon-o-x-mark class="size-5" aria-hidden="true" /></button>
+            </div>
+            <div class="mt-3 flex flex-wrap items-end gap-3">
+                <button
+                    type="button"
+                    @click="startVoiceSearch()"
+                    class="inline-flex min-h-10 items-center gap-2 rounded-full bg-futa-orange px-4 text-sm font-bold text-white hover:bg-futa-orange-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
+                >
+                    <x-heroicon-s-microphone class="size-4" aria-hidden="true" />
+                    <span x-text="voiceListening ? @js(__('core::app.home.hero.voice_stop')) : @js(__('core::app.home.hero.voice_listen'))"></span>
+                </button>
+                <label class="min-w-50 flex-1 text-xs font-semibold text-gray-700">{{ __('core::app.home.hero.voice_transcript_label') }}
+                    <input
+                        type="text"
+                        x-model="voiceTranscript"
+                        @input.debounce.250ms="interpretVoice()"
+                        placeholder="{{ __('core::app.home.hero.voice_transcript_placeholder') }}"
+                        class="mt-1 block h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm font-medium text-gray-900 outline-none focus:border-futa-orange focus:ring-2 focus:ring-futa-orange/15"
+                    >
+                </label>
+            </div>
+            <p class="mt-2 min-h-5 text-xs font-medium" :class="voiceError ? 'text-red-600' : 'text-futa-green'" role="status" aria-live="polite" x-text="voiceError || (voiceListening ? @js(__('core::app.home.hero.voice_listening')) : '')"></p>
+            <template x-if="voicePreview && !voicePreview.error">
+                <div class="mt-2 rounded-lg border border-futa-green/15 bg-white px-3 py-2 text-sm font-semibold text-gray-900">
+                    <span x-text="voicePreview.departure + ' → ' + voicePreview.destination"></span>
+                    <span class="ml-2 text-futa-green" x-text="voicePreview.departureDate || $el.closest('form').querySelector('[name=departure_date]')?.value"></span>
+                    <span x-show="voicePreview.roundTrip" class="ml-2 text-futa-green" x-text="'→ ' + voicePreview.returnDate"></span>
+                    <span x-show="voicePreview.quantity" class="ml-2 text-gray-600" x-text="voicePreview.quantity + ' ' + @js(__('core::app.home.hero.voice_tickets'))"></span>
+                </div>
+            </template>
+            <div class="mt-3 flex justify-end">
+                <button
+                    type="button"
+                    @click="applyVoiceSearch()"
+                    :disabled="!voicePreview || !!voicePreview.error || voiceSubmitting"
+                    class="rounded-full bg-futa-green px-5 py-2 text-sm font-bold text-white hover:bg-futa-green-dark disabled:cursor-not-allowed disabled:opacity-40"
+                >{{ __('core::app.home.hero.voice_apply') }}</button>
+            </div>
         </div>
 
         <div
