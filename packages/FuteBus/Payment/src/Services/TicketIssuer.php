@@ -36,8 +36,12 @@ class TicketIssuer
             'total_amount' => count($seatIds) * (int) $trip['fare'],
             'status'       => 'confirmed',
             'notes'        => json_encode([
-                'pickup'  => $outbound ? ['name' => $trip['origin']] : $preview['pickup'],
-                'dropoff' => $outbound ? ['name' => $trip['destination']] : $preview['dropoff'],
+                'pickup'  => $outbound
+                    ? ($preview['outbound_pickup'] ?? ['name' => $trip['origin']])
+                    : $preview['pickup'],
+                'dropoff' => $outbound
+                    ? ($preview['outbound_dropoff'] ?? ['name' => $trip['destination']])
+                    : $preview['dropoff'],
             ], JSON_UNESCAPED_UNICODE),
             'created_at' => now(),
             'updated_at' => now(),

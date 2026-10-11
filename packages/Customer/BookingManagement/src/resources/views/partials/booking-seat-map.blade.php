@@ -22,9 +22,7 @@
         <p x-show="deckSeats('lower', @js($leg)).length + deckSeats('upper', @js($leg)).length === 0"
             class="text-sm text-slate-500">{{ __('core::trip-search.no_seat_map') }}</p>
     </div>
-    <div class="booking-page__legend" aria-label="{{ __('core::trip-search.seat_status') }}">
-        <span><i class="trip-card__seat-key is-sold"></i>{{ __('core::booking.sold') }}</span>
-        <span><i class="trip-card__seat-key is-free"></i>{{ __('core::booking.available') }}</span>
-        <span><i class="trip-card__seat-key is-chosen"></i>{{ __('core::booking.selected') }}</span>
-    </div>
+    @unless ($sharedLegend ?? false)
+        @include('BookingManagement::partials.booking-seat-legend')
+    @endunless
 </div>

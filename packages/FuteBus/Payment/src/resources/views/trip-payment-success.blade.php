@@ -55,7 +55,7 @@
                                 'trip' => $ticket['trip'],
                                 'departure' => \Illuminate\Support\Carbon::parse($ticket['trip']['departure_time']),
                                 'ticketPickup' => $ticket['trip']['id'] === ($preview['outbound_trip']['id'] ?? null)
-                                    ? ['name' => $ticket['trip']['origin'], 'address' => null]
+                                    ? ($preview['outbound_pickup'] ?? ['name' => $ticket['trip']['origin'], 'address' => null])
                                     : $preview['pickup'],
                                 'shareUrl' => $shareUrl,
                             ])
