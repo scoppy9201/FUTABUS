@@ -1,4 +1,10 @@
 @media (max-width: 900px) {
+    .booking-page__round-trip-legs {
+        grid-template-columns: 1fr;
+    }
+    .booking-page__round-trip-legs > .booking-page__seats:last-child {
+        border-left: 1px solid #dce1e7;
+    }
     .booking-page__hero-inner {
         grid-template-columns: 1fr auto 1fr;
     }

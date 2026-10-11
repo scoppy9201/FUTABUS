@@ -22,8 +22,8 @@
         <div class="grid grid-cols-[105px_minmax(0,1fr)] gap-2"><dt class="text-[#859098]">{{ __('Payment::payment.success_seat') }}</dt><dd class="m-0 wrap-break-word text-right font-semibold text-futa-green">{{ $ticket['seat'] }}</dd></div>
         <div class="grid grid-cols-[105px_minmax(0,1fr)] gap-2">
             <dt class="text-[#859098]">{{ __('Payment::payment.success_pickup') }}</dt>
-            <dd class="m-0 wrap-break-word text-right font-semibold text-futa-green">{{ $preview['pickup']['name'] }}
-                <small class="mt-1 block text-xs font-normal text-[#8c979d]">{{ $preview['pickup']['address'] ?? '' }}</small>
+            <dd class="m-0 wrap-break-word text-right font-semibold text-futa-green">{{ $ticketPickup['name'] }}
+                <small class="mt-1 block text-xs font-normal text-[#8c979d]">{{ $ticketPickup['address'] ?? '' }}</small>
             </dd>
         </div>
         <div class="grid grid-cols-[105px_minmax(0,1fr)] gap-2"><dt class="text-[#859098]">{{ __('Payment::payment.success_fare') }}</dt><dd class="m-0 wrap-break-word text-right font-semibold text-futa-green">{{ number_format($ticket['price'], 0, ',', '.') }}đ</dd></div>

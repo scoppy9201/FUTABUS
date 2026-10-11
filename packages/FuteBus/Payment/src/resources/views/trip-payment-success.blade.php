@@ -50,7 +50,15 @@
                     </button>
                     <div class="ticket-success__tickets flex snap-x snap-mandatory gap-4.5 overflow-x-auto px-7 pb-4.5 scroll-smooth [scrollbar-width:thin] max-sm:px-3 max-sm:pb-3.75 print:block print:overflow-visible" data-ticket-list>
                         @foreach ($tickets as $ticket)
-                            @include('Payment::partials.payment-success-ticket', ['ticket' => $ticket, 'trip' => $trip, 'departure' => $departure, 'shareUrl' => $shareUrl])
+                            @include('Payment::partials.payment-success-ticket', [
+                                'ticket' => $ticket,
+                                'trip' => $ticket['trip'],
+                                'departure' => \Illuminate\Support\Carbon::parse($ticket['trip']['departure_time']),
+                                'ticketPickup' => $ticket['trip']['id'] === ($preview['outbound_trip']['id'] ?? null)
+                                    ? ['name' => $ticket['trip']['origin'], 'address' => null]
+                                    : $preview['pickup'],
+                                'shareUrl' => $shareUrl,
+                            ])
                         @endforeach
                     </div>
                     <button type="button" class="ticket-success__scroll-button absolute top-[45%] right-1.25 z-10 grid size-12 cursor-pointer place-items-center rounded-full bg-white text-[#5c666a]

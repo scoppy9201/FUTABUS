@@ -35,11 +35,34 @@ class PaymentPreviewBuilder
             throw ValidationException::withMessages(['seats' => __('core::booking.seats_unavailable')]);
         }
 
+        $outboundTrip = null;
+        $outboundSeatIds = [];
+        $outboundSeats = collect();
+        if ($data['trip_type'] === 'round_trip') {
+            if (! $isReturn) {
+                throw ValidationException::withMessages(['direction' => __('core::booking.invalid_round_trip')]);
+            }
+            $outboundTrip = collect($this->search->search(
+                $data['departure'], $data['destination'], $data['departure_date'], (int) $data['quantity'],
+            ))->firstWhere('id', (int) $data['outbound_trip']);
+            abort_if($outboundTrip === null, 404);
+            if (Carbon::parse($outboundTrip['arrival_time'])->greaterThanOrEqualTo(Carbon::parse($selected['departure_time']))) {
+                throw ValidationException::withMessages(['outbound_trip' => __('core::booking.invalid_round_trip')]);
+            }
+            $outboundSeatIds = array_map('intval', $data['outbound_seats']);
+            $outboundSeats = collect($outboundTrip['seats'])
+                ->filter(fn (array $seat): bool => ! $seat['sold'] && in_array($seat['id'], $outboundSeatIds, true))
+                ->values();
+            if ($outboundSeats->count() !== count($outboundSeatIds)) {
+                throw ValidationException::withMessages(['outbound_seats' => __('core::booking.seats_unavailable')]);
+            }
+        }
+
         $catalog = $this->locations->all();
         $pickupIsTransfer = $data['pickup_mode'] === 'transfer';
         $dropoffIsTransfer = $data['dropoff_mode'] === 'transfer';
 
-        return [
+        $preview = [
             'user_id'    => $userId,
             'token'      => (string) Str::uuid(),
             'created_at' => now()->timestamp,
@@ -75,6 +98,20 @@ class PaymentPreviewBuilder
                     : $this->addressFor($selected['destination'], $catalog),
             ],
         ];
+
+        if ($outboundTrip !== null) {
+            $preview['outbound_trip'] = [
+                'id'             => $outboundTrip['id'],
+                'origin'         => $outboundTrip['origin'],
+                'destination'    => $outboundTrip['destination'],
+                'departure_time' => $outboundTrip['departure_time'],
+                'fare'           => $outboundTrip['price'],
+            ];
+            $preview['outbound_seats'] = $outboundSeats->pluck('code')->all();
+            $preview['outbound_seat_ids'] = $outboundSeatIds;
+        }
+
+        return $preview;
     }
 
     private function addressFor(string $station, array $catalog): ?string

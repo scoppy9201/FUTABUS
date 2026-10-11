@@ -39,6 +39,10 @@
                 this.$nextTick(() => this.$refs.directionTabs?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
                 return;
             }
+            if (trip.departure_time <= this.selectedOutboundTrip.arrival_time) {
+                this.showSeatNotice(@js(__('core::booking.invalid_round_trip')));
+                return;
+            }
             this.openBooking(trip);
         },
         openBooking(trip) {
@@ -47,6 +51,10 @@
             url.search = window.location.search;
             url.searchParams.set('direction', this.direction);
             url.searchParams.set('seats', this.selectedSeats(trip).map(seat => seat.id).join(','));
+            if (this.roundTrip && this.selectedOutboundTrip) {
+                url.searchParams.set('outbound_trip', this.selectedOutboundTrip.id);
+                url.searchParams.set('outbound_seats', this.selectedSeats(this.selectedOutboundTrip).map(seat => seat.id).join(','));
+            }
             window.location.assign(url.toString());
         },
         selectedSeats(trip) {

@@ -39,18 +39,26 @@ class TripSearchService
             ->get();
 
         $reservedSeatRows = DB::table('sepay_payment_intents')
-            ->whereIn('trip_id', $trips->pluck('id'))
+            ->where(fn ($query) => $query->whereIn('trip_id', $trips->pluck('id'))
+                ->orWhereIn('secondary_trip_id', $trips->pluck('id')))
             ->where('status', 'pending')
             ->where('expires_at', '>', now())
-            ->get(['trip_id', 'seat_ids'])
+            ->get(['trip_id', 'seat_ids', 'secondary_trip_id', 'secondary_seat_ids'])
             ->flatMap(function ($intent): array {
-                return array_map(
-                    fn ($seatId): object => (object) [
-                        'trip_id'        => $intent->trip_id,
-                        'seat_layout_id' => (int) $seatId,
-                    ],
-                    json_decode($intent->seat_ids, true) ?: []
-                );
+                $rows = [];
+                foreach ([
+                    [$intent->trip_id, $intent->seat_ids],
+                    [$intent->secondary_trip_id, $intent->secondary_seat_ids],
+                ] as [$tripId, $seatIds]) {
+                    if ($tripId === null) {
+                        continue;
+                    }
+                    foreach (json_decode($seatIds, true) ?: [] as $seatId) {
+                        $rows[] = (object) ['trip_id' => $tripId, 'seat_layout_id' => (int) $seatId];
+                    }
+                }
+
+                return $rows;
             });
         $bookedSeats = $occupiedSeatRows->concat($reservedSeatRows)->groupBy('trip_id');
 

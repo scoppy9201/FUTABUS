@@ -15,6 +15,7 @@ class TripBookingController extends Controller
     {
         $criteria = $request->validated();
         $isReturn = $criteria['trip_type'] === 'round_trip' && $request->query('direction') === 'return';
+        abort_if($criteria['trip_type'] === 'round_trip' && ! $isReturn, 404);
         $from = $isReturn ? $criteria['destination'] : $criteria['departure'];
         $to = $isReturn ? $criteria['departure'] : $criteria['destination'];
         $date = $isReturn ? $criteria['return_date'] : $criteria['departure_date'];
@@ -33,12 +34,35 @@ class TripBookingController extends Controller
             ->pluck('id')
             ->all();
 
+        $outboundTrip = null;
+        $outboundSeatIds = [];
+        if ($isReturn) {
+            $outboundId = filter_var($request->query('outbound_trip'), FILTER_VALIDATE_INT);
+            abort_if($outboundId === false || $outboundId === null, 404);
+            $outboundTrip = collect($search->search(
+                $criteria['departure'], $criteria['destination'], $criteria['departure_date'], (int) $criteria['quantity'],
+            ))->firstWhere('id', $outboundId);
+            abort_if($outboundTrip === null, 404);
+
+            $requestedOutboundSeats = collect(explode(',', (string) $request->query('outbound_seats', '')))
+                ->filter(fn ($id) => ctype_digit($id))
+                ->map(fn ($id) => (int) $id)
+                ->all();
+            $outboundSeatIds = collect($outboundTrip['seats'])
+                ->filter(fn ($seat) => ! $seat['sold'] && in_array($seat['id'], $requestedOutboundSeats, true))
+                ->take(5)
+                ->pluck('id')
+                ->all();
+        }
+
         return view('BookingManagement::trip-booking', [
             'trip'            => $selectedTrip,
             'criteria'        => $criteria,
             'from'            => $from,
             'to'              => $to,
             'selectedSeatIds' => $selectedSeatIds,
+            'outboundTrip'    => $outboundTrip,
+            'outboundSeatIds' => $outboundSeatIds,
         ]);
     }
 }

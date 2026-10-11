@@ -53,18 +53,22 @@ class TripPaymentPreviewController extends Controller
     {
         $intent = DB::table('sepay_payment_intents')->where('token', $draft)->first();
         if ($intent?->status === 'paid') {
-            $tickets = DB::table('tickets')->where('booking_id', $intent->booking_id)
-                ->orderBy('id')->get(['ticket_code', 'seat_code', 'price'])
+            $preview = json_decode($intent->snapshot, true);
+            $bookingIds = array_filter([$intent->booking_id, $intent->secondary_booking_id]);
+            $tickets = DB::table('tickets')->whereIn('booking_id', $bookingIds)
+                ->orderBy('id')->get(['ticket_code', 'trip_id', 'seat_code', 'price'])
                 ->map(fn (object $ticket): array => [
                     'code'      => $ticket->ticket_code,
                     'seat'      => $ticket->seat_code,
                     'price'     => $ticket->price,
                     'qr'        => $ticketQr->dataUri($ticket->ticket_code),
-                ]);
+                    'trip'      => isset($preview['outbound_trip']) && $ticket->trip_id === $preview['outbound_trip']['id']
+                        ? $preview['outbound_trip'] : $preview['trip'],
+                ])->sortBy(fn (array $ticket): string => $ticket['trip']['departure_time'])->values();
 
             return view('Payment::trip-payment-success', [
                 'bookingCode' => DB::table('bookings')->where('id', $intent->booking_id)->value('booking_code'),
-                'preview'     => json_decode($intent->snapshot, true),
+                'preview'     => $preview,
                 'total'       => $intent->amount,
                 'tickets'     => $tickets,
             ]);
@@ -130,7 +134,12 @@ class TripPaymentPreviewController extends Controller
         return redirect()->route('trip-booking.show', array_merge(
             ['trip' => $preview['trip']['id']],
             $preview['criteria'],
-            ['direction' => $preview['direction'], 'seats' => implode(',', $preview['seat_ids'])]
+            [
+                'direction'      => $preview['direction'],
+                'seats'          => implode(',', $preview['seat_ids']),
+                'outbound_trip'  => $preview['outbound_trip']['id'] ?? null,
+                'outbound_seats' => isset($preview['outbound_seat_ids']) ? implode(',', $preview['outbound_seat_ids']) : null,
+            ]
         ));
     }
 

@@ -43,8 +43,16 @@ class SePayWebhookProcessor
             $code = (string) $code;
             $intent = DB::table('sepay_payment_intents')->where('code', $code)->first();
             $trip = null;
+            $secondaryTrip = null;
             if ($intent !== null) {
-                $trip = DB::table('trips')->where('id', $intent->trip_id)->lockForUpdate()->first();
+                $tripIds = array_filter([(int) $intent->trip_id, (int) $intent->secondary_trip_id]);
+                sort($tripIds);
+                $lockedTrips = [];
+                foreach ($tripIds as $tripId) {
+                    $lockedTrips[$tripId] = DB::table('trips')->where('id', $tripId)->lockForUpdate()->first();
+                }
+                $trip = $lockedTrips[(int) $intent->trip_id] ?? null;
+                $secondaryTrip = $lockedTrips[(int) $intent->secondary_trip_id] ?? null;
                 $intent = DB::table('sepay_payment_intents')->where('id', $intent->id)->lockForUpdate()->first();
             }
             if ($event['transferType'] !== 'in'
@@ -72,13 +80,26 @@ class SePayWebhookProcessor
 
             $preview = json_decode($intent->snapshot, true);
             $seatIds = array_map('intval', json_decode($intent->seat_ids, true));
+            $secondarySeatIds = $intent->secondary_trip_id === null
+                ? [] : array_map('intval', json_decode($intent->secondary_seat_ids, true) ?: []);
             $this->seats->releaseCancelled((int) $intent->trip_id, $seatIds);
+            if ($intent->secondary_trip_id !== null) {
+                $this->seats->releaseCancelled((int) $intent->secondary_trip_id, $secondarySeatIds);
+            }
             $booked = DB::table('booked_seats')
                 ->where('trip_id', $intent->trip_id)
                 ->whereIn('seat_layout_id', $seatIds)
                 ->exists();
+            $secondaryBooked = $intent->secondary_trip_id !== null && DB::table('booked_seats')
+                ->where('trip_id', $intent->secondary_trip_id)
+                ->whereIn('seat_layout_id', $secondarySeatIds)
+                ->exists();
             if ($trip === null || $trip->status !== 'scheduled'
-                || $trip->departure_time <= now()->toDateTimeString() || $booked) {
+                || $trip->departure_time <= now()->toDateTimeString() || $booked
+                || ($intent->secondary_trip_id !== null && ($secondaryTrip === null
+                    || $secondaryTrip->status !== 'scheduled'
+                    || $secondaryTrip->departure_time <= now()->toDateTimeString()
+                    || $secondaryBooked))) {
                 DB::table('sepay_payment_intents')->where('id', $intent->id)
                     ->update(['status' => 'needs_review', 'updated_at' => now()]);
                 $this->markTransaction($transactionId, $intent->id, 'needs_review');
@@ -87,6 +108,8 @@ class SePayWebhookProcessor
             }
 
             $bookingId = $this->issuer->issue($intent, $preview, $seatIds);
+            $secondaryBookingId = $intent->secondary_trip_id === null ? null
+                : $this->issuer->issue($intent, $preview, $secondarySeatIds, true);
 
             DB::table('payments')->insert([
                 'payment_code'   => $intent->code,
@@ -101,10 +124,11 @@ class SePayWebhookProcessor
                 'updated_at'     => now(),
             ]);
             DB::table('sepay_payment_intents')->where('id', $intent->id)->update([
-                'status'     => 'paid',
-                'booking_id' => $bookingId,
-                'paid_at'    => now(),
-                'updated_at' => now(),
+                'status'               => 'paid',
+                'booking_id'           => $bookingId,
+                'secondary_booking_id' => $secondaryBookingId,
+                'paid_at'              => now(),
+                'updated_at'           => now(),
             ]);
             $this->markTransaction($transactionId, $intent->id, 'matched');
         });

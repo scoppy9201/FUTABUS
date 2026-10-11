@@ -102,6 +102,10 @@ class PaymentIntentController extends Controller
         if ($intent->status === 'paid' && $intent->booking_id !== null) {
             $data['booking'] = DB::table('bookings')->where('id', $intent->booking_id)
                 ->first(['id', 'booking_code']);
+            if ($intent->secondary_booking_id !== null) {
+                $data['outbound_booking'] = DB::table('bookings')->where('id', $intent->secondary_booking_id)
+                    ->first(['id', 'booking_code']);
+            }
         }
 
         return $data;

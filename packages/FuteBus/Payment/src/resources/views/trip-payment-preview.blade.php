@@ -14,7 +14,8 @@
     @php
         $trip = $preview['trip'];
         $departure = \Illuminate\Support\Carbon::parse($trip['departure_time']);
-        $total = count($preview['seats']) * $trip['fare'];
+        $total = count($preview['seats']) * $trip['fare']
+            + count($preview['outbound_seats'] ?? []) * ($preview['outbound_trip']['fare'] ?? 0);
         $formattedTotal = number_format($total, 0, ',', '.').'đ';
         $methods = [
             ['name' => __('Payment::payment.payment_sepay'), 'image' => 'images/sepay.png', 'class' => 'sepay'],
@@ -203,9 +204,15 @@
                         <div><dt>{{ __('core::booking.email') }}</dt><dd>{{ $preview['customer']['email'] }}</dd></div>
                     </dl>
                 </section>
+                @if (isset($preview['outbound_trip']))
+                    <section class="payment-page__summary-card">
+                        <h2>{{ __('core::booking.outbound_leg') }}</h2>
+                        @include('Payment::partials.payment-preview-trip-summary', ['summaryLeg' => 'outbound'])
+                    </section>
+                @endif
                 <section class="payment-page__summary-card">
                     <div class="payment-page__card-heading">
-                        <h2>{{ __('core::booking.trip_info') }}</h2>
+                        <h2>{{ __('core::booking.trip_info') }}@if (isset($preview['outbound_trip'])) · {{ __('core::booking.return_leg') }}@endif</h2>
                         @include('Payment::partials.payment-preview-trip-tooltip')
                         <button type="button" class="payment-page__detail-link" x-ref="tripDetailTrigger" @click="openTripDetail()">
                             {{ __('core::booking.detail') }}
@@ -219,7 +226,12 @@
                         @include('Payment::partials.payment-preview-price-tooltip')
                     </div>
                     <dl>
-                        <div><dt>{{ __('core::booking.fare') }}</dt><dd>{{ $formattedTotal }}</dd></div>
+                        @if (isset($preview['outbound_trip']))
+                            <div><dt>{{ __('core::booking.outbound_fare') }}</dt><dd>{{ number_format(count($preview['outbound_seats']) * $preview['outbound_trip']['fare'], 0, ',', '.') }}đ</dd></div>
+                            <div><dt>{{ __('core::booking.return_fare') }}</dt><dd>{{ number_format(count($preview['seats']) * $trip['fare'], 0, ',', '.') }}đ</dd></div>
+                        @else
+                            <div><dt>{{ __('core::booking.fare') }}</dt><dd>{{ $formattedTotal }}</dd></div>
+                        @endif
                         <div><dt>{{ __('core::booking.payment_fee') }}</dt><dd>0đ</dd></div>
                         <div class="payment-page__total-row">
                             <dt>{{ __('core::booking.total') }}</dt><dd>{{ $formattedTotal }}</dd>
@@ -234,13 +246,16 @@
             <div class="booking-page__modal" role="dialog" aria-modal="true"
                 aria-labelledby="payment-trip-detail-title">
                 <div class="booking-page__modal-heading">
-                    <h2 id="payment-trip-detail-title">{{ __('core::booking.trip_details_title', ['count' => 1]) }}</h2>
+                    <h2 id="payment-trip-detail-title">{{ __('core::booking.trip_details_title', ['count' => isset($preview['outbound_trip']) ? 2 : 1]) }}</h2>
                     <button type="button" class="booking-page__modal-close" x-ref="tripDetailClose" @click="closeTripDetail()"
                         aria-label="{{ __('core::booking.close') }}">
                         <x-heroicon-o-x-mark class="size-5" aria-hidden="true" />
                     </button>
                 </div>
                 <div class="payment-page__modal-content">
+                    @if (isset($preview['outbound_trip']))
+                        @include('Payment::partials.payment-preview-trip-summary', ['summaryLeg' => 'outbound'])
+                    @endif
                     @include('Payment::partials.payment-preview-trip-summary')
                 </div>
             </div>
