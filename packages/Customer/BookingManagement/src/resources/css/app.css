@@ -1,4 +1,5 @@
 @import "./trip-booking.css";
+@import "../../../../TripSearch/src/resources/css/trip-seats.css";
 @import "./trip-booking-form.css";
 @import "./trip-booking-summary.css";
 @import "./trip-booking-vehicle.css";

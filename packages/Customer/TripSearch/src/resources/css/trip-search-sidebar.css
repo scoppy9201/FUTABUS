@@ -55,6 +55,14 @@
     font-weight: 700;
 }
 
+.trip-selection-summary.is-round-trip-selected .trip-selection-summary__content {
+    border-left-color: #d1d5db;
+}
+
+.trip-selection-summary.is-round-trip-selected .trip-selection-summary__count {
+    background: #9ca3af;
+}
+
 .trip-selection-summary__timeline {
     display: grid;
     grid-template-columns: max-content 14px minmax(5px, 1fr) max-content minmax(5px, 1fr) 16px max-content;
