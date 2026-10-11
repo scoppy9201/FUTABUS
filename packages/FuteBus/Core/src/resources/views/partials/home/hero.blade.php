@@ -368,7 +368,13 @@
                 </label>
             </div>
             <div class="flex items-center gap-3">
-                <button type="button" @click="startVoiceSearch()" :aria-pressed="voiceListening" class="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-futa-orange/30 bg-futa-orange-soft px-3 text-sm font-bold text-futa-orange transition hover:border-futa-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange" aria-label="{{ __('core::app.home.hero.voice_label') }}">
+                <button
+                    type="button"
+                    @click="startVoiceSearch()"
+                    :aria-pressed="voiceListening"
+                    class="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-futa-orange/30 bg-futa-orange-soft px-3 text-sm font-bold text-futa-orange transition hover:border-futa-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
+                    aria-label="{{ __('core::app.home.hero.voice_label') }}"
+                >
                     <x-heroicon-s-microphone class="size-4" aria-hidden="true" />
                     <span class="hidden sm:inline">{{ __('core::app.home.hero.voice_label') }}</span>
                 </button>
@@ -382,12 +388,30 @@
                     <p class="text-sm font-extrabold text-futa-green">{{ __('core::app.home.hero.voice_label') }}</p>
                     <p class="mt-1 text-xs leading-5 text-gray-600">{{ __('core::app.home.hero.voice_example') }}</p>
                 </div>
-                <button type="button" @click="voiceOpen = false; window.FutaVoiceSearch?.stop()" class="grid size-8 shrink-0 place-items-center rounded-full text-gray-500 hover:bg-white focus-visible:outline-2 focus-visible:outline-futa-orange" aria-label="{{ __('core::app.home.hero.voice_close') }}"><x-heroicon-o-x-mark class="size-5" aria-hidden="true" /></button>
+                <button
+                    type="button"
+                    @click="voiceOpen = false; window.FutaVoiceSearch?.stop()"
+                    class="grid size-8 shrink-0 place-items-center rounded-full text-gray-500 hover:bg-white focus-visible:outline-2 focus-visible:outline-futa-orange"
+                    aria-label="{{ __('core::app.home.hero.voice_close') }}"
+                ><x-heroicon-o-x-mark class="size-5" aria-hidden="true" /></button>
             </div>
             <div class="mt-3 flex flex-wrap items-end gap-3">
-                <button type="button" @click="startVoiceSearch()" class="inline-flex min-h-10 items-center gap-2 rounded-full bg-futa-orange px-4 text-sm font-bold text-white hover:bg-futa-orange-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"><x-heroicon-s-microphone class="size-4" aria-hidden="true" /><span x-text="voiceListening ? @js(__('core::app.home.hero.voice_stop')) : @js(__('core::app.home.hero.voice_listen'))"></span></button>
+                <button
+                    type="button"
+                    @click="startVoiceSearch()"
+                    class="inline-flex min-h-10 items-center gap-2 rounded-full bg-futa-orange px-4 text-sm font-bold text-white hover:bg-futa-orange-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
+                >
+                    <x-heroicon-s-microphone class="size-4" aria-hidden="true" />
+                    <span x-text="voiceListening ? @js(__('core::app.home.hero.voice_stop')) : @js(__('core::app.home.hero.voice_listen'))"></span>
+                </button>
                 <label class="min-w-50 flex-1 text-xs font-semibold text-gray-700">{{ __('core::app.home.hero.voice_transcript_label') }}
-                    <input type="text" x-model="voiceTranscript" @input.debounce.250ms="interpretVoice()" placeholder="{{ __('core::app.home.hero.voice_transcript_placeholder') }}" class="mt-1 block h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm font-medium text-gray-900 outline-none focus:border-futa-orange focus:ring-2 focus:ring-futa-orange/15">
+                    <input
+                        type="text"
+                        x-model="voiceTranscript"
+                        @input.debounce.250ms="interpretVoice()"
+                        placeholder="{{ __('core::app.home.hero.voice_transcript_placeholder') }}"
+                        class="mt-1 block h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm font-medium text-gray-900 outline-none focus:border-futa-orange focus:ring-2 focus:ring-futa-orange/15"
+                    >
                 </label>
             </div>
             <p class="mt-2 min-h-5 text-xs font-medium" :class="voiceError ? 'text-red-600' : 'text-futa-green'" role="status" aria-live="polite" x-text="voiceError || (voiceListening ? @js(__('core::app.home.hero.voice_listening')) : '')"></p>
@@ -400,7 +424,12 @@
                 </div>
             </template>
             <div class="mt-3 flex justify-end">
-                <button type="button" @click="applyVoiceSearch()" :disabled="!voicePreview || !!voicePreview.error || voiceSubmitting" class="rounded-full bg-futa-green px-5 py-2 text-sm font-bold text-white hover:bg-futa-green-dark disabled:cursor-not-allowed disabled:opacity-40">{{ __('core::app.home.hero.voice_apply') }}</button>
+                <button
+                    type="button"
+                    @click="applyVoiceSearch()"
+                    :disabled="!voicePreview || !!voicePreview.error || voiceSubmitting"
+                    class="rounded-full bg-futa-green px-5 py-2 text-sm font-bold text-white hover:bg-futa-green-dark disabled:cursor-not-allowed disabled:opacity-40"
+                >{{ __('core::app.home.hero.voice_apply') }}</button>
             </div>
         </div>
 
