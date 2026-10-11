@@ -40,6 +40,7 @@
         'complaint' => 'complaint',
         'customer' => 'customer-support',
         'web_guide' => 'booking-guide',
+        'topup_guide' => 'topup-guide',
     ];
     $brandLogos = [
         ['icons/futabus-logo.png', 'FUTA Bus Lines'],
@@ -96,10 +97,10 @@
                         <h3 class="font-bold uppercase text-futa-green">{{ __('core::app.home.footer.connect') }}</h3>
                         <div class="mt-3 flex gap-3">
                             <a href="#" aria-label="Facebook" class="block size-8 transition-transform hover:-translate-y-0.5">
-                                <img src="{{ asset('icons/social/facebook.svg') }}" alt="" class="size-full">
+                                <img src="{{ asset('icons/social/facebook.png') }}" alt="" width="32" height="32" class="size-full object-contain">
                             </a>
                             <a href="#" aria-label="YouTube" class="block size-8 transition-transform hover:-translate-y-0.5">
-                                <img src="{{ asset('icons/social/youtube.svg') }}" alt="" class="size-full">
+                                <img src="{{ asset('icons/social/youtube.png') }}" alt="" width="32" height="32" class="size-full object-contain">
                             </a>
                         </div>
                     </div>
