@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use FuteBus\Profile\Http\Controllers\FeedbackController;
 use FuteBus\Profile\Http\Controllers\PasswordController;
 use FuteBus\Profile\Http\Controllers\ProfileController;
 use FuteBus\Profile\Http\Controllers\TicketHistoryController;
@@ -20,4 +21,12 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/thong-tin-tai-khoan/dat-lai-mat-khau', [PasswordController::class, 'edit'])->name('profile.password.edit');
     Route::put('/thong-tin-tai-khoan/dat-lai-mat-khau', [PasswordController::class, 'update'])
         ->middleware('throttle:5,1')->name('profile.password.update');
+    Route::get('/thong-tin-tai-khoan/phan-anh', [FeedbackController::class, 'index'])
+        ->name('profile.feedback.index');
+    Route::post('/thong-tin-tai-khoan/phan-anh', [FeedbackController::class, 'store'])
+        ->middleware('throttle:5,1')->name('profile.feedback.store');
+    Route::get('/thong-tin-tai-khoan/phan-anh/{report}', [FeedbackController::class, 'show'])
+        ->whereNumber('report')->name('profile.feedback.show');
+    Route::get('/thong-tin-tai-khoan/phan-anh/{report}/anh/{attachment}', [FeedbackController::class, 'attachment'])
+        ->whereNumber(['report', 'attachment'])->name('profile.feedback.attachment');
 });

@@ -46,6 +46,14 @@
             <span class="grid size-9 shrink-0 place-items-center rounded-full bg-futa-orange text-white"><x-heroicon-o-lock-closed class="size-6" /></span>
             <span>{{ __('Profile::app.reset_password') }}</span>
         </a>
+        <a href="{{ route('profile.feedback.index') }}" @if(request()->routeIs('profile.feedback.*')) aria-current="page" @endif @class([
+            'flex items-center gap-3 rounded-xl px-3 py-3 text-lg hover:bg-futa-orange-soft',
+            'bg-futa-orange-soft font-semibold text-gray-950' => request()->routeIs('profile.feedback.*'),
+            'font-medium text-gray-900' => ! request()->routeIs('profile.feedback.*'),
+        ])>
+            <span class="grid size-9 shrink-0 place-items-center rounded-full bg-violet-600 text-white"><x-heroicon-o-chat-bubble-left-right class="size-6" /></span>
+            <span>{{ __('Profile::app.feedback') }}</span>
+        </a>
         <form
             action="{{ route('logout') }}"
             method="post"

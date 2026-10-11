@@ -6,6 +6,7 @@ return [
     'futapay'         => 'FUTAPay',
     'ticket_history'  => 'Lịch sử mua vé',
     'reset_password'  => 'Đặt lại mật khẩu',
+    'feedback'        => 'Phản ánh',
     'logout'          => 'Đăng xuất',
     'coming_soon'     => 'Tính năng đang được phát triển',
     'name'            => 'Họ và tên',

@@ -51,6 +51,10 @@
             <span class="grid size-9 shrink-0 place-items-center rounded-full bg-futa-orange text-white"><x-heroicon-o-lock-closed class="size-6" /></span>
             <span>{{ __('core::app.home.navbar.reset_password') }}</span>
         </a>
+        <a href="{{ route('profile.feedback.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-base font-semibold text-gray-900 transition hover:bg-futa-orange-soft focus-visible:bg-futa-orange-soft focus-visible:outline-none">
+            <span class="grid size-9 shrink-0 place-items-center rounded-full bg-violet-600 text-white"><x-heroicon-o-chat-bubble-left-right class="size-6" /></span>
+            <span>{{ __('core::app.home.navbar.feedback') }}</span>
+        </a>
         <form
             action="{{ route('logout') }}"
             method="post"

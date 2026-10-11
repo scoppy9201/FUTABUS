@@ -4,3 +4,4 @@ import './date-range-picker.js';
 import './status-filter.js';
 import './ticket-history-actions.js';
 import './ticket-history-detail.js';
+import './feedback.js';

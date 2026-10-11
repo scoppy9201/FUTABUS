@@ -3,7 +3,7 @@
 @section('title', __('Profile::tickets.title'))
 
 @section('content')
-    <div class="home-page min-h-screen bg-white">
+    <div class="home-page ticket-history-page min-h-screen bg-white">
         @include('core::partials.home.navbar')
 
         <main class="mx-auto grid w-full max-w-282 gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[255px_minmax(0,1fr)] lg:px-0">
@@ -127,7 +127,7 @@
                             role="listbox"
                             aria-label="{{ __('Profile::tickets.fields.status') }}"
                             hidden
-                            class="absolute left-0 top-full z-40 mt-2 max-h-64 w-full min-w-48 overflow-y-auto rounded-xl border border-gray-200 bg-white py-1 shadow-xl"
+                            class="ticket-history-scroll absolute left-0 top-full z-40 mt-2 max-h-64 w-full min-w-48 overflow-y-auto rounded-xl border border-gray-200 bg-white py-1 shadow-xl"
                         >
                             <button
                                 type="button" role="option" tabindex="-1" data-ticket-status-option=""
@@ -160,7 +160,7 @@
                     </div>
                 @endif
 
-                <div class="mt-5 rounded-2xl border border-gray-200 bg-white shadow-sm lg:flex lg:flex-1 lg:flex-col">
+                <div class="mt-5 rounded-2xl border border-gray-200 bg-white shadow-sm">
                     <div class="flex items-center justify-between gap-4 border-b border-gray-100 px-5 py-4">
                         <div>
                             <p class="text-sm font-semibold text-futa-green">{{ __('Profile::tickets.results', ['count' => $bookings->total()]) }}</p>
@@ -173,13 +173,12 @@
                         @endif
                     </div>
                     <div
-                        class="overflow-x-auto [scrollbar-width:thin] [scrollbar-color:#ef5222_#f3f4f6] lg:flex-1
-                            [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:rounded-full
-                            [&::-webkit-scrollbar-thumb]:bg-futa-orange [&::-webkit-scrollbar-track]:bg-gray-100"
+                        tabindex="0" aria-label="{{ __('Profile::tickets.title') }}"
+                        class="ticket-history-scroll max-h-96 overflow-auto focus-visible:-outline-offset-2 focus-visible:outline-2 focus-visible:outline-futa-orange"
                     >
                         <table class="w-full min-w-245 text-left text-sm">
                             <caption class="sr-only">{{ __('Profile::tickets.title') }}</caption>
-                            <thead class="bg-futa-orange-soft/40 text-gray-700">
+                            <thead class="sticky top-0 z-10 bg-futa-orange-soft text-gray-700">
                                 <tr>
                                     @foreach(['code', 'count', 'route', 'departure', 'amount', 'payment', 'status', 'action'] as $column)
                                         <th scope="col" class="whitespace-nowrap px-4 py-3.5 font-semibold">{{ __('Profile::tickets.columns.'.$column) }}</th>
@@ -214,7 +213,7 @@
                                         <td class="whitespace-nowrap px-4 py-4 text-gray-800">{{ \Illuminate\Support\Carbon::parse($booking->departure_time)->format('d/m/Y H:i') }}</td>
                                         <td class="whitespace-nowrap px-4 py-4 font-semibold text-gray-950">{{ __('Profile::tickets.currency', ['amount' => number_format((float) $booking->total_amount, 0, ',', '.')]) }}</td>
                                         <td class="whitespace-nowrap px-4 py-4 font-medium {{ $paymentColor }}">{{ __('Profile::tickets.payment_status.'.($booking->payment_status ?? 'unpaid')) }}</td>
-                                        <td class="whitespace-nowrap px-4 py-4"><span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {{ $bookingColor }}">{{ __('Profile::tickets.journey.list_status.'.$booking->journey_stage) }}</span></td>
+                                        <td class="whitespace-nowrap px-4 py-4"><span data-history-stage class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {{ $bookingColor }}">{{ __('Profile::tickets.journey.list_status.'.$booking->journey_stage) }}</span></td>
                                         <td class="whitespace-nowrap px-4 py-4 text-center">
                                             <button type="button" data-ticket-history-actions aria-controls="ticket-actions-{{ $booking->id }}" aria-expanded="false"
                                                 class="inline-flex size-9 items-center justify-center rounded-full border border-gray-200
@@ -284,7 +283,7 @@
 
         <dialog data-history-dialog aria-label="{{ __('Profile::tickets.detail_title') }}"
             data-load-error="{{ __('Profile::tickets.journey.load_error') }}"
-            class="m-auto w-[min(30rem,calc(100vw-1.5rem))] max-h-[calc(100dvh-1.5rem)] overflow-y-auto rounded-2xl border border-gray-200 bg-white p-0 shadow-2xl backdrop:bg-black/65">
+            class="ticket-history-scroll m-auto w-[min(64rem,calc(100vw-1.5rem))] max-h-[calc(100dvh-1.5rem)] overflow-y-auto rounded-2xl border border-gray-200 bg-white p-0 shadow-2xl backdrop:bg-black/65">
             <div data-history-dialog-content aria-live="polite"></div>
         </dialog>
 

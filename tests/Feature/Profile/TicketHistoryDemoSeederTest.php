@@ -62,7 +62,16 @@ class TicketHistoryDemoSeederTest extends TestCase
             $this->get(route('profile.tickets.show', ['booking' => $arrivedId, 'modal' => 1]))
                 ->assertOk()->assertSee('data-history-review', false)
                 ->assertSee('Tài xế thân thiện')
-                ->assertDontSee('data:image/svg+xml;base64,', false);
+                ->assertSee('QR mẫu', false)
+                ->assertSee('data:image/svg+xml;base64,', false);
+            $cancelledId = DB::table('bookings')->where('booking_code', 'DEMOHIST'.$user->id.'-2')->value('id');
+            $this->get(route('profile.tickets.show', ['booking' => $cancelledId, 'modal' => 1]))
+                ->assertOk()->assertDontSee('data:image/svg+xml;base64,', false);
+            $this->assertDatabaseCount('tickets', 0);
+            $this->app->detectEnvironment(fn (): string => 'testing');
+            $this->get(route('profile.tickets.show', ['booking' => $arrivedId, 'modal' => 1]))
+                ->assertOk()->assertDontSee('data:image/svg+xml;base64,', false);
+            $this->app->detectEnvironment(fn (): string => 'local');
             $departedId = DB::table('bookings')->where('booking_code', 'DEMOHIST'.$user->id.'-3')->value('id');
             $this->get(route('profile.tickets.show', ['booking' => $departedId, 'modal' => 1]))
                 ->assertOk()->assertSee('role="progressbar"', false)
