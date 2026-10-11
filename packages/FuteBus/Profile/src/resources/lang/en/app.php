@@ -6,6 +6,7 @@ return [
     'futapay'         => 'FUTAPay',
     'ticket_history'  => 'Ticket history',
     'reset_password'  => 'Reset password',
+    'feedback'        => 'Feedback',
     'logout'          => 'Log out',
     'coming_soon'     => 'This feature is coming soon',
     'name'            => 'Full name',

@@ -19,6 +19,7 @@ return [
             'account_information' => 'Thông tin tài khoản',
             'ticket_history'      => 'Lịch sử mua vé',
             'reset_password'      => 'Đặt lại mật khẩu',
+            'feedback'            => 'Phản ánh',
             'logout'              => 'Đăng xuất',
             'coming_soon'         => 'Tính năng đang được phát triển',
             'download_app'        => 'Tải ứng dụng',

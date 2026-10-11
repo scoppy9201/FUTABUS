@@ -19,6 +19,7 @@ return [
             'account_information' => 'Account information',
             'ticket_history'      => 'Ticket history',
             'reset_password'      => 'Reset password',
+            'feedback'            => 'Feedback',
             'logout'              => 'Log out',
             'coming_soon'         => 'This feature is coming soon',
             'download_app'        => 'Download app',

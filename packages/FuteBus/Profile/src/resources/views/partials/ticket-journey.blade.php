@@ -13,6 +13,25 @@
     $steps = ['booked', 'paid', 'departed', 'arrived', 'rated'];
     $isDemo = str_starts_with($booking->booking_code, 'DEMOHIST');
     $inDialog = $inDialog ?? false;
+    $reviewTags = [];
+    $reviewComment = '';
+    if ($review) {
+        $availableTags = array_unique(array_merge(
+            __('Profile::tickets.journey.review_tags_positive'),
+            __('Profile::tickets.journey.review_tags_negative'),
+            trans('Profile::tickets.journey.review_tags_positive', [], 'vi'),
+            trans('Profile::tickets.journey.review_tags_negative', [], 'vi'),
+            trans('Profile::tickets.journey.review_tags_positive', [], 'en'),
+            trans('Profile::tickets.journey.review_tags_negative', [], 'en')
+        ));
+        foreach (explode(' · ', (string) $review->comment) as $part) {
+            if (in_array($part, $availableTags, true)) {
+                $reviewTags[] = $part;
+            } elseif ($part !== '') {
+                $reviewComment = trim($reviewComment.' '.$part);
+            }
+        }
+    }
     $events = [];
     if (in_array($stage, ['cancelled', 'refunded', 'payment_failed'], true)) {
         $events[] = [
@@ -158,42 +177,73 @@
             </div>
         @endif
 
-        @if($canReview)
-            <form data-history-review @if($inDialog) data-no-loader @endif action="{{ route('profile.tickets.review', $booking->id) }}" method="post"
+        <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-8">
+        <div class="min-w-0 space-y-5">
+        @if($stage === 'rated' && $review)
+            <section class="rounded-xl border border-futa-orange bg-futa-orange-soft/30 p-4" aria-labelledby="journey-review-summary-title">
+                <h3 id="journey-review-summary-title" class="text-sm font-extrabold">{{ __('Profile::tickets.journey.review_your_review') }}</h3>
+                <div class="mt-2 flex items-center gap-2" aria-label="{{ __('Profile::tickets.journey.review_star', ['count' => $review->rating]) }}">
+                    @for($star = 1; $star <= 5; $star++)
+                        <x-heroicon-s-star @class(['size-5', 'text-amber-500' => $star <= $review->rating, 'text-slate-300' => $star > $review->rating]) aria-hidden="true" />
+                    @endfor
+                    <span class="ml-1 text-sm font-bold text-futa-orange">{{ __('Profile::tickets.journey.review_rating_labels.'.$review->rating) }}</span>
+                </div>
+                @if($reviewTags)
+                    <div class="mt-3 flex flex-wrap gap-1.5">
+                        @foreach($reviewTags as $tag)
+                            <span class="rounded-full border border-gray-200 bg-white px-2.5 py-1 text-xs font-semibold text-gray-800">{{ $tag }}</span>
+                        @endforeach
+                    </div>
+                @endif
+                @if($reviewComment !== '')
+                    <p class="mt-3 whitespace-pre-line text-sm text-slate-700">{{ $reviewComment }}</p>
+                @endif
+                <p class="mt-3 text-xs text-slate-500">{{ __('Profile::tickets.journey.review_date', ['date' => \Illuminate\Support\Carbon::parse($review->updated_at)->format('d/m/Y H:i')]) }}</p>
+            </section>
+        @elseif($canReview)
+            <form data-history-review data-review-too-long="{{ __('Profile::tickets.journey.review_comment_too_long') }}"
+                @if($inDialog) data-no-loader @endif action="{{ route('profile.tickets.review', $booking->id) }}" method="post"
                 class="rounded-xl border border-futa-orange/50 bg-futa-orange-soft/30 p-4">
                 @csrf
                 <fieldset>
                     <legend class="text-sm font-extrabold">{{ __('Profile::tickets.journey.review_title') }}</legend>
                     <p class="mt-1 text-xs text-slate-600">{{ __('Profile::tickets.journey.review_hint') }}</p>
+                    <input type="hidden" name="rating" value="">
                     <div class="mt-3 flex gap-1">
                         @for($star = 1; $star <= 5; $star++)
-                            <label data-review-star class="cursor-pointer rounded p-1 focus-within:outline-2 focus-within:outline-futa-orange">
-                                <input class="sr-only" type="radio" name="rating" value="{{ $star }}" @checked($review?->rating === $star) required>
-                                <x-heroicon-s-star @class(['size-7', 'text-futa-orange' => ($review?->rating ?? 0) >= $star, 'text-slate-300' => ($review?->rating ?? 0) < $star]) aria-hidden="true" />
-                                <span class="sr-only">{{ __('Profile::tickets.journey.review_star', ['count' => $star]) }}</span>
-                            </label>
+                            <button type="button" data-review-star="{{ $star }}" aria-pressed="false"
+                                aria-label="{{ __('Profile::tickets.journey.review_star', ['count' => $star]) }}"
+                                class="grid size-10 place-items-center rounded focus-visible:outline-2 focus-visible:outline-futa-orange">
+                                <x-heroicon-s-star class="size-7 text-slate-300" aria-hidden="true" />
+                            </button>
                         @endfor
                     </div>
                 </fieldset>
-                <p class="mt-3 text-xs font-semibold text-slate-600">{{ __('Profile::tickets.journey.review_tags_title') }}</p>
-                <div class="mt-2 flex flex-wrap gap-1.5">
-                    @foreach(__('Profile::tickets.journey.review_tags') as $tag)
-                        <button type="button" data-review-suggestion="{{ $tag }}"
-                            aria-pressed="{{ str_contains($review?->comment ?? '', $tag) ? 'true' : 'false' }}"
-                            class="rounded-full border border-gray-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:border-futa-orange hover:text-futa-orange aria-pressed:border-futa-orange aria-pressed:bg-futa-orange-soft aria-pressed:text-futa-orange">
-                            {{ $tag }}
-                        </button>
+                <div data-review-rating-labels class="mt-1 hidden text-xs font-bold text-futa-orange" aria-live="polite">
+                    @foreach(__('Profile::tickets.journey.review_rating_labels') as $rating => $label)
+                        <span data-review-rating-label="{{ $rating }}" hidden>{{ $label }}</span>
                     @endforeach
                 </div>
+                @foreach(['positive', 'negative'] as $group)
+                    <div data-review-tags="{{ $group }}" class="mt-3 hidden flex-wrap gap-1.5">
+                        @foreach(__('Profile::tickets.journey.review_tags_'.$group) as $tag)
+                            <button type="button" data-review-suggestion="{{ $tag }}" aria-pressed="false"
+                                class="rounded-full border border-gray-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:border-futa-orange hover:text-futa-orange aria-pressed:border-futa-orange aria-pressed:bg-futa-orange-soft aria-pressed:text-futa-orange">
+                                {{ $tag }}
+                            </button>
+                        @endforeach
+                    </div>
+                @endforeach
                 <label for="journey-comment-{{ $booking->id }}" class="sr-only">{{ __('Profile::tickets.journey.review_comment') }}</label>
-                <textarea id="journey-comment-{{ $booking->id }}" name="comment" rows="3" maxlength="300"
+                <input type="hidden" name="comment" value="">
+                <textarea id="journey-comment-{{ $booking->id }}" data-review-comment rows="3" maxlength="300"
                     placeholder="{{ __('Profile::tickets.journey.review_comment') }}"
-                    class="mt-3 w-full resize-y rounded-lg border border-gray-200 bg-white p-3 text-sm outline-none focus:border-futa-orange">{{ $review?->comment }}</textarea>
-                <p data-review-count class="text-right text-xs text-slate-500">{{ mb_strlen($review?->comment ?? '') }}/300</p>
+                    class="mt-3 w-full resize-y rounded-lg border border-gray-200 bg-white p-3 text-sm outline-none focus:border-futa-orange"></textarea>
+                <p data-review-count class="text-right text-xs text-slate-500">0/300</p>
                 <div class="mt-2 flex items-center justify-between gap-3">
                     <p data-review-error class="text-xs font-semibold text-red-700" role="alert"></p>
-                    <button type="submit" class="rounded-full bg-futa-orange px-4 py-2 text-xs font-bold text-white hover:bg-futa-orange-dark">
-                        {{ __('Profile::tickets.journey.'.($review ? 'review_update' : 'review_submit')) }}
+                    <button type="submit" disabled class="rounded-full bg-futa-orange px-4 py-2 text-xs font-bold text-white hover:bg-futa-orange-dark disabled:cursor-not-allowed disabled:opacity-50">
+                        {{ __('Profile::tickets.journey.review_submit') }}
                     </button>
                 </div>
             </form>
@@ -239,6 +289,8 @@
             </ol>
         </section>
 
+        </div>
+        <div class="min-w-0 space-y-5">
         <section aria-labelledby="journey-info-title">
             <h3 id="journey-info-title" class="text-xs font-extrabold uppercase tracking-wide">{{ __('Profile::tickets.journey.trip_info') }}</h3>
             <dl class="mt-3 grid grid-cols-2 gap-x-5 gap-y-3 border-t border-gray-100 pt-4 text-xs">
@@ -264,24 +316,40 @@
                 <h3 id="journey-tickets-title" class="text-xs font-extrabold uppercase tracking-wide">{{ __('Profile::tickets.journey.tickets') }}</h3>
                 <div class="mt-3 space-y-2">
                     @foreach($tickets as $ticket)
-                        <div class="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-3">
+                        <div class="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-3">
                             @if(isset($qrCodes[$ticket->ticket_code]))
-                                <img src="{{ $qrCodes[$ticket->ticket_code] }}" alt="{{ __('Profile::tickets.journey.qr_alt', ['code' => $ticket->ticket_code]) }}" class="size-18 rounded-lg border border-gray-200 bg-white p-1">
+                                <img src="{{ $qrCodes[$ticket->ticket_code] }}" alt="{{ __('Profile::tickets.journey.qr_alt', ['code' => $ticket->ticket_code]) }}"
+                                    class="size-24 shrink-0 rounded-lg border border-gray-200 bg-white p-1">
                             @else
-                                <span class="grid size-18 shrink-0 place-items-center rounded-lg bg-white text-slate-400"><x-heroicon-o-ticket class="size-8" aria-hidden="true" /></span>
+                                <span class="grid size-24 shrink-0 place-items-center rounded-lg bg-gray-50 text-slate-400"><x-heroicon-o-ticket class="size-8" aria-hidden="true" /></span>
                             @endif
-                            <div class="min-w-0 text-sm">
+                            <div class="min-w-0 space-y-0.5 text-sm">
+                                <p class="text-slate-600">{{ __('Profile::tickets.journey.ticket_and_seat', ['seat' => $ticket->seat_code ?: '—']) }}</p>
                                 <p class="break-all font-bold text-futa-orange">{{ $ticket->ticket_code }}</p>
-                                <p class="mt-1 text-slate-600">{{ __('Profile::tickets.journey.seat') }}: {{ $ticket->seat_code ?: '—' }}</p>
-                                <p class="text-xs text-slate-500">{{ __('Profile::tickets.journey.ticket_status.'.$ticket->status) }}</p>
+                                @if(isset($qrCodes[$ticket->ticket_code]) && $ticket->status === 'active')
+                                    <p class="text-xs leading-5 text-slate-600">{{ __('Profile::tickets.journey.show_qr_to_staff') }}</p>
+                                @else
+                                    <p class="text-xs text-slate-500">{{ __('Profile::tickets.journey.ticket_status.'.$ticket->status) }}</p>
+                                @endif
                             </div>
                         </div>
                     @endforeach
                 </div>
             </section>
+        @elseif($demoQrCode ?? null)
+            <section aria-labelledby="journey-demo-qr-title" class="rounded-xl border border-dashed border-futa-orange/40 bg-futa-orange-soft/30 p-3">
+                <h3 id="journey-demo-qr-title" class="text-xs font-extrabold text-futa-orange">{{ __('Profile::tickets.journey.demo_qr_title') }}</h3>
+                <div class="mt-2 flex items-center gap-3">
+                    <img src="{{ $demoQrCode }}" alt="{{ __('Profile::tickets.journey.demo_qr_alt') }}"
+                        class="size-22 shrink-0 rounded-lg border border-gray-200 bg-white p-1">
+                    <p class="text-xs leading-5 text-slate-600">{{ __('Profile::tickets.journey.demo_no_ticket') }}</p>
+                </div>
+            </section>
         @elseif($isDemo)
             <p class="rounded-xl border border-dashed border-gray-200 p-3 text-xs text-slate-500">{{ __('Profile::tickets.journey.demo_no_ticket') }}</p>
         @endif
+        </div>
+        </div>
     </div>
 
     <footer class="flex flex-wrap items-center justify-end gap-2 border-t border-gray-100 px-5 py-3.5">

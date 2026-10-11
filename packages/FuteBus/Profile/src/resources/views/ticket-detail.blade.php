@@ -11,7 +11,7 @@
                 <x-heroicon-o-arrow-left class="size-4" aria-hidden="true" />
                 {{ __('Profile::tickets.back_to_history') }}
             </a>
-            <div class="mx-auto mt-5 max-w-120 overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
+            <div class="mx-auto mt-5 max-w-5xl overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
                 @include('Profile::partials.ticket-journey')
             </div>
         </main>

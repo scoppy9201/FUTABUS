@@ -16,6 +16,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class TicketHistoryController extends Controller
 {
@@ -57,7 +58,16 @@ class TicketHistoryController extends Controller
             }
         }
 
-        $data = [...$detail, 'qrCodes' => $qrCodes];
+        $demoQrCode = null;
+        if (app()->environment('local')
+            && str_starts_with($detail['booking']->booking_code, 'DEMOHIST')
+            && in_array($detail['stage'], ['paid', 'departed', 'arrived', 'rated'], true)) {
+            $svg = (string) QrCode::format('svg')->size(160)->margin(2)
+                ->generate('FUTABUS-DEMO-INVALID:'.$detail['booking']->booking_code);
+            $demoQrCode = 'data:image/svg+xml;base64,'.base64_encode($svg);
+        }
+
+        $data = [...$detail, 'qrCodes' => $qrCodes, 'demoQrCode' => $demoQrCode];
 
         if ($request->query('modal') === '1') {
             return response()->view('Profile::partials.ticket-journey', [...$data, 'inDialog' => true])
@@ -80,7 +90,11 @@ class TicketHistoryController extends Controller
         $reviews->submit($user, $booking, (int) $input['rating'], $input['comment'] ?? null);
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => __('Profile::tickets.journey.review_saved')]);
+            return response()->json([
+                'message'    => __('Profile::tickets.journey.review_saved'),
+                'stage'      => 'rated',
+                'stageLabel' => __('Profile::tickets.journey.list_status.rated'),
+            ]);
         }
 
         return redirect()->route('profile.tickets.show', $booking);

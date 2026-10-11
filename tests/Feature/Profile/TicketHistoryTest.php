@@ -3,6 +3,7 @@
 namespace Tests\Feature\Profile;
 
 use App\Models\User;
+use FuteBus\Payment\Services\TicketQrService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Carbon;
@@ -191,9 +192,21 @@ class TicketHistoryTest extends TestCase
         $this->get($url)->assertOk()
             ->assertSee('Đã thanh toán, chờ giờ khởi hành')
             ->assertSee('JOURNEY-TICKET')
-            ->assertSee('Ghế: A01')
-            ->assertSee('data:image/svg+xml;base64,', false)
+            ->assertSee('Mã vé · Ghế A01')
+            ->assertSee('Đưa mã này cho nhân viên khi lên xe.')
+            ->assertSee(app(TicketQrService::class)->dataUri('JOURNEY-TICKET'), false)
             ->assertDontSee('data-history-review', false);
+
+        DB::table('tickets')->where('ticket_code', 'JOURNEY-TICKET')->update(['status' => 'used']);
+        $this->get($url)->assertOk()
+            ->assertSee(app(TicketQrService::class)->dataUri('JOURNEY-TICKET'), false)
+            ->assertDontSee('Đưa mã này cho nhân viên khi lên xe.');
+
+        DB::table('tickets')->where('ticket_code', 'JOURNEY-TICKET')->update(['status' => 'refunded']);
+        $this->get($url)->assertOk()
+            ->assertSee('JOURNEY-TICKET')
+            ->assertDontSee('data:image/svg+xml;base64,', false)
+            ->assertDontSee('Đưa mã này cho nhân viên khi lên xe.');
     }
 
     public function test_timeline_distinguishes_scheduled_times_from_operator_confirmation(): void
@@ -269,21 +282,60 @@ class TicketHistoryTest extends TestCase
         $this->actingAs($owner)->post($url, ['rating' => 5])->assertForbidden();
         DB::table('trips')->where('id', $booking['trip_id'])->update(['status' => 'arrived']);
 
+        $detailUrl = route('profile.tickets.show', ['booking' => $booking['booking_id'], 'modal' => 1]);
+        $this->get($detailUrl)->assertOk()
+            ->assertSee('data-review-star="5" aria-pressed="false"', false)
+            ->assertSee('data-review-tags="positive" class="mt-3 hidden', false)
+            ->assertSee('data-review-tags="negative" class="mt-3 hidden', false)
+            ->assertDontSee('id="journey-review-summary-title"', false);
+
         $this->post($url, ['rating' => 0])->assertSessionHasErrors('rating');
         $this->post($url, ['rating' => 6])->assertSessionHasErrors('rating');
         $this->post($url, ['rating' => 5, 'comment' => str_repeat('x', 301)])->assertSessionHasErrors('comment');
         $this->post($url, ['rating' => 5, 'comment' => 'Chuyến đi tốt'])->assertRedirect();
         $this->assertDatabaseHas('booking_reviews', ['booking_id' => $booking['booking_id'], 'user_id' => $owner->id, 'rating' => 5]);
-        $this->postJson($url, ['rating' => 4, 'comment' => 'Tốt <script>alert(1)</script>'])
-            ->assertOk()->assertJsonPath('message', 'Đã lưu đánh giá của bạn.');
+        $this->get($detailUrl)->assertOk()
+            ->assertSee('Cảm ơn bạn đã đánh giá!')
+            ->assertSee('Đánh giá của bạn')
+            ->assertSee('Tuyệt vời')
+            ->assertSee('Chuyến đi tốt')
+            ->assertDontSee('data-history-review', false);
+        $this->get(route('profile.tickets.index'))->assertOk()->assertSee('Đã đánh giá');
+
+        $this->postJson($url, ['rating' => 4, 'comment' => 'Xe sạch sẽ · Tốt <script>alert(1)</script>'])
+            ->assertOk()
+            ->assertJsonPath('message', 'Đã lưu đánh giá của bạn.')
+            ->assertJsonPath('stage', 'rated')
+            ->assertJsonPath('stageLabel', 'Đã đánh giá');
         $this->assertSame(1, DB::table('booking_reviews')->where('booking_id', $booking['booking_id'])->count());
         $this->assertDatabaseHas('booking_reviews', ['booking_id' => $booking['booking_id'], 'rating' => 4]);
-        $this->get(route('profile.tickets.show', ['booking' => $booking['booking_id'], 'modal' => 1]))
+        $this->get($detailUrl)
             ->assertOk()
-            ->assertSee('Cảm ơn bạn đã đánh giá chuyến đi')
+            ->assertSee('Cảm ơn bạn đã đánh giá!')
+            ->assertSee('Xe sạch sẽ')
+            ->assertSee('Tốt')
             ->assertSee('4 sao')
             ->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', false)
             ->assertDontSee('<script>alert(1)</script>', false);
+
+        foreach ([1 => 'Rất tệ', 2 => 'Chưa tốt', 3 => 'Bình thường'] as $rating => $label) {
+            $this->postJson($url, ['rating' => $rating, 'comment' => 'Xe trễ giờ'])
+                ->assertOk()->assertJsonPath('stage', 'rated');
+            $this->get($detailUrl)->assertOk()
+                ->assertSee($label)
+                ->assertSee('Xe trễ giờ')
+                ->assertDontSee('data-history-review', false);
+            $this->assertDatabaseHas('booking_reviews', [
+                'booking_id' => $booking['booking_id'],
+                'rating'     => $rating,
+                'comment'    => 'Xe trễ giờ',
+            ]);
+        }
+        $this->assertSame(1, DB::table('booking_reviews')->where('booking_id', $booking['booking_id'])->count());
+
+        app()->setLocale('en');
+        $this->get($detailUrl)->assertOk()->assertSee('>Xe trễ giờ</span>', false);
+        app()->setLocale('vi');
 
         DB::table('bookings')->where('id', $booking['booking_id'])->update(['status' => 'cancelled']);
         $this->post($url, ['rating' => 3])->assertForbidden();
