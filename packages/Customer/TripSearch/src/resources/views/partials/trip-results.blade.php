@@ -6,8 +6,13 @@
         returnTrips: @js($returnTrips),
         roundTrip: @js($roundTrip),
         direction: 'outbound',
+        selectedOutboundTrip: null,
         changeDirection(value) {
             if (this.direction === value) return;
+            if (value === 'return' && !this.selectedOutboundTrip) {
+                this.showSeatNotice(@js(__('core::trip-search.select_outbound_first')));
+                return;
+            }
             this.direction = value;
             this.trips = value === 'return' ? this.returnTrips : this.outboundTrips;
             this.openTripId = null;
@@ -23,6 +28,19 @@
         openTripId: null,
         openPanel: null,
         selectedSeatIds: {},
+        selectTrip(trip) {
+            if (!this.roundTrip) {
+                this.openBooking(trip);
+                return;
+            }
+            if (this.direction === 'outbound') {
+                this.selectedOutboundTrip = trip;
+                this.changeDirection('return');
+                this.$nextTick(() => this.$refs.directionTabs?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+                return;
+            }
+            this.openBooking(trip);
+        },
         openBooking(trip) {
             const url = new URL(@js(route('trip-booking.show', ['trip' => 0])), window.location.href);
             url.pathname = url.pathname.replace(/\/0$/, '/' + trip.id);
@@ -134,6 +152,9 @@
         activeTrip() {
             return this.openPanel ? this.trips.find(trip => trip.id === this.openTripId) ?? null : null;
         },
+        summaryTrip() {
+            return this.roundTrip && this.selectedOutboundTrip ? this.selectedOutboundTrip : this.activeTrip();
+        },
         tripDate(value) {
             const date = new Date(value.replace(' ', 'T'));
             const weekdays = @js(app()->getLocale() === 'vi' ? ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'] : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']);
@@ -146,28 +167,28 @@
     class="trip-search-results grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)] lg:items-start"
 >
     <div class="trip-search-results__aside self-start space-y-4 lg:sticky lg:top-4 lg:z-1">
-        <template x-if="activeTrip()">
-            <div class="trip-selection-summary">
+        <template x-if="summaryTrip()">
+            <div class="trip-selection-summary" :class="{ 'is-round-trip-selected': roundTrip && selectedOutboundTrip }">
                 <h2>{{ __('core::trip-search.your_trip') }}</h2>
                 <div class="trip-selection-summary__content">
                     <div class="trip-selection-summary__route">
                         <span class="trip-selection-summary__count">1</span>
                         <div class="min-w-0">
-                            <p x-text="tripDate(activeTrip().departure_time)"></p>
-                            <strong x-text="stationLabel(activeTrip().origin) + ' - ' + stationLabel(activeTrip().destination)"></strong>
+                            <p x-text="tripDate(summaryTrip().departure_time)"></p>
+                            <strong x-text="stationLabel(summaryTrip().origin) + ' - ' + stationLabel(summaryTrip().destination)"></strong>
                         </div>
                     </div>
                     <div class="trip-selection-summary__timeline">
-                        <time x-text="activeTrip().departure_hour"></time>
+                        <time x-text="summaryTrip().departure_hour"></time>
                         <span class="trip-card__origin-mark" aria-hidden="true"></span>
                         <span class="trip-selection-summary__line" aria-hidden="true"></span>
-                        <span class="trip-selection-summary__duration" x-text="clockDuration(activeTrip().duration_minutes)"></span>
+                        <span class="trip-selection-summary__duration" x-text="clockDuration(summaryTrip().duration_minutes)"></span>
                         <span class="trip-selection-summary__line" aria-hidden="true"></span>
                         <img src="{{ asset('images/trip-destination-pin.png') }}" alt="" aria-hidden="true">
-                        <time x-text="activeTrip().arrival_hour"></time>
+                        <time x-text="summaryTrip().arrival_hour"></time>
                     </div>
-                    <p class="trip-selection-summary__seats" x-show="selectedSeats(activeTrip()).length > 0">
-                        {{ __('core::trip-search.seats_label') }}: <span x-text="selectedSeats(activeTrip()).map(seat => seat.code).join(', ')"></span>
+                    <p class="trip-selection-summary__seats" x-show="selectedSeats(summaryTrip()).length > 0">
+                        {{ __('core::trip-search.seats_label') }}: <span x-text="selectedSeats(summaryTrip()).map(seat => seat.code).join(', ')"></span>
                     </p>
                 </div>
             </div>
@@ -257,18 +278,19 @@
         </div>
 
         @if ($roundTrip)
-            <div class="my-6 grid grid-cols-2 border-b border-[#e4e7eb] bg-white" role="tablist" aria-label="{{ __('core::trip-search.direction_tabs') }}">
-                <button type="button" role="tab" id="trip-outbound-tab" class="min-h-11.5 cursor-pointer border-b-4 border-transparent px-3 py-2.5 text-center text-[15px] font-semibold text-gray-950
-                    hover:text-futa-orange focus-visible:outline-3 focus-visible:-outline-offset-3 focus-visible:outline-futa-orange max-sm:px-1
-                    max-sm:py-2.25 max-sm:text-xs"
-                    :class="direction === 'outbound' ? 'border-futa-orange text-futa-orange' : ''"
+            <div x-ref="directionTabs" class="my-6 grid grid-cols-2 border-b border-gray-200 bg-white" role="tablist" aria-label="{{ __('core::trip-search.direction_tabs') }}">
+                <button type="button" role="tab" id="trip-outbound-tab"
+                    class="min-h-12 cursor-pointer border-b-4 px-2 py-2.5 text-center text-[15px] font-semibold uppercase transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-futa-orange max-sm:px-1 max-sm:text-xs"
+                    :class="direction === 'outbound' ? 'border-futa-orange text-futa-orange' : 'border-transparent text-gray-950 hover:text-futa-orange'"
                     :aria-selected="direction === 'outbound'"
                     aria-controls="trip-direction-results" @click="changeDirection('outbound')">
                     {{ __('core::trip-search.outbound_tab') }} - {{ \Illuminate\Support\Carbon::parse($departureDate)->locale(app()->getLocale())->translatedFormat('l, d/m') }}
                 </button>
-                <button type="button" role="tab" id="trip-return-tab" class="trip-direction-tabs__tab"
-                    :class="direction === 'return' ? 'border-futa-orange text-futa-orange' : ''"
+                <button type="button" role="tab" id="trip-return-tab"
+                    class="min-h-12 cursor-pointer border-b-4 px-2 py-2.5 text-center text-[15px] font-semibold uppercase transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-futa-orange max-sm:px-1 max-sm:text-xs"
+                    :class="direction === 'return' ? 'border-futa-orange text-futa-orange' : 'border-transparent text-gray-950 hover:text-futa-orange'"
                     :aria-selected="direction === 'return'"
+                    :aria-disabled="!selectedOutboundTrip"
                     aria-controls="trip-direction-results" @click="changeDirection('return')">
                     {{ __('core::trip-search.return_tab') }} - {{ \Illuminate\Support\Carbon::parse($returnDate)->locale(app()->getLocale())->translatedFormat('l, d/m') }}
                 </button>
@@ -322,8 +344,8 @@
                             <button type="button" @click="togglePanel(trip.id, 'policy')" :aria-expanded="openTripId === trip.id && openPanel === 'policy'" :class="{ 'is-active': openTripId === trip.id && openPanel === 'policy' }">{{ __('core::trip-search.policy') }}</button>
                         </div>
                         <button type="button"
-                            @click="openBooking(trip)"
-                            :class="openTripId === trip.id ? 'is-selected' : ''"
+                            @click="selectTrip(trip)"
+                            :class="openTripId === trip.id && !roundTrip ? 'is-selected' : ''"
                             class="trip-card__select">{{ __('core::trip-search.select_trip') }}</button>
                     </div>
                     <div class="trip-card__detail" :class="{ 'is-seats': openPanel === 'seats' }" x-show="openTripId === trip.id && openPanel !== null" x-cloak>
@@ -365,7 +387,13 @@
                                     <span>{{ __('core::trip-search.total_price') }}</span>
                                     <strong x-text="money(selectedSeats(trip).length * trip.price)"></strong>
                                 </div>
-                                <button type="button" @click="selectedSeats(trip).length ? openBooking(trip) : showSeatNotice(@js(__('core::trip-search.select_seat_notice')))" :disabled="trip.seats.length === 0">{{ __('core::trip-search.confirm_seats') }}</button>
+                                <button type="button"
+                                    @click="selectedSeats(trip).length
+                                        ? (roundTrip && direction === 'outbound' ? selectTrip(trip) : openBooking(trip))
+                                        : showSeatNotice(@js(__('core::trip-search.select_seat_notice')))"
+                                    :disabled="trip.seats.length === 0">
+                                    {{ __('core::trip-search.confirm_seats') }}
+                                </button>
                             </div>
                         </div>
                         <div x-show="openPanel === 'schedule'" class="trip-card__detail-content">

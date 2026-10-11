@@ -87,7 +87,8 @@ class TripSearchTest extends TestCase
             ->assertOk()
             ->assertSee(asset('images/banners/home-banner.jpg'))
             ->assertSee('TP. Hồ Chí Minh - Lâm Đồng')
-            ->assertSee('Bộ lọc tìm kiếm');
+            ->assertSee('Bộ lọc tìm kiếm')
+            ->assertDontSee('id="trip-return-tab"', false);
 
         $this->get(route('trip-booking.show', ['trip' => $trips[0]['id'], ...$query, 'seats' => $trips[0]['seats'][0]['id']]))
             ->assertOk()
@@ -167,8 +168,19 @@ class TripSearchTest extends TestCase
             ->assertSee('CHUYẾN ĐI')
             ->assertSee('CHUYẾN VỀ')
             ->assertSee('id="trip-return-tab"', false)
+            ->assertSeeInOrder(['trip-search-results__aside', 'trip-selection-summary', 'Bộ lọc tìm kiếm'])
             ->assertDontSee('NaN')
             ->assertSee("direction: 'outbound'", false);
+
+        $returnTripId = DB::table('trips')->where('route_id', $reverseRouteId)->value('id');
+        $this->get(route('trip-booking.show', [
+            'trip' => $returnTripId,
+            ...$query,
+            'trip_type'   => 'round_trip',
+            'return_date' => $returnDate->toDateString(),
+            'direction'   => 'return',
+        ]))->assertOk()
+            ->assertViewHas('trip', fn (array $trip): bool => $trip['id'] === $returnTripId);
 
         $this->get(route('trip-search', [...$query, 'quantity' => 32]))
             ->assertSessionHasErrors('quantity');

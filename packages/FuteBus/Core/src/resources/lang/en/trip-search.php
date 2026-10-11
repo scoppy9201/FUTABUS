@@ -92,6 +92,7 @@ return [
         'To board along the route, please call 19006067 to register at least 2 hours before departure and bring compact luggage (up to 20kg).',
         'Pickup is available only at selected convenient locations along the route.',
     ],
-    'select_trip' => 'Select trip',
-    'selected'    => 'Selected',
+    'select_trip'           => 'Select trip',
+    'selected'              => 'Selected',
+    'select_outbound_first' => 'Please select an outbound trip before choosing a return trip.',
 ];

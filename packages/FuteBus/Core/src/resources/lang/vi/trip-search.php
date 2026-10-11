@@ -92,6 +92,7 @@ return [
         'Trường hợp có nhu cầu lên xe dọc đường, Quý khách vui lòng liên hệ tổng đài 19006067 để đăng kí trước ít nhất 2 tiếng so với giờ xe khởi hành và vui lòng chuẩn bị hành lý nhỏ gọn (tối đa 20kg).',
         'Lưu ý, chúng tôi chỉ hỗ trợ đón ở một số địa điểm thuận tiện nằm trên lộ trình.',
     ],
-    'select_trip' => 'Chọn chuyến',
-    'selected'    => 'Đã chọn',
+    'select_trip'           => 'Chọn chuyến',
+    'selected'              => 'Đã chọn',
+    'select_outbound_first' => 'Vui lòng chọn chuyến đi trước khi chọn chuyến về.',
 ];
