@@ -105,4 +105,12 @@ return [
     'tr_err_has_tickets'         => 'Chuyến đã có vé bán, không thể sửa. Hãy hủy chuyến để hoàn tiền hoặc đổi chuyến cho khách.',
     'tr_err_cancel_past'         => 'Chuyến đã khởi hành, không thể hủy.',
     'tr_err_cancel_48h'          => 'Chuyến đã có vé chỉ được hủy trước giờ khởi hành 48 giờ.',
+    'tr_err_docs_head'           => 'Không thể gán xe :plate vì chưa đủ giấy tờ bắt buộc:',
+    'tr_err_doc_missing'         => 'Thiếu giấy tờ bắt buộc: :type',
+    'tr_err_doc_expired'         => 'Giấy tờ :type đã hết hạn (:date), không còn hiệu lực tại ngày khởi hành',
+    'tr_doc_warn'                => 'Xe chưa đủ giấy tờ bắt buộc, không thể gán:',
+    'tr_doc_missing'             => 'chưa có hồ sơ',
+    'tr_doc_expired'             => 'hết hạn trước ngày khởi hành',
+    'tr_f_arrival'               => 'Giờ đến dự kiến',
+    'tr_err_arrival'             => 'Giờ đến phải sau giờ khởi hành.',
 ];

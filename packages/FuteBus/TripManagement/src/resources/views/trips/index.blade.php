@@ -174,6 +174,16 @@
                                 <option value="{{ $b->id }}">{{ $b->license_plate }} ({{ $b->capacity }} {{ __('BusManagement::app.field_capacity_unit') }})</option>
                             @endforeach
                         </select>
+                                                <div x-show="busProblems.length > 0" x-cloak class="mt-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
+                            <p class="font-bold">{{ __('TripManagement::app.tr_doc_warn') }}</p>
+                            <ul class="mt-1 list-inside list-disc space-y-0.5">
+                                <template x-for="p in busProblems" :key="p.name">
+                                    <li x-text="p.reason === 'missing'
+                                        ? p.name + ' — ' + @js(__('TripManagement::app.tr_doc_missing'))
+                                        : p.name + ' — ' + @js(__('TripManagement::app.tr_doc_expired')) + ' (' + p.expiry + ')'"></li>
+                                </template>
+                            </ul>
+                        </div>
                     </div>
                     <div>
                         <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.tr_f_price') }} <span class="text-rose-500">*</span></label>
@@ -184,7 +194,8 @@
 
                 <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
                     <button type="button" @click="showForm = false" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('TripManagement::app.btn_cancel') }}</button>
-                    <button type="submit" class="rounded-lg bg-futa-orange px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-futa-orange-dark"
+                                       <button type="submit" :disabled="busProblems.length > 0"
+                            class="rounded-lg bg-futa-orange px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-futa-orange-dark disabled:cursor-not-allowed disabled:opacity-50"
                             x-text="isEdit ? @js(__('TripManagement::app.btn_save')) : @js(__('TripManagement::app.btn_store'))"></button>
                 </div>
             </form>
@@ -220,10 +231,25 @@
 function tripManager() {
     const blank = { route_id:'', bus_id:'', departure_time:'', arrival_time:'', price:'' };
     const base = `{{ url('quan-tri/chuyen-xe') }}`;
+    const requiredTypes = @json($requiredTypes);
+    const busDocs = @json($busDocs);
+    const today = `{{ today()->toDateString() }}`;
     return {
         showForm: false, showCancel: false, isEdit: false, locked: false,
         form: { ...blank }, formAction: base,
         cancelData: {}, cancelAction: '',
+                get busProblems() {
+            if (!this.form.bus_id) return [];
+            const day = this.form.departure_time ? this.form.departure_time.slice(0, 10) : today;
+            const docs = busDocs[this.form.bus_id] || {};
+            const out = [];
+            requiredTypes.forEach(t => {
+                const exp = docs[t.id];
+                if (!exp) out.push({ name: t.name, reason: 'missing' });
+                else if (exp < day) out.push({ name: t.name, reason: 'expired', expiry: exp.split('-').reverse().join('/') });
+            });
+            return out;
+        },
         openAdd()    { this.isEdit = false; this.locked = false; this.form = { ...blank }; this.formAction = base; this.showForm = true; },
         openEdit(d)  { this.isEdit = true; this.locked = d.from_schedule; this.form = { ...blank, ...d, bus_id: d.bus_id ?? '' }; this.formAction = `${base}/${d.id}`; this.showForm = true; },
         openCancel(d){ this.cancelData = d; this.cancelAction = `${base}/${d.id}`; this.showCancel = true; },

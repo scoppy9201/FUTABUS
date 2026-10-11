@@ -83,10 +83,10 @@
                     $navItems = [
                         ['key' => 'overview', 'icon' => 'squares-2x2', 'route' => route('dashboard')],
                         ['key' => 'buses',    'icon' => 'truck',        'route' => '#', 'submenu' => [
-                            ['key' => 'vehicle_types',  'route' => route('bus-management.vehicle-types.index')],
-                            ['key' => 'bus_info', 'route' => route('bus-management.buses.index')],
-                            ['key' => 'document_types', 'route' => route('bus-management.document-types.index')],
-                            ['key' => 'bus_documents',  'route' => route('bus-management.vehicle-documents.index')],
+                            ['key' => 'vehicle_types',  'icon' => 'squares-plus',            'route' => route('bus-management.vehicle-types.index')],
+                            ['key' => 'bus_info',       'icon' => 'information-circle',      'route' => route('bus-management.buses.index')],
+                            ['key' => 'document_types', 'icon' => 'clipboard-document-list', 'route' => route('bus-management.document-types.index')],
+                            ['key' => 'bus_documents',  'icon' => 'folder-open',             'route' => route('bus-management.vehicle-documents.index')],
                         ]],
                         ['key' => 'trips', 'icon' => 'map-pin', 'route' => route('trip-management.trips.index')],
                         ['key' => 'routes', 'icon' => 'calendar-days', 'route' => route('trip-management.schedules.index')],
@@ -151,11 +151,12 @@
                                             @endphp
                                             <li>
                                                 <a href="{{ $sub['route'] }}" @class([
-                                                    'block pl-12 pr-4 py-2 text-sm transition rounded-r-lg',
+                                                    'flex items-center gap-2.5 pl-11 pr-4 py-2 text-sm transition rounded-r-lg',
                                                     'text-futa-orange font-bold bg-futa-orange-soft/60 border-r-2 border-futa-orange' => $subActive,
                                                     'text-gray-600 hover:text-futa-orange hover:bg-futa-orange-soft' => !$subActive,
                                                 ])>
-                                                    {{ __('Dashboard::app.'.$sub['key']) }}
+                                                    <x-dynamic-component :component="'heroicon-o-'.$sub['icon']" class="w-4 h-4 shrink-0" />
+                                                    <span>{{ __('Dashboard::app.'.$sub['key']) }}</span>
                                                 </a>
                                             </li>
                                         @endforeach

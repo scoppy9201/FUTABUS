@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FuteBus\TripManagement\Http\Controllers;
 
 use FuteBus\TripManagement\Events\TripCancelled;
+use FuteBus\TripManagement\Services\BusDocumentChecker;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -60,6 +61,19 @@ class TripController extends Controller
             'buses'   => DB::table('buses')->where('status', 'active')
                 ->where('bus_company_id', $company?->id ?? 0)
                 ->orderBy('license_plate')->get(['id', 'license_plate', 'capacity']),
+            'requiredTypes' => DB::table('document_types')->where('is_required', 1)
+                ->where('status', 'active')->get(['id', 'name']),
+            'busDocs' => DB::table('vehicle_documents')
+                ->join('document_types', 'document_types.id', '=', 'vehicle_documents.document_type_id')
+                ->where('document_types.is_required', 1)->where('document_types.status', 'active')
+                ->where('vehicle_documents.status', 'active')
+                ->whereNotExists(function ($q) {
+                    $q->select(DB::raw(1))->from('vehicle_documents as n')
+                        ->whereColumn('n.renewed_from_id', 'vehicle_documents.id');
+                })
+                ->get(['vehicle_documents.bus_id', 'vehicle_documents.document_type_id', 'vehicle_documents.expiry_date'])
+                ->groupBy('bus_id')
+                ->map(fn ($g) => $g->pluck('expiry_date', 'document_type_id')),
             'company' => $company,
         ]);
     }
@@ -84,6 +98,10 @@ class TripController extends Controller
 
         $dep = Carbon::createFromFormat(self::DT, $data['departure_time']);
         $arr = Carbon::createFromFormat(self::DT, $data['arrival_time']);
+
+        if ($docErrors = BusDocumentChecker::messages($bus, $dep)) {
+            return back()->withInput()->withErrors(['trip' => $docErrors]);
+        }
 
         if ($this->busConflict((int) $bus->id, $dep, $arr)) {                      // 7a
             return back()->withInput()->withErrors(['trip' => __('TripManagement::app.tr_err_conflict')]);
@@ -146,6 +164,9 @@ class TripController extends Controller
             }
             if ($dep->lte(now())) {                                                // 7b khi gán xe
                 return back()->withInput()->withErrors(['trip' => __('TripManagement::app.tr_err_past')]);
+            }
+            if ($docErrors = BusDocumentChecker::messages($bus, $dep)) {
+                return back()->withInput()->withErrors(['trip' => $docErrors]); // Kiểm tra giấy tờ
             }
             if ($this->busConflict((int) $bus->id, $dep, $arr, $id)) {             // 7a
                 return back()->withInput()->withErrors(['trip' => __('TripManagement::app.tr_err_conflict')]);
