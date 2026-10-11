@@ -21,10 +21,10 @@ class TripScheduleController extends Controller
         abort_unless($request->user()?->isAdmin(), 403);
 
         $search = $request->input('search', '');
-        $query  = DB::table('trip_schedules')
+        $query = DB::table('trip_schedules')
             ->join('routes', 'routes.id', '=', 'trip_schedules.route_id')
             ->select('trip_schedules.*', 'routes.code as route_code',
-                     'routes.origin_city', 'routes.destination_city')
+                'routes.origin_city', 'routes.destination_city')
             ->orderByDesc('trip_schedules.id');
 
         if ($search) {

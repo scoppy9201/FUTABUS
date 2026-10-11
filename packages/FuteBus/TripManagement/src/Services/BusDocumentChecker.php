@@ -25,7 +25,7 @@ class BusDocumentChecker
             ->where('status', 'active')
             ->whereNotExists(function ($q) {
                 $q->select(DB::raw(1))->from('vehicle_documents as n')
-                  ->whereColumn('n.renewed_from_id', 'vehicle_documents.id');
+                    ->whereColumn('n.renewed_from_id', 'vehicle_documents.id');
             })
             ->get()->keyBy('document_type_id');
 

@@ -16,16 +16,17 @@ use Illuminate\View\View;
 class TripController extends Controller
 {
     private const EDITABLE = ['unassigned', 'scheduled'];
+
     private const DT = 'Y-m-d\TH:i';
 
     public function index(Request $request): View
     {
         abort_unless($request->user()?->isAdmin(), 403);
 
-        $company   = DB::table('bus_companies')->where('code', 'FUTA')->first();
-        $search    = (string) $request->input('search', '');
-        $status    = (string) $request->input('status', '');
-        $date      = (string) $request->input('date', '');
+        $company = DB::table('bus_companies')->where('code', 'FUTA')->first();
+        $search = (string) $request->input('search', '');
+        $status = (string) $request->input('status', '');
+        $date = (string) $request->input('date', '');
 
         $query = DB::table('trips')
             ->join('routes', 'routes.id', '=', 'trips.route_id')
@@ -58,17 +59,17 @@ class TripController extends Controller
             'date'    => $date,
             'routes'  => DB::table('routes')->where('is_active', 1)->orderBy('code')->get(),
             'buses'   => DB::table('buses')->where('status', 'active')
-                            ->where('bus_company_id', $company?->id ?? 0)
-                            ->orderBy('license_plate')->get(['id', 'license_plate', 'capacity']),
-                        'requiredTypes' => DB::table('document_types')->where('is_required', 1)
-                                  ->where('status', 'active')->get(['id', 'name']),
+                ->where('bus_company_id', $company?->id ?? 0)
+                ->orderBy('license_plate')->get(['id', 'license_plate', 'capacity']),
+            'requiredTypes' => DB::table('document_types')->where('is_required', 1)
+                ->where('status', 'active')->get(['id', 'name']),
             'busDocs' => DB::table('vehicle_documents')
                 ->join('document_types', 'document_types.id', '=', 'vehicle_documents.document_type_id')
                 ->where('document_types.is_required', 1)->where('document_types.status', 'active')
                 ->where('vehicle_documents.status', 'active')
                 ->whereNotExists(function ($q) {
                     $q->select(DB::raw(1))->from('vehicle_documents as n')
-                      ->whereColumn('n.renewed_from_id', 'vehicle_documents.id');
+                        ->whereColumn('n.renewed_from_id', 'vehicle_documents.id');
                 })
                 ->get(['vehicle_documents.bus_id', 'vehicle_documents.document_type_id', 'vehicle_documents.expiry_date'])
                 ->groupBy('bus_id')
@@ -105,7 +106,6 @@ class TripController extends Controller
         if ($this->busConflict((int) $bus->id, $dep, $arr)) {                      // 7a
             return back()->withInput()->withErrors(['trip' => __('TripManagement::app.tr_err_conflict')]);
         }
-
 
         DB::table('trips')->insert([
             'route_id'        => $data['route_id'],
@@ -201,7 +201,7 @@ class TripController extends Controller
             return back()->withErrors(['trip' => __('TripManagement::app.tr_err_status')]);
         }
 
-        $dep     = Carbon::parse($trip->departure_time);
+        $dep = Carbon::parse($trip->departure_time);
         $tickets = $this->ticketCount($id);
 
         if ($dep->lte(now())) {
@@ -227,7 +227,6 @@ class TripController extends Controller
         return DB::table('bookings')->where('trip_id', $tripId)->where('status', '<>', 'cancelled')->count();
     }
 
-    
     private function busConflict(int $busId, Carbon $dep, Carbon $arr, ?int $ignoreId = null): bool
     {
         return DB::table('trips')
@@ -239,7 +238,6 @@ class TripController extends Controller
             ->exists();
     }
 
-    
     private function futureRule(): \Closure
     {
         return function ($attr, $value, $fail) {

@@ -26,12 +26,12 @@ class DashboardController extends Controller
     public function section(Request $request, OwnerDashboardService $dashboard, string $section): View
     {
         $permission = match ($section) {
-            'trips' => 'trip.view',
-            'routes' => 'route.view',
-            'buses' => 'bus.view',
-            'bookings' => 'booking.view',
+            'trips'     => 'trip.view',
+            'routes'    => 'route.view',
+            'buses'     => 'bus.view',
+            'bookings'  => 'booking.view',
             'customers' => 'customer.view',
-            'reports' => 'report.view',
+            'reports'   => 'report.view',
         };
         abort_unless($request->user()?->hasPermissionTo($permission), 403);
 

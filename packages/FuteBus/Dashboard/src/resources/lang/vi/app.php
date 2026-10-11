@@ -112,7 +112,7 @@ return [
         'confirmed'   => 'Đã xác nhận',
         'completed'   => 'Hoàn thành',
         'cancelled'   => 'Đã hủy',
-        'unassigned' => 'Chưa gán xe',
+        'unassigned'  => 'Chưa gán xe',
     ],
     'bus_types' => [
         'limousine' => 'Limousine',
