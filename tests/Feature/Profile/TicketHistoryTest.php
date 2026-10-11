@@ -4,6 +4,8 @@ namespace Tests\Feature\Profile;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Routing\Middleware\ThrottleRequests;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -161,6 +163,164 @@ class TicketHistoryTest extends TestCase
         $this->get(route('profile.tickets.show', $otherBooking['booking_id']))
             ->assertNotFound();
 
+        $this->get(route('profile.tickets.show', ['booking' => $otherBooking['booking_id'], 'modal' => 1]))
+            ->assertNotFound();
+
+    }
+
+    public function test_modal_uses_real_payment_and_issued_ticket_data(): void
+    {
+        $user = $this->createTestUser();
+        $booking = $this->createBooking($user, 'JOURNEY-PAID', [
+            'departure_time' => now()->addDays(2)->toDateTimeString(),
+        ]);
+        $url = route('profile.tickets.show', ['booking' => $booking['booking_id'], 'modal' => 1]);
+
+        $this->actingAs($user)->get(route('profile.tickets.index'))
+            ->assertOk()->assertSee('data-history-dialog', false)
+            ->assertSee('data-history-detail data-no-loader', false)
+            ->assertDontSee('data-loading=', false);
+        $this->get($url)->assertOk()
+            ->assertHeader('Cache-Control', 'no-store, private')
+            ->assertSee('Đơn đã được ghi nhận, đang chờ thanh toán')
+            ->assertDontSee('data:image/svg+xml;base64,');
+
+        $this->issueTicket($booking, 'JOURNEY-TICKET');
+        $this->recordPayment($booking, 'completed');
+
+        $this->get($url)->assertOk()
+            ->assertSee('Đã thanh toán, chờ giờ khởi hành')
+            ->assertSee('JOURNEY-TICKET')
+            ->assertSee('Ghế: A01')
+            ->assertSee('data:image/svg+xml;base64,', false)
+            ->assertDontSee('data-history-review', false);
+    }
+
+    public function test_timeline_distinguishes_scheduled_times_from_operator_confirmation(): void
+    {
+        $this->travelTo(Carbon::parse('2026-10-11 09:00:00'));
+        $user = $this->createTestUser();
+        $booking = $this->createBooking($user, 'JOURNEY-STAGES', [
+            'departure_time' => '2026-10-11 10:00:00',
+            'arrival_time'   => '2026-10-11 16:00:00',
+        ]);
+        $this->issueTicket($booking, 'STAGES-TICKET');
+        $this->recordPayment($booking, 'completed');
+        $url = route('profile.tickets.show', ['booking' => $booking['booking_id'], 'modal' => 1]);
+
+        $this->actingAs($user)->get($url)->assertOk()
+            ->assertSee('Đã thanh toán, chờ giờ khởi hành')
+            ->assertDontSee('Đã qua giờ khởi hành dự kiến');
+
+        $this->travelTo(Carbon::parse('2026-10-11 12:00:00'));
+        $this->get($url)->assertOk()
+            ->assertSee('Đã qua giờ khởi hành dự kiến')
+            ->assertSee('nhà xe chưa xác nhận xe đã đi')
+            ->assertDontSee('data-history-review', false);
+
+        $this->travelTo(Carbon::parse('2026-10-11 17:00:00'));
+        $this->get($url)->assertOk()
+            ->assertSee('Đã qua giờ đến dự kiến')
+            ->assertSee('Chỉ có thể đánh giá sau khi nhà xe xác nhận')
+            ->assertDontSee('data-history-review', false);
+
+        DB::table('trips')->where('id', $booking['trip_id'])->update(['status' => 'arrived']);
+        $this->get($url)->assertOk()
+            ->assertSee('Nhà xe đã cập nhật: xe đến nơi')
+            ->assertSee('data-history-review', false);
+    }
+
+    public function test_cancelled_and_refunded_bookings_do_not_show_a_valid_qr_or_review_form(): void
+    {
+        $user = $this->createTestUser();
+        $cancelled = $this->createBooking($user, 'JOURNEY-CANCELLED', ['status' => 'cancelled']);
+        $refunded = $this->createBooking($user, 'JOURNEY-REFUNDED');
+        foreach ([$cancelled, $refunded] as $booking) {
+            $this->issueTicket($booking, 'TICKET-'.$booking['booking_id']);
+        }
+        $this->recordPayment($cancelled, 'completed');
+        $this->recordPayment($refunded, 'refunded');
+        $this->actingAs($user);
+
+        foreach ([$cancelled, $refunded] as $booking) {
+            $this->get(route('profile.tickets.show', ['booking' => $booking['booking_id'], 'modal' => 1]))
+                ->assertOk()
+                ->assertDontSee('data:image/svg+xml;base64,', false)
+                ->assertDontSee('data-history-review', false);
+        }
+    }
+
+    public function test_review_requires_owned_completed_paid_trip_and_updates_one_record(): void
+    {
+        $this->withoutMiddleware(ThrottleRequests::class);
+        $this->travelTo(Carbon::parse('2026-10-11 18:00:00'));
+        $owner = $this->createTestUser();
+        $other = $this->createTestUser();
+        $booking = $this->createBooking($owner, 'JOURNEY-REVIEW', [
+            'departure_time' => '2026-10-11 08:00:00',
+            'arrival_time'   => '2026-10-11 14:00:00',
+        ]);
+        $this->issueTicket($booking, 'REVIEW-TICKET');
+        $this->recordPayment($booking, 'completed');
+        $url = route('profile.tickets.review', $booking['booking_id']);
+
+        $this->post($url, ['rating' => 5])->assertRedirect(route('login'));
+        $this->actingAs($other)->post($url, ['rating' => 5])->assertNotFound();
+        $this->actingAs($owner)->post($url, ['rating' => 5])->assertForbidden();
+        DB::table('trips')->where('id', $booking['trip_id'])->update(['status' => 'arrived']);
+
+        $this->post($url, ['rating' => 0])->assertSessionHasErrors('rating');
+        $this->post($url, ['rating' => 6])->assertSessionHasErrors('rating');
+        $this->post($url, ['rating' => 5, 'comment' => str_repeat('x', 301)])->assertSessionHasErrors('comment');
+        $this->post($url, ['rating' => 5, 'comment' => 'Chuyến đi tốt'])->assertRedirect();
+        $this->assertDatabaseHas('booking_reviews', ['booking_id' => $booking['booking_id'], 'user_id' => $owner->id, 'rating' => 5]);
+        $this->postJson($url, ['rating' => 4, 'comment' => 'Tốt <script>alert(1)</script>'])
+            ->assertOk()->assertJsonPath('message', 'Đã lưu đánh giá của bạn.');
+        $this->assertSame(1, DB::table('booking_reviews')->where('booking_id', $booking['booking_id'])->count());
+        $this->assertDatabaseHas('booking_reviews', ['booking_id' => $booking['booking_id'], 'rating' => 4]);
+        $this->get(route('profile.tickets.show', ['booking' => $booking['booking_id'], 'modal' => 1]))
+            ->assertOk()
+            ->assertSee('Cảm ơn bạn đã đánh giá chuyến đi')
+            ->assertSee('4 sao')
+            ->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', false)
+            ->assertDontSee('<script>alert(1)</script>', false);
+
+        DB::table('bookings')->where('id', $booking['booking_id'])->update(['status' => 'cancelled']);
+        $this->post($url, ['rating' => 3])->assertForbidden();
+        $this->get(route('profile.tickets.show', ['booking' => $booking['booking_id'], 'modal' => 1]))
+            ->assertOk()->assertSee('Đơn đặt vé đã hủy')->assertDontSee('data-history-review', false);
+    }
+
+    public function test_review_endpoint_limits_repeated_submissions(): void
+    {
+        $user = $this->createTestUser();
+        $this->actingAs($user)->withServerVariables(['REMOTE_ADDR' => '127.0.0.44']);
+        $url = route('profile.tickets.review', 999999);
+
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $this->post($url, ['rating' => 0])->assertSessionHasErrors('rating');
+        }
+        $this->post($url, ['rating' => 0])->assertTooManyRequests();
+    }
+
+    public function test_demo_and_booking_without_issued_ticket_cannot_be_reviewed(): void
+    {
+        $this->withoutMiddleware(ThrottleRequests::class);
+        $user = $this->createTestUser();
+        $demo = $this->createBooking($user, 'DEMOHIST-REVIEW', ['trip_status' => 'arrived']);
+        $withoutTicket = $this->createBooking($user, 'NO-TICKET-REVIEW', ['trip_status' => 'arrived']);
+        $this->issueTicket($demo, 'DEMO-TICKET');
+        $this->recordPayment($demo, 'completed');
+        $this->recordPayment($withoutTicket, 'completed');
+        $this->actingAs($user);
+
+        foreach ([$demo, $withoutTicket] as $booking) {
+            $this->post(route('profile.tickets.review', $booking['booking_id']), ['rating' => 5])
+                ->assertForbidden();
+            $this->get(route('profile.tickets.show', ['booking' => $booking['booking_id'], 'modal' => 1]))
+                ->assertOk()->assertDontSee('data-history-review', false);
+        }
+        $this->assertDatabaseCount('booking_reviews', 0);
     }
 
     public function test_change_and_cancel_menu_only_contacts_support_for_eligible_paid_booking(): void
@@ -226,7 +386,8 @@ class TicketHistoryTest extends TestCase
             'bus_id'         => $busId,
             'bus_company_id' => $companyId,
             'departure_time' => $options['departure_time'] ?? '2026-10-10 08:00:00',
-            'arrival_time'   => '2026-10-10 14:00:00',
+            'arrival_time'   => $options['arrival_time'] ?? Carbon::parse($options['departure_time'] ?? '2026-10-10 08:00:00')->addHours(6)->toDateTimeString(),
+            'status'         => $options['trip_status'] ?? 'scheduled',
             'price'          => 250000,
         ]);
         $customerId = DB::table('customers')->insertGetId([
@@ -247,5 +408,29 @@ class TicketHistoryTest extends TestCase
         ]);
 
         return ['booking_id' => $bookingId, 'trip_id' => $tripId];
+    }
+
+    private function issueTicket(array $booking, string $code): void
+    {
+        DB::table('tickets')->insert([
+            'ticket_code'    => $code,
+            'booking_id'     => $booking['booking_id'],
+            'trip_id'        => $booking['trip_id'],
+            'passenger_name' => 'Customer',
+            'seat_code'      => 'A01',
+            'price'          => 250000,
+        ]);
+    }
+
+    private function recordPayment(array $booking, string $status): void
+    {
+        DB::table('payments')->insert([
+            'payment_code' => 'PAY-'.$booking['booking_id'].'-'.$status,
+            'booking_id'   => $booking['booking_id'],
+            'amount'       => 250000,
+            'method'       => 'mock',
+            'status'       => $status,
+            'paid_at'      => $status === 'completed' ? now() : null,
+        ]);
     }
 }

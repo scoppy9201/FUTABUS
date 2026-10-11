@@ -7,6 +7,7 @@ namespace FuteBus\Profile\Services;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use stdClass;
 
@@ -70,6 +71,79 @@ class TicketHistoryService
             ->first();
     }
 
+    public function stageForBooking(object $booking): string
+    {
+        if ($booking->status === 'cancelled' || $booking->trip_status === 'cancelled') {
+            return 'cancelled';
+        }
+        if ($booking->payment_status === 'refunded') {
+            return 'refunded';
+        }
+        if ($booking->payment_status === 'failed') {
+            return 'payment_failed';
+        }
+        if ($booking->payment_status !== 'completed') {
+            return 'booked';
+        }
+
+        $arrived = $booking->trip_status === 'arrived'
+            || $booking->status === 'completed'
+            || Carbon::parse($booking->arrival_time)->lte(now());
+        if ($arrived) {
+            return $booking->review_id ? 'rated' : 'arrived';
+        }
+
+        return $booking->trip_status === 'departed'
+            || Carbon::parse($booking->departure_time)->lte(now()) ? 'departed' : 'paid';
+    }
+
+    public function detailForUser(User $user, int $bookingId): ?array
+    {
+        $booking = $this->ownedBookings($user)
+            ->join('buses', 'buses.id', '=', 'trips.bus_id')
+            ->where('bookings.id', $bookingId)
+            ->addSelect([
+                'bookings.updated_at',
+                'bookings.notes',
+                'routes.origin_station',
+                'routes.destination_station',
+                'buses.bus_type',
+                'buses.license_plate',
+            ])
+            ->first();
+
+        if ($booking === null) {
+            return null;
+        }
+
+        $payment = DB::table('payments')->where('booking_id', $bookingId)
+            ->orderByDesc('id')->first(['status', 'method', 'paid_at', 'created_at']);
+        $tickets = DB::table('tickets')->where('booking_id', $bookingId)
+            ->orderBy('id')->get(['ticket_code', 'seat_code', 'status']);
+        $review = DB::table('booking_reviews')->where('booking_id', $bookingId)
+            ->first(['rating', 'comment', 'created_at', 'updated_at']);
+
+        $cancelled = $booking->status === 'cancelled' || $booking->trip_status === 'cancelled';
+        $paid = $payment?->status === 'completed';
+        $arrivalConfirmed = $booking->trip_status === 'arrived' || $booking->status === 'completed';
+        $isDemo = str_starts_with($booking->booking_code, 'DEMOHIST');
+        $isLocalDemo = $isDemo && app()->environment('local')
+            && str_starts_with((string) $booking->notes, 'Local ticket-history display data only;');
+
+        return [
+            'booking'            => $booking,
+            'payment'            => $payment,
+            'tickets'            => $tickets,
+            'review'             => $review,
+            'stage'              => $this->stageForBooking($booking),
+            'departureConfirmed' => in_array($booking->trip_status, ['departed', 'arrived'], true),
+            'arrivalConfirmed'   => $arrivalConfirmed,
+            'canReview'          => ! $cancelled && $paid && $arrivalConfirmed
+                && ($tickets->contains(fn (object $ticket): bool => in_array($ticket->status, ['active', 'used'], true)) || $isLocalDemo)
+                && (! $isDemo || $isLocalDemo),
+        ];
+    }
+
     private function ownedBookings(User $user): Builder
     {
         return DB::table('bookings as bookings')
@@ -91,10 +165,16 @@ class TicketHistoryService
                 'bookings.status',
                 'bookings.created_at',
                 'trips.departure_time',
+                'trips.arrival_time',
+                'trips.status as trip_status',
                 'routes.origin_city',
                 'routes.destination_city',
             ])
-            ->selectSub($this->latestPaymentStatus(), 'payment_status');
+            ->selectSub($this->latestPaymentStatus(), 'payment_status')
+            ->selectSub(
+                DB::table('booking_reviews')->select('id')->whereColumn('booking_id', 'bookings.id')->limit(1),
+                'review_id'
+            );
     }
 
     private function latestPaymentStatus(): Builder

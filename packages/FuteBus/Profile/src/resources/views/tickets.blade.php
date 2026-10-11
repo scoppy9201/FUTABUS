@@ -189,9 +189,11 @@
                             <tbody class="divide-y divide-gray-100">
                                 @forelse($bookings as $booking)
                                     @php
-                                        $bookingColor = match ($booking->status) {
-                                            'confirmed', 'completed' => 'bg-green-50 text-green-700',
-                                            'cancelled' => 'bg-red-50 text-red-700',
+                                        $bookingColor = match ($booking->journey_stage) {
+                                            'arrived', 'rated' => 'bg-green-50 text-green-700',
+                                            'cancelled', 'refunded', 'payment_failed' => 'bg-red-50 text-red-700',
+                                            'departed' => 'bg-futa-orange-soft text-futa-orange',
+                                            'paid' => 'bg-blue-50 text-blue-700',
                                             default => 'bg-amber-50 text-amber-800',
                                         };
                                         $paymentColor = match ($booking->payment_status) {
@@ -212,7 +214,7 @@
                                         <td class="whitespace-nowrap px-4 py-4 text-gray-800">{{ \Illuminate\Support\Carbon::parse($booking->departure_time)->format('d/m/Y H:i') }}</td>
                                         <td class="whitespace-nowrap px-4 py-4 font-semibold text-gray-950">{{ __('Profile::tickets.currency', ['amount' => number_format((float) $booking->total_amount, 0, ',', '.')]) }}</td>
                                         <td class="whitespace-nowrap px-4 py-4 font-medium {{ $paymentColor }}">{{ __('Profile::tickets.payment_status.'.($booking->payment_status ?? 'unpaid')) }}</td>
-                                        <td class="whitespace-nowrap px-4 py-4"><span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {{ $bookingColor }}">{{ __('Profile::tickets.booking_status.'.$booking->status) }}</span></td>
+                                        <td class="whitespace-nowrap px-4 py-4"><span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {{ $bookingColor }}">{{ __('Profile::tickets.journey.list_status.'.$booking->journey_stage) }}</span></td>
                                         <td class="whitespace-nowrap px-4 py-4 text-center">
                                             <button type="button" data-ticket-history-actions aria-controls="ticket-actions-{{ $booking->id }}" aria-expanded="false"
                                                 class="inline-flex size-9 items-center justify-center rounded-full border border-gray-200
@@ -223,7 +225,7 @@
                                             </button>
                                             <div id="ticket-actions-{{ $booking->id }}" popover="auto"
                                                 class="fixed z-50 m-0 w-52 rounded-xl border border-gray-200 bg-white p-1.5 text-left shadow-xl">
-                                                <a href="{{ route('profile.tickets.show', $booking->id) }}"
+                                                <a href="{{ route('profile.tickets.show', $booking->id) }}" data-history-detail data-no-loader
                                                     class="block whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-semibold
                                                         text-gray-900 hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-futa-orange">
                                                     {{ __('Profile::tickets.view_details') }}
@@ -279,6 +281,12 @@
                 @endif
             </section>
         </main>
+
+        <dialog data-history-dialog aria-label="{{ __('Profile::tickets.detail_title') }}"
+            data-load-error="{{ __('Profile::tickets.journey.load_error') }}"
+            class="m-auto w-[min(30rem,calc(100vw-1.5rem))] max-h-[calc(100dvh-1.5rem)] overflow-y-auto rounded-2xl border border-gray-200 bg-white p-0 shadow-2xl backdrop:bg-black/65">
+            <div data-history-dialog-content aria-live="polite"></div>
+        </dialog>
 
         @include('core::partials.home.footer')
     </div>

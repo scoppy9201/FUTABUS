@@ -15,6 +15,8 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/thong-tin-tai-khoan/lich-su-mua-ve', [TicketHistoryController::class, 'index'])->name('profile.tickets.index');
     Route::get('/thong-tin-tai-khoan/lich-su-mua-ve/{booking}', [TicketHistoryController::class, 'show'])
         ->whereNumber('booking')->name('profile.tickets.show');
+    Route::post('/thong-tin-tai-khoan/lich-su-mua-ve/{booking}/danh-gia', [TicketHistoryController::class, 'review'])
+        ->whereNumber('booking')->middleware('throttle:5,1')->name('profile.tickets.review');
     Route::get('/thong-tin-tai-khoan/dat-lai-mat-khau', [PasswordController::class, 'edit'])->name('profile.password.edit');
     Route::put('/thong-tin-tai-khoan/dat-lai-mat-khau', [PasswordController::class, 'update'])
         ->middleware('throttle:5,1')->name('profile.password.update');
