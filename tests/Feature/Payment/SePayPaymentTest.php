@@ -3,9 +3,11 @@
 namespace Tests\Feature\Payment;
 
 use App\Models\User;
+use FuteBus\Core\Services\BookingTripStops;
 use FuteBus\Core\Services\TripSearchService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class SePayPaymentTest extends TestCase
@@ -154,6 +156,10 @@ class SePayPaymentTest extends TestCase
             ->assertOk()->assertSee('booking-outbound-seats-title')
             ->assertSee('name="outbound_pickup_mode"', false)
             ->assertSee('name="outbound_dropoff_mode"', false)
+            ->assertSee('name="outbound_pickup_station"', false)
+            ->assertSee('name="outbound_dropoff_station"', false)
+            ->assertSee('name="pickup_station"', false)
+            ->assertSee('name="dropoff_station"', false)
             ->assertSee('booking-outbound-pickup-info')
             ->assertSee('booking-return-pickup-info')
             ->assertSee('Thời gian nhận khách')
@@ -481,6 +487,91 @@ class SePayPaymentTest extends TestCase
             ->postJson(route('sepay.webhook'), $this->event($intent->code))
             ->assertOk()->assertJson(['success' => true]);
         $this->assertDatabaseCount('bookings', 1);
+    }
+
+    public function test_operator_stops_are_searchable_on_booking_page_and_saved_in_payment_snapshot(): void
+    {
+        $routeId = DB::table('trips')->where('id', $this->tripId)->value('route_id');
+        $pickupId = DB::table('route_stops')->insertGetId([
+            'route_id'       => $routeId, 'name' => 'Văn phòng Trung Tâm',
+            'address'        => '12 Đường A', 'stop_order' => 1,
+            'offset_minutes' => 30, 'stop_type' => 'pickup', 'status' => 'active',
+        ]);
+        $dropoffId = DB::table('route_stops')->insertGetId([
+            'route_id'       => $routeId, 'name' => 'Bến xe Cuối Tuyến',
+            'address'        => '34 Đường B', 'stop_order' => 2,
+            'offset_minutes' => 450, 'stop_type' => 'dropoff', 'status' => 'active',
+        ]);
+
+        $this->get(route('trip-booking.show', ['trip' => $this->tripId, ...$this->criteria]))
+            ->assertOk()->assertSee('booking-page__stop-search')
+            ->assertSee('Xem vị trí')
+            ->assertSee('name="pickup_station"', false)
+            ->assertSee('name="dropoff_station"', false);
+
+        $this->post(route('trip-booking.payment.store', ['trip' => $this->tripId, ...$this->criteria]), [
+            'name'           => 'Nguyen Van A', 'phone' => '0912345678',
+            'email'          => 'customer@example.com', 'accept_terms' => '1',
+            'seats'          => [$this->seatId], 'pickup_mode' => 'station', 'dropoff_mode' => 'station',
+            'pickup_station' => (string) $pickupId, 'dropoff_station' => (string) $dropoffId,
+        ])->assertRedirect();
+
+        $snapshot = json_decode(DB::table('sepay_payment_intents')->value('snapshot'), true);
+        $this->assertSame('Văn phòng Trung Tâm', $snapshot['pickup']['name']);
+        $this->assertSame('12 Đường A', $snapshot['pickup']['address']);
+        $this->assertSame('Bến xe Cuối Tuyến', $snapshot['dropoff']['name']);
+        $this->assertSame('34 Đường B', $snapshot['dropoff']['address']);
+    }
+
+    public function test_operator_stop_from_another_route_is_rejected(): void
+    {
+        $routeId = DB::table('trips')->where('id', $this->tripId)->value('route_id');
+        $stopId = DB::table('route_stops')->insertGetId([
+            'route_id'   => $routeId, 'name' => 'Điểm hợp lệ',
+            'stop_order' => 1, 'offset_minutes' => 0,
+            'stop_type'  => 'pickup', 'status' => 'active',
+        ]);
+
+        $this->post(route('trip-booking.payment.store', ['trip' => $this->tripId, ...$this->criteria]), [
+            'name'           => 'Nguyen Van A', 'phone' => '0912345678',
+            'email'          => 'customer@example.com', 'accept_terms' => '1',
+            'seats'          => [$this->seatId], 'pickup_mode' => 'station', 'dropoff_mode' => 'station',
+            'pickup_station' => (string) ($stopId + 1000),
+        ])->assertSessionHasErrors('pickup_station');
+
+        $this->assertDatabaseCount('sepay_payment_intents', 0);
+    }
+
+    public function test_departed_operator_stop_remains_listed_but_cannot_be_selected(): void
+    {
+        $routeId = DB::table('trips')->where('id', $this->tripId)->value('route_id');
+        $expiredId = DB::table('route_stops')->insertGetId([
+            'route_id'       => $routeId, 'name' => 'Điểm đã qua', 'stop_order' => 1,
+            'offset_minutes' => 0, 'stop_type' => 'pickup', 'status' => 'active',
+        ]);
+        $futureId = DB::table('route_stops')->insertGetId([
+            'route_id'       => $routeId, 'name' => 'Điểm tiếp theo', 'stop_order' => 2,
+            'offset_minutes' => 120, 'stop_type' => 'pickup', 'status' => 'active',
+        ]);
+        $trip = [
+            'route_id'       => $routeId,
+            'departure_time' => now()->subHour()->toDateTimeString(),
+            'arrival_time'   => now()->addHours(3)->toDateTimeString(),
+            'origin'         => 'Điểm đầu', 'destination' => 'Điểm cuối',
+        ];
+        $stops = app(BookingTripStops::class);
+        $options = $stops->forTrip($trip)['pickup'];
+
+        $this->assertCount(2, $options);
+        $this->assertTrue($options[0]['expired']);
+        $this->assertFalse($options[1]['expired']);
+        $this->assertSame((string) $futureId, $stops->selected($trip, 'pickup', null, 'pickup_station')['id']);
+        try {
+            $stops->selected($trip, 'pickup', (string) $expiredId, 'pickup_station');
+            $this->fail('The departed stop was accepted.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('pickup_station', $exception->errors());
+        }
     }
 
     private function signedWebhook(array $event, ?int $timestamp = null, ?string $signedBody = null)

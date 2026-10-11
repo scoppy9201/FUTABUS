@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FuteBus\Payment\Services;
 
 use FuteBus\Core\Services\BookingLocationCatalog;
+use FuteBus\Core\Services\BookingTripStops;
 use FuteBus\Core\Services\TripSearchService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
@@ -15,6 +16,7 @@ class PaymentPreviewBuilder
     public function __construct(
         private readonly TripSearchService $search,
         private readonly BookingLocationCatalog $locations,
+        private readonly BookingTripStops $stops,
     ) {}
 
     public function build(array $data, int $trip, ?int $userId): array
@@ -109,20 +111,28 @@ class PaymentPreviewBuilder
     {
         $pickupIsTransfer = $data[$prefix.'pickup_mode'] === 'transfer';
         $dropoffIsTransfer = $data[$prefix.'dropoff_mode'] === 'transfer';
+        $pickup = $pickupIsTransfer ? null : $this->stops->selected(
+            $trip, 'pickup', $data[$prefix.'pickup_station'] ?? null, $prefix.'pickup_station',
+        );
+        $dropoff = $dropoffIsTransfer ? null : $this->stops->selected(
+            $trip, 'dropoff', $data[$prefix.'dropoff_station'] ?? null, $prefix.'dropoff_station',
+        );
 
         return [
             'pickup' => [
-                'name'    => $pickupIsTransfer ? __('core::booking.transfer') : $trip['origin'],
+                'name'    => $pickupIsTransfer ? __('core::booking.transfer') : $pickup['name'],
                 'address' => $pickupIsTransfer
                     ? $data[$prefix.'pickup_address']
-                    : $this->addressFor($trip['origin'], $catalog),
-                'arrival_time' => Carbon::parse($trip['departure_time'])->subMinutes(15)->toDateTimeString(),
+                    : ($pickup['address'] ?: $this->addressFor($pickup['name'], $catalog)),
+                'arrival_time' => $pickupIsTransfer
+                    ? Carbon::parse($trip['departure_time'])->subMinutes(15)->toDateTimeString()
+                    : $pickup['boarding_time'],
             ],
             'dropoff' => [
-                'name'    => $dropoffIsTransfer ? __('core::booking.transfer') : $trip['destination'],
+                'name'    => $dropoffIsTransfer ? __('core::booking.transfer') : $dropoff['name'],
                 'address' => $dropoffIsTransfer
                     ? $data[$prefix.'dropoff_address']
-                    : $this->addressFor($trip['destination'], $catalog),
+                    : ($dropoff['address'] ?: $this->addressFor($dropoff['name'], $catalog)),
             ],
         ];
     }

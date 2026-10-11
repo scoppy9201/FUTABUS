@@ -81,7 +81,7 @@
             @include('BookingManagement::partials.booking-pickup-leg', ['pickupTrip' => $trip, 'pickupLeg' => 'return'])
         </section>
     @else
-    <section class="booking-panel" aria-labelledby="booking-pickup-title">
+    <section class="booking-panel booking-page__pickup-panel" aria-labelledby="booking-pickup-title">
         <div class="booking-panel__header">
             <h2 id="booking-pickup-title">{{ __('core::booking.pickup_title') }}</h2>
             <img class="booking-page__info-icon" src="{{ asset('icons/booking-info.png') }}" alt="" aria-hidden="true">
@@ -94,9 +94,12 @@
                     <label><input type="radio" name="pickup_mode" value="transfer" x-model="pickupMode"> {{ __('core::booking.transfer') }}</label>
                 </div>
                 <div x-show="pickupMode === 'station'" class="booking-page__select-wrap">
-                    <select name="pickup_station" aria-label="{{ __('core::booking.pickup') }}">
-                        <option>{{ $origin }}</option>
-                    </select>
+                    @include('BookingManagement::partials.booking-stop-picker', [
+                        'stopTrip' => $trip,
+                        'stopKind' => 'pickup',
+                        'stopFieldName' => 'pickup_station',
+                        'stopLabel' => __('core::booking.pickup'),
+                    ])
                 </div>
                 <div x-show="pickupMode === 'transfer'" class="booking-page__input-wrap">
                     <input :required="pickupMode === 'transfer'" name="pickup_address"
@@ -109,11 +112,6 @@
                         <x-heroicon-o-x-mark class="size-4" aria-hidden="true" />
                     </button>
                 </div>
-                <p x-show="pickupMode === 'station'" class="booking-page__boarding-reminder">
-                    {{ __('core::booking.arrive_at') }} <strong>{{ $origin }}</strong>
-                    <em>{{ __('core::booking.before_time') }} {{ $departure->copy()->subMinutes(15)->format('H:i d/m/Y') }}</em>
-                    {{ __('core::booking.boarding_help') }}
-                </p>
             </fieldset>
             <fieldset>
                 <legend>{{ __('core::booking.dropoff') }}</legend>
@@ -122,9 +120,12 @@
                     <label><input type="radio" name="dropoff_mode" value="transfer" x-model="dropoffMode"> {{ __('core::booking.transfer') }}</label>
                 </div>
                 <div x-show="dropoffMode === 'station'" class="booking-page__select-wrap">
-                    <select name="dropoff_station" aria-label="{{ __('core::booking.dropoff') }}">
-                        <option>{{ $destination }}</option>
-                    </select>
+                    @include('BookingManagement::partials.booking-stop-picker', [
+                        'stopTrip' => $trip,
+                        'stopKind' => 'dropoff',
+                        'stopFieldName' => 'dropoff_station',
+                        'stopLabel' => __('core::booking.dropoff'),
+                    ])
                 </div>
                 <div x-show="dropoffMode === 'transfer'" class="booking-page__input-wrap">
                     <input :required="dropoffMode === 'transfer'" name="dropoff_address"

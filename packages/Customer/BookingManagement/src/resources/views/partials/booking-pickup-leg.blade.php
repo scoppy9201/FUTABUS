@@ -41,9 +41,12 @@
             <label><input type="radio" name="{{ $fieldPrefix }}pickup_mode" value="transfer" x-model="{{ $pickupModeModel }}"> {{ __('core::booking.transfer') }}</label>
         </div>
         <div x-show="{{ $pickupModeModel }} === 'station'" class="booking-page__select-wrap">
-            <select name="{{ $fieldPrefix }}pickup_station" aria-label="{{ $legName }} - {{ __('core::booking.pickup') }}">
-                <option value="{{ $pickupTrip['origin'] }}">{{ $pickupTrip['origin'] }}</option>
-            </select>
+            @include('BookingManagement::partials.booking-stop-picker', [
+                'stopTrip' => $pickupTrip,
+                'stopKind' => 'pickup',
+                'stopFieldName' => $fieldPrefix.'pickup_station',
+                'stopLabel' => $legName.' - '.__('core::booking.pickup'),
+            ])
         </div>
         <div x-show="{{ $pickupModeModel }} === 'transfer'" class="booking-page__input-wrap" x-cloak>
             <input :required="{{ $pickupModeModel }} === 'transfer'" name="{{ $fieldPrefix }}pickup_address"
@@ -57,11 +60,6 @@
                 <x-heroicon-o-x-mark class="size-4" aria-hidden="true" />
             </button>
         </div>
-        <p x-show="{{ $pickupModeModel }} === 'station'" class="booking-page__boarding-reminder">
-            {{ __('core::booking.arrive_at') }} <strong>{{ $pickupTrip['origin'] }}</strong>
-            <em>{{ __('core::booking.before_time') }} {{ $pickupDeparture->copy()->subMinutes(15)->format('H:i d/m/Y') }}</em>
-            {{ __('core::booking.boarding_help') }}
-        </p>
     </fieldset>
 
     <fieldset>
@@ -71,9 +69,12 @@
             <label><input type="radio" name="{{ $fieldPrefix }}dropoff_mode" value="transfer" x-model="{{ $dropoffModeModel }}"> {{ __('core::booking.transfer') }}</label>
         </div>
         <div x-show="{{ $dropoffModeModel }} === 'station'" class="booking-page__select-wrap">
-            <select name="{{ $fieldPrefix }}dropoff_station" aria-label="{{ $legName }} - {{ __('core::booking.dropoff') }}">
-                <option value="{{ $pickupTrip['destination'] }}">{{ $pickupTrip['destination'] }}</option>
-            </select>
+            @include('BookingManagement::partials.booking-stop-picker', [
+                'stopTrip' => $pickupTrip,
+                'stopKind' => 'dropoff',
+                'stopFieldName' => $fieldPrefix.'dropoff_station',
+                'stopLabel' => $legName.' - '.__('core::booking.dropoff'),
+            ])
         </div>
         <div x-show="{{ $dropoffModeModel }} === 'transfer'" class="booking-page__input-wrap" x-cloak>
             <input :required="{{ $dropoffModeModel }} === 'transfer'" name="{{ $fieldPrefix }}dropoff_address"

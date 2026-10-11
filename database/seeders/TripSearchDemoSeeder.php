@@ -66,6 +66,8 @@ class TripSearchDemoSeeder extends Seeder
                     ]);
                 }
 
+                $this->seedRouteStops($routeId, $fromStation, $toStation, $duration, $from);
+
                 $busId = DB::table('buses')->where('license_plate', $code)->value('id');
                 if (! $busId) {
                     $busId = DB::table('buses')->insertGetId([
@@ -131,5 +133,61 @@ class TripSearchDemoSeeder extends Seeder
                 }
             }
         });
+    }
+
+    private function seedRouteStops(int $routeId, string $origin, string $destination, int $duration, string $originCity): void
+    {
+        $addresses = [
+            'Bến xe Miền Tây'       => '395 Kinh Dương Vương, Phường An Lạc, TP. Hồ Chí Minh',
+            'Bến xe An Sương'       => '16 Lê Quang Đạo, Xã Bà Điểm, TP. Hồ Chí Minh',
+            'Bến xe Miền Đông Mới'  => '501 Hoàng Hữu Nam, Phường Long Bình, TP. Hồ Chí Minh',
+            'Bến xe Miền Đông Cũ'   => '292 Đinh Bộ Lĩnh, Phường Bình Thạnh, TP. Hồ Chí Minh',
+            'Văn phòng Quang Trung' => '190 Quang Trung, Phường Gò Vấp, TP. Hồ Chí Minh',
+            'Đà Lạt'                => '01 Tô Hiến Thành, Phường Xuân Hương, Đà Lạt, Lâm Đồng',
+            'Bảo Lộc'               => "399 Trần Phú, Phường B'Lao, Lâm Đồng",
+        ];
+
+        foreach ($addresses as $name => $address) {
+            DB::table('route_stops')->where('route_id', $routeId)
+                ->where('name', $name)->whereNull('address')
+                ->update(['address' => $address, 'updated_at' => now()]);
+        }
+
+        if (DB::table('route_stops')->where('route_id', $routeId)->exists()) {
+            return;
+        }
+
+        $stops = [
+            [$origin, 0, 'pickup'],
+            [$destination, $duration, 'dropoff'],
+        ];
+        if ($originCity === 'TP. Hồ Chí Minh') {
+            $stops[] = ['Văn phòng Quang Trung', 15, 'pickup'];
+            $stops[] = ['Bến xe Miền Đông Cũ', 30, 'pickup'];
+        } else {
+            $stops[] = ['Văn phòng Quang Trung', $duration - 30, 'dropoff'];
+            $stops[] = ['Bến xe Miền Đông Cũ', $duration - 15, 'dropoff'];
+        }
+        if ($destination === 'Đà Lạt') {
+            $stops[] = ['Bảo Lộc', $duration - 90, 'dropoff'];
+        }
+        if ($origin === 'Đà Lạt') {
+            $stops[] = ['Bảo Lộc', 180, 'pickup'];
+        }
+
+        usort($stops, fn (array $a, array $b): int => $a[1] <=> $b[1]);
+        foreach ($stops as $index => [$name, $offset, $type]) {
+            DB::table('route_stops')->insert([
+                'route_id'       => $routeId,
+                'name'           => $name,
+                'address'        => $addresses[$name],
+                'stop_order'     => $index + 1,
+                'offset_minutes' => $offset,
+                'stop_type'      => $type,
+                'status'         => 'active',
+                'created_at'     => now(),
+                'updated_at'     => now(),
+            ]);
+        }
     }
 }
