@@ -11,6 +11,23 @@ class TripSearchTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_voice_search_is_available_on_home_and_trip_results_forms(): void
+    {
+        app()->setLocale('vi');
+
+        $this->get(route('home'))->assertOk()
+            ->assertSee('Tìm bằng giọng nói')
+            ->assertSee('hero-voice-result', false);
+
+        $this->get(route('trip-search', [
+            'departure'      => 'TP. Hồ Chí Minh',
+            'destination'    => 'Lâm Đồng',
+            'departure_date' => now()->addDay()->toDateString(),
+            'trip_type'      => 'one_way',
+            'quantity'       => 1,
+        ]))->assertOk()->assertSee('Tìm bằng giọng nói');
+    }
+
     public function test_search_shows_only_available_futa_trips_on_the_requested_route_and_date(): void
     {
         config()->set('services.sepay.enabled', false);

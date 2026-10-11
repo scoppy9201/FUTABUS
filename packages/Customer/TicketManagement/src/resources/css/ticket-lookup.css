@@ -1,0 +1,25 @@
+@media print {
+    body:has([data-lookup-tickets]) * {
+        visibility: hidden !important;
+    }
+
+    [data-lookup-tickets] [data-ticket-slide]:not([hidden]),
+    [data-lookup-tickets] [data-ticket-slide]:not([hidden]) * {
+        visibility: visible !important;
+    }
+
+    [data-lookup-tickets] [data-ticket-slide]:not([hidden]) {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 340px;
+        max-width: 100%;
+        box-shadow: none;
+        break-inside: avoid;
+    }
+
+    [data-lookup-tickets] [data-ticket-slide] button,
+    [data-lookup-tickets] [data-ticket-slide] a[data-ticket-download] {
+        display: none !important;
+    }
+}

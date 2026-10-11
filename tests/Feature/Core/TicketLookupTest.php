@@ -34,15 +34,26 @@ class TicketLookupTest extends TestCase
         app()->setLocale('vi');
         $this->createBooking();
 
-        $this->get(route('ticket-lookup'))->assertOk()->assertSee('Tra cứu thông tin đặt vé');
+        $this->get(route('ticket-lookup'))->assertOk()
+            ->assertSee('Tra cứu thông tin đặt vé')
+            ->assertSee('href="'.route('ticket-lookup').'" class="futa-nav-active relative', false);
 
         $this->post(route('ticket-lookup.search'), [
             'phone'       => '+84 568 503 606',
             'ticket_code' => 'booking-001',
         ])->assertOk()
+            ->assertSee('href="'.route('ticket-lookup').'" class="futa-nav-active relative', false)
             ->assertSee('BOOKING-001')
             ->assertSee('TICKET-001')
             ->assertSee('TICKET-002')
+            ->assertSee('FUTA')
+            ->assertSee('51B-12345')
+            ->assertSee('0568503606')
+            ->assertSee('data:image/svg+xml;base64,', false)
+            ->assertSee('Thanh toán thử nghiệm')
+            ->assertSee('data-ticket-current', false)
+            ->assertSee('data-share-current', false)
+            ->assertSee('data-print-ticket', false)
             ->assertSee('Đà Lạt')
             ->assertSee('Đã thanh toán')
             ->assertDontSee('data-notice-on-load', false);
