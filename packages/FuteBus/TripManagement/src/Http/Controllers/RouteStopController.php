@@ -17,7 +17,7 @@ class RouteStopController extends Controller
     {
         abort_unless($request->user()?->isAdmin(), 403);
 
-        $routes  = DB::table('routes')->where('is_active', 1)->orderBy('code')->get();
+        $routes = DB::table('routes')->where('is_active', 1)->orderBy('code')->get();
         $routeId = (int) $request->input('route_id', $routes->first()->id ?? 0);
 
         return view('TripManagement::route-stops.index', [
@@ -25,7 +25,7 @@ class RouteStopController extends Controller
             'route'   => $routes->firstWhere('id', $routeId),
             'routeId' => $routeId,
             'stops'   => DB::table('route_stops')->where('route_id', $routeId)
-                            ->orderBy('stop_order')->get(),
+                ->orderBy('stop_order')->get(),
             'company' => DB::table('bus_companies')->where('code', 'FUTA')->first(),
         ]);
     }
@@ -37,9 +37,9 @@ class RouteStopController extends Controller
         $data = $request->validate($this->rules() + ['route_id' => ['required', 'exists:routes,id']]);
 
         DB::table('route_stops')->insert($this->payload($data) + [
-        'route_id' => $data['route_id'], 'status' => 'active', 'stop_order' => 0,
-        'created_at' => now(), 'updated_at' => now(),
-    ]);
+            'route_id'   => $data['route_id'], 'status' => 'active', 'stop_order' => 0,
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
         $this->reorder((int) $data['route_id']);
 
         return $this->back((int) $data['route_id'], 'success', __('TripManagement::app.rs_flash_created'));
@@ -87,7 +87,7 @@ class RouteStopController extends Controller
     /** Tuyến đang có lịch trình áp dụng thì phải còn >= 2 điểm hoạt động. */
     private function cannotDrop(int $routeId): ?string
     {
-        $active   = DB::table('route_stops')->where('route_id', $routeId)->where('status', 'active')->count();
+        $active = DB::table('route_stops')->where('route_id', $routeId)->where('status', 'active')->count();
         $hasSched = DB::table('trip_schedules')->where('route_id', $routeId)->where('status', 'active')->exists();
 
         return ($hasSched && $active <= 2) ? __('TripManagement::app.rs_err_min') : null;
@@ -97,7 +97,7 @@ class RouteStopController extends Controller
     {
         $i = 1;
         foreach (DB::table('route_stops')->where('route_id', $routeId)
-                     ->orderBy('offset_minutes')->orderBy('id')->pluck('id') as $sid) {
+            ->orderBy('offset_minutes')->orderBy('id')->pluck('id') as $sid) {
             DB::table('route_stops')->where('id', $sid)->update(['stop_order' => $i++]);
         }
     }

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
+use FuteBus\TripManagement\Http\Controllers\RouteStopController;
+use FuteBus\TripManagement\Http\Controllers\TripController;
 use FuteBus\TripManagement\Http\Controllers\TripScheduleController;
 use Illuminate\Support\Facades\Route;
-use FuteBus\TripManagement\Http\Controllers\TripController;
-use FuteBus\TripManagement\Http\Controllers\RouteStopController;
 
 Route::middleware(['web', 'auth'])->prefix('quan-tri/chuyen-xe')->group(function () {
     Route::get('/lich-trinh', [TripScheduleController::class, 'index'])->name('trip-management.schedules.index');

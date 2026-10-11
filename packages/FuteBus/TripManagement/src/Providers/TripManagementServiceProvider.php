@@ -18,9 +18,9 @@ class TripManagementServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'TripManagement');
-        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'TripManagement');
-        Route::middleware('web')->group(__DIR__ . '/../routes/web.php');
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'TripManagement');
+        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'TripManagement');
+        Route::middleware('web')->group(__DIR__.'/../routes/web.php');
 
         if ($this->app->runningInConsole()) {
             $this->commands([GenerateTripsCommand::class]);

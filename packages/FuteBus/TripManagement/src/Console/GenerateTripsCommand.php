@@ -10,6 +10,7 @@ use Illuminate\Console\Command;
 class GenerateTripsCommand extends Command
 {
     protected $signature = 'trips:generate';
+
     protected $description = 'Sinh chuyến xe 30 ngày tới từ các lịch trình đang áp dụng';
 
     public function handle(TripGenerator $generator): int

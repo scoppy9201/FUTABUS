@@ -32,12 +32,12 @@ class TripGenerator
             return 0;
         }
 
-        $days      = json_decode($schedule->days_of_week, true) ?: [];
-        $from      = Carbon::today()->max(Carbon::parse($schedule->start_date));
-        $to        = Carbon::today()->addDays(self::DAYS_AHEAD)->min(Carbon::parse($schedule->end_date)->endOfDay());
+        $days = json_decode($schedule->days_of_week, true) ?: [];
+        $from = Carbon::today()->max(Carbon::parse($schedule->start_date));
+        $to = Carbon::today()->addDays(self::DAYS_AHEAD)->min(Carbon::parse($schedule->end_date)->endOfDay());
         $companyId = DB::table('bus_companies')->where('code', 'FUTA')->value('id');
-        $duration  = self::duration((int) $schedule->route_id);
-        $count     = 0;
+        $duration = self::duration((int) $schedule->route_id);
+        $count = 0;
 
         for ($d = $from->copy(); $d->lte($to); $d->addDay()) {
             if (! in_array($d->dayOfWeekIso, $days, true)) {
