@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace FuteBus\Core\Http\Controllers;
 
 use FuteBus\Core\Http\Requests\TripSearchRequest;
+use FuteBus\Core\Services\BookingTripStops;
 use FuteBus\Core\Services\TripSearchService;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 
 class TripBookingController extends Controller
 {
-    public function __invoke(TripSearchRequest $request, TripSearchService $search, int $trip): View
+    public function __invoke(TripSearchRequest $request, TripSearchService $search, BookingTripStops $stops, int $trip): View
     {
         $criteria = $request->validated();
         $isReturn = $criteria['trip_type'] === 'round_trip' && $request->query('direction') === 'return';
@@ -55,6 +56,11 @@ class TripBookingController extends Controller
                 ->all();
         }
 
+        $stopOptions = [$selectedTrip['id'] => $stops->forTrip($selectedTrip)];
+        if ($outboundTrip !== null) {
+            $stopOptions[$outboundTrip['id']] = $stops->forTrip($outboundTrip);
+        }
+
         return view('BookingManagement::trip-booking', [
             'trip'            => $selectedTrip,
             'criteria'        => $criteria,
@@ -63,6 +69,7 @@ class TripBookingController extends Controller
             'selectedSeatIds' => $selectedSeatIds,
             'outboundTrip'    => $outboundTrip,
             'outboundSeatIds' => $outboundSeatIds,
+            'stopOptions'     => $stopOptions,
         ]);
     }
 }

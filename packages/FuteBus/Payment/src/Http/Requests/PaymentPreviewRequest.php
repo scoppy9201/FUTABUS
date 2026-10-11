@@ -27,10 +27,14 @@ class PaymentPreviewRequest extends TripSearchRequest
             'dropoff_mode'             => ['required', Rule::in(['station', 'transfer'])],
             'pickup_address'           => ['required_if:pickup_mode,transfer', 'nullable', 'string', 'max:255'],
             'dropoff_address'          => ['required_if:dropoff_mode,transfer', 'nullable', 'string', 'max:255'],
+            'pickup_station'           => ['nullable', 'string', 'max:30'],
+            'dropoff_station'          => ['nullable', 'string', 'max:30'],
             'outbound_pickup_mode'     => ['required_if:trip_type,round_trip', 'nullable', Rule::in(['station', 'transfer'])],
             'outbound_dropoff_mode'    => ['required_if:trip_type,round_trip', 'nullable', Rule::in(['station', 'transfer'])],
             'outbound_pickup_address'  => ['required_if:outbound_pickup_mode,transfer', 'nullable', 'string', 'max:255'],
             'outbound_dropoff_address' => ['required_if:outbound_dropoff_mode,transfer', 'nullable', 'string', 'max:255'],
+            'outbound_pickup_station'  => ['nullable', 'string', 'max:30'],
+            'outbound_dropoff_station' => ['nullable', 'string', 'max:30'],
         ];
     }
 }

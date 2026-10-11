@@ -140,6 +140,7 @@ class TripSearchService
 
                 return [
                     'id'                     => (int) $trip->id,
+                    'route_id'               => (int) $trip->route_id,
                     'departure_time'         => $trip->departure_time,
                     'arrival_time'           => $trip->arrival_time,
                     'departure_hour'         => $departure->format('H:i'),
