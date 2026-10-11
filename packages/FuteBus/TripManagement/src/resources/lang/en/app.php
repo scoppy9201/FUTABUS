@@ -137,4 +137,12 @@ return [
     'tr_err_has_tickets' => 'The trip has sold tickets and cannot be edited. Please cancel the trip to process refunds or trip changes for passengers.',
     'tr_err_cancel_past' => 'The trip has already departed and cannot be cancelled.',
     'tr_err_cancel_48h' => 'Trips with sold tickets can only be cancelled at least 48 hours before departure.',
+    'tr_err_docs_head' => 'Cannot assign vehicle :plate because required documents are incomplete:',
+    'tr_err_doc_missing' => 'Missing required document: :type',
+    'tr_err_doc_expired' => 'Document :type expired on :date and is not valid on the departure date',
+    'tr_doc_warn' => 'This vehicle lacks required documents and cannot be assigned:',
+    'tr_doc_missing' => 'no record',
+    'tr_doc_expired' => 'expires before departure date',
+    'tr_f_arrival' => 'Estimated arrival time',
+    'tr_err_arrival' => 'Arrival time must be after the departure time.',
 ];
