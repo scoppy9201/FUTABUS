@@ -20,9 +20,35 @@
                     <p role="alert" class="mt-5 rounded-lg bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">{{ session('warning') }}</p>
                 @endif
 
-                <form action="{{ route('profile.password.update') }}" method="post" class="mt-7 min-h-134 rounded-2xl border border-gray-200 bg-white p-6 sm:p-8">
+                <form action="{{ route('profile.password.update') }}" method="post" autocomplete="on" novalidate
+                    @submit="validateForSubmit($event)"
+                    x-data="{
+                        passwordValue: '',
+                        confirmationValue: '',
+                        passwordTouched: false,
+                        confirmationTouched: false,
+                        strong(value) {
+                            return value.length >= 8 && /\p{Lu}/u.test(value)
+                                && /\p{Ll}/u.test(value) && /\p{Nd}/u.test(value);
+                        },
+                        passwordInvalid() { return this.passwordTouched && !this.strong(this.passwordValue) },
+                        confirmationInvalid() {
+                            return this.confirmationTouched
+                                && (!this.strong(this.confirmationValue) || this.confirmationValue !== this.passwordValue);
+                        },
+                        validateForSubmit(event) {
+                            this.passwordValue = event.target.elements.namedItem('password').value;
+                            this.confirmationValue = event.target.elements.namedItem('password_confirmation').value;
+                            this.passwordTouched = true;
+                            this.confirmationTouched = true;
+                            if (this.passwordInvalid() || this.confirmationInvalid()) event.preventDefault();
+                        }
+                    }"
+                    class="mt-7 min-h-134 rounded-2xl border border-gray-200 bg-white p-6 sm:p-8">
                     @csrf
                     @method('PUT')
+                    <input type="text" name="username" value="{{ $user->email }}" autocomplete="username"
+                        class="sr-only" tabindex="-1" aria-hidden="true">
 
                     <p class="mb-10 text-center text-2xl font-semibold wrap-anywhere text-gray-950">{{ $user->email }}</p>
 
@@ -40,7 +66,16 @@
                                         type="password"
                                         :type="visible ? 'text' : 'password'"
                                         required
-                                        @if($field === 'password') minlength="8" @endif
+                                        @if($field !== 'current_password') minlength="8" @endif
+                                        @if($field === 'password')
+                                            x-model="passwordValue" @input="passwordTouched = true" @change="passwordValue = $el.value"
+                                            :style="passwordInvalid() ? 'border-color: #ef4444' : null"
+                                            :aria-invalid="passwordInvalid() || @js($errors->has($field))"
+                                        @elseif($field === 'password_confirmation')
+                                            x-model="confirmationValue" @input="confirmationTouched = true" @change="confirmationValue = $el.value"
+                                            :style="confirmationInvalid() ? 'border-color: #ef4444' : null"
+                                            :aria-invalid="confirmationInvalid() || @js($errors->has($field))"
+                                        @endif
                                         autocomplete="{{ $field === 'current_password' ? 'current-password' : 'new-password' }}"
                                         placeholder="{{ __('Profile::app.password_change.placeholders.'.$field) }}"
                                         @class([
@@ -59,6 +94,19 @@
                                         <x-heroicon-o-eye x-cloak x-show="visible" class="size-5" />
                                     </button>
                                 </div>
+                                @if($field === 'password')
+                                    <p x-show="passwordInvalid()" x-cloak role="alert" class="mt-1 text-sm font-medium text-red-600"
+                                        x-text="passwordValue === ''
+                                            ? @js(__('Profile::app.password_change.validation.empty_password'))
+                                            : @js(__('Profile::app.password_change.validation.strong_password'))"></p>
+                                @elseif($field === 'password_confirmation')
+                                    <p x-show="confirmationInvalid()" x-cloak role="alert" class="mt-1 text-sm font-medium text-red-600"
+                                        x-text="confirmationValue === ''
+                                            ? @js(__('Profile::app.password_change.validation.empty_password'))
+                                            : strong(confirmationValue)
+                                                ? @js(__('Profile::app.password_change.validation.confirmed'))
+                                                : @js(__('Profile::app.password_change.validation.strong_password'))"></p>
+                                @endif
                                 @error($field)
                                     <p role="alert" class="mt-1 text-sm font-medium text-red-600">{{ $message }}</p>
                                 @enderror
