@@ -15,16 +15,17 @@ use Illuminate\View\View;
 class TripController extends Controller
 {
     private const EDITABLE = ['unassigned', 'scheduled'];
+
     private const DT = 'Y-m-d\TH:i';
 
     public function index(Request $request): View
     {
         abort_unless($request->user()?->isAdmin(), 403);
 
-        $company   = DB::table('bus_companies')->where('code', 'FUTA')->first();
-        $search    = (string) $request->input('search', '');
-        $status    = (string) $request->input('status', '');
-        $date      = (string) $request->input('date', '');
+        $company = DB::table('bus_companies')->where('code', 'FUTA')->first();
+        $search = (string) $request->input('search', '');
+        $status = (string) $request->input('status', '');
+        $date = (string) $request->input('date', '');
 
         $query = DB::table('trips')
             ->join('routes', 'routes.id', '=', 'trips.route_id')
@@ -57,8 +58,8 @@ class TripController extends Controller
             'date'    => $date,
             'routes'  => DB::table('routes')->where('is_active', 1)->orderBy('code')->get(),
             'buses'   => DB::table('buses')->where('status', 'active')
-                            ->where('bus_company_id', $company?->id ?? 0)
-                            ->orderBy('license_plate')->get(['id', 'license_plate', 'capacity']),
+                ->where('bus_company_id', $company?->id ?? 0)
+                ->orderBy('license_plate')->get(['id', 'license_plate', 'capacity']),
             'company' => $company,
         ]);
     }
@@ -179,7 +180,7 @@ class TripController extends Controller
             return back()->withErrors(['trip' => __('TripManagement::app.tr_err_status')]);
         }
 
-        $dep     = Carbon::parse($trip->departure_time);
+        $dep = Carbon::parse($trip->departure_time);
         $tickets = $this->ticketCount($id);
 
         if ($dep->lte(now())) {
@@ -205,7 +206,6 @@ class TripController extends Controller
         return DB::table('bookings')->where('trip_id', $tripId)->where('status', '<>', 'cancelled')->count();
     }
 
-    
     private function busConflict(int $busId, Carbon $dep, Carbon $arr, ?int $ignoreId = null): bool
     {
         return DB::table('trips')
@@ -217,7 +217,6 @@ class TripController extends Controller
             ->exists();
     }
 
-    
     private function futureRule(): \Closure
     {
         return function ($attr, $value, $fail) {
