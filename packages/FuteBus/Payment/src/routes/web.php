@@ -5,6 +5,8 @@ declare(strict_types=1);
 use FuteBus\Payment\Http\Controllers\TripPaymentPreviewController;
 use Illuminate\Support\Facades\Route;
 
+Route::view('/huong-dan-nap-tien-tren-app', 'Payment::topup-guide')->name('topup-guide');
+
 Route::post('/dat-ve/chon-chuyen/{trip}/thanh-toan', [TripPaymentPreviewController::class, 'store'])
     ->whereNumber('trip')->name('trip-booking.payment.store');
 Route::get('/thanh-toan/{draft}', [TripPaymentPreviewController::class, 'show'])
