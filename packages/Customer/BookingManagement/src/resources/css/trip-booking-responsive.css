@@ -1,9 +1,24 @@
 @media (max-width: 900px) {
+    .booking-page__round-trip-pickup {
+        grid-template-columns: 1fr;
+    }
+    .booking-page__round-trip-pickup::before {
+        content: none;
+    }
+    .booking-page__pickup-leg + .booking-page__pickup-leg {
+        border-top: 1px solid #e2e8f0;
+    }
     .booking-page__round-trip-legs {
         grid-template-columns: 1fr;
     }
     .booking-page__round-trip-legs > .booking-page__seats:last-child {
         border-left: 1px solid #dce1e7;
+        border-top: 0;
+        border-radius: 0;
+    }
+    .booking-page__round-trip-legs > .booking-page__seats:first-child {
+        border-bottom: 0;
+        border-radius: 12px 12px 0 0;
     }
     .booking-page__hero-inner {
         grid-template-columns: 1fr auto 1fr;
@@ -13,6 +28,14 @@
     }
     .booking-page__aside {
         grid-template-columns: 1fr 1fr;
+    }
+}
+@media (max-width: 400px) {
+    .booking-page__round-trip-legs .booking-page__seat-map {
+        gap: 16px;
+    }
+    .booking-page__round-trip-legs .trip-card__seat-grid {
+        gap: 7px 27px;
     }
 }
 @media (max-width: 640px) {

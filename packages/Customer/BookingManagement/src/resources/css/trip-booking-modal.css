@@ -36,7 +36,7 @@
 }
 .booking-page__modal-heading h2 {
     color: #111827;
-    font-size: 19px;
+    font-size: 20px;
     font-weight: 600;
 }
 .booking-page__info-button {
@@ -106,13 +106,28 @@
     border-radius: 11px;
     box-shadow: none;
 }
+.booking-page__modal-summary + .booking-page__modal-summary {
+    margin-top: 16px;
+}
 .booking-page__modal-summary dl {
-    gap: 9px;
-    padding: 13px 16px;
+    gap: 8px;
+    padding: 12px 16px;
+}
+.booking-page__modal-summary dl > div {
+    font-size: 14px;
+}
+.booking-page__modal-summary dd {
+    color: #111827;
+    font-weight: 500;
 }
 .booking-page__modal-summary .booking-page__total {
     padding-top: 0;
     border-top: 0;
+}
+.booking-page__modal-summary .booking-page__total dd {
+    color: var(--color-futa-green);
+    font-size: 14px;
+    font-weight: 500;
 }
 @media (max-width: 640px) {
     .booking-page__modal-backdrop {

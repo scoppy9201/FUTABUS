@@ -3,8 +3,16 @@
     $summaryTrip = $summaryIsOutbound ? $preview['outbound_trip'] : $preview['trip'];
     $summarySeats = $summaryIsOutbound ? $preview['outbound_seats'] : $preview['seats'];
     $summaryDeparture = \Illuminate\Support\Carbon::parse($summaryTrip['departure_time']);
-    $summaryPickup = $summaryIsOutbound ? ['name' => $summaryTrip['origin'], 'address' => null] : $preview['pickup'];
-    $summaryDropoff = $summaryIsOutbound ? ['name' => $summaryTrip['destination'], 'address' => null] : $preview['dropoff'];
+    $summaryPickup = $summaryIsOutbound
+        ? ($preview['outbound_pickup'] ?? [
+            'name' => $summaryTrip['origin'],
+            'address' => null,
+            'arrival_time' => $summaryDeparture->copy()->subMinutes(15)->toDateTimeString(),
+        ])
+        : $preview['pickup'];
+    $summaryDropoff = $summaryIsOutbound
+        ? ($preview['outbound_dropoff'] ?? ['name' => $summaryTrip['destination'], 'address' => null])
+        : $preview['dropoff'];
     $summaryTotal = number_format(count($summarySeats) * $summaryTrip['fare'], 0, ',', '.').'đ';
 @endphp
 <dl>
@@ -35,7 +43,7 @@
         <dt>{{ __('Payment::payment.payment_boarding_time') }}</dt>
         <dd class="payment-page__boarding-time">
             {{ __('core::booking.before_time') }}
-            {{ ($summaryIsOutbound ? $summaryDeparture->copy()->subMinutes(15) : \Illuminate\Support\Carbon::parse($preview['pickup']['arrival_time']))->format('H:i d/m/Y') }}
+            {{ \Illuminate\Support\Carbon::parse($summaryPickup['arrival_time'])->format('H:i d/m/Y') }}
         </dd>
     </div>
     <div>

@@ -24,16 +24,20 @@
         customerEmail: @js(auth()->user()?->email ?? ''),
         pickupAddress: '',
         dropoffAddress: '',
+        outboundPickupAddress: '',
+        outboundDropoffAddress: '',
         fare: @js($trip['price']),
         outboundFare: @js($outboundTrip['price'] ?? 0),
         roundTrip: @js($outboundTrip !== null),
         limit: @js($seatLimit),
         pickupMode: 'station',
         dropoffMode: 'station',
+        outboundPickupMode: 'station',
+        outboundDropoffMode: 'station',
         notify(message) {
             window.FutaNotify?.show(message, { tone: 'warning' });
         },
-        vehicleInfoOpen: false,
+        vehicleInfoOpen: null,
         vehicleInfoTab: 'schedule',
         tripDetailOpen: false,
         policyTooltipOpen: false,
@@ -61,8 +65,9 @@
         ]),
         captchaImageIndex: -1,
         savedPageOverflow: null,
-        openTripDetail() {
+        openTripDetail(event) {
             if (this.tripDetailOpen) return;
+            this.tripDetailTrigger = event?.currentTarget ?? this.$refs.tripDetailTrigger;
             this.savedPageOverflow = {
                 html: document.documentElement.style.overflow,
                 body: document.body.style.overflow,
@@ -79,7 +84,7 @@
             document.documentElement.style.overflow = this.savedPageOverflow?.html ?? '';
             document.body.style.overflow = this.savedPageOverflow?.body ?? '';
             this.savedPageOverflow = null;
-            this.$nextTick(() => this.$refs.tripDetailTrigger.focus());
+            this.$nextTick(() => this.tripDetailTrigger?.focus());
         },
         showTermsScrollbar() {
             this.termsScrolling = true;
@@ -281,8 +286,13 @@
                                     <h2 id="booking-outbound-seats-title">{{ __('core::booking.choose_seats') }}</h2>
                                     <p>{{ __('core::booking.outbound_leg') }} - {{ \Illuminate\Support\Carbon::parse($outboundTrip['departure_time'])->locale(app()->getLocale())->translatedFormat('l, d/m') }}</p>
                                 </div>
+                                <button type="button" class="booking-page__vehicle-link"
+                                    @click.stop="vehicleInfoOpen = vehicleInfoOpen === 'outbound' ? null : 'outbound'; vehicleInfoTab = 'schedule'"
+                                    :aria-expanded="vehicleInfoOpen === 'outbound'" aria-controls="booking-outbound-vehicle-info"
+                                    aria-haspopup="dialog">{{ __('core::booking.vehicle_info') }}</button>
                             </div>
-                            @include('BookingManagement::partials.booking-seat-map', ['seatTrip' => $outboundTrip, 'leg' => 'outbound'])
+                            @include('BookingManagement::partials.booking-seat-map', ['seatTrip' => $outboundTrip, 'leg' => 'outbound', 'sharedLegend' => true])
+                            @include('BookingManagement::partials.booking-vehicle-popover', ['vehicleLeg' => 'outbound'])
                         </section>
                 @endif
                 <section class="booking-panel booking-page__seats" aria-labelledby="booking-seats-title">
@@ -294,61 +304,17 @@
                             @endif
                         </div>
                         <button type="button" class="booking-page__vehicle-link"
-                            @click.stop="vehicleInfoOpen = !vehicleInfoOpen; vehicleInfoTab = 'schedule'"
-                            :aria-expanded="vehicleInfoOpen" aria-controls="booking-vehicle-info"
+                            @click.stop="vehicleInfoOpen = vehicleInfoOpen === 'return' ? null : 'return'; vehicleInfoTab = 'schedule'"
+                            :aria-expanded="vehicleInfoOpen === 'return'" aria-controls="booking-return-vehicle-info"
                             aria-haspopup="dialog">{{ __('core::booking.vehicle_info') }}</button>
                     </div>
-                    @include('BookingManagement::partials.booking-seat-map', ['seatTrip' => $trip, 'leg' => 'return'])
-                    <div id="booking-vehicle-info" class="booking-page__vehicle-popover"
-                        x-show="vehicleInfoOpen" x-transition.opacity x-cloak
-                        @click.outside="vehicleInfoOpen = false" @keydown.escape.window="vehicleInfoOpen = false"
-                        role="dialog" aria-label="{{ __('core::booking.vehicle_info') }}">
-                        <div class="booking-page__vehicle-tabs" role="tablist" aria-label="{{ __('core::booking.vehicle_info') }}">
-                            @foreach (['schedule', 'media', 'amenities', 'policy'] as $tab)
-                                <button type="button" role="tab"
-                                    @click="vehicleInfoTab = '{{ $tab }}'"
-                                    :aria-selected="vehicleInfoTab === '{{ $tab }}'"
-                                    :class="vehicleInfoTab === '{{ $tab }}' ? 'is-active' : ''">
-                                    {{ __('core::booking.vehicle_tab_'.$tab) }}
-                                </button>
-                            @endforeach
-                        </div>
-                        <div class="booking-page__vehicle-content">
-                            <div x-show="vehicleInfoTab === 'schedule'" class="booking-page__vehicle-empty">
-                                <p>{{ __('core::booking.schedule_empty') }}</p>
-                            </div>
-                            <div x-show="vehicleInfoTab === 'media'" class="booking-page__vehicle-empty">
-                                <p>{{ __('core::booking.media_empty') }}</p>
-                            </div>
-                            <div x-show="vehicleInfoTab === 'amenities'" class="booking-page__vehicle-empty">
-                                <p>{{ __('core::booking.amenities_empty') }}</p>
-                            </div>
-                            <div x-show="vehicleInfoTab === 'policy'" class="booking-page__vehicle-policy">
-                                @foreach ([
-                                    ['cancellation_policy', 'cancellation_items'],
-                                    ['boarding_requirements', 'boarding_items'],
-                                    ['carry_on_luggage', 'luggage_items'],
-                                    ['children_and_pregnancy', 'children_and_pregnancy_items'],
-                                    ['roadside_pickup', 'roadside_pickup_items'],
-                                ] as [$title, $items])
-                                    <section>
-                                        <h3>{{ __('core::trip-search.'.$title) }}</h3>
-                                        <ul>
-                                            @foreach (__('core::trip-search.'.$items) as $item)
-                                                <li>@include('BookingManagement::partials.booking-linked-text', ['text' => $item])</li>
-                                            @endforeach
-                                        </ul>
-                                    </section>
-                                @endforeach
-                            </div>
-                        </div>
-                        <div class="booking-page__vehicle-note" x-show="vehicleInfoTab === 'schedule'">
-                            <strong>{{ __('core::booking.schedule_note_title') }}</strong>
-                            <p>{{ __('core::booking.schedule_note') }}</p>
-                        </div>
-                    </div>
+                    @include('BookingManagement::partials.booking-seat-map', ['seatTrip' => $trip, 'leg' => 'return', 'sharedLegend' => (bool) $outboundTrip])
+                    @include('BookingManagement::partials.booking-vehicle-popover', ['vehicleLeg' => 'return'])
                 </section>
                 @if ($outboundTrip)
+                    <div class="booking-page__round-trip-legend">
+                        @include('BookingManagement::partials.booking-seat-legend')
+                    </div>
                     </div>
                 @endif
 
@@ -359,8 +325,10 @@
                 @if ($outboundTrip)
                     <section class="booking-panel booking-page__summary">
                         <div class="booking-panel__header">
-                            <h2>{{ __('core::booking.trip_info') }} · {{ __('core::booking.outbound_leg') }}</h2>
-                            <button type="button" class="booking-page__detail-link" @click="openTripDetail()">
+                            <h2>{{ __('core::booking.trip_info') }}<span class="sr-only"> · {{ __('core::booking.outbound_leg') }}</span></h2>
+                            <button type="button" class="booking-page__detail-link"
+                                @click="openTripDetail($event)" aria-haspopup="dialog"
+                                :aria-expanded="tripDetailOpen" aria-controls="booking-trip-detail-modal">
                                 {{ __('core::booking.detail') }}
                             </button>
                         </div>
@@ -369,9 +337,9 @@
                 @endif
                 <section id="booking-trip-info" class="booking-panel booking-page__summary">
                     <div class="booking-panel__header">
-                        <h2>{{ __('core::booking.trip_info') }}@if ($outboundTrip) · {{ __('core::booking.return_leg') }}@endif</h2>
+                        <h2>{{ __('core::booking.trip_info') }}@if ($outboundTrip)<span class="sr-only"> · {{ __('core::booking.return_leg') }}</span>@endif</h2>
                         <button type="button" class="booking-page__detail-link" x-ref="tripDetailTrigger"
-                            @click="openTripDetail()" aria-haspopup="dialog"
+                            @click="openTripDetail($event)" aria-haspopup="dialog"
                             :aria-expanded="tripDetailOpen" aria-controls="booking-trip-detail-modal">
                             {{ __('core::booking.detail') }}
                         </button>

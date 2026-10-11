@@ -1434,6 +1434,24 @@
                   },
                   "dropoff_address": {
                     "type": "string"
+                  },
+                  "outbound_pickup_mode": {
+                    "type": "string",
+                    "enum": ["station", "transfer"],
+                    "description": "Required for round_trip; pickup mode for the outbound leg."
+                  },
+                  "outbound_dropoff_mode": {
+                    "type": "string",
+                    "enum": ["station", "transfer"],
+                    "description": "Required for round_trip; dropoff mode for the outbound leg."
+                  },
+                  "outbound_pickup_address": {
+                    "type": "string",
+                    "description": "Required when outbound_pickup_mode is transfer."
+                  },
+                  "outbound_dropoff_address": {
+                    "type": "string",
+                    "description": "Required when outbound_dropoff_mode is transfer."
                   }
                 }
               }

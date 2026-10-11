@@ -75,6 +75,12 @@
         </div>
     </section>
 
+    @if ($outboundTrip)
+        <section class="booking-panel booking-page__round-trip-pickup" aria-label="{{ __('core::booking.pickup_title') }}">
+            @include('BookingManagement::partials.booking-pickup-leg', ['pickupTrip' => $outboundTrip, 'pickupLeg' => 'outbound'])
+            @include('BookingManagement::partials.booking-pickup-leg', ['pickupTrip' => $trip, 'pickupLeg' => 'return'])
+        </section>
+    @else
     <section class="booking-panel" aria-labelledby="booking-pickup-title">
         <div class="booking-panel__header">
             <h2 id="booking-pickup-title">{{ __('core::booking.pickup_title') }}</h2>
@@ -134,6 +140,7 @@
             </fieldset>
         </div>
     </section>
+    @endif
     <div class="booking-page__actions">
         <div><span>FUTAPAY</span><strong x-text="money(total())"></strong></div>
         <a href="{{ route('trip-search', $criteria) }}">{{ __('core::booking.cancel') }}</a>

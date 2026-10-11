@@ -59,8 +59,7 @@ class PaymentPreviewBuilder
         }
 
         $catalog = $this->locations->all();
-        $pickupIsTransfer = $data['pickup_mode'] === 'transfer';
-        $dropoffIsTransfer = $data['dropoff_mode'] === 'transfer';
+        $returnStops = $this->buildStops($selected, $data, $catalog);
 
         $preview = [
             'user_id'    => $userId,
@@ -84,19 +83,8 @@ class PaymentPreviewBuilder
             ],
             'seats'    => $selectedSeats->pluck('code')->all(),
             'seat_ids' => $seatIds,
-            'pickup'   => [
-                'name'    => $pickupIsTransfer ? __('core::booking.transfer') : $selected['origin'],
-                'address' => $pickupIsTransfer
-                    ? $data['pickup_address']
-                    : $this->addressFor($selected['origin'], $catalog),
-                'arrival_time' => Carbon::parse($selected['departure_time'])->subMinutes(15)->toDateTimeString(),
-            ],
-            'dropoff' => [
-                'name'    => $dropoffIsTransfer ? __('core::booking.transfer') : $selected['destination'],
-                'address' => $dropoffIsTransfer
-                    ? $data['dropoff_address']
-                    : $this->addressFor($selected['destination'], $catalog),
-            ],
+            'pickup'   => $returnStops['pickup'],
+            'dropoff'  => $returnStops['dropoff'],
         ];
 
         if ($outboundTrip !== null) {
@@ -109,9 +97,34 @@ class PaymentPreviewBuilder
             ];
             $preview['outbound_seats'] = $outboundSeats->pluck('code')->all();
             $preview['outbound_seat_ids'] = $outboundSeatIds;
+            $outboundStops = $this->buildStops($outboundTrip, $data, $catalog, 'outbound_');
+            $preview['outbound_pickup'] = $outboundStops['pickup'];
+            $preview['outbound_dropoff'] = $outboundStops['dropoff'];
         }
 
         return $preview;
+    }
+
+    private function buildStops(array $trip, array $data, array $catalog, string $prefix = ''): array
+    {
+        $pickupIsTransfer = $data[$prefix.'pickup_mode'] === 'transfer';
+        $dropoffIsTransfer = $data[$prefix.'dropoff_mode'] === 'transfer';
+
+        return [
+            'pickup' => [
+                'name'    => $pickupIsTransfer ? __('core::booking.transfer') : $trip['origin'],
+                'address' => $pickupIsTransfer
+                    ? $data[$prefix.'pickup_address']
+                    : $this->addressFor($trip['origin'], $catalog),
+                'arrival_time' => Carbon::parse($trip['departure_time'])->subMinutes(15)->toDateTimeString(),
+            ],
+            'dropoff' => [
+                'name'    => $dropoffIsTransfer ? __('core::booking.transfer') : $trip['destination'],
+                'address' => $dropoffIsTransfer
+                    ? $data[$prefix.'dropoff_address']
+                    : $this->addressFor($trip['destination'], $catalog),
+            ],
+        ];
     }
 
     private function addressFor(string $station, array $catalog): ?string

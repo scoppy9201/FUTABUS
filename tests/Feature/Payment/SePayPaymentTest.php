@@ -152,23 +152,37 @@ class SePayPaymentTest extends TestCase
 
         $this->get(route('trip-booking.show', ['trip' => $returnTripId, ...$criteria]))
             ->assertOk()->assertSee('booking-outbound-seats-title')
+            ->assertSee('name="outbound_pickup_mode"', false)
+            ->assertSee('name="outbound_dropoff_mode"', false)
+            ->assertSee('booking-outbound-pickup-info')
+            ->assertSee('booking-return-pickup-info')
+            ->assertSee('Thời gian nhận khách')
             ->assertSee('Giá vé lượt về');
 
         $payload = [
-            'name'           => 'Nguyen Van A',
-            'phone'          => '0912345678',
-            'email'          => 'customer@example.com',
-            'accept_terms'   => '1',
-            'seats'          => [$this->seatId],
-            'outbound_seats' => [$this->seatId],
-            'pickup_mode'    => 'station',
-            'dropoff_mode'   => 'station',
+            'name'                    => 'Nguyen Van A',
+            'phone'                   => '0912345678',
+            'email'                   => 'customer@example.com',
+            'accept_terms'            => '1',
+            'seats'                   => [$this->seatId],
+            'outbound_seats'          => [$this->seatId],
+            'pickup_mode'             => 'station',
+            'dropoff_mode'            => 'station',
+            'outbound_pickup_mode'    => 'transfer',
+            'outbound_pickup_address' => '123 Test Street',
+            'outbound_dropoff_mode'   => 'station',
         ];
         $url = route('trip-booking.payment.store', ['trip' => $returnTripId, ...$criteria]);
         $this->post($url, [...$payload, 'outbound_seats' => []])
             ->assertSessionHasErrors('outbound_seats');
+        $this->post($url, [...$payload, 'outbound_pickup_address' => null])
+            ->assertSessionHasErrors('outbound_pickup_address');
         $response = $this->post($url, $payload)->assertRedirect();
         $intent = DB::table('sepay_payment_intents')->first();
+        $snapshot = json_decode($intent->snapshot, true);
+        $this->assertSame('123 Test Street', $snapshot['outbound_pickup']['address']);
+        $this->assertSame($snapshot['outbound_trip']['destination'], $snapshot['outbound_dropoff']['name']);
+        $this->assertSame($snapshot['trip']['origin'], $snapshot['pickup']['name']);
         $this->assertSame(530000, (int) $intent->amount);
         $this->assertSame($this->tripId, (int) $intent->secondary_trip_id);
         $this->assertDatabaseCount('bookings', 0);
@@ -179,7 +193,8 @@ class SePayPaymentTest extends TestCase
             $this->criteria['destination'], $this->criteria['departure'], $returnDeparture->toDateString(), 1,
         ));
         $this->get($response->headers->get('Location'))
-            ->assertOk()->assertSee('530.000đ')->assertSee('Giá vé lượt về');
+            ->assertOk()->assertSee('530.000đ')->assertSee('Giá vé lượt về')
+            ->assertSee('123 Test Street');
 
         $event = $this->event($intent->code);
         $event['transferAmount'] = 530000;
@@ -189,6 +204,10 @@ class SePayPaymentTest extends TestCase
         $this->assertDatabaseCount('tickets', 2);
         $this->assertDatabaseHas('bookings', ['trip_id' => $this->tripId, 'total_amount' => 300000]);
         $this->assertDatabaseHas('bookings', ['trip_id' => $returnTripId, 'total_amount' => 230000]);
+        $outboundBooking = DB::table('bookings')->where('trip_id', $this->tripId)->first();
+        $outboundNotes = json_decode($outboundBooking->notes, true);
+        $this->assertSame('123 Test Street', $outboundNotes['pickup']['address']);
+        $this->assertSame($snapshot['outbound_trip']['destination'], $outboundNotes['dropoff']['name']);
         $this->assertDatabaseHas('sepay_payment_intents', ['id' => $intent->id, 'status' => 'paid']);
         $this->get($response->headers->get('Location'))->assertOk()->assertSee('Mua vé xe thành công');
     }

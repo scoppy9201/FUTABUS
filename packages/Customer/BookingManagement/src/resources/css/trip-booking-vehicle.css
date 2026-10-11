@@ -24,6 +24,18 @@
     background: #fff;
     box-shadow: 0 10px 34px rgb(15 23 42 / 19%);
 }
+.booking-page__round-trip-legs .booking-page__vehicle-popover {
+    top: 78px;
+}
+@media (min-width: 641px) {
+    .booking-page__round-trip-legs .booking-page__vehicle-popover {
+        width: min(480px, calc(100vw - 48px));
+    }
+    .booking-page__round-trip-legs > .booking-page__seats:first-child .booking-page__vehicle-popover {
+        right: auto;
+        left: 16px;
+    }
+}
 .booking-page__vehicle-tabs {
     display: flex;
     flex: 0 0 auto;
