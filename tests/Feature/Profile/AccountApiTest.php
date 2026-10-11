@@ -66,6 +66,12 @@ class AccountApiTest extends TestCase
 
         $this->putJson(route('api.v1.me.password.update'), [
             'current_password'      => 'OldPassword123',
+            'password'              => 'weakpassword1',
+            'password_confirmation' => 'weakpassword1',
+        ])->assertUnprocessable()->assertJsonValidationErrors(['password', 'password_confirmation']);
+
+        $this->putJson(route('api.v1.me.password.update'), [
+            'current_password'      => 'OldPassword123',
             'password'              => 'NewPassword123',
             'password_confirmation' => 'NewPassword123',
         ])->assertOk()->assertJsonPath('notification_sent', true);
