@@ -33,11 +33,17 @@ class TripScheduleController extends Controller
                 ->orWhere('routes.destination_city', 'like', "%$search%"));
         }
 
+        $schedules = $query->paginate(10)->withQueryString();
+
         return view('TripManagement::schedules.index', [
-            'schedules' => $query->paginate(10)->withQueryString(),
-            'search'    => $search,
-            'routes'    => DB::table('routes')->where('is_active', 1)->orderBy('code')->get(),
-            'company'   => DB::table('bus_companies')->where('code', 'FUTA')->first(),
+            'schedules'    => $schedules,
+            'search'       => $search,
+            'routes'       => DB::table('routes')->where('is_active', 1)->orderBy('code')->get(),
+            'company'      => DB::table('bus_companies')->where('code', 'FUTA')->first(),
+            'stopsByRoute' => DB::table('route_stops')
+                ->whereIn('route_id', $schedules->pluck('route_id')->unique())
+                ->orderBy('stop_order')->orderBy('id')->get()->groupBy('route_id'),
+            'open'         => $request->integer('open') ?: null,
         ]);
     }
 

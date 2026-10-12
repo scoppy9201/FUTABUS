@@ -6,6 +6,7 @@ namespace FuteBus\TripManagement\Http\Controllers;
 
 use FuteBus\TripManagement\Events\TripCancelled;
 use FuteBus\TripManagement\Services\BusDocumentChecker;
+use FuteBus\TripManagement\Services\TripGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -87,8 +88,7 @@ class TripController extends Controller
             'route_id'       => ['required', 'exists:routes,id'],
             'bus_id'         => ['required', 'exists:buses,id'],
             'departure_time' => ['required', 'date_format:'.self::DT, $this->futureRule()],
-            'arrival_time'   => ['required', 'date_format:'.self::DT, 'after:departure_time'],
-            'price'          => ['required', 'numeric', 'gt:0'],                   // 7c
+            'price'          => ['required', 'numeric', 'gt:0'],
         ], $this->messages());
 
         $bus = DB::table('buses')->where('id', $data['bus_id'])->where('status', 'active')->first();
@@ -96,8 +96,12 @@ class TripController extends Controller
             return back()->withInput()->withErrors(['trip' => __('TripManagement::app.tr_err_bus')]);
         }
 
+        if (! TripGenerator::hasStops((int) $data['route_id'])) {
+            return back()->withInput()->withErrors(['trip' => __('TripManagement::app.sch_err_stops')]);
+        }
+
         $dep = Carbon::createFromFormat(self::DT, $data['departure_time']);
-        $arr = Carbon::createFromFormat(self::DT, $data['arrival_time']);
+        $arr = $dep->copy()->addMinutes(TripGenerator::duration((int) $data['route_id']));
 
         if ($docErrors = BusDocumentChecker::messages($bus, $dep)) {
             return back()->withInput()->withErrors(['trip' => $docErrors]);
@@ -148,13 +152,14 @@ class TripController extends Controller
             $rules += [
                 'route_id'       => ['required', 'exists:routes,id'],
                 'departure_time' => ['required', 'date_format:'.self::DT, $this->futureRule()],
-                'arrival_time'   => ['required', 'date_format:'.self::DT, 'after:departure_time'],
             ];
         }
         $data = $request->validate($rules, $this->messages());
 
         $dep = $manual ? Carbon::createFromFormat(self::DT, $data['departure_time']) : Carbon::parse($trip->departure_time);
-        $arr = $manual ? Carbon::createFromFormat(self::DT, $data['arrival_time']) : Carbon::parse($trip->arrival_time);
+        $arr = $manual
+            ? $dep->copy()->addMinutes(TripGenerator::duration((int) $data['route_id']))
+            : Carbon::parse($trip->arrival_time);
 
         $bus = null;
         if (! empty($data['bus_id'])) {
