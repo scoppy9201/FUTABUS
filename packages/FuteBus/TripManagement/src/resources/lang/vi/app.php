@@ -124,10 +124,10 @@ return [
     'tr_err_arrival'             => 'Giờ đến phải sau giờ khởi hành.',
     'sch_stops_of'               => 'Lịch trình các điểm dừng tuyến',
     'rs_btn_deactivate'          => 'Xóa',
-    'tr_btn_delete'   => 'Xóa',
-    'tr_modal_delete' => 'Xóa chuyến xe',
-    'tr_delete_msg'   => 'Bạn có chắc muốn xóa chuyến',
-    'tr_delete_note'  => 'Chuyến sẽ bị xóa vĩnh viễn khỏi hệ thống và không thể khôi phục.',
-    'tr_flash_deleted' => 'Đã xóa chuyến xe.',
-    'tr_err_delete'   => 'Không thể xóa chuyến này vì còn dữ liệu liên quan.',
-    ];
+    'tr_btn_delete'              => 'Xóa',
+    'tr_modal_delete'            => 'Xóa chuyến xe',
+    'tr_delete_msg'              => 'Bạn có chắc muốn xóa chuyến',
+    'tr_delete_note'             => 'Chuyến sẽ bị xóa vĩnh viễn khỏi hệ thống và không thể khôi phục.',
+    'tr_flash_deleted'           => 'Đã xóa chuyến xe.',
+    'tr_err_delete'              => 'Không thể xóa chuyến này vì còn dữ liệu liên quan.',
+];

@@ -7,6 +7,7 @@ namespace FuteBus\TripManagement\Http\Controllers;
 use FuteBus\TripManagement\Events\TripCancelled;
 use FuteBus\TripManagement\Services\BusDocumentChecker;
 use FuteBus\TripManagement\Services\TripGenerator;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -222,7 +223,7 @@ class TripController extends Controller
 
             try {
                 DB::table('trips')->where('id', $id)->delete();
-            } catch (\Illuminate\Database\QueryException $e) {
+            } catch (QueryException $e) {
                 report($e);
 
                 return back()->withErrors(['trip' => __('TripManagement::app.tr_err_delete')]);
