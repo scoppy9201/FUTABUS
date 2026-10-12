@@ -11,8 +11,7 @@
                 <x-heroicon-o-x-mark class="size-5" aria-hidden="true" />
             </button>
         </div>
-        <div class="booking-page__terms-dialog-body" tabindex="0"
-            :class="{ 'is-scrolling': termsScrolling }" @scroll.passive="showTermsScrollbar()">
+        <div class="booking-page__terms-dialog-body" tabindex="0">
             <ol>
                 @foreach (__('core::booking.customer_rights') as $clause)
                     <li>

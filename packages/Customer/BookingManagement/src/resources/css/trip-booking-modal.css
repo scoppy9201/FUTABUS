@@ -176,8 +176,6 @@
     font-size: 14px;
     font-weight: 600;
     line-height: 1.5;
-    scrollbar-color: transparent transparent;
-    scrollbar-width: thin;
 }
 .booking-page__terms-dialog-body ol {
     display: grid;
@@ -190,22 +188,6 @@
 }
 .booking-page__terms-dialog-body li p {
     margin-top: 3px;
-}
-.booking-page__terms-dialog-body.is-scrolling {
-    scrollbar-color: #c4c9cf transparent;
-}
-.booking-page__terms-dialog-body::-webkit-scrollbar {
-    width: 6px;
-}
-.booking-page__terms-dialog-body::-webkit-scrollbar-thumb {
-    border-radius: 999px;
-    background: transparent;
-}
-.booking-page__terms-dialog-body.is-scrolling::-webkit-scrollbar-thumb {
-    background: #c4c9cf;
-}
-.booking-page__terms-dialog-body::-webkit-scrollbar-thumb:hover {
-    background: var(--color-futa-orange);
 }
 .booking-page__terms-dialog-body .booking-page__hotline,
 .booking-page__terms-emphasis {

@@ -4,11 +4,11 @@
 @section('page_title', __('RolePermission::app.title'))
 
 @section('content')
-    <section class="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-orange-100 bg-gradient-to-r from-white via-orange-50 to-orange-100 px-5 py-4 shadow-sm sm:px-6">
+    <section class="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-orange-100 bg-linear-to-r from-white via-orange-50 to-orange-100 px-5 py-4 shadow-sm sm:px-6">
         <div class="flex min-w-0 items-center gap-3">
             <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-white text-[#F26522] shadow-sm"><x-heroicon-o-key class="size-6" /></span>
             <div class="min-w-0">
-                <p class="truncate text-xs font-bold uppercase tracking-wider text-[#ef5222]">{{ $company->name }}</p>
+                <p class="truncate text-xs font-bold uppercase tracking-wider text-futa-orange">{{ $company->name }}</p>
                 <h1 class="mt-0.5 text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">{{ __('RolePermission::app.title') }}</h1>
                 <p class="mt-1 max-w-2xl text-sm text-slate-600">{{ __('RolePermission::app.description') }}</p>
             </div>

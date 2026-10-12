@@ -24,6 +24,33 @@ class FeedbackTest extends TestCase
         $this->assertDatabaseCount('customer_feedback_reports', 0);
     }
 
+    public function test_feedback_wizard_keeps_all_submission_fields_enabled_across_four_steps(): void
+    {
+        $response = $this->actingAs($this->createTestUser())->get(route('profile.feedback.index'))->assertOk();
+        $document = new \DOMDocument;
+        @$document->loadHTML('<?xml encoding="utf-8" ?>'.$response->getContent());
+        $xpath = new \DOMXPath($document);
+        $form = $xpath->query('//form[@data-feedback-wizard]')->item(0);
+        $this->assertNotNull($form);
+        $this->assertSame('multipart/form-data', $form->getAttribute('enctype'));
+        $this->assertCount(4, $xpath->query('.//*[@data-feedback-step]', $form));
+        $expectedSteps = [
+            'category'      => '0', 'urgency' => '0', 'booking_id' => '1',
+            'subject'       => '2', 'message' => '2', 'attachments[]' => '2',
+            'contact_name'  => '3', 'contact_phone' => '3', 'contact_email' => '3',
+            'truth_confirm' => '3', 'allow_contact' => '3',
+        ];
+        foreach ($expectedSteps as $field => $step) {
+            $nodes = $xpath->query('.//*[@data-feedback-step="'.$step.'"]//*[@name="'.$field.'"]', $form);
+            $this->assertGreaterThan(0, $nodes->length, 'Submission field '.$field.' belongs in the expected wizard step.');
+            foreach ($nodes as $node) {
+                $this->assertFalse($node->hasAttribute('disabled'));
+            }
+        }
+        $this->assertCount(1, $xpath->query('.//button[@type="submit"]', $form));
+        $this->assertSame('1', $xpath->query('.//*[@name="truth_confirm"]', $form)->item(0)->getAttribute('value'));
+    }
+
     public function test_feedback_is_persisted_separately_with_server_controlled_identity_and_initial_status(): void
     {
         $owner = $this->createTestUser();

@@ -1,6 +1,13 @@
 <?php
 
 return [
+    'wizard' => [
+        'progress'   => 'Các bước tạo phản ánh',
+        'steps'      => ['Vấn đề', 'Chuyến đi', 'Nội dung', 'Liên hệ'],
+        'step_count' => 'Bước :current / :total',
+        'previous'   => 'Quay lại',
+        'next'       => 'Tiếp tục',
+    ],
     'title'       => 'Phản ánh',
     'description' => 'Theo dõi phản ánh của bạn và kết quả xử lý từ bộ phận hỗ trợ.',
     'create'      => 'Tạo phản ánh',

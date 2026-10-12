@@ -1,6 +1,13 @@
 <?php
 
 return [
+    'wizard' => [
+        'progress'   => 'Feedback submission steps',
+        'steps'      => ['Issue', 'Trip', 'Details', 'Contact'],
+        'step_count' => 'Step :current / :total',
+        'previous'   => 'Back',
+        'next'       => 'Continue',
+    ],
     'title'     => 'Feedback', 'description' => 'Track your reports and the support team’s responses.',
     'create'    => 'Create feedback', 'form_title' => 'Submit feedback',
     'form_hint' => 'Tell us what happened so we can help you.', 'close' => 'Close', 'cancel' => 'Cancel',

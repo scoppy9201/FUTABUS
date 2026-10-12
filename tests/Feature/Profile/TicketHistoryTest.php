@@ -26,7 +26,7 @@ class TicketHistoryTest extends TestCase
             ->assertSee('Bạn chưa có vé nào')
             ->assertSee('aria-current="page"', false)
             ->assertSee('data-profile-date-picker', false)
-            ->assertSee('data-ticket-status-picker', false)
+            ->assertSee('<select id="ticket-status" name="status"', false)
             ->assertSee('colspan="8"', false)
             ->assertSee('href="'.route('home').'"', false);
     }
@@ -133,7 +133,7 @@ class TicketHistoryTest extends TestCase
             ->assertOk()
             ->assertSee('PAID-001')
             ->assertDontSee('OPEN-001')
-            ->assertSee('data-ticket-status-option="payment:completed"', false);
+            ->assertSee('value="payment:completed" selected', false);
 
         $this->get(route('profile.tickets.index', ['status' => 'payment:unpaid']))
             ->assertOk()
@@ -283,11 +283,14 @@ class TicketHistoryTest extends TestCase
         DB::table('trips')->where('id', $booking['trip_id'])->update(['status' => 'arrived']);
 
         $detailUrl = route('profile.tickets.show', ['booking' => $booking['booking_id'], 'modal' => 1]);
-        $this->get($detailUrl)->assertOk()
-            ->assertSee('data-review-star="5" aria-pressed="false"', false)
-            ->assertSee('data-review-tags="positive" class="mt-3 hidden', false)
-            ->assertSee('data-review-tags="negative" class="mt-3 hidden', false)
+        $form = $this->get($detailUrl)->assertOk()
+            ->assertSee('name="rating" value=""', false)
+            ->assertSee('data-review-tags="positive"', false)
+            ->assertSee('data-review-tags="negative"', false)
             ->assertDontSee('id="journey-review-summary-title"', false);
+        foreach ([1, 2, 3, 4, 5] as $rating) {
+            $form->assertSee('data-review-rating="'.$rating.'"', false);
+        }
 
         $this->post($url, ['rating' => 0])->assertSessionHasErrors('rating');
         $this->post($url, ['rating' => 6])->assertSessionHasErrors('rating');
@@ -314,7 +317,7 @@ class TicketHistoryTest extends TestCase
             ->assertSee('Cảm ơn bạn đã đánh giá!')
             ->assertSee('Xe sạch sẽ')
             ->assertSee('Tốt')
-            ->assertSee('4 sao')
+            ->assertSee('4/5')
             ->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', false)
             ->assertDontSee('<script>alert(1)</script>', false);
 
@@ -353,6 +356,97 @@ class TicketHistoryTest extends TestCase
             $this->post($url, ['rating' => 0])->assertSessionHasErrors('rating');
         }
         $this->post($url, ['rating' => 0])->assertTooManyRequests();
+    }
+
+    public function test_invalid_emotion_scores_do_not_change_a_saved_review(): void
+    {
+        $this->withoutMiddleware(ThrottleRequests::class);
+        $owner = $this->createTestUser();
+        $booking = $this->createBooking($owner, 'INVALID-SCORE-REVIEW', ['trip_status' => 'arrived']);
+        $this->issueTicket($booking, 'INVALID-SCORE-TICKET');
+        $this->recordPayment($booking, 'completed');
+        $url = route('profile.tickets.review', $booking['booking_id']);
+        $this->actingAs($owner)->postJson($url, ['rating' => 3, 'comment' => 'Original review'])
+            ->assertOk();
+
+        foreach ([0, 6, 3.5, 'happy', null, [5]] as $rating) {
+            $this->postJson($url, ['rating' => $rating, 'comment' => 'Changed review'])
+                ->assertUnprocessable()
+                ->assertJsonValidationErrors('rating');
+            $this->assertDatabaseHas('booking_reviews', [
+                'booking_id' => $booking['booking_id'],
+                'user_id'    => $owner->id,
+                'rating'     => 3,
+                'comment'    => 'Original review',
+            ]);
+        }
+
+        $this->assertDatabaseCount('booking_reviews', 1);
+    }
+
+    public function test_review_uses_the_route_booking_and_authenticated_account_despite_forged_identifiers(): void
+    {
+        $this->withoutMiddleware(ThrottleRequests::class);
+        $owner = $this->createTestUser();
+        $other = $this->createTestUser();
+        $ownBooking = $this->createBooking($owner, 'OWN-FORGED-REVIEW', ['trip_status' => 'arrived']);
+        $otherBooking = $this->createBooking($other, 'OTHER-FORGED-REVIEW', ['trip_status' => 'arrived']);
+        foreach ([$ownBooking, $otherBooking] as $booking) {
+            $this->issueTicket($booking, 'FORGED-TICKET-'.$booking['booking_id']);
+            $this->recordPayment($booking, 'completed');
+        }
+
+        $this->actingAs($owner)
+            ->postJson(route('profile.tickets.review', $ownBooking['booking_id']), [
+                'rating'     => 1,
+                'booking_id' => $otherBooking['booking_id'],
+                'user_id'    => $other->id,
+            ])
+            ->assertOk()
+            ->assertJsonPath('stage', 'rated');
+        $this->assertDatabaseHas('booking_reviews', [
+            'booking_id' => $ownBooking['booking_id'],
+            'user_id'    => $owner->id,
+            'rating'     => 1,
+        ]);
+
+        $this->postJson(route('profile.tickets.review', $otherBooking['booking_id']), [
+            'rating'     => 5,
+            'booking_id' => $ownBooking['booking_id'],
+            'user_id'    => $owner->id,
+        ])->assertNotFound();
+        $this->assertDatabaseMissing('booking_reviews', ['booking_id' => $otherBooking['booking_id']]);
+        $this->assertDatabaseCount('booking_reviews', 1);
+    }
+
+    public function test_review_requires_the_latest_payment_to_be_completed(): void
+    {
+        $this->withoutMiddleware(ThrottleRequests::class);
+        $owner = $this->createTestUser();
+        $this->actingAs($owner);
+
+        foreach ([null, 'pending', 'failed', 'refunded'] as $paymentStatus) {
+            $booking = $this->createBooking($owner, 'PAYMENT-REVIEW-'.($paymentStatus ?? 'unpaid'), [
+                'trip_status' => 'arrived',
+            ]);
+            $this->issueTicket($booking, 'PAYMENT-TICKET-'.$booking['booking_id']);
+            if ($paymentStatus !== null) {
+                $this->recordPayment($booking, 'completed');
+                $this->recordPayment($booking, $paymentStatus);
+            }
+
+            $this->postJson(route('profile.tickets.review', $booking['booking_id']), [
+                'rating'           => 5,
+                'payment_status'   => 'completed',
+                'arrivalConfirmed' => true,
+                'canReview'        => true,
+            ])->assertForbidden();
+            $this->get(route('profile.tickets.show', ['booking' => $booking['booking_id'], 'modal' => 1]))
+                ->assertOk()
+                ->assertDontSee('data-history-review', false);
+        }
+
+        $this->assertDatabaseCount('booking_reviews', 0);
     }
 
     public function test_demo_and_booking_without_issued_ticket_cannot_be_reviewed(): void

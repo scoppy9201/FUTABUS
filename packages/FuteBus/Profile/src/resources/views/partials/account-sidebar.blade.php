@@ -1,4 +1,4 @@
-<aside class="rounded-2xl border border-gray-200 bg-white p-2.5 lg:min-h-134" aria-label="{{ __('Profile::app.title') }}">
+<aside class="rounded-2xl border border-gray-200 bg-white p-2.5 lg:min-h-134 lg:self-stretch" aria-label="{{ __('Profile::app.title') }}">
     <div class="space-y-1.5">
         <a
             href="{{ route('profile.futapay') }}"

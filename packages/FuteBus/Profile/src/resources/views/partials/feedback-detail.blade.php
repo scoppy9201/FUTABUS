@@ -14,7 +14,7 @@
     <header class="flex items-start justify-between gap-4 border-b border-gray-100 p-5 sm:px-6">
         <div class="min-w-0">
             <p class="text-xs font-bold text-futa-orange">{{ $reference }}</p>
-            <h2 class="mt-1 break-words text-lg font-bold text-gray-950">{{ $report->subject }}</h2>
+            <h2 class="mt-1 wrap-break-word text-lg font-bold text-gray-950">{{ $report->subject }}</h2>
             <p class="mt-2 text-xs text-slate-500">{{ __('Profile::feedback.sent_at', ['date' => \Illuminate\Support\Carbon::parse($report->created_at)->format('d/m/Y H:i')]) }}</p>
         </div>
         @if($inDialog)
@@ -60,7 +60,7 @@
             <h3 id="feedback-response-title" class="flex items-center gap-2 text-sm font-bold text-gray-950">
                 <x-heroicon-o-chat-bubble-left-right class="size-5 text-futa-orange" aria-hidden="true" />{{ __('Profile::feedback.response_title') }}
             </h3>
-            <p class="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-slate-600">{{ filled($report->response) ? $report->response : __('Profile::feedback.'.$emptyResponse) }}</p>
+            <p class="mt-2 whitespace-pre-wrap wrap-break-word text-sm leading-6 text-slate-600">{{ filled($report->response) ? $report->response : __('Profile::feedback.'.$emptyResponse) }}</p>
         </section>
         <section aria-labelledby="feedback-report-content-title">
             <h3 id="feedback-report-content-title" class="text-sm font-bold text-gray-950">{{ __('Profile::feedback.content_section') }}</h3>
@@ -78,7 +78,7 @@
                 @endif
                 <div class="sm:col-span-2">
                     <dt class="text-xs text-slate-500">{{ __('Profile::feedback.fields.message') }}</dt>
-                    <dd class="mt-2 whitespace-pre-wrap break-words leading-6 text-slate-700">{{ $report->message }}</dd>
+                    <dd class="mt-2 whitespace-pre-wrap wrap-break-word leading-6 text-slate-700">{{ $report->message }}</dd>
                 </div>
             </dl>
             @if($attachments->isNotEmpty())
@@ -100,7 +100,7 @@
             <dl class="mt-3 grid gap-3 text-sm sm:grid-cols-2">
                 @foreach(['contact_name', 'contact_phone', 'contact_email'] as $key)
                     @if(filled($report->{$key}))
-                        <div><dt class="text-xs text-slate-500">{{ __('Profile::feedback.fields.'.$key) }}</dt><dd class="mt-1 break-words font-semibold">{{ $report->{$key} }}</dd></div>
+                        <div><dt class="text-xs text-slate-500">{{ __('Profile::feedback.fields.'.$key) }}</dt><dd class="mt-1 wrap-break-word font-semibold">{{ $report->{$key} }}</dd></div>
                     @endif
                 @endforeach
             </dl>

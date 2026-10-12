@@ -1,4 +1,8 @@
+import { createPopup } from '../../../../Core/src/resources/js/ui-popup.js';
+
 function initializeDateRangePicker(picker) {
+    if (picker.dataset.initialized) return;
+    picker.dataset.initialized = 'true';
     const toggle = picker.querySelector('[data-range-toggle]');
     const calendar = picker.querySelector('[data-range-calendar]');
     const startLabel = picker.querySelector('[data-range-start-label]');
@@ -14,6 +18,7 @@ function initializeDateRangePicker(picker) {
     const weekday = new Intl.DateTimeFormat(locale, { weekday: 'short' });
     const placeholders = [startLabel.textContent.trim(), endLabel.textContent.trim()];
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
     let visibleMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     let start = null;
     let end = null;
@@ -21,7 +26,7 @@ function initializeDateRangePicker(picker) {
     weekdayContainers.forEach((container) => {
         for (let day = 0; day < 7; day++) {
             const label = document.createElement('span');
-            label.textContent = weekday.format(new Date(2023, 0, day + 1));
+            label.textContent = weekday.format(new Date(2023, 0, day + 2));
             container.append(label);
         }
     });
@@ -31,9 +36,7 @@ function initializeDateRangePicker(picker) {
     }
 
     function close(restoreFocus = false) {
-        calendar.hidden = true;
-        toggle.setAttribute('aria-expanded', 'false');
-        if (restoreFocus) toggle.focus();
+        popup.close(restoreFocus);
     }
 
     function updateLabels() {
@@ -63,7 +66,7 @@ function initializeDateRangePicker(picker) {
 
     function renderMonth(month, container) {
         container.replaceChildren();
-        const leadingDays = month.getDay();
+        const leadingDays = (month.getDay() + 6) % 7;
         const firstVisible = new Date(month.getFullYear(), month.getMonth(), 1 - leadingDays);
 
         for (let offset = 0; offset < 42; offset++) {
@@ -76,19 +79,10 @@ function initializeDateRangePicker(picker) {
             button.textContent = String(date.getDate());
             button.setAttribute('aria-label', fullDate.format(date));
             button.setAttribute('aria-pressed', String(Boolean(endpoint)));
-            button.className = 'grid size-9 place-items-center rounded-lg text-sm focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-futa-orange';
-
-            if (endpoint) {
-                button.className += ' bg-futa-orange font-semibold text-white hover:bg-futa-orange-dark';
-            } else if (inRange) {
-                button.className += ' bg-futa-orange-soft font-medium text-futa-orange-dark hover:bg-futa-orange/20';
-            } else if (date.getMonth() !== month.getMonth()) {
-                button.className += ' text-gray-300 hover:bg-futa-orange-soft hover:text-futa-orange';
-            } else if (sameDay(date, today)) {
-                button.className += ' font-semibold text-futa-orange ring-1 ring-futa-orange hover:bg-futa-orange-soft';
-            } else {
-                button.className += ' text-gray-900 hover:bg-futa-orange-soft hover:text-futa-orange';
-            }
+            button.className = 'futa-calendar-day';
+            button.classList.toggle('is-range', Boolean(inRange));
+            button.classList.toggle('is-outside', date.getMonth() !== month.getMonth());
+            button.classList.toggle('is-today', sameDay(date, today));
 
             button.addEventListener('click', () => choose(date));
             container.append(button);
@@ -110,15 +104,14 @@ function initializeDateRangePicker(picker) {
         render();
     }
 
-    toggle.addEventListener('click', () => {
-        if (!calendar.hidden) {
-            close();
-            return;
-        }
-        calendar.hidden = false;
-        toggle.setAttribute('aria-expanded', 'true');
-        render();
+    const popup = createPopup(calendar, toggle, {
+        matchWidth: false,
+        onOpen() {
+            render();
+            queueMicrotask(() => calendar.querySelector('[aria-pressed="true"], button')?.focus({ preventScroll: true }));
+        },
     });
+    toggle.addEventListener('click', () => popup.toggle());
 
     picker.querySelector('[data-range-prev-year]').addEventListener('click', () => moveMonth(-12));
     picker.querySelector('[data-range-prev-month]').addEventListener('click', () => moveMonth(-1));
@@ -131,16 +124,6 @@ function initializeDateRangePicker(picker) {
         render();
         close(true);
     });
-    picker.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && !calendar.hidden) {
-            event.preventDefault();
-            close(true);
-        }
-    });
-    document.addEventListener('click', (event) => {
-        if (!picker.contains(event.target)) close();
-    });
-
     updateLabels();
 }
 

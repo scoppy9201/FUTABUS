@@ -1,7 +1,8 @@
 import '../css/app.css';
 import './date-picker.js';
 import './date-range-picker.js';
-import './status-filter.js';
 import './ticket-history-actions.js';
 import './ticket-history-detail.js';
+import './ticket-review-emotions.js';
+import './feedback-wizard.js';
 import './feedback.js';

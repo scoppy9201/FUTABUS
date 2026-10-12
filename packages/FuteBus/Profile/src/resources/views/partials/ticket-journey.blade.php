@@ -58,7 +58,10 @@
                 default => __('Profile::tickets.journey.event.'.$eventStep),
             };
             $eventDetail = match ($eventStep) {
-                'rated' => $eventState === 'future' ? __('Profile::tickets.journey.review_future') : __('Profile::tickets.journey.review_star', ['count' => $review?->rating]),
+                'rated' => $eventState === 'future' ? __('Profile::tickets.journey.review_future') : __('Profile::tickets.journey.review_emotion', [
+                    'label' => __('Profile::tickets.journey.review_rating_labels.'.$review?->rating),
+                    'count' => $review?->rating,
+                ]),
                 'arrived' => $booking->destination_station ?: $booking->destination_city,
                 'departed' => $booking->origin_station ?: $booking->origin_city,
                 'paid' => $eventState === 'future' ? __('Profile::tickets.journey.payment_future') : __('Profile::tickets.journey.paid_detail', ['amount' => number_format((float) $booking->total_amount, 0, ',', '.')]),
@@ -182,11 +185,12 @@
         @if($stage === 'rated' && $review)
             <section class="rounded-xl border border-futa-orange bg-futa-orange-soft/30 p-4" aria-labelledby="journey-review-summary-title">
                 <h3 id="journey-review-summary-title" class="text-sm font-extrabold">{{ __('Profile::tickets.journey.review_your_review') }}</h3>
-                <div class="mt-2 flex items-center gap-2" aria-label="{{ __('Profile::tickets.journey.review_star', ['count' => $review->rating]) }}">
-                    @for($star = 1; $star <= 5; $star++)
-                        <x-heroicon-s-star @class(['size-5', 'text-amber-500' => $star <= $review->rating, 'text-slate-300' => $star > $review->rating]) aria-hidden="true" />
-                    @endfor
-                    <span class="ml-1 text-sm font-bold text-futa-orange">{{ __('Profile::tickets.journey.review_rating_labels.'.$review->rating) }}</span>
+                <div class="mt-3 flex items-center gap-3">
+                    @include('Profile::partials.ticket-review-emotion', ['emotionRating' => (int) $review->rating])
+                    <div>
+                        <p class="text-sm font-bold text-futa-orange">{{ __('Profile::tickets.journey.review_rating_labels.'.$review->rating) }}</p>
+                        <p class="mt-1 text-xs font-semibold text-slate-500">{{ __('Profile::tickets.journey.review_score', ['count' => $review->rating]) }}</p>
+                    </div>
                 </div>
                 @if($reviewTags)
                     <div class="mt-3 flex flex-wrap gap-1.5">
@@ -209,15 +213,17 @@
                     <legend class="text-sm font-extrabold">{{ __('Profile::tickets.journey.review_title') }}</legend>
                     <p class="mt-1 text-xs text-slate-600">{{ __('Profile::tickets.journey.review_hint') }}</p>
                     <input type="hidden" name="rating" value="">
-                    <div class="mt-3 flex gap-1">
-                        @for($star = 1; $star <= 5; $star++)
-                            <button type="button" data-review-star="{{ $star }}" aria-pressed="false"
-                                aria-label="{{ __('Profile::tickets.journey.review_star', ['count' => $star]) }}"
-                                class="grid size-10 place-items-center rounded focus-visible:outline-2 focus-visible:outline-futa-orange">
-                                <x-heroicon-s-star class="size-7 text-slate-300" aria-hidden="true" />
+                    <div class="mt-4 grid grid-cols-5 gap-1.5 sm:gap-2" aria-describedby="journey-emotion-hint">
+                        @foreach(__('Profile::tickets.journey.review_rating_labels') as $rating => $label)
+                            <button type="button" data-review-rating="{{ $rating }}" aria-pressed="false"
+                                aria-label="{{ __('Profile::tickets.journey.review_choice', ['label' => $label, 'count' => $rating]) }}"
+                                class="ticket-review-emotion-choice">
+                                @include('Profile::partials.ticket-review-emotion', ['emotionRating' => (int) $rating])
+                                <span class="text-[11px] font-semibold leading-4 sm:text-xs">{{ $label }}</span>
                             </button>
-                        @endfor
+                        @endforeach
                     </div>
+                    <p id="journey-emotion-hint" class="mt-2 text-[11px] text-slate-500">{{ __('Profile::tickets.journey.review_toggle_hint') }}</p>
                 </fieldset>
                 <div data-review-rating-labels class="mt-1 hidden text-xs font-bold text-futa-orange" aria-live="polite">
                     @foreach(__('Profile::tickets.journey.review_rating_labels') as $rating => $label)

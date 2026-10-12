@@ -221,19 +221,6 @@
     font-weight: 500;
 }
 
-.payment-page__tooltip::-webkit-scrollbar {
-    width: 6px;
-}
-
-.payment-page__tooltip::-webkit-scrollbar-thumb {
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--color-futa-orange) 45%, white);
-}
-
-.payment-page__tooltip::-webkit-scrollbar-thumb:hover {
-    background: var(--color-futa-orange);
-}
-
 .payment-page__result {
     width: min(560px, calc(100% - 32px));
     margin: 48px auto 72px;

@@ -4,10 +4,10 @@
 @section('page_title', __('RolePermission::app.staff_assignments'))
 
 @section('content')
-    <section class="flex items-center gap-3 rounded-xl border border-orange-100 bg-gradient-to-r from-white via-orange-50 to-orange-100 px-5 py-4 shadow-sm sm:px-6">
+    <section class="flex items-center gap-3 rounded-xl border border-orange-100 bg-linear-to-r from-white via-orange-50 to-orange-100 px-5 py-4 shadow-sm sm:px-6">
         <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-white text-[#F26522] shadow-sm"><x-heroicon-o-users class="size-6" /></span>
         <div class="min-w-0">
-            <p class="truncate text-xs font-bold uppercase tracking-wider text-[#ef5222]">{{ $company->name }}</p>
+            <p class="truncate text-xs font-bold uppercase tracking-wider text-futa-orange">{{ $company->name }}</p>
             <h1 class="mt-0.5 text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">{{ __('RolePermission::app.staff_assignments') }}</h1>
             <p class="mt-1 text-sm text-slate-600">{{ __('RolePermission::app.assignments_description') }}</p>
         </div>

@@ -7,8 +7,10 @@
 
 <div
     class="contents"
+    x-id="['trip-date-calendar']"
     x-data="{
         calendarOpen: false,
+        calendarPopup: null,
         activeField: 'departure',
         departureDate: @js($initialSearch['departure_date'] ?? $today),
         returnDate: @js($initialSearch['return_date'] ?? ''),
@@ -20,10 +22,25 @@
         init() {
             this.$watch('roundTrip', (enabled) => {
                 if (!enabled) {
+                    this.calendarPopup?.close();
                     this.calendarOpen = false;
                     this.activeField = 'departure';
                 }
             });
+            this.$nextTick(() => {
+                const initializePopup = () => {
+                    this.calendarPopup = window.FutaUi.createPopup(this.$refs.calendar, this.$refs.departureTrigger, {
+                        matchWidth: false,
+                        onClose: () => { this.calendarOpen = false; },
+                    });
+                    if (this.calendarOpen) this.focusCalendar(this.activeField);
+                };
+                if (window.FutaUi) initializePopup();
+                else document.addEventListener('futa-ui-ready', initializePopup, { once: true });
+            });
+        },
+        destroy() {
+            this.calendarPopup?.destroy();
         },
         toIso(date) {
             const year = date.getFullYear();
@@ -33,6 +50,7 @@
         },
         openCalendar(field) {
             if (this.calendarOpen && this.activeField === field) {
+                this.calendarPopup?.close();
                 this.calendarOpen = false;
                 return;
             }
@@ -41,11 +59,15 @@
         focusCalendar(field) {
             this.selectField(field);
             this.calendarOpen = true;
-            this.$nextTick(() => this.$refs.calendar.focus({ preventScroll: true }));
+            this.$nextTick(() => {
+                this.calendarPopup?.open();
+                this.$refs.calendar.focus({ preventScroll: true });
+            });
         },
         restoreDates(detail) {
             this.departureDate = detail.departureDate;
             this.returnDate = detail.returnDate;
+            this.calendarPopup?.close();
             this.calendarOpen = false;
             this.selectField('departure');
         },
@@ -57,6 +79,8 @@
             const [year, month] = source.split('-').map(Number);
             this.viewYear = year;
             this.viewMonth = month - 1;
+            this.calendarPopup?.setTrigger(field === 'return' ? this.$refs.returnTrigger : this.$refs.departureTrigger);
+            this.$nextTick(() => this.calendarPopup?.position());
         },
         moveMonth(offset) {
             const date = new Date(this.viewYear, this.viewMonth + offset, 1);
@@ -95,14 +119,16 @@
                 this.departureDate = day.iso;
                 if (this.returnDate && this.returnDate < day.iso) this.returnDate = '';
                 if (this.roundTrip) {
-                    this.activeField = 'return';
+                    this.selectField('return');
                     return;
                 }
+                this.calendarPopup?.close();
                 this.calendarOpen = false;
                 this.$nextTick(() => this.$refs.departureTrigger.focus({ preventScroll: true }));
                 return;
             }
             this.returnDate = day.iso;
+            this.calendarPopup?.close();
             this.calendarOpen = false;
             this.$nextTick(() => this.$refs.returnTrigger.focus({ preventScroll: true }));
         },
@@ -121,8 +147,8 @@
     }"
     @hero-open-calendar.window="focusCalendar($event.detail.field)"
     @hero-restore-dates.window="restoreDates($event.detail)"
-    @click.document="if (calendarOpen && !$el.contains($event.target)) calendarOpen = false"
-    @keydown.escape.window="if (calendarOpen) { calendarOpen = false; (activeField === 'return' ? $refs.returnTrigger : $refs.departureTrigger).focus({ preventScroll: true }); }"
+    @click.document="if (calendarOpen && !$el.contains($event.target)) { calendarPopup?.close(); calendarOpen = false; }"
+    @keydown.escape.window="if (calendarOpen) { calendarPopup?.close(); calendarOpen = false; (activeField === 'return' ? $refs.returnTrigger : $refs.departureTrigger).focus({ preventScroll: true }); }"
 >
     <div class="relative" :class="calendarOpen ? 'z-50' : 'z-auto'">
         <label class="mb-2 ml-4 block text-sm font-bold text-gray-900">{{ __('core::app.home.hero.date') }}</label>
@@ -144,6 +170,7 @@
 
         <div
             x-ref="calendar"
+            :id="$id('trip-date-calendar')"
             x-cloak
             x-show="calendarOpen"
             x-transition:enter="transition-[opacity,transform] duration-220 ease-out"
@@ -155,7 +182,7 @@
             role="dialog"
             :aria-label="activeField === 'return' ? @js(__('core::app.home.hero.return_date')) : @js(__('core::app.home.hero.date'))"
             tabindex="-1"
-            class="absolute left-0 top-0 z-50 max-w-[calc(100vw-32px)] origin-top-left rounded-xl border border-gray-200 bg-white p-3 shadow-[0_18px_42px_rgba(15,23,42,.22)] outline-none"
+            class="futa-trip-calendar absolute left-0 top-0 z-50 max-w-[calc(100vw-32px)] origin-top-left rounded-xl border border-gray-200 bg-white p-3 outline-none"
             :class="roundTrip ? 'w-107.5' : 'w-96'"
         >
             <div class="grid gap-3" :class="roundTrip ? 'grid-cols-2' : 'grid-cols-1'">
@@ -190,25 +217,25 @@
                 </button>
             </div>
 
-            <div class="mt-3 grid grid-cols-7 text-center text-sm font-bold text-gray-600">
+            <div class="futa-calendar-weekdays mt-3 grid grid-cols-7 text-center text-sm font-bold text-gray-600">
                 <template x-for="weekdayName in weekdays" :key="weekdayName">
                     <span class="py-2" x-text="weekdayName"></span>
                 </template>
             </div>
 
-            <div class="grid grid-cols-7 overflow-hidden rounded-lg border-l border-t border-gray-200">
+            <div class="futa-calendar-days grid grid-cols-7">
                 <template x-for="day in days()" :key="day.iso">
                     <button
                         type="button"
                         @click="choose(day)"
                         :disabled="day.iso < minimumDate()"
-                        class="relative grid aspect-square place-items-center border-b border-r border-gray-200 text-sm font-semibold transition"
+                        :aria-pressed="day.iso === selectedDate()"
+                        :aria-label="new Intl.DateTimeFormat(locale === 'vi' ? 'vi-VN' : 'en-US', { dateStyle: 'full' }).format(new Date(day.iso + 'T12:00:00'))"
+                        class="futa-calendar-day relative grid aspect-square place-items-center text-sm font-semibold transition"
                         :class="{
-                            'bg-futa-orange-soft font-extrabold text-futa-orange': day.iso === selectedDate(),
-                            'bg-futa-orange-soft text-futa-orange': roundTrip && day.iso === departureDate && activeField === 'return',
-                            'text-gray-900 hover:bg-futa-orange-soft hover:text-futa-orange': day.current && day.iso >= minimumDate() && day.iso !== selectedDate(),
-                            'text-gray-300': !day.current || day.iso < minimumDate(),
-                            'cursor-not-allowed bg-gray-50/70': day.iso < minimumDate(),
+                            'is-range': roundTrip && day.iso === departureDate && activeField === 'return' && day.iso !== selectedDate(),
+                            'is-outside': !day.current,
+                            'is-today': day.iso === today,
                         }"
                     >
                         <span x-text="day.number"></span>

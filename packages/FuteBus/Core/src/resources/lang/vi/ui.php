@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'choose'         => 'Chọn',
+    'search'         => 'Tìm kiếm',
+    'no_options'     => 'Không có lựa chọn phù hợp',
+    'selected'       => 'Đã chọn',
+    'clear'          => 'Xóa',
+    'apply'          => 'Áp dụng',
+    'today'          => 'Hôm nay',
+    'current_month'  => 'Tháng này',
+    'now'            => 'Bây giờ',
+    'previous_month' => 'Tháng trước',
+    'next_month'     => 'Tháng sau',
+    'year'           => 'Năm',
+    'hour'           => 'Giờ',
+    'minute'         => 'Phút',
+    'second'         => 'Giây',
+    'millisecond'    => 'Mili giây',
+    'invalid_date'   => 'Vui lòng chọn ngày, giờ phù hợp với giới hạn của trường này.',
+    'calendar'       => 'Chọn ngày, giờ',
+    'date'           => 'Ngày',
+    'time'           => 'Thời gian',
+    'month'          => 'Tháng',
+];

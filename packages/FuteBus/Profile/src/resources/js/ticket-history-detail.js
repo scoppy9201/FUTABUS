@@ -2,30 +2,11 @@ import { composeReviewComment, ratingGroup, toggleRating } from './ticket-review
 
 const dialog = document.querySelector('[data-history-dialog]');
 const content = dialog?.querySelector('[data-history-dialog-content]');
-const historyPage = document.querySelector('.ticket-history-page');
-
-if (historyPage && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-    let nearPageScrollbar = false;
-    document.addEventListener('pointermove', (event) => {
-        const nearEdge = event.clientX >= window.innerWidth - 24;
-        if (nearEdge === nearPageScrollbar) return;
-        nearPageScrollbar = nearEdge;
-        document.documentElement.classList.toggle('ticket-history-page-scroll-hover', nearEdge);
-    }, { passive: true });
-    window.addEventListener('blur', () => {
-        nearPageScrollbar = false;
-        document.documentElement.classList.remove('ticket-history-page-scroll-hover');
-    });
-}
-
 function syncReviewForm(form) {
     const rating = Number(form.elements.rating.value);
     const group = ratingGroup(rating);
-    form.querySelectorAll('[data-review-star]').forEach((button) => {
-        const selected = Number(button.dataset.reviewStar) <= rating;
-        button.setAttribute('aria-pressed', String(Number(button.dataset.reviewStar) === rating));
-        button.querySelector('svg').classList.toggle('text-amber-500', selected);
-        button.querySelector('svg').classList.toggle('text-slate-300', !selected);
+    form.querySelectorAll('[data-review-rating]').forEach((button) => {
+        button.setAttribute('aria-pressed', String(Number(button.dataset.reviewRating) === rating));
     });
     const ratingLabels = form.querySelector('[data-review-rating-labels]');
     ratingLabels.classList.toggle('hidden', rating === 0);
@@ -52,10 +33,10 @@ function syncReviewForm(form) {
 }
 
 document.addEventListener('click', (event) => {
-    const star = event.target.closest('[data-review-star]');
-    if (!star) return;
-    const form = star.closest('[data-history-review]');
-    form.elements.rating.value = toggleRating(Number(form.elements.rating.value), Number(star.dataset.reviewStar));
+    const choice = event.target.closest('[data-review-rating]');
+    if (!choice) return;
+    const form = choice.closest('[data-history-review]');
+    form.elements.rating.value = toggleRating(Number(form.elements.rating.value), Number(choice.dataset.reviewRating));
     form.dataset.dirty = 'true';
     syncReviewForm(form);
 });
