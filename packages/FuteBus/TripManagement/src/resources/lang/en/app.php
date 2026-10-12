@@ -98,6 +98,7 @@ return [
     'rs_arrival_note'      => 'The trip\'s estimated arrival time is the time of the last stop. Times are estimates and may change depending on actual conditions.',
     'rs_flash_deleted'     => 'Stop deleted.',
     'tr_arrival_short'     => 'Arrives',
+    'sch_err_days'         => 'Please select at least one day of the week.',
 
     // ── Trips ──
     'tr_title'      => 'Trip Management',
@@ -156,4 +157,10 @@ return [
     'tr_err_arrival'     => 'Arrival time must be after the departure time.',
     'sch_stops_of'       => 'Stop itinerary for route',
     'rs_btn_deactivate'  => 'Delete',
+    'tr_btn_delete'      => 'Delete',
+    'tr_modal_delete'    => 'Delete trip',
+    'tr_delete_msg'      => 'Are you sure you want to delete the trip',
+    'tr_delete_note'     => 'This trip will be permanently removed and cannot be restored.',
+    'tr_flash_deleted'   => 'Trip deleted.',
+    'tr_err_delete'      => 'This trip cannot be deleted because related data exists.',
 ];
