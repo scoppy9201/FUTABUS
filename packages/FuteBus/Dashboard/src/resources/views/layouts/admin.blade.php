@@ -105,7 +105,8 @@
                 <nav class="space-y-1">
                     @foreach($navItems as $item)
                         @php
-                            $active = $item['key'] === ($section ?? 'overview')
+                            $active = ($item['key'] === 'overview' && request()->routeIs('dashboard'))
+                                || ($item['key'] !== 'overview' && $item['key'] === ($section ?? null))
                                 || ($item['key'] === 'buses' && $isBusSection)
                                 || ($item['key'] === 'trips' && request()->routeIs('trip-management.trips*'))
                                 || ($item['key'] === 'routes' && request()->routeIs('trip-management.schedules*'))
