@@ -19,24 +19,6 @@
         </span>
     </div>
 
-    @if(session('success'))
-        <div class="mt-4 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
-            <x-heroicon-o-check-circle class="size-5 shrink-0" /> {{ session('success') }}
-        </div>
-    @endif
-    @if(session('warning'))
-        <div class="mt-4 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
-            <x-heroicon-o-exclamation-triangle class="size-5 shrink-0" /> {{ session('warning') }}
-        </div>
-    @endif
-    @if($errors->any())
-        <div class="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
-            <ul class="list-inside list-disc space-y-1">
-                @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
-            </ul>
-        </div>
-    @endif
-
     <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
         <form method="GET" action="{{ route('trip-management.schedules.index') }}" class="flex items-center gap-2">
             <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('TripManagement::app.sch_search_ph') }}"
@@ -233,7 +215,7 @@
                 <button type="button" @click="showForm = false" class="text-white/70 hover:text-white"><x-heroicon-o-x-mark class="size-4" /></button>
             </div>
 
-            <form :action="formAction" method="POST" class="space-y-3 p-5">
+            <form :action="formAction" method="POST" class="space-y-3 p-5" @submit="validateForm($event)">
                 @csrf
                 <template x-if="isEdit"><input type="hidden" name="_method" value="PUT"></template>
 
@@ -384,12 +366,38 @@
     </div>
 </div>
 
+{{-- THÔNG BÁO TỪ SERVER (FutaNotify) --}}
+@if(session('success') || session('warning') || $errors->any())
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (!window.FutaNotify) return;
+    @if(session('success'))
+        FutaNotify.success(@json(session('success'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP), { key: 'flash-success' });
+    @endif
+    @if(session('warning'))
+        FutaNotify.warning(@json(session('warning'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP), { key: 'flash-warning' });
+    @endif
+    @if($errors->any())
+        FutaNotify.error(@json(implode(' • ', $errors->all()), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP), { key: 'flash-error', duration: 8000 });
+    @endif
+});
+</script>
+@endif
+
 <script>
 function scheduleManager() {
     const blank = { route_id:'', departure_time:'', days_of_week:[], start_date:'', end_date:'', price:'' };
     const stopBlank = { name:'', address:'', leg_minutes:10, position:'', stop_type:'both' };
     const base = `{{ url('quan-tri/chuyen-xe/lich-trinh') }}`;
     const stopBase = `{{ url('quan-tri/chuyen-xe/diem-dung') }}`;
+    const today = `{{ today()->toDateString() }}`;
+    const t = {
+        errDays: @js(__('TripManagement::app.sch_err_days')),
+        errDate: @js(__('TripManagement::app.sch_err_date')),
+        errPast: @js(__('TripManagement::app.sch_err_past')),
+    };
+    const notify = (type, msg, opts) => window.FutaNotify && window.FutaNotify[type](msg, opts);
+
     return {
         open: {!! json_encode((object) ($open ? [(int) $open => true] : [])) !!},
         showForm: false, showDelete: false, isEdit: false,
@@ -404,6 +412,23 @@ function scheduleManager() {
         openAdd()    { this.isEdit = false; this.form = { ...blank, days_of_week: [] }; this.formAction = base; this.showForm = true; },
         openEdit(d)  { this.isEdit = true; this.form = { ...blank, ...d, days_of_week: (d.days_of_week || []).map(String) }; this.formAction = `${base}/${d.id}`; this.showForm = true; },
         openDelete(d){ this.deleteData = d; this.deleteAction = `${base}/${d.id}`; this.showDelete = true; },
+
+        // Kiểm tra sớm ở client, server vẫn kiểm tra lại
+        validateForm(e) {
+            const f = this.form;
+            if (!f.days_of_week.length) {
+                e.preventDefault();
+                return notify('error', t.errDays, { key: 'sch-error' });
+            }
+            if (f.start_date && f.end_date && f.end_date < f.start_date) {
+                e.preventDefault();
+                return notify('error', t.errDate, { key: 'sch-error' });
+            }
+            if (f.end_date && f.end_date < today) {
+                e.preventDefault();
+                return notify('error', t.errPast, { key: 'sch-error' });
+            }
+        },
 
         openStopAdd(routeId, scheduleId) {
             this.stopEdit = false; this.stopForm = { ...stopBlank };

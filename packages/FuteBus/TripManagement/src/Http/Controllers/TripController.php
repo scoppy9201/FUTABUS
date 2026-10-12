@@ -87,7 +87,7 @@ class TripController extends Controller
         $data = $request->validate([
             'route_id'       => ['required', 'exists:routes,id'],
             'bus_id'         => ['required', 'exists:buses,id'],
-            'departure_time' => ['required', 'date_format:'.self::DT, $this->futureRule()],
+            'departure_time' => ['bail', 'required', 'date_format:'.self::DT, $this->futureRule()],
             'price'          => ['required', 'numeric', 'gt:0'],
         ], $this->messages());
 
@@ -151,12 +151,18 @@ class TripController extends Controller
         if ($manual) {
             $rules += [
                 'route_id'       => ['required', 'exists:routes,id'],
-                'departure_time' => ['required', 'date_format:'.self::DT, $this->futureRule()],
+                'departure_time' => ['bail', 'required', 'date_format:'.self::DT, $this->futureRule()],
             ];
         }
         $data = $request->validate($rules, $this->messages());
 
-        $dep = $manual ? Carbon::createFromFormat(self::DT, $data['departure_time']) : Carbon::parse($trip->departure_time);
+        if ($manual && ! TripGenerator::hasStops((int) $data['route_id'])) {
+            return back()->withInput()->withErrors(['trip' => __('TripManagement::app.sch_err_stops')]);
+        }
+
+        $dep = $manual
+            ? Carbon::createFromFormat(self::DT, $data['departure_time'])
+            : Carbon::parse($trip->departure_time);
         $arr = $manual
             ? $dep->copy()->addMinutes(TripGenerator::duration((int) $data['route_id']))
             : Carbon::parse($trip->arrival_time);
@@ -171,7 +177,7 @@ class TripController extends Controller
                 return back()->withInput()->withErrors(['trip' => __('TripManagement::app.tr_err_past')]);
             }
             if ($docErrors = BusDocumentChecker::messages($bus, $dep)) {
-                return back()->withInput()->withErrors(['trip' => $docErrors]); // Kiểm tra giấy tờ
+                return back()->withInput()->withErrors(['trip' => $docErrors]);    // Kiểm tra giấy tờ
             }
             if ($this->busConflict((int) $bus->id, $dep, $arr, $id)) {             // 7a
                 return back()->withInput()->withErrors(['trip' => __('TripManagement::app.tr_err_conflict')]);
@@ -195,7 +201,7 @@ class TripController extends Controller
             ->with('success', __('TripManagement::app.tr_flash_updated'));
     }
 
-    /** Hủy chuyến. */
+    /** Chưa gán xe → xóa hẳn. Đã lên lịch → hủy chuyến. */
     public function destroy(Request $request, int $id): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
@@ -206,8 +212,28 @@ class TripController extends Controller
             return back()->withErrors(['trip' => __('TripManagement::app.tr_err_status')]);
         }
 
-        $dep = Carbon::parse($trip->departure_time);
         $tickets = $this->ticketCount($id);
+
+        // Chuyến chưa gán xe: xóa hoàn toàn khỏi hệ thống
+        if ($trip->status === 'unassigned') {
+            if ($tickets > 0) {
+                return back()->withErrors(['trip' => __('TripManagement::app.tr_err_has_tickets')]);
+            }
+
+            try {
+                DB::table('trips')->where('id', $id)->delete();
+            } catch (\Illuminate\Database\QueryException $e) {
+                report($e);
+
+                return back()->withErrors(['trip' => __('TripManagement::app.tr_err_delete')]);
+            }
+
+            return redirect()->route('trip-management.trips.index')
+                ->with('success', __('TripManagement::app.tr_flash_deleted'));
+        }
+
+        // Chuyến đã lên lịch: hủy chuyến
+        $dep = Carbon::parse($trip->departure_time);
 
         if ($dep->lte(now())) {
             return back()->withErrors(['trip' => __('TripManagement::app.tr_err_cancel_past')]);
@@ -222,9 +248,12 @@ class TripController extends Controller
         });
 
         return redirect()->route('trip-management.trips.index')
-            ->with($tickets > 0 ? 'warning' : 'success',
-                $tickets > 0 ? __('TripManagement::app.tr_flash_cancelled_tickets', ['n' => $tickets])
-                             : __('TripManagement::app.tr_flash_cancelled'));
+            ->with(
+                $tickets > 0 ? 'warning' : 'success',
+                $tickets > 0
+                    ? __('TripManagement::app.tr_flash_cancelled_tickets', ['n' => $tickets])
+                    : __('TripManagement::app.tr_flash_cancelled')
+            );
     }
 
     private function ticketCount(int $tripId): int
@@ -246,7 +275,12 @@ class TripController extends Controller
     private function futureRule(): \Closure
     {
         return function ($attr, $value, $fail) {
-            $d = Carbon::createFromFormat(self::DT, $value);
+            try {
+                $d = Carbon::createFromFormat(self::DT, (string) $value);
+            } catch (\Throwable) {
+                $d = false;
+            }
+
             if ($d === false || $d->lte(now())) {
                 $fail(__('TripManagement::app.tr_err_past'));
             }
@@ -256,8 +290,7 @@ class TripController extends Controller
     private function messages(): array
     {
         return [
-            'price.gt'            => __('TripManagement::app.tr_err_price'),
-            'arrival_time.after'  => __('TripManagement::app.tr_err_arrival'),
+            'price.gt' => __('TripManagement::app.tr_err_price'),
         ];
     }
 }

@@ -16,24 +16,6 @@
         </span>
     </div>
 
-    @if(session('success'))
-        <div class="mt-4 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
-            <x-heroicon-o-check-circle class="size-5 shrink-0" /> {{ session('success') }}
-        </div>
-    @endif
-    @if(session('warning'))
-        <div class="mt-4 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
-            <x-heroicon-o-exclamation-triangle class="size-5 shrink-0" /> {{ session('warning') }}
-        </div>
-    @endif
-    @if($errors->any())
-        <div class="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
-            <ul class="list-inside list-disc space-y-1">
-                @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
-            </ul>
-        </div>
-    @endif
-
     <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
         <form method="GET" action="{{ route('trip-management.trips.index') }}" class="flex flex-wrap items-center gap-2">
             <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('TripManagement::app.tr_search_ph') }}"
@@ -105,10 +87,15 @@
                                     </button>
                                     @endif
                                     <button @click="openCancel({{ json_encode([
-                                        'id' => $t->id, 'name' => $t->origin_city.' → '.$t->destination_city, 'tickets' => (int) $t->ticket_count,
-                                    ]) }})" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 hover:border-rose-300 hover:bg-rose-50">
+                                    'id' => $t->id, 'name' => $t->origin_city.' → '.$t->destination_city, 'tickets' => (int) $t->ticket_count,
+                                    'mode' => $t->status === 'unassigned' ? 'delete' : 'cancel',
+                                ]) }})" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 hover:border-rose-300 hover:bg-rose-50">
+                                    @if($t->status === 'unassigned')
+                                        <x-heroicon-o-trash class="size-3.5" /> {{ __('TripManagement::app.tr_btn_delete') }}
+                                    @else
                                         <x-heroicon-o-no-symbol class="size-3.5" /> {{ __('TripManagement::app.tr_btn_cancel') }}
-                                    </button>
+                                    @endif
+                                </button>
                                 </div>
                                 @endif
                             </td>
@@ -125,17 +112,17 @@
     </div>
 
     {{-- ADD / EDIT MODAL --}}
-    <div role="dialog" aria-modal="true" x-show="showForm" x-cloak @click.self="showForm = false"
+    <div role="dialog" aria-modal="true" x-show="showForm" x-cloak @click.self="closeForm()"
          class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
         <div class="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
             <div class="flex items-center justify-between px-5 py-3"
                  :class="isEdit ? 'bg-slate-800' : 'bg-futa-orange'">
                 <h2 class="text-base font-bold text-white"
                     x-text="isEdit ? @js(__('TripManagement::app.tr_modal_edit')) : @js(__('TripManagement::app.tr_modal_add'))"></h2>
-                <button type="button" @click="showForm = false" class="text-white/70 hover:text-white"><x-heroicon-o-x-mark class="size-4" /></button>
+                <button type="button" @click="closeForm()" class="text-white/70 hover:text-white"><x-heroicon-o-x-mark class="size-4" /></button>
             </div>
 
-            <form :action="formAction" method="POST" class="space-y-3 p-5">
+            <form :action="formAction" method="POST" class="space-y-3 p-5" @submit="validateSubmit($event)">
                 @csrf
                 <template x-if="isEdit"><input type="hidden" name="_method" value="PUT"></template>
 
@@ -171,16 +158,6 @@
                                 <option value="{{ $b->id }}">{{ $b->license_plate }} ({{ $b->capacity }} {{ __('BusManagement::app.field_capacity_unit') }})</option>
                             @endforeach
                         </select>
-                        <div x-show="busProblems.length > 0" x-cloak class="mt-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
-                            <p class="font-bold">{{ __('TripManagement::app.tr_doc_warn') }}</p>
-                            <ul class="mt-1 list-inside list-disc space-y-0.5">
-                                <template x-for="p in busProblems" :key="p.name">
-                                    <li x-text="p.reason === 'missing'
-                                        ? p.name + ' — ' + @js(__('TripManagement::app.tr_doc_missing'))
-                                        : p.name + ' — ' + @js(__('TripManagement::app.tr_doc_expired')) + ' (' + p.expiry + ')'"></li>
-                                </template>
-                            </ul>
-                        </div>
                     </div>
                     <div>
                         <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.tr_f_price') }} <span class="text-rose-500">*</span></label>
@@ -190,9 +167,9 @@
                 </div>
 
                 <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
-                    <button type="button" @click="showForm = false" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('TripManagement::app.btn_cancel') }}</button>
-                    <button type="submit" :disabled="busProblems.length > 0"
-                            class="rounded-lg bg-futa-orange px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-futa-orange-dark disabled:cursor-not-allowed disabled:opacity-50"
+                    <button type="button" @click="closeForm()" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('TripManagement::app.btn_cancel') }}</button>
+                    <button type="submit"
+                            class="rounded-lg bg-futa-orange px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-futa-orange-dark"
                             x-text="isEdit ? @js(__('TripManagement::app.btn_save')) : @js(__('TripManagement::app.btn_store'))"></button>
                 </div>
             </form>
@@ -206,12 +183,16 @@
             <div class="mx-auto mb-4 grid size-14 place-items-center rounded-full bg-rose-100">
                 <x-heroicon-o-exclamation-triangle class="size-7 text-rose-500" />
             </div>
-            <h3 class="text-lg font-bold text-slate-900">{{ __('TripManagement::app.tr_modal_cancel') }}</h3>
+            <h3 class="text-lg font-bold text-slate-900"
+            x-text="cancelData.mode === 'delete' ? @js(__('TripManagement::app.tr_modal_delete')) : @js(__('TripManagement::app.tr_modal_cancel'))"></h3>
             <p class="mt-2 text-sm text-slate-500">
-                {{ __('TripManagement::app.tr_cancel_msg') }}
+                <span x-text="cancelData.mode === 'delete' ? @js(__('TripManagement::app.tr_delete_msg')) : @js(__('TripManagement::app.tr_cancel_msg'))"></span>
                 <span class="font-bold text-slate-800" x-text="cancelData.name"></span>?
             </p>
-            <p x-show="cancelData.tickets > 0" class="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-left text-xs text-amber-700">
+            <p x-show="cancelData.mode === 'delete'" class="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-left text-xs text-rose-700">
+                {{ __('TripManagement::app.tr_delete_note') }}
+            </p>
+            <p x-show="cancelData.mode !== 'delete' && cancelData.tickets > 0" class="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-left text-xs text-amber-700">
                 <span x-text="cancelData.tickets"></span> {{ __('TripManagement::app.tr_cancel_note_tickets') }}
             </p>
             <form :action="cancelAction" method="POST" class="mt-5 flex items-center justify-end gap-2">
@@ -224,6 +205,24 @@
     </div>
 </div>
 
+{{-- THÔNG BÁO TỪ SERVER (FutaNotify) --}}
+@if(session('success') || session('warning') || $errors->any())
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (!window.FutaNotify) return;
+    @if(session('success'))
+        FutaNotify.success(@json(session('success'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP), { key: 'flash-success' });
+    @endif
+    @if(session('warning'))
+        FutaNotify.warning(@json(session('warning'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP), { key: 'flash-warning' });
+    @endif
+    @if($errors->any())
+        FutaNotify.error(@json(implode(' • ', $errors->all()), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP), { key: 'flash-error', duration: 8000 });
+    @endif
+});
+</script>
+@endif
+
 <script>
 function tripManager() {
     const blank = { route_id:'', bus_id:'', departure_time:'', price:'' };
@@ -231,24 +230,71 @@ function tripManager() {
     const requiredTypes = @json($requiredTypes);
     const busDocs = @json($busDocs);
     const today = `{{ today()->toDateString() }}`;
+    const t = {
+        docWarn:    {{ Js::from(__('TripManagement::app.tr_doc_warn')) }},
+        docMissing: {{ Js::from(__('TripManagement::app.tr_doc_missing')) }},
+        docExpired: {{ Js::from(__('TripManagement::app.tr_doc_expired')) }},
+        errPast:    {{ Js::from(__('TripManagement::app.tr_err_past')) }},
+    };
+    const notify = (type, msg, opts) => window.FutaNotify && window.FutaNotify[type](msg, opts);
+
     return {
         showForm: false, showCancel: false, isEdit: false, locked: false,
         form: { ...blank }, formAction: base,
         cancelData: {}, cancelAction: '',
+
+        init() {
+            // Tự động cảnh báo giấy tờ khi đổi xe / giờ khởi hành
+            this.$watch('busProblems', () => this.syncDocToast());
+        },
+
         get busProblems() {
             if (!this.form.bus_id) return [];
             const day = this.form.departure_time ? this.form.departure_time.slice(0, 10) : today;
             const docs = busDocs[this.form.bus_id] || {};
             const out = [];
-            requiredTypes.forEach(t => {
-                const exp = docs[t.id];
-                if (!exp) out.push({ name: t.name, reason: 'missing' });
-                else if (exp < day) out.push({ name: t.name, reason: 'expired', expiry: exp.split('-').reverse().join('/') });
+            requiredTypes.forEach(r => {
+                const exp = docs[r.id];
+                if (!exp) out.push({ name: r.name, reason: 'missing' });
+                else if (exp < day) out.push({ name: r.name, reason: 'expired', expiry: exp.split('-').reverse().join('/') });
             });
             return out;
         },
+
+        docMessage() {
+            const lines = this.busProblems.map(p => p.reason === 'missing'
+                ? `${p.name} — ${t.docMissing}`
+                : `${p.name} — ${t.docExpired} (${p.expiry})`);
+            return `${t.docWarn} ${lines.join('; ')}`;
+        },
+
+        syncDocToast() {
+            if (this.showForm && this.busProblems.length > 0) {
+                notify('warning', this.docMessage(), { key: 'bus-docs', duration: 8000 });
+            } else if (window.FutaNotify) {
+                FutaNotify.close('bus-docs');
+            }
+        },
+
+        validateSubmit(e) {
+            if (this.busProblems.length > 0) {
+                e.preventDefault();
+                notify('error', this.docMessage(), { key: 'bus-docs', duration: 8000 });
+                return;
+            }
+            if (!this.locked && this.form.departure_time && new Date(this.form.departure_time) <= new Date()) {
+                e.preventDefault();
+                notify('error', t.errPast, { key: 'trip-past' });
+            }
+        },
+
+        closeForm() {
+            this.showForm = false;
+            if (window.FutaNotify) { FutaNotify.close('bus-docs'); FutaNotify.close('trip-past'); }
+        },
+
         openAdd()    { this.isEdit = false; this.locked = false; this.form = { ...blank }; this.formAction = base; this.showForm = true; },
-        openEdit(d)  { this.isEdit = true; this.locked = d.from_schedule; this.form = { ...blank, ...d, bus_id: d.bus_id ?? '' }; this.formAction = `${base}/${d.id}`; this.showForm = true; },
+        openEdit(d)  { this.isEdit = true; this.locked = d.from_schedule; this.form = { ...blank, ...d, bus_id: d.bus_id ?? '' }; this.formAction = `${base}/${d.id}`; this.showForm = true; this.syncDocToast(); },
         openCancel(d){ this.cancelData = d; this.cancelAction = `${base}/${d.id}`; this.showCancel = true; },
     };
 }

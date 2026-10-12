@@ -74,7 +74,7 @@ return [
     'rs_arrival_note'      => 'Giờ đến dự kiến của chuyến xe chính là giờ của điểm dừng cuối cùng. Thời gian các mốc là thời gian dự kiến, có thể thay đổi tùy tình hình thực tế.',
     'rs_flash_deleted'     => 'Đã xóa điểm dừng.',
     'tr_arrival_short'     => 'Đến',
-
+    'sch_err_days'         => 'Vui lòng chọn ít nhất một ngày chạy trong tuần.',
     // ── Chuyến xe ──
     'tr_title'                   => 'Quản lý chuyến xe',
     'tr_subtitle'                => 'Gán xe cho chuyến sinh từ lịch trình, thêm chuyến lẻ, sửa giá và hủy chuyến.',
@@ -124,4 +124,10 @@ return [
     'tr_err_arrival'             => 'Giờ đến phải sau giờ khởi hành.',
     'sch_stops_of'               => 'Lịch trình các điểm dừng tuyến',
     'rs_btn_deactivate'          => 'Xóa',
-];
+    'tr_btn_delete'   => 'Xóa',
+    'tr_modal_delete' => 'Xóa chuyến xe',
+    'tr_delete_msg'   => 'Bạn có chắc muốn xóa chuyến',
+    'tr_delete_note'  => 'Chuyến sẽ bị xóa vĩnh viễn khỏi hệ thống và không thể khôi phục.',
+    'tr_flash_deleted' => 'Đã xóa chuyến xe.',
+    'tr_err_delete'   => 'Không thể xóa chuyến này vì còn dữ liệu liên quan.',
+    ];
