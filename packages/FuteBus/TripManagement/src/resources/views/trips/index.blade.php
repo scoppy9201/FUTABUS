@@ -81,7 +81,10 @@
                                 {{ $t->origin_city }} → {{ $t->destination_city }}
                                 <span class="block text-xs font-medium text-slate-400">{{ $t->route_code }}</span>
                             </td>
-                            <td class="whitespace-nowrap px-5 py-4">{{ \Illuminate\Support\Carbon::parse($t->departure_time)->format('H:i · d/m/Y') }}</td>
+                            <td class="whitespace-nowrap px-5 py-4">
+                                {{ \Illuminate\Support\Carbon::parse($t->departure_time)->format('H:i · d/m/Y') }}
+                                <span class="block text-xs text-slate-400">{{ __('TripManagement::app.tr_arrival_short') }} {{ \Illuminate\Support\Carbon::parse($t->arrival_time)->format('H:i · d/m') }}</span>
+                            </td>
                             <td class="px-5 py-4">{{ $t->license_plate ?? '—' }}</td>
                             <td class="px-5 py-4">{{ $t->license_plate ? ($t->available_seats ?? 0).'/'.$t->capacity : '—' }}</td>
                             <td class="whitespace-nowrap px-5 py-4">{{ number_format($t->price, 0, ',', '.') }} ₫</td>
@@ -96,7 +99,6 @@
                                     <button @click="openEdit({{ json_encode([
                                         'id' => $t->id, 'route_id' => $t->route_id, 'bus_id' => $t->bus_id,
                                         'departure_time' => \Illuminate\Support\Carbon::parse($t->departure_time)->format('Y-m-d\TH:i'),
-                                        'arrival_time' => \Illuminate\Support\Carbon::parse($t->arrival_time)->format('Y-m-d\TH:i'),
                                         'price' => (int) $t->price, 'from_schedule' => $t->trip_schedule_id !== null,
                                     ]) }})" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-futa-orange hover:text-futa-orange">
                                         <x-heroicon-o-pencil-square class="size-3.5" /> {{ __('TripManagement::app.tr_btn_edit') }}
@@ -159,11 +161,6 @@
                                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:bg-slate-100 focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
                     </div>
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.tr_f_arrival') }} <span class="text-rose-500">*</span></label>
-                        <input type="datetime-local" name="arrival_time" x-model="form.arrival_time" :disabled="locked" required
-                               class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:bg-slate-100 focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
-                    </div>
-                    <div>
                         <label class="mb-1 block text-xs font-semibold text-slate-700">
                             {{ __('TripManagement::app.tr_f_bus') }} <span x-show="!isEdit" class="text-rose-500">*</span>
                         </label>
@@ -174,7 +171,7 @@
                                 <option value="{{ $b->id }}">{{ $b->license_plate }} ({{ $b->capacity }} {{ __('BusManagement::app.field_capacity_unit') }})</option>
                             @endforeach
                         </select>
-                                                <div x-show="busProblems.length > 0" x-cloak class="mt-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
+                        <div x-show="busProblems.length > 0" x-cloak class="mt-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
                             <p class="font-bold">{{ __('TripManagement::app.tr_doc_warn') }}</p>
                             <ul class="mt-1 list-inside list-disc space-y-0.5">
                                 <template x-for="p in busProblems" :key="p.name">
@@ -194,7 +191,7 @@
 
                 <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
                     <button type="button" @click="showForm = false" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('TripManagement::app.btn_cancel') }}</button>
-                                       <button type="submit" :disabled="busProblems.length > 0"
+                    <button type="submit" :disabled="busProblems.length > 0"
                             class="rounded-lg bg-futa-orange px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-futa-orange-dark disabled:cursor-not-allowed disabled:opacity-50"
                             x-text="isEdit ? @js(__('TripManagement::app.btn_save')) : @js(__('TripManagement::app.btn_store'))"></button>
                 </div>
@@ -229,7 +226,7 @@
 
 <script>
 function tripManager() {
-    const blank = { route_id:'', bus_id:'', departure_time:'', arrival_time:'', price:'' };
+    const blank = { route_id:'', bus_id:'', departure_time:'', price:'' };
     const base = `{{ url('quan-tri/chuyen-xe') }}`;
     const requiredTypes = @json($requiredTypes);
     const busDocs = @json($busDocs);
@@ -238,7 +235,7 @@ function tripManager() {
         showForm: false, showCancel: false, isEdit: false, locked: false,
         form: { ...blank }, formAction: base,
         cancelData: {}, cancelAction: '',
-                get busProblems() {
+        get busProblems() {
             if (!this.form.bus_id) return [];
             const day = this.form.departure_time ? this.form.departure_time.slice(0, 10) : today;
             const docs = busDocs[this.form.bus_id] || {};

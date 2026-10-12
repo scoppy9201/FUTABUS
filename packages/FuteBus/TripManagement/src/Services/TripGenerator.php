@@ -11,19 +11,33 @@ class TripGenerator
 {
     public const DAYS_AHEAD = 30;
 
-    /** Tuyến phải có ít nhất 2 điểm dừng đang hoạt động (điểm đầu + điểm cuối). */
+    /** Tuyến phải có ít nhất 1 điểm dừng */
     public static function hasStops(int $routeId): bool
     {
-        return DB::table('route_stops')->where('route_id', $routeId)->where('status', 'active')->count() >= 2;
+        return DB::table('route_stops')->where('route_id', $routeId)->exists();
     }
 
-    /** Thời gian chạy (phút) = offset lớn nhất - offset nhỏ nhất của các điểm đang hoạt động. */
+    /** Tổng thời gian chạy (phút) = tổng số phút của các chặng. */
     public static function duration(int $routeId): int
     {
-        $r = DB::table('route_stops')->where('route_id', $routeId)->where('status', 'active')
-            ->selectRaw('count(*) as c, min(offset_minutes) as mn, max(offset_minutes) as mx')->first();
+        return (int) DB::table('route_stops')->where('route_id', $routeId)->sum('leg_minutes');
+    }
 
-        return $r->c >= 2 ? (int) ($r->mx - $r->mn) : 0;
+    /** Cập nhật giờ đến cho chuyến chưa khởi hành và chưa có vé. */
+    public static function syncArrivals(int $routeId): void
+    {
+        $minutes = self::duration($routeId);
+
+        DB::table('trips')
+            ->where('route_id', $routeId)
+            ->where('departure_time', '>', now())
+            ->whereIn('status', ['unassigned', 'scheduled'])
+            ->whereNotExists(function ($q) {
+                $q->select(DB::raw(1))->from('bookings')
+                    ->whereColumn('bookings.trip_id', 'trips.id')
+                    ->where('bookings.status', '<>', 'cancelled');
+            })
+            ->update(['arrival_time' => DB::raw("DATE_ADD(departure_time, INTERVAL {$minutes} MINUTE)")]);
     }
 
     public function generate(object $schedule): int

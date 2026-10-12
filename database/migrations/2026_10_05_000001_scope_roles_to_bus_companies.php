@@ -19,17 +19,17 @@ return new class extends Migration
 
         $catalog = [
             'dashboard.view' => ['Dashboard access', 'dashboard'],
-            'role.view' => ['View access roles', 'role'],
-            'role.create' => ['Create access roles', 'role'],
-            'role.update' => ['Update access roles', 'role'],
-            'role.delete' => ['Delete access roles', 'role'],
+            'role.view'      => ['View access roles', 'role'],
+            'role.create'    => ['Create access roles', 'role'],
+            'role.update'    => ['Update access roles', 'role'],
+            'role.delete'    => ['Delete access roles', 'role'],
         ];
 
         foreach ($catalog as $slug => [$name, $group]) {
             DB::table('permissions')->insertOrIgnore([
-                'name' => $name,
-                'slug' => $slug,
-                'group' => $group,
+                'name'       => $name,
+                'slug'       => $slug,
+                'group'      => $group,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -68,7 +68,7 @@ return new class extends Migration
             foreach ($rolePermissionIds as $permissionId) {
                 DB::table('permission_role')->insertOrIgnore([
                     'permission_id' => $permissionId,
-                    'role_id' => $roleId,
+                    'role_id'       => $roleId,
                 ]);
             }
         }
