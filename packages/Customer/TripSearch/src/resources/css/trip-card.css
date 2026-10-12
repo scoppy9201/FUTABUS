@@ -261,32 +261,7 @@
     color: #020617;
     font-size: 14px;
     line-height: 24px;
-    scrollbar-color: transparent transparent;
-    scrollbar-width: thin;
     scrollbar-gutter: stable;
-}
-
-.trip-card__detail:hover,
-.trip-card__detail:focus-within {
-    scrollbar-color: #c4c9cf transparent;
-}
-
-.trip-card__detail::-webkit-scrollbar {
-    width: 7px;
-}
-
-.trip-card__detail::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.trip-card__detail::-webkit-scrollbar-thumb {
-    border-radius: 999px;
-    background: transparent;
-}
-
-.trip-card__detail:hover::-webkit-scrollbar-thumb,
-.trip-card__detail:focus-within::-webkit-scrollbar-thumb {
-    background: #c4c9cf;
 }
 
 .trip-card__detail-content {

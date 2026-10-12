@@ -31,7 +31,12 @@
                     @foreach($permissions as $permission)
                         <label class="flex min-w-0 items-start gap-2.5 rounded-lg border border-slate-100 px-3 py-2.5 text-sm transition hover:border-orange-200 hover:bg-orange-50/40">
                             <input type="checkbox" name="permission_ids[]" value="{{ $permission->id }}" @checked(in_array($permission->id, $checkedPermissions, true) || in_array((string) $permission->id, $checkedPermissions, true)) class="mt-0.5 size-4 shrink-0 rounded border-slate-300 text-[#F26522] focus:ring-[#F26522]">
-                            <span class="min-w-0"><span class="block break-words font-medium text-slate-700">{{ $permission->display_name ?: ($permissionLabels[$permission->slug] ?? $permission->name) }}</span><code class="mt-1 block break-all text-[11px] text-slate-400">{{ $permission->slug }}</code></span>
+                            <span class="min-w-0">
+                                <span class="block wrap-break-word font-medium text-slate-700">
+                                    {{ $permission->display_name ?: ($permissionLabels[$permission->slug] ?? $permission->name) }}
+                                </span>
+                                <code class="mt-1 block break-all text-[11px] text-slate-400">{{ $permission->slug }}</code>
+                            </span>
                         </label>
                     @endforeach
                 </div>

@@ -95,29 +95,10 @@
                             </button>
                         </div>
                     </div>
-                    <div data-ticket-status-picker class="relative min-w-42">
-                        <span id="futapay-status-label" class="mb-1.5 block text-sm font-semibold text-gray-900">{{ __('Profile::futapay.status') }}</span>
-                        <input type="hidden" value="" data-ticket-status-value>
-                        <button
-                            type="button"
-                            data-ticket-status-toggle
-                            aria-labelledby="futapay-status-label futapay-status-display"
-                            aria-haspopup="listbox"
-                            aria-controls="futapay-status-options"
-                            aria-expanded="false"
-                            class="flex h-11 w-full items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-3 text-left text-sm font-medium text-gray-950 hover:border-futa-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
-                        >
-                            <span id="futapay-status-display" data-ticket-status-label class="truncate">{{ __('Profile::futapay.choose_status') }}</span>
-                            <x-heroicon-o-chevron-down class="size-4 shrink-0 text-slate-500" />
-                        </button>
-                        <div
-                            id="futapay-status-options"
-                            data-ticket-status-options
-                            role="listbox"
-                            aria-label="{{ __('Profile::futapay.status') }}"
-                            hidden
-                            class="absolute left-0 top-full z-40 mt-2 max-h-64 w-full min-w-45 overflow-y-auto rounded-xl border border-gray-200 bg-white py-1 shadow-xl"
-                        >
+                    <div class="min-w-42">
+                        <label for="futapay-status" class="mb-1.5 block text-sm font-semibold text-gray-900">{{ __('Profile::futapay.status') }}</label>
+                        <select id="futapay-status" name="status"
+                            class="h-11 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-950 hover:border-futa-orange focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/10">
                             @foreach([
                                 '' => 'choose_status',
                                 'initialized' => 'initialized',
@@ -125,13 +106,9 @@
                                 'cancelled' => 'cancelled',
                                 'approved' => 'approved',
                             ] as $value => $label)
-                                <button
-                                    type="button" role="option" tabindex="-1" data-ticket-status-option="{{ $value }}"
-                                    aria-selected="{{ $value === '' ? 'true' : 'false' }}"
-                                    class="block w-full px-3 py-2.5 text-left text-sm font-medium text-gray-900 hover:bg-futa-orange-soft focus:bg-futa-orange-soft focus:outline-none aria-selected:bg-futa-orange-soft aria-selected:font-semibold aria-selected:text-futa-orange"
-                                >{{ __('Profile::futapay.'.$label) }}</button>
+                                <option value="{{ $value }}">{{ __('Profile::futapay.'.$label) }}</option>
                             @endforeach
-                        </div>
+                        </select>
                     </div>
                     <button
                         type="button"

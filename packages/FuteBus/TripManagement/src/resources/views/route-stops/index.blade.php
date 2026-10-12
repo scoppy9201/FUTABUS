@@ -12,7 +12,7 @@
 
     <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
-            <p class="text-sm font-bold uppercase tracking-[0.16em] text-[#ef5222]">{{ $company?->name ?? 'FUTA Bus Lines' }}</p>
+            <p class="text-sm font-bold uppercase tracking-[0.16em] text-futa-orange">{{ $company?->name ?? 'FUTA Bus Lines' }}</p>
             <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">{{ __('TripManagement::app.rs_title') }}</h1>
             <p class="mt-2 max-w-3xl text-sm font-medium text-slate-500">{{ __('TripManagement::app.rs_subtitle') }}</p>
         </div>
@@ -49,7 +49,7 @@
             </select>
         </form>
         @if($route)
-        <button @click="openAdd()" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#F26522] to-[#E31B23] px-5 py-2.5 text-sm font-bold text-white shadow-md hover:opacity-90">
+        <button @click="openAdd()" class="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-[#F26522] to-[#E31B23] px-5 py-2.5 text-sm font-bold text-white shadow-md hover:opacity-90">
             <x-heroicon-o-plus class="size-4" /> {{ __('TripManagement::app.rs_btn_add') }}
         </button>
         @endif
@@ -61,7 +61,7 @@
 
     <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[800px] text-left text-sm">
+            <table class="w-full min-w-200 text-left text-sm">
                 <thead class="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500">
                     <tr>
                         <th class="px-5 py-4">#</th>
@@ -120,11 +120,11 @@
     </div>
 
     {{-- ADD / EDIT MODAL --}}
-    <div x-show="showForm" x-cloak @click.self="showForm = false"
+    <div role="dialog" aria-modal="true" x-show="showForm" x-cloak @click.self="showForm = false"
          class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
         <div class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white shadow-2xl">
             <div class="flex items-center justify-between px-5 py-3"
-                 :class="isEdit ? 'bg-slate-800' : 'bg-gradient-to-r from-[#F26522] to-[#E31B23]'">
+                 :class="isEdit ? 'bg-slate-800' : 'bg-linear-to-r from-[#F26522] to-[#E31B23]'">
                 <h2 class="text-base font-bold text-white"
                     x-text="isEdit ? @js(__('TripManagement::app.rs_modal_edit')) : @js(__('TripManagement::app.rs_modal_add'))"></h2>
                 <button type="button" @click="showForm = false" class="text-white/70 hover:text-white"><x-heroicon-o-x-mark class="size-4" /></button>
@@ -174,7 +174,7 @@
     </div>
 
     {{-- DEACTIVATE MODAL --}}
-    <div x-show="showDelete" x-cloak @click.self="showDelete = false"
+    <div role="dialog" aria-modal="true" x-show="showDelete" x-cloak @click.self="showDelete = false"
          class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
         <div class="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl">
             <div class="mx-auto mb-4 grid size-14 place-items-center rounded-full bg-rose-100">

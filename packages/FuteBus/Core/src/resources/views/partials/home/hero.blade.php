@@ -4,28 +4,6 @@
         box-shadow: 0 8px 0 rgba(181,86,51,.14);
     }
 
-    .hero-location-results {
-        scrollbar-width: none;
-    }
-
-    .hero-location-results:hover {
-        scrollbar-width: thin;
-        scrollbar-color: #cbd5e1 transparent;
-    }
-
-    .hero-location-results::-webkit-scrollbar {
-        width: 0;
-    }
-
-    .hero-location-results:hover::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .hero-location-results::-webkit-scrollbar-thumb {
-        border-radius: 999px;
-        background: #cbd5e1;
-    }
-
     .hero-return-field {
         min-width: 0;
         overflow: hidden;

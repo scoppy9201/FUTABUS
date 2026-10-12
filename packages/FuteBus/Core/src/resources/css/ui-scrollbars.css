@@ -1,0 +1,63 @@
+:root,
+.ui-scrollable {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+}
+
+:root {
+    scrollbar-gutter: stable;
+}
+
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.ui-scrollable::-webkit-scrollbar {
+    display: block;
+}
+
+*::-webkit-scrollbar-track,
+*::-webkit-scrollbar-corner,
+*::-webkit-scrollbar-button {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: transparent;
+}
+
+.ui-scrollable:is(.ui-scrolling, .ui-scrollbar-hover),
+:root:is(.ui-scrolling, .ui-scrollbar-hover) {
+    scrollbar-color: var(--color-futa-orange) transparent;
+}
+
+.ui-scrollable:is(.ui-scrolling, .ui-scrollbar-hover)::-webkit-scrollbar-thumb,
+:root:is(.ui-scrolling, .ui-scrollbar-hover)::-webkit-scrollbar-thumb {
+    background: var(--color-futa-orange);
+}
+
+.ui-scroll-locked {
+    overflow: hidden !important;
+    overscroll-behavior: none;
+}
+
+.ui-scrollable {
+    scrollbar-gutter: stable;
+}
+
+.ui-modal-open .ui-scrollable {
+    overscroll-behavior: contain;
+}
+
+@media (forced-colors: active) {
+    :root,
+    .ui-scrollable {
+        scrollbar-color: auto;
+    }
+
+    *::-webkit-scrollbar-thumb {
+        background: ButtonText;
+    }
+}

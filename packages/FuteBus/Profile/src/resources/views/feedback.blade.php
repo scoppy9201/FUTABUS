@@ -12,9 +12,9 @@
     @endphp
     <div class="home-page min-h-screen bg-white" data-feedback-page>
         @include('core::partials.home.navbar')
-        <main class="mx-auto grid w-full max-w-282 items-start gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[255px_minmax(0,1fr)] lg:px-0">
+        <main class="mx-auto grid w-full max-w-282 items-start gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[255px_minmax(0,1fr)] lg:items-stretch lg:px-0">
             @include('Profile::partials.account-sidebar')
-            <section class="min-w-0" aria-labelledby="feedback-title">
+            <section class="min-w-0 lg:flex lg:h-134 lg:flex-col" aria-labelledby="feedback-title">
                 <div class="flex flex-wrap items-start justify-between gap-4">
                     <div>
                         <h1 id="feedback-title" class="text-3xl font-semibold text-gray-950">{{ __('Profile::feedback.title') }}</h1>
@@ -52,14 +52,14 @@
                     </button>
                 </form>
 
-                <section class="mt-5 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm" aria-labelledby="feedback-history-title">
+                <section class="mt-5 flex min-h-0 flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm lg:flex-1" aria-labelledby="feedback-history-title">
                     <div class="flex items-center justify-between gap-3 border-b border-gray-100 px-5 py-4">
                         <h2 id="feedback-history-title" class="text-sm font-bold text-futa-green">{{ __('Profile::feedback.results', ['count' => $reports->total()]) }}</h2>
                         @if($hasFilters)
                             <a href="{{ route('profile.feedback.index') }}" class="text-sm font-semibold text-futa-orange hover:underline">{{ __('Profile::feedback.clear_filters') }}</a>
                         @endif
                     </div>
-                    <div class="ticket-history-scroll max-h-96 overflow-auto" tabindex="0" aria-label="{{ __('Profile::feedback.history_title') }}">
+                    <div class="ticket-history-scroll h-96 overflow-auto lg:min-h-0 lg:h-auto lg:flex-1" tabindex="0" aria-label="{{ __('Profile::feedback.history_title') }}">
                         <table class="w-full min-w-160 text-left text-sm">
                             <caption class="sr-only">{{ __('Profile::feedback.history_title') }}</caption>
                             <thead class="sticky top-0 z-10 bg-futa-orange-soft text-gray-700">
@@ -81,7 +81,7 @@
                                     <tr class="align-top hover:bg-gray-50/70">
                                         <td class="max-w-80 px-5 py-4">
                                             <p class="text-xs font-bold text-futa-orange">{{ __('Profile::feedback.reference', ['id' => str_pad((string) $report->id, 6, '0', STR_PAD_LEFT)]) }}</p>
-                                            <p class="mt-1 break-words font-semibold text-gray-950">{{ $report->subject }}</p>
+                                            <p class="mt-1 wrap-break-word font-semibold text-gray-950">{{ $report->subject }}</p>
                                             <p class="mt-1 text-xs text-slate-500">{{ __('Profile::feedback.categories.'.$report->category) }} · {{ __('Profile::feedback.urgencies.'.$report->urgency) }}</p>
                                         </td>
                                         <td class="whitespace-nowrap px-5 py-4 text-slate-600">{{ \Illuminate\Support\Carbon::parse($report->created_at)->format('d/m/Y H:i') }}</td>
@@ -111,8 +111,8 @@
 
         <dialog id="feedback-create-dialog" data-feedback-create @if($hasFormErrors) data-open-on-load @endif
             aria-labelledby="feedback-create-title"
-            class="ticket-history-scroll m-auto max-h-[calc(100dvh-1.5rem)] w-[min(64rem,calc(100vw-1.5rem))] overflow-y-auto rounded-2xl border border-gray-200 bg-white p-0 shadow-2xl backdrop:bg-black/60">
-            <header class="flex items-start justify-between gap-4 border-b border-gray-100 px-5 py-4 sm:px-6">
+            class="m-auto max-h-[calc(100dvh-1.5rem)] w-[min(64rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-gray-200 bg-white p-0 shadow-2xl backdrop:bg-black/60 open:flex open:flex-col">
+            <header class="flex shrink-0 items-start justify-between gap-4 border-b border-gray-100 px-5 py-4 sm:px-6">
                 <div>
                     <h2 id="feedback-create-title" class="text-xl font-bold text-gray-950">{{ __('Profile::feedback.form_title') }}</h2>
                     <p class="mt-1 text-sm text-slate-500">{{ __('Profile::feedback.form_hint') }}</p>
@@ -121,9 +121,9 @@
                     <x-heroicon-o-x-mark class="size-5" aria-hidden="true" />
                 </button>
             </header>
-            <div class="grid items-start gap-6 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_15rem]">
+            <div class="ticket-history-scroll grid min-h-0 flex-1 items-start gap-6 overflow-y-auto p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_15rem]">
                 @include('Profile::partials.feedback-form')
-                <aside class="space-y-4" aria-label="{{ __('Profile::feedback.process_title') }}">
+                <aside class="hidden space-y-4 lg:block" aria-label="{{ __('Profile::feedback.process_title') }}">
                     <div class="rounded-xl bg-futa-green p-4 text-white">
                         <p class="text-sm font-bold">{{ __('Profile::feedback.help_title') }}</p>
                         <a href="tel:19006067" class="mt-2 inline-flex items-center gap-2 text-2xl font-extrabold"><x-heroicon-o-phone class="size-5" aria-hidden="true" />1900 6067</a>

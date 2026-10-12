@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'choose'         => 'Choose',
+    'search'         => 'Search',
+    'no_options'     => 'No matching options',
+    'selected'       => 'Selected',
+    'clear'          => 'Clear',
+    'apply'          => 'Apply',
+    'today'          => 'Today',
+    'current_month'  => 'This month',
+    'now'            => 'Now',
+    'previous_month' => 'Previous month',
+    'next_month'     => 'Next month',
+    'year'           => 'Year',
+    'hour'           => 'Hour',
+    'minute'         => 'Minute',
+    'second'         => 'Second',
+    'millisecond'    => 'Millisecond',
+    'invalid_date'   => 'Choose a date and time within this field’s limits.',
+    'calendar'       => 'Choose date and time',
+    'date'           => 'Date',
+    'time'           => 'Time',
+    'month'          => 'Month',
+];

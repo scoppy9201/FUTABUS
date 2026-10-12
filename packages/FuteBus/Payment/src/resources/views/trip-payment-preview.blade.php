@@ -39,24 +39,14 @@
         remainingSeconds: @js(max(0, $preview['created_at'] + 600 - now()->timestamp)),
         countdown: null,
         statusTimer: null,
-        savedPageOverflow: null,
         openTripDetail() {
             if (this.detailOpen) return;
-            this.savedPageOverflow = {
-                html: document.documentElement.style.overflow,
-                body: document.body.style.overflow,
-            };
-            document.documentElement.style.overflow = 'hidden';
-            document.body.style.overflow = 'hidden';
             this.detailOpen = true;
             this.$nextTick(() => this.$refs.tripDetailClose.focus());
         },
         closeTripDetail() {
             if (!this.detailOpen) return;
             this.detailOpen = false;
-            document.documentElement.style.overflow = this.savedPageOverflow?.html ?? '';
-            document.body.style.overflow = this.savedPageOverflow?.body ?? '';
-            this.savedPageOverflow = null;
             this.$nextTick(() => this.$refs.tripDetailTrigger.focus());
         },
         async refreshPaymentState() {
@@ -105,10 +95,6 @@
         destroy() {
             clearInterval(this.countdown);
             clearInterval(this.statusTimer);
-            if (this.detailOpen) {
-                document.documentElement.style.overflow = this.savedPageOverflow?.html ?? '';
-                document.body.style.overflow = this.savedPageOverflow?.body ?? '';
-            }
         },
         countdownText() {
             const minutes = String(Math.floor(this.remainingSeconds / 60)).padStart(2, '0');

@@ -82,6 +82,7 @@
                             x-cloak
                             x-show="fromOpen && suggestions('from').length > 0"
                             x-transition.opacity.duration.150ms
+                            data-ui-menu
                             class="scrollbar-hidden absolute inset-x-0 top-full z-30 mt-2 max-h-72 overflow-y-auto rounded-2xl border border-gray-200 bg-white py-2 shadow-[0_12px_30px_rgba(15,23,42,.16)]"
                         >
                             <template x-for="point in suggestions('from')" :key="point">
@@ -127,6 +128,7 @@
                             x-cloak
                             x-show="toOpen && suggestions('to').length > 0"
                             x-transition.opacity.duration.150ms
+                            data-ui-menu
                             class="scrollbar-hidden absolute inset-x-0 top-full z-30 mt-2 max-h-72 overflow-y-auto rounded-2xl border border-gray-200 bg-white py-2 shadow-[0_12px_30px_rgba(15,23,42,.16)]"
                         >
                             <template x-for="point in suggestions('to')" :key="point">

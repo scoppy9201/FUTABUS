@@ -18,6 +18,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.13.0/lottie.min.js" defer></script>
 </head>
 <body class="overflow-x-hidden bg-white text-gray-900">
+    @include('core::components.ui-select-template')
+    @include('core::components.ui-calendar-templates')
     @include('core::partials.global-loader')
     @yield('content')
     @include('core::partials.floating-support')

@@ -4,7 +4,7 @@
 @section('page_title', __('UserManagement::app.detail_title'))
 
 @section('content')
-    <div class="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-orange-100 bg-gradient-to-r from-orange-50 to-rose-50 p-4 sm:px-5">
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-orange-100 bg-linear-to-r from-orange-50 to-rose-50 p-4 sm:px-5">
         <div class="flex items-center gap-3">
             <a href="{{ route('staff-accounts.index') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
                 <x-heroicon-o-arrow-left class="size-4" />{{ __('UserManagement::app.back') }}

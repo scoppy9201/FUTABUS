@@ -10,7 +10,10 @@
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.13.0/lottie.min.js" defer></script>
 </head>
-<body class="dashboard-page flex h-screen overflow-hidden flex-col bg-[#F8F9FA] font-[Inter,sans-serif] text-gray-800 antialiased" x-data="{ sidebarOpen: false }">
+<body class="dashboard-page flex h-screen overflow-hidden flex-col bg-[#F8F9FA] font-[Inter,sans-serif] text-gray-800 antialiased"
+    x-data="{ sidebarOpen: false, viewportWidth: window.innerWidth }" @resize.window="viewportWidth = window.innerWidth">
+    @include('core::components.ui-select-template')
+    @include('core::components.ui-calendar-templates')
     @include('core::partials.global-loader')
 
     <!-- HEADER -->
@@ -72,6 +75,9 @@
 
         <!-- SIDEBAR -->
         <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform lg:translate-x-0 lg:static lg:h-full transition-transform duration-200 ease-in-out flex flex-col justify-between"
+            :role="sidebarOpen && viewportWidth < 1024 ? 'dialog' : 'navigation'"
+            :aria-modal="sidebarOpen && viewportWidth < 1024 ? 'true' : 'false'"
+            aria-label="{{ __('Dashboard::app.operations') }}"
             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
             <div class="py-4 overflow-y-auto">
                 <div class="px-4 mb-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider">{{ __('Dashboard::app.operations') }}</div>

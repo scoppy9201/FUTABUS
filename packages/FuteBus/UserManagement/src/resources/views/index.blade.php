@@ -4,7 +4,7 @@
 @section('page_title', __('UserManagement::app.title'))
 
 @section('content')
-    <section class="relative isolate -mx-4 -mt-4 mb-4 flex min-h-24 items-center justify-between gap-4 overflow-hidden border-y border-orange-100 bg-gradient-to-r from-white via-orange-50 to-orange-100 px-5 py-3 shadow-sm md:-mx-6 md:-mt-6 md:px-8 lg:-mx-8 lg:-mt-8 lg:px-10">
+    <section class="relative isolate -mx-4 -mt-4 mb-4 flex min-h-24 items-center justify-between gap-4 overflow-hidden border-y border-orange-100 bg-linear-to-r from-white via-orange-50 to-orange-100 px-5 py-3 shadow-sm md:-mx-6 md:-mt-6 md:px-8 lg:-mx-8 lg:-mt-8 lg:px-10">
         <div class="relative z-10 flex min-w-0 flex-1 items-center gap-3 sm:pr-44">
             <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-white/90 text-[#F26522] shadow-sm"><x-heroicon-o-users class="size-5" /></span>
             <div class="min-w-0">
@@ -12,7 +12,7 @@
                 <p class="mt-0.5 line-clamp-2 max-w-2xl text-sm font-medium text-slate-600">{{ __('UserManagement::app.description') }}</p>
             </div>
         </div>
-        <img src="{{ asset('images/auth/transfer-bus.png') }}" alt="" aria-hidden="true" class="pointer-events-none absolute right-5 bottom-0 z-0 hidden h-20 w-52 object-contain object-right-bottom opacity-90 sm:block">
+        <img src="{{ asset('images/auth/transfer-bus.png') }}" alt="" aria-hidden="true" class="pointer-events-none absolute right-5 bottom-0 z-0 hidden h-20 w-52 object-contain object-bottom-right opacity-90 sm:block">
     </section>
 
     @if(session('status'))
@@ -65,7 +65,7 @@
             </a>
         </div>
         <div class="overflow-x-auto overflow-y-visible lg:overflow-visible">
-            <table class="w-full min-w-[880px] table-fixed text-left text-sm">
+            <table class="w-full min-w-220 table-fixed text-left text-sm">
                 <caption class="sr-only">{{ __('UserManagement::app.title') }}</caption>
                 <thead class="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500">
                     <tr>

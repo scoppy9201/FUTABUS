@@ -4,7 +4,7 @@
 @section('page_title', __('UserManagement::app.create_account'))
 
 @section('content')
-    <div class="flex items-center gap-3 rounded-xl border border-orange-100 bg-gradient-to-r from-orange-50 to-rose-50 px-5 py-4">
+    <div class="flex items-center gap-3 rounded-xl border border-orange-100 bg-linear-to-r from-orange-50 to-rose-50 px-5 py-4">
         <span class="grid size-10 shrink-0 place-items-center rounded-lg bg-[#F26522] text-white"><x-heroicon-o-user-plus class="size-5" /></span>
         <div>
             <h1 class="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">{{ __('UserManagement::app.create_account') }}</h1>

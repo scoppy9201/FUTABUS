@@ -5,8 +5,9 @@
         <div class="relative mx-auto flex h-15.5 w-[calc(100%-24px)] max-w-282 items-center justify-between sm:h-14 sm:w-[calc(100%-32px)]">
             <div class="flex items-center gap-3.5">
                 {{-- Language dropdown --}}
-                <div class="relative" x-data="{ open: false }" @click.away="open = false">
-                    <button type="button" @click="open = !open" class="flex items-center gap-1.5 text-sm font-bold" aria-label="{{ __('core::app.home.navbar.language_selector') }}">
+                <div class="relative" x-data="{ open: false }" @click.away="open = false" @keydown.escape.window="open = false">
+                    <button type="button" @click="open = !open" :aria-expanded="open" aria-controls="ui-language-menu"
+                        class="flex items-center gap-1.5 text-sm font-bold" aria-label="{{ __('core::app.home.navbar.language_selector') }}">
                         <span class="inline-flex size-6.5 items-center justify-center overflow-hidden rounded-full">
                             @if(app()->getLocale() === 'vi')
                                 <img src="{{ asset('icons/flags/vi.svg') }}" alt="" class="h-full w-full object-cover">
@@ -21,6 +22,7 @@
                         />
                     </button>
                     <div
+                        id="ui-language-menu" data-ui-menu
                         x-show="open"
                         x-transition:enter="transition ease-out duration-150"
                         x-transition:enter-start="opacity-0 -translate-y-1"
@@ -48,7 +50,7 @@
 
                 <span class="hidden h-6 w-px bg-white/70 sm:block"></span>
 
-                <div class="relative hidden sm:block" x-data="{ open: false }" @click.away="open = false">
+                <div class="relative hidden sm:block" x-data="{ open: false }" @click.away="open = false" @keydown.escape.window="open = false">
                     <button
                         type="button"
                         @click="open = !open"

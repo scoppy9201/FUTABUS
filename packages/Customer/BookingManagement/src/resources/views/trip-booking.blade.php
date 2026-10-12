@@ -43,8 +43,6 @@
         policyTooltipOpen: false,
         priceTooltipOpen: false,
         termsModalOpen: false,
-        termsScrolling: false,
-        termsScrollTimer: null,
         captchaOpen: false,
         captchaDragging: false,
         captchaVerified: false,
@@ -64,16 +62,9 @@
             asset('images/popular-routes/ho-chi-minh-city.png'),
         ]),
         captchaImageIndex: -1,
-        savedPageOverflow: null,
         openTripDetail(event) {
             if (this.tripDetailOpen) return;
             this.tripDetailTrigger = event?.currentTarget ?? this.$refs.tripDetailTrigger;
-            this.savedPageOverflow = {
-                html: document.documentElement.style.overflow,
-                body: document.body.style.overflow,
-            };
-            document.documentElement.style.overflow = 'hidden';
-            document.body.style.overflow = 'hidden';
             this.tripDetailOpen = true;
             this.$nextTick(() => this.$refs.tripDetailClose.focus());
         },
@@ -81,35 +72,16 @@
             if (!this.tripDetailOpen) return;
             this.tripDetailOpen = false;
             this.policyTooltipOpen = false;
-            document.documentElement.style.overflow = this.savedPageOverflow?.html ?? '';
-            document.body.style.overflow = this.savedPageOverflow?.body ?? '';
-            this.savedPageOverflow = null;
             this.$nextTick(() => this.tripDetailTrigger?.focus());
-        },
-        showTermsScrollbar() {
-            this.termsScrolling = true;
-            clearTimeout(this.termsScrollTimer);
-            this.termsScrollTimer = setTimeout(() => { this.termsScrolling = false; }, 700);
         },
         openTermsModal() {
             if (this.termsModalOpen) return;
-            this.savedPageOverflow = {
-                html: document.documentElement.style.overflow,
-                body: document.body.style.overflow,
-            };
-            document.documentElement.style.overflow = 'hidden';
-            document.body.style.overflow = 'hidden';
             this.termsModalOpen = true;
             this.$nextTick(() => this.$refs.termsModalClose.focus());
         },
         closeTermsModal() {
             if (!this.termsModalOpen) return;
             this.termsModalOpen = false;
-            clearTimeout(this.termsScrollTimer);
-            this.termsScrolling = false;
-            document.documentElement.style.overflow = this.savedPageOverflow?.html ?? '';
-            document.body.style.overflow = this.savedPageOverflow?.body ?? '';
-            this.savedPageOverflow = null;
             this.$nextTick(() => this.$refs.termsModalTrigger.focus());
         },
         selectedSeats() {
@@ -148,12 +120,6 @@
         },
         openCaptcha() {
             if (this.captchaOpen) return;
-            this.savedPageOverflow = {
-                html: document.documentElement.style.overflow,
-                body: document.body.style.overflow,
-            };
-            document.documentElement.style.overflow = 'hidden';
-            document.body.style.overflow = 'hidden';
             this.captchaOpen = true;
             this.$nextTick(() => {
                 this.resetCaptcha();
@@ -180,9 +146,6 @@
             clearTimeout(this.captchaSuccessTimer);
             this.captchaDragging = false;
             this.captchaOpen = false;
-            document.documentElement.style.overflow = this.savedPageOverflow?.html ?? '';
-            document.body.style.overflow = this.savedPageOverflow?.body ?? '';
-            this.savedPageOverflow = null;
             this.$nextTick(() => this.$refs.captchaTrigger.focus());
         },
         setCaptchaSlider(offset) {

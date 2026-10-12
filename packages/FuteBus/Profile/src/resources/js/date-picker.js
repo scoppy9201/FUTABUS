@@ -1,15 +1,9 @@
+import { createPopup } from '../../../../Core/src/resources/js/ui-popup.js';
+import { parseUiDateValue, uiDateFromParts } from '../../../../Core/src/resources/js/ui-date-value.js';
+
 function parseDate(value) {
-    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-
-    if (!match) return null;
-
-    const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
-
-    return date.getFullYear() === Number(match[1])
-        && date.getMonth() === Number(match[2]) - 1
-        && date.getDate() === Number(match[3])
-        ? date
-        : null;
+    const parts = parseUiDateValue('date', value);
+    return parts ? uiDateFromParts(parts) : null;
 }
 
 function formatValue(date) {
@@ -43,6 +37,7 @@ function initializeDatePicker(picker) {
     let selected = parseDate(input.value);
     let visibleYear = (selected ?? reference).getFullYear();
     let visibleMonth = (selected ?? reference).getMonth();
+    yearInput.setAttribute('form', '');
 
     for (let day = 0; day < 7; day++) {
         const heading = document.createElement('span');
@@ -51,8 +46,7 @@ function initializeDatePicker(picker) {
     }
 
     function close() {
-        calendar.hidden = true;
-        toggle.setAttribute('aria-expanded', 'false');
+        popup.close();
     }
 
     function updateLabel() {
@@ -86,22 +80,15 @@ function initializeDatePicker(picker) {
             button.textContent = day;
             button.setAttribute('aria-label', fullDateFormatter.format(date));
             button.disabled = maximum !== null && date > maximum;
-            button.className = 'grid size-9 place-items-center rounded-full text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-futa-orange';
-
-            if (isSelected) {
-                button.className += ' bg-futa-orange font-semibold text-white hover:bg-futa-orange-dark';
-                button.setAttribute('aria-pressed', 'true');
-            } else if (button.disabled) {
-                button.className += ' cursor-not-allowed text-gray-300';
-            } else if (isToday) {
-                button.className += ' text-futa-orange ring-1 ring-futa-orange hover:bg-futa-orange-soft';
-            } else {
-                button.className += ' text-gray-900 hover:bg-futa-orange-soft hover:text-futa-orange';
-            }
+            button.className = 'futa-calendar-day';
+            button.classList.toggle('is-today', isToday);
+            button.setAttribute('aria-pressed', String(Boolean(isSelected)));
 
             button.addEventListener('click', () => {
                 selected = date;
                 input.value = formatValue(date);
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.dispatchEvent(new Event('change', { bubbles: true }));
                 updateLabel();
                 close();
                 toggle.focus();
@@ -110,11 +97,17 @@ function initializeDatePicker(picker) {
         }
     }
 
-    toggle.addEventListener('click', () => {
-        calendar.hidden = !calendar.hidden;
-        toggle.setAttribute('aria-expanded', String(!calendar.hidden));
-        if (!calendar.hidden) render();
+    const popup = createPopup(calendar, toggle, {
+        matchWidth: false,
+        onOpen() {
+            selected = parseDate(input.value);
+            visibleYear = (selected ?? reference).getFullYear();
+            visibleMonth = (selected ?? reference).getMonth();
+            render();
+            queueMicrotask(() => calendar.querySelector('[aria-pressed="true"]:not(:disabled), button:not(:disabled)')?.focus({ preventScroll: true }));
+        },
     });
+    toggle.addEventListener('click', () => popup.toggle());
 
     function changeMonth(offset) {
         const date = new Date(visibleYear, visibleMonth + offset, 1);
@@ -144,21 +137,14 @@ function initializeDatePicker(picker) {
     clear.addEventListener('click', () => {
         selected = null;
         input.value = '';
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
         updateLabel();
         close();
         toggle.focus();
     });
 
-    document.addEventListener('click', (event) => {
-        if (!picker.contains(event.target)) close();
-    });
-    picker.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') {
-            close();
-            toggle.focus();
-        }
-    });
-    input.form.addEventListener('reset', () => queueMicrotask(() => {
+    input.form?.addEventListener('reset', () => queueMicrotask(() => {
         selected = parseDate(input.value);
         visibleYear = (selected ?? reference).getFullYear();
         visibleMonth = (selected ?? reference).getMonth();

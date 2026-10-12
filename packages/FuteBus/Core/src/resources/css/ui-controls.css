@@ -1,0 +1,105 @@
+.futa-control {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    min-width: 0;
+    height: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.futa-control__source {
+    position: absolute !important;
+    inset: 0 auto auto 0 !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+.futa-control__trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+    min-height: 2.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.625rem;
+    padding: 0.625rem 0.75rem;
+    background: white;
+    color: #111827;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.futa-control__trigger:hover:not(:disabled) { border-color: var(--color-futa-orange); }
+.futa-control__trigger:focus-visible {
+    outline: 2px solid var(--color-futa-orange);
+    outline-offset: 2px;
+}
+.futa-control__trigger:disabled { background: #f9fafb; color: #64748b; cursor: not-allowed; }
+.futa-control__trigger[aria-invalid="true"] { border-color: var(--color-futa-red); }
+.futa-control__value { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.futa-control__icon { width: 1rem; height: 1rem; flex-shrink: 0; color: var(--color-futa-orange); }
+.futa-control__error { margin-top: 0.25rem; font-size: 0.75rem; color: var(--color-futa-red); }
+
+.futa-control-panel {
+    position: fixed;
+    inset: auto;
+    z-index: 100;
+    margin: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.875rem;
+    padding: 0.375rem;
+    background: white;
+    color: #111827;
+    box-shadow: 0 12px 32px rgb(15 23 42 / 14%);
+}
+
+.futa-control-option {
+    display: block;
+    width: 100%;
+    border-radius: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    text-align: left;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+.futa-control-option:hover:not(:disabled), .futa-control-option:focus-visible {
+    outline: none;
+    background: var(--color-futa-orange-soft);
+    color: var(--color-futa-orange-dark);
+}
+.futa-control-option[aria-selected="true"] {
+    background: var(--color-futa-orange-soft);
+    color: var(--color-futa-orange);
+    font-weight: 700;
+}
+.futa-control-option:disabled { color: #94a3b8; cursor: not-allowed; }
+.futa-control-group { padding: 0.5rem 0.75rem; color: #64748b; font-size: 0.75rem; font-weight: 600; }
+
+.futa-dropdown-menu {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.875rem;
+    background: white;
+    color: #111827;
+    box-shadow: 0 12px 32px rgb(15 23 42 / 14%);
+}
+
+.futa-dropdown-menu :is([role="option"], [role="menuitem"]):is(:hover, :focus-visible) {
+    background: var(--color-futa-orange-soft);
+    color: var(--color-futa-orange-dark);
+}

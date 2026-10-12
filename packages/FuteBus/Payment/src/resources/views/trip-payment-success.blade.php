@@ -48,7 +48,7 @@
                         focus-visible:outline-futa-orange print:hidden [&_svg]:size-6.25" data-ticket-scroll="prev" aria-label="{{ __('Payment::payment.success_previous') }}">
                         <x-heroicon-o-chevron-left aria-hidden="true" />
                     </button>
-                    <div class="ticket-success__tickets flex snap-x snap-mandatory gap-4.5 overflow-x-auto px-7 pb-4.5 scroll-smooth [scrollbar-width:thin] max-sm:px-3 max-sm:pb-3.75 print:block print:overflow-visible" data-ticket-list>
+                    <div class="ticket-success__tickets flex snap-x snap-mandatory gap-4.5 overflow-x-auto px-7 pb-4.5 scroll-smooth max-sm:px-3 max-sm:pb-3.75 print:block print:overflow-visible" data-ticket-list>
                         @foreach ($tickets as $ticket)
                             @include('Payment::partials.payment-success-ticket', [
                                 'ticket' => $ticket,

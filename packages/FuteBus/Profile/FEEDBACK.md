@@ -2,6 +2,19 @@
 
 MVP thuộc module Profile. Khách đăng nhập mở mục **Phản ánh** trong tài khoản để gửi sự việc, đính kèm ảnh, chọn chuyến liên quan và theo dõi kết quả xử lý.
 
+## Tạo phản ánh theo 4 bước
+
+Bấm **Tạo phản ánh** để mở modal. Mỗi màn hình hiển thị một bước:
+
+1. **Vấn đề**: chọn loại sự việc và mức độ.
+2. **Chuyến đi**: chọn chuyến thuộc tài khoản; có thể tiếp tục khi không chọn chuyến.
+3. **Nội dung**: nhập tiêu đề, mô tả và chọn ảnh minh chứng nếu có.
+4. **Liên hệ**: kiểm tra họ tên, số điện thoại, email; xác nhận thông tin trung thực và chọn quyền liên hệ rồi gửi.
+
+**Tiếp tục** kiểm tra các ô của bước hiện tại. **Quay lại** giữ nguyên dữ liệu và ảnh đã chọn. Nút **Gửi phản ánh** xuất hiện ở bước cuối; trước khi gửi, toàn bộ ô bắt buộc được kiểm tra, kể cả các bước đang ẩn. Nếu server trả lỗi, modal mở lại ở bước chứa ô lỗi đầu tiên và giữ nội dung đã nhập; khách cần chọn lại ảnh sau request lỗi.
+
+Tiến trình có nhãn bước hiện tại cho trình đọc màn hình. Nội dung từng bước cuộn trong modal khi màn hình thấp; trên điện thoại, hướng dẫn phụ được thay bằng liên kết tổng đài gọn. Khi JavaScript chưa tải, form vẫn cho phép nhập và gửi đầy đủ các trường.
+
 ## Dữ liệu và luồng xử lý
 
 - `customer_feedback_reports`: chủ tài khoản, loại sự việc, mức độ, mã chuyến snapshot, nội dung, thông tin liên hệ, xác nhận, trạng thái, phản hồi và thời điểm xử lý.
@@ -43,9 +56,9 @@ Disk `local` cần ghi được. Cấu hình PHP/web server phải chấp nhận
 
 ```sh
 php artisan test tests/Feature/Profile
-node --test tests/js/feedback-images.test.mjs
+node --test tests/js/feedback-images.test.mjs tests/js/feedback-wizard.test.mjs
 ```
 
 Các test phản ánh kiểm tra lưu dữ liệu, validation, quyền sở hữu, phản hồi và ngày xử lý, XSS, giới hạn gửi, ảnh riêng tư, MIME/dung lượng/số lượng và rollback khi ghi ảnh lỗi.
 
-Kiểm tra trình duyệt ở màn hình rộng và điện thoại: mở/đóng bằng nút, Escape và nền ngoài dialog; tạo phản ánh có/không có chuyến; chọn/thả/xóa ảnh; sửa form khi có lỗi; lọc và xem chi tiết; kiểm tra ảnh và phản hồi sau khi cập nhật trạng thái.
+Kiểm tra trình duyệt ở màn hình rộng và điện thoại: mở/đóng bằng nút, Escape và nền ngoài dialog; đi qua đủ 4 bước với hoặc không chọn chuyến; thử Tiếp tục khi nội dung chưa hợp lệ; quay lại và kiểm tra dữ liệu/ảnh còn nguyên; chọn/thả/xóa ảnh; gửi ở bước cuối và sửa ở đúng bước khi server trả lỗi; lọc và xem chi tiết; kiểm tra ảnh và phản hồi sau khi cập nhật trạng thái.

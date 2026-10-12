@@ -123,7 +123,7 @@
     </div>
 
     {{-- ADD / EDIT MODAL --}}
-    <div x-show="showForm" x-cloak @click.self="showForm = false"
+    <div role="dialog" aria-modal="true" x-show="showForm" x-cloak @click.self="showForm = false"
          class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
         <div class="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
             <div class="flex items-center justify-between px-5 py-3"
@@ -203,7 +203,7 @@
     </div>
 
     {{-- CANCEL MODAL --}}
-    <div x-show="showCancel" x-cloak @click.self="showCancel = false"
+    <div role="dialog" aria-modal="true" x-show="showCancel" x-cloak @click.self="showCancel = false"
          class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
         <div class="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl">
             <div class="mx-auto mb-4 grid size-14 place-items-center rounded-full bg-rose-100">

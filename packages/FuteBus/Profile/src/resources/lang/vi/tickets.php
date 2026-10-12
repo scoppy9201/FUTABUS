@@ -109,8 +109,11 @@ return [
         'review_submit'           => 'Gửi đánh giá',
         'review_update'           => 'Cập nhật đánh giá',
         'review_saved'            => 'Đã lưu đánh giá của bạn.',
-        'review_select'           => 'Vui lòng chọn từ 1 đến 5 sao.',
-        'review_star'             => ':count sao',
+        'review_select'           => 'Vui lòng chọn một cảm xúc để đánh giá chuyến đi.',
+        'review_score'            => ':count/5',
+        'review_choice'           => ':label, :count/5',
+        'review_emotion'          => ':label · :count/5',
+        'review_toggle_hint'      => 'Chọn cảm xúc phù hợp. Bấm lại cảm xúc đã chọn để bỏ chọn.',
         'review_date'             => 'Đánh giá lúc :date',
         'review_pending'          => 'Chỉ có thể đánh giá sau khi nhà xe xác nhận chuyến đã hoàn thành.',
         'vehicle_type'            => [

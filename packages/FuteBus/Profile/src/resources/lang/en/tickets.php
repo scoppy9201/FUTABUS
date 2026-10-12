@@ -109,8 +109,11 @@ return [
         'review_submit'           => 'Submit review',
         'review_update'           => 'Update review',
         'review_saved'            => 'Your review has been saved.',
-        'review_select'           => 'Please select 1 to 5 stars.',
-        'review_star'             => ':count stars',
+        'review_select'           => 'Please choose an emotion to rate your trip.',
+        'review_score'            => ':count/5',
+        'review_choice'           => ':label, :count/5',
+        'review_emotion'          => ':label · :count/5',
+        'review_toggle_hint'      => 'Choose how you felt. Select the same emotion again to clear your choice.',
         'review_date'             => 'Reviewed at :date',
         'review_pending'          => 'Reviews are available once the operator confirms trip completion.',
         'vehicle_type'            => [

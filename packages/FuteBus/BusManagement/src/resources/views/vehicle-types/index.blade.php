@@ -163,7 +163,7 @@
     </div>
 
     {{-- ADD MODAL--}}
-    <div
+    <div role="dialog" aria-modal="true"
         x-show="showAdd"
         x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0"
@@ -268,7 +268,7 @@
         </div>
     </div>
     {{-- EDIT MODAL --}}
-    <div
+    <div role="dialog" aria-modal="true"
         x-show="showEdit"
         x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0"
@@ -376,7 +376,7 @@
     </div>
 
     {{-- DELETE CONFIRM MODAL                                       --}}
-    <div
+    <div role="dialog" aria-modal="true"
         x-show="showDelete"
         x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0"

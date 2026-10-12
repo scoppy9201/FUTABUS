@@ -70,21 +70,6 @@
     min-height: 0;
     flex: 1 1 auto;
     overflow-y: auto;
-    scrollbar-color: transparent transparent;
-    scrollbar-width: thin;
-}
-.booking-page__vehicle-content:hover {
-    scrollbar-color: #d2d6da transparent;
-}
-.booking-page__vehicle-content::-webkit-scrollbar {
-    width: 6px;
-}
-.booking-page__vehicle-content::-webkit-scrollbar-thumb {
-    border-radius: 999px;
-    background: transparent;
-}
-.booking-page__vehicle-content:hover::-webkit-scrollbar-thumb {
-    background: #d2d6da;
 }
 .booking-page__vehicle-empty {
     display: grid;
