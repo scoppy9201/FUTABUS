@@ -14,7 +14,7 @@ Trạng thái: chờ phê duyệt thay đổi API contract và một migration m
 
 ## API đề xuất, chờ phê duyệt
 
-Giữ endpoint `POST /api/v1/staff/ticket-sales/{sale}/cash`. Giữ auth, CSRF, rate limit, permission `booking.create` và phạm vi nhà xe hiện có.
+Giữ endpoint `POST /api/v1/staff/sales/{sale}/cash-collections`. Giữ auth, CSRF, rate limit, permission `booking.create` và phạm vi nhà xe hiện có.
 
 Request bắt buộc:
 
@@ -29,13 +29,13 @@ Request bắt buộc:
 
 Thành công giữ envelope `data`, bổ sung `tendered_amount` và `change_amount` do Backend tính. Tổng tiền giữ ở `data.amount`, phương thức `cash`, trạng thái `paid` chỉ sau commit. UUID `sale` vẫn là khóa idempotency; request lặp cùng thông tin trả cùng kết quả, thay số tiền khách đưa trên cùng khoản thu đã ghi nhận trả 409.
 
-`GET /api/v1/staff/ticket-sales/{sale}` và trang thanh toán Staff sẽ đọc thêm khoản thu chưa hoàn tất để trả trạng thái cần đối soát với mã tham chiếu. Lỗi nghiệp vụ sau xác nhận nhận tiền trả 409, lỗi xử lý nội bộ trả 503, không trả thành công. Client kiểm tra lại mã khoản thu khi mất kết nối, không yêu cầu thu tiền lần nữa.
+`GET /api/v1/staff/sales/{sale}` và trang thanh toán Staff sẽ đọc thêm khoản thu chưa hoàn tất để trả trạng thái cần đối soát với mã tham chiếu. Lỗi nghiệp vụ sau xác nhận nhận tiền trả 409, lỗi xử lý nội bộ trả 503, không trả thành công. Client kiểm tra lại mã khoản thu khi mất kết nối, không yêu cầu thu tiền lần nữa.
 
 ## Migration đề xuất, chờ phê duyệt
 
 File mới dự kiến: `database/migrations/2026_10_13_000001_create_staff_cash_collections_table.php`.
 
-Bảng mới: `staff_cash_collections`, thuộc Staff/TicketProcessing:
+Bảng mới: `staff_cash_collections`, thuộc FuteBus/StaffTicketProcessing:
 
 | Cột | Mục đích |
 | --- | --- |
@@ -63,17 +63,17 @@ Không sửa migration cũ hoặc bảng Payment hiện tại. Migration mới c
 
 ## File dự kiến chỉnh sửa
 
-- `packages/Staff/TicketProcessing/src/Http/Controllers/Api/CounterSaleController.php`: nhận Form Request và trả kết quả/đối soát.
-- `packages/Staff/TicketProcessing/src/Http/Requests/CashCollectionRequest.php`: mới, validation tiền khách đưa và xác nhận đã nhận.
-- `packages/Staff/TicketProcessing/src/Services/CashSaleService.php`: bổ sung ghi nhận khoản thu, kiểm tra số tiền, idempotency, phát hành nguyên tử và trạng thái đối soát; giữ tái sử dụng issuer hiện có.
-- `packages/Staff/TicketProcessing/src/Services/StaffPaymentPresenter.php`, `Http/Controllers/StaffPaymentController.php`: hiển thị khoản thu thành công hoặc cần đối soát.
-- `packages/Staff/TicketProcessing/src/resources/views/partials/customer-payment.blade.php`: form tiền khách đưa, tiền thừa, checkbox và nút xác nhận; giữ bố cục ba cột.
-- `packages/Staff/TicketProcessing/src/resources/views/partials/customer-success.blade.php`: nhãn Bán vé thành công và chi tiết biên nhận tiền mặt; giữ xem/in vé hiện có.
-- `packages/Staff/TicketProcessing/src/resources/views/partials/cash-review.blade.php`: mới, trạng thái cần đối soát và mã tham chiếu, không hiển thị vé đã phát hành giả.
-- `packages/Staff/TicketProcessing/src/resources/js/payment.js`: tính tiền thừa để hiển thị, khóa nút, gửi request và xử lý kết quả không rõ/đối soát; kết quả Backend là nguồn chính thức.
-- `packages/Staff/TicketProcessing/src/resources/lang/{vi,en}/sale.php`: toàn bộ thông báo/nhãn.
+- `packages/FuteBus/StaffTicketProcessing/src/Http/Controllers/Api/CounterSaleController.php`: nhận Form Request và trả kết quả/đối soát.
+- `packages/FuteBus/StaffTicketProcessing/src/Http/Requests/CashCollectionRequest.php`: mới, validation tiền khách đưa và xác nhận đã nhận.
+- `packages/FuteBus/StaffTicketProcessing/src/Services/CashSaleService.php`: bổ sung ghi nhận khoản thu, kiểm tra số tiền, idempotency, phát hành nguyên tử và trạng thái đối soát; giữ tái sử dụng issuer hiện có.
+- `packages/FuteBus/StaffTicketProcessing/src/Services/StaffPaymentPresenter.php`, `Http/Controllers/StaffPaymentController.php`: hiển thị khoản thu thành công hoặc cần đối soát.
+- `packages/FuteBus/StaffTicketProcessing/src/resources/views/partials/customer-payment.blade.php`: form tiền khách đưa, tiền thừa, checkbox và nút xác nhận; giữ bố cục ba cột.
+- `packages/FuteBus/StaffTicketProcessing/src/resources/views/partials/customer-success.blade.php`: nhãn Bán vé thành công và chi tiết biên nhận tiền mặt; giữ xem/in vé hiện có.
+- `packages/FuteBus/StaffTicketProcessing/src/resources/views/partials/cash-review.blade.php`: mới, trạng thái cần đối soát và mã tham chiếu, không hiển thị vé đã phát hành giả.
+- `packages/FuteBus/StaffTicketProcessing/src/resources/js/payment.js`: tính tiền thừa để hiển thị, khóa nút, gửi request và xử lý kết quả không rõ/đối soát; kết quả Backend là nguồn chính thức.
+- `packages/FuteBus/StaffTicketProcessing/src/resources/lang/{vi,en}/sale.php`: toàn bộ thông báo/nhãn.
 - Migration mới nêu trên; `docs/api/openapi.json`, `docs/api/README.md`: contract API.
-- Test mới `tests/Feature/Staff/TicketProcessing/CashCollectionTest.php`, đúng hai method; cập nhật payload các test tiền mặt cũ để giữ toàn bộ coverage.
+- Test mới `tests/Feature/StaffTicketProcessing/CashCollectionTest.php`, đúng hai method; cập nhật payload các test tiền mặt cũ để giữ toàn bộ coverage.
 
 Không dự kiến sửa `FuteBus/Payment`, Customer, cổng SePay, permission hoặc thêm thư viện/CSS mới. Nếu phân tích khi triển khai cho thấy cần mở rộng phạm vi, báo cáo trước.
 

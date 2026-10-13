@@ -2524,9 +2524,9 @@
         "parameters": []
       }
     },
-    "/api/v1/staff/profile": {
+    "/api/v1/staff/me": {
       "get": {
-        "operationId": "api_v1_staff_profile_show",
+        "operationId": "api_v1_staff_me_show",
         "security": [
           {
             "SessionCookie": []
@@ -2559,7 +2559,7 @@
         "parameters": []
       },
       "put": {
-        "operationId": "api_v1_staff_profile_update",
+        "operationId": "api_v1_staff_me_update",
         "security": [
           {
             "SessionCookie": []
@@ -2592,9 +2592,9 @@
         "parameters": []
       }
     },
-    "/api/v1/staff/profile/avatar": {
+    "/api/v1/staff/me/avatar": {
       "get": {
-        "operationId": "api_v1_staff_profile_avatar",
+        "operationId": "api_v1_staff_me_avatar",
         "security": [
           {
             "SessionCookie": []
@@ -2627,9 +2627,9 @@
         "parameters": []
       }
     },
-    "/api/v1/staff/profile/password": {
+    "/api/v1/staff/me/password": {
       "put": {
-        "operationId": "api_v1_staff_profile_password_update",
+        "operationId": "api_v1_staff_me_password_update",
         "security": [
           {
             "SessionCookie": []
@@ -2662,7 +2662,7 @@
         "parameters": []
       }
     },
-    "/api/v1/staff/ticket-context": {
+    "/api/v1/staff/sale-context": {
       "get": {
         "summary": "Operator identity and ticket capabilities",
         "tags": [
@@ -2705,7 +2705,7 @@
         }
       }
     },
-    "/api/v1/staff/ticket-trips": {
+    "/api/v1/staff/trips": {
       "get": {
         "summary": "Search real trips within the operator company",
         "tags": [
@@ -2821,7 +2821,7 @@
         ]
       }
     },
-    "/api/v1/staff/ticket-sales": {
+    "/api/v1/staff/sales": {
       "post": {
         "summary": "Create an idempotent pending SePay sale for a customer",
         "tags": [
@@ -3013,7 +3013,7 @@
         "responses": {"200": {"description": "Ticket rows in data; current_page, last_page, total, from and to in meta"}, "401": {"description": "Unauthenticated"}, "403": {"description": "Role, permission or company access denied"}, "422": {"description": "Invalid filters"}}
       }
     },
-    "/api/v1/staff/ticket-trips/{trip}/booking": {
+    "/api/v1/staff/trips/{trip}/booking-context": {
       "get": {
         "summary": "Render the staff customer booking form for a company trip",
         "tags": ["Staff ticket processing"],
@@ -3023,7 +3023,7 @@
         "responses": {"200": {"description": "Booking markup in data.html"}, "403": {"description": "Permission denied"}, "404": {"description": "Trip outside company scope"}, "422": {"description": "Invalid booking criteria"}}
       }
     },
-    "/api/v1/staff/ticket-previews": {
+    "/api/v1/staff/previews": {
       "post": {
         "summary": "Render a read-only staff payment draft",
         "tags": ["Staff ticket processing"],
@@ -3032,7 +3032,7 @@
         "responses": {"200": {"description": "Draft in data with payment HTML"}, "403": {"description": "Permission denied"}, "404": {"description": "Trip outside company scope"}, "422": {"description": "Invalid passenger or seat data"}}
       }
     },
-    "/api/v1/staff/ticket-sales/{sale}/cash": {
+    "/api/v1/staff/sales/{sale}/cash-collections": {
       "post": {
         "summary": "Confirm cash received at the staff counter and issue tickets",
         "tags": ["Staff ticket processing"],
@@ -3052,7 +3052,7 @@
         }
       }
     },
-    "/api/v1/staff/ticket-sales/{sale}": {
+    "/api/v1/staff/sales/{sale}": {
       "delete": {
         "summary": "Abandon an unpaid staff draft or pending payment intent",
         "tags": ["Staff ticket processing"],
@@ -3117,7 +3117,7 @@
         ]
       }
     },
-    "/api/v1/staff/ticket-quotes": {
+    "/api/v1/staff/quotes": {
       "post": {
         "summary": "Read canonical fare and boarding time without creating a payment intent",
         "tags": [

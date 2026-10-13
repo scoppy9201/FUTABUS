@@ -60,6 +60,24 @@ class ManualRefundTest extends TestCase
         $this->assertDatabaseCount('ticket_refund_events', 0);
     }
 
+    public function test_staff_uses_employee_portal_and_refund_forms_stay_in_employee_routes(): void
+    {
+        [$refund, , $company] = $this->fixture();
+        $staff = $this->operator($company);
+        $this->actingAs($staff)->get(route('staff.refunds.index'))->assertForbidden();
+        $role = DB::table('roles')->insertGetId(['name' => 'Staff', 'slug' => 'staff']);
+        DB::table('role_user')->insert(['user_id' => $staff->id, 'role_id' => $role]);
+        $this->get(route('refunds.index'))->assertRedirect(route('staff.refunds.index'));
+        $this->get(route('staff.refunds.index'))->assertOk()
+            ->assertSee('href="'.route('staff.dashboard').'"', false)
+            ->assertSee('href="'.route('staff.refunds.show', $refund).'"', false)
+            ->assertDontSee(__('Dashboard::app.owner_portal'));
+        $this->get(route('staff.refunds.show', $refund))->assertOk()
+            ->assertSee('action="'.route('staff.refunds.update', $refund).'"', false);
+        $this->postJson(route('staff.refunds.update', $refund), ['action' => 'claim', 'version' => 0])
+            ->assertOk()->assertJsonPath('status', 'refund_processing');
+    }
+
     public function test_second_staff_and_stale_version_cannot_take_over_or_complete(): void
     {
         [$refund, , $company] = $this->fixture();
