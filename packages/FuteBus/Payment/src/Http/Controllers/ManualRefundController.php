@@ -11,39 +11,42 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ManualRefundController extends Controller
 {
-    public function index(Request $request, ManualRefundService $service): View|RedirectResponse
+    public function index(Request $request, ManualRefundService $service): View|RedirectResponse|StreamedResponse
     {
         if ($request->routeIs('refunds.index') && $request->user()->isStaff()
             && ! $request->user()->isAdmin() && ! $request->user()->isBusCompany()) {
             return redirect()->route('staff.refunds.index', $request->query());
         }
         $filters = $request->validate(['status' => ['nullable', Rule::in(['refund_pending', 'refund_processing', 'refunded', 'refund_failed'])],
-            'search'                            => ['nullable', 'string', 'max:100']]);
+            'search'                            => ['nullable', 'string', 'max:100'],
+            'period'                            => ['nullable', Rule::in(['7', '30', 'all'])],
+            'selected'                          => ['nullable', 'integer', 'min:1'],
+            'export'                            => ['nullable', Rule::in(['csv'])],
+        ]);
         $query = $service->visible($request->user())->where('ticket_refunds.processing_mode', 'manual');
-        $counts = (clone $query)->reorder()->select('ticket_refunds.status')->selectRaw('COUNT(*) as total')
-            ->groupBy('ticket_refunds.status')->pluck('total', 'status');
-        if (! empty($filters['status'])) {
-            $query->where('ticket_refunds.status', $filters['status']);
+        $summary = (clone $query)->reorder()->select('ticket_refunds.status')
+            ->selectRaw('COUNT(*) as total, SUM(ticket_refunds.amount) as amount')
+            ->groupBy('ticket_refunds.status')->get()->keyBy('status');
+        $query = $service->filter($query, $filters);
+        if (($filters['export'] ?? null) === 'csv') {
+            return $service->export($query);
         }
-        if (! empty($filters['search'])) {
-            $query->where(function ($query) use ($filters): void {
-                $query->where('ticket_cancellations.reference', 'like', '%'.$filters['search'].'%')
-                    ->orWhere('tickets.ticket_code', 'like', '%'.$filters['search'].'%')
-                    ->orWhere('bookings.booking_code', 'like', '%'.$filters['search'].'%');
-            });
-        }
+        $refunds = $query->orderByDesc('ticket_refunds.id')->paginate(15)->withQueryString();
+        $selectedRefund = $refunds->getCollection()->firstWhere('id', (int) ($filters['selected'] ?? 0))
+            ?? $refunds->first();
 
         $staffPortal = $request->routeIs('staff.refunds.*');
 
         return view($staffPortal ? 'StaffDashboard::refunds' : 'Payment::refunds.index', [
-            'refunds'      => $query->orderByDesc('ticket_refunds.id')->paginate(15)->withQueryString(),
-            'counts'       => $counts, 'filters' => $filters, 'section' => 'refunds',
-            'refundRoutes' => $staffPortal ? 'staff.refunds' : 'refunds',
+            'refunds'        => $refunds, 'summary' => $summary, 'filters' => $filters, 'section' => 'refunds',
+            'selectedRefund' => $selectedRefund,
+            'events'         => $selectedRefund ? $service->events($selectedRefund->id) : collect(),
+            'refundRoutes'   => $staffPortal ? 'staff.refunds' : 'refunds',
         ]);
     }
 
@@ -51,8 +54,7 @@ class ManualRefundController extends Controller
     {
         $record = $service->visible($request->user())->where('ticket_refunds.id', $refund)->first();
         abort_if($record === null, 404);
-        $events = DB::table('ticket_refund_events')->join('users', 'users.id', '=', 'ticket_refund_events.actor_id')
-            ->where('refund_id', $refund)->orderBy('version')->select('ticket_refund_events.*', 'users.name')->get();
+        $events = $service->events($refund);
 
         return response()->view('Payment::refunds.detail', ['refund' => $record, 'events' => $events,
             'refundRoutes'                                           => $request->routeIs('staff.refunds.*') ? 'staff.refunds' : 'refunds'])

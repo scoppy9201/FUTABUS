@@ -1,6 +1,21 @@
 <?php
 
 return [
+    'request'             => 'Mã yêu cầu',
+    'export'              => 'Xuất báo cáo',
+    'total'               => 'Tổng',
+    'period'              => 'Thời gian gửi',
+    'period_all'          => 'Tất cả thời gian',
+    'period_7'            => '7 ngày qua',
+    'period_30'           => '30 ngày qua',
+    'choose'              => 'Chọn yêu cầu để xem hồ sơ đối soát và xử lý hoàn tiền.',
+    'reason'              => 'Lý do',
+    'method'              => 'Hình thức thanh toán',
+    'created'             => 'Tạo yêu cầu',
+    'no_events'           => 'Chưa có cập nhật xử lý.',
+    'records'             => 'Hiển thị :from–:to trên :total yêu cầu',
+    'summary_scope'       => 'Tổng quan toàn bộ yêu cầu hoàn tiền',
+    'methods'             => ['bank_transfer' => 'Chuyển khoản', 'cash' => 'Tiền mặt', 'sepay' => 'SePay'],
     'hour'                => 'Giờ', 'minute' => 'Phút',
     'title'               => 'Quản lý hoàn tiền',
     'intro'               => 'Đối soát giao dịch gốc và ghi nhận hoàn tiền do nhân viên thực hiện.',

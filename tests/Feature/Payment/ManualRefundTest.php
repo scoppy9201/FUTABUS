@@ -154,6 +154,45 @@ class ManualRefundTest extends TestCase
         $this->assertDatabaseCount('ticket_refund_events', 0);
     }
 
+    public function test_workspace_filters_requests_but_keeps_scoped_overview_totals(): void
+    {
+        [$recent, , $company] = $this->fixture();
+        [$old] = $this->fixture(2, $company);
+        DB::table('ticket_refunds')->where('id', $old)->update([
+            'status' => 'refund_failed', 'created_at' => now()->subDays(8),
+        ]);
+        $this->actingAs($this->operator($company));
+        $this->get(route('refunds.index', ['period' => '7']))->assertOk()
+            ->assertSee('TICKET-1')->assertDontSee('TICKET-2')
+            ->assertViewHas('summary', fn ($summary) => (int) $summary['refund_pending']->amount === 315000
+                && (int) $summary['refund_failed']->total === 1)
+            ->assertViewHas('selectedRefund', fn ($record) => $record->id === $recent);
+        $this->get(route('refunds.index', ['status' => 'refund_failed', 'search' => 'BOOK-2']))
+            ->assertOk()->assertSee('TICKET-2')->assertDontSee('TICKET-1');
+        $this->getJson(route('refunds.index', ['period' => '365']))->assertUnprocessable();
+    }
+
+    public function test_report_export_uses_company_and_filters_and_escapes_spreadsheet_formulas(): void
+    {
+        [$refund, , $company] = $this->fixture();
+        $this->fixture(2, $company);
+        $other = DB::table('bus_companies')->insertGetId(['code' => 'OTHER', 'name' => 'Other']);
+        $this->fixture(3, $other);
+        $customer = DB::table('ticket_cancellations')->where('id',
+            DB::table('ticket_refunds')->where('id', $refund)->value('cancellation_id'))->value('user_id');
+        DB::table('users')->where('id', $customer)->update(['name' => '=HYPERLINK("unsafe")']);
+        $this->actingAs($this->operator($company));
+        $response = $this->get(route('refunds.index', ['export' => 'csv', 'search' => 'TICKET-1']));
+        $response->assertOk()->assertDownload('refunds-'.now()->format('Y-m-d').'.csv');
+        $csv = $response->streamedContent();
+        $this->assertStringContainsString('TICKET-1', $csv);
+        $this->assertStringContainsString("'=HYPERLINK", $csv);
+        $this->assertStringNotContainsString('TICKET-2', $csv);
+        $this->assertStringNotContainsString('TICKET-3', $csv);
+        $this->actingAs($this->createTestUser())->get(route('refunds.index', ['export' => 'csv']))->assertForbidden();
+        Http::assertNothingSent();
+    }
+
     private function settlement(): array
     {
         return ['action'     => 'complete', 'version' => 1, 'amount' => 315000,
