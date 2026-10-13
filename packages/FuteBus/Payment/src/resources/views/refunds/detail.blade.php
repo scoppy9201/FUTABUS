@@ -25,14 +25,14 @@
     <div data-refund-error role="alert" class="mt-4 text-sm font-semibold text-red-700"></div>
     @if(auth()->user()->hasPermissionTo('payment.refund') && $refund->processing_mode === 'manual')
         @if(in_array($refund->status, ['refund_pending', 'refund_failed'], true))
-            <form data-refund-form action="{{ route('refunds.update', $refund->id) }}" method="post" class="mt-5">
+            <form data-refund-form action="{{ route($refundRoutes.'.update', $refund->id) }}" method="post" class="mt-5">
                 @csrf
                 <input type="hidden" name="version" value="{{ $refund->version }}"><input type="hidden" name="action" value="claim">
                 <button class="rounded-xl bg-futa-orange px-5 py-3 text-sm font-bold text-white">{{ __('Payment::refunds.claim') }}</button>
             </form>
         @elseif($refund->status === 'refund_processing' && (int) $refund->assigned_to === auth()->id())
             <p class="mt-5 rounded-xl bg-amber-50 p-4 text-sm leading-6 text-amber-800">{{ __('Payment::refunds.warning') }}</p>
-            <form data-refund-form action="{{ route('refunds.update', $refund->id) }}" method="post" class="mt-4 grid gap-4 sm:grid-cols-2">
+            <form data-refund-form action="{{ route($refundRoutes.'.update', $refund->id) }}" method="post" class="mt-4 grid gap-4 sm:grid-cols-2">
                 @csrf
                 <input type="hidden" name="version" value="{{ $refund->version }}"><input type="hidden" name="action" value="complete">
                 <label class="text-sm font-semibold">{{ __('Payment::refunds.amount') }}
@@ -64,7 +64,7 @@
                 </label>
                 <button class="rounded-xl bg-futa-orange px-5 py-3 text-sm font-bold text-white sm:col-span-2">{{ __('Payment::refunds.complete') }}</button>
             </form>
-            <form data-refund-form action="{{ route('refunds.update', $refund->id) }}" method="post" class="mt-5 border-t border-gray-200 pt-4">
+            <form data-refund-form action="{{ route($refundRoutes.'.update', $refund->id) }}" method="post" class="mt-5 border-t border-gray-200 pt-4">
                 @csrf
                 <input type="hidden" name="version" value="{{ $refund->version }}"><input type="hidden" name="action" value="fail">
                 <label class="text-sm font-semibold">{{ __('Payment::refunds.note') }}

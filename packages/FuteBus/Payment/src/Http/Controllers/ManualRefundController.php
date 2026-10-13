@@ -7,6 +7,7 @@ namespace FuteBus\Payment\Http\Controllers;
 use FuteBus\Payment\Services\ManualRefundService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
@@ -15,8 +16,12 @@ use Illuminate\Validation\Rule;
 
 class ManualRefundController extends Controller
 {
-    public function index(Request $request, ManualRefundService $service): View
+    public function index(Request $request, ManualRefundService $service): View|RedirectResponse
     {
+        if ($request->routeIs('refunds.index') && $request->user()->isStaff()
+            && ! $request->user()->isAdmin() && ! $request->user()->isBusCompany()) {
+            return redirect()->route('staff.refunds.index', $request->query());
+        }
         $filters = $request->validate(['status' => ['nullable', Rule::in(['refund_pending', 'refund_processing', 'refunded', 'refund_failed'])],
             'search'                            => ['nullable', 'string', 'max:100']]);
         $query = $service->visible($request->user())->where('ticket_refunds.processing_mode', 'manual');
@@ -33,8 +38,13 @@ class ManualRefundController extends Controller
             });
         }
 
-        return view('Payment::refunds.index', ['refunds' => $query->orderByDesc('ticket_refunds.id')->paginate(15)->withQueryString(),
-            'counts'                                     => $counts, 'filters' => $filters, 'section' => 'refunds']);
+        $staffPortal = $request->routeIs('staff.refunds.*');
+
+        return view($staffPortal ? 'StaffDashboard::refunds' : 'Payment::refunds.index', [
+            'refunds'      => $query->orderByDesc('ticket_refunds.id')->paginate(15)->withQueryString(),
+            'counts'       => $counts, 'filters' => $filters, 'section' => 'refunds',
+            'refundRoutes' => $staffPortal ? 'staff.refunds' : 'refunds',
+        ]);
     }
 
     public function show(Request $request, ManualRefundService $service, int $refund): Response
@@ -44,7 +54,8 @@ class ManualRefundController extends Controller
         $events = DB::table('ticket_refund_events')->join('users', 'users.id', '=', 'ticket_refund_events.actor_id')
             ->where('refund_id', $refund)->orderBy('version')->select('ticket_refund_events.*', 'users.name')->get();
 
-        return response()->view('Payment::refunds.detail', ['refund' => $record, 'events' => $events])
+        return response()->view('Payment::refunds.detail', ['refund' => $record, 'events' => $events,
+            'refundRoutes'                                           => $request->routeIs('staff.refunds.*') ? 'staff.refunds' : 'refunds'])
             ->header('Cache-Control', 'private, no-store');
     }
 
