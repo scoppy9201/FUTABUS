@@ -4,7 +4,13 @@
 @section('page_title', __('Reporting::app.title'))
 
 @section('content')
-    <div class="space-y-6" data-reporting-chart data-labels="{{ json_encode($report['labels']) }}" data-values="{{ json_encode($report['series']) }}" data-counts="{{ json_encode($report['rows']->pluck('count')->all()) }}" data-refunds="{{ json_encode($report['refund_series']) }}" data-status="{{ json_encode($report['status']) }}" data-chart-label="{{ __('Reporting::app.chart_value') }}">
+    <div class="space-y-6" data-reporting-chart
+        data-labels="{{ json_encode($report['labels']) }}"
+        data-values="{{ json_encode($report['series']) }}"
+        data-counts="{{ json_encode($report['rows']->pluck('count')->all()) }}"
+        data-refunds="{{ json_encode($report['refund_series']) }}"
+        data-status="{{ json_encode($report['status']) }}"
+        data-chart-label="{{ __('Reporting::app.chart_value') }}">
         <div class="flex flex-wrap items-end justify-between gap-4">
             <div>
                 <p class="text-sm font-bold uppercase tracking-[0.16em] text-futa-orange">{{ $company?->name ?? 'FUTA Bus Lines' }}</p>
@@ -39,9 +45,24 @@
         </form>
 
         <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="{{ __('Reporting::app.title') }}">
-            <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-sm font-semibold text-slate-500">{{ __('Reporting::app.total_count') }}</p><p class="mt-2 text-3xl font-extrabold text-slate-900">{{ number_format($report['totals']['count']) }}</p></article>
-            <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-sm font-semibold text-slate-500">{{ $filters['type'] === 'tickets' ? __('Reporting::app.tickets') : __('Reporting::app.total_amount') }}</p><p class="mt-2 text-3xl font-extrabold text-slate-900">{{ $filters['type'] === 'tickets' ? number_format($report['totals']['count']) : number_format($report['totals']['amount']).' ₫' }}</p></article>
-            @if($filters['type'] === 'payments')<article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-sm font-semibold text-slate-500">{{ __('Reporting::app.refund_amount') }}</p><p class="mt-2 text-3xl font-extrabold text-rose-700">{{ number_format($report['totals']['refunded']) }} <span class="text-base">₫</span></p></article>@endif
+            <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p class="text-sm font-semibold text-slate-500">{{ __('Reporting::app.total_count') }}</p>
+                <p class="mt-2 text-3xl font-extrabold text-slate-900">{{ number_format($report['totals']['count']) }}</p>
+            </article>
+            <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p class="text-sm font-semibold text-slate-500">{{ $filters['type'] === 'tickets' ? __('Reporting::app.tickets') : __('Reporting::app.total_amount') }}</p>
+                <p class="mt-2 text-3xl font-extrabold text-slate-900">
+                    {{ $filters['type'] === 'tickets' ? number_format($report['totals']['count']) : number_format($report['totals']['amount']).' ₫' }}
+                </p>
+            </article>
+            @if($filters['type'] === 'payments')
+                <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <p class="text-sm font-semibold text-slate-500">{{ __('Reporting::app.refund_amount') }}</p>
+                    <p class="mt-2 text-3xl font-extrabold text-rose-700">
+                        {{ number_format($report['totals']['refunded']) }} <span class="text-base">₫</span>
+                    </p>
+                </article>
+            @endif
         </section>
 
         <section class="grid min-w-0 gap-4 lg:grid-cols-2" aria-label="{{ __('Reporting::app.chart_title') }}">
@@ -68,7 +89,13 @@
                 @if (empty($report['status']))
                     <p class="py-12 text-center text-sm text-slate-500">{{ __('Reporting::app.empty') }}</p>
                 @else
-                    <div class="mt-4 h-56 w-full"><canvas class="block h-full w-full" data-report-donut data-total-label="{{ $filters['type'] === 'revenue' ? __('Reporting::app.donut_total_revenue') : __('Reporting::app.donut_total_count') }}" data-total-unit="{{ __('Reporting::app.million') }}" data-report-type="{{ $filters['type'] }}" role="img" aria-label="{{ __('Reporting::app.donut_chart') }}"></canvas></div>
+                    <div class="mt-4 h-56 w-full">
+                        <canvas class="block h-full w-full" data-report-donut
+                            data-total-label="{{ $filters['type'] === 'revenue' ? __('Reporting::app.donut_total_revenue') : __('Reporting::app.donut_total_count') }}"
+                            data-total-unit="{{ __('Reporting::app.million') }}"
+                            data-report-type="{{ $filters['type'] }}" role="img"
+                            aria-label="{{ __('Reporting::app.donut_chart') }}"></canvas>
+                    </div>
                     <ul class="mt-4 {{ $filters['type'] === 'revenue' ? 'mx-auto flex max-w-xl flex-col gap-3' : 'flex flex-wrap justify-center gap-x-4 gap-y-2' }} text-xs text-slate-600">
                         @php
                             $donutTotal = array_sum($report['status']);
@@ -96,8 +123,37 @@
         <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" aria-labelledby="report-table-title">
             <h2 id="report-table-title" class="px-5 py-4 text-lg font-bold text-slate-900">{{ __('Reporting::app.table_title') }}</h2>
             <div class="overflow-x-auto"><table class="w-full min-w-[560px] text-left text-sm">
-                <thead class="border-y border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500"><tr><th class="px-5 py-3">{{ __('Reporting::app.date') }}</th><th class="px-5 py-3">{{ __('Reporting::app.count') }}</th>@if($filters['type'] !== 'tickets')<th class="px-5 py-3">{{ __('Reporting::app.amount') }}</th>@endif @if($filters['type'] === 'payments')<th class="px-5 py-3">{{ __('Reporting::app.refund_amount') }}</th>@endif</tr></thead>
-                <tbody class="divide-y divide-slate-100">@forelse($report['rows'] as $row)<tr><td class="px-5 py-3 font-medium text-slate-800">{{ $row->period }}</td><td class="px-5 py-3 text-slate-600">{{ number_format($row->count) }}</td>@if($filters['type'] !== 'tickets')<td class="px-5 py-3 font-semibold text-slate-800">{{ number_format($row->amount) }} ₫</td>@endif @if($filters['type'] === 'payments')<td class="px-5 py-3 font-semibold text-rose-700">{{ number_format($row->refund_amount) }} ₫</td>@endif</tr>@empty<tr><td colspan="{{ $filters['type'] === 'tickets' ? 2 : ($filters['type'] === 'payments' ? 4 : 3) }}" class="px-5 py-10 text-center text-slate-500">{{ __('Reporting::app.empty') }}</td></tr>@endforelse</tbody>
+                <thead class="border-y border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                    <tr>
+                        <th class="px-5 py-3">{{ __('Reporting::app.date') }}</th>
+                        <th class="px-5 py-3">{{ __('Reporting::app.count') }}</th>
+                        @if($filters['type'] !== 'tickets')
+                            <th class="px-5 py-3">{{ __('Reporting::app.amount') }}</th>
+                        @endif
+                        @if($filters['type'] === 'payments')
+                            <th class="px-5 py-3">{{ __('Reporting::app.refund_amount') }}</th>
+                        @endif
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse($report['rows'] as $row)
+                        <tr>
+                            <td class="px-5 py-3 font-medium text-slate-800">{{ $row->period }}</td>
+                            <td class="px-5 py-3 text-slate-600">{{ number_format($row->count) }}</td>
+                            @if($filters['type'] !== 'tickets')
+                                <td class="px-5 py-3 font-semibold text-slate-800">{{ number_format($row->amount) }} ₫</td>
+                            @endif
+                            @if($filters['type'] === 'payments')
+                                <td class="px-5 py-3 font-semibold text-rose-700">{{ number_format($row->refund_amount) }} ₫</td>
+                            @endif
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="{{ $filters['type'] === 'tickets' ? 2 : ($filters['type'] === 'payments' ? 4 : 3) }}"
+                                class="px-5 py-10 text-center text-slate-500">{{ __('Reporting::app.empty') }}</td>
+                        </tr>
+                    @endforelse
+                </tbody>
             </table></div>
         </section>
     </div>

@@ -102,7 +102,7 @@ class ReportService
         $segments = $routes->take(3)->mapWithKeys(fn (stdClass $route): array => [
             $route->origin_city.' → '.$route->destination_city => (float) $route->revenue_amount,
         ]);
-        $otherRevenue = (float) $routes->skip(3)->sum('revenue_amount');
+        $otherRevenue = (float) $routes->slice(3)->sum('revenue_amount');
 
         if ($otherRevenue > 0) {
             $segments[__('Reporting::app.other_routes')] = $otherRevenue;

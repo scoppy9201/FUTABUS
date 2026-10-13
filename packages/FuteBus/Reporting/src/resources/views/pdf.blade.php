@@ -54,7 +54,12 @@
 
     <table class="metrics"><tr>
         <td><p class="metric-label">{{ __('Reporting::app.total_count') }}</p><p class="metric-value">{{ number_format($report['totals']['count']) }}</p></td>
-        <td><p class="metric-label">{{ $filters['type'] === 'tickets' ? __('Reporting::app.tickets') : __('Reporting::app.total_amount') }}</p><p class="metric-value">{{ $filters['type'] === 'tickets' ? number_format($report['totals']['count']) : number_format($report['totals']['amount']).' VND' }}</p></td>
+        <td>
+            <p class="metric-label">{{ $filters['type'] === 'tickets' ? __('Reporting::app.tickets') : __('Reporting::app.total_amount') }}</p>
+            <p class="metric-value">
+                {{ $filters['type'] === 'tickets' ? number_format($report['totals']['count']) : number_format($report['totals']['amount']).' VND' }}
+            </p>
+        </td>
         @if($filters['type'] === 'payments')<td><p class="metric-label">{{ __('Reporting::app.refund_amount') }}</p><p class="metric-value">{{ number_format($report['totals']['refunded']) }} VND</p></td>@endif
     </tr></table>
 
