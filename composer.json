@@ -51,6 +51,8 @@
     },
     "autoload": {
         "psr-4": {
+            "Staff\\Dashboard\\": "packages/Staff/Dashboard/src/",
+            "Staff\\TicketProcessing\\": "packages/Staff/TicketProcessing/src/",
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/",

@@ -1,0 +1,1 @@
+<div id="futa-notifications" class="futa-notifications top-auto! bottom-6! [&_.futa-notification\_\_title]:hidden! [&_.futa-notification\_\_message]:mt-0!" aria-label="{{ __('StaffDashboard::staff.notifications') }}"></div>
