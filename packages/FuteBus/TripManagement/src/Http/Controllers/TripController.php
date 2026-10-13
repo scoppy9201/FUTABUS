@@ -38,7 +38,7 @@ class TripController extends Controller
                 'routes.code as route_code', 'buses.license_plate', 'buses.capacity')
             ->selectRaw("(select count(*) from bookings where bookings.trip_id = trips.id
                           and bookings.status <> 'cancelled') as ticket_count")
-            ->orderByRaw('trips.departure_time < now()')   // chuyến sắp tới lên trước
+            ->orderByRaw('CASE WHEN trips.departure_time < ? THEN 1 ELSE 0 END', [now()->format('Y-m-d H:i:s')]) // chuyến sắp tới lên trước
             ->orderBy('trips.departure_time');
 
         if ($search !== '') {
@@ -54,8 +54,22 @@ class TripController extends Controller
             $query->whereDate('trips.departure_time', $date);
         }
 
+        $trips = $query->paginate(10)->withQueryString();
+        $tripIds = $trips->getCollection()->pluck('id')->map(static fn ($id): int => (int) $id)->all();
+        $occupiedSeats = $this->occupiedSeats($tripIds);
+        $trips->getCollection()->transform(function ($trip) use ($occupiedSeats) {
+            if ($trip->bus_id !== null && $trip->capacity !== null) {
+                $remaining = max(0, (int) $trip->capacity - count($occupiedSeats[(int) $trip->id] ?? []));
+                $trip->available_seats = $trip->available_seats === null
+                    ? $remaining
+                    : min((int) $trip->available_seats, $remaining);
+            }
+
+            return $trip;
+        });
+
         return view('TripManagement::trips.index', [
-            'trips'   => $query->paginate(10)->withQueryString(),
+            'trips'   => $trips,
             'search'  => $search,
             'status'  => $status,
             'date'    => $date,
@@ -260,6 +274,45 @@ class TripController extends Controller
     private function ticketCount(int $tripId): int
     {
         return DB::table('bookings')->where('trip_id', $tripId)->where('status', '<>', 'cancelled')->count();
+    }
+
+    private function occupiedSeats(array $tripIds): array
+    {
+        if ($tripIds === []) {
+            return [];
+        }
+
+        $occupied = [];
+        DB::table('booked_seats')
+            ->join('bookings', 'bookings.id', '=', 'booked_seats.booking_id')
+            ->whereIn('bookings.status', ['pending', 'confirmed', 'completed'])
+            ->whereIn('booked_seats.trip_id', $tripIds)
+            ->get(['booked_seats.trip_id', 'booked_seats.seat_layout_id'])
+            ->each(function ($seat) use (&$occupied): void {
+                $occupied[(int) $seat->trip_id][(int) $seat->seat_layout_id] = true;
+            });
+
+        DB::table('sepay_payment_intents')
+            ->where('status', 'pending')
+            ->where('expires_at', '>', now())
+            ->where(fn ($query) => $query->whereIn('trip_id', $tripIds)->orWhereIn('secondary_trip_id', $tripIds))
+            ->get(['trip_id', 'seat_ids', 'secondary_trip_id', 'secondary_seat_ids'])
+            ->each(function ($intent) use (&$occupied, $tripIds): void {
+                foreach ([
+                    [$intent->trip_id, $intent->seat_ids],
+                    [$intent->secondary_trip_id, $intent->secondary_seat_ids],
+                ] as [$tripId, $seatIds]) {
+                    if ($tripId === null || ! in_array((int) $tripId, $tripIds, true)) {
+                        continue;
+                    }
+
+                    foreach (json_decode((string) $seatIds, true) ?: [] as $seatId) {
+                        $occupied[(int) $tripId][(int) $seatId] = true;
+                    }
+                }
+            });
+
+        return $occupied;
     }
 
     private function busConflict(int $busId, Carbon $dep, Carbon $arr, ?int $ignoreId = null): bool

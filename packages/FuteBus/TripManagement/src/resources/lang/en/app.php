@@ -1,9 +1,11 @@
 <?php
 
 return [
-    'col_stt'     => 'No.',
-    'col_status'  => 'Status',
-    'col_actions' => 'Actions',
+    'sch_hint_all_days' => 'If you select no days, the schedule applies every day of the week.',
+    'sch_err_price'     => 'Ticket price must be greater than ₫1,000 and less than ₫100,000,000.',
+    'col_stt'           => 'No.',
+    'col_status'        => 'Status',
+    'col_actions'       => 'Actions',
 
     'status_active'   => 'Active',
     'status_inactive' => 'Inactive',
