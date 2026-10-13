@@ -97,6 +97,8 @@
                         ['key' => 'trips', 'icon' => 'map-pin', 'route' => route('trip-management.trips.index')],
                         ['key' => 'routes', 'icon' => 'calendar-days', 'route' => route('trip-management.schedules.index')],
                         ['key' => 'staff_accounts', 'icon' => 'users', 'route' => route('staff-accounts.index')],
+                        ['key' => 'refunds', 'icon' => 'receipt-refund', 'route' => route('refunds.index'),
+                            'permission' => 'payment.view', 'label' => __('Payment::refunds.title')],
                         ['key' => 'access_management', 'icon' => 'key', 'route' => route('access-management.index')],
                         ['key' => 'reports', 'icon' => 'chart-bar',     'route' => route('dashboard.section', 'reports')],
                     ];
@@ -104,6 +106,7 @@
 
                 <nav class="space-y-1">
                     @foreach($navItems as $item)
+                        @continue(isset($item['permission']) && ! auth()->user()->hasPermissionTo($item['permission']))
                         @php
                             $active = $item['key'] === ($section ?? 'overview')
                                 || ($item['key'] === 'buses' && $isBusSection)
@@ -177,7 +180,7 @@
                                     'text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange' => !$active,
                                 ])>
                                     <x-dynamic-component :component="'heroicon-o-'.$item['icon']" class="w-5 h-5" />
-                                    <span>{{ __('Dashboard::app.'.$item['key']) }}</span>
+                                    <span>{{ $item['label'] ?? __('Dashboard::app.'.$item['key']) }}</span>
                                 </a>
                             @endif
 

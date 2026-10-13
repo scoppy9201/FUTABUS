@@ -198,13 +198,16 @@
                                                         text-gray-900 hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-futa-orange">
                                                     {{ __('Profile::tickets.view_details') }}
                                                 </a>
-                                                @if($booking->can_contact_for_change)
-                                                    <a href="tel:19006067" data-history-sensitive
-                                                        data-departure="{{ \Illuminate\Support\Carbon::parse($booking->departure_time)->timestamp }}"
+                                                @if($booking->can_cancel || $booking->cancellation_id)
+                                                    <a href="{{ route('cancellation.show', $booking->id) }}" data-ticket-cancel data-no-loader
                                                         class="block whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-medium
                                                             text-gray-900 hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-futa-orange">
-                                                        {{ __('Profile::tickets.cancel_ticket') }}
+                                                        {{ $booking->cancellation_id ? __('Cancellation::cancellation.refund') : __('Profile::tickets.cancel_ticket') }}
                                                     </a>
+                                                @else
+                                                    <button type="button" disabled class="block w-full px-3 py-2.5 text-left text-sm text-slate-400">{{ __('Profile::tickets.cancel_ticket') }}</button>
+                                                @endif
+                                                @if($booking->can_contact_for_change)
                                                     <a href="tel:19006067" data-history-sensitive
                                                         data-departure="{{ \Illuminate\Support\Carbon::parse($booking->departure_time)->timestamp }}"
                                                         class="block whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-medium
@@ -212,11 +215,6 @@
                                                         {{ __('Profile::tickets.change_ticket') }}
                                                     </a>
                                                 @else
-                                                    <button type="button" disabled title="{{ __('Profile::tickets.change_unavailable') }}"
-                                                        class="block w-full cursor-not-allowed whitespace-nowrap rounded-lg
-                                                            px-3 py-2.5 text-left text-sm text-slate-400">
-                                                        {{ __('Profile::tickets.cancel_ticket') }}
-                                                    </button>
                                                     <button type="button" disabled title="{{ __('Profile::tickets.change_unavailable') }}"
                                                         class="block w-full cursor-not-allowed whitespace-nowrap rounded-lg
                                                             px-3 py-2.5 text-left text-sm text-slate-400">
@@ -257,6 +255,11 @@
         </dialog>
 
         @include('core::partials.home.footer')
+        <dialog data-cancellation-dialog aria-label="{{ __('Cancellation::cancellation.title') }}"
+            data-error="{{ __('Cancellation::cancellation.load_error') }}"
+            class="m-auto w-[min(64rem,calc(100vw-1.5rem))] max-h-[calc(100dvh-1.5rem)] overflow-y-auto rounded-2xl border border-gray-200 bg-white p-0 shadow-2xl backdrop:bg-black/65">
+            <div data-cancellation-content></div>
+        </dialog>
     </div>
     @vite('packages/FuteBus/Profile/src/resources/js/app.js')
 @endsection
