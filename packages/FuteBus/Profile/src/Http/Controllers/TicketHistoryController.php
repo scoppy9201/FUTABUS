@@ -16,6 +16,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Carbon;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class TicketHistoryController extends Controller
@@ -30,6 +31,10 @@ class TicketHistoryController extends Controller
         $bookings->getCollection()->each(function (object $booking) use ($actions, $history): void {
             $booking->can_contact_for_change = $actions->canContactForChange($booking);
             $booking->journey_stage = $history->stageForBooking($booking);
+            $booking->can_cancel = $booking->status === 'confirmed' && $booking->trip_status === 'scheduled'
+                && $booking->payment_status === 'completed'
+                && Carbon::parse($booking->departure_time)->gte(now()->addHours(4))
+                && ! str_starts_with($booking->booking_code, 'DEMOHIST');
         });
 
         return view('Profile::tickets', [

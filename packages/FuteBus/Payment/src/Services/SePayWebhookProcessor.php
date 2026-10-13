@@ -20,6 +20,7 @@ class SePayWebhookProcessor
             $code = $this->paymentCode($event);
             $inserted = DB::table('sepay_transactions')->insertOrIgnore([
                 'sepay_id'       => $transactionId,
+                'environment'    => config('services.sepay.environment', 'live'),
                 'code'           => $code,
                 'account_number' => $event['accountNumber'] ?? null,
                 'amount'         => $event['transferAmount'],

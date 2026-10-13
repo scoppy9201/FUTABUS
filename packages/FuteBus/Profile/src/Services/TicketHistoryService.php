@@ -46,11 +46,7 @@ class TicketHistoryService
             $status = $filters['status'];
 
             if ($status === 'payment:unpaid') {
-                $query->whereNotExists(function (Builder $payments): void {
-                    $payments->selectRaw('1')
-                        ->from('payments')
-                        ->whereColumn('payments.booking_id', 'bookings.id');
-                });
+                $query->where($this->latestPaymentStatus(), '=', null);
             } elseif (str_starts_with($status, 'payment:')) {
                 $query->where($this->latestPaymentStatus(), '=', substr($status, 8));
             } else {
@@ -116,7 +112,7 @@ class TicketHistoryService
             return null;
         }
 
-        $payment = DB::table('payments')->where('booking_id', $bookingId)
+        $payment = DB::table('payments')->where('id', $booking->payment_id)
             ->orderByDesc('id')->first(['status', 'method', 'paid_at', 'created_at']);
         $tickets = DB::table('tickets')->where('booking_id', $bookingId)
             ->orderBy('id')->get(['ticket_code', 'seat_code', 'status']);
@@ -171,6 +167,9 @@ class TicketHistoryService
                 'routes.destination_city',
             ])
             ->selectSub($this->latestPaymentStatus(), 'payment_status')
+            ->selectSub($this->latestPaymentStatus()->select('id'), 'payment_id')
+            ->selectSub(DB::table('ticket_cancellations')->join('tickets', 'tickets.id', '=', 'ticket_cancellations.ticket_id')
+                ->select('ticket_cancellations.id')->whereColumn('tickets.booking_id', 'bookings.id')->limit(1), 'cancellation_id')
             ->selectSub(
                 DB::table('booking_reviews')->select('id')->whereColumn('booking_id', 'bookings.id')->limit(1),
                 'review_id'
@@ -181,7 +180,16 @@ class TicketHistoryService
     {
         return DB::table('payments')
             ->select('status')
-            ->whereColumn('payments.booking_id', 'bookings.id')
+            ->where(function (Builder $query): void {
+                $query->whereColumn('payments.booking_id', 'bookings.id')
+                    ->orWhereExists(function (Builder $intents): void {
+                        $intents->selectRaw('1')->from('sepay_payment_intents')
+                            ->whereColumn('sepay_payment_intents.code', 'payments.payment_code')
+                            ->whereColumn('sepay_payment_intents.booking_id', 'payments.booking_id')
+                            ->whereColumn('sepay_payment_intents.secondary_booking_id', 'bookings.id')
+                            ->where('sepay_payment_intents.status', 'paid');
+                    });
+            })
             ->orderByDesc('payments.id')
             ->limit(1);
     }

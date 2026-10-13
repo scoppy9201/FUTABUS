@@ -500,7 +500,7 @@
 
         <div x-show="recentSearches.length > 0" x-cloak class="mt-5">
             <p class="mb-3 ml-4 text-sm font-bold text-gray-900">{{ __('core::app.home.hero.recent_searches') }}</p>
-            <div class="hero-location-results flex gap-3 overflow-x-auto pb-1 sm:gap-5">
+            <div class="flex gap-3 overflow-x-auto pb-1 sm:gap-5">
                 <template x-for="(search, index) in recentSearches" :key="index">
                     <button
                         type="button"
