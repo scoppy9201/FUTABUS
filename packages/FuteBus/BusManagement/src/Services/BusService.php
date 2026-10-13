@@ -13,6 +13,7 @@ use Illuminate\Validation\ValidationException;
 class BusService
 {
     public const COLORS = ['white', 'black', 'silver', 'gray', 'red', 'blue', 'green', 'yellow', 'orange', 'other'];
+
     /**
      * Regex biển số hợp lệ:
      *  Biển 5 số mới: 51B-123.45

@@ -62,7 +62,7 @@ class VehicleDocumentController extends Controller
                 $q->whereNull('vehicle_documents.expiry_date')->orWhere('vehicle_documents.expiry_date', '>', $soon);
             }),
             'no_expiry' => $query->whereNull('vehicle_documents.expiry_date'),
-            default    => null,
+            default     => null,
         };
 
         $types = DB::table('document_types')->where('status', 'active')->orderBy('name')->get();
@@ -104,7 +104,7 @@ class VehicleDocumentController extends Controller
         $fileName = Str::replace(['"', "\r", "\n"], '', basename($doc->file_name ?: $doc->file_path));
 
         return response()->file(Storage::disk('local')->path($doc->file_path), [
-            'Content-Disposition' => 'inline; filename="'.$fileName.'"',
+            'Content-Disposition'    => 'inline; filename="'.$fileName.'"',
             'X-Content-Type-Options' => 'nosniff',
         ]);
     }

@@ -22,13 +22,13 @@ class BusController extends Controller
         $status = (string) $request->input('status', '');
 
         return view('BusManagement::buses.index', [
-            'buses'        => $buses->paginate($search, $typeId, $status),
-            'search'       => $search,
-            'typeIdFilter' => $typeId,
-            'statusFilter' => $status,
-            'vehicleTypes' => DB::table('vehicle_types')->where('status', 'active')->orderBy('name')->get(),
+            'buses'         => $buses->paginate($search, $typeId, $status),
+            'search'        => $search,
+            'typeIdFilter'  => $typeId,
+            'statusFilter'  => $status,
+            'vehicleTypes'  => DB::table('vehicle_types')->where('status', 'active')->orderBy('name')->get(),
             'vehicleColors' => BusService::COLORS,
-            'company'      => DB::table('bus_companies')->where('code', 'FUTA')->first(),
+            'company'       => DB::table('bus_companies')->where('code', 'FUTA')->first(),
         ]);
     }
 

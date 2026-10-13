@@ -75,8 +75,8 @@ class VehicleTypeService
             throw ValidationException::withMessages([
                 'default_capacity' => __('BusManagement::app.vt_err_capacity_range', [
                     'class' => __('BusManagement::app.vt_class_'.$vehicleClass),
-                    'min' => $range['min'], 'max' => $range['max'],
-                    'unit' => __('BusManagement::app.vt_unit_'.$vehicleClass),
+                    'min'   => $range['min'], 'max' => $range['max'],
+                    'unit'  => __('BusManagement::app.vt_unit_'.$vehicleClass),
                 ]),
             ]);
         }
@@ -88,10 +88,10 @@ class VehicleTypeService
      */
     public function assertCapacityFormula(array $data): void
     {
-        $rows    = isset($data['seat_rows'])    && $data['seat_rows']    !== '' ? (int) $data['seat_rows']    : null;
-        $cols    = isset($data['seat_columns']) && $data['seat_columns'] !== '' ? (int) $data['seat_columns'] : null;
-        $floors  = (int) ($data['floor_count'] ?? 1);
-        $unused  = (int) ($data['unused_seats'] ?? 0);
+        $rows = isset($data['seat_rows']) && $data['seat_rows'] !== '' ? (int) $data['seat_rows'] : null;
+        $cols = isset($data['seat_columns']) && $data['seat_columns'] !== '' ? (int) $data['seat_columns'] : null;
+        $floors = (int) ($data['floor_count'] ?? 1);
+        $unused = (int) ($data['unused_seats'] ?? 0);
         $capacity = (int) $data['default_capacity'];
 
         if ($rows === null || $cols === null) {
@@ -135,7 +135,7 @@ class VehicleTypeService
     public function create(array $data): int
     {
         $vehicleClass = $data['vehicle_class'] ?? null;
-        $floorCount   = (int) ($data['floor_count'] ?? 1);
+        $floorCount = (int) ($data['floor_count'] ?? 1);
 
         if (empty($vehicleClass)) {
             throw ValidationException::withMessages(['vehicle_class' => __('BusManagement::app.vt_err_class_required')]);
@@ -175,7 +175,7 @@ class VehicleTypeService
         }
 
         $vehicleClass = $data['vehicle_class'] ?? null;
-        $floorCount   = (int) ($data['floor_count'] ?? 1);
+        $floorCount = (int) ($data['floor_count'] ?? 1);
 
         if (empty($vehicleClass)) {
             throw ValidationException::withMessages(['vehicle_class' => __('BusManagement::app.vt_err_class_required')]);
