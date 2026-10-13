@@ -18,13 +18,19 @@ class VehicleTypeController extends Controller
         abort_unless($request->user()?->isAdmin(), 403);
 
         $search = (string) $request->input('search', '');
-        $vehicleTypes = $types->paginate($search);
+        $vehicleClass = (string) $request->input('vehicle_class', '');
+        $status = (string) $request->input('status', '');
+
+        $vehicleTypes = $types->paginate($search, $vehicleClass, $status);
         $company = DB::table('bus_companies')->where('code', 'FUTA')->first();
 
         return view('BusManagement::vehicle-types.index', [
-            'vehicleTypes' => $vehicleTypes,
-            'search'       => $search,
-            'company'      => $company,
+            'vehicleTypes'  => $vehicleTypes,
+            'search'        => $search,
+            'vehicleClass'  => $vehicleClass,
+            'statusFilter'  => $status,
+            'company'       => $company,
+            'classes'       => VehicleTypeService::CLASSES,
         ]);
     }
 
@@ -32,7 +38,8 @@ class VehicleTypeController extends Controller
     {
         abort_unless($request->user()?->isAdmin(), 403);
 
-        $types->create($request->validate($types->rules()));
+        $data = $request->validate($types->rules());
+        $types->create($data);
 
         return redirect()->route('bus-management.vehicle-types.index')
             ->with('success', __('BusManagement::app.flash_created'));
@@ -42,7 +49,8 @@ class VehicleTypeController extends Controller
     {
         abort_unless($request->user()?->isAdmin(), 403);
 
-        $types->update($id, $request->validate($types->rules($id)));
+        $data = $request->validate($types->rules($id));
+        $types->update($id, $data);
 
         return redirect()->route('bus-management.vehicle-types.index')
             ->with('success', __('BusManagement::app.flash_updated'));
@@ -54,10 +62,21 @@ class VehicleTypeController extends Controller
 
         if (! $types->remove($id)) {
             return redirect()->route('bus-management.vehicle-types.index')
-                ->with('warning', __('BusManagement::app.flash_deactivated'));
+                ->with('warning', __('BusManagement::app.flash_cannot_delete_in_use'));
         }
 
         return redirect()->route('bus-management.vehicle-types.index')
             ->with('success', __('BusManagement::app.flash_deleted'));
+    }
+
+    public function toggle(Request $request, VehicleTypeService $types, int $id): RedirectResponse
+    {
+        abort_unless($request->user()?->isAdmin(), 403);
+
+        $newStatus = $types->toggle($id);
+        $msgKey = $newStatus === 'active' ? 'flash_activated' : 'flash_deactivated';
+
+        return redirect()->route('bus-management.vehicle-types.index')
+            ->with('success', __('BusManagement::app.'.$msgKey));
     }
 }
