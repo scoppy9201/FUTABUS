@@ -1,6 +1,21 @@
 <?php
 
 return [
+    'request'             => 'Request reference',
+    'export'              => 'Export report',
+    'total'               => 'Total',
+    'period'              => 'Submission period',
+    'period_all'          => 'All time',
+    'period_7'            => 'Last 7 days',
+    'period_30'           => 'Last 30 days',
+    'choose'              => 'Select a request to reconcile and process its refund.',
+    'reason'              => 'Reason',
+    'method'              => 'Payment method',
+    'created'             => 'Request created',
+    'no_events'           => 'No processing updates yet.',
+    'records'             => 'Showing :from–:to of :total requests',
+    'summary_scope'       => 'Overview of all refund requests',
+    'methods'             => ['bank_transfer' => 'Bank transfer', 'cash' => 'Cash', 'sepay' => 'SePay'],
     'hour'                => 'Hour', 'minute' => 'Minute',
     'title'               => 'Refund management',
     'intro'               => 'Reconcile original payments and record refunds performed by staff.',
