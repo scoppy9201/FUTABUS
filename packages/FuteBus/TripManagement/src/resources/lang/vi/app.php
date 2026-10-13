@@ -1,12 +1,14 @@
 <?php
 
 return [
-    'col_stt'       => 'STT', 'col_status' => 'Trạng thái', 'col_actions' => 'Thao tác',
-    'status_active' => 'Đang áp dụng', 'status_inactive' => 'Ngừng áp dụng',
-    'btn_search'    => 'Tìm kiếm', 'btn_clear_filter' => 'Xóa bộ lọc', 'btn_add' => 'Thêm lịch trình',
-    'btn_edit'      => 'Sửa', 'btn_delete' => 'Ngừng áp dụng', 'btn_cancel' => 'Hủy bỏ',
-    'btn_save'      => 'Lưu cập nhật', 'btn_store' => 'Thêm mới', 'btn_confirm' => 'Xác nhận',
-    'empty'         => 'Chưa có lịch trình nào.',
+    'sch_hint_all_days' => 'Không chọn ngày nào thì lịch sẽ áp dụng tất cả các ngày trong tuần.',
+    'sch_err_price'     => 'Giá vé phải lớn hơn 1.000 ₫ và nhỏ hơn 100.000.000 ₫.',
+    'col_stt'           => 'STT', 'col_status' => 'Trạng thái', 'col_actions' => 'Thao tác',
+    'status_active'     => 'Đang áp dụng', 'status_inactive' => 'Ngừng áp dụng',
+    'btn_search'        => 'Tìm kiếm', 'btn_clear_filter' => 'Xóa bộ lọc', 'btn_add' => 'Thêm lịch trình',
+    'btn_edit'          => 'Sửa', 'btn_delete' => 'Ngừng áp dụng', 'btn_cancel' => 'Hủy bỏ',
+    'btn_save'          => 'Lưu cập nhật', 'btn_store' => 'Thêm mới', 'btn_confirm' => 'Xác nhận',
+    'empty'             => 'Chưa có lịch trình nào.',
 
     // ── Lịch trình xe ──
     'sch_title'             => 'Quản lý lịch trình xe',

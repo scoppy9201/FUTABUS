@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <title>@yield('title') · FUTABUS</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js', 'packages/FuteBus/Core/src/resources/css/app.css', 'packages/FuteBus/Core/src/resources/js/app.js', 'packages/FuteBus/Dashboard/src/resources/css/app.css'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'packages/FuteBus/Core/src/resources/css/app.css', 'packages/FuteBus/Core/src/resources/js/app.js', 'packages/FuteBus/Dashboard/src/resources/css/app.css', 'packages/FuteBus/Reporting/src/resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.13.0/lottie.min.js" defer></script>
@@ -98,7 +98,7 @@
                         ['key' => 'routes', 'icon' => 'calendar-days', 'route' => route('trip-management.schedules.index')],
                         ['key' => 'staff_accounts', 'icon' => 'users', 'route' => route('staff-accounts.index')],
                         ['key' => 'access_management', 'icon' => 'key', 'route' => route('access-management.index')],
-                        ['key' => 'reports', 'icon' => 'chart-bar',     'route' => route('dashboard.section', 'reports')],
+                        ['key' => 'reports', 'icon' => 'chart-bar',     'route' => route('reporting.index')],
                     ];
                 @endphp
 
@@ -107,6 +107,7 @@
                         @php
                             $active = ($item['key'] === 'overview' && request()->routeIs('dashboard'))
                                 || ($item['key'] !== 'overview' && $item['key'] === ($section ?? null))
+                                || ($item['key'] === 'reports' && request()->routeIs('reporting.*'))
                                 || ($item['key'] === 'buses' && $isBusSection)
                                 || ($item['key'] === 'trips' && request()->routeIs('trip-management.trips*'))
                                 || ($item['key'] === 'routes' && request()->routeIs('trip-management.schedules*'))
