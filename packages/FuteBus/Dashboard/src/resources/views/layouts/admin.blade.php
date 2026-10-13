@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <title>@yield('title') · FUTABUS</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js', 'packages/FuteBus/Core/src/resources/css/app.css', 'packages/FuteBus/Core/src/resources/js/app.js', 'packages/FuteBus/Dashboard/src/resources/css/app.css'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'packages/FuteBus/Core/src/resources/css/app.css', 'packages/FuteBus/Core/src/resources/js/app.js', 'packages/FuteBus/Dashboard/src/resources/css/app.css', 'packages/FuteBus/Reporting/src/resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.13.0/lottie.min.js" defer></script>
@@ -97,15 +97,20 @@
                         ['key' => 'trips', 'icon' => 'map-pin', 'route' => route('trip-management.trips.index')],
                         ['key' => 'routes', 'icon' => 'calendar-days', 'route' => route('trip-management.schedules.index')],
                         ['key' => 'staff_accounts', 'icon' => 'users', 'route' => route('staff-accounts.index')],
+                        ['key' => 'refunds', 'icon' => 'receipt-refund', 'route' => route('refunds.index'),
+                            'permission' => 'payment.view', 'label' => __('Payment::refunds.title')],
                         ['key' => 'access_management', 'icon' => 'key', 'route' => route('access-management.index')],
-                        ['key' => 'reports', 'icon' => 'chart-bar',     'route' => route('dashboard.section', 'reports')],
+                        ['key' => 'reports', 'icon' => 'chart-bar',     'route' => route('reporting.index')],
                     ];
                 @endphp
 
                 <nav class="space-y-1">
                     @foreach($navItems as $item)
+                        @continue(isset($item['permission']) && ! auth()->user()->hasPermissionTo($item['permission']))
                         @php
-                            $active = $item['key'] === ($section ?? 'overview')
+                            $active = ($item['key'] === 'overview' && request()->routeIs('dashboard'))
+                                || ($item['key'] !== 'overview' && $item['key'] === ($section ?? null))
+                                || ($item['key'] === 'reports' && request()->routeIs('reporting.*'))
                                 || ($item['key'] === 'buses' && $isBusSection)
                                 || ($item['key'] === 'trips' && request()->routeIs('trip-management.trips*'))
                                 || ($item['key'] === 'routes' && request()->routeIs('trip-management.schedules*'))
@@ -177,7 +182,7 @@
                                     'text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange' => !$active,
                                 ])>
                                     <x-dynamic-component :component="'heroicon-o-'.$item['icon']" class="w-5 h-5" />
-                                    <span>{{ __('Dashboard::app.'.$item['key']) }}</span>
+                                    <span>{{ $item['label'] ?? __('Dashboard::app.'.$item['key']) }}</span>
                                 </a>
                             @endif
 

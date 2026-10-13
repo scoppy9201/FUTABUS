@@ -1,0 +1,120 @@
+<?php
+
+declare(strict_types=1);
+
+namespace FuteBus\Cancellation\Services;
+
+use App\Models\User;
+use FuteBus\Cancellation\Notifications\TicketCancelled;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+
+class TicketCancellationService
+{
+    public function __construct(private readonly CancellationPolicy $policy) {}
+
+    public function owned(User $user, int $booking): Builder
+    {
+        return DB::table('tickets')->join('bookings', 'bookings.id', '=', 'tickets.booking_id')
+            ->join('trips', 'trips.id', '=', 'tickets.trip_id')
+            ->join('routes', 'routes.id', '=', 'trips.route_id')
+            ->leftJoin('customers', 'customers.id', '=', 'bookings.customer_id')
+            ->where('bookings.id', $booking)
+            ->where(function (Builder $query) use ($user): void {
+                $query->where('bookings.user_id', $user->id)->orWhere(function (Builder $guest) use ($user): void {
+                    $guest->whereNull('bookings.user_id')->where('customers.user_id', $user->id);
+                });
+            })->select('tickets.*', 'bookings.booking_code', 'bookings.status as booking_status',
+                'trips.departure_time', 'trips.status as trip_status', 'routes.origin_city', 'routes.destination_city');
+    }
+
+    public function quote(User $user, int $booking, int $ticket): array
+    {
+        $record = $this->owned($user, $booking)->where('tickets.id', $ticket)->first();
+        abort_if($record === null, 404);
+        $this->payment($booking);
+
+        return ['ticket' => $record, 'quote' => $this->policy->quote($record)];
+    }
+
+    public function cancel(User $user, int $booking, array $input): object
+    {
+        $candidate = $this->owned($user, $booking)->where('tickets.id', $input['ticket_id'])->first();
+        abort_if($candidate === null, 404);
+
+        return DB::transaction(function () use ($user, $booking, $input, $candidate): object {
+            DB::table('trips')->where('id', $candidate->trip_id)->lockForUpdate()->first();
+            DB::table('bookings')->where('id', $booking)->lockForUpdate()->first();
+            DB::table('tickets')->where('id', $candidate->id)->lockForUpdate()->first();
+            $existing = DB::table('ticket_cancellations')->where('ticket_id', $candidate->id)->first();
+            if ($existing !== null) {
+                return $existing;
+            }
+            $data = $this->quote($user, $booking, (int) $candidate->id);
+            $quote = $data['quote'];
+            if ((int) $input['expected_refund'] !== $quote['refund']) {
+                throw ValidationException::withMessages(['ticket' => __('Cancellation::cancellation.quote_changed')]);
+            }
+            $payment = $this->payment($booking, true);
+            $reserved = DB::table('ticket_refunds')->where('payment_id', $payment->id)->sum('amount');
+            if ($reserved + $quote['refund'] > (int) $payment->amount) {
+                throw ValidationException::withMessages(['ticket' => __('Cancellation::cancellation.payment_unavailable')]);
+            }
+            $reference = (string) Str::uuid();
+            $id = DB::table('ticket_cancellations')->insertGetId([
+                'reference'      => $reference, 'ticket_id' => $candidate->id, 'user_id' => $user->id,
+                'reason'         => $input['reason'], 'note' => $input['note'] ?? null,
+                'ticket_amount'  => $quote['amount'], 'fee_percent' => $quote['fee_percent'],
+                'fee_amount'     => $quote['fee'], 'refund_amount' => $quote['refund'],
+                'policy_version' => $quote['policy_version'], 'departure_at' => $data['ticket']->departure_time,
+                'created_at'     => now(), 'updated_at' => now(),
+            ]);
+            DB::table('ticket_refunds')->insert([
+                'cancellation_id' => $id, 'payment_id' => $payment->id, 'transaction_id' => $payment->transaction_id,
+                'idempotency_key' => 'futa-cancel-'.$reference, 'amount' => $quote['refund'],
+                'environment'     => DB::table('sepay_transactions')->where('sepay_id', $payment->transaction_id)->value('environment')
+                    ?? config('services.sepay.environment', 'live'),
+                'processing_mode' => 'manual',
+                'status'          => 'refund_pending', 'created_at' => now(), 'updated_at' => now(),
+            ]);
+            DB::table('tickets')->where('id', $candidate->id)->update(['status' => 'cancelled', 'updated_at' => now()]);
+            DB::table('booked_seats')->where('booking_id', $booking)->where('trip_id', $candidate->trip_id)
+                ->where('seat_layout_id', $candidate->seat_layout_id)->delete();
+            if (! DB::table('tickets')->where('booking_id', $booking)->whereIn('status', ['active', 'used'])->exists()) {
+                DB::table('bookings')->where('id', $booking)->update(['status' => 'cancelled', 'updated_at' => now()]);
+            }
+            $user->notify(new TicketCancelled([
+                'reference' => $reference, 'ticket_code' => $candidate->ticket_code,
+                'refund'    => $quote['refund'], 'booking_id' => $booking,
+            ]));
+
+            return DB::table('ticket_cancellations')->where('id', $id)->first();
+        });
+    }
+
+    private function payment(int $booking, bool $lock = false): object
+    {
+        $query = DB::table('payments')->where(function (Builder $query) use ($booking): void {
+            $query->where('booking_id', $booking)->orWhereExists(function (Builder $intents) use ($booking): void {
+                $intents->selectRaw('1')->from('sepay_payment_intents')
+                    ->whereColumn('sepay_payment_intents.code', 'payments.payment_code')
+                    ->whereColumn('sepay_payment_intents.booking_id', 'payments.booking_id')
+                    ->where('sepay_payment_intents.secondary_booking_id', $booking)->where('sepay_payment_intents.status', 'paid');
+            });
+        })->orderByDesc('id');
+        $payment = ($lock ? $query->lockForUpdate() : $query)->first();
+        $transaction = $payment ? DB::table('sepay_transactions')->where('sepay_id', $payment->transaction_id) : null;
+        $receipt = $transaction ? ($lock ? $transaction->lockForUpdate() : $transaction)->first() : null;
+        if ($payment === null || $payment->status !== 'completed' || $payment->method !== 'bank_transfer'
+            || ! ctype_digit((string) $payment->transaction_id) || $receipt?->status !== 'matched'
+            || (int) $receipt->amount !== (int) $payment->amount
+            || (float) $payment->amount !== (float) (int) $payment->amount
+            || $receipt->code !== $payment->payment_code) {
+            throw ValidationException::withMessages(['ticket' => __('Cancellation::cancellation.payment_unavailable')]);
+        }
+
+        return $payment;
+    }
+}

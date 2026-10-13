@@ -37,12 +37,18 @@ class VehicleTypeApiTest extends TestCase
         $this->postJson($url, ['name' => 'Limousine'])
             ->assertUnprocessable()->assertJsonValidationErrors('default_capacity');
         $this->postJson($url, [
-            'name' => 'Limousine', 'description' => 'Comfort seats', 'default_capacity' => 24,
+            'name'             => 'Limousine',
+            'description'      => 'Comfort seats',
+            'vehicle_class'    => 'limousine',
+            'default_capacity' => 22,
         ])->assertCreated()->assertJsonPath('data.status', 'active');
 
         $id = DB::table('vehicle_types')->value('id');
         $this->putJson(route('api.v1.admin.vehicle-types.update', ['vehicleType' => $id]), [
-            'name' => 'Limousine', 'description' => 'Updated seats', 'default_capacity' => 22,
+            'name'             => 'Limousine',
+            'description'      => 'Updated seats',
+            'vehicle_class'    => 'limousine',
+            'default_capacity' => 22,
         ])->assertOk()->assertJsonPath('data.default_capacity', 22);
 
         $companyId = DB::table('bus_companies')->insertGetId(['name' => 'FUTA', 'code' => 'FUTA']);
@@ -61,12 +67,16 @@ class VehicleTypeApiTest extends TestCase
     {
         $this->actingAs($this->admin())
             ->post(route('bus-management.vehicle-types.store'), [
-                'name' => 'Sleeper', 'default_capacity' => 34,
+                'name'             => 'Sleeper',
+                'vehicle_class'    => 'sleeper',
+                'default_capacity' => 34,
             ])->assertRedirect(route('bus-management.vehicle-types.index'));
 
         $id = DB::table('vehicle_types')->value('id');
         $this->put(route('bus-management.vehicle-types.update', ['id' => $id]), [
-            'name' => 'Sleeper', 'default_capacity' => 32,
+            'name'             => 'Sleeper',
+            'vehicle_class'    => 'sleeper',
+            'default_capacity' => 32,
         ])->assertRedirect(route('bus-management.vehicle-types.index'));
         $this->assertDatabaseHas('vehicle_types', ['id' => $id, 'default_capacity' => 32]);
 

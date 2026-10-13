@@ -2488,6 +2488,759 @@
         },
         "description": "Requires a verified recovery challenge. The challenge is consumed and all existing Bearer tokens are revoked."
       }
+    },
+    "/api/v1/staff/dashboard": {
+      "get": {
+        "operationId": "api_v1_staff_dashboard_show",
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "BearerToken": []
+          }
+        ],
+        "tags": [
+          "Operator tickets"
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthenticated."
+          },
+          "404": {
+            "description": "Resource not found within the permitted scope."
+          },
+          "422": {
+            "description": "Validation errors returned as message and errors."
+          },
+          "403": {
+            "description": "Missing role, permission, active verified account or company scope."
+          },
+          "200": {
+            "description": "Successful JSON response."
+          }
+        },
+        "description": "Existing authentication and server-side authorization apply. Operator tickets require the corresponding permission and company scope; sale status is restricted to its initiating operator.",
+        "parameters": []
+      }
+    },
+    "/api/v1/staff/me": {
+      "get": {
+        "operationId": "api_v1_staff_me_show",
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "BearerToken": []
+          }
+        ],
+        "tags": [
+          "Operator tickets"
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthenticated."
+          },
+          "404": {
+            "description": "Resource not found within the permitted scope."
+          },
+          "422": {
+            "description": "Validation errors returned as message and errors."
+          },
+          "403": {
+            "description": "Missing role, permission, active verified account or company scope."
+          },
+          "200": {
+            "description": "Successful JSON response."
+          }
+        },
+        "description": "Existing authentication and server-side authorization apply. Operator tickets require the corresponding permission and company scope; sale status is restricted to its initiating operator.",
+        "parameters": []
+      },
+      "put": {
+        "operationId": "api_v1_staff_me_update",
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "BearerToken": []
+          }
+        ],
+        "tags": [
+          "Operator tickets"
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthenticated."
+          },
+          "404": {
+            "description": "Resource not found within the permitted scope."
+          },
+          "422": {
+            "description": "Validation errors returned as message and errors."
+          },
+          "403": {
+            "description": "Missing role, permission, active verified account or company scope."
+          },
+          "200": {
+            "description": "Successful JSON response."
+          }
+        },
+        "description": "Existing authentication and server-side authorization apply. Operator tickets require the corresponding permission and company scope; sale status is restricted to its initiating operator.",
+        "parameters": []
+      }
+    },
+    "/api/v1/staff/me/avatar": {
+      "get": {
+        "operationId": "api_v1_staff_me_avatar",
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "BearerToken": []
+          }
+        ],
+        "tags": [
+          "Operator tickets"
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthenticated."
+          },
+          "404": {
+            "description": "Resource not found within the permitted scope."
+          },
+          "422": {
+            "description": "Validation errors returned as message and errors."
+          },
+          "403": {
+            "description": "Missing role, permission, active verified account or company scope."
+          },
+          "200": {
+            "description": "Successful JSON response."
+          }
+        },
+        "description": "Existing authentication and server-side authorization apply. Operator tickets require the corresponding permission and company scope; sale status is restricted to its initiating operator.",
+        "parameters": []
+      }
+    },
+    "/api/v1/staff/me/password": {
+      "put": {
+        "operationId": "api_v1_staff_me_password_update",
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "BearerToken": []
+          }
+        ],
+        "tags": [
+          "Operator tickets"
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthenticated."
+          },
+          "404": {
+            "description": "Resource not found within the permitted scope."
+          },
+          "422": {
+            "description": "Validation errors returned as message and errors."
+          },
+          "403": {
+            "description": "Missing role, permission, active verified account or company scope."
+          },
+          "200": {
+            "description": "Successful JSON response."
+          }
+        },
+        "description": "Existing authentication and server-side authorization apply. Operator tickets require the corresponding permission and company scope; sale status is restricted to its initiating operator.",
+        "parameters": []
+      }
+    },
+    "/api/v1/staff/sale-context": {
+      "get": {
+        "summary": "Operator identity and ticket capabilities",
+        "tags": [
+          "Staff ticket processing"
+        ],
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "description": "Active verified staff or operator account required. Business endpoints additionally require booking.create and company scope. Session requests are supported; POST requires X-CSRF-TOKEN. Token requests require the api ability.",
+        "responses": {
+          "200": {
+            "description": "JSON response using the project data envelope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": [
+                        "object",
+                        "array"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "403": {
+            "description": "Role, permission or company access denied"
+          }
+        }
+      }
+    },
+    "/api/v1/staff/trips": {
+      "get": {
+        "summary": "Search real trips within the operator company",
+        "tags": [
+          "Staff ticket processing"
+        ],
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "description": "Active verified staff or operator account required. Business endpoints additionally require booking.create and company scope. Session requests are supported; POST requires X-CSRF-TOKEN. Token requests require the api ability.",
+        "responses": {
+          "200": {
+            "description": "JSON response using the project data envelope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": [
+                        "object",
+                        "array"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "403": {
+            "description": "Role, permission or company access denied"
+          },
+          "422": {
+            "description": "Invalid search criteria"
+          }
+        },
+        "parameters": [
+          {
+            "name": "departure",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "destination",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "departure_date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "trip_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "one_way",
+                "round_trip"
+              ]
+            }
+          },
+          {
+            "name": "quantity",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5
+            }
+          },
+          {
+            "name": "return_date",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "outbound",
+                "return"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/staff/sales": {
+      "post": {
+        "summary": "Create an idempotent pending SePay sale for a customer",
+        "tags": [
+          "Staff ticket processing"
+        ],
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "description": "Active verified staff or operator account required. Business endpoints additionally require booking.create and company scope. Session requests are supported; POST requires X-CSRF-TOKEN. Token requests require the api ability.",
+        "responses": {
+          "201": {
+            "description": "JSON response using the project data envelope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": [
+                        "object",
+                        "array"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "403": {
+            "description": "Role, permission or company access denied"
+          },
+          "404": {
+            "description": "Trip outside company scope"
+          },
+          "409": {
+            "description": "Idempotency key belongs to another request"
+          },
+          "419": {
+            "description": "Missing or invalid session CSRF token"
+          },
+          "422": {
+            "description": "Invalid passenger details or unavailable seats"
+          },
+          "503": {
+            "description": "SePay is not configured"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "departure",
+                  "destination",
+                  "name",
+                  "phone",
+                  "email",
+                  "trip_id",
+                  "idempotency_key",
+                  "departure_date",
+                  "quantity",
+                  "trip_type",
+                  "pickup_mode",
+                  "dropoff_mode",
+                  "seats",
+                  "accept_terms"
+                ],
+                "properties": {
+                  "departure": {
+                    "type": "string"
+                  },
+                  "destination": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "trip_id": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "idempotency_key": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "departure_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5
+                  },
+                  "trip_type": {
+                    "type": "string",
+                    "enum": [
+                      "one_way",
+                      "round_trip"
+                    ]
+                  },
+                  "pickup_mode": {
+                    "type": "string",
+                    "enum": [
+                      "station",
+                      "transfer"
+                    ]
+                  },
+                  "dropoff_mode": {
+                    "type": "string",
+                    "enum": [
+                      "station",
+                      "transfer"
+                    ]
+                  },
+                  "seats": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "minItems": 0,
+                    "maxItems": 5,
+                    "uniqueItems": true
+                  },
+                  "accept_terms": {
+                    "type": "boolean",
+                    "const": true
+                  },
+                  "direction": {
+                    "type": "string",
+                    "enum": [
+                      "outbound",
+                      "return"
+                    ]
+                  },
+                  "return_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "pickup_address": {
+                    "type": "string",
+                    "maxLength": 255
+                  },
+                  "dropoff_address": {
+                    "type": "string",
+                    "maxLength": 255
+                  },
+                  "quoted_fare": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/staff/tickets": {
+      "get": {
+        "summary": "List issued tickets within the operator company",
+        "tags": ["Staff ticket processing"],
+        "security": [{"BearerToken": []}],
+        "description": "Requires active verified staff/operator and ticket.view. Checks trip, route and bus company ownership. Lists real tickets newest first, 15 per page. Server-time checks derive display_status and usable; active tickets at or past departure display expired. Stored status is unchanged. No-store response contains passenger data only within the authorized company.",
+        "parameters": [
+          {"name": "code", "in": "query", "schema": {"type": "string"}, "description": "Exact ticket or booking code"},
+          {"name": "phone", "in": "query", "schema": {"type": "string"}},
+          {"name": "name", "in": "query", "schema": {"type": "string"}},
+          {"name": "date", "in": "query", "schema": {"type": "string", "format": "date"}},
+          {"name": "status", "in": "query", "schema": {"type": "string", "enum": ["active", "expired", "used", "cancelled", "refunded"]}},
+          {"name": "page", "in": "query", "schema": {"type": "integer", "minimum": 1}}
+        ],
+        "responses": {"200": {"description": "Ticket rows in data; current_page, last_page, total, from and to in meta"}, "401": {"description": "Unauthenticated"}, "403": {"description": "Role, permission or company access denied"}, "422": {"description": "Invalid filters"}}
+      }
+    },
+    "/api/v1/staff/trips/{trip}/booking-context": {
+      "get": {
+        "summary": "Render the staff customer booking form for a company trip",
+        "tags": ["Staff ticket processing"],
+        "security": [{"BearerToken": []}],
+        "parameters": [{"name": "trip", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "description": "Requires booking.create and company scope for each leg. Accepts validated search criteria, direction and selected seat IDs. Returns full staff-owned booking HTML in data.html.",
+        "responses": {"200": {"description": "Booking markup in data.html"}, "403": {"description": "Permission denied"}, "404": {"description": "Trip outside company scope"}, "422": {"description": "Invalid booking criteria"}}
+      }
+    },
+    "/api/v1/staff/previews": {
+      "post": {
+        "summary": "Render a read-only staff payment draft",
+        "tags": ["Staff ticket processing"],
+        "security": [{"BearerToken": []}],
+        "description": "Requires booking.create, company scope and the validated sale payload. Creates no seat hold, payment or ticket. Session mutations require CSRF.",
+        "responses": {"200": {"description": "Draft in data with payment HTML"}, "403": {"description": "Permission denied"}, "404": {"description": "Trip outside company scope"}, "422": {"description": "Invalid passenger or seat data"}}
+      }
+    },
+    "/api/v1/staff/sales/{sale}/cash-collections": {
+      "post": {
+        "summary": "Confirm cash received at the staff counter and issue tickets",
+        "tags": ["Staff ticket processing"],
+        "description": "Requires active verified staff/operator, booking.create, company scope, and the initiating browser session draft. X-CSRF-TOKEN is required for session mutations. The server calculates the amount and rechecks both trip legs, fares, departure and seat holds inside one transaction. Repeated confirmations return the same receipt. No SePay transaction is fabricated; a superseded pending bank intent is expired. Late bank transfers require reconciliation through the existing webhook. Cash receipts store operator/company audit metadata in payments.payload.",
+        "parameters": [{"name": "sale", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "required": ["received"], "properties": {"received": {"type": "boolean", "const": true}}}}}},
+        "responses": {
+          "200": {"description": "Completed cash receipt and issued tickets in data, including staff receipt HTML"},
+          "401": {"description": "Unauthenticated"},
+          "403": {"description": "Role, permission or company access denied"},
+          "404": {"description": "Missing session draft or sale outside initiating operator scope"},
+          "409": {"description": "Bank intent already settled, expired, or awaiting reconciliation"},
+          "410": {"description": "Draft expired"},
+          "419": {"description": "Invalid session CSRF token"},
+          "422": {"description": "Cash not confirmed received, fare changed, or seats unavailable"},
+          "429": {"description": "Rate limit exceeded"}
+        }
+      }
+    },
+    "/api/v1/staff/sales/{sale}": {
+      "delete": {
+        "summary": "Abandon an unpaid staff draft or pending payment intent",
+        "tags": ["Staff ticket processing"],
+        "security": [{"BearerToken": []}],
+        "description": "Requires booking.create and initiating operator/company ownership. Session mutations require CSRF. Issued tickets and paid/review intents cannot be cancelled here. HTML callers receive a 303 redirect to staff trip search with original criteria.",
+        "parameters": [{"name": "sale", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}],
+        "responses": {"200": {"description": "Expired draft or intent in data"}, "303": {"description": "HTML redirect to staff trip search"}, "403": {"description": "Permission denied"}, "404": {"description": "Outside operator scope"}, "409": {"description": "Already paid or requires reconciliation"}, "419": {"description": "Invalid session CSRF token"}}
+      },
+      "get": {
+        "summary": "Read the initiating operator sale and verified tickets",
+        "tags": [
+          "Staff ticket processing"
+        ],
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "description": "Active verified staff or operator account required. Business endpoints additionally require booking.create and company scope. Session requests are supported; POST requires X-CSRF-TOKEN. Token requests require the api ability.",
+        "responses": {
+          "200": {
+            "description": "JSON response using the project data envelope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": [
+                        "object",
+                        "array"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "403": {
+            "description": "Role, permission or company access denied"
+          },
+          "404": {
+            "description": "Sale absent or outside operator ownership/company"
+          }
+        },
+        "parameters": [
+          {
+            "name": "sale",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/staff/quotes": {
+      "post": {
+        "summary": "Read canonical fare and boarding time without creating a payment intent",
+        "tags": [
+          "Staff ticket processing"
+        ],
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "description": "Active verified staff or operator account required. Business endpoints additionally require booking.create and company scope. Session requests are supported; POST requires X-CSRF-TOKEN. Token requests require the api ability.",
+        "responses": {
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "403": {
+            "description": "Role, permission or company access denied"
+          },
+          "404": {
+            "description": "Trip outside company scope"
+          },
+          "409": {
+            "description": "Idempotency key belongs to another request"
+          },
+          "419": {
+            "description": "Missing or invalid session CSRF token"
+          },
+          "422": {
+            "description": "Invalid passenger details or unavailable seats"
+          },
+          "503": {
+            "description": "SePay is not configured"
+          },
+          "200": {
+            "description": "JSON response using the project data envelope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": [
+                        "object",
+                        "array"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "departure",
+                  "destination",
+                  "departure_date",
+                  "quantity",
+                  "trip_type",
+                  "trip_id",
+                  "seats"
+                ],
+                "properties": {
+                  "departure": {
+                    "type": "string"
+                  },
+                  "destination": {
+                    "type": "string"
+                  },
+                  "trip_id": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "departure_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5
+                  },
+                  "trip_type": {
+                    "type": "string",
+                    "enum": [
+                      "one_way",
+                      "round_trip"
+                    ]
+                  },
+                  "seats": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "minItems": 0,
+                    "maxItems": 5,
+                    "uniqueItems": true
+                  },
+                  "direction": {
+                    "type": "string",
+                    "enum": [
+                      "outbound",
+                      "return"
+                    ]
+                  },
+                  "return_date": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2508,6 +3261,12 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "Sanctum personal access token"
+      },
+      "SessionCookie": {
+        "description": "Existing authenticated session. Session requests require Laravel Sanctum stateful CSRF protection.",
+        "name": "laravel_session",
+        "in": "cookie",
+        "type": "apiKey"
       }
     },
     "schemas": {

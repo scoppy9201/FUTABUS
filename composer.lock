@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "aa905867828aecc15bbc39dd91fe0ff8",
+    "content-hash": "0303c96ebf3011d3613611a1235cf34b",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1901,6 +1901,72 @@
                 "MIT"
             ],
             "description": "SeatManagement module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/staffdashboard",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/FuteBus/StaffDashboard",
+                "reference": "86adb23e3f505999f793021c0d25f3f8fe90c577"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\StaffDashboard\\Providers\\StaffDashboardServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\StaffDashboard\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "StaffDashboard module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/staffticketprocessing",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/FuteBus/StaffTicketProcessing",
+                "reference": "8b467894a70cd3f4e5bde5e10e1edf0d8e3178d3"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\StaffTicketProcessing\\Providers\\StaffTicketProcessingServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\StaffTicketProcessing\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "StaffTicketProcessing module for FUTEBUS.",
             "transport-options": {
                 "symlink": true,
                 "relative": true

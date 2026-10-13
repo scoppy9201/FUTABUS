@@ -36,12 +36,18 @@ return [
     ],
 
     'sepay' => [
-        'enabled'         => env('SEPAY_ENABLED', false),
-        'bank'            => env('SEPAY_BANK'),
-        'account_no'      => env('SEPAY_ACCOUNT_NO'),
-        'webhook_auth'    => env('SEPAY_WEBHOOK_AUTH', 'hmac'),
-        'webhook_secret'  => env('SEPAY_WEBHOOK_SECRET'),
-        'webhook_key'     => env('SEPAY_WEBHOOK_KEY'),
+        'refund_mode'        => env('SEPAY_REFUND_MODE', 'manual'),
+        'environment'        => env('SEPAY_ENVIRONMENT', 'live'),
+        'refund_enabled'     => env('SEPAY_REFUND_ENABLED', false),
+        'refund_environment' => env('SEPAY_REFUND_ENVIRONMENT', 'sandbox'),
+        'refund_token'       => env('SEPAY_REFUND_TOKEN'),
+        'refund_bank_id'     => env('SEPAY_REFUND_BANK_ID'),
+        'enabled'            => env('SEPAY_ENABLED', false),
+        'bank'               => env('SEPAY_BANK'),
+        'account_no'         => env('SEPAY_ACCOUNT_NO'),
+        'webhook_auth'       => env('SEPAY_WEBHOOK_AUTH', 'hmac'),
+        'webhook_secret'     => env('SEPAY_WEBHOOK_SECRET'),
+        'webhook_key'        => env('SEPAY_WEBHOOK_KEY'),
     ],
 
     'google' => [

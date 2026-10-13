@@ -1,0 +1,263 @@
+<style>
+    .hero-form-border {
+        border: 2px solid color-mix(in srgb, var(--color-futa-orange) 60%, white);
+        box-shadow: 0 8px 0 rgba(181,86,51,.14);
+    }
+
+    .hero-return-field {
+        min-width: 0;
+        overflow: hidden;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 220ms ease, margin 300ms ease;
+    }
+
+    .hero-search-grid.is-round-trip .hero-return-field {
+        overflow: visible;
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    @media (max-width: 1023px) {
+        .hero-search-grid:not(.is-round-trip) .hero-return-field {
+            display: none;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .hero-search-grid {
+            grid-template-columns:
+                minmax(0, 1fr) 22px minmax(0, 1fr)
+                minmax(0, 1fr) minmax(0, 0fr) minmax(0, 1fr);
+            transition: grid-template-columns 300ms ease;
+        }
+
+        .hero-search-grid .hero-return-field {
+            margin-inline: -7.5px;
+        }
+
+        .hero-search-grid.is-round-trip {
+            grid-template-columns:
+                minmax(0, 1fr) 22px minmax(0, 1fr)
+                minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+        }
+
+        .hero-search-grid.is-round-trip .hero-return-field {
+            margin-inline: 0;
+        }
+    }
+</style>
+
+@php
+    $today = now();
+    $isoDay = (int) $today->isoFormat('d');
+    $dayOfWeek = $isoDay === 7 ? 'CN' : 'Thứ '.($isoDay + 1);
+    $initialSearch = $searchCriteria ?? [];
+@endphp
+
+<section
+    class="px-3 pt-2 pb-14.5 sm:px-4"
+    x-data="@include('StaffTicketProcessing::partials.search-form-state')"
+    @hero-voice-state.window="voiceListening = $event.detail.listening"
+    @hero-voice-result.window="voiceTranscript = $event.detail.transcript; voicePreview = null; if ($event.detail.final) { interpretVoice(); applyVoiceSearch() }"
+    @hero-voice-error.window="voiceListening = false; voiceError = voiceErrors[$event.detail.code] || voiceErrors.default"
+>
+    <form id="trip-search" class="relative mx-auto mt-8 w-full max-w-282 rounded-[18px] bg-white px-6 pt-6.5 pb-10.5 hero-form-border max-sm:px-4" action="{{ route('trip-search') }}" method="GET" @submit="submitSearch($event)">
+        <div class="mb-5.25 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-7 max-sm:gap-4">
+                <label class="flex cursor-pointer items-center gap-2 font-bold transition-colors duration-200" :class="!roundTrip ? 'text-futa-orange' : 'text-gray-500'">
+                    <input
+                        type="radio"
+                        name="trip_type"
+                        value="one_way"
+                        :checked="!roundTrip"
+                        class="h-4.25 w-4.25 accent-futa-orange"
+                        @change="roundTrip = false"
+                    >
+                    <span>{{ __('core::app.home.hero.one_way') }}</span>
+                </label>
+                <label class="flex cursor-pointer items-center gap-2 font-bold transition-colors duration-200" :class="roundTrip ? 'text-futa-orange' : 'text-gray-500'">
+                    <input
+                        type="radio"
+                        name="trip_type"
+                        value="round_trip"
+                        :checked="roundTrip"
+                        class="h-4.25 w-4.25 accent-futa-orange"
+                        @change="roundTrip = true"
+                    >
+                    <span>{{ __('core::app.home.hero.round_trip') }}</span>
+                </label>
+            </div>
+            <div class="flex items-center gap-3">
+                <button
+                    type="button"
+                    @click="startVoiceSearch()"
+                    :aria-pressed="voiceListening"
+                    class="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-futa-orange/30 bg-futa-orange-soft px-3 text-sm font-bold text-futa-orange transition hover:border-futa-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
+                    aria-label="{{ __('core::app.home.hero.voice_label') }}"
+                >
+                    <x-heroicon-s-microphone class="size-4" aria-hidden="true" />
+                    <span class="hidden sm:inline">{{ __('core::app.home.hero.voice_label') }}</span>
+                </button>
+            </div>
+        </div>
+
+        <div x-show="voiceOpen" x-cloak class="mb-5 rounded-xl border border-futa-orange/25 bg-futa-orange-soft p-4" aria-label="{{ __('core::app.home.hero.voice_label') }}">
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <p class="text-sm font-extrabold text-futa-green">{{ __('core::app.home.hero.voice_label') }}</p>
+                    <p class="mt-1 text-xs leading-5 text-gray-600">{{ __('core::app.home.hero.voice_example') }}</p>
+                </div>
+                <button
+                    type="button"
+                    @click="voiceOpen = false; window.FutaVoiceSearch?.stop()"
+                    class="grid size-8 shrink-0 place-items-center rounded-full text-gray-500 hover:bg-white focus-visible:outline-2 focus-visible:outline-futa-orange"
+                    aria-label="{{ __('core::app.home.hero.voice_close') }}"
+                ><x-heroicon-o-x-mark class="size-5" aria-hidden="true" /></button>
+            </div>
+            <div class="mt-3 flex flex-wrap items-end gap-3">
+                <button
+                    type="button"
+                    @click="startVoiceSearch()"
+                    class="inline-flex min-h-10 items-center gap-2 rounded-full bg-futa-orange px-4 text-sm font-bold text-white hover:bg-futa-orange-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
+                >
+                    <x-heroicon-s-microphone class="size-4" aria-hidden="true" />
+                    <span x-text="voiceListening ? @js(__('core::app.home.hero.voice_stop')) : @js(__('core::app.home.hero.voice_listen'))"></span>
+                </button>
+                <label class="min-w-50 flex-1 text-xs font-semibold text-gray-700">{{ __('core::app.home.hero.voice_transcript_label') }}
+                    <input
+                        type="text"
+                        x-model="voiceTranscript"
+                        @input.debounce.250ms="interpretVoice()"
+                        placeholder="{{ __('core::app.home.hero.voice_transcript_placeholder') }}"
+                        class="mt-1 block h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm font-medium text-gray-900 outline-none focus:border-futa-orange focus:ring-2 focus:ring-futa-orange/15"
+                    >
+                </label>
+            </div>
+            <p class="mt-2 min-h-5 text-xs font-medium" :class="voiceError ? 'text-red-600' : 'text-futa-green'" role="status" aria-live="polite" x-text="voiceError || (voiceListening ? @js(__('core::app.home.hero.voice_listening')) : '')"></p>
+            <template x-if="voicePreview && !voicePreview.error">
+                <div class="mt-2 rounded-lg border border-futa-green/15 bg-white px-3 py-2 text-sm font-semibold text-gray-900">
+                    <span x-text="voicePreview.departure + ' → ' + voicePreview.destination"></span>
+                    <span class="ml-2 text-futa-green" x-text="voicePreview.departureDate || $el.closest('form').querySelector('[name=departure_date]')?.value"></span>
+                    <span x-show="voicePreview.roundTrip" class="ml-2 text-futa-green" x-text="'→ ' + voicePreview.returnDate"></span>
+                    <span x-show="voicePreview.quantity" class="ml-2 text-gray-600" x-text="voicePreview.quantity + ' ' + @js(__('core::app.home.hero.voice_tickets'))"></span>
+                </div>
+            </template>
+            <div class="mt-3 flex justify-end">
+                <button
+                    type="button"
+                    @click="applyVoiceSearch()"
+                    :disabled="!voicePreview || !!voicePreview.error || voiceSubmitting"
+                    class="rounded-full bg-futa-green px-5 py-2 text-sm font-bold text-white hover:bg-futa-green-dark disabled:cursor-not-allowed disabled:opacity-40"
+                >{{ __('core::app.home.hero.voice_apply') }}</button>
+            </div>
+        </div>
+
+        <div
+            class="hero-search-grid grid grid-cols-1 items-end gap-3.75 md:grid-cols-2"
+            :class="{ 'is-round-trip': roundTrip }"
+        >
+            @include('StaffTicketProcessing::partials.location-picker', [
+                'field' => 'departure',
+                'label' => __('core::app.home.hero.from'),
+                'placeholder' => __('core::app.home.hero.from_placeholder'),
+            ])
+
+            <button
+                type="button"
+                @click="swapLocations"
+                class="group z-10 mb-3.75 -mx-1.75 hidden size-9.25 place-items-center rounded-full border border-gray-200 bg-white text-futa-orange shadow-sm transition hover:border-futa-orange hover:shadow-md lg:grid"
+                aria-label="{{ __('core::app.home.hero.swap_aria') }}"
+            >
+                <x-heroicon-o-arrows-right-left
+                    class="size-4.75 transition-transform duration-300 ease-out group-hover:rotate-180"
+                />
+            </button>
+
+            @include('StaffTicketProcessing::partials.location-picker', [
+                'field' => 'destination',
+                'label' => __('core::app.home.hero.to'),
+                'placeholder' => __('core::app.home.hero.to_placeholder'),
+            ])
+
+            @include('TripSearch::partials.date-picker')
+
+            <div
+                class="relative"
+                x-data="{ open: false, selected: @js((int) ($initialSearch['quantity'] ?? 1)) }"
+                @hero-restore-quantity.window="selected = $event.detail.quantity"
+                @click.away="open = false"
+                @keydown.escape.window="open = false"
+            >
+                <label class="mb-2 ml-4 block text-sm font-bold text-gray-900">{{ __('core::app.home.hero.quantity') }}</label>
+                <input type="hidden" name="quantity" :value="selected">
+                <button
+                    type="button"
+                    @click="open = !open"
+                    :aria-expanded="open"
+                    aria-haspopup="listbox"
+                    class="flex h-16.75 w-full items-center justify-between rounded-[10px] border border-gray-300 bg-white px-4.5 text-lg font-medium text-gray-900 outline-none transition-colors hover:border-futa-orange/60 focus:border-futa-orange/60 focus:ring-3 focus:ring-futa-orange/10"
+                >
+                    <span x-text="selected"></span>
+                    <span class="flex size-7.5 items-center justify-center rounded-lg bg-gray-100">
+                        <x-heroicon-o-chevron-down
+                            class="size-4 text-gray-500 transition-transform duration-200"
+                            ::class="open ? 'rotate-180' : ''"
+                        />
+                    </span>
+                </button>
+                <div
+                    x-show="open"
+                    x-transition:enter="transition ease-out duration-150"
+                    x-transition:enter-start="opacity-0 -translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    x-transition:leave="transition ease-in duration-100"
+                    x-transition:leave-start="opacity-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 -translate-y-1"
+                    role="listbox"
+                    class="scrollbar-hidden absolute left-0 right-0 top-full z-30 mt-2 max-h-60 overflow-auto rounded-[10px] border border-gray-200 bg-white py-1.5 shadow-[0_8px_20px_rgba(0,0,0,.14)]"
+                    style="display: none;"
+                >
+                    @for($i = 1; $i <= 5; $i++)
+                        <button
+                            type="button"
+                            role="option"
+                            :aria-selected="selected === {{ $i }}"
+                            @click="selected = {{ $i }}; open = false"
+                            class="flex w-full items-center justify-between px-4 py-3 text-left text-lg transition-colors"
+                            :class="selected === {{ $i }} ? 'bg-futa-orange-soft font-semibold text-futa-orange' : 'text-gray-800 hover:bg-gray-50'"
+                        >
+                            <span>{{ $i }}</span>
+                            <span
+                                x-show="selected === {{ $i }}"
+                                class="grid size-5.5 place-items-center rounded-full bg-futa-orange text-white"
+                            >
+                                <x-heroicon-s-check class="size-3.5" />
+                            </span>
+                        </button>
+                    @endfor
+                </div>
+            </div>
+        </div>
+
+        <div x-show="recentSearches.length > 0" x-cloak class="mt-5">
+            <p class="mb-3 ml-4 text-sm font-bold text-gray-900">{{ __('core::app.home.hero.recent_searches') }}</p>
+            <div class="hero-location-results flex gap-3 overflow-x-auto pb-1 sm:gap-5">
+                <template x-for="(search, index) in recentSearches" :key="index">
+                    <button
+                        type="button"
+                        @click="applyRecentSearch(search)"
+                        class="min-w-0 shrink-0 rounded-lg border border-gray-200 bg-[#fafafa] px-4 py-2.5 text-left transition hover:border-futa-orange hover:bg-[#fff7f2] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
+                    >
+                        <span class="block max-w-57 truncate text-sm font-semibold text-gray-950" x-text="search.departure + ' - ' + search.destination"></span>
+                        <span class="mt-1 block text-xs text-slate-500" x-text="formatRecentDate(search.departureDate)"></span>
+                    </button>
+                </template>
+            </div>
+        </div>
+
+        <button type="submit" class="absolute -bottom-6 left-1/2 h-12.25 w-[calc(100%-48px)] max-w-66 -translate-x-1/2 rounded-full bg-futa-orange text-base font-extrabold text-white shadow-[0_8px_18px_rgba(239,82,34,.28)] transition hover:-translate-y-0.5 hover:bg-[#e94512]">
+            {{ __('core::app.home.hero.search') }}
+        </button>
+    </form>
+</section>
