@@ -97,6 +97,8 @@
                         ['key' => 'trips', 'icon' => 'map-pin', 'route' => route('trip-management.trips.index')],
                         ['key' => 'routes', 'icon' => 'calendar-days', 'route' => route('trip-management.schedules.index')],
                         ['key' => 'staff_accounts', 'icon' => 'users', 'route' => route('staff-accounts.index')],
+                        ['key' => 'bookings', 'icon' => 'clipboard-document-list', 'route' => route('bookings.index'),
+                            'permission' => 'booking.view', 'label' => __('BookingTracking::bookings.title')],
                         ['key' => 'refunds', 'icon' => 'receipt-refund', 'route' => route('refunds.index'),
                             'permission' => 'payment.view', 'label' => __('Payment::refunds.title')],
                         ['key' => 'access_management', 'icon' => 'key', 'route' => route('access-management.index')],

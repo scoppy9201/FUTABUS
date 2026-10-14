@@ -2,10 +2,7 @@
 
 declare(strict_types=1);
 
+use FuteBus\BookingManagement\Http\Controllers\TripBookingController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('web')->group(function () {
-    Route::get('/BookingManagement', function () {
-        return view('BookingManagement::index');
-    })->name('BookingManagement.index');
-});
+Route::get('/dat-ve/chon-chuyen/{trip}', TripBookingController::class)->whereNumber('trip')->name('trip-booking.show');

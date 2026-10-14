@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FuteBus\Profile\Http\Controllers;
 
+use FuteBus\Profile\Http\Requests\FeedbackFilterRequest;
 use FuteBus\Profile\Http\Requests\StoreFeedbackRequest;
 use FuteBus\Profile\Services\FeedbackService;
 use FuteBus\StaffCustomerSupport\Services\FeedbackProcessingService;
@@ -14,17 +15,13 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FeedbackController extends Controller
 {
-    public function index(Request $request, FeedbackService $feedback): View
+    public function index(FeedbackFilterRequest $request, FeedbackService $feedback): View
     {
-        $filters = $request->validate([
-            'status' => ['nullable', Rule::in([...FeedbackService::STATUSES, 'waiting'])],
-            'search' => ['nullable', 'string', 'max:150'],
-        ]);
+        $filters = $request->validated();
 
         return view('Profile::feedback', [
             'user'                 => $request->user(),

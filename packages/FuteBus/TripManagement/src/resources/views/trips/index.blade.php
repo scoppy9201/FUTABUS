@@ -175,32 +175,16 @@
     </x-core::side-panel>
 
     {{-- CANCEL MODAL --}}
-    <div role="dialog" aria-modal="true" x-show="showCancel" x-cloak @click.self="showCancel = false"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
-        <div class="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl">
-            <div class="mx-auto mb-4 grid size-14 place-items-center rounded-full bg-rose-100">
-                <x-heroicon-o-exclamation-triangle class="size-7 text-rose-500" />
-            </div>
-            <h3 class="text-lg font-bold text-slate-900"
-            x-text="cancelData.mode === 'delete' ? @js(__('TripManagement::app.tr_modal_delete')) : @js(__('TripManagement::app.tr_modal_cancel'))"></h3>
-            <p class="mt-2 text-sm text-slate-500">
-                <span x-text="cancelData.mode === 'delete' ? @js(__('TripManagement::app.tr_delete_msg')) : @js(__('TripManagement::app.tr_cancel_msg'))"></span>
-                <span class="font-bold text-slate-800" x-text="cancelData.name"></span>?
-            </p>
-            <p x-show="cancelData.mode === 'delete'" class="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-left text-xs text-rose-700">
-                {{ __('TripManagement::app.tr_delete_note') }}
-            </p>
-            <p x-show="cancelData.mode !== 'delete' && cancelData.tickets > 0" class="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-left text-xs text-amber-700">
-                <span x-text="cancelData.tickets"></span> {{ __('TripManagement::app.tr_cancel_note_tickets') }}
-            </p>
-            <form :action="cancelAction" method="POST" class="mt-5 flex items-center justify-end gap-2">
-                @csrf
-                @method('DELETE')
-                <button type="button" @click="showCancel = false" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('TripManagement::app.btn_cancel') }}</button>
-                <button type="submit" class="rounded-lg bg-rose-600 px-5 py-2 text-xs font-bold text-white hover:bg-rose-700">{{ __('TripManagement::app.btn_confirm') }}</button>
-            </form>
-        </div>
-    </div>
+    <form x-ref="cancelForm" :action="cancelAction" method="POST" hidden data-confirm
+        :data-confirm-title="cancelData.mode === 'delete' ? @js(__('TripManagement::app.tr_modal_delete')) : @js(__('TripManagement::app.tr_modal_cancel'))"
+        :data-confirm-message="(cancelData.mode === 'delete' ? @js(__('TripManagement::app.tr_delete_msg')) : @js(__('TripManagement::app.tr_cancel_msg')))
+            + ' ' + cancelData.name + '? '
+            + (cancelData.mode === 'delete' ? @js(__('TripManagement::app.tr_delete_note'))
+                : (cancelData.tickets > 0 ? cancelData.tickets + ' ' + @js(__('TripManagement::app.tr_cancel_note_tickets')) : ''))"
+        data-confirm-label="{{ __('TripManagement::app.btn_confirm') }}">
+        @csrf
+        @method('DELETE')
+    </form>
 </div>
 
 {{-- THÔNG BÁO TỪ SERVER (FutaNotify) --}}
@@ -237,7 +221,7 @@ function tripManager() {
     const notify = (type, msg, opts) => window.FutaNotify && window.FutaNotify[type](msg, opts);
 
     return {
-        showForm: false, showCancel: false, isEdit: false, locked: false,
+        showForm: false, isEdit: false, locked: false,
         form: { ...blank }, formAction: base,
         cancelData: {}, cancelAction: '',
 
@@ -309,7 +293,7 @@ function tripManager() {
             this.$nextTick(() => this.$refs.tripDrawer.showModal());
             this.syncDocToast();
         },
-        openCancel(d){ this.cancelData = d; this.cancelAction = `${base}/${d.id}`; this.showCancel = true; },
+        openCancel(d){ this.cancelData = d; this.cancelAction = `${base}/${d.id}`; this.$nextTick(() => this.$refs.cancelForm.requestSubmit()); },
     };
 }
 </script>

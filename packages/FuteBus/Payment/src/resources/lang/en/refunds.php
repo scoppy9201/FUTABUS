@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'confirmation' => [
+        'claim'    => 'Claim refund :reference? You will be responsible for reconciliation and recording the result.',
+        'complete' => 'Confirm the verified :amount refund for request :reference? The ticket will be marked refunded.',
+        'fail'     => 'Record an unsuccessful refund for request :reference? The ticket remains cancelled.',
+    ],
     'request'             => 'Request reference',
     'export'              => 'Export report',
     'total'               => 'Total',

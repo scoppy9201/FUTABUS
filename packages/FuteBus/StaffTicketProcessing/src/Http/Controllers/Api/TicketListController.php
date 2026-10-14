@@ -4,22 +4,17 @@ declare(strict_types=1);
 
 namespace FuteBus\StaffTicketProcessing\Http\Controllers\Api;
 
+use FuteBus\StaffTicketProcessing\Http\Requests\TicketListRequest;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 
 class TicketListController extends Controller
 {
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(TicketListRequest $request): JsonResponse
     {
-        $filters = $request->validate([
-            'code'   => ['nullable', 'string', 'max:100'], 'phone' => ['nullable', 'string', 'max:20'],
-            'name'   => ['nullable', 'string', 'max:255'], 'date' => ['nullable', 'date_format:Y-m-d'],
-            'status' => ['nullable', Rule::in(['active', 'expired', 'used', 'cancelled', 'refunded'])], 'page' => ['sometimes', 'integer', 'min:1'],
-        ]);
+        $filters = $request->validated();
         $checkedAt = now();
         $company = $request->user()->bus_company_id;
         $query = DB::table('tickets')->join('bookings', 'bookings.id', '=', 'tickets.booking_id')

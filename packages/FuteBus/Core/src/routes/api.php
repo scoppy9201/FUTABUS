@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use FuteBus\Core\Http\Controllers\Api\ContactController;
 use FuteBus\Core\Http\Controllers\Api\PublicContentController;
-use FuteBus\Core\Http\Controllers\Api\TicketLookupController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->name('api.v1.')->group(function (): void {
@@ -17,6 +16,4 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
     Route::get('/schedules', [PublicContentController::class, 'schedules'])->name('schedules.index');
     Route::post('/contact-messages', [ContactController::class, 'store'])
         ->middleware('throttle:5,1')->name('contact-messages.store');
-    Route::post('/ticket-lookups', TicketLookupController::class)
-        ->middleware('throttle:10,1')->name('ticket-lookups.store');
 });

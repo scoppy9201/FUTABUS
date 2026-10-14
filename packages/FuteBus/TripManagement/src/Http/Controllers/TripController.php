@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FuteBus\TripManagement\Http\Controllers;
 
 use FuteBus\TripManagement\Events\TripCancelled;
+use FuteBus\TripManagement\Http\Requests\TripInputRequest;
 use FuteBus\TripManagement\Services\BusDocumentChecker;
 use FuteBus\TripManagement\Services\TripGenerator;
 use Illuminate\Database\QueryException;
@@ -95,16 +96,11 @@ class TripController extends Controller
     }
 
     /** Thêm chuyến lẻ (không thuộc lịch trình). */
-    public function store(Request $request): RedirectResponse
+    public function store(TripInputRequest $request): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
 
-        $data = $request->validate([
-            'route_id'       => ['required', 'exists:routes,id'],
-            'bus_id'         => ['required', 'exists:buses,id'],
-            'departure_time' => ['bail', 'required', 'date_format:'.self::DT, $this->futureRule()],
-            'price'          => ['required', 'numeric', 'gt:0'],
-        ], $this->messages());
+        $data = $request->validated();
 
         $bus = DB::table('buses')->where('id', $data['bus_id'])->where('status', 'active')->first();
         if (! $bus) {
@@ -144,7 +140,7 @@ class TripController extends Controller
     }
 
     /** Gán/đổi xe, sửa giá; chuyến lẻ sửa thêm tuyến + giờ. */
-    public function update(Request $request, int $id): RedirectResponse
+    public function update(TripInputRequest $request, int $id): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
         $trip = DB::table('trips')->find($id);
@@ -159,17 +155,7 @@ class TripController extends Controller
 
         $manual = $trip->trip_schedule_id === null;
 
-        $rules = [
-            'bus_id' => ['nullable', 'exists:buses,id'],
-            'price'  => ['required', 'numeric', 'gt:0'],
-        ];
-        if ($manual) {
-            $rules += [
-                'route_id'       => ['required', 'exists:routes,id'],
-                'departure_time' => ['bail', 'required', 'date_format:'.self::DT, $this->futureRule()],
-            ];
-        }
-        $data = $request->validate($rules, $this->messages());
+        $data = $request->validated();
 
         if ($manual && ! TripGenerator::hasStops((int) $data['route_id'])) {
             return back()->withInput()->withErrors(['trip' => __('TripManagement::app.sch_err_stops')]);
@@ -324,27 +310,5 @@ class TripController extends Controller
             ->where('arrival_time', '>', $dep)
             ->when($ignoreId, fn ($q) => $q->where('id', '<>', $ignoreId))
             ->exists();
-    }
-
-    private function futureRule(): \Closure
-    {
-        return function ($attr, $value, $fail) {
-            try {
-                $d = Carbon::createFromFormat(self::DT, (string) $value);
-            } catch (\Throwable) {
-                $d = false;
-            }
-
-            if ($d === false || $d->lte(now())) {
-                $fail(__('TripManagement::app.tr_err_past'));
-            }
-        };
-    }
-
-    private function messages(): array
-    {
-        return [
-            'price.gt' => __('TripManagement::app.tr_err_price'),
-        ];
     }
 }

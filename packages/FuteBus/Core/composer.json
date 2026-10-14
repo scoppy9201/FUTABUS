@@ -5,7 +5,13 @@
     "version": "1.0.0",
     "license": "MIT",
     "require": {
-        "php": "^8.2"
+        "php": "^8.2",
+        "futebus/bookingmanagement": "*",
+        "futebus/cancellation": "*",
+        "futebus/dashboard": "*",
+        "futebus/payment": "*",
+        "futebus/staffcustomersupport": "*",
+        "futebus/tripsearch": "*"
     },
     "autoload": {
         "psr-4": {

@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace FuteBus\BusManagement\Http\Controllers\Api;
 
+use FuteBus\BusManagement\Http\Requests\VehicleTypeInputRequest;
+use FuteBus\BusManagement\Http\Requests\VehicleTypeSearchRequest;
 use FuteBus\BusManagement\Services\VehicleTypeService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 
 class VehicleTypeController extends Controller
 {
-    public function index(Request $request, VehicleTypeService $types): JsonResponse
+    public function index(VehicleTypeSearchRequest $request, VehicleTypeService $types): JsonResponse
     {
-        $filters = $request->validate(['search' => ['nullable', 'string', 'max:100']]);
+        $filters = $request->validated();
 
         return response()->json($types->paginate($filters['search'] ?? ''));
     }
@@ -24,18 +25,18 @@ class VehicleTypeController extends Controller
         return response()->json(['data' => $this->find($vehicleType)]);
     }
 
-    public function store(Request $request, VehicleTypeService $types): JsonResponse
+    public function store(VehicleTypeInputRequest $request, VehicleTypeService $types): JsonResponse
     {
-        $id = $types->create($request->validate($types->rules()));
+        $id = $types->create($request->validated());
 
         return response()->json(['data' => $this->find($id)], 201)
             ->header('Location', route('api.v1.admin.vehicle-types.show', ['vehicleType' => $id]));
     }
 
-    public function update(Request $request, VehicleTypeService $types, int $vehicleType): JsonResponse
+    public function update(VehicleTypeInputRequest $request, VehicleTypeService $types, int $vehicleType): JsonResponse
     {
         $this->find($vehicleType);
-        $types->update($vehicleType, $request->validate($types->rules($vehicleType)));
+        $types->update($vehicleType, $request->validated());
 
         return response()->json(['data' => $this->find($vehicleType)]);
     }

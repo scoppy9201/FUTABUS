@@ -47,6 +47,12 @@ if (workspace) {
         event.preventDefault();
         if (busy) return;
         busy = true;
+        const confirmed = await window.FutaConfirm?.({
+            title: form.dataset.confirmTitle,
+            message: form.dataset.confirmMessage,
+            label: form.dataset.confirmLabel,
+        });
+        if (confirmed !== true) { busy = false; return; }
         const data = new FormData(form);
         if (data.get('action') === 'complete') {
             data.set('bank_paid_at', `${data.get('bank_paid_date')} ${data.get('bank_paid_hour')}:${data.get('bank_paid_minute')}:00`);

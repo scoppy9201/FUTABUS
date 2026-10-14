@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace FuteBus\Payment\Services;
 
-use FuteBus\Core\Services\BookingLocationCatalog;
-use FuteBus\Core\Services\BookingTripStops;
-use FuteBus\Core\Services\TripSearchService;
+use FuteBus\BookingManagement\Services\BookingTripStops;
+use FuteBus\TripSearch\Services\BookingLocationCatalog;
+use FuteBus\TripSearch\Services\TripSearchService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
