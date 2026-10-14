@@ -7,7 +7,9 @@
     <div x-data="staffDashboard(@js(route('api.v1.staff.dashboard.show')))" class="flex h-dvh min-h-0 flex-col overflow-hidden bg-gray-50 print:h-auto print:overflow-visible">
         @include('StaffDashboard::partials.header')
         @include('StaffDashboard::partials.notifications')
-        <div class="staff-shell grid min-h-0 min-w-0 flex-1 overflow-hidden grid-cols-1 bg-[#F8F9FA] text-sm lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-stretch [&>main]:min-h-0 [&>main]:overflow-y-auto [&>main]:p-4 md:[&>main]:p-6 lg:[&>main]:p-8 print:block print:overflow-visible print:[&>main]:overflow-visible print:[&>main]:p-0">
+        <div
+            class="staff-shell grid min-h-0 min-w-0 flex-1 overflow-hidden grid-cols-1 bg-[#F8F9FA] text-sm lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-stretch [&>main]:min-h-0
+            [&>main]:overflow-y-auto [&>main]:p-4 md:[&>main]:p-6 lg:[&>main]:p-8 print:block print:overflow-visible print:[&>main]:overflow-visible print:[&>main]:p-0">
             @include('StaffDashboard::partials.sidebar')
             <main class="min-w-0 space-y-5 pb-8"
                 x-data="staffSupport(@js([
@@ -129,7 +131,14 @@
                                         </td>
                                         <td class="px-4 py-3 text-gray-600" x-text="supportLabels.categories[item.category]"></td>
                                         <td class="whitespace-nowrap px-4 py-3 text-center text-gray-500" x-text="date(item.created_at)"></td>
-                                        <td class="px-4 py-3 text-center"><span class="inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-sm font-medium" :class="item.urgency === 'urgent' ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-600'" x-text="supportLabels.urgencies[item.urgency]"></span></td>
+                                        <td
+                                            class="px-4 py-3 text-center">
+                                            <span
+                                            class="inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-sm font-medium"
+                                            :class="item.urgency === 'urgent' ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-600'"
+                                            x-text="supportLabels.urgencies[item.urgency]">
+                                            </span>
+                                            </td>
                                         <td class="px-4 py-3 text-center">
                                             <span
                                             class="inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-sm font-semibold"

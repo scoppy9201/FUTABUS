@@ -38,7 +38,9 @@
         @include('StaffDashboard::partials.header', ['operatorProfileRoute' => Auth::user()->isBusCompany() ? 'profile.show' : 'staff.profile', 'operatorPasswordRoute' => Auth::user()->isBusCompany() ? 'profile.password.edit' : 'staff.password'])
         @include('StaffDashboard::partials.notifications')
     </div>
-    <div class="staff-shell grid min-h-0 min-w-0 flex-1 overflow-hidden grid-cols-1 bg-[#F8F9FA] text-sm lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-stretch [&>main]:min-h-0 [&>main]:overflow-y-auto [&>main]:p-4 md:[&>main]:p-6 lg:[&>main]:p-8 print:block print:overflow-visible print:[&>main]:overflow-visible print:[&>main]:p-0">
+    <div
+        class="staff-shell grid min-h-0 min-w-0 flex-1 overflow-hidden grid-cols-1 bg-[#F8F9FA] text-sm lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-stretch [&>main]:min-h-0
+        [&>main]:overflow-y-auto [&>main]:p-4 md:[&>main]:p-6 lg:[&>main]:p-8 print:block print:overflow-visible print:[&>main]:overflow-visible print:[&>main]:p-0">
         <div class="min-h-0 print:hidden">@include('StaffDashboard::partials.sidebar', ['sidebarHome' => Auth::user()->isBusCompany() ? 'dashboard' : 'staff.dashboard'])</div>
         <main class="min-w-0 space-y-5">
             <div class="flex items-center justify-between gap-4 rounded-xl border border-gray-100 bg-white px-5 py-4">

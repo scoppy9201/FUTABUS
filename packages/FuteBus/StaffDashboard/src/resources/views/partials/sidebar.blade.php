@@ -1,4 +1,11 @@
-<dialog id="staff-navigation-panel" x-data="staffNavigation" @staff-navigation-toggle.window="toggle()" @resize.window="syncViewport()" @close="syncExpanded()" @click="if ($event.target === $el) close()" aria-label="{{ __('StaffDashboard::staff.menu') }}" class="staff-navigation m-0 h-dvh max-h-none w-64 max-w-[85vw] border-0 border-r border-gray-200 bg-white p-0 text-gray-800 backdrop:bg-gray-900/50 lg:static lg:h-full lg:shrink-0 lg:open:flex lg:flex-col lg:justify-between">
+<dialog id="staff-navigation-panel"
+    x-data="staffNavigation"
+    @staff-navigation-toggle.window="toggle()"
+    @resize.window="syncViewport()"
+    @close="syncExpanded()"
+    @click="if ($event.target === $el) close()"
+    aria-label="{{ __('StaffDashboard::staff.menu') }}"
+    class="staff-navigation m-0 h-dvh max-h-none w-64 max-w-[85vw] border-0 border-r border-gray-200 bg-white p-0 text-gray-800 backdrop:bg-gray-900/50 lg:static lg:h-full lg:shrink-0 lg:open:flex lg:flex-col lg:justify-between">
     <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3 lg:hidden">
         <span class="text-sm font-semibold">{{ __('StaffDashboard::staff.menu') }}</span>
         <button type="button" @click="close()" aria-label="{{ __('StaffDashboard::staff.close_menu') }}" class="rounded-lg p-2 hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-futa-orange"><x-heroicon-o-x-mark class="size-5" /></button>
