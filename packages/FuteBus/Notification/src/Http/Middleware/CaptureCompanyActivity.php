@@ -21,7 +21,7 @@ class CaptureCompanyActivity
 
     public function handle(Request $request, Closure $next): Response
     {
-        $actor = $request->user('sanctum') ?? $request->user();
+        $actor = $request->user();
         $routeName = $request->route()?->getName();
         if ($request->attributes->get(self::CAPTURED_ATTRIBUTE)
             || ! $actor instanceof User
@@ -121,6 +121,7 @@ class CaptureCompanyActivity
             || str_starts_with($routeName, 'profile.')
             || str_starts_with($routeName, 'api.v1.me.')
             || str_starts_with($routeName, 'api.v1.staff.me.')
+            || str_starts_with($routeName, 'api.v1.staff.support.')
             || in_array($routeName, ['api.v1.staff.previews.store', 'api.v1.staff.quotes.store'], true);
     }
 

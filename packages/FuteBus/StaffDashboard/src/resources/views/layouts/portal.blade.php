@@ -28,7 +28,15 @@
                 </button>
                 <a href="{{ route('staff.dashboard') }}" class="flex shrink-0 items-center gap-3" aria-label="{{ __('StaffDashboard::staff.home') }}">
                     <img src="{{ asset('icons/futabus-logo.png') }}" alt="FUTA Bus Lines" class="h-12 w-14 object-contain">
-                    <span class="hidden sm:block"><span class="flex items-center gap-2"><span class="text-xl font-black tracking-tight text-futa-orange">FUTA</span><span class="text-sm font-bold tracking-wider text-gray-700">BUS LINES</span></span><span class="mt-0.5 block text-[10px] font-semibold uppercase tracking-widest text-futa-orange-dark">{{ __('Dashboard::app.slogan') }}</span></span>
+                    <span class="hidden sm:block">
+                        <span class="flex items-center gap-2">
+                            <span class="text-xl font-black tracking-tight text-futa-orange">FUTA</span>
+                            <span class="text-sm font-bold tracking-wider text-gray-700">BUS LINES</span>
+                        </span>
+                        <span class="mt-0.5 block text-[10px] font-semibold uppercase tracking-widest text-futa-orange-dark">
+                            {{ __('Dashboard::app.slogan') }}
+                        </span>
+                    </span>
                 </a>
                 <span class="hidden h-7 w-px bg-gray-200 md:block"></span>
                 <span class="hidden rounded-full border border-futa-orange-soft bg-futa-orange-soft px-3 py-1.5 text-sm font-semibold text-futa-orange md:inline-flex">{{ __('StaffDashboard::staff.role') }}</span>
@@ -36,13 +44,21 @@
 
             <div class="flex shrink-0 items-center gap-3 sm:gap-4">
                 <div class="relative" x-data="{ open: false }" @click.outside="open = false" @keydown.escape.window="open = false">
-                    <button type="button" @click="open = !open" :aria-expanded="open.toString()" aria-haspopup="true" aria-controls="staff-language-menu" class="flex items-center gap-1.5 rounded-lg px-1.5 py-1 text-sm font-bold text-gray-700 hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-futa-orange" aria-label="{{ __('core::app.home.navbar.language_selector') }}">
+                    <button type="button" @click="open = !open" :aria-expanded="open.toString()"
+                        aria-haspopup="true" aria-controls="staff-language-menu"
+                        class="flex items-center gap-1.5 rounded-lg px-1.5 py-1 text-sm font-bold text-gray-700 hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-futa-orange"
+                        aria-label="{{ __('core::app.home.navbar.language_selector') }}">
                         <span class="inline-flex size-6.5 items-center justify-center overflow-hidden rounded-full"><img src="{{ asset('icons/flags/'.app()->getLocale().'.svg') }}" alt="" class="size-full object-cover"></span>
                         <span>{{ strtoupper(app()->getLocale()) }}</span><x-heroicon-s-chevron-down class="size-3.5 transition-transform" ::class="open ? 'rotate-180' : ''" />
                     </button>
                     <div id="staff-language-menu" x-cloak x-show="open" x-transition class="absolute right-0 top-full z-50 mt-2 w-40 overflow-hidden rounded-lg border border-gray-100 bg-white py-1 shadow-xl">
                         @foreach(['vi', 'en'] as $language)
-                            <a href="{{ request()->fullUrlWithQuery(['lang' => $language]) }}" @class(['flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold transition-colors', 'bg-futa-orange-soft text-futa-orange' => app()->getLocale() === $language, 'text-gray-700 hover:bg-gray-50' => app()->getLocale() !== $language])>
+                            <a href="{{ request()->fullUrlWithQuery(['lang' => $language]) }}"
+                                @class([
+                                    'flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold transition-colors',
+                                    'bg-futa-orange-soft text-futa-orange' => app()->getLocale() === $language,
+                                    'text-gray-700 hover:bg-gray-50' => app()->getLocale() !== $language,
+                                ])>
                                 <span class="inline-flex size-5.5 items-center justify-center overflow-hidden rounded-full"><img src="{{ asset('icons/flags/'.$language.'.svg') }}" alt="" class="size-full object-cover"></span>
                                 <span>{{ __('StaffDashboard::language.'.$language) }}</span>
                             </a>
@@ -63,7 +79,12 @@
                     <x-heroicon-s-chevron-down class="hidden size-4 text-gray-500 sm:block" />
                     <form action="{{ route('logout') }}" method="post" data-confirm data-confirm-title="{{ __('core::confirm.logout_title') }}" data-confirm-message="{{ __('core::confirm.logout_message') }}">
                         @csrf
-                        <button type="submit" class="rounded-lg p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-2 focus-visible:outline-red-600" title="{{ __('core::app.home.navbar.logout') }}" aria-label="{{ __('core::app.home.navbar.logout') }}"><x-heroicon-o-arrow-right-on-rectangle class="size-5" /></button>
+                        <button type="submit"
+                            class="rounded-lg p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-2 focus-visible:outline-red-600"
+                            title="{{ __('core::app.home.navbar.logout') }}"
+                            aria-label="{{ __('core::app.home.navbar.logout') }}">
+                            <x-heroicon-o-arrow-right-on-rectangle class="size-5" />
+                        </button>
                     </form>
                 </div>
             </div>
