@@ -52,6 +52,8 @@ return [
     'rs_offset_hint'       => 'Số phút kể từ mốc 0. Điểm nhỏ nhất là điểm xuất bến.',
     'rs_f_type'            => 'Loại điểm',
     'rs_minutes'           => 'phút',
+    'rs_view_location'     => 'Xem vị trí',
+    'rs_map_new_tab'       => 'Mở Google Maps trong tab mới',
     'rs_type_both'         => 'Đón và trả',
     'rs_type_pickup'       => 'Chỉ đón',
     'rs_type_dropoff'      => 'Chỉ trả',
