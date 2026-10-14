@@ -182,7 +182,12 @@ return [
     'dt_btn_delete_field'                 => 'Remove field',
     'dt_blocks_dispatch_label'            => 'Block dispatch when missing or expired',
     'dt_dates_hint'                       => 'Enter issue and expiry dates in Vehicle Document Records.', 'dt_btn_delete' => 'Delete', 'dt_modal_delete' => 'Confirm document type deletion', 'dt_delete_msg' => 'Are you sure you want to delete the document type',
-    'document_field_registration_number'  => 'Document number', 'document_field_registration_date' => 'Registration date', 'document_field_owner' => 'Owner', 'document_field_issuing_authority' => 'Issuing authority', 'document_field_vehicle_model' => 'Vehicle make / model', 'document_field_note' => 'Notes',
+    'document_field_registration_number'  => 'Document number',
+    'document_field_registration_date'    => 'Registration date',
+    'document_field_owner'                => 'Owner',
+    'document_field_issuing_authority'    => 'Issuing authority',
+    'document_field_vehicle_model'        => 'Vehicle make / model',
+    'document_field_note'                 => 'Notes',
 
     // ── Vehicle Document Records ──
     'vd_title'                   => 'Vehicle Document Record Management',

@@ -178,11 +178,35 @@
                     {{-- Năm sản xuất --}}
                     <div>
                         <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.bus_f_year') }} <span class="text-rose-500">*</span>
-                            <span x-data="{ show: false, hideTimer: null, placeTooltip(el) { clearTimeout(this.hideTimer); const rect = el.getBoundingClientRect(); const tooltip = el.querySelector('[role=tooltip]'); tooltip.style.left = `${Math.max(8, Math.min(rect.left, window.innerWidth - 304))}px`; tooltip.style.top = `${Math.max(8, Math.min(rect.bottom + 8, window.innerHeight - 150))}px`; this.show = true; }, scheduleHide() { this.hideTimer = setTimeout(() => this.show = false, 150); } }" @mouseenter="placeTooltip($el)" @mouseleave="scheduleHide()" @focusin="placeTooltip($el)" @focusout="scheduleHide()" class="inline-flex align-middle">
-                                <button type="button" aria-label="{{ __('BusManagement::app.bus_year_info_title') }}" aria-describedby="bus-year-info-tooltip" title="{{ __('BusManagement::app.bus_year_info') }}" class="inline-flex size-4 items-center justify-center rounded-full text-slate-400 transition hover:text-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/30">
+                            <span
+                                x-data="{
+                                    show: false,
+                                    hideTimer: null,
+                                    placeTooltip(el) {
+                                        clearTimeout(this.hideTimer);
+                                        const rect = el.getBoundingClientRect();
+                                        const tooltip = el.querySelector('[role=tooltip]');
+                                        tooltip.style.left = `${Math.max(8, Math.min(rect.left, window.innerWidth - 304))}px`;
+                                        tooltip.style.top = `${Math.max(8, Math.min(rect.bottom + 8, window.innerHeight - 150))}px`;
+                                        this.show = true;
+                                    },
+                                    scheduleHide() {
+                                        this.hideTimer = setTimeout(() => this.show = false, 150);
+                                    }
+                                }"
+                                @mouseenter="placeTooltip($el)"
+                                @mouseleave="scheduleHide()"
+                                @focusin="placeTooltip($el)"
+                                @focusout="scheduleHide()"
+                                class="inline-flex align-middle">
+                                <button type="button" aria-label="{{ __('BusManagement::app.bus_year_info_title') }}"
+                                    aria-describedby="bus-year-info-tooltip" title="{{ __('BusManagement::app.bus_year_info') }}"
+                                    class="inline-flex size-4 items-center justify-center rounded-full text-slate-400 transition hover:text-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/30">
                                     <x-heroicon-o-information-circle class="size-4" />
                                 </button>
-                                <span x-ref="tooltip" x-show="show" @mouseenter="clearTimeout(hideTimer)" @mouseleave="scheduleHide()" id="bus-year-info-tooltip" role="tooltip" class="fixed z-[100] w-72 max-w-[calc(100vw-1rem)] whitespace-pre-line rounded-xl bg-slate-900 px-3 py-2.5 text-left text-xs font-medium leading-relaxed text-white shadow-xl">
+                                <span x-ref="tooltip" x-show="show" @mouseenter="clearTimeout(hideTimer)"
+                                    @mouseleave="scheduleHide()" id="bus-year-info-tooltip" role="tooltip"
+                                    class="fixed z-[100] w-72 max-w-[calc(100vw-1rem)] whitespace-pre-line rounded-xl bg-slate-900 px-3 py-2.5 text-left text-xs font-medium leading-relaxed text-white shadow-xl">
                                     {{ __('BusManagement::app.bus_year_info') }}
                                 </span>
                             </span>

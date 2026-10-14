@@ -207,7 +207,12 @@ return [
     'dt_btn_delete_field'                 => 'Xóa trường',
     'dt_blocks_dispatch_label'            => 'Chặn điều xe khi thiếu hoặc hết hạn',
     'dt_dates_hint'                       => 'Ngày cấp và ngày hết hạn được nhập trong mục Hồ sơ giấy tờ.', 'dt_btn_delete' => 'Xóa', 'dt_modal_delete' => 'Xác nhận xóa loại giấy tờ', 'dt_delete_msg' => 'Bạn có chắc muốn xóa loại giấy tờ',
-    'document_field_registration_number'  => 'Số đăng ký giấy tờ', 'document_field_registration_date' => 'Ngày đăng ký', 'document_field_owner' => 'Chủ sở hữu', 'document_field_issuing_authority' => 'Cơ quan cấp', 'document_field_vehicle_model' => 'Nhãn hiệu / kiểu loại xe', 'document_field_note' => 'Ghi chú',
+    'document_field_registration_number'  => 'Số đăng ký giấy tờ',
+    'document_field_registration_date'    => 'Ngày đăng ký',
+    'document_field_owner'                => 'Chủ sở hữu',
+    'document_field_issuing_authority'    => 'Cơ quan cấp',
+    'document_field_vehicle_model'        => 'Nhãn hiệu / kiểu loại xe',
+    'document_field_note'                 => 'Ghi chú',
 
     // ── Hồ sơ giấy tờ xe ─────────────────────────────────────────────────────
     'vd_title'                => 'Quản lý hồ sơ giấy tờ xe',
