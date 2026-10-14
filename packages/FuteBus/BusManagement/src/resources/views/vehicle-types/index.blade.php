@@ -5,7 +5,7 @@
 @section('content')
 @php
     $classes = $classes ?? [];
-    $inp = 'w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 transition focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20';
+    $inp = 'w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20';
     $inpDisabled = $inp . ' bg-slate-50 text-slate-500 cursor-not-allowed';
 @endphp
 <div x-data="vehicleTypeManager()">
@@ -144,36 +144,17 @@
         <div class="border-t border-slate-100 px-5 py-4"><x-core::data-pagination :paginator="$vehicleTypes" /></div>
     </div>
 
-    {{-- ══════════════════ ADD MODAL ══════════════════ --}}
-    <div role="dialog" aria-modal="true"
-        x-show="showAdd"
-        x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150"
-        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm"
-        @click.self="showAdd = false" style="display:none">
-        <div x-show="showAdd"
-            x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95"
-            x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-            class="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-
-            <div class="flex items-center justify-between bg-futa-orange px-5 py-3">
-                <div class="flex items-center gap-2">
-                    <span class="rounded-lg bg-white/20 p-1.5"><x-heroicon-o-plus class="size-4 text-white" /></span>
-                    <h2 class="text-base font-bold text-white">{{ __('BusManagement::app.modal_add_title') }}</h2>
-                </div>
-                <button @click="showAdd = false" class="text-white/70 transition hover:text-white">
-                    <x-heroicon-o-x-mark class="size-4" />
-                </button>
-            </div>
-
-            <form id="form-add-vehicle-type" method="POST" action="{{ route('bus-management.vehicle-types.store') }}" class="space-y-4 p-5">
+    {{-- Shared right-side panel --}}
+    <x-core::side-panel id="vehicle-types-add-panel" @close="showAdd = false" @click.self="showAdd = false"
+        x-effect="window.FutaSidePanel.sync($el, showAdd, $nextTick)">
+        <x-slot:title><span>{{ __('BusManagement::app.modal_add_title') }}</span></x-slot:title>
+        <form id="form-add-vehicle-type" method="POST" action="{{ route('bus-management.vehicle-types.store') }}" class="flex min-h-0 flex-1 flex-col">
                 @csrf
+                <div class="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6">
 
                 {{-- Tên --}}
                 <div>
-                    <label for="add-name" class="mb-1 block text-xs font-semibold text-slate-700">
+                    <label for="add-name" class="mb-1 block text-sm font-semibold text-slate-700">
                         {{ __('BusManagement::app.field_name') }} <span class="text-rose-500">*</span>
                     </label>
                     <input id="add-name" type="text" name="name" required minlength="5" maxlength="100"
@@ -185,7 +166,7 @@
                 {{-- Phân loại dòng xe + Số tầng --}}
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label for="add-class" class="mb-1 block text-xs font-semibold text-slate-700">
+                        <label for="add-class" class="mb-1 block text-sm font-semibold text-slate-700">
                             {{ __('BusManagement::app.field_vehicle_class') }} <span class="text-rose-500">*</span>
                         </label>
                         <select id="add-class" name="vehicle_class" required
@@ -199,7 +180,7 @@
                         </select>
                     </div>
                     <div>
-                        <label for="add-floor" class="mb-1 block text-xs font-semibold text-slate-700">
+                        <label for="add-floor" class="mb-1 block text-sm font-semibold text-slate-700">
                             {{ __('BusManagement::app.field_floor_count') }} <span class="text-rose-500">*</span>
                         </label>
                         <select id="add-floor" name="floor_count" required
@@ -216,7 +197,7 @@
                 {{-- Số hàng + Số cột --}}
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label for="add-rows" class="mb-1 block text-xs font-semibold text-slate-700">
+                        <label for="add-rows" class="mb-1 block text-sm font-semibold text-slate-700">
                             {{ __('BusManagement::app.field_seat_rows') }}
                         </label>
                         <input id="add-rows" type="number" name="seat_rows" min="1" max="30"
@@ -225,7 +206,7 @@
                             class="{{ $inp }}" placeholder="{{ __('BusManagement::app.vt_rows_example') }}" />
                     </div>
                     <div>
-                        <label for="add-cols" class="mb-1 block text-xs font-semibold text-slate-700">
+                        <label for="add-cols" class="mb-1 block text-sm font-semibold text-slate-700">
                             {{ __('BusManagement::app.field_seat_columns') }}
                         </label>
                         <input id="add-cols" type="number" name="seat_columns" min="1" max="10"
@@ -237,7 +218,7 @@
 
                 {{-- Số vị trí không dùng --}}
                 <div>
-                    <label for="add-unused" class="mb-1 block text-xs font-semibold text-slate-700">
+                    <label for="add-unused" class="mb-1 block text-sm font-semibold text-slate-700">
                         Số vị trí không dùng <span class="text-slate-400 font-normal">(lối đi, ghế tài xế…)</span>
                     </label>
                         <input id="add-unused" type="number" name="unused_seats" min="0" max="255"
@@ -248,7 +229,7 @@
 
                 {{-- Sức chứa (readonly, tự tính) --}}
                 <div>
-                    <label for="add-capacity" class="mb-1 block text-xs font-semibold text-slate-700">
+                    <label for="add-capacity" class="mb-1 block text-sm font-semibold text-slate-700">
                         {{ __('BusManagement::app.field_capacity') }} <span class="text-rose-500">*</span>
                         <span class="ml-1 text-xs font-normal text-slate-400">({{ __('BusManagement::app.vt_capacity_auto') }})</span>
                     </label>
@@ -265,7 +246,7 @@
 
                 {{-- Mô tả --}}
                 <div>
-                    <label for="add-desc" class="mb-1 block text-xs font-semibold text-slate-700">
+                    <label for="add-desc" class="mb-1 block text-sm font-semibold text-slate-700">
                         {{ __('BusManagement::app.field_description') }}
                     </label>
                     <textarea id="add-desc" name="description" rows="2" maxlength="500"
@@ -273,50 +254,31 @@
                         class="{{ $inp }} resize-none"></textarea>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                </div>
+                <footer class="flex shrink-0 items-center justify-end gap-3 border-t border-slate-200 bg-white px-6 py-4">
                     <button type="button" @click="showAdd = false"
-                        class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">
+                        class="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
                         {{ __('BusManagement::app.btn_cancel') }}
                     </button>
                     <button type="submit" :disabled="!!capacityError(addForm)"
-                        class="rounded-lg bg-futa-orange px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-futa-orange-dark disabled:cursor-not-allowed disabled:opacity-50">
+                        class="rounded-xl bg-futa-orange px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-futa-orange-dark disabled:cursor-not-allowed disabled:opacity-50">
                         {{ __('BusManagement::app.btn_store') }}
                     </button>
-                </div>
+                </footer>
             </form>
-        </div>
-    </div>
+    </x-core::side-panel>
 
-    {{-- ══════════════════ EDIT MODAL ══════════════════ --}}
-    <div role="dialog" aria-modal="true"
-        x-show="showEdit"
-        x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150"
-        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm"
-        @click.self="showEdit = false" style="display:none">
-        <div x-show="showEdit"
-            x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95"
-            x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-            class="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-
-            <div class="flex items-center justify-between bg-slate-800 px-5 py-3">
-                <div class="flex items-center gap-2">
-                    <span class="rounded-lg bg-white/20 p-1.5"><x-heroicon-o-pencil-square class="size-4 text-white" /></span>
-                    <h2 class="text-base font-bold text-white">{{ __('BusManagement::app.modal_edit_title') }}</h2>
-                </div>
-                <button @click="showEdit = false" class="text-white/70 transition hover:text-white">
-                    <x-heroicon-o-x-mark class="size-4" />
-                </button>
-            </div>
-
-            <form id="form-edit-vehicle-type" :action="editAction" method="POST" class="space-y-4 p-5">
-                @csrf @method('PUT')
+    {{-- Shared right-side panel --}}
+    <x-core::side-panel id="vehicle-types-edit-panel" @close="showEdit = false" @click.self="showEdit = false"
+        x-effect="window.FutaSidePanel.sync($el, showEdit, $nextTick)">
+        <x-slot:title><span>{{ __('BusManagement::app.modal_edit_title') }}</span></x-slot:title>
+        <form id="form-edit-vehicle-type" :action="editAction" method="POST" class="flex min-h-0 flex-1 flex-col">
+                @csrf
+                <div class="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6"> @method('PUT')
 
                 {{-- Khóa cứng nếu đã có xe --}}
                 <template x-if="editData.bus_count > 0">
-                    <div class="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-700">
+                    <div class="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
                         <x-heroicon-o-lock-closed class="size-4 shrink-0" />
                         {{ __('BusManagement::app.field_locked_hint') }}
                     </div>
@@ -324,7 +286,7 @@
 
                 {{-- Tên --}}
                 <div>
-                    <label for="edit-name" class="mb-1 block text-xs font-semibold text-slate-700">
+                    <label for="edit-name" class="mb-1 block text-sm font-semibold text-slate-700">
                         Tên loại phương tiện <span class="text-rose-500">*</span>
                     </label>
                     <input id="edit-name" type="text" name="name" :value="editData.name" required minlength="5" maxlength="100"
@@ -334,7 +296,7 @@
                 {{-- Phân loại dòng xe + Số tầng (disabled if in use) --}}
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.vt_class_label') }} <span class="text-rose-500">*</span></label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.vt_class_label') }} <span class="text-rose-500">*</span></label>
                         <select name="vehicle_class"
                             :disabled="editData.bus_count > 0"
                             :class="editData.bus_count > 0 ? '{{ $inpDisabled }}' : '{{ $inp }}'">
@@ -344,7 +306,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.vt_floor_count') }} <span class="text-rose-500">*</span></label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.vt_floor_count') }} <span class="text-rose-500">*</span></label>
                         <select name="floor_count"
                             :disabled="editData.bus_count > 0"
                             x-model.number="editData.floor_count"
@@ -359,7 +321,7 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.vt_seat_rows') }}</label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.vt_seat_rows') }}</label>
                         <input type="number" name="seat_rows" :value="editData.seat_rows" min="1" max="30"
                             x-model.number="editData.seat_rows"
                             @input="calcCapacity(editData)"
@@ -367,7 +329,7 @@
                             :class="editData.bus_count > 0 ? '{{ $inpDisabled }}' : '{{ $inp }}'" />
                     </div>
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.vt_seat_columns') }}</label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.vt_seat_columns') }}</label>
                         <input type="number" name="seat_columns" :value="editData.seat_columns" min="1" max="10"
                             x-model.number="editData.seat_columns"
                             @input="calcCapacity(editData)"
@@ -378,7 +340,7 @@
 
                 {{-- Số vị trí không dùng --}}
                 <div>
-                    <label class="mb-1 block text-xs font-semibold text-slate-700">
+                    <label class="mb-1 block text-sm font-semibold text-slate-700">
                         Số vị trí không dùng <span class="text-slate-400 font-normal">(lối đi, ghế tài xế…)</span>
                     </label>
                     <input type="number" name="unused_seats" min="0" max="255"
@@ -390,7 +352,7 @@
 
                 {{-- Sức chứa readonly --}}
                 <div>
-                    <label class="mb-1 block text-xs font-semibold text-slate-700">
+                    <label class="mb-1 block text-sm font-semibold text-slate-700">
                         {{ __('BusManagement::app.field_capacity') }} <span class="text-rose-500">*</span>
                         <span class="ml-1 text-xs font-normal text-slate-400">({{ __('BusManagement::app.vt_capacity_auto') }})</span>
                     </label>
@@ -402,25 +364,25 @@
                 </div>
 
                 <div>
-                    <label for="edit-desc" class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.field_description') }}</label>
+                    <label for="edit-desc" class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.field_description') }}</label>
                     <textarea id="edit-desc" name="description" rows="2" maxlength="500"
                         x-text="editData.description"
                         class="{{ $inp }} resize-none"></textarea>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                </div>
+                <footer class="flex shrink-0 items-center justify-end gap-3 border-t border-slate-200 bg-white px-6 py-4">
                     <button type="button" @click="showEdit = false"
-                        class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">
+                        class="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
                         {{ __('BusManagement::app.btn_cancel') }}
                     </button>
                     <button type="submit"
-                        class="rounded-lg bg-slate-800 px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-slate-900">
+                        class="rounded-xl bg-futa-orange px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-futa-orange-dark">
                         {{ __('BusManagement::app.btn_save') }}
                     </button>
-                </div>
+                </footer>
             </form>
-        </div>
-    </div>
+    </x-core::side-panel>
 
     {{-- ══════════════════ DELETE MODAL ══════════════════ --}}
     <div role="dialog" aria-modal="true"

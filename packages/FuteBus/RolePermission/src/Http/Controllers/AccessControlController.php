@@ -23,8 +23,9 @@ class AccessControlController extends Controller
         $company = $this->company($request, $access, 'role.view');
 
         return view('RolePermission::index', [
-            'company' => $company,
-            'roles' => $access->roleListing($company->id),
+            'company'          => $company,
+            'roles'            => $access->roleListing($company->id),
+            'permissionGroups' => $request->user()->hasPermissionTo('role.create') ? $access->permissionGroups() : collect(),
         ]);
     }
 
@@ -37,9 +38,9 @@ class AccessControlController extends Controller
         $knownSlugs = DB::table('permissions')->pluck('slug');
 
         return view('RolePermission::catalog', [
-            'company' => $company,
-            'permissionGroups' => $access->permissionGroups(false),
-            'canManageCatalog' => $request->user()->isAdmin(),
+            'company'                  => $company,
+            'permissionGroups'         => $access->permissionGroups(false),
+            'canManageCatalog'         => $request->user()->isAdmin(),
             'availablePermissionSlugs' => $registeredSlugs->diff($knownSlugs)->values(),
         ]);
     }
@@ -51,8 +52,8 @@ class AccessControlController extends Controller
             ->flatMap(fn (array $actions, string $group): array => collect($actions)->map(fn (string $action): string => $group.'.'.$action)->all())
             ->all();
         $data = $request->validate([
-            'slug' => ['required', 'string', Rule::in($allowedSlugs)],
-            'display_name' => ['required', 'string', 'max:120'],
+            'slug'          => ['required', 'string', Rule::in($allowedSlugs)],
+            'display_name'  => ['required', 'string', 'max:120'],
             'display_group' => ['nullable', 'string', 'max:80'],
         ]);
 
@@ -65,19 +66,19 @@ class AccessControlController extends Controller
         DB::table('permissions')->updateOrInsert(
             ['slug' => $data['slug']],
             [
-                'name' => $data['slug'],
-                'display_name' => $data['display_name'],
-                'group' => $group,
+                'name'          => $data['slug'],
+                'display_name'  => $data['display_name'],
+                'group'         => $group,
                 'display_group' => $data['display_group'] ?? null,
-                'is_active' => true,
-                'updated_at' => now(),
-                'created_at' => $existing?->created_at ?? now(),
+                'is_active'     => true,
+                'updated_at'    => now(),
+                'created_at'    => $existing?->created_at ?? now(),
             ],
         );
         if (filled($data['display_group'] ?? null)) {
             DB::table('permissions')->where('group', $group)->update([
                 'display_group' => $data['display_group'],
-                'updated_at' => now(),
+                'updated_at'    => now(),
             ]);
         }
 
@@ -88,7 +89,7 @@ class AccessControlController extends Controller
     {
         $this->assertCatalogAdmin($request);
         $data = $request->validate([
-            'display_name' => ['required', 'string', 'max:120'],
+            'display_name'  => ['required', 'string', 'max:120'],
             'display_group' => ['nullable', 'string', 'max:80'],
         ]);
 
@@ -96,11 +97,11 @@ class AccessControlController extends Controller
         abort_if($row === null, 404);
         DB::table('permissions')->where('group', $row->group)->update([
             'display_group' => $data['display_group'] ?? null,
-            'updated_at' => now(),
+            'updated_at'    => now(),
         ]);
         DB::table('permissions')->where('id', $permission)->update([
             'display_name' => $data['display_name'],
-            'updated_at' => now(),
+            'updated_at'   => now(),
         ]);
 
         return redirect()->route('access-management.catalog')->with('status', __('RolePermission::app.permission_saved'));
@@ -109,15 +110,17 @@ class AccessControlController extends Controller
     public function setPermissionStatus(Request $request, int $permission): RedirectResponse
     {
         $this->assertCatalogAdmin($request);
+        $request->validate(['is_active' => ['required', 'boolean']]);
+        $active = $request->boolean('is_active');
         $row = DB::table('permissions')->where('id', $permission)->first();
         abort_if($row === null, 404);
 
         DB::table('permissions')->where('id', $permission)->update([
-            'is_active' => ! (bool) $row->is_active,
+            'is_active'  => $active,
             'updated_at' => now(),
         ]);
 
-        return redirect()->route('access-management.catalog')->with('status', __((bool) $row->is_active ? 'RolePermission::app.permission_deactivated' : 'RolePermission::app.permission_activated'));
+        return redirect()->route('access-management.catalog')->with('status', __($active ? 'RolePermission::app.permission_activated' : 'RolePermission::app.permission_deactivated'));
     }
 
     public function users(Request $request, AccessControlService $access): View
@@ -127,10 +130,10 @@ class AccessControlController extends Controller
         $search = trim($filters['q'] ?? '');
 
         return view('RolePermission::users', [
-            'company' => $company,
+            'company'       => $company,
             'staffAccounts' => $access->staffListing($company->id, $search),
-            'roles' => $access->roleListing($company->id),
-            'search' => $search,
+            'roles'         => $access->roleListing($company->id),
+            'search'        => $search,
         ]);
     }
 
@@ -139,7 +142,7 @@ class AccessControlController extends Controller
         $company = $this->company($request, $access, 'user.update');
         $access->staffForCompany($company->id, $staff);
         $data = $request->validate([
-            'role_ids' => ['sometimes', 'array'],
+            'role_ids'   => ['sometimes', 'array'],
             'role_ids.*' => ['integer', 'distinct'],
         ]);
         $roleIds = array_map('intval', $data['role_ids'] ?? []);
@@ -149,7 +152,11 @@ class AccessControlController extends Controller
             throw ValidationException::withMessages(['role_ids' => __('RolePermission::app.validation.invalid_role')]);
         }
 
-        DB::transaction(fn () => $access->syncUserRoles($company->id, $staff, $companyRoleIds));
+        DB::transaction(function () use ($access, $company, $staff, $companyRoleIds): void {
+            DB::table('users')->where('id', $staff)->lockForUpdate()->first();
+            $access->staffForCompany($company->id, $staff);
+            $access->syncUserRoles($company->id, $staff, $companyRoleIds);
+        });
 
         return redirect()->route('access-management.users', ['q' => $request->input('q')])
             ->with('status', __('RolePermission::app.user_roles_saved'));
@@ -160,7 +167,7 @@ class AccessControlController extends Controller
         $company = $this->company($request, $access, 'role.create');
 
         return view('RolePermission::roles.create', [
-            'company' => $company,
+            'company'          => $company,
             'permissionGroups' => $access->permissionGroups(),
         ]);
     }
@@ -173,10 +180,10 @@ class AccessControlController extends Controller
                 'required', 'string', 'max:255',
                 Rule::unique('roles', 'name')->where(fn ($query) => $query->where('bus_company_id', $company->id)),
             ],
-            'description' => ['nullable', 'string', 'max:1000'],
+            'description'            => ['nullable', 'string', 'max:1000'],
             'permission_ids_present' => ['required', 'accepted'],
-            'permission_ids' => ['sometimes', 'array'],
-            'permission_ids.*' => ['integer', 'distinct', Rule::exists('permissions', 'id')->where('is_active', true)],
+            'permission_ids'         => ['sometimes', 'array'],
+            'permission_ids.*'       => ['integer', 'distinct', Rule::exists('permissions', 'id')->where('is_active', true)],
         ]);
 
         try {
@@ -190,11 +197,11 @@ class AccessControlController extends Controller
 
                 $roleId = DB::table('roles')->insertGetId([
                     'bus_company_id' => $company->id,
-                    'name' => $data['name'],
-                    'slug' => $slug,
-                    'description' => $data['description'] ?? null,
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'name'           => $data['name'],
+                    'slug'           => $slug,
+                    'description'    => $data['description'] ?? null,
+                    'created_at'     => now(),
+                    'updated_at'     => now(),
                 ]);
 
                 $access->syncRolePermissions($roleId, array_map('intval', $data['permission_ids'] ?? []));
@@ -216,9 +223,9 @@ class AccessControlController extends Controller
         $role = $access->roleForCompany($company->id, $role);
 
         return view('RolePermission::roles.edit', [
-            'company' => $company,
-            'role' => $role,
-            'permissionGroups' => $access->permissionGroups(),
+            'company'               => $company,
+            'role'                  => $role,
+            'permissionGroups'      => $access->permissionGroups(),
             'selectedPermissionIds' => $access->permissionIdsForRole($role->id),
         ]);
     }
@@ -234,17 +241,17 @@ class AccessControlController extends Controller
                     ->where(fn ($query) => $query->where('bus_company_id', $company->id))
                     ->ignore($role->id),
             ],
-            'description' => ['nullable', 'string', 'max:1000'],
+            'description'            => ['nullable', 'string', 'max:1000'],
             'permission_ids_present' => ['required', 'accepted'],
-            'permission_ids' => ['sometimes', 'array'],
-            'permission_ids.*' => ['integer', 'distinct', Rule::exists('permissions', 'id')->where('is_active', true)],
+            'permission_ids'         => ['sometimes', 'array'],
+            'permission_ids.*'       => ['integer', 'distinct', Rule::exists('permissions', 'id')->where('is_active', true)],
         ]);
 
         DB::transaction(function () use ($data, $role, $access): void {
             DB::table('roles')->where('id', $role->id)->update([
-                'name' => $data['name'],
+                'name'        => $data['name'],
                 'description' => $data['description'] ?? null,
-                'updated_at' => now(),
+                'updated_at'  => now(),
             ]);
             $access->syncRolePermissions($role->id, array_map('intval', $data['permission_ids'] ?? []));
         });

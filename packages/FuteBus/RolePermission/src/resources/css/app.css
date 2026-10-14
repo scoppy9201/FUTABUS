@@ -1,1 +1,3 @@
 /* RolePermission package styles */
+/* Hidden wizard steps and search results must remain hidden when they use flex/grid utilities. */
+[data-access-modal] [hidden], [data-access-catalog] [hidden] { display: none; }

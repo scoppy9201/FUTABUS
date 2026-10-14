@@ -110,36 +110,31 @@
         <div class="border-t border-slate-100 px-5 py-4"><x-core::data-pagination :paginator="$buses" /></div>
     </div>
 
-    {{-- ADD / EDIT MODAL --}}
-    <div role="dialog" aria-modal="true" x-show="showForm" x-cloak @click.self="showForm = false"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
-        <div class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div class="flex items-center justify-between px-5 py-3"
-                 :class="isEdit ? 'bg-slate-800' : 'bg-futa-orange'">
-                <h2 class="text-base font-bold text-white"
-                    x-text="isEdit ? @js(__('BusManagement::app.bus_modal_edit')) : @js(__('BusManagement::app.bus_modal_add'))"></h2>
-                <button type="button" @click="showForm = false" class="text-white/70 hover:text-white"><x-heroicon-o-x-mark class="size-4" /></button>
-            </div>
-
-            <form :action="formAction" method="POST" class="space-y-3 p-5">
+    {{-- Shared right-side panel --}}
+    <x-core::side-panel id="buses-form-panel" @close="showForm = false" @click.self="showForm = false"
+        x-effect="window.FutaSidePanel.sync($el, showForm, $nextTick)">
+        <x-slot:title><span
+                    x-text="isEdit ? @js(__('BusManagement::app.bus_modal_edit')) : @js(__('BusManagement::app.bus_modal_add'))"></span></x-slot:title>
+        <form :action="formAction" method="POST" class="flex min-h-0 flex-1 flex-col">
                 @csrf
+                <div class="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6">
                 <template x-if="isEdit"><input type="hidden" name="_method" value="PUT"></template>
 
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {{-- Biển số --}}
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.bus_f_plate') }} <span class="text-rose-500">*</span></label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.bus_f_plate') }} <span class="text-rose-500">*</span></label>
                         <input type="text" name="license_plate" x-model="form.license_plate" required maxlength="20" :placeholder="@js(__('BusManagement::app.bus_plate_example'))"
                                @input="formatPlate($event)"
-                               class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
+                               class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
                         <p class="mt-0.5 text-xs text-slate-400">{{ __('BusManagement::app.bus_plate_hint') }}</p>
                     </div>
                     {{-- Số khung --}}
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.bus_f_chassis') }} <span class="text-rose-500">*</span></label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.bus_f_chassis') }} <span class="text-rose-500">*</span></label>
                         <input type="text" name="chassis_number" x-model="form.chassis_number" required maxlength="17"
                                @input="form.chassis_number = $event.target.value.toUpperCase().replace(/[IOQ]/g,''); scheduleNotice('chassis', @js(__('BusManagement::app.bus_err_chassis_length')), form.chassis_number.length > 0 && form.chassis_number.length < 10)"
-                               class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
+                               class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
                         <p class="mt-0.5 text-xs"
                            :class="form.chassis_number.length > 0 && form.chassis_number.length !== 17 ? 'text-amber-500' : 'text-slate-400'">
                             {{ __('BusManagement::app.bus_chassis_hint') }}
@@ -148,74 +143,74 @@
                     </div>
                     {{-- Số máy --}}
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.bus_engine_label') }} <span class="text-rose-500">*</span></label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.bus_engine_label') }} <span class="text-rose-500">*</span></label>
                         <input type="text" name="engine_number" x-model="form.engine_number" required minlength="6" maxlength="20"
                                @input="form.engine_number = $event.target.value.toUpperCase(); scheduleNotice('engine', @js(__('BusManagement::app.bus_err_engine_number')), form.engine_number.length > 0 && form.engine_number.length < 6)"
                                :placeholder="@js(__('BusManagement::app.bus_engine_example'))"
-                               class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
+                               class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
                         <p class="mt-0.5 text-xs text-slate-400">{{ __('BusManagement::app.bus_engine_hint') }}</p>
                     </div>
                     {{-- Loại phương tiện --}}
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.bus_f_type') }} <span class="text-rose-500">*</span></label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.bus_f_type') }} <span class="text-rose-500">*</span></label>
                         <select name="vehicle_type_id" x-model="form.vehicle_type_id" required
                                 @change="onTypeChange()"
-                                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20">
+                                class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20">
                             <option value="">{{ __('BusManagement::app.bus_f_type_select') }}</option>
                             @foreach($vehicleTypes as $vt)
                                 <option value="{{ $vt->id }}" data-capacity="{{ $vt->default_capacity }}" data-name="{{ $vt->name }}" data-unit="{{ __('BusManagement::app.vt_unit_'.$vt->vehicle_class) }}">{{ $vt->name }}</option>
                             @endforeach
                         </select>
                         {{-- Thông tin kế thừa --}}
-                        <div x-show="inheritedInfo" class="mt-1 rounded-lg bg-futa-orange-soft px-3 py-1.5 text-xs font-semibold text-futa-orange" x-text="inheritedInfo"></div>
+                        <div x-show="inheritedInfo" class="mt-1 rounded-xl bg-futa-orange-soft px-3 py-1.5 text-sm font-semibold text-futa-orange" x-text="inheritedInfo"></div>
                     </div>
                     {{-- Hãng xe --}}
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.bus_f_brand') }} <span class="text-rose-500">*</span></label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.bus_f_brand') }} <span class="text-rose-500">*</span></label>
                         <input type="text" name="brand" x-model="form.brand" required maxlength="100"
-                               class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
+                               class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
                     </div>
                     {{-- Màu xe --}}
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.bus_f_color') }} <span class="text-rose-500">*</span></label>
-                        <select name="color" x-model="form.color" required class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20">
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.bus_f_color') }} <span class="text-rose-500">*</span></label>
+                        <select name="color" x-model="form.color" required class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20">
                             <option value="">{{ __('BusManagement::app.bus_color_select') }}</option>
                             @foreach($vehicleColors as $color)<option value="{{ $color }}">{{ __('BusManagement::app.bus_color_'.$color) }}</option>@endforeach
                         </select>
                     </div>
                     {{-- Năm sản xuất --}}
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.bus_f_year') }} <span class="text-rose-500">*</span></label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.bus_f_year') }} <span class="text-rose-500">*</span></label>
                         <input type="number" name="manufacture_year" x-model="form.manufacture_year" required min="1990" max="{{ date('Y') }}"
                                @input="scheduleNotice('year', @js(__('BusManagement::app.bus_err_year_range', ['min' => 1990, 'max' => date('Y')])), String(form.manufacture_year).length === 4 && (form.manufacture_year < 1990 || form.manufacture_year > {{ date('Y') }}))"
-                               class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
+                               class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
                         <p class="mt-0.5 text-xs text-slate-400">{{ __('BusManagement::app.bus_year_hint', ['min' => 1990, 'max' => date('Y')]) }}</p>
                     </div>
                 </div>
 
                 <div x-show="isEdit">
-                    <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.col_status') }}</label>
+                    <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.col_status') }}</label>
                     <select name="status" x-model="form.status" :disabled="!isEdit"
-                            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                            class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm">
                         <option value="active">{{ __('BusManagement::app.status_active') }}</option>
                         <option value="inactive">{{ __('BusManagement::app.status_inactive') }}</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.field_description') }}</label>
+                    <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.field_description') }}</label>
                     <textarea name="description" x-model="form.description" rows="2" maxlength="500"
-                              class="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20"></textarea>
+                              class="w-full resize-none rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20"></textarea>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
-                    <button type="button" @click="showForm = false" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('BusManagement::app.btn_cancel') }}</button>
-                    <button type="submit" class="rounded-lg bg-futa-orange px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-futa-orange-dark"
-                            x-text="isEdit ? @js(__('BusManagement::app.btn_save')) : @js(__('BusManagement::app.btn_store'))"></button>
                 </div>
+                <footer class="flex shrink-0 items-center justify-end gap-3 border-t border-slate-200 bg-white px-6 py-4">
+                    <button type="button" @click="showForm = false" class="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50">{{ __('BusManagement::app.btn_cancel') }}</button>
+                    <button type="submit" class="rounded-xl bg-futa-orange px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-futa-orange-dark"
+                            x-text="isEdit ? @js(__('BusManagement::app.btn_save')) : @js(__('BusManagement::app.btn_store'))"></button>
+                </footer>
             </form>
-        </div>
-    </div>
+    </x-core::side-panel>
 
     {{-- DELETE MODAL --}}
     <div role="dialog" aria-modal="true" x-show="showDelete" x-cloak @click.self="showDelete = false"
