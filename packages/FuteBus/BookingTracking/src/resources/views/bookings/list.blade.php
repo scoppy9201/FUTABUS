@@ -17,7 +17,9 @@
                 <x-heroicon-o-magnifying-glass class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
                 <input data-booking-search type="search" name="search" value="{{ $filters['search'] ?? '' }}" maxlength="100"
                     placeholder="{{ __('BookingTracking::bookings.search') }}"
-                    class="scheme-light block h-11 w-full rounded-lg border border-slate-300 bg-white py-2 pl-10 pr-3 text-sm text-slate-900 caret-futa-orange outline-none placeholder:text-slate-400 selection:bg-orange-100 focus:border-futa-orange focus:bg-white focus:text-slate-900 focus:ring-2 focus:ring-orange-100">
+                    class="scheme-light block h-11 w-full rounded-lg border border-slate-300 bg-white py-2 pl-10 pr-3
+                        text-sm text-slate-900 caret-futa-orange outline-none placeholder:text-slate-400 selection:bg-orange-100
+                        focus:border-futa-orange focus:bg-white focus:text-slate-900 focus:ring-2 focus:ring-orange-100">
             </span>
         </label>
         <label class="min-w-0 space-y-1.5 xl:col-span-2">
