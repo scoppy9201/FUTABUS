@@ -25,6 +25,9 @@
       "name": "Content"
     },
     {
+      "name": "Reporting"
+    },
+    {
       "name": "Authentication"
     },
     {
@@ -432,6 +435,102 @@
               }
             }
           }
+        }
+      }
+    },
+    "/api/v1/reports": {
+      "get": {
+        "tags": [
+          "Reporting"
+        ],
+        "operationId": "getReports",
+        "summary": "Get company report data",
+        "description": "Requires an authenticated user with the report.view permission. Results are scoped to the user's bus company.",
+        "security": [
+          {
+            "BearerToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["overview", "revenue", "payments", "tickets", "trips"],
+              "default": "overview"
+            }
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["today", "7days", "30days", "custom"],
+              "default": "7days"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {"type": "string", "format": "date"}
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {"type": "string", "format": "date"}
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["all", "completed", "refunded", "pending", "failed", "active", "used", "cancelled", "scheduled", "departed", "arrived"]
+            }
+          },
+          {
+            "name": "trip_status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["all", "scheduled", "departed", "arrived", "cancelled"]
+            }
+          },
+          {
+            "name": "route_id",
+            "in": "query",
+            "schema": {"type": "integer", "minimum": 1}
+          },
+          {
+            "name": "trip_id",
+            "in": "query",
+            "schema": {"type": "integer", "minimum": 1}
+          },
+          {
+            "name": "bus_id",
+            "in": "query",
+            "schema": {"type": "integer", "minimum": 1}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Report filters and company-scoped report metrics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["filters", "report"],
+                  "properties": {
+                    "filters": {"type": "object", "additionalProperties": true},
+                    "report": {"type": "object", "additionalProperties": true}
+                  }
+                }
+              }
+            }
+          },
+          "401": {"description": "Unauthenticated"},
+          "403": {"description": "Report permission denied"},
+          "422": {"description": "Invalid report filters"}
         }
       }
     },
