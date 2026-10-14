@@ -1,6 +1,14 @@
 <?php
 
 return [
+    'wizard' => [
+        'progress'       => 'Role configuration steps', 'information' => 'Role details',
+        'permissions'    => 'Choose permissions', 'review' => 'Review', 'previous' => 'Back', 'next' => 'Continue',
+        'review_title'   => 'Confirm role and permission scope', 'selected' => 'Selected permissions',
+        'select_group'   => 'Select / clear group',
+        'no_permissions' => 'This role has no functional permissions. Assigned staff receive no additional permissions from it.',
+        'fix_errors'     => 'Check the highlighted fields before saving.',
+    ],
     'title'                          => 'Access control',
     'description'                    => 'Create department roles, select functional permissions, and assign roles to your staff.',
     'navigation'                     => 'Access control navigation',
@@ -10,8 +18,8 @@ return [
     'catalog_description'            => 'Available system permissions grouped by department and action.',
     'catalog_admin_heading'          => 'Permission catalog administration',
     'catalog_admin_hint'             => 'Only register keys declared in code. Permission keys are locked; you can edit display names/groups or deactivate a permission without breaking existing role assignments.',
-    'permission_key'                 => 'Permission key declared in code',
-    'choose_permission_key'          => 'Choose a permission key',
+    'permission_key'                 => 'Function to register',
+    'choose_permission_key'          => 'Choose a function',
     'permission_name'                => 'Display name',
     'display_group'                  => 'Display group',
     'register_permission'            => 'Add to catalog',
@@ -35,7 +43,7 @@ return [
     'function_groups'                => 'Function groups',
     'functions_total'                => 'Functional permissions',
     'search_catalog'                 => 'Search function catalog',
-    'search_catalog_hint'            => 'Enter a permission name or key, such as trip.view',
+    'search_catalog_hint'            => 'Search by function or department',
     'no_search_results'              => 'No matching functional permissions found.',
     'assignment_list_hint'           => 'Select one or more roles for each staff account.',
     'search_staff'                   => 'Search staff',

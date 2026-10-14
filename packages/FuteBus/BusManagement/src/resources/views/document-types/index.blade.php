@@ -3,7 +3,7 @@
 @section('title', __('BusManagement::app.dt_title'))
 
 @section('content')
-@php $inp = 'w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20'; @endphp
+@php $inp = 'w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20'; @endphp
 <div x-data="docTypeManager()">
 
     <div class="flex flex-wrap items-end justify-between gap-4">
@@ -66,7 +66,8 @@
                             <td class="px-5 py-4">
                                 <div class="flex max-w-sm flex-wrap gap-1.5">
                                     @foreach($fs as $f)
-                                        <span class="whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">{{ Illuminate\Support\Facades\Lang::has('BusManagement::app.'.$f->label) ? __('BusManagement::app.'.$f->label) : $f->label }}</span>
+                                        <span
+                                            class="whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">{{ Illuminate\Support\Facades\Lang::has('BusManagement::app.'.$f->label) ? __('BusManagement::app.'.$f->label) : $f->label }}</span>
                                     @endforeach
                                 </div>
                             </td>
@@ -135,28 +136,24 @@
         <div class="border-t border-slate-100 px-5 py-4"><x-core::data-pagination :paginator="$types" /></div>
     </div>
 
-    {{-- ADD / EDIT MODAL --}}
-    <div role="dialog" aria-modal="true" x-show="showForm" x-cloak @click.self="showForm = false"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
-        <div class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div class="flex items-center justify-between bg-futa-orange px-5 py-3">
-                <h2 class="text-base font-bold text-white"
-                    x-text="isEdit ? @js(__('BusManagement::app.dt_modal_edit')) : @js(__('BusManagement::app.dt_modal_add'))"></h2>
-                <button type="button" @click="showForm = false" class="text-white/70 hover:text-white"><x-heroicon-o-x-mark class="size-4" /></button>
-            </div>
-
-            <form :action="formAction" method="POST" class="space-y-4 p-5">
+    {{-- Shared right-side panel --}}
+    <x-core::side-panel id="document-types-form-panel" @close="showForm = false" @click.self="showForm = false"
+        x-effect="window.FutaSidePanel.sync($el, showForm, $nextTick)">
+        <x-slot:title><span
+                    x-text="isEdit ? @js(__('BusManagement::app.dt_modal_edit')) : @js(__('BusManagement::app.dt_modal_add'))"></span></x-slot:title>
+        <form :action="formAction" method="POST" class="flex min-h-0 flex-1 flex-col">
                 @csrf
+                <div class="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6">
                 <template x-if="isEdit"><input type="hidden" name="_method" value="PUT"></template>
 
                 {{-- Tên + Bắt buộc --}}
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                     <div class="sm:col-span-2">
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.dt_f_name') }} <span class="text-rose-500">*</span></label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.dt_f_name') }} <span class="text-rose-500">*</span></label>
                         <input type="text" name="name" x-model="form.name" required maxlength="100" class="{{ $inp }}" />
                     </div>
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.dt_f_required') }}</label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.dt_f_required') }}</label>
                         <select name="is_required" x-model="form.is_required" class="{{ $inp }}">
                             <option value="0">{{ __('BusManagement::app.dt_required_no') }}</option>
                             <option value="1">{{ __('BusManagement::app.dt_required_yes') }}</option>
@@ -166,14 +163,14 @@
 
                 {{-- Mô tả --}}
                 <div>
-                    <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.dt_f_desc') }}</label>
+                    <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.dt_f_desc') }}</label>
                     <textarea name="description" x-model="form.description" rows="2" maxlength="500" class="{{ $inp }} resize-none"></textarea>
                 </div>
 
                 {{-- Có thời hạn + Chặn điều xe --}}
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.dt_expiry_yes') }} <span class="text-rose-500">*</span></label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.dt_expiry_yes') }} <span class="text-rose-500">*</span></label>
                         <div class="flex gap-4 mt-1">
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input type="radio" name="has_expiry" value="1" x-model="form.has_expiry" class="accent-futa-orange" />
@@ -186,7 +183,7 @@
                         </div>
                     </div>
                     <div>
-                    <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.dt_blocks_dispatch_label') }} <span class="text-rose-500">*</span></label>
+                    <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.dt_blocks_dispatch_label') }} <span class="text-rose-500">*</span></label>
                         <div class="flex gap-4 mt-1">
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input type="radio" name="blocks_dispatch" value="1" x-model="form.blocks_dispatch" class="accent-futa-orange" />
@@ -202,7 +199,7 @@
 
                 {{-- Số ngày cảnh báo (chỉ hiện khi có thời hạn) --}}
                 <div x-show="form.has_expiry == '1'" x-transition>
-                    <label class="mb-1 block text-xs font-semibold text-slate-700">
+                    <label class="mb-1 block text-sm font-semibold text-slate-700">
                         Số ngày cảnh báo trước hạn <span class="text-rose-500">*</span>
                     </label>
                     <input type="number" name="warning_days" x-model.number="form.warning_days"
@@ -212,7 +209,7 @@
                 </div>
 
                 {{-- Ghi chú --}}
-                <p class="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">
+                <p class="rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-500">
                     <x-heroicon-o-information-circle class="inline size-3.5 mr-1" />
                     {{ __('BusManagement::app.dt_dates_hint') }}
                 </p>
@@ -241,7 +238,8 @@
                                     <option value="1">{{ __('BusManagement::app.dt_required_yes') }}</option>
                                     <option value="0">{{ __('BusManagement::app.dt_required_no') }}</option>
                                 </select>
-                                <button type="button" @click="removeField(i)" x-show="form.fields.length > 1" :aria-label="@js(__('BusManagement::app.dt_btn_delete_field'))" :title="@js(__('BusManagement::app.dt_btn_delete_field'))" class="col-span-1 text-rose-500 hover:text-rose-700">
+                                <button type="button" @click="removeField(i)" x-show="form.fields.length > 1" :aria-label="@js(__('BusManagement::app.dt_btn_delete_field'))" :title="@js(__('BusManagement::app.dt_btn_delete_field'))"
+                                    class="col-span-1 text-rose-500 hover:text-rose-700">
                                     <x-heroicon-o-trash class="mx-auto size-4" />
                                 </button>
                             </div>
@@ -249,14 +247,14 @@
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
-                    <button type="button" @click="showForm = false" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('BusManagement::app.btn_cancel') }}</button>
-                    <button type="submit" class="rounded-lg bg-futa-orange px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-futa-orange-dark"
-                            x-text="isEdit ? @js(__('BusManagement::app.btn_save')) : @js(__('BusManagement::app.btn_store'))"></button>
                 </div>
+                <footer class="flex shrink-0 items-center justify-end gap-3 border-t border-slate-200 bg-white px-6 py-4">
+                    <button type="button" @click="showForm = false" class="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50">{{ __('BusManagement::app.btn_cancel') }}</button>
+                    <button type="submit" class="rounded-xl bg-futa-orange px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-futa-orange-dark"
+                            x-text="isEdit ? @js(__('BusManagement::app.btn_save')) : @js(__('BusManagement::app.btn_store'))"></button>
+                </footer>
             </form>
-        </div>
-    </div>
+    </x-core::side-panel>
 
     {{-- DEACTIVATE MODAL --}}
     <div role="dialog" aria-modal="true" x-show="showDelete" x-cloak @click.self="showDelete = false"

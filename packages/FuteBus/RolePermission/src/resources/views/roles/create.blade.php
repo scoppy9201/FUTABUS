@@ -1,20 +1,15 @@
 @extends('Dashboard::layouts.admin')
-
 @section('title', __('RolePermission::app.create_role'))
-@section('page_title', __('RolePermission::app.create_role'))
-
 @section('content')
-    <div class="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-orange-100 bg-linear-to-r from-white via-orange-50 to-orange-100 px-5 py-4 shadow-sm sm:px-6">
-        <div class="flex items-center gap-3">
-            <span class="grid size-11 place-items-center rounded-xl bg-white text-[#F26522] shadow-sm"><x-heroicon-o-shield-check class="size-6" /></span>
-            <div><p class="text-xs font-bold uppercase tracking-wider text-futa-orange">{{ $company->name }}</p><h1 class="mt-0.5 text-xl font-extrabold text-slate-900 sm:text-2xl">{{ __('RolePermission::app.create_role') }}</h1></div>
-        </div>
-        <a href="{{ route('access-management.index') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50"><x-heroicon-o-arrow-left class="size-4" />{{ __('RolePermission::app.back') }}</a>
-    </div>
     @php($activeAccessTab = 'roles')
+    @include('RolePermission::partials.header', ['hideCreate' => true])
     @include('RolePermission::partials.navigation')
-    <form method="post" action="{{ route('access-management.roles.store') }}" class="mt-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-        @csrf
-        @include('RolePermission::roles.form', ['role' => null, 'selectedPermissionIds' => []])
-    </form>
+    <div class="mt-5 flex flex-wrap gap-3">
+        @if(auth()->user()->hasPermissionTo('role.view'))
+            <a href="{{ route('access-management.index') }}" class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600">{{ __('RolePermission::app.back') }}</a>
+        @endif
+        <button type="button" data-access-target="role-wizard" class="rounded-xl bg-futa-orange px-4 py-3 text-sm font-bold text-white">{{ __('RolePermission::app.create_role') }}</button>
+    </div>
+    @include('RolePermission::roles.modal', ['role' => null, 'selectedPermissionIds' => []])
+    @vite('packages/FuteBus/RolePermission/src/resources/js/app.js')
 @endsection

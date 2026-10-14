@@ -3,7 +3,7 @@
 @section('title', __('BusManagement::app.vd_title'))
 
 @section('content')
-@php $inp = 'w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20'; @endphp
+@php $inp = 'w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20'; @endphp
 <div x-data="vehicleDocManager()">
 
     <div class="flex flex-wrap items-end justify-between gap-4">
@@ -153,23 +153,18 @@
         <div class="border-t border-slate-100 px-5 py-4"><x-core::data-pagination :paginator="$docs" /></div>
     </div>
 
-    {{-- ADD / RENEW MODAL --}}
-    <div role="dialog" aria-modal="true" x-show="showForm" x-cloak @click.self="showForm = false"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
-        <div class="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div class="flex items-center justify-between px-5 py-3"
-                 :class="mode === 'renew' ? 'bg-slate-800' : 'bg-futa-orange'">
-                <h2 class="text-base font-bold text-white"
-                    x-text="mode === 'renew' ? @js(__('BusManagement::app.vd_modal_renew')) : @js(__('BusManagement::app.vd_modal_add'))"></h2>
-                <button type="button" @click="showForm = false" class="text-white/70 hover:text-white"><x-heroicon-o-x-mark class="size-4" /></button>
-            </div>
-
-            <form :action="formAction" method="POST" enctype="multipart/form-data" class="space-y-3 p-5">
+    {{-- Shared right-side panel --}}
+    <x-core::side-panel id="vehicle-documents-form-panel" @close="showForm = false" @click.self="showForm = false"
+        x-effect="window.FutaSidePanel.sync($el, showForm, $nextTick)">
+        <x-slot:title><span
+                    x-text="mode === 'renew' ? @js(__('BusManagement::app.vd_modal_renew')) : (mode === 'edit' ? @js(__('BusManagement::app.vd_modal_edit')) : @js(__('BusManagement::app.vd_modal_add')))"></span></x-slot:title>
+        <form :action="formAction" method="POST" enctype="multipart/form-data" class="flex min-h-0 flex-1 flex-col">
                 @csrf
+                <div class="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6">
                 <template x-if="mode === 'edit'"><input type="hidden" name="_method" value="PUT"></template>
 
                 <template x-if="mode === 'renew'">
-                    <p class="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700">
+                    <p class="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-700">
                         <span x-text="renewInfo.type"></span> — <span x-text="renewInfo.bus"></span>.
                         {{ __('BusManagement::app.vd_renew_hint') }}
                     </p>
@@ -178,7 +173,7 @@
                 <template x-if="mode !== 'renew'">
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div x-show="mode === 'add'">
-                            <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.vd_f_bus') }} <span class="text-rose-500">*</span></label>
+                            <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.vd_f_bus') }} <span class="text-rose-500">*</span></label>
                             <select name="bus_id" x-model="form.bus_id" :disabled="mode !== 'add'" required class="{{ $inp }}">
                                 <option value="">{{ __('BusManagement::app.vd_f_bus_select') }}</option>
                                 @foreach($buses->where('status', 'active') as $b)
@@ -187,7 +182,7 @@
                             </select>
                         </div>
                         <div x-show="mode === 'add'">
-                            <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.vd_f_type') }} <span class="text-rose-500">*</span></label>
+                            <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.vd_f_type') }} <span class="text-rose-500">*</span></label>
                             <select name="document_type_id" x-model="form.document_type_id" :disabled="mode !== 'add'" @change="form.values = {}; if (!currentTypeHasExpiry) form.expiry_date = ''; validateDates()" required class="{{ $inp }}">
                                 <option value="">{{ __('BusManagement::app.vd_f_type_select') }}</option>
                                 <template x-for="t in types" :key="t.id">
@@ -200,17 +195,17 @@
 
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.vd_f_issued') }} <span class="text-rose-500">*</span></label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.vd_f_issued') }} <span class="text-rose-500">*</span></label>
                         <input type="date" name="issued_date" x-model="form.issued_date" :max="issuedMax" required @change="validateDates()" class="{{ $inp }}" />
                     </div>
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.vd_f_expiry') }} <span x-show="currentTypeHasExpiry" class="text-rose-500">*</span></label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.vd_f_expiry') }} <span x-show="currentTypeHasExpiry" class="text-rose-500">*</span></label>
                         <input type="date" name="expiry_date" x-model="form.expiry_date" :min="tomorrow" :required="currentTypeHasExpiry" :disabled="!currentTypeHasExpiry" @change="validateDates()" class="{{ $inp }} disabled:bg-slate-100" />
                     </div>
                 </div>
 
                 <div>
-                    <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.vd_f_attachment') }}</label>
+                    <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.vd_f_attachment') }}</label>
                     <input type="file" name="attachment" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" @change="validateAttachment($event.target.files[0])" class="{{ $inp }}" />
                     <p class="mt-1 text-xs text-slate-500">{{ __('BusManagement::app.vd_attachment_hint') }}</p>
                     <p x-show="form.file_name" class="mt-1 text-xs text-slate-600"><span>{{ __('BusManagement::app.vd_current_file') }}:</span> <span x-text="form.file_name"></span></p>
@@ -222,7 +217,7 @@
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <template x-for="f in currentFields" :key="form.document_type_id + ':' + f.key + ':' + f.type">
                             <div>
-                                <label class="mb-1 block text-xs font-semibold text-slate-700">
+                                <label class="mb-1 block text-sm font-semibold text-slate-700">
                                     <span x-text="f.label"></span> <span x-show="f.required" class="text-rose-500">*</span>
                                 </label>
                                 <input :type="f.type === 'number' ? 'number' : (f.type === 'date' ? 'date' : 'text')" step="any" maxlength="255"
@@ -233,21 +228,21 @@
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
-                    <button type="button" @click="showForm = false" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('BusManagement::app.btn_cancel') }}</button>
-                    <button type="submit" :disabled="attachmentInvalid || datesInvalid" class="rounded-lg bg-futa-orange px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-futa-orange-dark disabled:cursor-not-allowed disabled:opacity-50"
-                            x-text="mode === 'renew' ? @js(__('BusManagement::app.vd_btn_renew')) : (mode === 'edit' ? @js(__('BusManagement::app.vd_btn_save')) : @js(__('BusManagement::app.btn_store')))"></button>
                 </div>
+                <footer class="flex shrink-0 items-center justify-end gap-3 border-t border-slate-200 bg-white px-6 py-4">
+                    <button type="button" @click="showForm = false" class="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50">{{ __('BusManagement::app.btn_cancel') }}</button>
+                    <button type="submit" :disabled="attachmentInvalid || datesInvalid" class="rounded-xl bg-futa-orange px-5 py-3 text-sm font-bold text-white shadow-sm hover:bg-futa-orange-dark disabled:cursor-not-allowed disabled:opacity-50"
+                            x-text="mode === 'renew' ? @js(__('BusManagement::app.vd_btn_renew')) : (mode === 'edit' ? @js(__('BusManagement::app.vd_btn_save')) : @js(__('BusManagement::app.btn_store')))"></button>
+                </footer>
             </form>
-        </div>
-    </div>
+    </x-core::side-panel>
 
-    {{-- VIEW MODAL --}}
-    <div role="dialog" aria-modal="true" x-show="showView" x-cloak @click.self="showView = false"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
-        <div class="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
-            <h3 class="text-lg font-bold text-slate-900">{{ __('BusManagement::app.vd_modal_view') }}</h3>
-            <p class="mt-1 text-sm text-slate-500"><span x-text="viewData.type"></span> — <span class="font-bold" x-text="viewData.bus"></span></p>
+    {{-- Document details use the same right-side panel. --}}
+    <x-core::side-panel id="vehicle-documents-view-panel" :title="__('BusManagement::app.vd_modal_view')"
+        @close="showView = false" @click.self="showView = false"
+        x-effect="window.FutaSidePanel.sync($el, showView, $nextTick)">
+        <div class="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6">
+<p class="mt-1 text-sm text-slate-500"><span x-text="viewData.type"></span> — <span class="font-bold" x-text="viewData.bus"></span></p>
             <dl class="mt-4 space-y-2 text-sm">
                 <div class="flex justify-between gap-4"><dt class="text-slate-500">{{ __('BusManagement::app.vd_f_issued') }}</dt><dd class="font-semibold text-slate-800" x-text="viewData.issued"></dd></div>
                 <div class="flex justify-between gap-4"><dt class="text-slate-500">{{ __('BusManagement::app.vd_f_expiry') }}</dt><dd class="font-semibold text-slate-800" x-text="viewData.expiry"></dd></div>
@@ -259,11 +254,12 @@
             <a x-show="viewData.file" :href="viewData.file" target="_blank" rel="noopener" class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-futa-orange hover:underline">
                 <x-heroicon-o-paper-clip class="size-4" /><span x-text="viewData.file_name || @js(__('BusManagement::app.vd_view_file'))"></span>
             </a>
-            <div class="mt-5 text-right">
-                <button type="button" @click="showView = false" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('BusManagement::app.btn_cancel') }}</button>
-            </div>
+            
         </div>
-    </div>
+        <footer class="flex shrink-0 justify-end border-t border-slate-200 px-6 py-4">
+            <button type="button" @click="showView = false" class="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600">{{ __('BusManagement::app.btn_cancel') }}</button>
+        </footer>
+    </x-core::side-panel>
 
     {{-- DELETE MODAL --}}
     <div role="dialog" aria-modal="true" x-show="showDelete" x-cloak @click.self="showDelete = false"

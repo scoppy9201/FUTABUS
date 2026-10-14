@@ -4,7 +4,7 @@
 
 @section('content')
 @php
-    $inp = 'w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20';
+    $inp = 'w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20';
 @endphp
 <div x-data="scheduleManager()">
 
@@ -207,23 +207,19 @@
         <div class="border-t border-slate-100 px-5 py-4"><x-core::data-pagination :paginator="$schedules" /></div>
     </div>
 
-    {{-- ADD / EDIT SCHEDULE MODAL --}}
-    <div x-show="showForm" x-cloak @click.self="showForm = false"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
-        <div class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div class="flex items-center justify-between bg-futa-orange px-5 py-3">
-                <h2 class="text-base font-bold text-white"
-                    x-text="isEdit ? @js(__('TripManagement::app.sch_modal_edit')) : @js(__('TripManagement::app.sch_modal_add'))"></h2>
-                <button type="button" @click="showForm = false" class="text-white/70 hover:text-white"><x-heroicon-o-x-mark class="size-4" /></button>
-            </div>
-
-            <form :action="formAction" method="POST" class="space-y-3 p-5" @submit="validateForm($event)">
+    {{-- Shared right-side panel --}}
+    <x-core::side-panel id="schedules-form-panel" @close="showForm = false" @click.self="showForm = false"
+        x-effect="window.FutaSidePanel.sync($el, showForm, $nextTick)">
+        <x-slot:title><span
+                    x-text="isEdit ? @js(__('TripManagement::app.sch_modal_edit')) : @js(__('TripManagement::app.sch_modal_add'))"></span></x-slot:title>
+        <form :action="formAction" method="POST" class="flex min-h-0 flex-1 flex-col" @submit="validateForm($event)">
                 @csrf
+                <div class="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6">
                 <template x-if="isEdit"><input type="hidden" name="_method" value="PUT"></template>
 
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div class="sm:col-span-2">
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_route') }} <span class="text-rose-500">*</span></label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_route') }} <span class="text-rose-500">*</span></label>
                         <select name="route_id" x-model="form.route_id" required class="{{ $inp }}">
                             <option value="">{{ __('TripManagement::app.sch_f_route_select') }}</option>
                             @foreach($routes as $r)
@@ -233,11 +229,11 @@
                         <p class="mt-1 text-xs text-slate-400">{{ __('TripManagement::app.sch_hint_stops') }}</p>
                     </div>
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_time') }} <span class="text-rose-500">*</span></label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_time') }} <span class="text-rose-500">*</span></label>
                         <input type="time" name="departure_time" x-model="form.departure_time" required class="{{ $inp }}" />
                     </div>
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_price') }} <span class="text-rose-500">*</span></label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_price') }} <span class="text-rose-500">*</span></label>
                         <input type="number" name="price" x-model="form.price" required step="any"
                                class="{{ $inp }}" :class="form.price !== '' && !isPriceValid() ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500' : ''" />
                         <p x-cloak x-show="form.price !== '' && !isPriceValid()" class="mt-1 text-xs text-rose-600" role="alert">
@@ -245,37 +241,43 @@
                         </p>
                     </div>
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_from') }} <span class="text-rose-500">*</span></label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_from') }} <span class="text-rose-500">*</span></label>
                         <input type="date" name="start_date" x-model="form.start_date" required class="{{ $inp }}" />
                     </div>
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_to') }} <span class="text-rose-500">*</span></label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_to') }} <span class="text-rose-500">*</span></label>
                         <input type="date" name="end_date" x-model="form.end_date" required class="{{ $inp }}" />
                     </div>
-                    <div class="sm:col-span-2">
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_days') }}</label>
-                        <div class="flex flex-wrap gap-4">
+                    <fieldset class="sm:col-span-2" aria-describedby="schedule-weekdays-hint">
+                        <legend class="mb-2 text-sm font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_days') }}</legend>
+                        <div class="flex flex-wrap gap-2">
                             @foreach(range(1, 7) as $v)
-                                <label class="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700">
-                                    <input type="checkbox" name="days_of_week[]" value="{{ $v }}" x-model="form.days_of_week">
-                                    {{ __('TripManagement::app.day_'.$v) }}
+                                <label class="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl px-2.5 text-sm font-semibold text-slate-700 hover:bg-futa-orange-soft/50">
+                                    <input type="checkbox" name="days_of_week[]" value="{{ $v }}" x-model="form.days_of_week" class="peer sr-only">
+                                    <span aria-hidden="true"
+                                        class="grid size-5 shrink-0 place-items-center rounded-full border-2 border-slate-300 bg-white transition
+                                            peer-checked:border-futa-orange peer-checked:[&>span]:opacity-100
+                                            peer-focus-visible:ring-2 peer-focus-visible:ring-futa-orange/30 peer-focus-visible:ring-offset-2">
+                                        <span class="size-2.5 rounded-full border-2 border-futa-orange opacity-0 transition"></span>
+                                    </span>
+                                    <span class="peer-checked:text-futa-orange">{{ __('TripManagement::app.day_'.$v) }}</span>
                                 </label>
                             @endforeach
                         </div>
-                        <p class="mt-1 text-xs text-slate-400">{{ __('TripManagement::app.sch_hint_all_days') }}</p>
-                    </div>
+                        <p id="schedule-weekdays-hint" class="mt-2 text-xs leading-5 text-slate-500">{{ __('TripManagement::app.sch_hint_all_days') }}</p>
+                    </fieldset>
                 </div>
 
                 <input type="hidden" name="apply_all_days" value="1" :disabled="form.days_of_week.length > 0">
 
-                <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
-                    <button type="button" @click="showForm = false" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('TripManagement::app.btn_cancel') }}</button>
-                    <button type="submit" class="rounded-lg bg-futa-orange px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-futa-orange-dark"
-                            x-text="isEdit ? @js(__('TripManagement::app.btn_save')) : @js(__('TripManagement::app.btn_store'))"></button>
                 </div>
+                <footer class="flex shrink-0 items-center justify-end gap-3 border-t border-slate-200 bg-white px-6 py-4">
+                    <button type="button" @click="showForm = false" class="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50">{{ __('TripManagement::app.btn_cancel') }}</button>
+                    <button type="submit" class="rounded-xl bg-futa-orange px-5 py-3 text-sm font-bold text-white shadow-sm hover:bg-futa-orange-dark"
+                            x-text="isEdit ? @js(__('TripManagement::app.btn_save')) : @js(__('TripManagement::app.btn_store'))"></button>
+                </footer>
             </form>
-        </div>
-    </div>
+    </x-core::side-panel>
 
     {{-- DEACTIVATE SCHEDULE MODAL --}}
     <div x-show="showDelete" x-cloak @click.self="showDelete = false"
@@ -299,43 +301,40 @@
         </div>
     </div>
 
-    {{-- ADD / EDIT STOP MODAL --}}
-    <div x-show="showStop" x-cloak @click.self="showStop = false"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
-        <div class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div class="flex items-center justify-between px-5 py-3" :class="stopEdit ? 'bg-slate-800' : 'bg-futa-orange'">
-                <h2 class="text-base font-bold text-white"
-                    x-text="stopEdit ? @js(__('TripManagement::app.rs_modal_edit')) : @js(__('TripManagement::app.rs_modal_add'))"></h2>
-                <button type="button" @click="showStop = false" class="text-white/70 hover:text-white"><x-heroicon-o-x-mark class="size-4" /></button>
-            </div>
-            <form :action="stopAction" method="POST" class="space-y-3 p-5">
+    {{-- Shared right-side panel --}}
+    <x-core::side-panel id="schedules-stop-panel" @close="showStop = false" @click.self="showStop = false"
+        x-effect="window.FutaSidePanel.sync($el, showStop, $nextTick)">
+        <x-slot:title><span
+                    x-text="stopEdit ? @js(__('TripManagement::app.rs_modal_edit')) : @js(__('TripManagement::app.rs_modal_add'))"></span></x-slot:title>
+        <form :action="stopAction" method="POST" class="flex min-h-0 flex-1 flex-col">
                 @csrf
+                <div class="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6">
                 <template x-if="stopEdit"><input type="hidden" name="_method" value="PUT"></template>
                 <input type="hidden" name="route_id" :value="stopRoute">
                 <input type="hidden" name="schedule_id" :value="stopSchedule">
 
                 <div>
-                    <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.rs_f_name') }} <span class="text-rose-500">*</span></label>
+                    <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.rs_f_name') }} <span class="text-rose-500">*</span></label>
                     <input type="text" name="name" x-model="stopForm.name" required maxlength="150" class="{{ $inp }}" />
                 </div>
                 <div>
-                    <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.rs_f_address') }}</label>
+                    <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.rs_f_address') }}</label>
                     <input type="text" name="address" x-model="stopForm.address" maxlength="255" class="{{ $inp }}" />
                 </div>
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                     <div class="sm:col-span-2">
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.rs_f_leg') }} <span class="text-rose-500">*</span></label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.rs_f_leg') }} <span class="text-rose-500">*</span></label>
                         <input type="number" name="leg_minutes" x-model="stopForm.leg_minutes" required min="1" max="1440" step="any" class="{{ $inp }}" />
                         <p class="mt-0.5 text-xs text-slate-400">{{ __('TripManagement::app.rs_leg_hint') }}</p>
                     </div>
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.rs_f_position') }}</label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.rs_f_position') }}</label>
                         <input type="number" name="position" x-model="stopForm.position" min="1" step="any" class="{{ $inp }}" />
                         <p class="mt-0.5 text-xs text-slate-400">{{ __('TripManagement::app.rs_position_hint') }}</p>
                     </div>
                 </div>
                 <div>
-                    <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.rs_f_type') }}</label>
+                    <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.rs_f_type') }}</label>
                     <select name="stop_type" x-model="stopForm.stop_type" class="{{ $inp }}">
                         <option value="both">{{ __('TripManagement::app.rs_type_both') }}</option>
                         <option value="pickup">{{ __('TripManagement::app.rs_type_pickup') }}</option>
@@ -343,14 +342,14 @@
                     </select>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
-                    <button type="button" @click="showStop = false" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('TripManagement::app.btn_cancel') }}</button>
-                    <button type="submit" class="rounded-lg bg-futa-orange px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-futa-orange-dark"
-                            x-text="stopEdit ? @js(__('TripManagement::app.btn_save')) : @js(__('TripManagement::app.btn_store'))"></button>
                 </div>
+                <footer class="flex shrink-0 items-center justify-end gap-3 border-t border-slate-200 bg-white px-6 py-4">
+                    <button type="button" @click="showStop = false" class="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50">{{ __('TripManagement::app.btn_cancel') }}</button>
+                    <button type="submit" class="rounded-xl bg-futa-orange px-5 py-3 text-sm font-bold text-white shadow-sm hover:bg-futa-orange-dark"
+                            x-text="stopEdit ? @js(__('TripManagement::app.btn_save')) : @js(__('TripManagement::app.btn_store'))"></button>
+                </footer>
             </form>
-        </div>
-    </div>
+    </x-core::side-panel>
 
     {{-- DELETE STOP MODAL --}}
     <div x-show="showStopDel" x-cloak @click.self="showStopDel = false"
