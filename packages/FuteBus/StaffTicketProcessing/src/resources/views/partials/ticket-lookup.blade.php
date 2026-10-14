@@ -104,29 +104,9 @@
                             class="text-futa-orange">{{ __('StaffDashboard::staff.retry') }}</button>
                     </td></tr>
                 </tbody></table></div>
-                <div x-show="meta.total > 0 && !listFailed" x-cloak class="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500">
-                    <span><span x-text="meta.from"></span>–<span x-text="meta.to"></span> / <span x-text="meta.total"></span> {{ __('StaffTicketProcessing::tickets.ticket_count') }}</span>
-                    <div
-                        class="flex items-center gap-3">
-                    <button
-                        type="button"
-                        @click="loadTickets(meta.current_page - 1)"
-                        :disabled="loadingTickets || meta.current_page <= 1"
-                        class="rounded-md border px-3 py-2 disabled:opacity-40">{{ __('StaffTicketProcessing::tickets.previous') }}</button>
-                    <span>
-                    <span
-                        x-text="meta.current_page">
-                    </span> / <span
-                        x-text="meta.last_page">
-                    </span>
-                    </span>
-                    <button
-                        type="button"
-                        @click="loadTickets(meta.current_page + 1)"
-                        :disabled="loadingTickets || meta.current_page >= meta.last_page"
-                        class="rounded-md border px-3 py-2 disabled:opacity-40">{{ __('StaffTicketProcessing::tickets.next') }}</button>
-                    </div>
-                </div>
+                <x-core::data-pagination meta="meta" navigate="loadTickets" busy="loadingTickets"
+                    x-cloak x-show="!listFailed && groups?.tickets.lookup" class="mt-4" />
+
             </section>
             <dialog x-ref="ticketDetail" class="m-auto w-[calc(100%-2rem)] max-w-lg rounded-2xl border border-gray-100 bg-white p-6 shadow-xl backdrop:bg-gray-950/50" @click="if ($event.target === $refs.ticketDetail) $refs.ticketDetail.close()" aria-labelledby="staff-ticket-detail-title">
                 <div

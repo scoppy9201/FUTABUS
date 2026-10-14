@@ -47,10 +47,20 @@ function initializeStaffForms() {
                 });
             }
         }
+        form.staffValidation = names => fields.filter(field => field.type !== 'file' && (!names || names.includes(field.name)))
+            .filter(field => !validate(field));
         form.addEventListener('submit', event => {
-            const invalid = fields.filter(field => field.type !== 'file').filter(field => !validate(field));
+            if (form.dataset.staffWizard !== undefined && form.dataset.step !== '3') {
+                event.preventDefault();
+                form.dispatchEvent(new Event('staff-next'));
+                return;
+            }
+            const invalid = form.staffValidation();
             if (invalid.length) {
                 event.preventDefault();
+                if (form.dataset.staffWizard !== undefined) {
+                    form.dispatchEvent(new CustomEvent('staff-invalid', { detail: invalid[0].name }));
+                }
                 invalid[0].focus();
             }
         });

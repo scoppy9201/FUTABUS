@@ -107,9 +107,7 @@
                 </tbody>
             </table>
         </div>
-        @if($buses->hasPages())
-            <div class="border-t border-slate-100 px-5 py-4">{{ $buses->links() }}</div>
-        @endif
+        <div class="border-t border-slate-100 px-5 py-4"><x-core::data-pagination :paginator="$buses" /></div>
     </div>
 
     {{-- ADD / EDIT MODAL --}}

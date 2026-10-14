@@ -82,8 +82,7 @@
                 </table>
             </div>
             <footer class="space-y-3 border-t border-slate-100 p-4">
-                <p class="text-xs text-slate-500">{{ __('Payment::refunds.records', ['from' => $refunds->firstItem() ?? 0, 'to' => $refunds->lastItem() ?? 0, 'total' => $refunds->total()]) }}</p>
-                {{ $refunds->links() }}
+                <x-core::data-pagination :paginator="$refunds" />
             </footer>
         </section>
         <aside id="refund-details" data-refund-content aria-label="{{ __('Payment::refunds.view') }}" aria-busy="false" class="min-w-0 rounded-2xl border border-slate-200 bg-white shadow-sm xl:sticky xl:top-5 xl:max-h-[calc(100dvh-8rem)] xl:overflow-auto">
