@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace FuteBus\Payment\Services;
 
 use App\Models\User;
+use FuteBus\BusCompanyManagement\Models\BusCompany as BusCompanyRecord;
+use FuteBus\Payment\Models\TicketRefund as TicketRefundRecord;
+use FuteBus\Payment\Models\TicketRefundEvent as TicketRefundEventRecord;
 use FuteBus\Payment\Notifications\TicketRefundCompleted;
+use FuteBus\TicketManagement\Models\Ticket as TicketRecord;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;
@@ -19,7 +23,7 @@ class ManualRefundService
     public function visible(User $actor): Builder
     {
         abort_unless($actor->is_active && $actor->hasPermissionTo('payment.view'), 403);
-        $query = DB::table('ticket_refunds')->join('ticket_cancellations', 'ticket_cancellations.id', '=', 'ticket_refunds.cancellation_id')
+        $query = TicketRefundRecord::query()->toBase()->join('ticket_cancellations', 'ticket_cancellations.id', '=', 'ticket_refunds.cancellation_id')
             ->join('tickets', 'tickets.id', '=', 'ticket_cancellations.ticket_id')
             ->join('bookings', 'bookings.id', '=', 'tickets.booking_id')
             ->join('trips', 'trips.id', '=', 'tickets.trip_id')
@@ -37,7 +41,7 @@ class ManualRefundService
                 'handler.name as handler_name', 'customers.phone as customer_phone',
                 'routes.origin_city', 'routes.destination_city', 'payments.method as payment_method');
         if (! $actor->isAdmin()) {
-            $company = $actor->bus_company_id ?: DB::table('bus_companies')->whereRaw('LOWER(email) = ?', [mb_strtolower($actor->email)])->value('id');
+            $company = $actor->bus_company_id ?: BusCompanyRecord::query()->toBase()->whereRaw('LOWER(email) = ?', [mb_strtolower($actor->email)])->value('id');
             abort_if(! $company, 403);
             $query->where('trips.bus_company_id', $company);
         }
@@ -66,7 +70,7 @@ class ManualRefundService
 
     public function events(int $refund): Collection
     {
-        return DB::table('ticket_refund_events')->join('users', 'users.id', '=', 'ticket_refund_events.actor_id')
+        return TicketRefundEventRecord::query()->toBase()->join('users', 'users.id', '=', 'ticket_refund_events.actor_id')
             ->where('refund_id', $refund)->orderBy('version')->select('ticket_refund_events.*', 'users.name')->get();
     }
 
@@ -95,7 +99,7 @@ class ManualRefundService
         abort_unless($actor->is_active && $actor->hasPermissionTo('payment.refund'), 403);
         try {
             return DB::transaction(function () use ($actor, $id, $input): object {
-                $current = DB::table('ticket_refunds')->where('id', $id)->lockForUpdate()->first();
+                $current = TicketRefundRecord::query()->toBase()->where('id', $id)->lockForUpdate()->first();
                 abort_if($current === null, 404);
                 $record = $this->visible($actor)->where('ticket_refunds.id', $id)->first();
                 abort_if($record === null, 404);
@@ -112,8 +116,8 @@ class ManualRefundService
                 $changes = $this->transition($actor, $record, $input, $target);
                 $changes['version'] = $current->version + 1;
                 $changes['updated_at'] = now();
-                DB::table('ticket_refunds')->where('id', $id)->update($changes);
-                DB::table('ticket_refund_events')->insert([
+                TicketRefundRecord::query()->toBase()->where('id', $id)->update($changes);
+                TicketRefundEventRecord::query()->toBase()->insert([
                     'refund_id'      => $id, 'actor_id' => $actor->id, 'version' => $changes['version'],
                     'from_status'    => $current->status, 'to_status' => $target, 'note' => $input['note'] ?? null,
                     'amount'         => $changes['confirmed_amount'] ?? null,
@@ -121,14 +125,14 @@ class ManualRefundService
                     'created_at'     => now(),
                 ]);
                 if ($target === 'refunded') {
-                    DB::table('tickets')->where('id', $record->ticket_id)->where('status', 'cancelled')
+                    TicketRecord::query()->toBase()->where('id', $record->ticket_id)->where('status', 'cancelled')
                         ->update(['status' => 'refunded', 'updated_at' => now()]);
                     User::findOrFail($record->customer_user_id)->notify(new TicketRefundCompleted([
                         'reference' => $record->reference, 'amount' => (int) $record->amount, 'status' => 'refunded',
                     ]));
                 }
 
-                return DB::table('ticket_refunds')->where('id', $id)->first();
+                return TicketRefundRecord::query()->toBase()->where('id', $id)->first();
             });
         } catch (UniqueConstraintViolationException) {
             throw ValidationException::withMessages(['bank_reference' => __('Payment::refunds.duplicate_reference')]);
@@ -151,7 +155,7 @@ class ManualRefundService
             || Carbon::parse($input['bank_paid_at'])->lt(Carbon::parse($record->cancelled_at))) {
             throw ValidationException::withMessages(['amount' => __('Payment::refunds.invalid_settlement')]);
         }
-        abort_unless(DB::table('tickets')->where('id', $record->ticket_id)->value('status') === 'cancelled', 409);
+        abort_unless(TicketRecord::query()->toBase()->where('id', $record->ticket_id)->value('status') === 'cancelled', 409);
 
         return ['status'     => $target, 'confirmed_amount' => (int) $input['amount'],
             'bank_reference' => strtoupper(trim($input['bank_reference'])), 'bank_paid_at' => Carbon::parse($input['bank_paid_at']),

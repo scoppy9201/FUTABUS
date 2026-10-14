@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace FuteBus\TripManagement\Providers;
 
+use FuteBus\RouteManagement\Events\RouteTimingChanged;
 use FuteBus\TripManagement\Console\GenerateTripsCommand;
+use FuteBus\TripManagement\Services\TripGenerator;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,6 +24,7 @@ class TripManagementServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'TripManagement');
         $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'TripManagement');
         Route::middleware('web')->group(__DIR__.'/../routes/web.php');
+        Event::listen(RouteTimingChanged::class, fn (RouteTimingChanged $event) => TripGenerator::syncArrivals($event->routeId));
 
         if ($this->app->runningInConsole()) {
             $this->commands([GenerateTripsCommand::class]);

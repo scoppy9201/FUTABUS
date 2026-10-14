@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace FuteBus\StaffCustomerSupport\Http\Controllers;
 
+use FuteBus\BusCompanyManagement\Models\BusCompany as BusCompanyRecord;
 use FuteBus\StaffCustomerSupport\Http\Requests\AssignSupportCompanyRequest;
 use FuteBus\StaffCustomerSupport\Services\FeedbackProcessingService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\DB;
 
 class SupportTriageController extends Controller
 {
@@ -20,7 +20,7 @@ class SupportTriageController extends Controller
 
         return view('StaffCustomerSupport::support-triage', [
             'reports'   => $support->visible($request->user())->orderByDesc('feedback.id')->paginate(15),
-            'companies' => DB::table('bus_companies')->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'companies' => BusCompanyRecord::query()->toBase()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
         ]);
     }
 

@@ -7,7 +7,14 @@
     "require": {
         "php": "^8.2",
         "futebus/core": "*",
-        "futebus/tripsearch": "*"
+        "futebus/tripsearch": "*",
+        "futebus/customermanagement": "*",
+        "futebus/payment": "*",
+        "futebus/profile": "*",
+        "futebus/routemanagement": "*",
+        "futebus/seatmanagement": "*",
+        "futebus/ticketmanagement": "*",
+        "futebus/tripmanagement": "*"
     },
     "autoload": {
         "psr-4": {

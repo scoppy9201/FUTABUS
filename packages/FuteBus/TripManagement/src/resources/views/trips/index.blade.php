@@ -237,8 +237,12 @@ function tripManager() {
             const out = [];
             requiredTypes.forEach(r => {
                 const exp = docs[r.id];
-                if (!exp) out.push({ name: r.name, reason: 'missing' });
-                else if (exp < day) out.push({ name: r.name, reason: 'expired', expiry: exp.split('-').reverse().join('/') });
+                const hasDocument = Object.prototype.hasOwnProperty.call(docs, r.id);
+                if (!hasDocument || (r.has_expiry && !exp)) {
+                    out.push({ name: r.name, reason: 'missing' });
+                } else if (r.has_expiry && exp < day) {
+                    out.push({ name: r.name, reason: 'expired', expiry: exp.split('-').reverse().join('/') });
+                }
             });
             return out;
         },

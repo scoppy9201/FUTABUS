@@ -7,8 +7,8 @@ namespace FuteBus\StaffDashboard\Services;
 use App\Models\User;
 use FuteBus\Core\Models\FaqQuestion;
 use FuteBus\StaffCustomerSupport\Services\FeedbackProcessingService;
+use FuteBus\TicketManagement\Models\Ticket as TicketRecord;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class StaffDashboardService
@@ -73,7 +73,7 @@ class StaffDashboardService
 
         $start = now()->startOfDay();
 
-        return DB::table('tickets')
+        return TicketRecord::query()->toBase()
             ->join('bookings', 'bookings.id', '=', 'tickets.booking_id')
             ->join('trips', 'trips.id', '=', 'tickets.trip_id')
             ->join('routes', 'routes.id', '=', 'trips.route_id')

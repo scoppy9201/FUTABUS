@@ -6,12 +6,13 @@ namespace FuteBus\Cancellation\Http\Controllers;
 
 use FuteBus\Cancellation\Http\Requests\CancellationQuoteRequest;
 use FuteBus\Cancellation\Http\Requests\StoreCancellationRequest;
+use FuteBus\Cancellation\Models\TicketCancellation as TicketCancellationRecord;
 use FuteBus\Cancellation\Services\TicketCancellationService;
+use FuteBus\Payment\Models\TicketRefund as TicketRefundRecord;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\DB;
 
 class TicketCancellationController extends Controller
 {
@@ -19,7 +20,7 @@ class TicketCancellationController extends Controller
     {
         $tickets = $service->owned($request->user(), $booking)->get();
         abort_if($tickets->isEmpty(), 404);
-        $receipts = DB::table('ticket_cancellations')->join('ticket_refunds', 'ticket_refunds.cancellation_id', '=', 'ticket_cancellations.id')
+        $receipts = TicketCancellationRecord::query()->toBase()->join('ticket_refunds', 'ticket_refunds.cancellation_id', '=', 'ticket_cancellations.id')
             ->whereIn('ticket_cancellations.ticket_id', $tickets->pluck('id'))
             ->select('ticket_cancellations.reference', 'ticket_cancellations.refund_amount', 'ticket_refunds.status')->get();
 
@@ -41,14 +42,14 @@ class TicketCancellationController extends Controller
 
         return response()->json(['reference' => $cancellation->reference,
             'fee'                            => $cancellation->fee_amount, 'refund' => $cancellation->refund_amount,
-            'refund_status'                  => DB::table('ticket_refunds')->where('cancellation_id', $cancellation->id)->value('status')]);
+            'refund_status'                  => TicketRefundRecord::query()->toBase()->where('cancellation_id', $cancellation->id)->value('status')]);
     }
 
     public function status(Request $request, TicketCancellationService $service, int $booking): JsonResponse
     {
         $tickets = $service->owned($request->user(), $booking)->pluck('tickets.id');
         abort_if($tickets->isEmpty(), 404);
-        $receipts = DB::table('ticket_cancellations')->join('ticket_refunds', 'ticket_refunds.cancellation_id', '=', 'ticket_cancellations.id')
+        $receipts = TicketCancellationRecord::query()->toBase()->join('ticket_refunds', 'ticket_refunds.cancellation_id', '=', 'ticket_cancellations.id')
             ->whereIn('ticket_cancellations.ticket_id', $tickets)
             ->select('ticket_cancellations.reference', 'ticket_refunds.status')->get();
 

@@ -1351,7 +1351,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/AiAssistant",
-                "reference": "4b2b5896d8601423f2879a36b9ef4b80e1956e4e"
+                "reference": "e711a1fa81eaa5308ce33e71f7b45dc2817348e7"
             },
             "require": {
                 "php": "^8.2"
@@ -1384,9 +1384,17 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/Auth",
-                "reference": "d5ff887230fe7185297d7ccbc12ec77610e23655"
+                "reference": "2631b76a4f78d55f7c829cf3958f23369f52be4a"
             },
             "require": {
+                "futebus/bookingmanagement": "*",
+                "futebus/buscompanymanagement": "*",
+                "futebus/cancellation": "*",
+                "futebus/customermanagement": "*",
+                "futebus/payment": "*",
+                "futebus/profile": "*",
+                "futebus/rolepermission": "*",
+                "futebus/staffcustomersupport": "*",
                 "php": "^8.2"
             },
             "type": "library",
@@ -1417,10 +1425,17 @@
             "dist": {
                 "type": "path",
                 "url": "packages/Customer/BookingManagement",
-                "reference": "637c6dc17ce16a3785a665b482039cfe2d6feee1"
+                "reference": "a7722e68d6d093709f1e597163e721cdf6ecbe4c"
             },
             "require": {
                 "futebus/core": "*",
+                "futebus/customermanagement": "*",
+                "futebus/payment": "*",
+                "futebus/profile": "*",
+                "futebus/routemanagement": "*",
+                "futebus/seatmanagement": "*",
+                "futebus/ticketmanagement": "*",
+                "futebus/tripmanagement": "*",
                 "futebus/tripsearch": "*",
                 "php": "^8.2"
             },
@@ -1452,14 +1467,16 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/BookingTracking",
-                "reference": "3b8f3cdb0e294bb970cf577218c4f11d22d5f0cd"
+                "reference": "3b5f8403551f3ab800de3e82d880f36155539100"
             },
             "require": {
+                "futebus/buscompanymanagement": "*",
                 "futebus/cancellation": "*",
                 "futebus/core": "*",
                 "futebus/dashboard": "*",
                 "futebus/payment": "*",
                 "futebus/staffdashboard": "*",
+                "futebus/ticketmanagement": "*",
                 "php": "^8.2"
             },
             "type": "library",
@@ -1490,9 +1507,15 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/BusCompanyManagement",
-                "reference": "9c5d3899c33b30340ed27f17105a29704329c2ec"
+                "reference": "930211881267d3f788eed577894d88335932d8dc"
             },
             "require": {
+                "futebus/busmanagement": "*",
+                "futebus/profile": "*",
+                "futebus/rolepermission": "*",
+                "futebus/routemanagement": "*",
+                "futebus/staffcustomersupport": "*",
+                "futebus/tripmanagement": "*",
                 "php": "^8.2"
             },
             "type": "library",
@@ -1523,9 +1546,15 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/BusManagement",
-                "reference": "ec6592086dabcd239e8a1049aaabbc4c6c93aa50"
+                "reference": "efc1a975001b4166fa740d310a176300b4fed902"
             },
             "require": {
+                "futebus/bookingmanagement": "*",
+                "futebus/buscompanymanagement": "*",
+                "futebus/payment": "*",
+                "futebus/seatmanagement": "*",
+                "futebus/ticketmanagement": "*",
+                "futebus/tripmanagement": "*",
                 "php": "^8.2"
             },
             "type": "library",
@@ -1556,9 +1585,13 @@
             "dist": {
                 "type": "path",
                 "url": "packages/Customer/Cancellation",
-                "reference": "e697d9e8add723a2d922dc38e58c640655f8f31a"
+                "reference": "668e043afd43e59ce99c8bb93e8b3c90384e175c"
             },
             "require": {
+                "futebus/bookingmanagement": "*",
+                "futebus/payment": "*",
+                "futebus/ticketmanagement": "*",
+                "futebus/tripmanagement": "*",
                 "php": "^8.2"
             },
             "type": "library",
@@ -1589,13 +1622,14 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/Core",
-                "reference": "1daef70e2b58ee4b7199257ba0a5378f7ee5440b"
+                "reference": "dd6e0451cb5882acd08211a0562a482ee6a88a6f"
             },
             "require": {
                 "futebus/bookingmanagement": "*",
                 "futebus/cancellation": "*",
                 "futebus/dashboard": "*",
                 "futebus/payment": "*",
+                "futebus/routemanagement": "^1.0",
                 "futebus/staffcustomersupport": "*",
                 "futebus/tripsearch": "*",
                 "php": "^8.2"
@@ -1628,9 +1662,10 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/CustomerManagement",
-                "reference": "89428d41211f4b24c5b0f3bebb3d0f5d0ceee33d"
+                "reference": "1599da97498fc17ff1d41d0bb8fc3a7bc400a4c8"
             },
             "require": {
+                "futebus/bookingmanagement": "*",
                 "php": "^8.2"
             },
             "type": "library",
@@ -1661,9 +1696,16 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/Dashboard",
-                "reference": "2d44ee23788ca8fa5d920f66f680b6312f673caa"
+                "reference": "5ce312a8bae71031b88cc7a6c94209c1d554a7fb"
             },
             "require": {
+                "futebus/bookingmanagement": "*",
+                "futebus/buscompanymanagement": "*",
+                "futebus/busmanagement": "*",
+                "futebus/customermanagement": "*",
+                "futebus/payment": "*",
+                "futebus/routemanagement": "*",
+                "futebus/tripmanagement": "*",
                 "php": "^8.2"
             },
             "type": "library",
@@ -1694,7 +1736,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/Notification",
-                "reference": "cdaabd288f41b51e53e3a3f8feae2d22c1fe07d7"
+                "reference": "06c0d29ede9c856a923815070697fa4cbf2c4e82"
             },
             "require": {
                 "php": "^8.2"
@@ -1727,16 +1769,21 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/Payment",
-                "reference": "9f4408b53ac4f3dc735f65905362bb86716b9a02"
+                "reference": "a059d52cea3c1f3d5b400dc63cd8d6406ec0a8f0"
             },
             "require": {
                 "futebus/auth": "*",
                 "futebus/bookingmanagement": "*",
+                "futebus/buscompanymanagement": "*",
                 "futebus/cancellation": "*",
                 "futebus/core": "*",
+                "futebus/customermanagement": "*",
                 "futebus/dashboard": "*",
                 "futebus/profile": "*",
+                "futebus/seatmanagement": "*",
                 "futebus/staffdashboard": "*",
+                "futebus/ticketmanagement": "*",
+                "futebus/tripmanagement": "*",
                 "futebus/tripsearch": "*",
                 "php": "^8.2"
             },
@@ -1768,14 +1815,18 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/Profile",
-                "reference": "0e354880f0441756b4a0ff4d79f5e43339aa6a39"
+                "reference": "e8959427f967562e4ea9a7c1ecba5ec1ebd94774"
             },
             "require": {
                 "futebus/auth": "*",
+                "futebus/bookingmanagement": "*",
+                "futebus/buscompanymanagement": "*",
                 "futebus/cancellation": "*",
                 "futebus/core": "*",
                 "futebus/payment": "*",
+                "futebus/rolepermission": "*",
                 "futebus/staffcustomersupport": "*",
+                "futebus/ticketmanagement": "*",
                 "php": "^8.2"
             },
             "type": "library",
@@ -1806,9 +1857,14 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/Reporting",
-                "reference": "5754c806ea3ef7eda74da84bee39478e50e7e06e"
+                "reference": "6decc4d106d300853fbd17c2eb2886f71d184ad7"
             },
             "require": {
+                "futebus/busmanagement": "*",
+                "futebus/payment": "*",
+                "futebus/routemanagement": "*",
+                "futebus/ticketmanagement": "*",
+                "futebus/tripmanagement": "*",
                 "php": "^8.2"
             },
             "type": "library",
@@ -1839,9 +1895,11 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/RolePermission",
-                "reference": "907c926976e22850834cf3bb96452772b09936d8"
+                "reference": "b1fec2f99aa1e1b6e13009780de7721a4a22f290"
             },
             "require": {
+                "futebus/buscompanymanagement": "*",
+                "futebus/profile": "*",
                 "php": "^8.2"
             },
             "type": "library",
@@ -1872,9 +1930,14 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/RouteManagement",
-                "reference": "2990c4f108b5907782b5d81145e91adf785245e2"
+                "reference": "e76cbccc8abf0d2b33c8093ebb7b2aaa2c576a48"
             },
             "require": {
+                "futebus/bookingmanagement": "*",
+                "futebus/buscompanymanagement": "*",
+                "futebus/payment": "*",
+                "futebus/ticketmanagement": "*",
+                "futebus/tripmanagement": "*",
                 "php": "^8.2"
             },
             "type": "library",
@@ -1905,7 +1968,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/Customer/SeatAvailability",
-                "reference": "76f518bda008e0d4e371416f90494cd909fac349"
+                "reference": "4eaa58783fdab4ada6b67d2b9d3751467caec839"
             },
             "require": {
                 "php": "^8.2"
@@ -1938,9 +2001,12 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/SeatManagement",
-                "reference": "3d0823b6d9a0b140354b051c615c7a826b39371d"
+                "reference": "787e3d8f22784008d60c6eb398e6036cc1641120"
             },
             "require": {
+                "futebus/bookingmanagement": "*",
+                "futebus/busmanagement": "*",
+                "futebus/ticketmanagement": "*",
                 "php": "^8.2"
             },
             "type": "library",
@@ -1971,9 +2037,13 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/StaffCustomerSupport",
-                "reference": "b403931217c03a5d450c3e45652ec074a5ae92f2"
+                "reference": "f99b91eb9d4646ecdfbc09a2bfac8b3aef2d7d65"
             },
             "require": {
+                "futebus/bookingmanagement": "*",
+                "futebus/buscompanymanagement": "*",
+                "futebus/profile": "*",
+                "futebus/rolepermission": "*",
                 "php": "^8.2"
             },
             "type": "library",
@@ -2004,7 +2074,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/StaffDashboard",
-                "reference": "a24fe51753ecbdb4e4861e89988e1ecc6f3d4494"
+                "reference": "b55534be38b66f87ba6c33aaabc7e3c52326d834"
             },
             "require": {
                 "futebus/auth": "*",
@@ -2015,6 +2085,7 @@
                 "futebus/profile": "*",
                 "futebus/staffcustomersupport": "*",
                 "futebus/staffticketprocessing": "*",
+                "futebus/ticketmanagement": "*",
                 "php": "^8.2"
             },
             "type": "library",
@@ -2045,13 +2116,18 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/StaffTicketProcessing",
-                "reference": "862c4337dfa136980e132be5496059e53d052dfb"
+                "reference": "a647b8da3145e662bb1eb2c29e245eb718ef6a02"
             },
             "require": {
                 "futebus/bookingmanagement": "*",
+                "futebus/busmanagement": "*",
                 "futebus/core": "*",
                 "futebus/payment": "*",
+                "futebus/routemanagement": "*",
+                "futebus/seatmanagement": "*",
                 "futebus/staffdashboard": "*",
+                "futebus/ticketmanagement": "*",
+                "futebus/tripmanagement": "*",
                 "futebus/tripsearch": "*",
                 "php": "^8.2"
             },
@@ -2083,7 +2159,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/SystemSetting",
-                "reference": "6f6213bc3148379cf8d72830639f138083796a73"
+                "reference": "0bf49f2616f30ed1e606b16ed28eda0fa4650010"
             },
             "require": {
                 "php": "^8.2"
@@ -2116,11 +2192,15 @@
             "dist": {
                 "type": "path",
                 "url": "packages/Customer/TicketManagement",
-                "reference": "e05100cf8523cc8a4fd0d2d6c40bd2ec25bb078b"
+                "reference": "7db4ddd13f58b7be1fca712ea0b5f049cf4324b1"
             },
             "require": {
+                "futebus/bookingmanagement": "*",
+                "futebus/cancellation": "*",
                 "futebus/core": "*",
                 "futebus/payment": "*",
+                "futebus/seatmanagement": "*",
+                "futebus/tripmanagement": "*",
                 "php": "^8.2"
             },
             "type": "library",
@@ -2151,9 +2231,15 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/TripManagement",
-                "reference": "47689e1901daf9c9202e56bd42e3095a07b2984a"
+                "reference": "18cef9df10ed9e6c61f747e61543c0531377bb6b"
             },
             "require": {
+                "futebus/bookingmanagement": "*",
+                "futebus/buscompanymanagement": "*",
+                "futebus/busmanagement": "*",
+                "futebus/payment": "*",
+                "futebus/routemanagement": "^1.0",
+                "futebus/ticketmanagement": "*",
                 "php": "^8.2"
             },
             "type": "library",
@@ -2184,10 +2270,15 @@
             "dist": {
                 "type": "path",
                 "url": "packages/Customer/TripSearch",
-                "reference": "9cac8e5876bc0dec0fd4ad0515449f2e4effd6a3"
+                "reference": "f25b472fd9dd9f0f15553c628a8cf1f109f85610"
             },
             "require": {
+                "futebus/bookingmanagement": "*",
                 "futebus/core": "*",
+                "futebus/payment": "*",
+                "futebus/routemanagement": "*",
+                "futebus/seatmanagement": "*",
+                "futebus/tripmanagement": "*",
                 "php": "^8.2"
             },
             "type": "library",
@@ -2218,9 +2309,11 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/UserManagement",
-                "reference": "e84c29b86a191fc4dde533802cd688547e5d77c4"
+                "reference": "66f3a639e5826a91e28c3b492b76962f03160105"
             },
             "require": {
+                "futebus/buscompanymanagement": "*",
+                "futebus/rolepermission": "*",
                 "php": "^8.2"
             },
             "type": "library",

@@ -74,9 +74,11 @@ class TripSearchTest extends TestCase
         );
         $this->assertCount(1, $trips);
         $this->assertSame(31, $trips[0]['available_seats']);
+        $this->assertSame('limousine', $trips[0]['vehicle_type']);
         $this->assertSame('Đà Lạt', $trips[0]['destination']);
         $this->assertEqualsCanonicalizing(['front', 'back'], $trips[0]['row_options']);
         $this->assertEqualsCanonicalizing(['lower', 'upper'], $trips[0]['deck_options']);
+        $this->assertEqualsCanonicalizing(['lower', 'upper'], $trips[0]['seat_decks']);
         $this->assertSame([], app(TripSearchService::class)->search(
             'Bx Miền Tây', $query['destination'], $query['departure_date'], 1,
         ));

@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace FuteBus\Reporting\Services;
 
+use FuteBus\BusManagement\Models\Bus as BusRecord;
+use FuteBus\Payment\Models\Payment as PaymentRecord;
+use FuteBus\RouteManagement\Models\BusRoute as BusRouteRecord;
+use FuteBus\TicketManagement\Models\Ticket as TicketRecord;
+use FuteBus\TripManagement\Models\Trip as TripRecord;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -27,12 +32,12 @@ class ReportService
     public function options(int $companyId): array
     {
         return [
-            'routes' => DB::table('routes')->where('bus_company_id', $companyId)
+            'routes' => BusRouteRecord::query()->toBase()->where('bus_company_id', $companyId)
                 ->orderBy('origin_city')->orderBy('destination_city')
                 ->get(['id', 'code', 'origin_city', 'destination_city']),
-            'buses' => DB::table('buses')->where('bus_company_id', $companyId)
+            'buses' => BusRecord::query()->toBase()->where('bus_company_id', $companyId)
                 ->orderBy('license_plate')->get(['id', 'license_plate']),
-            'trips' => DB::table('trips')->join('routes', 'routes.id', '=', 'trips.route_id')
+            'trips' => TripRecord::query()->toBase()->join('routes', 'routes.id', '=', 'trips.route_id')
                 ->where('trips.bus_company_id', $companyId)->orderByDesc('trips.departure_time')
                 ->limit(500)->get(['trips.id', 'trips.departure_time', 'routes.origin_city', 'routes.destination_city']),
         ];
@@ -199,7 +204,7 @@ class ReportService
 
     private function revenueLegs(int $companyId, array $filters): Builder
     {
-        $primary = DB::table('payments')
+        $primary = PaymentRecord::query()->toBase()
             ->join('bookings', 'bookings.id', '=', 'payments.booking_id')
             ->join('trips', 'trips.id', '=', 'bookings.trip_id')
             ->leftJoin('sepay_payment_intents as intents', 'intents.code', '=', 'payments.payment_code')
@@ -233,7 +238,7 @@ class ReportService
                 ELSE 0 END AS refund_amount
                 SQL);
 
-        $secondary = DB::table('payments')
+        $secondary = PaymentRecord::query()->toBase()
             ->join('sepay_payment_intents as intents', 'intents.code', '=', 'payments.payment_code')
             ->join('bookings as primary_bookings', 'primary_bookings.id', '=', 'payments.booking_id')
             ->join('trips as primary_trips', 'primary_trips.id', '=', 'primary_bookings.trip_id')
@@ -275,7 +280,7 @@ class ReportService
 
     private function payments(int $companyId, array $filters, bool $applyReportStatus = true): Builder
     {
-        return DB::table('payments')->join('bookings', 'bookings.id', '=', 'payments.booking_id')
+        return PaymentRecord::query()->toBase()->join('bookings', 'bookings.id', '=', 'payments.booking_id')
             ->join('trips', 'trips.id', '=', 'bookings.trip_id')
             ->where('trips.bus_company_id', $companyId)
             ->whereDate('payments.'.($filters['type'] === 'payments' ? 'created_at' : 'paid_at'), '>=', $filters['from'])
@@ -291,7 +296,7 @@ class ReportService
     {
         $paymentStatuses = $includeRefunded ? ['completed', 'refunded'] : ['completed'];
 
-        return DB::table('tickets')->join('bookings', 'bookings.id', '=', 'tickets.booking_id')
+        return TicketRecord::query()->toBase()->join('bookings', 'bookings.id', '=', 'tickets.booking_id')
             ->join('trips', 'trips.id', '=', 'tickets.trip_id')
             ->where('trips.bus_company_id', $companyId)
             ->whereDate('tickets.created_at', '>=', $filters['from'])->whereDate('tickets.created_at', '<=', $filters['to'])
@@ -312,7 +317,7 @@ class ReportService
 
     private function trips(int $companyId, array $filters, bool $applyReportStatus = true): Builder
     {
-        return DB::table('trips')->join('routes', 'routes.id', '=', 'trips.route_id')
+        return TripRecord::query()->toBase()->join('routes', 'routes.id', '=', 'trips.route_id')
             ->join('buses', 'buses.id', '=', 'trips.bus_id')->where('trips.bus_company_id', $companyId)
             ->whereDate('trips.departure_time', '>=', $filters['from'])->whereDate('trips.departure_time', '<=', $filters['to'])
             ->when($applyReportStatus && $filters['status'] !== 'all' && $filters['type'] === 'trips', fn (Builder $query) => $query->where('trips.status', $filters['status']))
@@ -343,7 +348,7 @@ class ReportService
 
     private function paymentSuccessRate(int $companyId, array $filters): float
     {
-        $payments = DB::table('payments')->join('bookings', 'bookings.id', '=', 'payments.booking_id')
+        $payments = PaymentRecord::query()->toBase()->join('bookings', 'bookings.id', '=', 'payments.booking_id')
             ->join('trips', 'trips.id', '=', 'bookings.trip_id')->where('trips.bus_company_id', $companyId)
             ->whereBetween('payments.created_at', [$filters['from'].' 00:00:00', $filters['to'].' 23:59:59'])
             ->when($filters['route_id'], fn (Builder $query) => $query->where('trips.route_id', $filters['route_id']))
@@ -357,7 +362,7 @@ class ReportService
 
     private function orderTypes(int $companyId, array $filters): array
     {
-        $query = DB::table('payments')->join('bookings', 'bookings.id', '=', 'payments.booking_id')
+        $query = PaymentRecord::query()->toBase()->join('bookings', 'bookings.id', '=', 'payments.booking_id')
             ->join('trips', 'trips.id', '=', 'bookings.trip_id')
             ->leftJoin('sepay_payment_intents as intents', 'intents.code', '=', 'payments.payment_code')
             ->leftJoin('bookings as return_bookings', 'return_bookings.id', '=', 'intents.secondary_booking_id')
@@ -422,7 +427,7 @@ class ReportService
 
     private function tripTickets(int $companyId, array $filters): Builder
     {
-        return DB::table('tickets')->join('bookings', 'bookings.id', '=', 'tickets.booking_id')
+        return TicketRecord::query()->toBase()->join('bookings', 'bookings.id', '=', 'tickets.booking_id')
             ->join('trips', 'trips.id', '=', 'tickets.trip_id')->where('trips.bus_company_id', $companyId)
             ->whereIn('tickets.status', ['active', 'used'])
             ->whereDate('trips.departure_time', '>=', $filters['from'])->whereDate('trips.departure_time', '<=', $filters['to'])

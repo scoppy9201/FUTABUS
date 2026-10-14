@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace FuteBus\TripSearch\Services;
 
+use FuteBus\BookingManagement\Models\BookedSeat as BookedSeatRecord;
+use FuteBus\Payment\Models\SePayPaymentIntent as SePayPaymentIntentRecord;
+use FuteBus\SeatManagement\Models\SeatLayout as SeatLayoutRecord;
+use FuteBus\TripManagement\Models\Trip as TripRecord;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class TripSearchService
@@ -14,7 +17,7 @@ class TripSearchService
 
     public function search(string $from, string $to, string $date, int $quantity): array
     {
-        $trips = DB::table('trips')
+        $trips = TripRecord::query()->toBase()
             ->join('routes', 'routes.id', '=', 'trips.route_id')
             ->join('buses', 'buses.id', '=', 'trips.bus_id')
             ->join('bus_companies', 'bus_companies.id', '=', 'trips.bus_company_id')
@@ -31,14 +34,14 @@ class TripSearchService
             )
             ->get();
 
-        $occupiedSeatRows = DB::table('booked_seats')
+        $occupiedSeatRows = BookedSeatRecord::query()->toBase()
             ->join('bookings', 'bookings.id', '=', 'booked_seats.booking_id')
             ->whereIn('bookings.status', ['pending', 'confirmed', 'completed'])
             ->whereIn('booked_seats.trip_id', $trips->pluck('id'))
             ->select('booked_seats.trip_id', 'booked_seats.seat_layout_id')
             ->get();
 
-        $reservedSeatRows = DB::table('sepay_payment_intents')
+        $reservedSeatRows = SePayPaymentIntentRecord::query()->toBase()
             ->where(fn ($query) => $query->whereIn('trip_id', $trips->pluck('id'))
                 ->orWhereIn('secondary_trip_id', $trips->pluck('id')))
             ->where('status', 'pending')
@@ -62,7 +65,7 @@ class TripSearchService
             });
         $bookedSeats = $occupiedSeatRows->concat($reservedSeatRows)->groupBy('trip_id');
 
-        $seatLayouts = DB::table('seat_layouts')
+        $seatLayouts = SeatLayoutRecord::query()->toBase()
             ->whereIn('bus_id', $trips->pluck('bus_id'))
             ->orderBy('row_number')
             ->orderBy('column_number')

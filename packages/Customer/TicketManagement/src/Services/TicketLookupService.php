@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace FuteBus\TicketManagement\Services;
 
-use Illuminate\Support\Facades\DB;
+use FuteBus\BookingManagement\Models\Booking as BookingRecord;
+use FuteBus\Payment\Models\Payment as PaymentRecord;
+use FuteBus\TicketManagement\Models\Ticket as TicketRecord;
 
 class TicketLookupService
 {
     public function find(string $phone, string $code): ?array
     {
-        $booking = DB::table('bookings')
+        $booking = BookingRecord::query()->toBase()
             ->join('customers', 'customers.id', '=', 'bookings.customer_id')
             ->join('trips', 'trips.id', '=', 'bookings.trip_id')
             ->join('routes', 'routes.id', '=', 'trips.route_id')
@@ -57,13 +59,13 @@ class TicketLookupService
             return null;
         }
 
-        $tickets = DB::table('tickets')
+        $tickets = TicketRecord::query()->toBase()
             ->where('booking_id', $booking->id)
             ->when($booking->booking_code !== $code, fn ($query) => $query->where('ticket_code', $code))
             ->orderBy('id')
             ->get(['ticket_code', 'passenger_name', 'passenger_phone', 'seat_code', 'price', 'status']);
 
-        $payment = DB::table('payments')
+        $payment = PaymentRecord::query()->toBase()
             ->where('booking_id', $booking->id)
             ->orderByDesc('id')
             ->first(['method', 'status']);

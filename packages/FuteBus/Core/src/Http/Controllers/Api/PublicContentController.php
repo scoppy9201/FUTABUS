@@ -6,11 +6,11 @@ namespace FuteBus\Core\Http\Controllers\Api;
 
 use FuteBus\Core\Http\Requests\NewsFilterRequest;
 use FuteBus\Core\Models\BranchRegion;
-use FuteBus\Core\Models\BusRoute;
 use FuteBus\Core\Models\FaqCategory;
 use FuteBus\Core\Services\FeaturedArticleBodyRepository;
 use FuteBus\Core\Services\FeaturedNewsCatalog;
 use FuteBus\Core\Services\FeaturedPromotionCatalog;
+use FuteBus\RouteManagement\Models\BusRoute;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;

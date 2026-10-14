@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace FuteBus\BusManagement\Services;
 
+use FuteBus\BusManagement\Models\Bus as BusRecord;
+use FuteBus\BusManagement\Models\VehicleType as VehicleTypeRecord;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -13,18 +14,20 @@ class VehicleTypeService
 {
     /** Nhóm dòng xe cố định. */
     public const CLASSES = [
-        'seater'    => 'seater',
-        'sleeper'   => 'sleeper',
-        'limousine' => 'limousine',
-        'vip_cabin' => 'vip_cabin',
+        'seater'            => 'seater',
+        'sleeper'           => 'sleeper',
+        'limousine'         => 'limousine',
+        'limousine_sleeper' => 'limousine_sleeper',
+        'vip_cabin'         => 'vip_cabin',
     ];
 
     /** Giới hạn sức chứa theo dòng xe. */
     private const CAPACITY_RANGES = [
-        'seater'    => ['min' => 8,  'max' => 50],
-        'sleeper'   => ['min' => 20, 'max' => 46],
-        'limousine' => ['min' => 8,  'max' => 22],
-        'vip_cabin' => ['min' => 20, 'max' => 24],
+        'seater'            => ['min' => 8,  'max' => 50],
+        'sleeper'           => ['min' => 20, 'max' => 46],
+        'limousine'         => ['min' => 8,  'max' => 22],
+        'limousine_sleeper' => ['min' => 20, 'max' => 46],
+        'vip_cabin'         => ['min' => 20, 'max' => 24],
     ];
 
     /**
@@ -32,15 +35,16 @@ class VehicleTypeService
      * seater và limousine chỉ được 1 tầng.
      */
     private const FLOOR_LIMITS = [
-        'seater'    => 1,
-        'limousine' => 1,
-        'sleeper'   => 2,
-        'vip_cabin' => 2,
+        'seater'            => 1,
+        'limousine'         => 1,
+        'sleeper'           => 2,
+        'limousine_sleeper' => 2,
+        'vip_cabin'         => 2,
     ];
 
     public function paginate(string $search = '', string $vehicleClass = '', string $status = ''): LengthAwarePaginator
     {
-        return DB::table('vehicle_types')
+        return VehicleTypeRecord::query()->toBase()
             ->selectRaw('vehicle_types.*,
                 (select count(*) from buses where buses.vehicle_type_id = vehicle_types.id) as bus_count')
             ->when($search !== '', fn ($q) => $q->where('name', 'like', "%$search%"))
@@ -148,7 +152,7 @@ class VehicleTypeService
 
         $this->assertCapacityFormula($data);
 
-        return DB::table('vehicle_types')->insertGetId([
+        return VehicleTypeRecord::query()->toBase()->insertGetId([
             ...$this->attributes($data),
             'status'     => 'active',
             'created_at' => now(),
@@ -158,14 +162,14 @@ class VehicleTypeService
 
     public function update(int $id, array $data): void
     {
-        $type = DB::table('vehicle_types')->where('id', $id)->first();
+        $type = VehicleTypeRecord::query()->toBase()->where('id', $id)->first();
         abort_unless($type, 404);
 
-        $isInUse = (int) DB::table('buses')->where('vehicle_type_id', $id)->count() > 0;
+        $isInUse = (int) BusRecord::query()->toBase()->where('vehicle_type_id', $id)->count() > 0;
 
         // Nếu đã gán xe: chỉ cho sửa name và description
         if ($isInUse) {
-            DB::table('vehicle_types')->where('id', $id)->update([
+            VehicleTypeRecord::query()->toBase()->where('id', $id)->update([
                 'name'        => $data['name'],
                 'description' => $data['description'] ?? null,
                 'updated_at'  => now(),
@@ -188,7 +192,7 @@ class VehicleTypeService
 
         $this->assertCapacityFormula($data);
 
-        DB::table('vehicle_types')->where('id', $id)->update([
+        VehicleTypeRecord::query()->toBase()->where('id', $id)->update([
             ...$this->attributes($data),
             'updated_at' => now(),
         ]);
@@ -197,16 +201,16 @@ class VehicleTypeService
     /** Xóa hoàn toàn nếu chưa gán xe; ngừng sử dụng nếu đã gán. */
     public function remove(int $id): bool
     {
-        abort_unless(DB::table('vehicle_types')->where('id', $id)->exists(), 404);
+        abort_unless(VehicleTypeRecord::query()->toBase()->where('id', $id)->exists(), 404);
 
-        if (DB::table('buses')->where('vehicle_type_id', $id)->exists()) {
-            DB::table('vehicle_types')->where('id', $id)
+        if (BusRecord::query()->toBase()->where('vehicle_type_id', $id)->exists()) {
+            VehicleTypeRecord::query()->toBase()->where('id', $id)
                 ->update(['status' => 'inactive', 'updated_at' => now()]);
 
             return false; // Không cho xóa cứng, chuyển sang ngừng sử dụng
         }
 
-        DB::table('vehicle_types')->where('id', $id)->delete();
+        VehicleTypeRecord::query()->toBase()->where('id', $id)->delete();
 
         return true;
     }
@@ -214,11 +218,11 @@ class VehicleTypeService
     /** Đổi trạng thái active <-> inactive. */
     public function toggle(int $id): string
     {
-        $type = DB::table('vehicle_types')->where('id', $id)->first();
+        $type = VehicleTypeRecord::query()->toBase()->where('id', $id)->first();
         abort_unless($type, 404);
 
         $newStatus = $type->status === 'active' ? 'inactive' : 'active';
-        DB::table('vehicle_types')->where('id', $id)->update([
+        VehicleTypeRecord::query()->toBase()->where('id', $id)->update([
             'status'     => $newStatus,
             'updated_at' => now(),
         ]);

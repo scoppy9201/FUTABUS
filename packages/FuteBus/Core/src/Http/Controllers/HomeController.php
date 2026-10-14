@@ -6,13 +6,13 @@ namespace FuteBus\Core\Http\Controllers;
 
 use FuteBus\Core\Http\Requests\ContactRequest;
 use FuteBus\Core\Models\BranchRegion;
-use FuteBus\Core\Models\BusRoute;
 use FuteBus\Core\Models\ContactMessage;
 use FuteBus\Core\Models\FaqCategory;
 use FuteBus\Core\Services\FeaturedArticleBodyRepository;
 use FuteBus\Core\Services\FeaturedNewsCatalog;
 use FuteBus\Core\Services\FeaturedPromotionCatalog;
 use FuteBus\Core\Services\HomeService;
+use FuteBus\RouteManagement\Models\BusRoute;
 use FuteBus\TripSearch\Services\BookingLocationCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;

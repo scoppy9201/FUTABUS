@@ -13,7 +13,12 @@
         "futebus/dashboard": "*",
         "futebus/profile": "*",
         "futebus/staffdashboard": "*",
-        "futebus/tripsearch": "*"
+        "futebus/tripsearch": "*",
+        "futebus/buscompanymanagement": "*",
+        "futebus/customermanagement": "*",
+        "futebus/seatmanagement": "*",
+        "futebus/ticketmanagement": "*",
+        "futebus/tripmanagement": "*"
     },
     "autoload": {
         "psr-4": {

@@ -4,8 +4,17 @@ declare(strict_types=1);
 
 namespace FuteBus\TripManagement\Http\Controllers;
 
+use FuteBus\BookingManagement\Models\BookedSeat as BookedSeatRecord;
+use FuteBus\BookingManagement\Models\Booking as BookingRecord;
+use FuteBus\BusCompanyManagement\Models\BusCompany as BusCompanyRecord;
+use FuteBus\BusManagement\Models\Bus as BusRecord;
+use FuteBus\BusManagement\Models\DocumentType as DocumentTypeRecord;
+use FuteBus\BusManagement\Models\VehicleDocument as VehicleDocumentRecord;
+use FuteBus\Payment\Models\SePayPaymentIntent as SePayPaymentIntentRecord;
+use FuteBus\RouteManagement\Models\BusRoute as BusRouteRecord;
 use FuteBus\TripManagement\Events\TripCancelled;
 use FuteBus\TripManagement\Http\Requests\TripInputRequest;
+use FuteBus\TripManagement\Models\Trip as TripRecord;
 use FuteBus\TripManagement\Services\BusDocumentChecker;
 use FuteBus\TripManagement\Services\TripGenerator;
 use Illuminate\Database\QueryException;
@@ -26,19 +35,19 @@ class TripController extends Controller
     {
         abort_unless($request->user()?->isAdmin(), 403);
 
-        $company = DB::table('bus_companies')->where('code', 'FUTA')->first();
+        $company = BusCompanyRecord::query()->toBase()->where('code', 'FUTA')->first();
         $search = (string) $request->input('search', '');
         $status = (string) $request->input('status', '');
         $date = (string) $request->input('date', '');
 
-        $bookedSeatCounts = DB::table('booked_seats')
+        $bookedSeatCounts = BookedSeatRecord::query()->toBase()
             ->join('bookings', 'bookings.id', '=', 'booked_seats.booking_id')
             ->where('bookings.status', '<>', 'cancelled')
             ->select('booked_seats.trip_id')
             ->selectRaw('COUNT(*) AS booked_seat_count')
             ->groupBy('booked_seats.trip_id');
 
-        $query = DB::table('trips')
+        $query = TripRecord::query()->toBase()
             ->join('routes', 'routes.id', '=', 'trips.route_id')
             ->leftJoin('buses', 'buses.id', '=', 'trips.bus_id')
             ->leftJoinSub($bookedSeatCounts, 'booked_seat_counts', 'booked_seat_counts.trip_id', '=', 'trips.id')
@@ -84,13 +93,13 @@ class TripController extends Controller
             'search'  => $search,
             'status'  => $status,
             'date'    => $date,
-            'routes'  => DB::table('routes')->where('is_active', 1)->orderBy('code')->get(),
-            'buses'   => DB::table('buses')->where('status', 'active')
+            'routes'  => BusRouteRecord::query()->toBase()->where('is_active', 1)->orderBy('code')->get(),
+            'buses'   => BusRecord::query()->toBase()->where('status', 'active')
                 ->where('bus_company_id', $company?->id ?? 0)
                 ->orderBy('license_plate')->get(['id', 'license_plate', 'capacity']),
-            'requiredTypes' => DB::table('document_types')->where('is_required', 1)
-                ->where('status', 'active')->get(['id', 'name']),
-            'busDocs' => DB::table('vehicle_documents')
+            'requiredTypes' => DocumentTypeRecord::query()->toBase()->where('is_required', 1)
+                ->where('status', 'active')->get(['id', 'name', 'has_expiry']),
+            'busDocs' => VehicleDocumentRecord::query()->toBase()
                 ->join('document_types', 'document_types.id', '=', 'vehicle_documents.document_type_id')
                 ->where('document_types.is_required', 1)->where('document_types.status', 'active')
                 ->where('vehicle_documents.status', 'active')
@@ -112,7 +121,7 @@ class TripController extends Controller
 
         $data = $request->validated();
 
-        $bus = DB::table('buses')->where('id', $data['bus_id'])->where('status', 'active')->first();
+        $bus = BusRecord::query()->toBase()->where('id', $data['bus_id'])->where('status', 'active')->first();
         if (! $bus) {
             return back()->withInput()->withErrors(['trip' => __('TripManagement::app.tr_err_bus')]);
         }
@@ -132,7 +141,7 @@ class TripController extends Controller
             return back()->withInput()->withErrors(['trip' => __('TripManagement::app.tr_err_conflict')]);
         }
 
-        DB::table('trips')->insert([
+        TripRecord::query()->toBase()->insert([
             'route_id'        => $data['route_id'],
             'bus_id'          => $bus->id,
             'bus_company_id'  => $bus->bus_company_id,
@@ -153,7 +162,7 @@ class TripController extends Controller
     public function update(TripInputRequest $request, int $id): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
-        $trip = DB::table('trips')->find($id);
+        $trip = TripRecord::query()->toBase()->find($id);
         abort_unless($trip, 404);
 
         if (! in_array($trip->status, self::EDITABLE, true)) {
@@ -180,7 +189,7 @@ class TripController extends Controller
 
         $bus = null;
         if (! empty($data['bus_id'])) {
-            $bus = DB::table('buses')->where('id', $data['bus_id'])->where('status', 'active')->first();
+            $bus = BusRecord::query()->toBase()->where('id', $data['bus_id'])->where('status', 'active')->first();
             if (! $bus) {
                 return back()->withInput()->withErrors(['trip' => __('TripManagement::app.tr_err_bus')]);
             }
@@ -206,7 +215,7 @@ class TripController extends Controller
             $update += ['route_id' => $data['route_id'], 'departure_time' => $dep, 'arrival_time' => $arr];
         }
 
-        DB::table('trips')->where('id', $id)->update($update);
+        TripRecord::query()->toBase()->where('id', $id)->update($update);
 
         return redirect()->route('trip-management.trips.index')
             ->with('success', __('TripManagement::app.tr_flash_updated'));
@@ -216,7 +225,7 @@ class TripController extends Controller
     public function destroy(Request $request, int $id): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
-        $trip = DB::table('trips')->find($id);
+        $trip = TripRecord::query()->toBase()->find($id);
         abort_unless($trip, 404);
 
         if (! in_array($trip->status, self::EDITABLE, true)) {
@@ -232,7 +241,7 @@ class TripController extends Controller
             }
 
             try {
-                DB::table('trips')->where('id', $id)->delete();
+                TripRecord::query()->toBase()->where('id', $id)->delete();
             } catch (QueryException $e) {
                 report($e);
 
@@ -254,7 +263,7 @@ class TripController extends Controller
         }
 
         DB::transaction(function () use ($id, $tickets) {
-            DB::table('trips')->where('id', $id)->update(['status' => 'cancelled', 'updated_at' => now()]);
+            TripRecord::query()->toBase()->where('id', $id)->update(['status' => 'cancelled', 'updated_at' => now()]);
             event(new TripCancelled($id, $tickets));
         });
 
@@ -269,7 +278,7 @@ class TripController extends Controller
 
     private function ticketCount(int $tripId): int
     {
-        return DB::table('bookings')->where('trip_id', $tripId)->where('status', '<>', 'cancelled')->count();
+        return BookingRecord::query()->toBase()->where('trip_id', $tripId)->where('status', '<>', 'cancelled')->count();
     }
 
     private function occupiedSeats(array $tripIds): array
@@ -279,7 +288,7 @@ class TripController extends Controller
         }
 
         $occupied = [];
-        DB::table('booked_seats')
+        BookedSeatRecord::query()->toBase()
             ->join('bookings', 'bookings.id', '=', 'booked_seats.booking_id')
             ->whereIn('bookings.status', ['pending', 'confirmed', 'completed'])
             ->whereIn('booked_seats.trip_id', $tripIds)
@@ -288,7 +297,7 @@ class TripController extends Controller
                 $occupied[(int) $seat->trip_id][(int) $seat->seat_layout_id] = true;
             });
 
-        DB::table('sepay_payment_intents')
+        SePayPaymentIntentRecord::query()->toBase()
             ->where('status', 'pending')
             ->where('expires_at', '>', now())
             ->where(fn ($query) => $query->whereIn('trip_id', $tripIds)->orWhereIn('secondary_trip_id', $tripIds))
@@ -313,7 +322,7 @@ class TripController extends Controller
 
     private function busConflict(int $busId, Carbon $dep, Carbon $arr, ?int $ignoreId = null): bool
     {
-        return DB::table('trips')
+        return TripRecord::query()->toBase()
             ->where('bus_id', $busId)
             ->whereIn('status', ['scheduled', 'departed'])
             ->where('departure_time', '<', $arr)

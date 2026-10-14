@@ -5,7 +5,14 @@
     "version": "1.0.0",
     "license": "MIT",
     "require": {
-        "php": "^8.2"
+        "php": "^8.2",
+        "futebus/bookingmanagement": "*",
+        "futebus/buscompanymanagement": "*",
+        "futebus/busmanagement": "*",
+        "futebus/customermanagement": "*",
+        "futebus/payment": "*",
+        "futebus/routemanagement": "*",
+        "futebus/tripmanagement": "*"
     },
     "autoload": {
         "psr-4": {

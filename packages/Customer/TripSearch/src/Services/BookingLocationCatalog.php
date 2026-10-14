@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace FuteBus\TripSearch\Services;
 
 use FuteBus\Core\Models\BranchOffice;
-use Illuminate\Support\Facades\DB;
+use FuteBus\RouteManagement\Models\BusRoute as BusRouteRecord;
 use Illuminate\Support\Str;
 
 class BookingLocationCatalog
@@ -20,7 +20,7 @@ class BookingLocationCatalog
         );
 
         // Active departures extend the operator-supplied examples without inventing stops.
-        $routes = DB::table('routes')
+        $routes = BusRouteRecord::query()->toBase()
             ->join('trips', 'trips.route_id', '=', 'routes.id')
             ->join('bus_companies', 'bus_companies.id', '=', 'routes.bus_company_id')
             ->where('bus_companies.code', 'FUTA')

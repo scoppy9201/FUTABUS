@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace FuteBus\Payment\Services;
 
+use FuteBus\BookingManagement\Models\BookedSeat as BookedSeatRecord;
+use FuteBus\Payment\Models\Payment as PaymentRecord;
+use FuteBus\Payment\Models\SePayPaymentIntent as SePayPaymentIntentRecord;
+use FuteBus\Payment\Models\SePayTransaction as SePayTransactionRecord;
+use FuteBus\TripManagement\Models\Trip as TripRecord;
 use Illuminate\Support\Facades\DB;
 
 class SePayWebhookProcessor
@@ -18,7 +23,7 @@ class SePayWebhookProcessor
         DB::transaction(function () use ($event): void {
             $transactionId = (int) $event['id'];
             $code = $this->paymentCode($event);
-            $inserted = DB::table('sepay_transactions')->insertOrIgnore([
+            $inserted = SePayTransactionRecord::query()->toBase()->insertOrIgnore([
                 'sepay_id'       => $transactionId,
                 'environment'    => config('services.sepay.environment', 'live'),
                 'code'           => $code,
@@ -30,19 +35,19 @@ class SePayWebhookProcessor
                 'updated_at'     => now(),
             ]);
             if ($inserted === 0) {
-                $transaction = DB::table('sepay_transactions')
+                $transaction = SePayTransactionRecord::query()->toBase()
                     ->where('sepay_id', $transactionId)->lockForUpdate()->first();
                 if ($transaction?->status !== 'unmatched') {
                     return;
                 }
                 $event = json_decode($transaction->payload, true);
                 $code = $this->paymentCode($event);
-                DB::table('sepay_transactions')->where('sepay_id', $transactionId)
+                SePayTransactionRecord::query()->toBase()->where('sepay_id', $transactionId)
                     ->update(['code' => $code, 'updated_at' => now()]);
             }
 
             $code = (string) $code;
-            $intent = DB::table('sepay_payment_intents')->where('code', $code)->first();
+            $intent = SePayPaymentIntentRecord::query()->toBase()->where('code', $code)->first();
             $trip = null;
             $secondaryTrip = null;
             if ($intent !== null) {
@@ -50,11 +55,11 @@ class SePayWebhookProcessor
                 sort($tripIds);
                 $lockedTrips = [];
                 foreach ($tripIds as $tripId) {
-                    $lockedTrips[$tripId] = DB::table('trips')->where('id', $tripId)->lockForUpdate()->first();
+                    $lockedTrips[$tripId] = TripRecord::query()->toBase()->where('id', $tripId)->lockForUpdate()->first();
                 }
                 $trip = $lockedTrips[(int) $intent->trip_id] ?? null;
                 $secondaryTrip = $lockedTrips[(int) $intent->secondary_trip_id] ?? null;
-                $intent = DB::table('sepay_payment_intents')->where('id', $intent->id)->lockForUpdate()->first();
+                $intent = SePayPaymentIntentRecord::query()->toBase()->where('id', $intent->id)->lockForUpdate()->first();
             }
             if ($event['transferType'] !== 'in'
                 || ! hash_equals((string) config('services.sepay.account_no'), (string) ($event['accountNumber'] ?? ''))
@@ -72,7 +77,7 @@ class SePayWebhookProcessor
 
             if ($intent->status !== 'pending' || $intent->expires_at <= now()->toDateTimeString()
                 || (int) $intent->amount !== (int) $event['transferAmount']) {
-                DB::table('sepay_payment_intents')->where('id', $intent->id)
+                SePayPaymentIntentRecord::query()->toBase()->where('id', $intent->id)
                     ->update(['status' => 'needs_review', 'updated_at' => now()]);
                 $this->markTransaction($transactionId, $intent->id, 'needs_review');
 
@@ -87,11 +92,11 @@ class SePayWebhookProcessor
             if ($intent->secondary_trip_id !== null) {
                 $this->seats->releaseCancelled((int) $intent->secondary_trip_id, $secondarySeatIds);
             }
-            $booked = DB::table('booked_seats')
+            $booked = BookedSeatRecord::query()->toBase()
                 ->where('trip_id', $intent->trip_id)
                 ->whereIn('seat_layout_id', $seatIds)
                 ->exists();
-            $secondaryBooked = $intent->secondary_trip_id !== null && DB::table('booked_seats')
+            $secondaryBooked = $intent->secondary_trip_id !== null && BookedSeatRecord::query()->toBase()
                 ->where('trip_id', $intent->secondary_trip_id)
                 ->whereIn('seat_layout_id', $secondarySeatIds)
                 ->exists();
@@ -101,7 +106,7 @@ class SePayWebhookProcessor
                     || $secondaryTrip->status !== 'scheduled'
                     || $secondaryTrip->departure_time <= now()->toDateTimeString()
                     || $secondaryBooked))) {
-                DB::table('sepay_payment_intents')->where('id', $intent->id)
+                SePayPaymentIntentRecord::query()->toBase()->where('id', $intent->id)
                     ->update(['status' => 'needs_review', 'updated_at' => now()]);
                 $this->markTransaction($transactionId, $intent->id, 'needs_review');
 
@@ -112,7 +117,7 @@ class SePayWebhookProcessor
             $secondaryBookingId = $intent->secondary_trip_id === null ? null
                 : $this->issuer->issue($intent, $preview, $secondarySeatIds, true);
 
-            DB::table('payments')->insert([
+            PaymentRecord::query()->toBase()->insert([
                 'payment_code'   => $intent->code,
                 'booking_id'     => $bookingId,
                 'amount'         => $intent->amount,
@@ -124,7 +129,7 @@ class SePayWebhookProcessor
                 'created_at'     => now(),
                 'updated_at'     => now(),
             ]);
-            DB::table('sepay_payment_intents')->where('id', $intent->id)->update([
+            SePayPaymentIntentRecord::query()->toBase()->where('id', $intent->id)->update([
                 'status'               => 'paid',
                 'booking_id'           => $bookingId,
                 'secondary_booking_id' => $secondaryBookingId,
@@ -152,7 +157,7 @@ class SePayWebhookProcessor
 
     private function markTransaction(int $id, ?int $intentId, string $status): void
     {
-        DB::table('sepay_transactions')->where('sepay_id', $id)->update([
+        SePayTransactionRecord::query()->toBase()->where('sepay_id', $id)->update([
             'payment_intent_id' => $intentId,
             'status'            => $status,
             'updated_at'        => now(),

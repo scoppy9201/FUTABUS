@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace FuteBus\RolePermission\Services;
 
 use App\Models\User;
+use FuteBus\BusCompanyManagement\Models\BusCompany as BusCompanyRecord;
+use FuteBus\RolePermission\Models\Permission as PermissionRecord;
+use FuteBus\RolePermission\Models\Role as RoleRecord;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use stdClass;
@@ -14,14 +17,14 @@ class AccessControlService
     public function companyFor(User $user): ?stdClass
     {
         if ($user->isAdmin()) {
-            return DB::table('bus_companies')->where('code', 'FUTA')->first();
+            return BusCompanyRecord::query()->toBase()->where('code', 'FUTA')->first();
         }
 
         if ($user->bus_company_id) {
-            return DB::table('bus_companies')->where('id', $user->bus_company_id)->first();
+            return BusCompanyRecord::query()->toBase()->where('id', $user->bus_company_id)->first();
         }
 
-        return DB::table('bus_companies')
+        return BusCompanyRecord::query()->toBase()
             ->whereRaw('LOWER(email) = ?', [mb_strtolower($user->email)])
             ->first();
     }
@@ -35,7 +38,7 @@ class AccessControlService
             ->selectRaw('COUNT(*)')
             ->whereColumn('role_user.role_id', 'roles.id');
 
-        return DB::table('roles')
+        return RoleRecord::query()->toBase()
             ->where('bus_company_id', $companyId)
             ->select('id', 'name', 'description', 'created_at')
             ->selectSub($permissionCount, 'permission_count')
@@ -46,7 +49,7 @@ class AccessControlService
 
     public function roleForCompany(int $companyId, int $roleId): stdClass
     {
-        $role = DB::table('roles')->where('bus_company_id', $companyId)->where('id', $roleId)->first();
+        $role = RoleRecord::query()->toBase()->where('bus_company_id', $companyId)->where('id', $roleId)->first();
         abort_if($role === null, 404);
 
         return $role;
@@ -54,7 +57,7 @@ class AccessControlService
 
     public function permissionGroups(bool $activeOnly = true)
     {
-        return DB::table('permissions')
+        return PermissionRecord::query()->toBase()
             ->when($activeOnly, fn ($query) => $query->where('is_active', true))
             ->orderBy('group')->orderBy('slug')->get()->groupBy('group');
     }
@@ -74,7 +77,7 @@ class AccessControlService
 
         DB::table('permission_role')->insertOrIgnore(array_map(
             static fn (int|string $permissionId): array => [
-                'role_id' => $roleId,
+                'role_id'       => $roleId,
                 'permission_id' => (int) $permissionId,
             ],
             $permissionIds,
@@ -83,7 +86,7 @@ class AccessControlService
 
     public function staffListing(int $companyId, ?string $search = null): LengthAwarePaginator
     {
-        $staff = DB::table('users')
+        $staff = User::query()->toBase()
             ->join('role_user', 'role_user.user_id', '=', 'users.id')
             ->join('roles as staff_role', 'staff_role.id', '=', 'role_user.role_id')
             ->where('users.bus_company_id', $companyId)
@@ -149,7 +152,7 @@ class AccessControlService
             return [];
         }
 
-        return DB::table('roles')
+        return RoleRecord::query()->toBase()
             ->where('bus_company_id', $companyId)
             ->whereIn('id', $roleIds)
             ->pluck('id')
@@ -159,7 +162,7 @@ class AccessControlService
 
     public function syncUserRoles(int $companyId, int $staffId, array $roleIds): void
     {
-        $companyRoleIds = DB::table('roles')->where('bus_company_id', $companyId)->pluck('id')->all();
+        $companyRoleIds = RoleRecord::query()->toBase()->where('bus_company_id', $companyId)->pluck('id')->all();
         DB::table('role_user')->where('user_id', $staffId)->whereIn('role_id', $companyRoleIds)->delete();
 
         foreach ($roleIds as $roleId) {

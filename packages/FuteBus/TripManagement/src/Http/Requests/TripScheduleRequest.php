@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace FuteBus\TripManagement\Http\Requests;
 
+use FuteBus\BusCompanyManagement\Models\BusCompany as BusCompanyRecord;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
 
 class TripScheduleRequest extends FormRequest
 {
@@ -24,7 +26,8 @@ class TripScheduleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'route_id'       => ['required', 'exists:routes,id'],
+            'route_id'       => ['required', Rule::exists('routes', 'id')->where('is_active', true)
+                ->where('bus_company_id', BusCompanyRecord::query()->toBase()->where('code', 'FUTA')->value('id') ?? 0)],
             'departure_time' => ['required', 'date_format:H:i'],
             'days_of_week'   => ['required', 'array', 'min:1'],
             'days_of_week.*' => ['integer', 'between:1,7'],

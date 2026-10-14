@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace FuteBus\Payment\Services;
 
+use FuteBus\BookingManagement\Models\BookedSeat as BookedSeatRecord;
+use FuteBus\Payment\Models\SePayPaymentIntent as SePayPaymentIntentRecord;
+use FuteBus\SeatManagement\Models\SeatLayout as SeatLayoutRecord;
+use FuteBus\TripManagement\Models\Trip as TripRecord;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -30,7 +34,7 @@ class SePayIntentService
             foreach ($legs as $leg) {
                 $tripId = (int) $leg['trip']['id'];
                 $seatIds = array_values(array_unique(array_map('intval', $leg['seat_ids'])));
-                $trip = DB::table('trips')->where('id', $tripId)->lockForUpdate()->first();
+                $trip = TripRecord::query()->toBase()->where('id', $tripId)->lockForUpdate()->first();
                 if ($trip === null || $trip->status !== 'scheduled'
                     || $trip->departure_time <= now()->toDateTimeString()
                     || (int) $trip->price !== (int) $leg['trip']['fare']
@@ -38,21 +42,21 @@ class SePayIntentService
                     $this->seatsUnavailable();
                 }
 
-                DB::table('sepay_payment_intents')
+                SePayPaymentIntentRecord::query()->toBase()
                     ->where(fn ($query) => $query->where('trip_id', $tripId)->orWhere('secondary_trip_id', $tripId))
                     ->where('status', 'pending')
                     ->where('expires_at', '<=', now())
                     ->update(['status' => 'expired', 'updated_at' => now()]);
 
                 $this->seats->releaseCancelled($tripId, $seatIds);
-                $validSeats = DB::table('seat_layouts')->where('bus_id', $trip->bus_id)
+                $validSeats = SeatLayoutRecord::query()->toBase()->where('bus_id', $trip->bus_id)
                     ->whereIn('id', $seatIds)->where('is_available', true)->count();
-                $booked = DB::table('booked_seats')
+                $booked = BookedSeatRecord::query()->toBase()
                     ->join('bookings', 'bookings.id', '=', 'booked_seats.booking_id')
                     ->where('booked_seats.trip_id', $tripId)
                     ->whereIn('booked_seats.seat_layout_id', $seatIds)
                     ->whereIn('bookings.status', ['pending', 'confirmed', 'completed'])->exists();
-                $reserved = DB::table('sepay_payment_intents')
+                $reserved = SePayPaymentIntentRecord::query()->toBase()
                     ->where(fn ($query) => $query->where('trip_id', $tripId)->orWhere('secondary_trip_id', $tripId))
                     ->where('status', 'pending')->where('expires_at', '>', now())
                     ->get(['trip_id', 'seat_ids', 'secondary_trip_id', 'secondary_seat_ids'])
@@ -67,7 +71,7 @@ class SePayIntentService
                 $amount += count($seatIds) * (int) $trip->price;
             }
 
-            DB::table('sepay_payment_intents')->insert([
+            SePayPaymentIntentRecord::query()->toBase()->insert([
                 'token'              => $preview['token'],
                 'code'               => 'FUTA'.strtoupper(bin2hex(random_bytes(5))),
                 'trip_id'            => $preview['trip']['id'],

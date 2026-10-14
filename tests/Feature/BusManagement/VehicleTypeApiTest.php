@@ -63,6 +63,37 @@ class VehicleTypeApiTest extends TestCase
         $this->assertDatabaseHas('vehicle_types', ['id' => $id, 'status' => 'inactive']);
     }
 
+    public function test_admin_can_create_two_deck_34_berth_limousine_type(): void
+    {
+        $admin = $this->admin();
+        $this->withToken($admin->createToken('admin', ['api'])->plainTextToken)
+            ->postJson(route('api.v1.admin.vehicle-types.store'), [
+                'name'             => 'Limousine Sleeper Two Deck 34',
+                'vehicle_class'    => 'limousine_sleeper',
+                'floor_count'      => 2,
+                'seat_rows'        => 6,
+                'seat_columns'     => 3,
+                'unused_seats'     => 2,
+                'default_capacity' => 34,
+            ])
+            ->assertCreated()
+            ->assertJsonPath('data.default_capacity', 34);
+
+        $this->assertDatabaseHas('vehicle_types', [
+            'vehicle_class'    => 'limousine_sleeper',
+            'floor_count'      => 2,
+            'seat_rows'        => 6,
+            'seat_columns'     => 3,
+            'unused_seats'     => 2,
+            'default_capacity' => 34,
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('bus-management.vehicle-types.index'))
+            ->assertOk()
+            ->assertSee('Limousine');
+    }
+
     public function test_existing_web_vehicle_type_form_uses_the_same_business_rules(): void
     {
         $this->actingAs($this->admin())

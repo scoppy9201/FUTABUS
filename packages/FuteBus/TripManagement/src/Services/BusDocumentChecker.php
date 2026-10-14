@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace FuteBus\TripManagement\Services;
 
+use FuteBus\BusManagement\Models\DocumentType as DocumentTypeRecord;
+use FuteBus\BusManagement\Models\VehicleDocument as VehicleDocumentRecord;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -12,14 +14,14 @@ class BusDocumentChecker
     /** Trả về danh sách thông báo lỗi (rỗng nếu xe đủ giấy tờ bắt buộc, còn hạn tại ngày khởi hành). */
     public static function messages(object $bus, Carbon $departure): array
     {
-        $types = DB::table('document_types')
-            ->where('is_required', 1)->where('status', 'active')->get(['id', 'name']);
+        $types = DocumentTypeRecord::query()->toBase()
+            ->where('is_required', 1)->where('status', 'active')->get(['id', 'name', 'has_expiry']);
 
         if ($types->isEmpty()) {
             return [];
         }
 
-        $current = DB::table('vehicle_documents')
+        $current = VehicleDocumentRecord::query()->toBase()
             ->where('bus_id', $bus->id)
             ->whereIn('document_type_id', $types->pluck('id'))
             ->where('status', 'active')
@@ -34,9 +36,9 @@ class BusDocumentChecker
 
         foreach ($types as $t) {
             $doc = $current->get($t->id);
-            if (! $doc) {
+            if (! $doc || ($t->has_expiry && $doc->expiry_date === null)) {
                 $out[] = __('TripManagement::app.tr_err_doc_missing', ['type' => $t->name]);
-            } elseif ($doc->expiry_date < $day) {
+            } elseif ($t->has_expiry && $doc->expiry_date < $day) {
                 $out[] = __('TripManagement::app.tr_err_doc_expired', [
                     'type' => $t->name,
                     'date' => Carbon::parse($doc->expiry_date)->format('d/m/Y'),

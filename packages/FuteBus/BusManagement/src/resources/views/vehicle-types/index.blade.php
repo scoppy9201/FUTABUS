@@ -31,9 +31,27 @@
                 <tbody class="divide-y divide-slate-100">
                     @forelse($vehicleTypes as $type)
                         @php
-                            $classLabels = ['seater' => __('BusManagement::app.vt_class_seater'), 'sleeper' => __('BusManagement::app.vt_class_sleeper'), 'limousine' => __('BusManagement::app.vt_class_limousine'), 'vip_cabin' => __('BusManagement::app.vt_class_vip_cabin')];
-                            $classColors = ['seater' => 'bg-sky-50 text-sky-700', 'sleeper' => 'bg-indigo-50 text-indigo-700', 'limousine' => 'bg-purple-50 text-purple-700', 'vip_cabin' => 'bg-amber-50 text-amber-700'];
-                            $unitMap = ['seater' => __('BusManagement::app.vt_unit_seater'), 'sleeper' => __('BusManagement::app.vt_unit_sleeper'), 'limousine' => __('BusManagement::app.vt_unit_limousine'), 'vip_cabin' => __('BusManagement::app.vt_unit_vip_cabin')];
+                            $classLabels = [
+                                'seater' => __('BusManagement::app.vt_class_seater'),
+                                'sleeper' => __('BusManagement::app.vt_class_sleeper'),
+                                'limousine' => __('BusManagement::app.vt_class_limousine'),
+                                'limousine_sleeper' => __('BusManagement::app.vt_class_limousine_sleeper'),
+                                'vip_cabin' => __('BusManagement::app.vt_class_vip_cabin'),
+                            ];
+                            $classColors = [
+                                'seater' => 'bg-sky-50 text-sky-700',
+                                'sleeper' => 'bg-indigo-50 text-indigo-700',
+                                'limousine' => 'bg-purple-50 text-purple-700',
+                                'limousine_sleeper' => 'bg-purple-50 text-purple-700',
+                                'vip_cabin' => 'bg-amber-50 text-amber-700',
+                            ];
+                            $unitMap = [
+                                'seater' => __('BusManagement::app.vt_unit_seater'),
+                                'sleeper' => __('BusManagement::app.vt_unit_sleeper'),
+                                'limousine' => __('BusManagement::app.vt_unit_limousine'),
+                                'limousine_sleeper' => __('BusManagement::app.vt_unit_limousine_sleeper'),
+                                'vip_cabin' => __('BusManagement::app.vt_unit_vip_cabin'),
+                            ];
                             $busCount = $type->bus_count ?? 0;
                             $canDelete = $busCount === 0;
                             $floors = $type->floor_count ?? 1;
@@ -401,6 +419,7 @@ function vehicleTypeManager() {
         seater:    { min: 8,  max: 50,  suggested: 40, unit: @js(__('BusManagement::app.vt_unit_seater')), maxFloors: 1 },
         sleeper:   { min: 20, max: 46,  suggested: 40, unit: @js(__('BusManagement::app.vt_unit_sleeper')), maxFloors: 2 },
         limousine: { min: 8,  max: 22,  suggested: 22, unit: @js(__('BusManagement::app.vt_unit_limousine')), maxFloors: 1 },
+        limousine_sleeper: { min: 20, max: 46, suggested: 34, unit: @js(__('BusManagement::app.vt_unit_limousine_sleeper')), maxFloors: 2 },
         vip_cabin: { min: 20, max: 24, suggested: 20, unit: @js(__('BusManagement::app.vt_unit_vip_cabin')), maxFloors: 2 },
     };
     const hintTemplate = @js(__('BusManagement::app.vt_capacity_hint'));

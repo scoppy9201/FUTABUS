@@ -6,6 +6,7 @@ namespace FuteBus\UserManagement\Http\Controllers;
 
 use App\Models\User;
 use Carbon\Carbon;
+use FuteBus\RolePermission\Models\Role as RoleRecord;
 use FuteBus\UserManagement\Http\Requests\StaffAccountFilterRequest;
 use FuteBus\UserManagement\Http\Requests\StaffAccountRequest;
 use FuteBus\UserManagement\Http\Requests\StaffAccountStatusRequest;
@@ -56,7 +57,7 @@ class StaffAccountController extends Controller
 
         try {
             DB::transaction(function () use ($data, $company, $avatarPath): void {
-                $roleId = DB::table('roles')->whereNull('bus_company_id')->where('slug', 'staff')->value('id');
+                $roleId = RoleRecord::query()->toBase()->whereNull('bus_company_id')->where('slug', 'staff')->value('id');
                 abort_if($roleId === null, 500);
 
                 $staff = User::create([

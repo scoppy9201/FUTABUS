@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace FuteBus\BookingTracking\Services;
 
 use App\Models\User;
+use FuteBus\BusCompanyManagement\Models\BusCompany as BusCompanyRecord;
+use FuteBus\Payment\Models\Payment as PaymentRecord;
+use FuteBus\TicketManagement\Models\Ticket as TicketRecord;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +21,7 @@ class BookingMonitorService
             && $actor->hasPermissionTo('booking.view'), 403);
         $company = $actor->bus_company_id;
         if (! $company && $actor->isBusCompany()) {
-            $company = DB::table('bus_companies')->whereRaw('LOWER(email) = ?', [mb_strtolower($actor->email)])->value('id');
+            $company = BusCompanyRecord::query()->toBase()->whereRaw('LOWER(email) = ?', [mb_strtolower($actor->email)])->value('id');
         }
         abort_unless($actor->isAdmin() || $company, 403);
 
@@ -98,7 +101,7 @@ class BookingMonitorService
         // A paid round trip has one payment, attached to its primary booking.
         $original = $this->originalPaymentBookings(collect([$booking]))->get($booking);
 
-        return DB::table('payments')->whereIn('booking_id', array_filter([$booking, $original]))
+        return PaymentRecord::query()->toBase()->whereIn('booking_id', array_filter([$booking, $original]))
             ->orderByDesc('id')->get(['payment_code', 'transaction_id', 'amount', 'method', 'status', 'paid_at']);
     }
 
@@ -106,7 +109,7 @@ class BookingMonitorService
     {
         $ids = $records->where('kind', 'booking')->pluck('id');
         $originals = $this->originalPaymentBookings($ids);
-        $payments = DB::table('payments')->whereIn('booking_id', $ids->merge($originals->values()))
+        $payments = PaymentRecord::query()->toBase()->whereIn('booking_id', $ids->merge($originals->values()))
             ->orderByDesc('id')->get(['booking_id', 'status'])->unique('booking_id')->keyBy('booking_id');
         foreach ($records as $record) {
             $record->payment_status = $record->kind === 'booking'
@@ -131,7 +134,7 @@ class BookingMonitorService
         $record = $this->visible($actor)->where('kind', $kind)->where('id', $id)->first();
         abort_if($record === null, 404);
         $record = $this->present($record);
-        $tickets = $kind === 'booking' ? DB::table('tickets')->where('booking_id', $id)->where('trip_id', $record->trip_id)
+        $tickets = $kind === 'booking' ? TicketRecord::query()->toBase()->where('booking_id', $id)->where('trip_id', $record->trip_id)
             ->orderBy('seat_code')->get(['id', 'ticket_code', 'seat_code', 'passenger_name', 'passenger_phone', 'price', 'status', 'used_at']) : collect();
         $refunds = $tickets->isEmpty() ? collect() : DB::table('ticket_cancellations as c')
             ->leftJoin('ticket_refunds as r', 'r.cancellation_id', '=', 'c.id')->whereIn('c.ticket_id', $tickets->pluck('id'))

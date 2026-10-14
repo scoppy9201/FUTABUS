@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace FuteBus\StaffCustomerSupport\Http\Controllers\Api;
 
+use FuteBus\BookingManagement\Models\BookedSeat as BookedSeatRecord;
+use FuteBus\Profile\Models\CustomerFeedbackAttachment as CustomerFeedbackAttachmentRecord;
 use FuteBus\StaffCustomerSupport\Http\Requests\ClaimSupportRequest;
 use FuteBus\StaffCustomerSupport\Http\Requests\RespondSupportRequest;
 use FuteBus\StaffCustomerSupport\Http\Requests\SupportActionRequest;
 use FuteBus\StaffCustomerSupport\Http\Requests\SupportFilterRequest;
+use FuteBus\StaffCustomerSupport\Models\CustomerSupportEvent as CustomerSupportEventRecord;
 use FuteBus\StaffCustomerSupport\Services\FeedbackProcessingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -58,14 +61,14 @@ class SupportRequestController extends Controller
         $history = $support->history($report, true)->map(function (object $event): array {
             return [...(array) $event, 'created_at' => Carbon::parse($event->created_at)->toIso8601String()];
         });
-        $images = DB::table('customer_feedback_attachments')->where('report_id', $report)->orderBy('id')->get(['id', 'original_name']);
+        $images = CustomerFeedbackAttachmentRecord::query()->toBase()->where('report_id', $report)->orderBy('id')->get(['id', 'original_name']);
 
         return response()->json(['data' => [...$this->resource($item),
             'departments'  => $support->departments($request->user()),
             'can_claim'    => $item->department_role_id === null || DB::table('role_user')->where('user_id', $request->user()->id)->where('role_id', $item->department_role_id)->exists(),
             'updated_at'   => Carbon::parse($item->updated_at)->toIso8601String(),
             'departure_at' => $item->departure_time ? Carbon::parse($item->departure_time)->toIso8601String() : null,
-            'seat_codes'   => $item->booking_id ? DB::table('booked_seats')->where('booking_id', $item->booking_id)->orderBy('seat_code')->pluck('seat_code') : [],
+            'seat_codes'   => $item->booking_id ? BookedSeatRecord::query()->toBase()->where('booking_id', $item->booking_id)->orderBy('seat_code')->pluck('seat_code') : [],
             'message'      => $item->message, 'response' => $item->response, 'history' => $history,
             'contact'      => ['name' => $item->contact_name, 'allow_contact' => (bool) $item->allow_contact,
                 'phone'               => $item->allow_contact ? $item->contact_phone : null,
@@ -100,7 +103,7 @@ class SupportRequestController extends Controller
     public function response(Request $request, FeedbackProcessingService $support, int $report, int $response): JsonResponse
     {
         abort_unless($support->visible($request->user())->where('feedback.id', $report)->exists(), 404);
-        $event = DB::table('customer_support_events')->where('report_id', $report)->where('id', $response)->where('kind', 'response')
+        $event = CustomerSupportEventRecord::query()->toBase()->where('report_id', $report)->where('id', $response)->where('kind', 'response')
             ->first(['id', 'report_id', 'actor_name', 'status', 'response', 'version', 'created_at']);
         abort_if($event === null, 404);
         $event->created_at = Carbon::parse($event->created_at)->toIso8601String();
@@ -139,7 +142,7 @@ class SupportRequestController extends Controller
     public function attachment(Request $request, FeedbackProcessingService $support, int $report, int $attachment): StreamedResponse
     {
         abort_unless($support->visible($request->user())->where('feedback.id', $report)->exists(), 404);
-        $image = DB::table('customer_feedback_attachments')->where('report_id', $report)->where('id', $attachment)->first();
+        $image = CustomerFeedbackAttachmentRecord::query()->toBase()->where('report_id', $report)->where('id', $attachment)->first();
         abort_if($image === null, 404);
         abort_unless(preg_match('#^customer-feedback/'.$report.'/[a-f0-9-]{36}\.(jpg|png|webp)$#', $image->path) === 1
             && in_array($image->mime_type, ['image/jpeg', 'image/png', 'image/webp'], true)

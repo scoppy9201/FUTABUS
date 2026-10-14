@@ -13,7 +13,8 @@
         "futebus/payment": "*",
         "futebus/profile": "*",
         "futebus/staffcustomersupport": "*",
-        "futebus/staffticketprocessing": "*"
+        "futebus/staffticketprocessing": "*",
+        "futebus/ticketmanagement": "*"
     },
     "autoload": {
         "psr-4": {

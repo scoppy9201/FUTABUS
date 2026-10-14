@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace FuteBus\BusManagement\Http\Controllers;
 
+use FuteBus\BusCompanyManagement\Models\BusCompany as BusCompanyRecord;
 use FuteBus\BusManagement\Http\Requests\VehicleDocumentRequest;
+use FuteBus\BusManagement\Models\Bus as BusRecord;
+use FuteBus\BusManagement\Models\DocumentType as DocumentTypeRecord;
+use FuteBus\BusManagement\Models\DocumentTypeField as DocumentTypeFieldRecord;
+use FuteBus\BusManagement\Models\VehicleDocument as VehicleDocumentRecord;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -27,7 +32,7 @@ class VehicleDocumentController extends Controller
         $today = today()->toDateString();
         $soon = today()->addDays(30)->toDateString();
 
-        $query = DB::table('vehicle_documents')
+        $query = VehicleDocumentRecord::query()->toBase()
             ->join('buses', 'buses.id', '=', 'vehicle_documents.bus_id')
             ->join('document_types', 'document_types.id', '=', 'vehicle_documents.document_type_id')
             ->select(
@@ -65,8 +70,8 @@ class VehicleDocumentController extends Controller
             default     => null,
         };
 
-        $types = DB::table('document_types')->where('status', 'active')->orderBy('name')->get();
-        $dbFields = DB::table('document_type_fields')
+        $types = DocumentTypeRecord::query()->toBase()->where('status', 'active')->orderBy('name')->get();
+        $dbFields = DocumentTypeFieldRecord::query()->toBase()
             ->whereIn('document_type_id', $types->pluck('id'))
             ->where('is_active', 1)->orderBy('sort_order')->get()->groupBy('document_type_id');
 
@@ -88,17 +93,17 @@ class VehicleDocumentController extends Controller
             'busId'       => $busId,
             'typeId'      => $typeId,
             'state'       => $state,
-            'buses'       => DB::table('buses')->orderBy('license_plate')->get(['id', 'license_plate', 'status']),
+            'buses'       => BusRecord::query()->toBase()->orderBy('license_plate')->get(['id', 'license_plate', 'status']),
             'allTypes'    => $types,
             'typePayload' => $typePayload,
-            'company'     => DB::table('bus_companies')->where('code', 'FUTA')->first(),
+            'company'     => BusCompanyRecord::query()->toBase()->where('code', 'FUTA')->first(),
         ]);
     }
 
     public function file(Request $request, int $id)
     {
         abort_unless($request->user()?->isAdmin(), 403);
-        $doc = DB::table('vehicle_documents')->find($id);
+        $doc = VehicleDocumentRecord::query()->toBase()->find($id);
         abort_unless($doc && $doc->file_path && Storage::disk('local')->exists($doc->file_path), 404);
 
         $fileName = Str::replace(['"', "\r", "\n"], '', basename($doc->file_name ?: $doc->file_path));
@@ -113,7 +118,7 @@ class VehicleDocumentController extends Controller
     {
         abort_unless($request->user()?->isAdmin(), 403);
 
-        $docType = DB::table('document_types')
+        $docType = DocumentTypeRecord::query()->toBase()
             ->where('id', $request->input('document_type_id'))
             ->where('status', 'active')
             ->first();
@@ -133,7 +138,7 @@ class VehicleDocumentController extends Controller
             ['path' => $filePath, 'name' => $fileName] = $this->storeFile($request);
         }
 
-        DB::table('vehicle_documents')->insert([
+        VehicleDocumentRecord::query()->toBase()->insert([
             'bus_id'           => $data['bus_id'],
             'document_type_id' => $data['document_type_id'],
             'renewed_from_id'  => $existingId, // Hồ sơ cũ tự thành lịch sử
@@ -154,10 +159,10 @@ class VehicleDocumentController extends Controller
     public function update(VehicleDocumentRequest $request, int $id): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
-        $doc = DB::table('vehicle_documents')->find($id);
+        $doc = VehicleDocumentRecord::query()->toBase()->find($id);
         abort_unless($doc, 404);
 
-        $docType = DB::table('document_types')->find($doc->document_type_id);
+        $docType = DocumentTypeRecord::query()->toBase()->find($doc->document_type_id);
         $hasExpiry = (bool) ($docType?->has_expiry ?? true);
 
         $data = $request->validated();
@@ -175,7 +180,7 @@ class VehicleDocumentController extends Controller
             ['path' => $updateData['file_path'], 'name' => $updateData['file_name']] = $this->storeFile($request);
         }
 
-        DB::table('vehicle_documents')->where('id', $id)->update($updateData);
+        VehicleDocumentRecord::query()->toBase()->where('id', $id)->update($updateData);
         if ($request->hasFile('attachment') && $doc->file_path) {
             Storage::disk('local')->delete($doc->file_path);
         }
@@ -188,14 +193,14 @@ class VehicleDocumentController extends Controller
     public function renew(VehicleDocumentRequest $request, int $id): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
-        $old = DB::table('vehicle_documents')->find($id);
+        $old = VehicleDocumentRecord::query()->toBase()->find($id);
         abort_unless($old, 404);
 
-        if ($old->status !== 'active' || DB::table('vehicle_documents')->where('renewed_from_id', $id)->exists()) {
+        if ($old->status !== 'active' || VehicleDocumentRecord::query()->toBase()->where('renewed_from_id', $id)->exists()) {
             return back()->withErrors(['doc' => __('BusManagement::app.vd_err_history')]);
         }
 
-        $docType = DB::table('document_types')
+        $docType = DocumentTypeRecord::query()->toBase()
             ->where('id', $old->document_type_id)->where('status', 'active')->first();
         if (! $docType) {
             return back()->withErrors(['doc' => __('BusManagement::app.vd_err_type')]);
@@ -211,7 +216,7 @@ class VehicleDocumentController extends Controller
             ['path' => $filePath, 'name' => $fileName] = $this->storeFile($request);
         }
 
-        DB::table('vehicle_documents')->insert([
+        VehicleDocumentRecord::query()->toBase()->insert([
             'bus_id'           => $old->bus_id,
             'document_type_id' => $old->document_type_id,
             'renewed_from_id'  => $old->id,
@@ -233,14 +238,14 @@ class VehicleDocumentController extends Controller
     public function destroy(Request $request, int $id): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
-        $doc = DB::table('vehicle_documents')->find($id);
+        $doc = VehicleDocumentRecord::query()->toBase()->find($id);
         abort_unless($doc, 404);
 
-        if (DB::table('vehicle_documents')->where('renewed_from_id', $id)->exists()) {
+        if (VehicleDocumentRecord::query()->toBase()->where('renewed_from_id', $id)->exists()) {
             return back()->withErrors(['doc' => __('BusManagement::app.vd_err_has_child')]);
         }
 
-        DB::table('vehicle_documents')->where('id', $id)->delete();
+        VehicleDocumentRecord::query()->toBase()->where('id', $id)->delete();
         if ($doc->file_path) {
             Storage::disk('local')->delete($doc->file_path);
         }
@@ -253,14 +258,14 @@ class VehicleDocumentController extends Controller
     public function deactivate(Request $request, int $id): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
-        $doc = DB::table('vehicle_documents')->find($id);
+        $doc = VehicleDocumentRecord::query()->toBase()->find($id);
         abort_unless($doc, 404);
 
         if ($doc->status !== 'active') {
             return back()->withErrors(['doc' => __('BusManagement::app.vd_err_inactive')]);
         }
 
-        DB::table('vehicle_documents')->where('id', $id)->update([
+        VehicleDocumentRecord::query()->toBase()->where('id', $id)->update([
             'status'     => 'inactive',
             'updated_at' => now(),
         ]);
@@ -272,7 +277,7 @@ class VehicleDocumentController extends Controller
     /** ID của hồ sơ hiện hành (active + chưa bị superseded). */
     private function getCurrentDocId(int $busId, int $typeId): ?int
     {
-        return DB::table('vehicle_documents')
+        return VehicleDocumentRecord::query()->toBase()
             ->where('bus_id', $busId)->where('document_type_id', $typeId)->where('status', 'active')
             ->whereNotExists(function ($q) {
                 $q->select(DB::raw(1))->from('vehicle_documents as n')

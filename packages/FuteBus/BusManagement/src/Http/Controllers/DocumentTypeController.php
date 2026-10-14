@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace FuteBus\BusManagement\Http\Controllers;
 
+use FuteBus\BusCompanyManagement\Models\BusCompany as BusCompanyRecord;
 use FuteBus\BusManagement\Http\Requests\DocumentTypeRequest;
+use FuteBus\BusManagement\Models\DocumentType as DocumentTypeRecord;
+use FuteBus\BusManagement\Models\DocumentTypeField as DocumentTypeFieldRecord;
+use FuteBus\BusManagement\Models\VehicleDocument as VehicleDocumentRecord;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -19,7 +23,7 @@ class DocumentTypeController extends Controller
         abort_unless($request->user()?->isAdmin(), 403);
 
         $search = (string) $request->input('search', '');
-        $query = DB::table('document_types')
+        $query = DocumentTypeRecord::query()->toBase()
             ->selectRaw('document_types.*, (select count(*) from vehicle_documents
                          where vehicle_documents.document_type_id = document_types.id) as record_count')
             ->orderBy('name');
@@ -29,7 +33,7 @@ class DocumentTypeController extends Controller
         }
 
         $types = $query->paginate(15)->withQueryString();
-        $fields = DB::table('document_type_fields')
+        $fields = DocumentTypeFieldRecord::query()->toBase()
             ->whereIn('document_type_id', $types->pluck('id'))
             ->where('is_active', 1)->orderBy('sort_order')->get()
             ->groupBy('document_type_id');
@@ -38,7 +42,7 @@ class DocumentTypeController extends Controller
             'types'   => $types,
             'fields'  => $fields,
             'search'  => $search,
-            'company' => DB::table('bus_companies')->where('code', 'FUTA')->first(),
+            'company' => BusCompanyRecord::query()->toBase()->where('code', 'FUTA')->first(),
         ]);
     }
 
@@ -49,7 +53,7 @@ class DocumentTypeController extends Controller
         $data = $request->validated();
 
         DB::transaction(function () use ($data) {
-            $id = DB::table('document_types')->insertGetId([
+            $id = DocumentTypeRecord::query()->toBase()->insertGetId([
                 'name'            => trim($data['name']),
                 'description'     => $data['description'] ?? null,
                 'is_required'     => (bool) $data['is_required'],
@@ -72,7 +76,7 @@ class DocumentTypeController extends Controller
     public function update(DocumentTypeRequest $request, int $id): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
-        $type = DB::table('document_types')->find($id);
+        $type = DocumentTypeRecord::query()->toBase()->find($id);
         abort_unless($type, 404);
 
         if ($type->status !== 'active') {
@@ -82,7 +86,7 @@ class DocumentTypeController extends Controller
         $data = $request->validated();
 
         DB::transaction(function () use ($data, $id) {
-            DB::table('document_types')->where('id', $id)->update([
+            DocumentTypeRecord::query()->toBase()->where('id', $id)->update([
                 'name'            => trim($data['name']),
                 'description'     => $data['description'] ?? null,
                 'is_required'     => (bool) $data['is_required'],
@@ -92,13 +96,13 @@ class DocumentTypeController extends Controller
                 'updated_at'      => now(),
             ]);
 
-            $existing = DB::table('document_type_fields')->where('document_type_id', $id)->pluck('id')->all();
+            $existing = DocumentTypeFieldRecord::query()->toBase()->where('document_type_id', $id)->pluck('id')->all();
             $keep = [];
 
             foreach (array_values($data['fields']) as $i => $f) {
                 $fid = isset($f['id']) && in_array((int) $f['id'], $existing, true) ? (int) $f['id'] : null;
                 if ($fid) {
-                    DB::table('document_type_fields')->where('id', $fid)->update([
+                    DocumentTypeFieldRecord::query()->toBase()->where('id', $fid)->update([
                         'label'       => trim($f['label']),
                         'is_required' => (bool) $f['required'],
                         'sort_order'  => $i,
@@ -112,7 +116,7 @@ class DocumentTypeController extends Controller
             }
 
             // Ẩn trường bị bỏ, không xóa (bảo toàn dữ liệu hồ sơ cũ)
-            DB::table('document_type_fields')->where('document_type_id', $id)
+            DocumentTypeFieldRecord::query()->toBase()->where('document_type_id', $id)
                 ->whereNotIn('id', $keep)->update(['is_active' => 0, 'updated_at' => now()]);
         });
 
@@ -124,10 +128,10 @@ class DocumentTypeController extends Controller
     public function destroy(Request $request, int $id): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
-        $type = DB::table('document_types')->find($id);
+        $type = DocumentTypeRecord::query()->toBase()->find($id);
         abort_unless($type, 404);
 
-        $recordCount = (int) DB::table('vehicle_documents')->where('document_type_id', $id)->count();
+        $recordCount = (int) VehicleDocumentRecord::query()->toBase()->where('document_type_id', $id)->count();
 
         // Nếu có hồ sơ: chỉ ngừng sử dụng
         if ($recordCount > 0) {
@@ -135,8 +139,8 @@ class DocumentTypeController extends Controller
         }
 
         // Chưa có hồ sơ: xóa hoàn toàn
-        DB::table('document_type_fields')->where('document_type_id', $id)->delete();
-        DB::table('document_types')->where('id', $id)->delete();
+        DocumentTypeFieldRecord::query()->toBase()->where('document_type_id', $id)->delete();
+        DocumentTypeRecord::query()->toBase()->where('id', $id)->delete();
 
         return redirect()->route('bus-management.document-types.index')
             ->with('success', __('BusManagement::app.dt_flash_deleted'));
@@ -146,11 +150,11 @@ class DocumentTypeController extends Controller
     public function toggle(Request $request, int $id): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
-        $type = DB::table('document_types')->find($id);
+        $type = DocumentTypeRecord::query()->toBase()->find($id);
         abort_unless($type, 404);
 
         $newStatus = $type->status === 'active' ? 'inactive' : 'active';
-        DB::table('document_types')->where('id', $id)->update([
+        DocumentTypeRecord::query()->toBase()->where('id', $id)->update([
             'status'     => $newStatus,
             'updated_at' => now(),
         ]);
@@ -163,7 +167,7 @@ class DocumentTypeController extends Controller
 
     private function insertField(int $typeId, array $f, int $order): int
     {
-        return DB::table('document_type_fields')->insertGetId([
+        return DocumentTypeFieldRecord::query()->toBase()->insertGetId([
             'document_type_id' => $typeId,
             'field_key'        => Str::lower(Str::random(8)),
             'label'            => trim($f['label']),

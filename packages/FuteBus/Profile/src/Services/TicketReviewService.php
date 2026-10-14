@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FuteBus\Profile\Services;
 
 use App\Models\User;
+use FuteBus\Profile\Models\BookingReview as BookingReviewRecord;
 use Illuminate\Support\Facades\DB;
 
 class TicketReviewService
@@ -19,7 +20,7 @@ class TicketReviewService
 
             abort_unless($detail['canReview'], 403);
 
-            DB::table('booking_reviews')->upsert([[
+            BookingReviewRecord::query()->toBase()->upsert([[
                 'booking_id' => $bookingId,
                 'user_id'    => $user->id,
                 'rating'     => $rating,

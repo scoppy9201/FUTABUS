@@ -116,10 +116,10 @@
                                         {{ __('TripManagement::app.sch_stops_of') }}
                                         {{ $s->origin_city }} → {{ $s->destination_city }}
                                     </h3>
-                                    <button type="button" @click="openStopAdd({{ $s->route_id }}, {{ $s->id }})"
-                                        class="inline-flex items-center gap-1.5 rounded-lg bg-futa-orange px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-futa-orange-dark">
-                                        <x-heroicon-o-plus class="size-3.5" /> {{ __('TripManagement::app.rs_btn_add') }}
-                                    </button>
+                                    <a href="{{ route('route-management.stops.index', ['route_id' => $s->route_id]) }}"
+                                        class="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 bg-white px-3.5 py-2 text-xs font-bold text-futa-orange">
+                                        <x-heroicon-o-map-pin class="size-3.5" /> {{ __('RouteManagement::app.manage_stops') }}
+                                    </a>
                                 </div>
 
                                 @if($routeStops->isEmpty())
@@ -129,21 +129,6 @@
                                 @endif
 
                                 <ol class="mt-4">
-                                    {{-- Bến xuất phát (cố định) --}}
-                                    <li class="flex gap-4">
-                                        <span class="w-16 shrink-0 pt-0.5 text-right text-sm font-bold text-slate-800">{{ $dep->format('H:i') }}</span>
-                                        <div class="flex flex-col items-center">
-                                            <span class="mt-1.5 size-3 shrink-0 rounded-full border-2 border-futa-orange bg-futa-orange"></span>
-                                            @if($routeStops->isNotEmpty())<span class="w-px grow bg-slate-200"></span>@endif
-                                        </div>
-                                        <div class="min-w-0 flex-1 pb-5">
-                                            <p class="text-sm font-bold text-slate-800">
-                                                {{ $s->origin_city }}
-                                                <span class="ml-1 rounded bg-futa-orange-soft px-1.5 py-0.5 text-[10px] font-semibold text-futa-orange-dark">{{ __('TripManagement::app.rs_departure_point') }}</span>
-                                            </p>
-                                        </div>
-                                    </li>
-
                                     @php $run = 0; @endphp
                                     @foreach($routeStops as $st)
                                         @php
@@ -171,22 +156,7 @@
                                                 @if($st->address)<p class="text-xs text-slate-500">{{ $st->address }}</p>@endif
                                                 <p class="text-[11px] text-slate-400">+{{ $st->leg_minutes }} {{ __('TripManagement::app.rs_minutes') }}</p>
                                             </div>
-                                            <div class="flex shrink-0 items-start gap-1.5">
-                                                <button type="button" title="{{ __('TripManagement::app.btn_edit') }}"
-                                                    @click="openStopEdit({{ json_encode([
-                                                        'id' => $st->id, 'name' => $st->name, 'address' => $st->address,
-                                                        'leg_minutes' => $st->leg_minutes, 'position' => $st->stop_order,
-                                                        'stop_type' => $st->stop_type,
-                                                    ]) }}, {{ $s->route_id }}, {{ $s->id }})"
-                                                    class="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-600 hover:border-futa-orange hover:text-futa-orange">
-                                                    <x-heroicon-o-pencil-square class="size-3.5" />
-                                                </button>
-                                                <button type="button" title="{{ __('TripManagement::app.rs_btn_deactivate') }}"
-                                                    @click="openStopDelete({{ json_encode(['id' => $st->id, 'name' => $st->name]) }}, {{ $s->id }})"
-                                                    class="rounded-lg border border-slate-200 bg-white p-1.5 text-rose-600 hover:border-rose-300 hover:bg-rose-50">
-                                                    <x-heroicon-o-trash class="size-3.5" />
-                                                </button>
-                                            </div>
+
                                         </li>
                                     @endforeach
                                 </ol>
@@ -288,65 +258,6 @@
         @method('DELETE')
     </form>
 
-    {{-- Shared right-side panel --}}
-    <x-core::side-panel id="schedules-stop-panel" @close="showStop = false" @click.self="showStop = false"
-        x-effect="window.FutaSidePanel.sync($el, showStop, $nextTick)">
-        <x-slot:title><span
-                    x-text="stopEdit ? @js(__('TripManagement::app.rs_modal_edit')) : @js(__('TripManagement::app.rs_modal_add'))"></span></x-slot:title>
-        <form :action="stopAction" method="POST" class="flex min-h-0 flex-1 flex-col">
-                @csrf
-                <div class="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6">
-                <template x-if="stopEdit"><input type="hidden" name="_method" value="PUT"></template>
-                <input type="hidden" name="route_id" :value="stopRoute">
-                <input type="hidden" name="schedule_id" :value="stopSchedule">
-
-                <div>
-                    <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.rs_f_name') }} <span class="text-rose-500">*</span></label>
-                    <input type="text" name="name" x-model="stopForm.name" required maxlength="150" class="{{ $inp }}" />
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.rs_f_address') }}</label>
-                    <input type="text" name="address" x-model="stopForm.address" maxlength="255" class="{{ $inp }}" />
-                </div>
-                <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                    <div class="sm:col-span-2">
-                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.rs_f_leg') }} <span class="text-rose-500">*</span></label>
-                        <input type="number" name="leg_minutes" x-model="stopForm.leg_minutes" required min="1" max="1440" step="any" class="{{ $inp }}" />
-                        <p class="mt-0.5 text-xs text-slate-400">{{ __('TripManagement::app.rs_leg_hint') }}</p>
-                    </div>
-                    <div>
-                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.rs_f_position') }}</label>
-                        <input type="number" name="position" x-model="stopForm.position" min="1" step="any" class="{{ $inp }}" />
-                        <p class="mt-0.5 text-xs text-slate-400">{{ __('TripManagement::app.rs_position_hint') }}</p>
-                    </div>
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.rs_f_type') }}</label>
-                    <select name="stop_type" x-model="stopForm.stop_type" class="{{ $inp }}">
-                        <option value="both">{{ __('TripManagement::app.rs_type_both') }}</option>
-                        <option value="pickup">{{ __('TripManagement::app.rs_type_pickup') }}</option>
-                        <option value="dropoff">{{ __('TripManagement::app.rs_type_dropoff') }}</option>
-                    </select>
-                </div>
-
-                </div>
-                <footer class="flex shrink-0 items-center justify-end gap-3 border-t border-slate-200 bg-white px-6 py-4">
-                    <button type="button" @click="showStop = false" class="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50">{{ __('TripManagement::app.btn_cancel') }}</button>
-                    <button type="submit" class="rounded-xl bg-futa-orange px-5 py-3 text-sm font-bold text-white shadow-sm hover:bg-futa-orange-dark"
-                            x-text="stopEdit ? @js(__('TripManagement::app.btn_save')) : @js(__('TripManagement::app.btn_store'))"></button>
-                </footer>
-            </form>
-    </x-core::side-panel>
-
-    {{-- DELETE STOP MODAL --}}
-    <form x-ref="stopDeleteForm" :action="stopDelAction" method="POST" hidden data-confirm
-        :data-confirm-title="@js(__('TripManagement::app.rs_modal_deactivate'))"
-        :data-confirm-message="@js(__('TripManagement::app.rs_deactivate_msg')) + ' ' + stopDel.name + '?'"
-        data-confirm-label="{{ __('TripManagement::app.btn_confirm') }}">
-        @csrf
-        @method('DELETE')
-        <input type="hidden" name="schedule_id" :value="stopSchedule">
-    </form>
 </div>
 
 {{-- THÔNG BÁO TỪ SERVER (FutaNotify) --}}
@@ -370,9 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <script>
 function scheduleManager() {
     const blank = { route_id:'', departure_time:'', days_of_week:[], start_date:'', end_date:'', price:'' };
-    const stopBlank = { name:'', address:'', leg_minutes:10, position:'', stop_type:'both' };
     const base = `{{ url('quan-tri/chuyen-xe/lich-trinh') }}`;
-    const stopBase = `{{ url('quan-tri/chuyen-xe/diem-dung') }}`;
     const today = `{{ today()->toDateString() }}`;
     const t = {
         errDate: @js(__('TripManagement::app.sch_err_date')),
@@ -385,10 +294,6 @@ function scheduleManager() {
         showForm: false, isEdit: false,
         form: { ...blank }, formAction: base,
         deleteData: {}, deleteAction: '',
-        showStop: false, stopEdit: false,
-        stopForm: { ...stopBlank }, stopAction: stopBase,
-        stopRoute: '', stopSchedule: '',
-        stopDel: {}, stopDelAction: '',
 
         toggle(id)   { this.open[id] = !this.open[id]; },
         openAdd()    { this.isEdit = false; this.form = { ...blank, days_of_week: [] }; this.formAction = base; this.showForm = true; },
@@ -417,20 +322,6 @@ function scheduleManager() {
             }
         },
 
-        openStopAdd(routeId, scheduleId) {
-            this.stopEdit = false; this.stopForm = { ...stopBlank };
-            this.stopAction = stopBase; this.stopRoute = routeId; this.stopSchedule = scheduleId;
-            this.showStop = true;
-        },
-        openStopEdit(s, routeId, scheduleId) {
-            this.stopEdit = true; this.stopForm = { ...stopBlank, ...s, address: s.address ?? '', position: s.position ?? '' };
-            this.stopAction = `${stopBase}/${s.id}`; this.stopRoute = routeId; this.stopSchedule = scheduleId;
-            this.showStop = true;
-        },
-        openStopDelete(s, scheduleId) {
-            this.stopDel = s; this.stopDelAction = `${stopBase}/${s.id}`; this.stopSchedule = scheduleId;
-            this.$nextTick(() => this.$refs.stopDeleteForm.requestSubmit());
-        },
     };
 }
 </script>
