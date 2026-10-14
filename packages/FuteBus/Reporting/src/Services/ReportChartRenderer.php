@@ -152,11 +152,12 @@ class ReportChartRenderer
         $diameter = 280;
         $values = array_filter($report['status'], static fn ($value): bool => (float) $value > 0);
         $total = array_sum($values);
+        $isRevenue = in_array($filters['type'], ['overview', 'revenue'], true);
 
         if ($total > 0) {
-            $palette = $filters['type'] === 'revenue'
+            $palette = $isRevenue
                 ? [self::ORANGE, self::BLUE, self::GREEN, [100, 116, 139]]
-                : ['completed' => self::ORANGE, 'pending' => self::TEAL, 'failed' => self::BLUE, 'refunded' => self::RED, 'active' => self::TEAL, 'used' => self::BLUE];
+                : ['completed' => self::ORANGE, 'pending' => self::TEAL, 'failed' => self::BLUE, 'refunded' => self::RED, 'active' => self::TEAL, 'used' => self::BLUE, 'cancelled' => self::MUTED, 'scheduled' => self::BLUE, 'departed' => self::ORANGE, 'arrived' => self::GREEN];
             $angle = -90;
             foreach (array_values($values) as $index => $value) {
                 $sweep = (int) round(((float) $value / $total) * 360);
@@ -165,13 +166,13 @@ class ReportChartRenderer
                 }
 
                 $key = array_keys($values)[$index];
-                $rgb = $filters['type'] === 'revenue' ? ($palette[$index] ?? [100, 116, 139]) : ($palette[$key] ?? [124, 58, 237]);
+                $rgb = $isRevenue ? ($palette[$index] ?? [100, 116, 139]) : ($palette[$key] ?? [124, 58, 237]);
                 imagefilledarc($image, $centerX, $centerY, $diameter, $diameter, $angle, $angle + $sweep, $this->color($image, $rgb), IMG_ARC_PIE);
                 $angle += $sweep;
             }
 
             imagefilledellipse($image, $centerX, $centerY, 166, 166, $this->color($image, [255, 255, 255]));
-            $centerLabel = $filters['type'] === 'revenue' ? number_format($total / 1_000_000, 2).'M' : number_format($total);
+            $centerLabel = $isRevenue ? number_format($total / 1_000_000, 2).'M' : number_format($total);
             $ink = $this->color($image, self::INK);
             imagestring($image, 5, (int) ($centerX - imagefontwidth(5) * strlen($centerLabel) / 2), $centerY - 8, $centerLabel, $ink);
         }

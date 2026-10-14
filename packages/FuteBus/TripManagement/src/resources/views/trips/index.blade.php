@@ -68,7 +68,7 @@
                                 <span class="block text-xs text-slate-400">{{ __('TripManagement::app.tr_arrival_short') }} {{ \Illuminate\Support\Carbon::parse($t->arrival_time)->format('H:i · d/m') }}</span>
                             </td>
                             <td class="px-5 py-4">{{ $t->license_plate ?? '—' }}</td>
-                            <td class="px-5 py-4">{{ $t->license_plate ? ($t->available_seats ?? 0).'/'.$t->capacity : '—' }}</td>
+                            <td class="px-5 py-4">{{ $t->license_plate ? $t->remaining_seats.'/'.$t->capacity : '—' }}</td>
                             <td class="whitespace-nowrap px-5 py-4">{{ number_format($t->price, 0, ',', '.') }} ₫</td>
                             <td class="px-5 py-4 text-xs font-semibold text-slate-500">
                                 {{ $t->trip_schedule_id ? __('TripManagement::app.tr_src_schedule') : __('TripManagement::app.tr_src_manual') }}

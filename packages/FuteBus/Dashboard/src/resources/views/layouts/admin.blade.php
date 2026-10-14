@@ -115,7 +115,8 @@
                                 || ($item['key'] === 'trips' && request()->routeIs('trip-management.trips*'))
                                 || ($item['key'] === 'routes' && request()->routeIs('trip-management.schedules*'))
                                 || ($item['key'] === 'staff_accounts' && request()->routeIs('staff-accounts.*'))
-                                || ($item['key'] === 'access_management' && request()->routeIs('access-management.*'));
+                                || ($item['key'] === 'access_management' && request()->routeIs('access-management.*'))
+                                || ($item['key'] === 'reports' && request()->routeIs('reporting.*'));
                             $hasSubmenu  = isset($item['submenu']);
                             $openDefault = ($item['key'] === 'buses' && $isBusSection) ? 'true' : 'false';
                         @endphp

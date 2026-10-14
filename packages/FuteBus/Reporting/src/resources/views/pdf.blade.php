@@ -15,7 +15,7 @@
         .header .company { color: #f4511e; font-size: 10px; font-weight: bold; text-transform: uppercase; }
         .header .filters { color: #475569; line-height: 1.7; text-align: right; }
         .metrics { margin-bottom: 14px; }
-        .metrics td { background: #fff; border: 1px solid #dbe3ec; padding: 10px 14px; width: 33.33%; }
+        .metrics td { background: #fff; border: 1px solid #dbe3ec; padding: 10px 14px; width: 25%; }
         .metrics td + td { border-left: 8px solid #fff; }
         .metric-label { color: #64748b; font-size: 8px; font-weight: bold; }
         .metric-value { color: #172033; font-size: 18px; font-weight: bold; margin-top: 5px; }
@@ -44,31 +44,38 @@
                 <p class="muted">{{ __('Reporting::app.'.$filters['type']) }}</p>
             </td>
             <td class="filters">
+                @php $selectedRoute = $options['routes']->firstWhere('id', $filters['route_id']); @endphp
                 <strong>{{ __('Reporting::app.from') }}:</strong> {{ $filters['from'] }}<br>
-                <strong>{{ __('Reporting::app.to') }}:</strong> {{ $filters['to'] }}
-                @if($filters['type'] === 'payments')<br><strong>{{ __('Reporting::app.status') }}:</strong> {{ __('Reporting::app.'.$filters['status']) }}@endif
+                <strong>{{ __('Reporting::app.to') }}:</strong> {{ $filters['to'] }}<br>
+                <span>{{ __('Reporting::app.date_basis_payment') }}</span>
+                @if($filters['route_id'])<br><strong>{{ __('Reporting::app.route') }}:</strong> {{ $selectedRoute ? $selectedRoute->origin_city.' → '.$selectedRoute->destination_city : $filters['route_id'] }}@endif
+                @if($filters['trip_id'])<br><strong>{{ __('Reporting::app.trip') }}:</strong> {{ $filters['trip_id'] }}@endif
+                @if($filters['bus_id'])<br><strong>{{ __('Reporting::app.bus') }}:</strong> {{ $options['buses']->firstWhere('id', $filters['bus_id'])?->license_plate ?? $filters['bus_id'] }}@endif
+                @if($filters['status'] !== 'all')<br><strong>{{ __('Reporting::app.status') }}:</strong> {{ __('Reporting::app.'.$filters['status']) }}@endif
             </td>
         </tr></table>
     </div>
 
     <table class="metrics"><tr>
-        <td><p class="metric-label">{{ __('Reporting::app.total_count') }}</p><p class="metric-value">{{ number_format($report['totals']['count']) }}</p></td>
-        <td>
-            <p class="metric-label">{{ $filters['type'] === 'tickets' ? __('Reporting::app.tickets') : __('Reporting::app.total_amount') }}</p>
-            <p class="metric-value">
-                {{ $filters['type'] === 'tickets' ? number_format($report['totals']['count']) : number_format($report['totals']['amount']).' VND' }}
-            </p>
-        </td>
-        @if($filters['type'] === 'payments')<td><p class="metric-label">{{ __('Reporting::app.refund_amount') }}</p><p class="metric-value">{{ number_format($report['totals']['refunded']) }} VND</p></td>@endif
+        <td><p class="metric-label">{{ __('Reporting::app.total_amount') }}</p><p class="metric-value">{{ number_format($report['kpis']['net_revenue']) }} VND</p></td>
+        <td><p class="metric-label">{{ __('Reporting::app.tickets_sold') }}</p><p class="metric-value">{{ number_format($report['kpis']['tickets_sold']) }}</p></td>
+        <td><p class="metric-label">{{ __('Reporting::app.occupancy') }}</p><p class="metric-value">{{ number_format($report['kpis']['occupancy'], 1) }}%</p></td>
+        <td><p class="metric-label">{{ __('Reporting::app.completed_trips') }}</p><p class="metric-value">{{ number_format($report['kpis']['completed_trips']) }}</p></td>
     </tr></table>
 
     @if($report['rows']->isEmpty())
-        <x-core::empty-state :title="__('Reporting::app.empty')" print />
+        <p class="muted">{{ __('Reporting::app.empty') }}</p>
     @else
         <div class="chart-card bar-card">
             <h2>{{ __('Reporting::app.column_chart') }}</h2>
-            @if($filters['type'] === 'payments')
-                <p class="muted"><span style="color:#f97316">&#9679;</span> {{ __('Reporting::app.completed') }} &nbsp;&nbsp; <span style="color:#dc2626">&#9679;</span> {{ __('Reporting::app.refunded') }}</p>
+            @if(in_array($filters['type'], ['revenue', 'payments', 'tickets'], true) && array_sum($report['refund_series']) > 0)
+                <p class="muted">
+                    <span style="color:#f97316">&#9679;</span>
+                    {{ in_array($filters['type'], ['revenue', 'overview'], true)
+                        ? __('Reporting::app.total_amount')
+                        : ($filters['type'] === 'tickets' ? __('Reporting::app.active') : __('Reporting::app.completed')) }}
+                    &nbsp;&nbsp; <span style="color:#dc2626">&#9679;</span> {{ __('Reporting::app.refunded') }}
+                </p>
             @endif
             <img class="chart-image" src="data:image/png;base64,{{ $charts['bar'] }}" alt="{{ __('Reporting::app.column_chart') }}">
         </div>
@@ -83,41 +90,82 @@
                 <img class="chart-image" src="data:image/png;base64,{{ $charts['donut'] }}" alt="{{ __('Reporting::app.donut_chart') }}">
                 @php
                     $donutTotal = array_sum($report['status']);
-                    $donutColors = $filters['type'] === 'revenue'
+                    $isRevenue = in_array($filters['type'], ['overview', 'revenue'], true);
+                    $donutColors = $isRevenue
                         ? ['#f97316', '#3b82f6', '#16a34a', '#64748b']
-                        : ['completed' => '#f97316', 'pending' => '#0f766e', 'failed' => '#2563eb', 'refunded' => '#dc2626', 'active' => '#0f766e', 'used' => '#2563eb'];
+                        : ['completed' => '#f97316', 'pending' => '#0f766e', 'failed' => '#2563eb', 'refunded' => '#dc2626', 'active' => '#0f766e', 'used' => '#2563eb', 'cancelled' => '#64748b', 'scheduled' => '#2563eb', 'departed' => '#f97316', 'arrived' => '#16a34a'];
                 @endphp
                 @if($donutTotal > 0)
                     <table class="legend">
                         @foreach($report['status'] as $key => $value)
                             @php
-                                $legendColor = $filters['type'] === 'revenue'
+                                $legendColor = $isRevenue
                                     ? ($donutColors[$loop->index] ?? '#64748b')
                                     : ($donutColors[$key] ?? '#7c3aed');
-                                $legendName = in_array($filters['type'], ['payments', 'tickets'], true) ? __('Reporting::app.'.$key) : $key;
+                                $legendName = $isRevenue ? $key : __('Reporting::app.'.$key);
                             @endphp
                             <tr>
                                 <td><span class="swatch" style="background:{{ $legendColor }}"></span></td>
                                 <td>{{ $legendName }}</td>
-                                <td class="muted">{{ $filters['type'] === 'revenue' ? number_format($value / 1_000_000, 2).' '.__('Reporting::app.million') : number_format($value) }} &middot; {{ number_format(((float) $value / $donutTotal) * 100, 2) }}%</td>
+                                <td class="muted">{{ $isRevenue ? number_format($value).' VND' : number_format($value) }} &middot; {{ number_format(((float) $value / $donutTotal) * 100, 2) }}%</td>
                             </tr>
                         @endforeach
                     </table>
                 @else
-                    <x-core::empty-state :title="__('Reporting::app.empty')" print />
+                    <p class="muted">{{ __('Reporting::app.empty') }}</p>
                 @endif
             </div></td>
         </tr></table>
 
         <h2>{{ __('Reporting::app.table_title') }}</h2>
         <table class="details">
-            <thead><tr><th>{{ __('Reporting::app.date') }}</th><th>{{ __('Reporting::app.count') }}</th>@if($filters['type'] !== 'tickets')<th>{{ __('Reporting::app.amount') }}</th>@endif @if($filters['type'] === 'payments')<th>{{ __('Reporting::app.refund_amount') }}</th>@endif</tr></thead>
+            <thead>
+                <tr>
+                    <th>{{ __('Reporting::app.date') }}</th>
+                    <th>{{ __('Reporting::app.count') }}</th>
+                    <th>{{ __('Reporting::app.amount') }}</th>
+                    @if($filters['type'] === 'trips')<th>{{ __('Reporting::app.seats_sold') }}</th>@endif
+                    @if(in_array($filters['type'], ['payments', 'tickets'], true))<th>{{ __('Reporting::app.refund_amount') }}</th>@endif
+                </tr>
+            </thead>
             <tbody>
                 @foreach($report['rows'] as $row)
-                    <tr><td>{{ $row->period }}</td><td>{{ number_format($row->count) }}</td>@if($filters['type'] !== 'tickets')<td>{{ number_format($row->amount) }} VND</td>@endif @if($filters['type'] === 'payments')<td>{{ number_format($row->refund_amount) }} VND</td>@endif</tr>
+                    <tr>
+                        <td>{{ $row->period }}</td>
+                        <td>{{ number_format($row->count) }}</td>
+                        <td>{{ number_format($row->amount) }} VND</td>
+                        @if($filters['type'] === 'trips')
+                            <td>{{ number_format($row->tickets ?? 0) }} ({{ number_format($row->occupancy ?? 0, 1) }}%)</td>
+                        @endif
+                        @if(in_array($filters['type'], ['payments', 'tickets'], true))
+                            <td>{{ number_format($row->refund_amount) }} VND</td>
+                        @endif
+                    </tr>
                 @endforeach
             </tbody>
         </table>
+        @if($filters['type'] === 'payments' && $report['methods']->isNotEmpty())
+            <h2 style="margin-top:14px">{{ __('Reporting::app.payment_method') }}</h2>
+            <table class="details">
+                <thead><tr><th>{{ __('Reporting::app.payment_method') }}</th><th>{{ __('Reporting::app.payment_count') }}</th><th>{{ __('Reporting::app.amount') }}</th></tr></thead>
+                <tbody>
+                    @foreach($report['methods'] as $method)
+                        <tr><td>{{ __('Reporting::app.'.$method->method) }}</td><td>{{ number_format($method->payment_count) }}</td><td>{{ number_format($method->amount) }} VND</td></tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
+        @if($filters['type'] === 'tickets')
+            <h2 style="margin-top:14px">{{ __('Reporting::app.order_type') }}</h2>
+            <table class="details">
+                <thead><tr><th>{{ __('Reporting::app.order_type') }}</th><th>{{ __('Reporting::app.count') }}</th></tr></thead>
+                <tbody>
+                    @foreach($report['order_types'] as $type => $count)
+                        <tr><td>{{ __('Reporting::app.'.$type) }}</td><td>{{ number_format($count) }}</td></tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
     @endif
 </body>
 </html>
