@@ -30,6 +30,11 @@
         aria-labelledby="account-menu-button"
     >
         @if(Auth::user()->isAdmin())
+            <a href="{{ route('staff.support-triage') }}" class="flex items-center gap-3 px-3 py-2.5 font-semibold hover:bg-futa-orange-soft">
+                <x-heroicon-o-chat-bubble-left-right class="size-6" />{{ __('StaffCustomerSupport::support.triage') }}
+            </a>
+        @endif
+        @if(Auth::user()->isAdmin())
             <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 text-base font-semibold text-gray-900 transition hover:bg-futa-orange-soft focus-visible:bg-futa-orange-soft focus-visible:outline-none">
                 <span class="grid size-9 shrink-0 place-items-center rounded-full bg-[#0b2733] text-white"><x-heroicon-o-squares-2x2 class="size-5" /></span>
                 <span>{{ __('Dashboard::app.owner_portal') }}</span>

@@ -6,6 +6,8 @@ namespace FuteBus\StaffDashboard\Services;
 
 use App\Models\User;
 use FuteBus\Core\Models\FaqQuestion;
+use FuteBus\StaffCustomerSupport\Services\FeedbackProcessingService;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -13,6 +15,8 @@ class StaffDashboardService
 {
     public function data(User $staff): array
     {
+        $canSupport = $staff->bus_company_id !== null && $staff->hasPermissionTo('support.view');
+        $support = $canSupport ? app(FeedbackProcessingService::class)->visible($staff) : null;
         $avatar = $staff->avatar;
         $avatarUrl = is_string($avatar) && str_starts_with($avatar, 'avatars/') && ! str_contains($avatar, '..') && Storage::disk('public')->exists($avatar)
             ? Storage::disk('public')->url($avatar) : null;
@@ -44,11 +48,18 @@ class StaffDashboardService
                     'exchange' => false, 'cancellation' => false,
                     'lookup'   => $staff->bus_company_id !== null && $staff->hasPermissionTo('ticket.view'),
                 ],
-                'support' => ['intake' => false, 'requests' => false, 'resolution' => false],
+                'support' => ['intake' => false, 'requests' => $canSupport,
+                    'resolution'       => $canSupport && $staff->hasPermissionTo('support.respond')],
             ],
             'navigation'       => $navigation,
-            'statistics'       => ['trips_today' => null, 'tickets_today' => $this->ticketsToday($staff), 'support_requests' => null, 'processing_requests' => null],
-            'support_requests' => null,
+            'statistics'       => ['trips_today' => null, 'tickets_today' => $this->ticketsToday($staff),
+                'support_requests'               => $support === null ? null : (clone $support)->count('feedback.id'),
+                'processing_requests'            => $support === null ? null : (clone $support)->where('feedback.status', 'reviewing')->count('feedback.id')],
+            'support_requests' => $support === null ? null : (clone $support)->orderByDesc('feedback.id')->limit(5)->get()
+                ->map(fn (object $item): array => ['id' => $item->id, 'subject' => $item->subject,
+                    'reference'                         => 'PA-'.str_pad((string) $item->id, 6, '0', STR_PAD_LEFT),
+                    'created_at'                        => Carbon::parse($item->created_at)->toIso8601String(),
+                    'status'                            => $item->status, 'url' => route('staff.support', ['report' => $item->id])])->all(),
             'notifications'    => $notifications,
             'faq'              => $faq,
         ];

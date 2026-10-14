@@ -14,6 +14,7 @@ return [
     'time'             => 'Time',
     'actions'          => 'Actions',
     'call_hours'       => 'Call center hours',
+    'call_hours_value' => '06:00 – 22:00',
     'navigation'       => ['trips' => 'Trip list', 'reports' => 'Reports'],
     'metrics'          => ['trips_today' => 'Trips today', 'tickets_today' => 'Tickets sold today', 'support_requests' => 'Support requests', 'processing_requests' => 'Requests in progress'],
     'home'             => 'Home',

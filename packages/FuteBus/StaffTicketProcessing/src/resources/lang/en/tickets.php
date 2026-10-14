@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'lookup_intro'      => 'Find tickets by ticket or booking reference, phone number or passenger details.',
     'expired'           => 'Departure time has passed',
     'intro'             => 'Sell, exchange, cancel tickets and access related operations.',
     'sale_hint'         => 'Create a ticket for a customer',

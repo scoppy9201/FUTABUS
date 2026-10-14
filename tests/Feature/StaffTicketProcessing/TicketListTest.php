@@ -31,6 +31,9 @@ class TicketListTest extends TestCase
         $foreignBooking = DB::table('bookings')->insertGetId(['booking_code' => 'OTHER-BOOKING', 'trip_id' => $otherTrip, 'customer_id' => $customer, 'seat_count' => 1, 'total_amount' => 300000]);
         DB::table('tickets')->insert(['booking_id' => $foreignBooking, 'trip_id' => $otherTrip, 'ticket_code' => 'FOREIGN', 'passenger_name' => 'Foreign passenger', 'price' => 300000]);
         $this->actingAs($staff)->get(route('staff.tickets'))->assertOk()->assertSeeText('Danh sách vé');
+        $this->get(route('staff.ticket-lookup', ['code' => 'BOOKING']))->assertOk()
+            ->assertSeeText(__('StaffTicketProcessing::tickets.lookup_intro'))
+            ->assertSeeText('Mã vé / Mã đặt vé');
         $list = $this->getJson(route('api.v1.staff.tickets.index'))->assertOk()->assertHeader('Cache-Control', 'no-store, private')
             ->assertJsonCount(15, 'data')->assertJsonPath('meta.total', 16)->assertJsonPath('data.0.code', 'TICKET-16')->assertJsonMissing(['code' => 'FOREIGN']);
         $this->assertSame('Đã sử dụng', $list->json('data.0.status_label'));
@@ -70,12 +73,14 @@ class TicketListTest extends TestCase
         DB::table('role_user')->insert(['role_id' => $role, 'user_id' => $staff->id]);
         $this->getJson(route('api.v1.staff.tickets.index'))->assertUnauthorized();
         $this->actingAs($staff)->getJson(route('api.v1.staff.tickets.index'))->assertForbidden();
+        $this->get(route('staff.ticket-lookup'))->assertForbidden();
         $permission = DB::table('permissions')->insertGetId(['name' => 'View tickets', 'slug' => 'ticket.view']);
         DB::table('permission_role')->insert(['role_id' => $role, 'permission_id' => $permission]);
         $staff->update(['bus_company_id' => null]);
         $this->getJson(route('api.v1.staff.tickets.index'))->assertForbidden();
         $customer = $this->createTestUser(['is_active' => true, 'email_verified_at' => now()]);
         $this->actingAs($customer)->getJson(route('api.v1.staff.tickets.index'))->assertForbidden();
+        $this->get(route('staff.ticket-lookup'))->assertForbidden();
     }
 
     private function trip(int $company, string $plate): int

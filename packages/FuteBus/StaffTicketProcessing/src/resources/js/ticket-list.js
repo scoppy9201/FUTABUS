@@ -2,7 +2,7 @@ import '../../../../StaffDashboard/src/resources/js/app.js';
 
 window.staffTicketList = (endpoint, messages) => ({
     rows: [], selected: null, loadingTickets: false, listFailed: false,
-    filters: { code: '', phone: '', name: '', date: '', status: '' },
+    filters: { code: new URLSearchParams(window.location.search).get('code') || '', phone: '', name: '', date: '', status: '' },
     meta: { current_page: 1, last_page: 1, total: 0, from: null, to: null },
     init() {
         this.$watch('groups', groups => {

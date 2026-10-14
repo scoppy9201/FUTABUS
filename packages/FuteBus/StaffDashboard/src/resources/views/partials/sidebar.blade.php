@@ -1,4 +1,4 @@
-            <aside class="rounded-xl bg-white p-2">
+            <aside class="rounded-xl bg-white p-2 lg:sticky lg:top-24 lg:h-[calc(100dvh-7rem)] lg:self-start lg:overflow-y-auto">
                 <button
                     type="button"
                     @click="sidebarOpen = !sidebarOpen"
@@ -7,7 +7,7 @@
                     class="flex w-full items-center justify-between rounded-xl p-2 font-semibold text-gray-900 lg:hidden">{{ __('StaffDashboard::staff.menu') }}<x-heroicon-o-bars-3
                     class="size-6 shrink-0" />
                 </button>
-                <nav id="staff-navigation" aria-label="{{ __('StaffDashboard::staff.title') }}" :class="sidebarOpen ? 'flex' : 'hidden lg:flex'" class="flex-col gap-1 lg:sticky lg:top-4">
+                <nav id="staff-navigation" aria-label="{{ __('StaffDashboard::staff.title') }}" :class="sidebarOpen ? 'flex' : 'hidden lg:flex'" class="flex-col gap-1">
                     <a
                         href="{{ route($sidebarHome ?? 'staff.dashboard') }}" @if(request()->routeIs($sidebarHome ?? 'staff.dashboard'))
                         aria-current="page" @endif @class(['flex shrink-0 items-center gap-3 rounded-xl px-3 py-3 font-semibold',
@@ -25,11 +25,20 @@
                     <x-heroicon-o-ticket
                         class="size-6 shrink-0" />{{ __('StaffDashboard::staff.ticket_menu') }}</a>
                     <a
-                        href="{{ route($sidebarHome ?? 'staff.dashboard') }}#support"
-                        class="flex shrink-0 items-center gap-3 rounded-xl px-3 py-3 text-gray-900 hover:bg-futa-orange-soft">
+                        href="{{ auth()->user()->hasPermissionTo('support.view') ? route('staff.support') : route($sidebarHome ?? 'staff.dashboard').'#support' }}"
+                        @if(request()->routeIs('staff.support')) aria-current="page" @endif
+                        @class(['flex shrink-0 items-center gap-3 rounded-xl px-3 py-3',
+                            'bg-linear-to-r from-red-600 to-orange-500 font-semibold text-white' => request()->routeIs('staff.support'),
+                            'text-gray-900 hover:bg-futa-orange-soft' => ! request()->routeIs('staff.support')])>
                     <x-heroicon-o-chat-bubble-left-right
                         class="size-6 shrink-0" />{{ __('StaffDashboard::staff.support.title') }}</a>
-                    <a href="{{ route('staff.tickets') }}" class="flex shrink-0 items-center gap-3 rounded-xl px-3 py-3 text-gray-900 hover:bg-futa-orange-soft"><x-heroicon-o-magnifying-glass class="size-6 shrink-0" />{{ __('StaffDashboard::staff.tickets.actions.lookup') }}</a>
+                    <a href="{{ route('staff.ticket-lookup') }}"
+                        @if(request()->routeIs('staff.ticket-lookup')) aria-current="page" @endif
+                        @class(['flex shrink-0 items-center gap-3 rounded-xl px-3 py-3',
+                            'bg-linear-to-r from-red-600 to-orange-500 font-semibold text-white' => request()->routeIs('staff.ticket-lookup'),
+                            'text-gray-900 hover:bg-futa-orange-soft' => ! request()->routeIs('staff.ticket-lookup')])>
+                        <x-heroicon-o-magnifying-glass class="size-6 shrink-0" />{{ __('StaffDashboard::staff.tickets.actions.lookup') }}
+                    </a>
                     @if(auth()->user()->hasPermissionTo('payment.view'))
                         <a href="{{ route('staff.refunds.index') }}"
                             @if(request()->routeIs('staff.refunds.*')) aria-current="page" @endif
@@ -52,6 +61,5 @@
                     </span>
                     </a>
                     </template>
-                    <a href="{{ route($sidebarHome ?? 'staff.dashboard') }}#notifications" class="flex items-center gap-3 rounded-xl px-3 py-3 text-gray-900 hover:bg-futa-orange-soft"><x-heroicon-o-bell class="size-6 shrink-0" />{{ __('StaffDashboard::staff.notice_menu') }}</a>
                 </nav>
             </aside>

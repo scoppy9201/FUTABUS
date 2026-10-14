@@ -6,6 +6,7 @@ namespace FuteBus\Profile\Http\Controllers;
 
 use FuteBus\Profile\Http\Requests\StoreFeedbackRequest;
 use FuteBus\Profile\Services\FeedbackService;
+use FuteBus\StaffCustomerSupport\Services\FeedbackProcessingService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,15 +22,16 @@ class FeedbackController extends Controller
     public function index(Request $request, FeedbackService $feedback): View
     {
         $filters = $request->validate([
-            'status' => ['nullable', Rule::in(FeedbackService::STATUSES)],
+            'status' => ['nullable', Rule::in([...FeedbackService::STATUSES, 'waiting'])],
             'search' => ['nullable', 'string', 'max:150'],
         ]);
 
         return view('Profile::feedback', [
-            'user'     => $request->user(),
-            'reports'  => $feedback->search($request->user(), $filters),
-            'bookings' => $feedback->bookingsForUser($request->user()),
-            'filters'  => $filters,
+            'user'                 => $request->user(),
+            'supportNotifications' => $request->user()->notifications()->where('type', 'customer-support-response')->latest()->limit(5)->get(),
+            'reports'              => $feedback->search($request->user(), $filters),
+            'bookings'             => $feedback->bookingsForUser($request->user()),
+            'filters'              => $filters,
         ]);
     }
 
@@ -52,6 +54,7 @@ class FeedbackController extends Controller
             'user'        => $request->user(),
             'report'      => $details,
             'attachments' => $feedback->attachmentsForReport($report),
+            'history'     => app(FeedbackProcessingService::class)->history($report)->whereNotNull('response'),
             'booking'     => $feedback->bookingForReport($request->user(), $details),
         ])->header('Cache-Control', 'private, no-store');
     }

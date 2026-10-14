@@ -26,6 +26,7 @@
         "futebus/routemanagement": "*",
         "futebus/seatavailability": "*",
         "futebus/seatmanagement": "*",
+        "futebus/staffcustomersupport": "*",
         "futebus/staffdashboard": "*",
         "futebus/staffticketprocessing": "*",
         "futebus/systemsetting": "*",
@@ -53,6 +54,7 @@
     },
     "autoload": {
         "psr-4": {
+            "FuteBus\\StaffCustomerSupport\\": "packages/FuteBus/StaffCustomerSupport/src/",
             "FuteBus\\StaffDashboard\\": "packages/FuteBus/StaffDashboard/src/",
             "FuteBus\\StaffTicketProcessing\\": "packages/FuteBus/StaffTicketProcessing/src/",
             "App\\": "app/",
@@ -88,6 +90,11 @@
         }
     },
     "repositories": [
+        {
+            "type": "path",
+            "url": "packages/FuteBus/StaffCustomerSupport",
+            "options": { "symlink": true }
+        },
         {
             "type": "path",
             "url": "packages/FuteBus/StaffDashboard",
