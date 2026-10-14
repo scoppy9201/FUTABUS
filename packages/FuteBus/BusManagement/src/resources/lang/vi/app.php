@@ -1,6 +1,10 @@
 <?php
 
 return [
+    'presentation_title'     => 'Thông tin xe & tiện ích',
+    'presentation_hint'      => 'Tiện ích hiển thị cho khách theo xe gán cho chuyến. Cập nhật mục này không đổi ghế, vé hay lịch chạy.',
+    'presentation_saved'     => 'Đã cập nhật tiện ích hiển thị của xe.',
+    'presentation_wifi_hint' => 'Thông tin Wi-Fi này được công khai cho khách. Để trống nếu nhà xe chưa công bố.',
     // ── Loại phương tiện ──────────────────────────────────────────────────────
     'vehicle_types_title'       => 'Quản lý loại phương tiện',
     'vehicle_types_subtitle'    => 'Khuôn mẫu xe: cấu hình sơ đồ chỗ ngồi làm cơ sở gán cho từng xe thực tế.',

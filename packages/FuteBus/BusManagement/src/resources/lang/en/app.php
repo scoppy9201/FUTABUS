@@ -1,6 +1,10 @@
 <?php
 
 return [
+    'presentation_title'     => 'Vehicle details & amenities',
+    'presentation_hint'      => 'Amenities follow the vehicle assigned to the trip. Updating this section does not change seats, tickets or schedules.',
+    'presentation_saved'     => 'Vehicle amenities updated.',
+    'presentation_wifi_hint' => 'This Wi-Fi information is visible to customers. Leave blank if not published.',
     // Page
     'vehicle_types_title'       => 'Vehicle Type Management',
     'vehicle_types_subtitle'    => 'View, add, edit and deactivate vehicle types used as the basis for assigning trips.',

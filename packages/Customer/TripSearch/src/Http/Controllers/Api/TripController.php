@@ -58,9 +58,15 @@ class TripController extends Controller
 
         return response()->json(['data' => [
             ...$this->summarize($selected),
-            'seats' => array_map(static fn (array $seat): array => [
+            'stops'           => $selected['stops'],
+            'seat_columns'    => $selected['seat_columns'],
+            'vehicle_details' => $selected['vehicle_details'],
+            'seats'           => array_map(static fn (array $seat): array => [
                 'id'        => $seat['id'],
                 'code'      => $seat['code'],
+                'row'       => $seat['row'],
+                'column'    => $seat['column'],
+                'deck'      => $seat['deck'],
                 'available' => ! $seat['sold'],
             ], $selected['seats']),
         ]]);

@@ -88,6 +88,10 @@
                                         class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-futa-orange hover:text-futa-orange">
                                         <x-heroicon-o-pencil-square class="size-3.5" /> {{ __('BusManagement::app.btn_edit') }}
                                     </button>
+                                    <button type="button" @click="openPresentation({{ $bus->id }})"
+                                        class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-futa-orange">
+                                        <x-heroicon-o-wifi class="size-3.5" />{{ __('core::booking.vehicle_tab_amenities') }}
+                                    </button>
                                     @if($bus->status === 'active')
                                     <button @click="openDelete({{ json_encode(['id' => $bus->id, 'name' => $bus->license_plate]) }})"
                                         class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 shadow-sm transition hover:border-rose-300 hover:bg-rose-50">
@@ -212,6 +216,8 @@
             </form>
     </x-core::side-panel>
 
+    @include('BusManagement::partials.bus-presentation-panel')
+
     {{-- DELETE MODAL --}}
     <form x-ref="deleteForm" :action="deleteAction" method="POST" hidden data-confirm
         :data-confirm-title="@js(__('BusManagement::app.bus_modal_delete'))"
@@ -226,6 +232,7 @@
 function busManager() {
     // Bảng tra nhanh: vehicle_type_id → {capacity, name}
     const vtMap = {};
+    const presentations = @js($busPresentations);
     @foreach($vehicleTypes as $vt)
                 vtMap[{{ $vt->id }}] = { capacity: {{ $vt->default_capacity }}, name: @js($vt->name), unit: @js(__('BusManagement::app.vt_unit_'.$vt->vehicle_class)) };
     @endforeach
@@ -239,6 +246,23 @@ function busManager() {
 
     return {
         showForm: false, isEdit: false,
+        showPresentation: false,
+        presentation: { id: '', license_plate: '', vehicle_type: '', amenities: [], wifi_name: '', wifi_password: '' },
+        presentationAction: '',
+        init() {
+            const oldId = @js(old('presentation_bus_id'));
+            if (oldId && presentations[oldId]) {
+                this.openPresentation(oldId);
+                this.presentation.amenities = @js(old('amenities', []));
+                this.presentation.wifi_name = @js(old('wifi_name', ''));
+                this.presentation.wifi_password = @js(old('wifi_password', ''));
+            }
+        },
+        openPresentation(id) {
+            this.presentation = { ...presentations[id], amenities: [...presentations[id].amenities] };
+            this.presentationAction = `${base}/${id}/hien-thi`;
+            this.showPresentation = true;
+        },
         form: { ...blank }, formAction: base,
         deleteData: {}, deleteAction: '',
         inheritedInfo: '',

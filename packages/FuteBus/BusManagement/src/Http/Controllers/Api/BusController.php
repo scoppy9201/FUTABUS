@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace FuteBus\BusManagement\Http\Controllers\Api;
 
 use FuteBus\BusManagement\Http\Requests\BusInputRequest;
+use FuteBus\BusManagement\Http\Requests\BusPresentationRequest;
 use FuteBus\BusManagement\Http\Requests\BusSearchRequest;
+use FuteBus\BusManagement\Models\Bus;
+use FuteBus\BusManagement\Services\BusPresentationService;
 use FuteBus\BusManagement\Services\BusService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
@@ -38,6 +41,15 @@ class BusController extends Controller
         $buses->update($bus, $request->validated());
 
         return response()->json(['data' => $buses->find($bus)]);
+    }
+
+    public function updatePresentation(BusPresentationRequest $request, BusPresentationService $service, int $bus): JsonResponse
+    {
+        $service->update($bus, $request->validated());
+
+        return response()->json(['data' => BusPresentationService::publicData(
+            Bus::with('vehicleType')->findOrFail($bus),
+        )]);
     }
 
     public function destroy(BusService $buses, int $bus): JsonResponse

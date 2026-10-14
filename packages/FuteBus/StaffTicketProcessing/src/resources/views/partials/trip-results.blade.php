@@ -195,11 +195,11 @@
                                 <template x-for="deck in trip.seat_decks" :key="deck">
                                     <div class="trip-card__deck">
                                         <h3 x-text="deck === 'lower' ? @js(__('core::trip-search.deck_lower')) : @js(__('core::trip-search.deck_upper'))"></h3>
-                                        <div class="trip-card__seat-grid">
+                                        <div class="trip-card__seat-grid" :style="{ '--seat-columns': trip.seat_columns }">
                                             <template x-for="seat in deckSeats(trip, deck)" :key="seat.id">
                                                 <button type="button"
                                                     class="trip-card__seat"
-                                                    :style="trip.demo_seat_map ? { gridColumn: seat.column, gridRow: seat.row } : {}"
+                                                    :style="{ gridColumn: seat.column, gridRow: seat.row }"
                                                     :class="seat.sold ? 'is-sold' : (seatSelected(trip, seat) ? 'is-chosen' : 'is-free')"
                                                     :disabled="seat.sold"
                                                     :aria-pressed="seatSelected(trip, seat)"
@@ -232,9 +232,8 @@
                                 </button>
                             </div>
                         </div>
-                        <div x-show="openPanel === 'schedule'" class="trip-card__detail-content">
-                            <h3>{{ __('core::trip-search.schedule') }}</h3>
-                            <p x-text="stationLabel(trip.origin) + ' ' + trip.departure_hour + ' → ' + stationLabel(trip.destination) + ' ' + trip.arrival_hour + ' · ' + clockDuration(trip.duration_minutes)"></p>
+                        <div x-show="openPanel === 'schedule'" class="trip-card__itinerary-panel">
+                            @include('TripSearch::partials.trip-itinerary')
                         </div>
                         <div x-show="openPanel === 'transfer'" class="trip-card__detail-content trip-card__transfer-content">
                             <h3 class="mb-0! text-base! leading-6! font-bold!">{{ __('core::trip-search.transfer_information') }}</h3>

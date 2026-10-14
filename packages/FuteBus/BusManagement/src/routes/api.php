@@ -25,6 +25,8 @@ Route::prefix('v1/admin')->name('api.v1.admin.')
             ->whereNumber('bus')->name('buses.show');
         Route::put('/buses/{bus}', [BusController::class, 'update'])
             ->whereNumber('bus')->name('buses.update');
+        Route::put('/buses/{bus}/presentation', [BusController::class, 'updatePresentation'])
+            ->whereNumber('bus')->name('buses.presentation.update');
         Route::delete('/buses/{bus}', [BusController::class, 'destroy'])
             ->whereNumber('bus')->name('buses.destroy');
     });
