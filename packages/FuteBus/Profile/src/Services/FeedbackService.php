@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FuteBus\Profile\Services;
 
 use App\Models\User;
+use FuteBus\StaffCustomerSupport\Services\FeedbackProcessingService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\UploadedFile;
@@ -81,8 +82,11 @@ class FeedbackService
 
                 $timestamp = now();
                 $reportId = DB::table('customer_feedback_reports')->insertGetId([
-                    'user_id'       => $user->id,
-                    'booking_id'    => $booking?->id,
+                    'user_id'                 => $user->id,
+                    'booking_id'              => $booking?->id,
+                    'assigned_bus_company_id' => $booking !== null
+                        && $booking->trip_company === $booking->route_company && $booking->trip_company === $booking->bus_company
+                        ? $booking->trip_company : null,
                     'booking_code'  => $booking?->booking_code,
                     'category'      => $details['category'],
                     'urgency'       => $details['urgency'],
@@ -114,36 +118,7 @@ class FeedbackService
 
     public function updateStatus(User $admin, int $reportId, string $status, ?string $response): stdClass
     {
-        abort_unless($admin->isAdmin(), 403);
-
-        if (! in_array($status, self::STATUSES, true)) {
-            throw ValidationException::withMessages(['status' => __('Profile::feedback.validation.status_invalid')]);
-        }
-
-        $response = $response === null ? null : trim($response);
-        if ($response !== null && mb_strlen($response) > 3000) {
-            throw ValidationException::withMessages(['response' => __('Profile::feedback.validation.response_length')]);
-        }
-
-        return DB::transaction(function () use ($reportId, $status, $response): stdClass {
-            $report = DB::table('customer_feedback_reports')->where('id', $reportId)->lockForUpdate()->first();
-            abort_if($report === null, 404);
-
-            $current = array_search($report->status, self::STATUSES, true);
-            $next = array_search($status, self::STATUSES, true);
-            if ($current === false || $next < $current || $next > $current + 1) {
-                throw ValidationException::withMessages(['status' => __('Profile::feedback.validation.status_transition')]);
-            }
-
-            $changes = ['status' => $status, 'response' => $response, 'updated_at' => now()];
-            if ($status !== $report->status) {
-                $changes[$status === 'reviewing' ? 'reviewing_at' : 'resolved_at'] = now();
-            }
-
-            DB::table('customer_feedback_reports')->where('id', $reportId)->update($changes);
-
-            return DB::table('customer_feedback_reports')->where('id', $reportId)->first();
-        });
+        return app(FeedbackProcessingService::class)->updateAsAdmin($admin, $reportId, $status, $response);
     }
 
     private function ownedBookings(User $user): Builder
@@ -151,6 +126,7 @@ class FeedbackService
         return DB::table('bookings')
             ->join('trips', 'trips.id', '=', 'bookings.trip_id')
             ->join('routes', 'routes.id', '=', 'trips.route_id')
+            ->leftJoin('buses', 'buses.id', '=', 'trips.bus_id')
             ->leftJoin('customers', 'customers.id', '=', 'bookings.customer_id')
             ->where(function (Builder $query) use ($user): void {
                 $query->where('bookings.user_id', $user->id)
@@ -161,6 +137,7 @@ class FeedbackService
             ->select([
                 'bookings.id', 'bookings.booking_code', 'trips.departure_time', 'trips.arrival_time',
                 'routes.origin_city', 'routes.destination_city',
+                'trips.bus_company_id as trip_company', 'routes.bus_company_id as route_company', 'buses.bus_company_id as bus_company',
             ]);
     }
 

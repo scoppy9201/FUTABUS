@@ -24,11 +24,12 @@
     <form method="get" action="{{ route('staff-accounts.index') }}" class="mt-4 flex flex-wrap items-end gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
         <label class="min-w-60 flex-1 text-xs font-semibold text-slate-700">
             {{ __('UserManagement::app.search') }}
-            <input type="search" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="{{ __('UserManagement::app.search_hint') }}" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-800 outline-none transition focus:border-[#F26522] focus:ring-2 focus:ring-orange-100">
+            <input type="search" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="{{ __('UserManagement::app.search_hint') }}"
+                class="mt-1 block h-11 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-800 outline-none transition focus:border-[#F26522] focus:ring-2 focus:ring-orange-100">
         </label>
         <label class="min-w-40 text-xs font-semibold text-slate-700">
             {{ __('UserManagement::app.status') }}
-            <select name="status" x-on:change="$el.form.requestSubmit()" class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-800 outline-none transition focus:border-[#F26522] focus:ring-2 focus:ring-orange-100">
+            <select name="status" x-on:change="$el.form.requestSubmit()" class="mt-1 block h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-800 outline-none transition focus:border-[#F26522] focus:ring-2 focus:ring-orange-100">
                 <option value="">{{ __('UserManagement::app.all_statuses') }}</option>
                 <option value="active" @selected(($filters['status'] ?? '') === 'active')>{{ __('UserManagement::app.active') }}</option>
                 <option value="inactive" @selected(($filters['status'] ?? '') === 'inactive')>{{ __('UserManagement::app.inactive') }}</option>

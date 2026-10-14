@@ -14,6 +14,7 @@ return [
     'time'             => 'Thời gian',
     'actions'          => 'Thao tác',
     'call_hours'       => 'Giờ tổng đài',
+    'call_hours_value' => '06:00 – 22:00',
     'navigation'       => ['trips' => 'Danh sách chuyến xe', 'reports' => 'Báo cáo'],
     'metrics'          => ['trips_today' => 'Chuyến xe hôm nay', 'tickets_today' => 'Vé đã bán hôm nay', 'support_requests' => 'Yêu cầu hỗ trợ', 'processing_requests' => 'Yêu cầu đang xử lý'],
     'home'             => 'Trang chủ',

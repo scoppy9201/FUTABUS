@@ -1,3 +1,4 @@
+@vite('packages/FuteBus/UserManagement/src/resources/js/app.js')
 <div class="grid gap-4 xl:grid-cols-2 xl:items-stretch">
 <section class="rounded-xl border border-slate-200 bg-white">
     <div class="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-3">
@@ -28,7 +29,7 @@
                 <input id="staff-avatar" name="avatar" type="file" accept="image/jpeg,image/png" class="sr-only" x-on:change="const file = $event.target.files[0]; if (file) { avatarPreview = URL.createObjectURL(file); avatarFileName = file.name; }">
                 <p class="mt-1 text-xs text-slate-500">{{ __('UserManagement::app.photo_hint') }}</p>
                 <p x-cloak x-show="avatarFileName" x-text="avatarFileName" class="mt-1 max-w-60 truncate text-xs font-medium text-slate-600"></p>
-                @error('avatar')<span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>@enderror
+                @error('avatar')<span data-server-error class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>@enderror
             </div>
         </div>
 
@@ -41,7 +42,7 @@
                         'border-red-400' => $errors->has($field),
                         'border-slate-300' => ! $errors->has($field),
                     ])>
-                    @error($field)<span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>@enderror
+                    @error($field)<span data-server-error class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>@enderror
                 </label>
             @endforeach
 
@@ -52,7 +53,7 @@
                     'border-red-400' => $errors->has('date_of_birth'),
                     'border-slate-300' => ! $errors->has('date_of_birth'),
                 ])>
-                @error('date_of_birth')<span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>@enderror
+                @error('date_of_birth')<span data-server-error class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>@enderror
             </label>
 
             <label class="text-sm font-semibold text-slate-700">
@@ -63,13 +64,13 @@
                         <option value="{{ $gender }}" @selected(old('gender', $staff?->gender) === $gender)>{{ __('UserManagement::app.gender_values.'.$gender) }}</option>
                     @endforeach
                 </select>
-                @error('gender')<span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>@enderror
+                @error('gender')<span data-server-error class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>@enderror
             </label>
 
             <label class="text-sm font-semibold text-slate-700 sm:col-span-2">
                 {{ __('UserManagement::app.fields.address') }}
                 <input type="text" name="address" value="{{ old('address', $staff?->address) }}" maxlength="255" class="mt-1.5 block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 outline-none transition focus:border-[#F26522] focus:ring-2 focus:ring-orange-100">
-                @error('address')<span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>@enderror
+                @error('address')<span data-server-error class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>@enderror
             </label>
         </div>
     </div>
@@ -88,7 +89,7 @@
                 'border-red-400' => $errors->has('email'),
                 'border-slate-300' => ! $errors->has('email'),
             ])>
-            @error('email')<span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>@enderror
+            @error('email')<span data-server-error class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>@enderror
         </label>
 
         <div x-data="{ passwordVisible: false }" class="text-sm font-semibold text-slate-700">
@@ -100,7 +101,7 @@
                 <x-heroicon-o-eye-slash x-cloak x-show="passwordVisible" class="size-5" />
             </button>
             </div>
-            @error('password')<span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>@enderror
+            @error('password')<span data-server-error class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>@enderror
             @unless($isCreate)<span class="mt-1 block text-xs font-medium text-slate-500">{{ __('UserManagement::app.password_hint') }}</span>@endunless
         </div>
 
@@ -117,7 +118,7 @@
                 <x-heroicon-o-eye-slash x-cloak x-show="passwordVisible" class="size-5" />
             </button>
             </div>
-            @error('password_confirmation')<span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>@enderror
+            @error('password_confirmation')<span data-server-error class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>@enderror
         </div>
 
         @unless($isCreate)

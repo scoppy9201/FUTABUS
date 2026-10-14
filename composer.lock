@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0303c96ebf3011d3613611a1235cf34b",
+    "content-hash": "561ef352a9365daeaf2ece3ca0112108",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1216,12 +1216,12 @@
             "version": "v7.0.3",
             "source": {
                 "type": "git",
-                "url": "https://github.com/firebase/php-jwt.git",
+                "url": "https://github.com/googleapis/php-jwt.git",
                 "reference": "28aa0694bcfdfa5e2959c394d5a1ee7a5083629e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/firebase/php-jwt/zipball/28aa0694bcfdfa5e2959c394d5a1ee7a5083629e",
+                "url": "https://api.github.com/repos/googleapis/php-jwt/zipball/28aa0694bcfdfa5e2959c394d5a1ee7a5083629e",
                 "reference": "28aa0694bcfdfa5e2959c394d5a1ee7a5083629e",
                 "shasum": ""
             },
@@ -1351,7 +1351,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/AiAssistant",
-                "reference": "6d3debe41c6033ef99a55bfe9607741940970e6d"
+                "reference": "4b2b5896d8601423f2879a36b9ef4b80e1956e4e"
             },
             "require": {
                 "php": "^8.2"
@@ -1384,7 +1384,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/Auth",
-                "reference": "d34196154f103d1c9142ba479190d0876385cfe0"
+                "reference": "d5ff887230fe7185297d7ccbc12ec77610e23655"
             },
             "require": {
                 "php": "^8.2"
@@ -1417,7 +1417,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/Customer/BookingManagement",
-                "reference": "a96444a6a1bef160d6505ebe0f0dbbde7e8a19bf"
+                "reference": "768e216789d5d1646d35522cbacde778b01d9489"
             },
             "require": {
                 "php": "^8.2"
@@ -1450,7 +1450,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/BusCompanyManagement",
-                "reference": "eb0656810770b6a68e06670abd2603b5fb2ae505"
+                "reference": "9c5d3899c33b30340ed27f17105a29704329c2ec"
             },
             "require": {
                 "php": "^8.2"
@@ -1483,7 +1483,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/BusManagement",
-                "reference": "a3a35514aa3f1176a94dfd31dc9bdcc5ea9de8e0"
+                "reference": "ec6592086dabcd239e8a1049aaabbc4c6c93aa50"
             },
             "require": {
                 "php": "^8.2"
@@ -1516,7 +1516,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/Customer/Cancellation",
-                "reference": "378b7f80d5c879d0524151d85eaaade59a3f94b6"
+                "reference": "e697d9e8add723a2d922dc38e58c640655f8f31a"
             },
             "require": {
                 "php": "^8.2"
@@ -1549,7 +1549,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/Core",
-                "reference": "029063f7b15ec11d3748426c001323b873fbc251"
+                "reference": "4bc2df05f57781aaaee12e1e1cf1fa3c92fb4bcc"
             },
             "require": {
                 "php": "^8.2"
@@ -1582,7 +1582,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/CustomerManagement",
-                "reference": "c99f87968640683f9bcf9e12d7974a2d7ed4505b"
+                "reference": "89428d41211f4b24c5b0f3bebb3d0f5d0ceee33d"
             },
             "require": {
                 "php": "^8.2"
@@ -1615,7 +1615,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/Dashboard",
-                "reference": "2f8659175d9f8b543c4c0515254692cf7b34114b"
+                "reference": "2d44ee23788ca8fa5d920f66f680b6312f673caa"
             },
             "require": {
                 "php": "^8.2"
@@ -1648,7 +1648,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/Notification",
-                "reference": "585e8bda15aa9249a1243d1d5adee788ce80642a"
+                "reference": "cdaabd288f41b51e53e3a3f8feae2d22c1fe07d7"
             },
             "require": {
                 "php": "^8.2"
@@ -1681,9 +1681,10 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/Payment",
-                "reference": "d9069c15a387cd7ecfdc807b47340f9062f77192"
+                "reference": "db2c3ac24e91d067b994777d064720bc93e467e0"
             },
             "require": {
+                "futebus/core": "*",
                 "php": "^8.2"
             },
             "type": "library",
@@ -1714,7 +1715,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/Profile",
-                "reference": "bd50ed557642260cc00d5c7f6b1ec00ab503e14a"
+                "reference": "59098ff9c8c0d9167c1402f8e9f20bc6ed8f91e6"
             },
             "require": {
                 "php": "^8.2"
@@ -1747,7 +1748,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/Reporting",
-                "reference": "73a40dedf0cb4d6737ed94105f73408d6be6df7b"
+                "reference": "5754c806ea3ef7eda74da84bee39478e50e7e06e"
             },
             "require": {
                 "php": "^8.2"
@@ -1780,7 +1781,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/RolePermission",
-                "reference": "17f46022b477ae9880cc1c418070e38962cfea3c"
+                "reference": "907c926976e22850834cf3bb96452772b09936d8"
             },
             "require": {
                 "php": "^8.2"
@@ -1813,7 +1814,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/RouteManagement",
-                "reference": "d0a144cbae2a7aa613a62b92dabc4949e6170d46"
+                "reference": "2990c4f108b5907782b5d81145e91adf785245e2"
             },
             "require": {
                 "php": "^8.2"
@@ -1846,7 +1847,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/Customer/SeatAvailability",
-                "reference": "1164513c0c2b3840900037db4fabd05d54529f59"
+                "reference": "76f518bda008e0d4e371416f90494cd909fac349"
             },
             "require": {
                 "php": "^8.2"
@@ -1879,7 +1880,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/SeatManagement",
-                "reference": "c17a6bec276334a80e2a2cd6c766b9ba300ae283"
+                "reference": "3d0823b6d9a0b140354b051c615c7a826b39371d"
             },
             "require": {
                 "php": "^8.2"
@@ -1901,6 +1902,39 @@
                 "MIT"
             ],
             "description": "SeatManagement module for FUTEBUS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "futebus/staffcustomersupport",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/FuteBus/StaffCustomerSupport",
+                "reference": "6e53a80a3d8a4296ced127f261c36d2e060e2120"
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "FuteBus\\StaffCustomerSupport\\Providers\\StaffCustomerSupportServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FuteBus\\StaffCustomerSupport\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "StaffCustomerSupport module for FUTEBUS.",
             "transport-options": {
                 "symlink": true,
                 "relative": true
@@ -1978,7 +2012,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/SystemSetting",
-                "reference": "406bd8e09c389b6f16ff9a53d7766034976d1353"
+                "reference": "6f6213bc3148379cf8d72830639f138083796a73"
             },
             "require": {
                 "php": "^8.2"
@@ -2011,7 +2045,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/Customer/TicketManagement",
-                "reference": "48842b89631d18d11d9059b3b4148e6c16f154b2"
+                "reference": "332ed06d07b73edbd1c821e598d959d6ca9a019c"
             },
             "require": {
                 "php": "^8.2"
@@ -2044,7 +2078,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/TripManagement",
-                "reference": "d1e2b4adfa6735cc18659351dc8d9fd33d93b2a5"
+                "reference": "47689e1901daf9c9202e56bd42e3095a07b2984a"
             },
             "require": {
                 "php": "^8.2"
@@ -2077,7 +2111,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/Customer/TripSearch",
-                "reference": "87c9ab641137ff418e7de55979957cae07039791"
+                "reference": "e3e027792fd109e3c7643f033d9238267db80121"
             },
             "require": {
                 "php": "^8.2"
@@ -2110,7 +2144,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/UserManagement",
-                "reference": "4448b452ce4850978623960ad45ed7578500b989"
+                "reference": "e84c29b86a191fc4dde533802cd688547e5d77c4"
             },
             "require": {
                 "php": "^8.2"
@@ -8586,12 +8620,12 @@
             "version": "v5.6.3",
             "source": {
                 "type": "git",
-                "url": "https://github.com/vlucas/phpdotenv.git",
+                "url": "https://github.com/phpdotenv/phpdotenv.git",
                 "reference": "955e7815d677a3eaa7075231212f2110983adecc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vlucas/phpdotenv/zipball/955e7815d677a3eaa7075231212f2110983adecc",
+                "url": "https://api.github.com/repos/phpdotenv/phpdotenv/zipball/955e7815d677a3eaa7075231212f2110983adecc",
                 "reference": "955e7815d677a3eaa7075231212f2110983adecc",
                 "shasum": ""
             },

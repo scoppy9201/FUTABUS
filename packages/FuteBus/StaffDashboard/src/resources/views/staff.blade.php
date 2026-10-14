@@ -7,7 +7,7 @@
 @endpush
 
 @section('content')
-    <div x-data="staffDashboard(@js(route('api.v1.staff.dashboard.show')))" :aria-busy="loading" class="lg:flex lg:h-dvh lg:flex-col">
+    <div x-data="staffDashboard(@js(route('api.v1.staff.dashboard.show')))" :aria-busy="loading" class="min-h-dvh lg:flex lg:flex-col">
         @include('StaffDashboard::partials.header')
         @include('StaffDashboard::partials.notifications')
         <div class="grid gap-2 bg-gray-50 p-2 text-sm lg:min-h-0 lg:flex-1 lg:grid-cols-[15%_minmax(0,1fr)]">
@@ -93,13 +93,18 @@
                                             class="absolute inset-0 rounded-xl focus-visible:outline-2 focus-visible:outline-futa-orange">
                                         </button>
                                     @endif
+                                    @if($action === 'support' && auth()->user()->hasPermissionTo('support.view'))
+                                        <a href="{{ route('staff.support') }}" aria-label="{{ __('StaffCustomerSupport::support.title') }}"
+                                            class="absolute inset-0 rounded-xl focus-visible:outline-2 focus-visible:outline-futa-orange"></a>
+                                    @endif
                                     <x-dynamic-component :component="'heroicon-o-'.$actionIcon" class="size-6 shrink-0" />
                                     <div class="mt-2 flex items-end justify-between gap-2">
                                         <div>
                                         <span
                                             class="block text-sm font-bold text-gray-900">{{ $action === 'support' ? __('StaffDashboard::staff.support.title') : __('StaffDashboard::staff.tickets.actions.'.$action) }}</span>
                                         <span
-                                            class="sr-only">{{ __('StaffDashboard::staff.unavailable') }}</span>
+                                            class="sr-only">{{ $action === 'support' && auth()->user()->hasPermissionTo('support.view')
+                                                ? __('StaffDashboard::staff.support.actions.requests') : __('StaffDashboard::staff.unavailable') }}</span>
                                         </div>
                                         <x-heroicon-o-arrow-right class="size-5 shrink-0 text-gray-900" />
                                     </div>
@@ -107,18 +112,15 @@
                             @endforeach
                         </ul>
                     </section>
-            <div class="grid min-h-0 gap-3 lg:grid-cols-[1.4fr_1fr]">
+            <div class="grid min-h-0 gap-3">
             <section id="support" class="min-w-0 rounded-xl border border-gray-200 bg-white p-3 shadow-sm ">
                 <div
                     class="flex items-center justify-between gap-2">
                 <h2
                     class="text-sm font-bold text-gray-900">{{ __('StaffDashboard::staff.recent_support') }}</h2>
-                <button
-                    type="button" disabled
-                    title="{{ __('StaffDashboard::staff.unavailable') }}"
-                    class="flex items-center gap-1 text-xs text-blue-600 disabled:cursor-not-allowed">{{ __('StaffDashboard::staff.view_all') }}<x-heroicon-o-arrow-right
-                    class="size-4 shrink-0" />
-                </button>
+                @if(auth()->user()->hasPermissionTo('support.view'))
+                    <a href="{{ route('staff.support') }}" class="text-xs font-semibold text-futa-orange">{{ __('StaffDashboard::staff.view_all') }}</a>
+                @endif
                 </div>
                 <div
                     class="mt-3 overflow-x-auto">
@@ -129,49 +131,24 @@
                     class="border-b border-gray-200">@foreach(['request', 'content', 'time', 'status', 'actions'] as $column)<th
                     class="whitespace-nowrap px-1 pb-2">{{ __('StaffDashboard::staff.'.$column) }}</th>@endforeach</tr>
                 </thead>
+                <tbody><template x-for="item in dashboard?.support_requests || []" :key="item.id">
+                    <tr class="border-b border-gray-100">
+                        <td class="p-2 font-semibold text-futa-orange" x-text="item.reference"></td>
+                        <td class="max-w-48 truncate p-2" x-text="item.subject"></td>
+                        <td class="p-2" x-text="new Date(item.created_at).toLocaleDateString(document.documentElement.lang)"></td>
+                        <td class="p-2" x-text="(@js(__('Profile::feedback.status')))[item.status]"></td>
+                        <td class="p-2"><a :href="item.url" class="font-semibold text-futa-orange">{{ __('StaffCustomerSupport::support.view') }}</a></td>
+                    </tr>
+                </template></tbody>
                 </table>
                 </div>
-                <p class="py-3 text-center text-xs text-gray-500">{{ __('StaffDashboard::staff.unavailable') }}</p>
-            </section>
-            <section
-                id="notifications"
-                class="min-w-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <div
-                class="flex items-center justify-between gap-2">
-            <h2
-                class="text-sm font-bold text-gray-900">{{ __('StaffDashboard::staff.notifications') }}</h2>
-            <button
-                type="button" disabled
-                class="flex items-center gap-1 text-xs text-blue-600 disabled:cursor-not-allowed"
-                title="{{ __('StaffDashboard::staff.unavailable') }}">{{ __('StaffDashboard::staff.view_all') }}<x-heroicon-o-arrow-right
-                class="size-4 shrink-0" />
-            </button>
-            </div>
-            <p
-                x-show="dashboard && !dashboard.notifications.length"
-                class="py-8 text-center text-xs text-gray-500">{{ __('StaffDashboard::staff.no_notifications') }}</p>
-            <template
-                x-for="notice in dashboard?.notifications || []"
-                :key="notice.id">
-            <article
-                class="mt-3 border-t border-gray-100 pt-2 text-sm">
-            <h3
-                class="font-semibold"
-                x-text="notice.title">
-            </h3>
-            <p
-                x-text="notice.message">
-            </p>
-            <time
-                class="text-xs text-gray-500"
-                x-text="new Intl.DateTimeFormat(document.documentElement.lang, {dateStyle:'short', timeStyle:'short', timeZone:'Asia/Ho_Chi_Minh'}).format(new Date(notice.created_at))">
-            </time>
-            </article>
-            </template>
+                <p x-show="!(dashboard?.support_requests?.length)" class="py-3 text-center text-xs text-gray-500">
+                    {{ auth()->user()->hasPermissionTo('support.view') ? __('StaffCustomerSupport::support.empty') : __('StaffDashboard::staff.unavailable') }}
+                </p>
             </section>
             </div>
         </main>
-                <aside class="grid gap-3 lg:min-h-0 lg:grid-rows-[minmax(0,2.04fr)_minmax(0,2.3fr)_minmax(0,0.96fr)]">
+                <aside class="flex flex-col gap-3 lg:min-h-0">
                     <section class="min-h-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                         <h2 class="border-b border-gray-100 pb-2 font-bold text-gray-900">{{ __('StaffDashboard::staff.contact') }}</h2>
                         <div
@@ -216,28 +193,11 @@
                         <p
                             class="font-semibold text-gray-900">{{ __('StaffDashboard::staff.call_hours') }}</p>
                         <p
-                            class="mt-1 text-xs text-gray-500">{{ __('StaffDashboard::staff.unavailable') }}</p>
+                            class="mt-1 text-xs text-gray-500">{{ __('StaffDashboard::staff.call_hours_value') }}</p>
                         </div>
                         </div>
                     </section>
-                    <section class="min-h-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                        <div class="flex items-center justify-between gap-2"><h2 class="text-sm font-bold text-gray-900">{{ __('StaffDashboard::staff.faq') }}</h2><a href="{{ route('faq') }}" class="shrink-0 text-xs text-blue-600 hover:underline">{{ __('StaffDashboard::staff.view_all') }}</a></div>
-                        <template
-                            x-for="question in dashboard?.faq || []"
-                            :key="question.id">
-                        <a
-                            :href="question.url"
-                            class="mt-3 flex items-center justify-between gap-2 border-t border-gray-100 pt-2 text-xs leading-5 text-gray-900 hover:text-futa-orange">
-                        <span
-                            x-text="question.question">
-                        </span>
-                        <x-heroicon-o-chevron-right
-                            class="size-4 shrink-0" />
-                        </a>
-                        </template>
-                        <p x-show="dashboard && !dashboard.faq.length" class="mt-3 text-xs text-gray-500">{{ __('StaffDashboard::staff.no_faq') }}</p>
-                    </section>
-                    <div class="flex min-h-0 items-end overflow-hidden rounded-xl border border-gray-200 bg-white p-0 shadow-sm"><img src="{{ asset('images/about/futabus-fleet.png') }}" alt="{{ __('StaffDashboard::staff.fleet_alt') }}" class="max-h-full w-full object-contain"></div>
+                    <div class="flex min-h-0 items-end overflow-hidden rounded-xl border border-gray-200 bg-white p-0 shadow-sm"><img src="{{ asset('images/about/futabus-fleet.png') }}" alt="{{ __('StaffDashboard::staff.fleet_alt') }}" class="max-h-40 w-full object-contain"></div>
                 </aside>
             </div>
         </div>

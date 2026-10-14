@@ -14,6 +14,9 @@ Route::middleware(['auth', EnsureTicketOperator::class.':booking.create'])->grou
         ->whereUuid('sale')->name('staff.ticket-sales.destroy');
 });
 
+Route::view('/nhan-vien/tra-cuu-ve', 'StaffTicketProcessing::lookup')
+    ->middleware(['auth', EnsureStaff::class, 'permission:ticket.view'])->name('staff.ticket-lookup');
+
 Route::view('/nhan-vien/xu-ly-ve', 'StaffTicketProcessing::tickets')
     ->middleware(['auth', EnsureStaff::class])->name('staff.tickets');
 

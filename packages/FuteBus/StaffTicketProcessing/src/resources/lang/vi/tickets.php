@@ -1,13 +1,14 @@
 <?php
 
 return [
+    'lookup_intro'      => 'Tra cứu vé theo mã vé, mã đặt vé, số điện thoại hoặc thông tin hành khách.',
     'expired'           => 'Đã quá giờ khởi hành',
     'intro'             => 'Thực hiện bán vé mới, đổi vé, hủy vé và các nghiệp vụ liên quan.',
     'sale_hint'         => 'Tạo vé mới cho khách hàng',
     'exchange_hint'     => 'Đổi sang chuyến khác',
     'cancellation_hint' => 'Kiểm tra điều kiện hủy vé',
-    'code'              => 'Mã vé',
-    'code_hint'         => 'Nhập mã vé',
+    'code'              => 'Mã vé / Mã đặt vé',
+    'code_hint'         => 'Nhập mã vé hoặc mã đặt vé',
     'phone'             => 'Số điện thoại',
     'phone_hint'        => 'Nhập số điện thoại',
     'name'              => 'Họ và tên',
