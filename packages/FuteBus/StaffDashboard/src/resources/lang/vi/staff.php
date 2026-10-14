@@ -2,11 +2,13 @@
 
 return [
     'refund_access_hint' => 'Bạn chưa được cấp quyền xem hoàn tiền. Liên hệ quản lý để cấp quyền Xem thanh toán; quyền Hoàn tiền cho phép nhận và xử lý yêu cầu.',
+    'account'            => 'Tài khoản',
     'change_password'    => 'Đổi mật khẩu',
     'contact'            => 'Thông tin liên hệ',
     'ticket_menu'        => 'Xử lý vé',
     'notice_menu'        => 'Thông báo',
     'role'               => 'Nhân viên nhà xe',
+    'close_menu'         => 'Đóng danh mục',
     'menu'               => 'Danh mục',
     'notifications'      => 'Thông báo hệ thống',
     'no_notifications'   => 'Chưa có thông báo mới.',

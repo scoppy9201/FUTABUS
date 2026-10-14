@@ -6,20 +6,9 @@
                         :aria-expanded="open.toString()"
                         aria-haspopup="true"
                         aria-controls="language-menu"
-                        class="flex items-center gap-1.5 rounded-lg text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                        class="flex items-center rounded-lg text-xs font-bold text-gray-600 hover:text-futa-orange focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-futa-orange"
                         aria-label="{{ __('core::app.home.navbar.language_selector') }}">
-                        <span class="inline-flex size-6.5 items-center justify-center overflow-hidden rounded-full">
-                            @if(app()->getLocale() === 'vi')
-                                <img src="{{ asset('icons/flags/vi.svg') }}" alt="" class="h-full w-full object-cover">
-                            @else
-                                <img src="{{ asset('icons/flags/en.svg') }}" alt="" class="h-full w-full object-cover">
-                            @endif
-                        </span>
                         <span>{{ strtoupper(app()->getLocale()) }}</span>
-                        <x-heroicon-s-chevron-down
-                            class="size-3.5 transition-transform duration-200"
-                            ::class="open ? 'rotate-180' : ''"
-                        />
                     </button>
                     <div
                         id="language-menu"

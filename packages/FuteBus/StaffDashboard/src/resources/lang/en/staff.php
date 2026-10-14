@@ -2,11 +2,13 @@
 
 return [
     'refund_access_hint' => 'Refund access has not been granted. Ask your manager for View payments permission; Refund payments permission allows claiming and processing requests.',
+    'account'            => 'Account',
     'change_password'    => 'Change password',
     'contact'            => 'Contact information',
     'ticket_menu'        => 'Tickets',
     'notice_menu'        => 'Notifications',
     'role'               => 'Bus company staff',
+    'close_menu'         => 'Close menu',
     'menu'               => 'Menu',
     'notifications'      => 'System notifications',
     'no_notifications'   => 'No new notifications.',

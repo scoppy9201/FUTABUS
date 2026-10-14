@@ -1,4 +1,4 @@
-@extends('core::layouts.home')
+@extends('StaffDashboard::layouts.staff')
 
 @section('title', __('StaffDashboard::staff.change_password'))
 
@@ -14,10 +14,12 @@
             'update' => route('api.v1.staff.me.password.update')]),
             @js(['error' => __('StaffDashboard::staff.error'),
             'validation' => __('Profile::app.password_change.validation')]))"
-        class="flex min-h-dvh flex-col bg-gray-50 lg:h-dvh lg:min-h-0">
+        class="flex h-dvh min-h-0 flex-col overflow-hidden bg-gray-50 print:h-auto print:overflow-visible">
         @include('StaffDashboard::partials.header')
         @include('StaffDashboard::partials.notifications')
-        <div class="grid flex-1 gap-2 p-2 text-sm lg:min-h-0 lg:grid-cols-[15%_minmax(0,1fr)]">
+        <div
+            class="staff-shell grid min-h-0 min-w-0 flex-1 overflow-hidden grid-cols-1 bg-[#F8F9FA] text-sm lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-stretch [&>main]:min-h-0
+            [&>main]:overflow-y-auto [&>main]:p-4 md:[&>main]:p-6 lg:[&>main]:p-8 print:block print:overflow-visible print:[&>main]:overflow-visible print:[&>main]:p-0">
             @include('StaffDashboard::partials.sidebar')
             <main class="flex min-w-0 items-start p-2 lg:min-h-0">
                 <section class="flex w-full min-w-0 flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-sm xl:p-8">
