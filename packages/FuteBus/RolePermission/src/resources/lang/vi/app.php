@@ -1,6 +1,14 @@
 <?php
 
 return [
+    'wizard' => [
+        'progress'       => 'Các bước thiết lập vai trò', 'information' => 'Thông tin vai trò',
+        'permissions'    => 'Chọn quyền', 'review' => 'Kiểm tra', 'previous' => 'Quay lại', 'next' => 'Tiếp tục',
+        'review_title'   => 'Xác nhận vai trò và phạm vi quyền', 'selected' => 'Quyền đã chọn',
+        'select_group'   => 'Chọn / bỏ cả nhóm',
+        'no_permissions' => 'Vai trò chưa có quyền chức năng. Nhân viên được gán vai trò này sẽ không nhận thêm quyền từ vai trò.',
+        'fix_errors'     => 'Vui lòng kiểm tra các trường được đánh dấu trước khi lưu.',
+    ],
     'title'                          => 'Quản lý quyền truy cập',
     'description'                    => 'Tạo vai trò theo bộ phận, chọn quyền chức năng và gán vai trò cho nhân viên của nhà xe.',
     'navigation'                     => 'Điều hướng quản lý quyền truy cập',
@@ -10,8 +18,8 @@ return [
     'catalog_description'            => 'Danh mục quyền khả dụng theo từng bộ phận và thao tác trong hệ thống.',
     'catalog_admin_heading'          => 'Quản trị danh mục quyền',
     'catalog_admin_hint'             => 'Chỉ đăng ký mã đã được khai báo trong code. Mã quyền được khóa; có thể sửa tên/nhóm hiển thị hoặc ngừng kích hoạt để không làm hỏng các vai trò đã gán.',
-    'permission_key'                 => 'Mã quyền đã khai báo trong code',
-    'choose_permission_key'          => 'Chọn mã quyền',
+    'permission_key'                 => 'Chức năng cần đăng ký',
+    'choose_permission_key'          => 'Chọn chức năng',
     'permission_name'                => 'Tên chức năng hiển thị',
     'display_group'                  => 'Tên nhóm hiển thị',
     'register_permission'            => 'Thêm vào danh mục',
@@ -35,7 +43,7 @@ return [
     'function_groups'                => 'Nhóm chức năng',
     'functions_total'                => 'Quyền chức năng',
     'search_catalog'                 => 'Tra cứu chức năng',
-    'search_catalog_hint'            => 'Nhập tên quyền hoặc mã quyền, ví dụ trip.view',
+    'search_catalog_hint'            => 'Tìm theo tên chức năng hoặc bộ phận',
     'no_search_results'              => 'Không tìm thấy quyền chức năng phù hợp.',
     'assignment_list_hint'           => 'Chọn một hoặc nhiều vai trò cho từng tài khoản nhân viên.',
     'search_staff'                   => 'Tìm nhân viên',

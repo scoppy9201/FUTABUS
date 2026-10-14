@@ -113,28 +113,25 @@
         <div class="border-t border-slate-100 px-5 py-4"><x-core::data-pagination :paginator="$trips" /></div>
     </div>
 
-    {{-- ADD / EDIT MODAL --}}
-    <div role="dialog" aria-modal="true" x-show="showForm" x-cloak @click.self="closeForm()"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
-        <div class="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div class="flex items-center justify-between bg-futa-orange px-5 py-3">
-                <h2 class="text-base font-bold text-white"
-                    x-text="isEdit ? @js(__('TripManagement::app.tr_modal_edit')) : @js(__('TripManagement::app.tr_modal_add'))"></h2>
-                <button type="button" @click="closeForm()" class="text-white/70 hover:text-white"><x-heroicon-o-x-mark class="size-4" /></button>
-            </div>
-
-            <form :action="formAction" method="POST" class="space-y-3 p-5" @submit="validateSubmit($event)">
+    {{-- Reference implementation: shared right-side panel, with a fixed header and footer. --}}
+    <x-core::side-panel id="trip-form-panel" x-ref="tripDrawer" @close="closeForm()" @click.self="closeForm()"
+        :description="__('TripManagement::app.tr_subtitle')">
+        <x-slot:title>
+            <span x-text="isEdit ? @js(__('TripManagement::app.tr_modal_edit')) : @js(__('TripManagement::app.tr_modal_add'))"></span>
+        </x-slot:title>
+            <form :action="formAction" method="POST" class="flex min-h-0 flex-1 flex-col" @submit="validateSubmit($event)">
                 @csrf
+                <div class="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6">
                 <template x-if="isEdit"><input type="hidden" name="_method" value="PUT"></template>
 
-                <p x-show="locked" class="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700">
+                <p x-show="locked" class="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-700">
                     {{ __('TripManagement::app.tr_locked_note') }}
                 </p>
 
                 <div>
-                    <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_route') }} <span class="text-rose-500">*</span></label>
+                    <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_route') }} <span class="text-rose-500">*</span></label>
                     <select name="route_id" x-model="form.route_id" :disabled="locked" required
-                            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:bg-slate-100 focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20">
+                            class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm disabled:bg-slate-100 focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20">
                         <option value="">{{ __('TripManagement::app.sch_f_route_select') }}</option>
                         @foreach($routes as $r)
                             <option value="{{ $r->id }}">{{ $r->code }} — {{ $r->origin_city }} → {{ $r->destination_city }}</option>
@@ -144,16 +141,16 @@
 
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.tr_f_departure') }} <span class="text-rose-500">*</span></label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.tr_f_departure') }} <span class="text-rose-500">*</span></label>
                         <input type="datetime-local" name="departure_time" x-model="form.departure_time" :disabled="locked" required
-                               class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:bg-slate-100 focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
+                               class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm disabled:bg-slate-100 focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
                     </div>
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">
                             {{ __('TripManagement::app.tr_f_bus') }} <span x-show="!isEdit" class="text-rose-500">*</span>
                         </label>
                         <select name="bus_id" x-model="form.bus_id" :required="!isEdit"
-                                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20">
+                                class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20">
                             <option value="">{{ __('TripManagement::app.tr_f_bus_select') }}</option>
                             @foreach($buses as $b)
                                 <option value="{{ $b->id }}">{{ $b->license_plate }} ({{ $b->capacity }} {{ __('BusManagement::app.field_capacity_unit') }})</option>
@@ -161,21 +158,21 @@
                         </select>
                     </div>
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.tr_f_price') }} <span class="text-rose-500">*</span></label>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.tr_f_price') }} <span class="text-rose-500">*</span></label>
                         <input type="number" name="price" x-model="form.price" required min="1" step="any"
-                               class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
+                               class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
-                    <button type="button" @click="closeForm()" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('TripManagement::app.btn_cancel') }}</button>
-                    <button type="submit"
-                            class="rounded-lg bg-futa-orange px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-futa-orange-dark"
-                            x-text="isEdit ? @js(__('TripManagement::app.btn_save')) : @js(__('TripManagement::app.btn_store'))"></button>
                 </div>
+                <footer class="flex shrink-0 items-center justify-end gap-3 border-t border-slate-200 bg-white px-6 py-4">
+                    <button type="button" @click="closeForm()" class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">{{ __('TripManagement::app.btn_cancel') }}</button>
+                    <button type="submit"
+                            class="rounded-xl bg-futa-orange px-5 py-3 text-sm font-bold text-white shadow-sm hover:bg-futa-orange-dark"
+                            x-text="isEdit ? @js(__('TripManagement::app.btn_save')) : @js(__('TripManagement::app.btn_store'))"></button>
+                </footer>
             </form>
-        </div>
-    </div>
+    </x-core::side-panel>
 
     {{-- CANCEL MODAL --}}
     <div role="dialog" aria-modal="true" x-show="showCancel" x-cloak @click.self="showCancel = false"
@@ -291,11 +288,27 @@ function tripManager() {
 
         closeForm() {
             this.showForm = false;
+            if (this.$refs.tripDrawer.open) this.$refs.tripDrawer.close();
             if (window.FutaNotify) { FutaNotify.close('bus-docs'); FutaNotify.close('trip-past'); }
         },
 
-        openAdd()    { this.isEdit = false; this.locked = false; this.form = { ...blank }; this.formAction = base; this.showForm = true; },
-        openEdit(d)  { this.isEdit = true; this.locked = d.from_schedule; this.form = { ...blank, ...d, bus_id: d.bus_id ?? '' }; this.formAction = `${base}/${d.id}`; this.showForm = true; this.syncDocToast(); },
+        openAdd() {
+            this.isEdit = false;
+            this.locked = false;
+            this.form = { ...blank };
+            this.formAction = base;
+            this.showForm = true;
+            this.$nextTick(() => this.$refs.tripDrawer.showModal());
+        },
+        openEdit(d) {
+            this.isEdit = true;
+            this.locked = d.from_schedule;
+            this.form = { ...blank, ...d, bus_id: d.bus_id ?? '' };
+            this.formAction = `${base}/${d.id}`;
+            this.showForm = true;
+            this.$nextTick(() => this.$refs.tripDrawer.showModal());
+            this.syncDocToast();
+        },
         openCancel(d){ this.cancelData = d; this.cancelAction = `${base}/${d.id}`; this.showCancel = true; },
     };
 }
