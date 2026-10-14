@@ -1,13 +1,13 @@
-@extends('core::layouts.home')
+@extends('StaffDashboard::layouts.staff')
 @section('title', __('StaffCustomerSupport::support.title'))
 @push('styles')
     @vite(['packages/FuteBus/StaffDashboard/src/resources/css/app.css', 'packages/FuteBus/StaffDashboard/src/resources/js/app.js', 'packages/FuteBus/StaffCustomerSupport/src/resources/css/app.css', 'packages/FuteBus/StaffCustomerSupport/src/resources/js/app.js'])
 @endpush
 @section('content')
-    <div x-data="staffDashboard(@js(route('api.v1.staff.dashboard.show')))" class="flex min-h-dvh flex-col bg-gray-50">
+    <div x-data="staffDashboard(@js(route('api.v1.staff.dashboard.show')))" class="flex h-dvh min-h-0 flex-col overflow-hidden bg-gray-50 print:h-auto print:overflow-visible">
         @include('StaffDashboard::partials.header')
         @include('StaffDashboard::partials.notifications')
-        <div class="grid flex-1 items-start gap-4 p-3 text-sm lg:grid-cols-[220px_minmax(0,1fr)] lg:p-4">
+        <div class="staff-shell grid min-h-0 min-w-0 flex-1 overflow-hidden grid-cols-1 bg-[#F8F9FA] text-sm lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-stretch [&>main]:min-h-0 [&>main]:overflow-y-auto [&>main]:p-4 md:[&>main]:p-6 lg:[&>main]:p-8 print:block print:overflow-visible print:[&>main]:overflow-visible print:[&>main]:p-0">
             @include('StaffDashboard::partials.sidebar')
             <main class="min-w-0 space-y-5 pb-8"
                 x-data="staffSupport(@js([
@@ -62,12 +62,12 @@
                             <h2 id="support-filters-title" class="font-semibold text-gray-900">{{ __('StaffCustomerSupport::support.filters') }}</h2>
                         </div>
                         <form @submit.prevent="loadList(1)" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-[minmax(220px,1.5fr)_repeat(3,minmax(0,1fr))_auto]">
-                            <label class="block text-xs font-semibold text-gray-600">{{ __('StaffCustomerSupport::support.search') }}
+                            <label class="block text-sm font-semibold text-gray-600">{{ __('StaffCustomerSupport::support.search') }}
                                 <input x-model="filters.search" type="search" maxlength="150" placeholder="{{ __('StaffCustomerSupport::support.search_placeholder') }}"
                                     class="mt-2 h-11 w-full rounded-xl border border-gray-200 bg-gray-50/50 px-3 text-sm font-normal outline-none focus:border-futa-orange focus:ring-2 focus:ring-futa-orange/15">
                             </label>
                             @foreach(['status' => 'status', 'category' => 'categories', 'urgency' => 'urgencies'] as $field => $translation)
-                                <label class="block text-xs font-semibold text-gray-600">{{ $field === 'status' ? __('StaffCustomerSupport::support.status') : __('Profile::feedback.fields.'.$field) }}
+                                <label class="block text-sm font-semibold text-gray-600">{{ $field === 'status' ? __('StaffCustomerSupport::support.status') : __('Profile::feedback.fields.'.$field) }}
                                     <select x-model="filters.{{ $field }}" class="mt-2 h-11 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm font-normal focus:border-futa-orange focus:ring-2 focus:ring-futa-orange/15">
                                         <option value="">{{ __('StaffCustomerSupport::support.all') }}</option>
                                         @foreach(__('Profile::feedback.'.$translation) as $value => $label)
@@ -82,15 +82,15 @@
                         </form>
                     </section>
                     <section aria-labelledby="support-list-title" :aria-busy="loading" class="min-w-0 rounded-2xl border border-gray-200 bg-white shadow-sm">
-                        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-5 py-5">
+                        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-5 py-4">
                             <div class="flex items-center gap-3">
                                 <span class="grid size-10 shrink-0 place-items-center rounded-xl bg-futa-orange-soft text-futa-orange"><x-heroicon-o-inbox-stack class="size-5" /></span>
                                 <div>
                                     <h2 id="support-list-title" class="text-lg font-bold text-gray-900">{{ __('StaffCustomerSupport::support.list_title') }}</h2>
-                                    <p class="mt-1 text-xs text-gray-500">{{ __('StaffCustomerSupport::support.list_hint') }}</p>
+                                    <p class="mt-1 text-sm text-gray-500">{{ __('StaffCustomerSupport::support.list_hint') }}</p>
                                 </div>
                             </div>
-                            <span x-cloak x-show="!loading && !failed" class="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-600"><span x-text="meta.total"></span> {{ __('StaffCustomerSupport::support.requests') }}</span>
+                            <span x-cloak x-show="!loading && !failed" class="rounded-full bg-gray-100 px-3 py-1.5 text-sm font-semibold text-gray-600"><span x-text="meta.total"></span> {{ __('StaffCustomerSupport::support.requests') }}</span>
                         </div>
                         <div x-show="loading" role="status" class="flex min-h-60 flex-col items-center justify-center gap-3 p-8 text-gray-500">
                             <x-heroicon-o-arrow-path class="size-6 animate-spin text-futa-orange" />{{ __('StaffCustomerSupport::support.loading') }}
@@ -101,46 +101,54 @@
                             <button @click="loadList()" class="rounded-xl border border-futa-orange px-4 py-2 font-semibold text-futa-orange">{{ __('StaffCustomerSupport::support.reload') }}</button>
                         </div>
                         <div x-cloak x-show="!loading && !failed" class="overflow-x-auto">
-                            <table class="w-full min-w-[900px] text-left text-sm">
-                                <thead class="border-b border-gray-100 bg-gray-50 text-xs font-semibold text-gray-500"><tr>
+                            <table class="w-full min-w-[1100px] table-fixed text-left text-sm">
+                                <colgroup>
+                                    <col class="w-[22%]">
+                                    <col class="w-[18%]">
+                                    <col class="w-40">
+                                    <col class="w-32">
+                                    <col class="w-36">
+                                    <col>
+                                    <col class="w-36">
+                                </colgroup>
+                                <thead class="border-b border-gray-100 bg-gray-50 text-sm font-semibold text-gray-500"><tr>
                                     <th scope="col" class="px-5 py-4">{{ __('StaffCustomerSupport::support.request') }}</th>
-                                    <th scope="col" class="px-4 py-4">{{ __('Profile::feedback.fields.category') }}</th>
-                                    <th scope="col" class="px-4 py-4">{{ __('Profile::feedback.fields.urgency') }}</th>
-                                    <th scope="col" class="px-4 py-4">{{ __('StaffCustomerSupport::support.status') }}</th>
-                                    <th scope="col" class="px-4 py-4">{{ __('StaffCustomerSupport::support.handler') }}</th>
-                                    <th scope="col" class="px-4 py-4"><span class="sr-only">{{ __('StaffCustomerSupport::support.view') }}</span></th>
+                                    <th scope="col" class="px-4 py-3">{{ __('Profile::feedback.fields.category') }}</th>
+                                    <th scope="col" class="px-4 py-3 text-center">{{ __('StaffDashboard::staff.time') }}</th>
+                                    <th scope="col" class="px-4 py-3 text-center">{{ __('Profile::feedback.fields.urgency') }}</th>
+                                    <th scope="col" class="px-4 py-3 text-center">{{ __('StaffCustomerSupport::support.status') }}</th>
+                                    <th scope="col" class="px-4 py-3">{{ __('StaffCustomerSupport::support.handler') }}</th>
+                                    <th scope="col" class="px-4 py-3 text-center">{{ __('StaffDashboard::staff.actions') }}</th>
                                 </tr></thead>
                                 <tbody class="divide-y divide-gray-100"><template x-for="item in rows" :key="item.id">
-                                    <tr class="transition hover:bg-orange-50/40">
-                                        <td class="max-w-80 px-5 py-5">
+                                    <tr class="align-middle transition-colors hover:bg-futa-orange-soft/40">
+                                        <td class="px-5 py-3 align-middle">
                                             <a :href="@js(route('staff.support', ['report' => '__report__'])).replace('__report__', item.id)" class="font-semibold text-futa-orange hover:underline" x-text="item.reference"></a>
-                                            <p class="mt-1.5 wrap-break-word font-medium text-gray-900" x-text="item.subject"></p>
-                                            <p class="mt-2 text-xs text-gray-500" x-text="item.customer_name"></p>
-                                            <p class="mt-1 text-xs text-gray-400" x-text="date(item.created_at)"></p>
+                                            <p class="mt-1 truncate font-medium text-gray-900" :title="item.subject" x-text="item.subject"></p>
+                                            <p class="mt-1 text-sm text-gray-500" x-show="item.customer_name" x-text="item.customer_name"></p>
                                         </td>
-                                        <td class="px-4 py-5 text-gray-600" x-text="supportLabels.categories[item.category]"></td>
-                                        <td class="px-4 py-5"><span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium" :class="item.urgency === 'urgent' ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-600'" x-text="supportLabels.urgencies[item.urgency]"></span></td>
-                                        <td class="px-4 py-5">
+                                        <td class="px-4 py-3 text-gray-600" x-text="supportLabels.categories[item.category]"></td>
+                                        <td class="whitespace-nowrap px-4 py-3 text-center text-gray-500" x-text="date(item.created_at)"></td>
+                                        <td class="px-4 py-3 text-center"><span class="inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-sm font-medium" :class="item.urgency === 'urgent' ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-600'" x-text="supportLabels.urgencies[item.urgency]"></span></td>
+                                        <td class="px-4 py-3 text-center">
                                             <span
-                                            class="inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold"
+                                            class="inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-sm font-semibold"
                                             :class="{'bg-blue-50 text-blue-700': item.status === 'received', 'bg-orange-50 text-orange-700': item.status === 'reviewing', 'bg-purple-50 text-purple-700': item.status === 'waiting', 'bg-green-50 text-green-700': item.status === 'resolved'}"
                                             x-text="supportLabels.statuses[item.status]">
                                             </span>
                                             </td>
-                                        <td class="px-4 py-5 text-gray-600" x-text="item.handler || item.department || @js(__('StaffCustomerSupport::support.unclaimed'))"></td>
-                                        <td class="px-4 py-5">
+                                        <td class="px-4 py-3 text-gray-600" x-text="item.handler || item.department || @js(__('StaffCustomerSupport::support.unclaimed'))"></td>
+                                        <td class="px-4 py-3 text-center">
                                             <a
                                             :href="@js(route('staff.support', ['report' => '__report__'])).replace('__report__', item.id)"
-                                            class="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 hover:border-futa-orange hover:text-futa-orange">
+                                            class="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 hover:border-futa-orange hover:text-futa-orange">
                                             {{ __('StaffCustomerSupport::support.view') }}
-                                            <x-heroicon-o-chevron-right
-                                            class="size-3.5" />
                                             </a>
                                             </td>
                                     </tr>
                                 </template>
                                     <tr x-show="!rows.length">
-                                        <td colspan="6" class="px-6 py-10 text-center">
+                                        <td colspan="7" class="px-6 py-10 text-center">
                                             <div class="flex flex-col items-center">
                                                 <x-core::empty-state :title="__('StaffCustomerSupport::support.empty')" :description="__('StaffCustomerSupport::support.empty_hint')" compact />
                                             </div>

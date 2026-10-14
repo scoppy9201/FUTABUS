@@ -1,51 +1,49 @@
-            <aside class="rounded-xl bg-white p-2 lg:sticky lg:top-24 lg:h-[calc(100dvh-7rem)] lg:self-start lg:overflow-y-auto">
-                <button
-                    type="button"
-                    @click="sidebarOpen = !sidebarOpen"
-                    :aria-expanded="sidebarOpen"
-                    aria-controls="staff-navigation"
-                    class="flex w-full items-center justify-between rounded-xl p-2 font-semibold text-gray-900 lg:hidden">{{ __('StaffDashboard::staff.menu') }}<x-heroicon-o-bars-3
-                    class="size-6 shrink-0" />
-                </button>
-                <nav id="staff-navigation" aria-label="{{ __('StaffDashboard::staff.title') }}" :class="sidebarOpen ? 'flex' : 'hidden lg:flex'" class="flex-col gap-1">
+<dialog id="staff-navigation-panel" x-data="staffNavigation" @staff-navigation-toggle.window="toggle()" @resize.window="syncViewport()" @close="syncExpanded()" @click="if ($event.target === $el) close()" aria-label="{{ __('StaffDashboard::staff.menu') }}" class="staff-navigation m-0 h-dvh max-h-none w-64 max-w-[85vw] border-0 border-r border-gray-200 bg-white p-0 text-gray-800 backdrop:bg-gray-900/50 lg:static lg:h-full lg:shrink-0 lg:open:flex lg:flex-col lg:justify-between">
+    <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3 lg:hidden">
+        <span class="text-sm font-semibold">{{ __('StaffDashboard::staff.menu') }}</span>
+        <button type="button" @click="close()" aria-label="{{ __('StaffDashboard::staff.close_menu') }}" class="rounded-lg p-2 hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-futa-orange"><x-heroicon-o-x-mark class="size-5" /></button>
+    </div>
+    <div class="py-4 overflow-y-auto">
+        <div class="px-4 mb-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider">{{ __('StaffDashboard::staff.menu') }}</div>
+                <nav id="staff-navigation" aria-label="{{ __('StaffDashboard::staff.title') }}" class="space-y-1">
                     <a
                         href="{{ route($sidebarHome ?? 'staff.dashboard') }}" @if(request()->routeIs($sidebarHome ?? 'staff.dashboard'))
-                        aria-current="page" @endif @class(['flex shrink-0 items-center gap-3 rounded-xl px-3 py-3 font-semibold',
-                            'bg-linear-to-r from-red-600 to-orange-500 text-white' => request()->routeIs($sidebarHome ?? 'staff.dashboard'),
-                            'text-gray-900 hover:bg-futa-orange-soft' => !request()->routeIs($sidebarHome ?? 'staff.dashboard')])>
+                        aria-current="page" @endif @class(['w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition',
+                            'bg-futa-orange-soft text-futa-orange border-r-4 border-futa-orange font-semibold' => request()->routeIs($sidebarHome ?? 'staff.dashboard'),
+                            'text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange' => !request()->routeIs($sidebarHome ?? 'staff.dashboard')])>
                     <x-heroicon-o-home
-                        class="size-6 shrink-0" />{{ __('StaffDashboard::staff.home') }}</a>
+                        class="size-5 shrink-0" /><span>{{ __('StaffDashboard::staff.home') }}</span></a>
                     <a
                         href="{{ route('staff.tickets') }}" @if(request()->routeIs('staff.tickets', 'staff.tickets.*'))
-                        aria-current="page" @endif @class(['flex shrink-0 items-center gap-3 rounded-xl px-3 py-3',
-                            'bg-linear-to-r from-red-600 to-orange-500 font-semibold text-white' => request()->routeIs('staff.tickets',
+                        aria-current="page" @endif @class(['w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition',
+                            'bg-futa-orange-soft font-semibold text-futa-orange border-r-4 border-futa-orange' => request()->routeIs('staff.tickets',
                             'staff.tickets.*'),
-                            'text-gray-900 hover:bg-futa-orange-soft' => !request()->routeIs('staff.tickets',
+                            'text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange' => !request()->routeIs('staff.tickets',
                             'staff.tickets.*')])>
                     <x-heroicon-o-ticket
-                        class="size-6 shrink-0" />{{ __('StaffDashboard::staff.ticket_menu') }}</a>
+                        class="size-5 shrink-0" /><span>{{ __('StaffDashboard::staff.ticket_menu') }}</span></a>
                     <a
                         href="{{ auth()->user()->hasPermissionTo('support.view') ? route('staff.support') : route($sidebarHome ?? 'staff.dashboard').'#support' }}"
                         @if(request()->routeIs('staff.support')) aria-current="page" @endif
-                        @class(['flex shrink-0 items-center gap-3 rounded-xl px-3 py-3',
-                            'bg-linear-to-r from-red-600 to-orange-500 font-semibold text-white' => request()->routeIs('staff.support'),
-                            'text-gray-900 hover:bg-futa-orange-soft' => ! request()->routeIs('staff.support')])>
+                        @class(['w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition',
+                            'bg-futa-orange-soft font-semibold text-futa-orange border-r-4 border-futa-orange' => request()->routeIs('staff.support'),
+                            'text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange' => ! request()->routeIs('staff.support')])>
                     <x-heroicon-o-chat-bubble-left-right
-                        class="size-6 shrink-0" />{{ __('StaffDashboard::staff.support.title') }}</a>
+                        class="size-5 shrink-0" /><span>{{ __('StaffDashboard::staff.support.title') }}</span></a>
                     <a href="{{ route('staff.ticket-lookup') }}"
                         @if(request()->routeIs('staff.ticket-lookup')) aria-current="page" @endif
-                        @class(['flex shrink-0 items-center gap-3 rounded-xl px-3 py-3',
-                            'bg-linear-to-r from-red-600 to-orange-500 font-semibold text-white' => request()->routeIs('staff.ticket-lookup'),
-                            'text-gray-900 hover:bg-futa-orange-soft' => ! request()->routeIs('staff.ticket-lookup')])>
-                        <x-heroicon-o-magnifying-glass class="size-6 shrink-0" />{{ __('StaffDashboard::staff.tickets.actions.lookup') }}
+                        @class(['w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition',
+                            'bg-futa-orange-soft font-semibold text-futa-orange border-r-4 border-futa-orange' => request()->routeIs('staff.ticket-lookup'),
+                            'text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange' => ! request()->routeIs('staff.ticket-lookup')])>
+                        <x-heroicon-o-magnifying-glass class="size-5 shrink-0" /><span>{{ __('StaffDashboard::staff.tickets.actions.lookup') }}</span>
                     </a>
                     @if(auth()->user()->hasPermissionTo('payment.view'))
                         <a href="{{ route('staff.refunds.index') }}"
                             @if(request()->routeIs('staff.refunds.*')) aria-current="page" @endif
-                            @class(['flex items-center gap-3 rounded-xl px-3 py-3',
-                                'bg-linear-to-r from-red-600 to-orange-500 font-semibold text-white' => request()->routeIs('staff.refunds.*'),
-                                'text-gray-900 hover:bg-futa-orange-soft' => ! request()->routeIs('staff.refunds.*')])>
-                            <x-heroicon-o-receipt-refund class="size-6 shrink-0" />{{ __('Payment::refunds.title') }}
+                            @class(['w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition',
+                                'bg-futa-orange-soft font-semibold text-futa-orange border-r-4 border-futa-orange' => request()->routeIs('staff.refunds.*'),
+                                'text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange' => ! request()->routeIs('staff.refunds.*')])>
+                            <x-heroicon-o-receipt-refund class="size-5 shrink-0" /><span>{{ __('Payment::refunds.title') }}</span>
                         </a>
                     @endif
                     <template
@@ -53,13 +51,36 @@
                         :key="item.key">
                     <a
                         :href="item.url"
-                        class="flex items-center gap-3 rounded-xl px-3 py-3 text-gray-900 hover:bg-futa-orange-soft">
+                        class="flex items-center gap-3 border-r-4 border-transparent px-4 py-3 text-sm text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange">
                     <x-heroicon-o-rectangle-stack
-                        class="size-6 shrink-0" />
+                        class="size-5 shrink-0" />
                     <span
                         x-text="@js(__('StaffDashboard::staff.navigation'))[item.key]">
                     </span>
                     </a>
                     </template>
                 </nav>
-            </aside>
+
+        <div class="px-4 mt-8 mb-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider">{{ __('StaffDashboard::staff.account') }}</div>
+        <nav class="space-y-1">
+            <a href="{{ route($operatorProfileRoute ?? 'staff.profile') }}"
+                @if(request()->routeIs($operatorProfileRoute ?? 'staff.profile')) aria-current="page" @endif
+                @class([
+                    'w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition',
+                    'bg-futa-orange-soft font-semibold text-futa-orange border-r-4 border-futa-orange' => request()->routeIs($operatorProfileRoute ?? 'staff.profile'),
+                    'text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange' => ! request()->routeIs($operatorProfileRoute ?? 'staff.profile'),
+                ])>
+                <x-heroicon-o-user-circle class="size-5 shrink-0" /><span>{{ __('Profile::app.title') }}</span>
+            </a>
+            <a href="{{ route($operatorPasswordRoute ?? 'staff.password') }}"
+                @if(request()->routeIs($operatorPasswordRoute ?? 'staff.password')) aria-current="page" @endif
+                @class([
+                    'w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition',
+                    'bg-futa-orange-soft font-semibold text-futa-orange border-r-4 border-futa-orange' => request()->routeIs($operatorPasswordRoute ?? 'staff.password'),
+                    'text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange' => ! request()->routeIs($operatorPasswordRoute ?? 'staff.password'),
+                ])>
+                <x-heroicon-o-lock-closed class="size-5 shrink-0" /><span>{{ __('StaffDashboard::staff.change_password') }}</span>
+            </a>
+        </nav>
+    </div>
+</dialog>

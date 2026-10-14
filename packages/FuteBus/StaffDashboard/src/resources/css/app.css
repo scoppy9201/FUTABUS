@@ -1,1 +1,5 @@
 /* StaffDashboard uses the shared FUTABUS theme and UI components. */
+
+.staff-navigation-open {
+    overflow: hidden;
+}

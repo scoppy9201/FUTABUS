@@ -1,11 +1,13 @@
 <?php
 
 return [
+    'account'          => 'Account',
     'change_password'  => 'Change password',
     'contact'          => 'Contact information',
     'ticket_menu'      => 'Tickets',
     'notice_menu'      => 'Notifications',
     'role'             => 'Bus company staff',
+    'close_menu'       => 'Close menu',
     'menu'             => 'Menu',
     'notifications'    => 'System notifications',
     'no_notifications' => 'No new notifications.',

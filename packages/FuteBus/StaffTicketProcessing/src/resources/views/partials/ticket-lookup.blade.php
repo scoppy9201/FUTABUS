@@ -5,7 +5,7 @@
                     <div>
                     <label
                         for="ticket-{{ $field }}"
-                        class="mb-1 block text-xs font-semibold text-gray-600">{{ __('StaffTicketProcessing::tickets.'.$field) }}</label>
+                        class="mb-1 block text-sm font-semibold text-gray-600">{{ __('StaffTicketProcessing::tickets.'.$field) }}</label>
                     <input
                         id="ticket-{{ $field }}"
                         x-model="filters.{{ $field }}"
@@ -28,7 +28,7 @@
                         @change="loadTickets()"
                         :disabled="loadingTickets || !groups?.tickets.lookup"
                         aria-label="{{ __('StaffDashboard::staff.status') }}"
-                        class="rounded-md border border-gray-200 bg-white px-2 py-1 text-xs text-gray-500">
+                        class="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600">
                     <option
                         value="">{{ __('StaffTicketProcessing::tickets.all_statuses') }}</option>@foreach(['active', 'expired', 'used', 'cancelled', 'refunded'] as $status)<option
                         value="{{ $status }}">{{ $status === 'expired' ? __('StaffTicketProcessing::tickets.expired') : __('core::ticket-lookup.ticket_status.'.$status) }}</option>@endforeach</select>
@@ -36,20 +36,20 @@
                 <div
                     class="overflow-x-auto">
                 <table
-                    class="w-full whitespace-nowrap text-left text-xs">
+                    class="w-full whitespace-nowrap text-left text-sm">
                 <thead
                     class="bg-gray-50 text-gray-500">
                 <tr>@foreach(['code', 'customer', 'phone', 'route', 'date', 'time', 'seat'] as $column)<th
-                    class="px-3 py-3">{{ __('StaffTicketProcessing::tickets.'.$column) }}</th>@endforeach<th
-                    class="px-3 py-3">{{ __('StaffDashboard::staff.status') }}</th>
+                    @class(['px-3 py-3', 'text-center' => in_array($column, ['date', 'time', 'seat'])])>{{ __('StaffTicketProcessing::tickets.'.$column) }}</th>@endforeach<th
+                    class="px-3 py-3 text-center">{{ __('StaffDashboard::staff.status') }}</th>
                 <th
-                    class="px-3 py-3">{{ __('StaffDashboard::staff.actions') }}</th>
+                    class="px-3 py-3 text-center">{{ __('StaffDashboard::staff.actions') }}</th>
                 </tr>
                 </thead>
                 <tbody>
                     <template x-for="ticket in rows" :key="ticket.id"><tr x-show="!loadingTickets" class="border-b border-gray-100 hover:bg-orange-50/40">
                         <td
-                            class="px-3 py-3 font-semibold"
+                            class="max-w-52 whitespace-normal break-all px-3 py-3 font-semibold"
                             x-text="ticket.code">
                         </td>
                         <td
@@ -61,23 +61,23 @@
                             x-text="ticket.phone || '—'">
                         </td>
                         <td
-                            class="px-3 py-3"
+                            class="max-w-48 whitespace-normal px-3 py-3"
                             x-text="ticket.route">
                         </td>
                         <td
-                            class="px-3 py-3"
+                            class="px-3 py-3 text-center whitespace-nowrap"
                             x-text="ticket.date">
                         </td>
                         <td
-                            class="px-3 py-3"
+                            class="px-3 py-3 text-center whitespace-nowrap"
                             x-text="ticket.time">
                         </td>
                         <td
-                            class="px-3 py-3"
+                            class="px-3 py-3 text-center"
                             x-text="ticket.seat || '—'">
                         </td>
                         <td
-                            class="px-3 py-3">
+                            class="px-3 py-3 text-center">
                         <span
                             class="rounded-full px-2 py-1 font-medium"
                             :class="statusClass(ticket.display_status)"
@@ -85,7 +85,7 @@
                         </span>
                         </td>
                         <td
-                            class="px-3 py-3">
+                            class="px-3 py-3 text-center">
                         <button
                             type="button"
                             @click="openTicket(ticket)"

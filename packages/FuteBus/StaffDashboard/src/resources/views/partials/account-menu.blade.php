@@ -2,14 +2,14 @@
     <button
         type="button"
         id="account-menu-button"
-        class="flex max-w-56 items-center gap-2 rounded-full px-2 py-1 text-base font-semibold text-white transition hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:gap-2.5"
+        class="flex max-w-56 items-center gap-2 rounded-full px-2 py-1 text-sm font-semibold text-gray-800 transition hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange sm:gap-2.5"
         @click="open = ! open"
         :aria-expanded="open.toString()"
         aria-haspopup="true"
         aria-controls="account-menu"
         aria-label="{{ __('core::app.home.navbar.account_menu', ['name' => ($apiAccount ?? false) ? '' : Auth::user()->name]) }}"
     >
-        <span class="grid size-9 shrink-0 place-items-center rounded-full bg-[#414e62] text-futa-orange ring-2 ring-white/30">
+        <span class="grid size-9 shrink-0 place-items-center rounded-full bg-futa-orange-soft text-futa-orange ring-2 ring-futa-orange/30">
             @if($staffAccount ?? false)
                 <img x-show="employee?.avatar_url" x-cloak :src="employee?.avatar_url || null" alt="" class="size-9 rounded-full object-cover">
                 <x-heroicon-s-user-circle x-show="!employee?.avatar_url" class="size-8" />
