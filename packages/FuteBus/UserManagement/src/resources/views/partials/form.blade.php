@@ -1,4 +1,7 @@
-<div @class(['space-y-4' => $wizard ?? false, 'grid gap-4 xl:grid-cols-2 xl:items-stretch' => !($wizard ?? false)])>
+<div @class([
+    'space-y-4' => ($wizard ?? false) || ($sidePanel ?? false),
+    'grid gap-4 xl:grid-cols-2 xl:items-stretch' => !($wizard ?? false) && !($sidePanel ?? false),
+])>
 <section @if($wizard ?? false) data-staff-step="1" @endif class="rounded-xl border border-slate-200 bg-white">
     <div class="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-3">
         <x-heroicon-o-user class="size-5 text-slate-600" />
@@ -15,18 +18,18 @@
                         <span x-show="!avatarPreview"><x-heroicon-o-user class="size-9" /></span>
                     @endif
                 </div>
-                <label for="staff-avatar" title="{{ __('UserManagement::app.change_photo') }}"
+                <label for="{{ $idPrefix ?? 'staff' }}-avatar" title="{{ __('UserManagement::app.change_photo') }}"
                     class="absolute bottom-0 right-0 grid size-7 cursor-pointer place-items-center rounded-full border-2 border-white bg-futa-orange text-white shadow-sm transition hover:bg-futa-orange-dark">
                     <x-heroicon-o-camera class="size-3.5" />
                 </label>
             </div>
             <div>
                 <p class="text-sm font-semibold text-slate-800">{{ __('UserManagement::app.avatar') }}</p>
-                <label for="staff-avatar" class="mt-1.5 inline-flex min-h-8 cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-1 text-sm font-semibold text-slate-700 transition hover:border-[#F26522] hover:text-futa-orange">
+                <label for="{{ $idPrefix ?? 'staff' }}-avatar" class="mt-1.5 inline-flex min-h-8 cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-1 text-sm font-semibold text-slate-700 transition hover:border-[#F26522] hover:text-futa-orange">
                     <x-heroicon-o-arrow-up-tray class="size-4" />
                     {{ __('UserManagement::app.upload_photo') }}
                 </label>
-                <input id="staff-avatar" name="avatar" type="file" accept="image/jpeg,image/png" class="sr-only" x-on:change="const file = $event.target.files[0]; if (file) { avatarPreview = URL.createObjectURL(file); avatarFileName = file.name; }">
+                <input id="{{ $idPrefix ?? 'staff' }}-avatar" name="avatar" type="file" accept="image/jpeg,image/png" class="sr-only" x-on:change="const file = $event.target.files[0]; if (file) { avatarPreview = URL.createObjectURL(file); avatarFileName = file.name; }">
                 <p class="mt-1 text-xs text-slate-500">{{ __('UserManagement::app.photo_hint') }}</p>
                 <p x-cloak x-show="avatarFileName" x-text="avatarFileName" class="mt-1 max-w-60 truncate text-xs font-medium text-slate-600"></p>
                 @error('avatar')<span data-server-error class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>@enderror
@@ -94,9 +97,9 @@
         </label>
 
         <div x-data="{ passwordVisible: false }" class="text-sm font-semibold text-slate-700">
-            <label for="staff-password">{{ __('UserManagement::app.fields.password') }} @if($isCreate)<span class="text-red-600">*</span>@endif</label>
+            <label for="{{ $idPrefix ?? 'staff' }}-password">{{ __('UserManagement::app.fields.password') }} @if($isCreate)<span class="text-red-600">*</span>@endif</label>
             <div class="relative mt-1.5">
-            <input id="staff-password"
+            <input id="{{ $idPrefix ?? 'staff' }}-password"
                 :type="passwordVisible ? 'text' : 'password'" name="password"
                 @required($isCreate) autocomplete="new-password"
                 class="block w-full rounded-lg border border-slate-300 px-3 py-2.5 pr-11 text-sm text-slate-800 outline-none transition focus:border-futa-orange focus:ring-2 focus:ring-orange-100">
@@ -112,9 +115,9 @@
         </div>
 
         <div x-data="{ passwordVisible: false }" class="text-sm font-semibold text-slate-700 sm:col-span-2">
-            <label for="staff-password-confirmation">{{ __('UserManagement::app.fields.password_confirmation') }} @if($isCreate)<span class="text-red-600">*</span>@endif</label>
+            <label for="{{ $idPrefix ?? 'staff' }}-password-confirmation">{{ __('UserManagement::app.fields.password_confirmation') }} @if($isCreate)<span class="text-red-600">*</span>@endif</label>
             <div class="relative mt-1.5">
-            <input id="staff-password-confirmation" :type="passwordVisible ? 'text' : 'password'" name="password_confirmation" @required($isCreate) autocomplete="new-password" @class([
+            <input id="{{ $idPrefix ?? 'staff' }}-password-confirmation" :type="passwordVisible ? 'text' : 'password'" name="password_confirmation" @required($isCreate) autocomplete="new-password" @class([
                 'block w-full rounded-lg border px-3 py-2.5 pr-11 text-sm text-slate-800 outline-none transition focus:border-futa-orange focus:ring-2 focus:ring-orange-100',
                 'border-red-400' => $errors->has('password_confirmation'),
                 'border-slate-300' => ! $errors->has('password_confirmation'),
@@ -140,9 +143,9 @@
 </section>
 </div>
 
-@unless($wizard ?? false)
+@if(!($wizard ?? false) && !($sidePanel ?? false))
 <div class="mt-4 flex flex-wrap justify-end gap-3 border-t border-slate-100 pt-3">
     <a href="{{ route('staff-accounts.index') }}" class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50">{{ __('UserManagement::app.cancel') }}</a>
     <button type="submit" class="rounded-lg bg-futa-orange px-4 py-2.5 text-sm font-bold text-white transition hover:bg-futa-orange-dark">{{ __($isCreate ? 'UserManagement::app.save' : 'UserManagement::app.save_changes') }}</button>
 </div>
-@endunless
+@endif

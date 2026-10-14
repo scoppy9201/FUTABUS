@@ -44,6 +44,7 @@ return [
     'functions_total'                => 'Quyền chức năng',
     'search_catalog'                 => 'Tra cứu chức năng',
     'search_catalog_hint'            => 'Tìm theo tên chức năng hoặc bộ phận',
+    'catalog_search_help'            => 'Danh mục này liệt kê các quyền có thể gán cho vai trò. Nhập tên quyền, mã quyền hoặc bộ phận để lọc danh sách; thao tác tra cứu không thay đổi phân quyền.',
     'no_search_results'              => 'Không tìm thấy quyền chức năng phù hợp.',
     'assignment_list_hint'           => 'Chọn một hoặc nhiều vai trò cho từng tài khoản nhân viên.',
     'search_staff'                   => 'Tìm nhân viên',

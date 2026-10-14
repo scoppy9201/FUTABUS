@@ -1,28 +1,28 @@
 @vite(['packages/FuteBus/BookingTracking/src/resources/css/app.css', 'packages/FuteBus/BookingTracking/src/resources/js/app.js'])
 <div data-booking-monitor class="space-y-5 text-sm">
-    <header class="rounded-2xl border border-orange-100 bg-linear-to-r from-white to-futa-orange-soft p-6 shadow-sm">
-        <div class="flex items-start gap-4">
-            <span class="grid size-11 shrink-0 place-items-center rounded-xl border border-slate-100 bg-white text-futa-orange shadow-sm">
-                <x-heroicon-o-clipboard-document-list class="size-6" />
-            </span>
-            <div>
-                <h1 class="text-2xl font-extrabold tracking-tight text-slate-950">{{ __('BookingTracking::bookings.title') }}</h1>
-                <p class="mt-2 text-slate-500">{{ __('BookingTracking::bookings.intro') }}</p>
-                <p class="mt-2 flex items-center gap-2 text-xs text-slate-500">
-                    <x-heroicon-o-eye class="size-4" />{{ __('BookingTracking::bookings.readonly') }}
-                </p>
-            </div>
+    <header class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+            <p class="text-sm font-bold uppercase tracking-[0.16em] text-futa-orange">{{ config('app.name') }}</p>
+            <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">{{ __('BookingTracking::bookings.title') }}</h1>
+            <p class="mt-2 text-sm text-slate-500">{{ __('BookingTracking::bookings.intro') }}</p>
+            <p class="mt-2 flex items-center gap-2 text-xs text-slate-500">
+                <x-heroicon-o-eye class="size-4" />{{ __('BookingTracking::bookings.readonly') }}
+            </p>
         </div>
     </header>
-    <form method="get" class="grid items-end gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:grid-cols-6">
-        <label class="space-y-2 lg:col-span-2">
-            <span class="font-medium text-slate-700">{{ __('BookingTracking::bookings.search') }}</span>
-            <input name="search" value="{{ $filters['search'] ?? '' }}" maxlength="100"
-                class="w-full rounded-xl border border-slate-200 px-4 py-3 focus:border-futa-orange">
+    <form method="get" class="grid items-end gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-2 xl:grid-cols-12">
+        <label class="min-w-0 space-y-1.5 xl:col-span-4">
+            <span class="text-xs font-semibold text-slate-700">{{ __('BookingTracking::bookings.search') }}</span>
+            <span class="relative block">
+                <x-heroicon-o-magnifying-glass class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                <input data-booking-search type="search" name="search" value="{{ $filters['search'] ?? '' }}" maxlength="100"
+                    placeholder="{{ __('BookingTracking::bookings.search') }}"
+                    class="scheme-light block h-11 w-full rounded-lg border border-slate-300 bg-white py-2 pl-10 pr-3 text-sm text-slate-900 caret-futa-orange outline-none placeholder:text-slate-400 selection:bg-orange-100 focus:border-futa-orange focus:bg-white focus:text-slate-900 focus:ring-2 focus:ring-orange-100">
+            </span>
         </label>
-        <label class="space-y-2">
-            <span class="font-medium text-slate-700">{{ __('BookingTracking::bookings.status') }}</span>
-            <select name="status" class="w-full rounded-xl border border-slate-200 px-4 py-3">
+        <label class="min-w-0 space-y-1.5 xl:col-span-2">
+            <span class="text-xs font-semibold text-slate-700">{{ __('BookingTracking::bookings.status') }}</span>
+            <select name="status" class="scheme-light block h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-futa-orange focus:ring-2 focus:ring-orange-100">
                 <option value="">{{ __('BookingTracking::bookings.all') }}</option>
                 @foreach(__('BookingTracking::bookings.statuses') as $value => $label)
                     <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
@@ -30,17 +30,19 @@
             </select>
         </label>
         @foreach(['from', 'to'] as $field)
-            <label class="space-y-2">
-                <span class="font-medium text-slate-700">{{ __('BookingTracking::bookings.'.$field) }}</span>
+            <label class="min-w-0 space-y-1.5 xl:col-span-2">
+                <span class="text-xs font-semibold text-slate-700">{{ __('BookingTracking::bookings.'.$field) }}</span>
                 <input type="date" name="{{ $field }}" value="{{ $filters[$field] ?? '' }}"
-                    class="w-full rounded-xl border border-slate-200 px-4 py-3">
+                    class="scheme-light block h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-futa-orange focus:ring-2 focus:ring-orange-100">
             </label>
         @endforeach
-        <div class="flex items-center gap-3">
-            <button class="rounded-xl bg-futa-orange px-5 py-3 font-bold text-white hover:bg-futa-orange-dark">{{ __('BookingTracking::bookings.find') }}</button>
-            <a href="{{ route($bookingRoutes.'.index') }}" class="text-xs font-semibold text-slate-500 hover:text-futa-orange">{{ __('BookingTracking::bookings.reset') }}</a>
+        <div class="flex items-center gap-3 md:col-span-2 xl:col-span-2 xl:justify-end">
+            <button class="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-futa-orange px-5 text-sm font-bold text-white transition hover:bg-futa-orange-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange">
+                <x-heroicon-o-magnifying-glass class="size-4" />{{ __('BookingTracking::bookings.find') }}
+            </button>
+            <a href="{{ route($bookingRoutes.'.index') }}" class="inline-flex h-11 items-center px-2 text-sm font-semibold text-slate-500 transition hover:text-futa-orange">{{ __('BookingTracking::bookings.reset') }}</a>
         </div>
-        @if($errors->any())<p class="text-red-600 lg:col-span-6" role="alert">{{ $errors->first() }}</p>@endif
+        @if($errors->any())<p class="text-red-600 md:col-span-2 xl:col-span-12" role="alert">{{ $errors->first() }}</p>@endif
     </form>
     <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div class="overflow-auto">

@@ -91,6 +91,31 @@ class AccessManagementTest extends TestCase
         $this->assertDatabaseHas('permissions', ['id' => $permission, 'is_active' => true]);
     }
 
+    public function test_catalog_explains_search_and_localizes_customer_support_permissions(): void
+    {
+        [$manager, $company] = $this->fixture();
+        DB::table('permissions')->updateOrInsert(['slug' => 'support.assign'], [
+            'name'          => 'Assign customer support',
+            'group'         => 'support',
+            'display_name'  => 'Assign customer support',
+            'display_group' => 'Customer support',
+            'is_active'     => true,
+        ]);
+        app()->setLocale('vi');
+        $this->actingAs($manager);
+
+        $this->get(route('access-management.catalog'))->assertOk()
+            ->assertSee('Danh mục này liệt kê các quyền có thể gán cho vai trò.')
+            ->assertSee('Hỗ trợ khách hàng')
+            ->assertSee('Điều phối yêu cầu hỗ trợ')
+            ->assertDontSeeText('Assign customer support');
+
+        $this->get(route('access-management.roles.create'))->assertOk()
+            ->assertSee('Hỗ trợ khách hàng')
+            ->assertSee('Điều phối yêu cầu hỗ trợ')
+            ->assertDontSeeText('Assign customer support');
+    }
+
     private function fixture(): array
     {
         $company = DB::table('bus_companies')->insertGetId(['code' => 'FUTA', 'name' => 'FUTA']);
