@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
+use FuteBus\Notification\Http\Middleware\CaptureCompanyActivity;
 use FuteBus\StaffDashboard\Http\Middleware\EnsureStaff;
 use FuteBus\StaffTicketProcessing\Http\Controllers\StaffPaymentController;
 use FuteBus\StaffTicketProcessing\Http\Middleware\EnsureTicketOperator;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', EnsureTicketOperator::class.':booking.create'])->group(function (): void {
+Route::middleware(['auth', EnsureTicketOperator::class.':booking.create', CaptureCompanyActivity::class])->group(function (): void {
     Route::post('/nhan-vien/ban-ve', [StaffPaymentController::class, 'store'])
         ->middleware('throttle:staff-ticket-sales')->name('staff.ticket-sales.store');
     Route::delete('/nhan-vien/ban-ve/{sale}', [StaffPaymentController::class, 'destroy'])

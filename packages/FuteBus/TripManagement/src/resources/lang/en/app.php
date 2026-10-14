@@ -47,12 +47,13 @@ return [
     'sch_flash_updated'     => 'Schedule updated successfully.',
     'sch_flash_deactivated' => 'Schedule has been deactivated. Previously generated trips are kept unchanged.',
 
-    'sch_err_date'     => 'The start date must be less than or equal to the end date.',
-    'sch_err_past'     => 'The end date cannot be earlier than today.',
-    'sch_err_conflict' => 'A schedule with the same route, time slot, and effective dates already exists (:from → :to).',
-    'sch_err_inactive' => 'The schedule is no longer active.',
-    'sch_err_generate' => 'Unable to update or generate trips. The data has been kept unchanged.',
-    'sch_err_stops'    => 'This route has no stops yet. Please define the route stops first (the last stop is the destination).',
+    'sch_err_date'      => 'The start date must be less than or equal to the end date.',
+    'sch_err_past'      => 'The effective date cannot be earlier than today.',
+    'sch_err_time_past' => 'Departure time must be later than now when the schedule starts today.',
+    'sch_err_conflict'  => 'A schedule with the same route, time slot, and effective dates already exists (:from → :to).',
+    'sch_err_inactive'  => 'The schedule is no longer active.',
+    'sch_err_generate'  => 'Unable to update or generate trips. The data has been kept unchanged.',
+    'sch_err_stops'     => 'This route has no stops yet. Please define the route stops first (the last stop is the destination).',
 
     'day_1' => 'Mon',
     'day_2' => 'Tue',
@@ -105,11 +106,13 @@ return [
     'sch_err_days'         => 'Please select at least one day of the week.',
 
     // ── Trips ──
-    'tr_title'      => 'Trip Management',
-    'tr_subtitle'   => 'Assign vehicles to trips generated from schedules, add one-off trips, edit fares, and cancel trips.',
-    'tr_search_ph'  => 'Search by route, license plate...',
-    'tr_filter_all' => 'All statuses',
-    'tr_empty'      => 'No trips available.',
+    'tr_title'                        => 'Trip Management',
+    'tr_subtitle'                     => 'Assign vehicles to trips generated from schedules, add one-off trips, edit fares, and cancel trips.',
+    'tr_search_ph'                    => 'Search by route, license plate...',
+    'tr_filter_all'                   => 'All statuses',
+    'tr_filter_departure_date'        => 'Departure date',
+    'tr_filter_select_departure_date' => 'Choose departure date',
+    'tr_empty'                        => 'No trips available.',
 
     'tr_f_departure'  => 'Departure time',
     'tr_f_bus'        => 'Vehicle',

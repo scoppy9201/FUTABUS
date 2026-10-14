@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
+use FuteBus\Notification\Http\Middleware\CaptureCompanyActivity;
 use FuteBus\UserManagement\Http\Controllers\StaffAccountController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth')->prefix('quan-tri/tai-khoan-nhan-vien')->name('staff-accounts.')->group(function (): void {
+Route::middleware(['auth', CaptureCompanyActivity::class])->prefix('quan-tri/tai-khoan-nhan-vien')->name('staff-accounts.')->group(function (): void {
     Route::get('/', [StaffAccountController::class, 'index'])->middleware('permission:user.view')->name('index');
     Route::get('/tao-moi', [StaffAccountController::class, 'create'])->middleware('permission:user.create')->name('create');
     Route::post('/', [StaffAccountController::class, 'store'])->middleware('permission:user.create')->name('store');

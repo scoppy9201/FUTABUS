@@ -90,10 +90,7 @@
                     </div>
                 </div>
 
-                <button class="relative p-2 text-gray-500 hover:text-futa-orange hover:bg-futa-orange-soft rounded-full transition">
-                    <x-heroicon-o-bell class="w-5 h-5" />
-                    <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-[#E31B23] rounded-full ring-2 ring-white"></span>
-                </button>
+                @include('Notification::partials.bell')
 
                 <div class="h-6 w-px bg-gray-200"></div>
 

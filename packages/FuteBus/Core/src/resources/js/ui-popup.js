@@ -56,7 +56,8 @@ export function createPopup(panel, trigger, { onOpen, onClose, matchWidth = true
     }
 
     const onOutsideClick = (event) => {
-        if (opened && !panel.contains(event.target) && !trigger.contains(event.target)) close();
+        const path = event.composedPath();
+        if (opened && !path.includes(panel) && !panel.contains(event.target) && !trigger.contains(event.target)) close();
     };
     const onKeydown = (event) => {
         if (!opened) return;
@@ -72,7 +73,10 @@ export function createPopup(panel, trigger, { onOpen, onClose, matchWidth = true
         anchorFrame = requestAnimationFrame(position);
     };
     const onFocus = (event) => {
-        if (opened && !panel.contains(event.target) && !trigger.contains(event.target)) close();
+        if (!opened || panel.contains(event.target) || trigger.contains(event.target)) return;
+        queueMicrotask(() => {
+            if (opened && !panel.contains(document.activeElement) && !trigger.contains(document.activeElement)) close();
+        });
     };
     const onToggle = (event) => { if (event.newState === 'closed' && opened) close(); };
     document.addEventListener('click', onOutsideClick);

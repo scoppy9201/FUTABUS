@@ -28,14 +28,34 @@ class TripScheduleRequest extends FormRequest
         return [
             'route_id'       => ['required', Rule::exists('routes', 'id')->where('is_active', true)
                 ->where('bus_company_id', BusCompanyRecord::query()->toBase()->where('code', 'FUTA')->value('id') ?? 0)],
-            'departure_time' => ['required', 'date_format:H:i'],
+            'departure_time' => [
+                'required',
+                'date_format:H:i',
+                function ($attribute, $value, $fail): void {
+                    if ($this->input('start_date') === today()->toDateString()
+                        && is_string($value) && preg_match('/^\d{2}:\d{2}$/D', $value) === 1
+                        && $value <= now()->format('H:i')) {
+                        $fail(__('TripManagement::app.sch_err_time_past'));
+                    }
+                },
+            ],
             'days_of_week'   => ['required', 'array', 'min:1'],
             'days_of_week.*' => ['integer', 'between:1,7'],
-            'start_date'     => ['required', 'date'],
+            'start_date'     => [
+                'bail',
+                'required',
+                'date',
+                function ($attribute, $value, $fail): void {
+                    if (is_string($value) && Carbon::parse($value)->lt(today())) {
+                        $fail(__('TripManagement::app.sch_err_past'));
+                    }
+                },
+            ],
             'end_date'       => [
+                'bail',
                 'required', 'date', 'after_or_equal:start_date',
                 function ($attribute, $value, $fail) {
-                    if (Carbon::parse($value)->lt(today())) {
+                    if (is_string($value) && Carbon::parse($value)->lt(today())) {
                         $fail(__('TripManagement::app.sch_err_past'));
                     }
                 },

@@ -112,10 +112,8 @@ function initializeDateControl(source) {
         viewMonth = parts.month;
         if (!includesTime) commit(candidate());
         else {
+            timeInputs[0].focus({ preventScroll: true });
             render();
-            queueMicrotask(() => {
-                if (popup.isOpen()) timeInputs[0].focus({ preventScroll: true });
-            });
         }
     }
 

@@ -12,6 +12,7 @@ use FuteBus\BusManagement\Models\DocumentType as DocumentTypeRecord;
 use FuteBus\BusManagement\Models\VehicleDocument as VehicleDocumentRecord;
 use FuteBus\Payment\Models\SePayPaymentIntent as SePayPaymentIntentRecord;
 use FuteBus\RouteManagement\Models\BusRoute as BusRouteRecord;
+use FuteBus\RouteManagement\Models\RouteStop as RouteStopRecord;
 use FuteBus\TripManagement\Events\TripCancelled;
 use FuteBus\TripManagement\Http\Requests\TripInputRequest;
 use FuteBus\TripManagement\Models\Trip as TripRecord;
@@ -93,7 +94,15 @@ class TripController extends Controller
             'search'  => $search,
             'status'  => $status,
             'date'    => $date,
-            'routes'  => BusRouteRecord::query()->toBase()->where('is_active', 1)->orderBy('code')->get(),
+            'routes'  => BusRouteRecord::query()->toBase()
+                ->where('bus_company_id', $company?->id ?? 0)
+                ->where('is_active', 1)
+                ->whereIn('id', RouteStopRecord::query()->toBase()
+                    ->select('route_id')
+                    ->where('status', 'active')
+                    ->groupBy('route_id')
+                    ->havingRaw('COUNT(*) >= 2'))
+                ->orderBy('code')->get(),
             'buses'   => BusRecord::query()->toBase()->where('status', 'active')
                 ->where('bus_company_id', $company?->id ?? 0)
                 ->orderBy('license_plate')->get(['id', 'license_plate', 'capacity']),
