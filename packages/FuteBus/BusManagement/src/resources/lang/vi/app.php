@@ -124,6 +124,9 @@ return [
     'bus_err_chassis_ioq'     => 'Số khung (VIN) không được chứa ký tự I, O hoặc Q.',
     'bus_err_engine_number'   => 'Số máy phải gồm 6–20 ký tự chữ hoa và số.',
     'bus_err_plate_format'    => 'Biển số chưa đúng định dạng. Vui lòng kiểm tra biển số xe.', 'bus_err_chassis_length' => 'Số khung phải có từ 10 đến 17 ký tự.', 'bus_err_year_range' => 'Năm sản xuất phải từ :min đến :max.',
+    'bus_year_info_title'     => 'Thông tin về năm sản xuất',
+    'bus_year_info'           => "Niên hạn xe khách (theo NĐ 166/2024/NĐ-CP):\n• Xe từ 9 chỗ trở lên (kể cả xe đưa đón học sinh): tối đa 20 năm.\n• Xe 4 bánh gắn động cơ chở người: tối đa 15 năm.",
+    'bus_err_year_format'     => 'Năm sản xuất phải có đúng 4 chữ số.',
     'bus_plate_hint'          => 'Biển số được tự định dạng khi nhập.', 'bus_chassis_hint' => '10–17 ký tự, không dùng I/O/Q.', 'bus_vin_standard_hint' => 'Chuẩn VIN gồm 17 ký tự.',
     'bus_engine_label'        => 'Số máy', 'bus_engine_hint' => '6–20 ký tự chữ hoa và số.', 'bus_year_hint' => ':min – :max', 'bus_capacity_inherited' => 'Sức chứa kế thừa: :capacity :unit — :name',
     'bus_plate_example'       => 'Ví dụ: 51B-123.45', 'bus_engine_example' => 'Ví dụ: 4HK1TCS123', 'bus_color_select' => '-- Chọn màu xe --',
@@ -196,6 +199,7 @@ return [
     'dt_expiry_yes'                       => 'Có thời hạn', 'dt_expiry_no' => 'Không thời hạn', 'dt_blocks_yes' => 'Có', 'dt_blocks_no' => 'Không',
     'dt_field_presets'                    => 'Chọn trường thông tin phổ biến',
     'dt_field_registration_number'        => 'Số đăng ký giấy tờ',
+    'dt_field_registration_date'          => 'Ngày đăng ký',
     'dt_field_owner'                      => 'Chủ sở hữu',
     'dt_field_issuing_authority'          => 'Cơ quan cấp',
     'dt_field_vehicle_model'              => 'Nhãn hiệu / kiểu loại xe',
@@ -203,7 +207,7 @@ return [
     'dt_btn_delete_field'                 => 'Xóa trường',
     'dt_blocks_dispatch_label'            => 'Chặn điều xe khi thiếu hoặc hết hạn',
     'dt_dates_hint'                       => 'Ngày cấp và ngày hết hạn được nhập trong mục Hồ sơ giấy tờ.', 'dt_btn_delete' => 'Xóa', 'dt_modal_delete' => 'Xác nhận xóa loại giấy tờ', 'dt_delete_msg' => 'Bạn có chắc muốn xóa loại giấy tờ',
-    'document_field_registration_number'  => 'Số đăng ký giấy tờ', 'document_field_owner' => 'Chủ sở hữu', 'document_field_issuing_authority' => 'Cơ quan cấp', 'document_field_vehicle_model' => 'Nhãn hiệu / kiểu loại xe', 'document_field_note' => 'Ghi chú',
+    'document_field_registration_number'  => 'Số đăng ký giấy tờ', 'document_field_registration_date' => 'Ngày đăng ký', 'document_field_owner' => 'Chủ sở hữu', 'document_field_issuing_authority' => 'Cơ quan cấp', 'document_field_vehicle_model' => 'Nhãn hiệu / kiểu loại xe', 'document_field_note' => 'Ghi chú',
 
     // ── Hồ sơ giấy tờ xe ─────────────────────────────────────────────────────
     'vd_title'                => 'Quản lý hồ sơ giấy tờ xe',

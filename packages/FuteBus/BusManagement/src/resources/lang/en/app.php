@@ -120,6 +120,9 @@ return [
     'bus_year_hint'           => ':min – :max',
     'bus_capacity_inherited'  => 'Inherited capacity: :capacity :unit — :name',
     'bus_err_plate_format'    => 'The license plate format is invalid. Check the vehicle plate.', 'bus_err_chassis_length' => 'The chassis number must contain 10–17 characters.', 'bus_err_year_range' => 'The manufacture year must be between :min and :max.',
+    'bus_year_info_title'     => 'Manufacture year information',
+    'bus_year_info'           => "Passenger vehicle service life (under Decree 166/2024/ND-CP):\n• Vehicles carrying 9 or more people, including school buses: up to 20 years.\n• Four-wheel motor vehicles carrying passengers: up to 15 years.",
+    'bus_err_year_format'     => 'The manufacture year must contain exactly 4 digits.',
     'bus_plate_example'       => 'Example: 51B-123.45', 'bus_engine_example' => 'Example: 4HK1TCS123', 'bus_color_select' => '-- Select vehicle color --',
     'bus_color_white'         => 'White',
     'bus_color_black'         => 'Black',
@@ -171,6 +174,7 @@ return [
     'dt_expiry_yes'                       => 'Has expiry', 'dt_expiry_no' => 'No expiry', 'dt_blocks_yes' => 'Yes', 'dt_blocks_no' => 'No',
     'dt_field_presets'                    => 'Choose common information fields',
     'dt_field_registration_number'        => 'Document number',
+    'dt_field_registration_date'          => 'Registration date',
     'dt_field_owner'                      => 'Owner',
     'dt_field_issuing_authority'          => 'Issuing authority',
     'dt_field_vehicle_model'              => 'Vehicle make / model',
@@ -178,7 +182,7 @@ return [
     'dt_btn_delete_field'                 => 'Remove field',
     'dt_blocks_dispatch_label'            => 'Block dispatch when missing or expired',
     'dt_dates_hint'                       => 'Enter issue and expiry dates in Vehicle Document Records.', 'dt_btn_delete' => 'Delete', 'dt_modal_delete' => 'Confirm document type deletion', 'dt_delete_msg' => 'Are you sure you want to delete the document type',
-    'document_field_registration_number'  => 'Document number', 'document_field_owner' => 'Owner', 'document_field_issuing_authority' => 'Issuing authority', 'document_field_vehicle_model' => 'Vehicle make / model', 'document_field_note' => 'Notes',
+    'document_field_registration_number'  => 'Document number', 'document_field_registration_date' => 'Registration date', 'document_field_owner' => 'Owner', 'document_field_issuing_authority' => 'Issuing authority', 'document_field_vehicle_model' => 'Vehicle make / model', 'document_field_note' => 'Notes',
 
     // ── Vehicle Document Records ──
     'vd_title'                   => 'Vehicle Document Record Management',

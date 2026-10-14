@@ -11,7 +11,7 @@
             <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">{{ __('BusManagement::app.bus_title') }}</h1>
             <p class="mt-2 max-w-3xl text-sm font-medium text-slate-500">{{ __('BusManagement::app.bus_subtitle') }}</p>
         </div>
-        <span class="rounded-full bg-futa-orange-soft px-4 py-2 text-sm font-bold text-futa-orange">
+        <span id="bus-results-count" class="rounded-full bg-futa-orange-soft px-4 py-2 text-sm font-bold text-futa-orange">
             {{ number_format($buses->total()) }} {{ __('Dashboard::app.records') }}
         </span>
     </div>
@@ -22,12 +22,9 @@
         <form method="GET" action="{{ route('bus-management.buses.index') }}" class="flex items-center gap-2">
             <div class="relative">
                 <x-heroicon-o-magnifying-glass class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-                <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('BusManagement::app.bus_search_ph') }}"
+                <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('BusManagement::app.bus_search_ph') }}" @input="window.busManagementLiveSearch($el.form, 'bus-results')"
                     class="w-72 rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm shadow-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
             </div>
-            <button type="submit" class="rounded-xl bg-futa-orange px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-futa-orange-dark">
-                {{ __('BusManagement::app.btn_search') }}
-            </button>
             @if($search)
                 <a href="{{ route('bus-management.buses.index') }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-500 hover:text-slate-700">
                     {{ __('BusManagement::app.btn_clear_filter') }}
@@ -40,7 +37,7 @@
     </div>
 
     {{-- Table --}}
-    <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div id="bus-results" class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div class="overflow-x-auto">
             <table class="w-full min-w-[900px] text-left text-sm">
                 <thead class="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500">
@@ -180,11 +177,19 @@
                     </div>
                     {{-- Năm sản xuất --}}
                     <div>
-                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.bus_f_year') }} <span class="text-rose-500">*</span></label>
-                        <input type="number" name="manufacture_year" x-model="form.manufacture_year" required min="1990" max="{{ date('Y') }}"
-                               @input="scheduleNotice('year', @js(__('BusManagement::app.bus_err_year_range', ['min' => 1990, 'max' => date('Y')])), String(form.manufacture_year).length === 4 && (form.manufacture_year < 1990 || form.manufacture_year > {{ date('Y') }}))"
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('BusManagement::app.bus_f_year') }} <span class="text-rose-500">*</span>
+                            <span x-data="{ show: false, hideTimer: null, placeTooltip(el) { clearTimeout(this.hideTimer); const rect = el.getBoundingClientRect(); const tooltip = el.querySelector('[role=tooltip]'); tooltip.style.left = `${Math.max(8, Math.min(rect.left, window.innerWidth - 304))}px`; tooltip.style.top = `${Math.max(8, Math.min(rect.bottom + 8, window.innerHeight - 150))}px`; this.show = true; }, scheduleHide() { this.hideTimer = setTimeout(() => this.show = false, 150); } }" @mouseenter="placeTooltip($el)" @mouseleave="scheduleHide()" @focusin="placeTooltip($el)" @focusout="scheduleHide()" class="inline-flex align-middle">
+                                <button type="button" aria-label="{{ __('BusManagement::app.bus_year_info_title') }}" aria-describedby="bus-year-info-tooltip" title="{{ __('BusManagement::app.bus_year_info') }}" class="inline-flex size-4 items-center justify-center rounded-full text-slate-400 transition hover:text-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/30">
+                                    <x-heroicon-o-information-circle class="size-4" />
+                                </button>
+                                <span x-ref="tooltip" x-show="show" @mouseenter="clearTimeout(hideTimer)" @mouseleave="scheduleHide()" id="bus-year-info-tooltip" role="tooltip" class="fixed z-[100] w-72 max-w-[calc(100vw-1rem)] whitespace-pre-line rounded-xl bg-slate-900 px-3 py-2.5 text-left text-xs font-medium leading-relaxed text-white shadow-xl">
+                                    {{ __('BusManagement::app.bus_year_info') }}
+                                </span>
+                            </span>
+                        </label>
+                        <input type="text" name="manufacture_year" x-model="form.manufacture_year" required inputmode="numeric" autocomplete="off" maxlength="4" pattern="[0-9]{4}"
+                               @input="validateManufactureYear()" @blur="validateManufactureYear(true)"
                                class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
-                        <p class="mt-0.5 text-xs text-slate-400">{{ __('BusManagement::app.bus_year_hint', ['min' => 1990, 'max' => date('Y')]) }}</p>
                     </div>
                 </div>
 
@@ -254,6 +259,21 @@ function busManager() {
             this.noticeTimers[field] = setTimeout(() => window.FutaNotify?.warning(message, { key }), 500);
         },
 
+        validateManufactureYear(onBlur = false) {
+            const value = String(this.form.manufacture_year ?? '');
+            const key = 'bus-field-year';
+            let message = '';
+
+            if (value && (!/^\d{1,4}$/.test(value) || (onBlur && value.length !== 4))) {
+                message = @js(__('BusManagement::app.bus_err_year_format'));
+            } else if (value.length === 4 && (Number(value) < 1990 || Number(value) > {{ date('Y') }})) {
+                message = @js(__('BusManagement::app.bus_err_year_range', ['min' => 1990, 'max' => date('Y')]));
+            }
+
+            if (message) window.FutaNotify?.warning(message, { key });
+            else window.FutaNotify?.close(key);
+        },
+
         onTypeChange() {
             const vt = vtMap[this.form.vehicle_type_id];
             if (vt) {
@@ -305,4 +325,5 @@ function busManager() {
 }
 </script>
 @include('BusManagement::partials.notifications')
+@include('BusManagement::partials.live-search')
 @endsection
