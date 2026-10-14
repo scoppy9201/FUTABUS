@@ -2,8 +2,16 @@
 
 declare(strict_types=1);
 
+use FuteBus\Payment\Http\Controllers\ManualRefundController;
 use FuteBus\Payment\Http\Controllers\TripPaymentPreviewController;
 use Illuminate\Support\Facades\Route;
+
+Route::middleware(['auth', 'permission:payment.view'])->prefix('quan-tri/hoan-tien')->name('refunds.')->group(function (): void {
+    Route::get('/', [ManualRefundController::class, 'index'])->name('index');
+    Route::get('/{refund}', [ManualRefundController::class, 'show'])->whereNumber('refund')->name('show');
+    Route::patch('/{refund}', [ManualRefundController::class, 'update'])->whereNumber('refund')
+        ->middleware(['permission:payment.refund', 'throttle:15,1'])->name('update');
+});
 
 Route::view('/huong-dan-nap-tien-tren-app', 'Payment::topup-guide')->name('topup-guide');
 

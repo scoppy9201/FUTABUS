@@ -195,21 +195,23 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="8" class="px-6 py-16 text-center text-sm font-semibold text-slate-500">{{ __('TripManagement::app.empty') }}</td></tr>
+                        <tr>
+                            <td colspan="8" class="px-6 py-16 text-center text-sm font-semibold text-slate-500">
+                                <x-core::empty-state :title="__('TripManagement::app.empty')" />
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        @if($schedules->hasPages())
-            <div class="border-t border-slate-100 px-5 py-4">{{ $schedules->links() }}</div>
-        @endif
+        <div class="border-t border-slate-100 px-5 py-4"><x-core::data-pagination :paginator="$schedules" /></div>
     </div>
 
     {{-- ADD / EDIT SCHEDULE MODAL --}}
     <div x-show="showForm" x-cloak @click.self="showForm = false"
          class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
         <div class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div class="flex items-center justify-between px-5 py-3" :class="isEdit ? 'bg-slate-800' : 'bg-futa-orange'">
+            <div class="flex items-center justify-between bg-futa-orange px-5 py-3">
                 <h2 class="text-base font-bold text-white"
                     x-text="isEdit ? @js(__('TripManagement::app.sch_modal_edit')) : @js(__('TripManagement::app.sch_modal_add'))"></h2>
                 <button type="button" @click="showForm = false" class="text-white/70 hover:text-white"><x-heroicon-o-x-mark class="size-4" /></button>
@@ -236,7 +238,11 @@
                     </div>
                     <div>
                         <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_price') }} <span class="text-rose-500">*</span></label>
-                        <input type="number" name="price" x-model="form.price" required min="0" step="any" class="{{ $inp }}" />
+                        <input type="number" name="price" x-model="form.price" required step="any"
+                               class="{{ $inp }}" :class="form.price !== '' && !isPriceValid() ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500' : ''" />
+                        <p x-cloak x-show="form.price !== '' && !isPriceValid()" class="mt-1 text-xs text-rose-600" role="alert">
+                            {{ __('TripManagement::app.sch_err_price') }}
+                        </p>
                     </div>
                     <div>
                         <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_from') }} <span class="text-rose-500">*</span></label>
@@ -247,7 +253,7 @@
                         <input type="date" name="end_date" x-model="form.end_date" required class="{{ $inp }}" />
                     </div>
                     <div class="sm:col-span-2">
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_days') }} <span class="text-rose-500">*</span></label>
+                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_days') }}</label>
                         <div class="flex flex-wrap gap-4">
                             @foreach(range(1, 7) as $v)
                                 <label class="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700">
@@ -256,8 +262,11 @@
                                 </label>
                             @endforeach
                         </div>
+                        <p class="mt-1 text-xs text-slate-400">{{ __('TripManagement::app.sch_hint_all_days') }}</p>
                     </div>
                 </div>
+
+                <input type="hidden" name="apply_all_days" value="1" :disabled="form.days_of_week.length > 0">
 
                 <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
                     <button type="button" @click="showForm = false" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('TripManagement::app.btn_cancel') }}</button>
@@ -392,7 +401,6 @@ function scheduleManager() {
     const stopBase = `{{ url('quan-tri/chuyen-xe/diem-dung') }}`;
     const today = `{{ today()->toDateString() }}`;
     const t = {
-        errDays: @js(__('TripManagement::app.sch_err_days')),
         errDate: @js(__('TripManagement::app.sch_err_date')),
         errPast: @js(__('TripManagement::app.sch_err_past')),
     };
@@ -413,12 +421,17 @@ function scheduleManager() {
         openEdit(d)  { this.isEdit = true; this.form = { ...blank, ...d, days_of_week: (d.days_of_week || []).map(String) }; this.formAction = `${base}/${d.id}`; this.showForm = true; },
         openDelete(d){ this.deleteData = d; this.deleteAction = `${base}/${d.id}`; this.showDelete = true; },
 
+        isPriceValid() {
+            const price = Number(this.form.price);
+            return Number.isInteger(price) && price > 1000 && price < 100000000;
+        },
+
         // Kiểm tra sớm ở client, server vẫn kiểm tra lại
         validateForm(e) {
             const f = this.form;
-            if (!f.days_of_week.length) {
+            if (f.price !== '' && !this.isPriceValid()) {
                 e.preventDefault();
-                return notify('error', t.errDays, { key: 'sch-error' });
+                return;
             }
             if (f.start_date && f.end_date && f.end_date < f.start_date) {
                 e.preventDefault();

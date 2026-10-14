@@ -26,6 +26,9 @@
         "futebus/routemanagement": "*",
         "futebus/seatavailability": "*",
         "futebus/seatmanagement": "*",
+        "futebus/staffcustomersupport": "*",
+        "futebus/staffdashboard": "*",
+        "futebus/staffticketprocessing": "*",
         "futebus/systemsetting": "*",
         "futebus/ticketmanagement": "*",
         "futebus/tripmanagement": "*",
@@ -51,6 +54,9 @@
     },
     "autoload": {
         "psr-4": {
+            "FuteBus\\StaffCustomerSupport\\": "packages/FuteBus/StaffCustomerSupport/src/",
+            "FuteBus\\StaffDashboard\\": "packages/FuteBus/StaffDashboard/src/",
+            "FuteBus\\StaffTicketProcessing\\": "packages/FuteBus/StaffTicketProcessing/src/",
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/",
@@ -84,6 +90,21 @@
         }
     },
     "repositories": [
+        {
+            "type": "path",
+            "url": "packages/FuteBus/StaffCustomerSupport",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/FuteBus/StaffDashboard",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "packages/FuteBus/StaffTicketProcessing",
+            "options": { "symlink": true }
+        },
         {
             "type": "path",
             "url": "packages/Customer/BookingManagement",

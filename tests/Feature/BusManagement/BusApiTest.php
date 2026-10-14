@@ -32,25 +32,27 @@ class BusApiTest extends TestCase
         DB::table('role_user')->insert(['user_id' => $admin->id, 'role_id' => $roleId]);
         $companyId = DB::table('bus_companies')->insertGetId(['name' => 'FUTA', 'code' => 'FUTA']);
         $typeId = DB::table('vehicle_types')->insertGetId([
-            'name' => 'Limousine', 'default_capacity' => 24, 'status' => 'active',
+            'name'             => 'Limousine',
+            'vehicle_class'    => 'limousine',
+            'default_capacity' => 22,
+            'status'           => 'active',
         ]);
         $payload = [
-            'license_plate'    => '51b-12345',
-            'chassis_number'   => 'frame-12345',
-            'color'            => 'Orange',
+            'license_plate'    => '51B-123.45',
+            'chassis_number'   => 'FRAME123456',
+            'engine_number'    => 'ENGINE123',
+            'color'            => 'orange',
             'brand'            => 'FUTA',
             'manufacture_year' => 2025,
             'vehicle_type_id'  => $typeId,
-            'seat_rows'        => 6,
-            'seat_columns'     => 4,
         ];
 
         $this->postJson(route('api.v1.admin.buses.store'), $payload)->assertUnauthorized();
         $this->withToken($admin->createToken('admin', ['api'])->plainTextToken)
             ->postJson(route('api.v1.admin.buses.store'), $payload)
             ->assertCreated()
-            ->assertJsonPath('data.capacity', 24)
-            ->assertJsonPath('data.license_plate', '51B-12345');
+            ->assertJsonPath('data.capacity', 22)
+            ->assertJsonPath('data.license_plate', '51B-123.45');
 
         $busId = DB::table('buses')->value('id');
         $this->getJson(route('api.v1.admin.buses.show', ['bus' => $busId]))
@@ -91,6 +93,7 @@ class BusApiTest extends TestCase
         $this->assertDatabaseHas('buses', ['id' => $busId, 'status' => 'active']);
 
         $this->actingAs($admin)->delete(route('bus-management.buses.destroy', ['id' => $busId]))
-            ->assertSessionHasErrors('bus');
+            ->assertRedirect(route('bus-management.buses.index'))
+            ->assertSessionHas('warning', __('BusManagement::app.bus_err_cannot_delete'));
     }
 }

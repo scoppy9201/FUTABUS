@@ -107,7 +107,7 @@ class ReportService
             ->pluck('item_count', 'status')->all();
 
         return array_merge(
-            $this->reportResult($rows, (int) $rows->sum('count'), (float) $rows->sum('amount') - (float) $rows->sum('refund_amount'),
+            ReportResultFormatter::format($rows, (int) $rows->sum('count'), (float) $rows->sum('amount') - (float) $rows->sum('refund_amount'),
                 (float) $rows->sum('refund_amount'), $status),
             ['methods' => (clone $query)->select('payments.method')
                 ->selectRaw('COUNT(DISTINCT payments.id) AS payment_count')
@@ -128,7 +128,7 @@ class ReportService
                 'refund_amount' => (float) $row->refund_amount,
             ]);
 
-        return $this->reportResult($rows, (int) $rows->sum('count'), (float) $rows->sum('amount'),
+        return ReportResultFormatter::format($rows, (int) $rows->sum('count'), (float) $rows->sum('amount'),
             (float) $rows->sum('refund_amount'), $this->revenueByRoute($routePerformance));
     }
 
@@ -148,7 +148,7 @@ class ReportService
             ->groupBy('tickets.status')->pluck('item_count', 'status')->all();
 
         return array_merge(
-            $this->reportResult($rows, (int) $rows->sum('count'), (float) $rows->sum('amount') - (float) $rows->sum('refund_amount'),
+            ReportResultFormatter::format($rows, (int) $rows->sum('count'), (float) $rows->sum('amount') - (float) $rows->sum('refund_amount'),
                 (float) $rows->sum('refund_amount'), $status),
             ['order_types' => $this->orderTypes($companyId, $filters)]
         );
@@ -194,17 +194,7 @@ class ReportService
         $status = (clone $query)->select('trips.status')->selectRaw('COUNT(DISTINCT trips.id) AS item_count')
             ->groupBy('trips.status')->pluck('item_count', 'status')->all();
 
-        return $this->reportResult($rows, (int) $rows->sum('count'), (float) $rows->sum('amount'), 0.0, $status);
-    }
-
-    private function reportResult($rows, int $count, float $amount, float $refunded, array $status): array
-    {
-        return [
-            'totals' => ['count' => $count, 'amount' => $amount, 'gross' => $amount + $refunded, 'refunded' => $refunded],
-            'rows'   => $rows, 'labels' => $rows->pluck('label')->all(),
-            'series' => $rows->pluck('amount')->all(), 'refund_series' => $rows->pluck('refund_amount')->all(),
-            'status' => $status,
-        ];
+        return ReportResultFormatter::format($rows, (int) $rows->sum('count'), (float) $rows->sum('amount'), 0.0, $status);
     }
 
     private function revenueLegs(int $companyId, array $filters): Builder

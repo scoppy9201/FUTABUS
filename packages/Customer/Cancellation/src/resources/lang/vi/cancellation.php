@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'title'   => 'Hủy vé', 'close' => 'Đóng', 'choose' => 'Chọn vé', 'action' => 'Lý do hủy',
+    'confirm' => 'Xác nhận', 'done' => 'Hoàn tất', 'next' => 'Tiếp tục', 'back' => 'Quay lại',
+    'intro'   => 'Chọn vé, kiểm tra phí theo chính sách và xác nhận hủy.',
+    'summary' => 'Tóm tắt', 'price' => 'Giá vé', 'fee' => 'Phí hủy', 'refund' => 'Tiền hoàn lại',
+    'seat'    => 'Ghế', 'reason' => 'Lý do hủy vé', 'note' => 'Ghi chú (không bắt buộc)',
+    'reasons' => ['plans' => 'Thay đổi kế hoạch', 'mistake' => 'Đặt nhầm ngày/giờ',
+        'urgent'          => 'Có việc đột xuất', 'alternative' => 'Tìm được lựa chọn khác'],
+    'policy'       => 'Chính sách áp dụng', 'before' => 'Thời gian trước giờ khởi hành',
+    'over24'       => 'Trên 24 giờ', '4to24' => 'Từ 4 đến 24 giờ', 'under4' => 'Dưới 4 giờ',
+    'blocked'      => 'Không hủy', 'consent' => 'Tôi đã đọc và đồng ý với chính sách hủy vé.',
+    'warning'      => 'Vé đã hủy không thể khôi phục. Nhân viên sẽ đối soát giao dịch gốc và xử lý hoàn tiền theo quy trình kế toán.',
+    'method'       => 'Nhân viên xử lý hoàn tiền sau khi đối soát', 'submit' => 'Xác nhận hủy vé',
+    'success'      => 'Đã hủy vé', 'reference' => 'Mã yêu cầu', 'another' => 'Đóng và cập nhật danh sách',
+    'pending_note' => 'Yêu cầu hoàn tiền đã được ghi nhận. Bạn có thể theo dõi tại lịch sử mua vé; chỉ hiển thị đã hoàn tiền sau khi nhân viên xác minh giao dịch thành công.',
+    'statuses'     => ['queued' => 'Chờ gửi yêu cầu hoàn tiền', 'pending' => 'Đang hoàn tiền',
+        'refund_pending'        => 'Chờ nhân viên hoàn tiền', 'refund_processing' => 'Nhân viên đang xử lý',
+        'refunded'              => 'Đã hoàn tiền', 'refund_failed' => 'Cần xử lý lại — liên hệ 1900 6067',
+        'succeeded'             => 'Đã hoàn tiền', 'needs_review' => 'Cần hỗ trợ đối soát — liên hệ 1900 6067',
+        'failed'                => 'Hoàn tiền chưa thành công — liên hệ 1900 6067'],
+    'unavailable'         => 'Vé không đủ điều kiện hủy hoặc còn dưới 4 giờ trước giờ khởi hành.',
+    'payment_unavailable' => 'Chưa xác minh được giao dịch ngân hàng gốc để hoàn tiền. Vui lòng liên hệ 1900 6067.',
+    'quote_changed'       => 'Phí hủy đã thay đổi. Vui lòng chọn lại vé và kiểm tra số tiền mới.',
+    'load_error'          => 'Không thể xử lý lúc này. Vui lòng thử lại.',
+];

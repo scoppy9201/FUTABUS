@@ -12,9 +12,14 @@
         </div>
     </div>
 
-    <form method="post" action="{{ route('staff-accounts.update', $staff->id) }}" enctype="multipart/form-data" novalidate x-data="{ avatarPreview: null, avatarFileName: '' }" class="mt-4 w-full rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+    <form method="post" action="{{ route('staff-accounts.update', $staff->id) }}" enctype="multipart/form-data" novalidate
+        data-staff-live-validation
+        data-validation="{{ json_encode(__('UserManagement::app.validation')) }}"
+        x-data="{ avatarPreview: null, avatarFileName: '' }"
+        class="mt-4 w-full rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         @csrf
         @method('put')
         @include('UserManagement::partials.form', ['staff' => $staff, 'isCreate' => false])
     </form>
+    @vite('packages/FuteBus/UserManagement/src/resources/js/app.js')
 @endsection

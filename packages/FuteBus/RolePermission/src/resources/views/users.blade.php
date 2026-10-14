@@ -36,8 +36,7 @@
 
         @if($staffAccounts->isEmpty())
             <div class="px-6 py-14 text-center">
-                <span class="mx-auto grid size-12 place-items-center rounded-full bg-orange-50 text-[#F26522]"><x-heroicon-o-users class="size-6" /></span>
-                <p class="mt-3 text-sm font-semibold text-slate-600">{{ $search !== '' ? __('RolePermission::app.no_staff_search_results') : __('RolePermission::app.empty_staff') }}</p>
+                <x-core::empty-state :title="$search !== '' ? __('RolePermission::app.no_staff_search_results') : __('RolePermission::app.empty_staff')" />
                 @if($search === '')
                     <a href="{{ route('staff-accounts.index') }}" class="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#F26522] px-4 py-2 text-sm font-bold text-white hover:bg-[#d95318]"><x-heroicon-o-arrow-right class="size-4" />{{ __('RolePermission::app.manage_staff') }}</a>
                 @endif
@@ -71,7 +70,7 @@
                                     @forelse($staff->role_names as $roleName)
                                         <span class="mb-1 mr-1 inline-flex rounded-full border border-orange-100 bg-orange-50 px-2.5 py-1 text-xs font-semibold text-[#d7461a]">{{ $roleName }}</span>
                                     @empty
-                                        <span class="text-sm text-slate-400">{{ __('RolePermission::app.no_roles') }}</span>
+                                        <x-core::empty-state :title="__('RolePermission::app.no_roles')" compact />
                                     @endforelse
                                 </td>
                                 <td class="px-4 py-4 sm:px-5">
@@ -86,6 +85,7 @@
                                                     <span class="truncate">{{ $role->name }}</span>
                                                 </label>
                                             @empty
+                                                <x-core::empty-state :title="__('RolePermission::app.empty_roles')" compact />
                                                 <a href="{{ route('access-management.roles.create') }}" class="font-semibold text-[#F26522] hover:text-[#d95318]">{{ __('RolePermission::app.create_first_role') }}</a>
                                             @endforelse
                                         </fieldset>
@@ -101,10 +101,8 @@
                     </tbody>
                 </table>
             </div>
-            @if($staffAccounts->hasPages())
-                <div class="border-t border-slate-100 px-5 py-4">{{ $staffAccounts->links() }}</div>
-            @endif
         @endif
+        <div class="border-t border-slate-100 px-5 py-4"><x-core::data-pagination :paginator="$staffAccounts" /></div>
     </section>
 
     @if(session('status'))

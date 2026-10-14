@@ -153,7 +153,11 @@
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="4" class="px-6 py-12 text-center text-sm text-gray-500">{{ __('Dashboard::app.no_bookings') }}</td></tr>
+                                <tr>
+                                    <td colspan="4" class="px-6 py-12 text-center text-sm text-gray-500">
+                                        <x-core::empty-state :title="__('Dashboard::app.no_bookings')" />
+                                    </td>
+                                </tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -187,7 +191,11 @@
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="4" class="px-6 py-12 text-center text-sm text-gray-500">{{ __('Dashboard::app.no_trips') }}</td></tr>
+                                <tr>
+                                    <td colspan="4" class="px-6 py-12 text-center text-sm text-gray-500">
+                                        <x-core::empty-state :title="__('Dashboard::app.no_trips')" />
+                                    </td>
+                                </tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -200,30 +208,23 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const ctx = document.getElementById('revenueChart').getContext('2d');
+            const canvas = document.getElementById('revenueChart');
+            if (!canvas || typeof Chart === 'undefined') return;
 
-            const brandOrange = getComputedStyle(document.documentElement).getPropertyValue('--color-futa-orange').trim();
-            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, `color-mix(in srgb, ${brandOrange} 20%, transparent)`);
-            gradient.addColorStop(1, `color-mix(in srgb, ${brandOrange} 0%, transparent)`);
+            const brandOrange = getComputedStyle(document.documentElement).getPropertyValue('--color-futa-orange').trim() || '#f4511e';
 
-            new Chart(ctx, {
-                type: 'line',
+            new Chart(canvas, {
+                type: 'bar',
                 data: {
-                    labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+                    labels: @json(collect($overview['revenue_chart'])->pluck('label')->all()),
                     datasets: [{
                         label: '{{ __('Dashboard::app.revenue') }}',
-                        data: [280, 310, 290, 350, 420, 480, 342.5],
-                        borderColor: brandOrange,
-                        backgroundColor: gradient,
-                        borderWidth: 3,
-                        pointBackgroundColor: brandOrange,
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                        fill: true,
-                        tension: 0.4
+                        data: @json(collect($overview['revenue_chart'])->pluck('value')->all()),
+                        backgroundColor: brandOrange,
+                        hoverBackgroundColor: '#c2410c',
+                        borderRadius: 7,
+                        borderSkipped: false,
+                        maxBarThickness: 52,
                     }]
                 },
                 options: {
@@ -238,17 +239,24 @@
                             bodyFont: { size: 14, weight: 'bold', family: "'Inter', sans-serif" },
                             displayColors: false,
                             callbacks: {
-                                label: function(context) { return context.parsed.y + ' {{ __('Dashboard::app.million_vnd') }}'; }
+                                label: function(context) {
+                                    return new Intl.NumberFormat(@js(app()->getLocale()), { maximumFractionDigits: 2 }).format(context.parsed.y)
+                                        + ' {{ __('Dashboard::app.million_vnd') }}';
+                                }
                             }
                         }
                     },
                     scales: {
                         y: {
-                            beginAtZero: false,
-                            min: 280,
-                            max: 480,
+                            beginAtZero: true,
                             grid: { color: '#f3f4f6', drawBorder: false },
-                            ticks: { font: { family: "'Inter', sans-serif", size: 12 }, color: '#6b7280', stepSize: 20 }
+                            ticks: {
+                                font: { family: "'Inter', sans-serif", size: 12 },
+                                color: '#6b7280',
+                                callback: function(value) {
+                                    return new Intl.NumberFormat(@js(app()->getLocale()), { maximumFractionDigits: 1 }).format(value);
+                                }
+                            }
                         },
                         x: {
                             grid: { display: false, drawBorder: false },

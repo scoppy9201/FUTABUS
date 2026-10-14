@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FuteBus\Payment\Providers;
 
+use FuteBus\Payment\Console\ProcessTicketRefunds;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -16,6 +17,9 @@ class PaymentServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if ($this->app->runningInConsole()) {
+            $this->commands([ProcessTicketRefunds::class]);
+        }
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'Payment');
         $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'Payment');
         Route::middleware('web')->group(__DIR__.'/../routes/web.php');

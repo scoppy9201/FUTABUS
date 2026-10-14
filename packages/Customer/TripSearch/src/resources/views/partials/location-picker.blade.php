@@ -143,8 +143,6 @@
             </div>
 
         </div>
-        <p x-show="locationQuery.trim() && locationRowCount() === 0" class="px-2 pt-4 pb-3 text-center text-sm font-medium text-slate-500">
-            {{ __('core::app.home.hero.location_not_found') }}
-        </p>
+        <x-core::empty-state x-show="locationQuery.trim() && locationRowCount() === 0" class="px-2 pt-4 pb-3 text-center text-sm font-medium text-slate-500" :title="__('core::app.home.hero.location_not_found')" compact />
     </div>
 </div>

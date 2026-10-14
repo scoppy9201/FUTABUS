@@ -45,7 +45,7 @@ return [
     'empty_hint'              => 'Create a report here when you need help with an issue or want to share a suggestion.',
     'filtered_empty'          => 'No matching reports', 'filtered_hint' => 'Try another search term or status.',
     'reference'               => 'PA-:id', 'sent_at' => 'Submitted :date', 'related_booking' => 'Booking code: :code',
-    'status'                  => ['received' => 'Received', 'reviewing' => 'In progress', 'resolved' => 'Resolved'],
+    'status'                  => ['waiting' => 'Awaiting department', 'received' => 'Received', 'reviewing' => 'In progress', 'resolved' => 'Resolved'],
     'search'                  => 'Search', 'search_placeholder' => 'Search by subject or booking code',
     'all_statuses'            => 'All statuses', 'clear_filters' => 'Clear filters',
     'columns'                 => ['report' => 'Feedback', 'created' => 'Submitted', 'status' => 'Status', 'action' => 'Actions'],

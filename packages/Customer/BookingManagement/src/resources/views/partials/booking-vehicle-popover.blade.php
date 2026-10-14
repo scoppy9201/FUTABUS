@@ -14,13 +14,13 @@
     </div>
     <div class="booking-page__vehicle-content">
         <div x-show="vehicleInfoTab === 'schedule'" class="booking-page__vehicle-empty">
-            <p>{{ __('core::booking.schedule_empty') }}</p>
+            <x-core::empty-state :title="__('core::booking.schedule_empty')" compact />
         </div>
         <div x-show="vehicleInfoTab === 'media'" class="booking-page__vehicle-empty">
-            <p>{{ __('core::booking.media_empty') }}</p>
+            <x-core::empty-state :title="__('core::booking.media_empty')" compact />
         </div>
         <div x-show="vehicleInfoTab === 'amenities'" class="booking-page__vehicle-empty">
-            <p>{{ __('core::booking.amenities_empty') }}</p>
+            <x-core::empty-state :title="__('core::booking.amenities_empty')" compact />
         </div>
         <div x-show="vehicleInfoTab === 'policy'" class="booking-page__vehicle-policy">
             @foreach ([

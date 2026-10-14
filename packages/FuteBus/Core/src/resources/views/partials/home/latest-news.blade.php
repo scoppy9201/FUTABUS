@@ -12,7 +12,7 @@
 
         @if($newsArticles->isEmpty())
             <div class="mt-8 rounded-xl border border-dashed border-futa-orange/20 bg-white px-6 py-10 text-center text-sm text-gray-500">
-                {{ __('core::app.home.latest_news.empty') }}
+                <x-core::empty-state :title="__('core::app.home.latest_news.empty')" />
             </div>
         @else
             @php($newsPages = $newsArticles->chunk(3))

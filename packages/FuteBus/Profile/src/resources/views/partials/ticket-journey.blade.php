@@ -352,7 +352,7 @@
                 </div>
             </section>
         @elseif($isDemo)
-            <p class="rounded-xl border border-dashed border-gray-200 p-3 text-xs text-slate-500">{{ __('Profile::tickets.journey.demo_no_ticket') }}</p>
+            <x-core::empty-state :title="__('Profile::tickets.journey.demo_no_ticket')" compact />
         @endif
         </div>
         </div>

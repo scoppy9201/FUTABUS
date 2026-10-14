@@ -4,5 +4,6 @@ import './date-range-picker.js';
 import './ticket-history-actions.js';
 import './ticket-history-detail.js';
 import './ticket-review-emotions.js';
+import '../../../../../Customer/Cancellation/src/resources/js/modal.js';
 import './feedback-wizard.js';
 import './feedback.js';

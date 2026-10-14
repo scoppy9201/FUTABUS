@@ -103,6 +103,7 @@
                 @endforeach
             </select>
             <p id="feedback-booking-error" class="mt-1 text-xs text-red-600">{{ $errors->first('booking_id') }}</p>
+            <p class="mt-1 text-xs text-gray-500">{{ __('StaffCustomerSupport::support.unlinked_notice') }}</p>
         </section>
         <section data-feedback-step="2" aria-labelledby="feedback-content-title" class="space-y-3">
             <h3 id="feedback-content-title" data-feedback-step-heading tabindex="-1" class="flex items-center gap-2 text-sm font-bold text-gray-950 outline-none">

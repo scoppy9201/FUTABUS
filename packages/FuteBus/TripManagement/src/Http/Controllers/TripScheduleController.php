@@ -135,6 +135,10 @@ class TripScheduleController extends Controller
 
     private function validated(Request $request): array
     {
+        if ($request->boolean('apply_all_days') || ! $request->filled('days_of_week')) {
+            $request->merge(['days_of_week' => range(1, 7)]);
+        }
+
         return $request->validate([
             'route_id'       => ['required', 'exists:routes,id'],
             'departure_time' => ['required', 'date_format:H:i'],
@@ -149,9 +153,12 @@ class TripScheduleController extends Controller
                     }
                 },
             ],
-            'price'          => ['required', 'integer', 'min:0'],
+            'price'          => ['required', 'integer', 'gt:1000', 'lt:100000000'],
         ], [
             'end_date.after_or_equal' => __('TripManagement::app.sch_err_date'),
+            'price.integer'           => __('TripManagement::app.sch_err_price'),
+            'price.gt'                => __('TripManagement::app.sch_err_price'),
+            'price.lt'                => __('TripManagement::app.sch_err_price'),
         ]);
     }
 

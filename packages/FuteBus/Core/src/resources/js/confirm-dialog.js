@@ -7,6 +7,7 @@ if (dialog) {
     const accept = dialog.querySelector('[data-confirm-accept]');
     const allowedForms = new WeakSet();
 
+    let pendingDecision = null;
     let pendingForm = null;
     let pendingSubmitter = null;
     let previousFocus = null;
@@ -92,6 +93,12 @@ if (dialog) {
         }
     }
 
+    window.FutaConfirm = (options = {}) => new Promise(resolve => {
+        if (dialog.open || isClosing) { resolve(false); return; }
+        pendingDecision = resolve;
+        openDialog({ dataset: { confirmTitle: options.title, confirmMessage: options.message, confirmLabel: options.label } });
+    });
+
     function showNotice(source) {
         window.FutaNotify?.show(
             source.dataset.noticeMessage || source.dataset.confirmMessage || dialog.dataset.defaultMessage,
@@ -148,6 +155,8 @@ if (dialog) {
     });
 
     dialog.addEventListener('close', () => {
+        pendingDecision?.(false);
+        pendingDecision = null;
         pendingForm = null;
         pendingSubmitter = null;
         accept.disabled = false;
@@ -159,6 +168,14 @@ if (dialog) {
         const form = pendingForm;
         const submitter = pendingSubmitter;
 
+        if (pendingDecision) {
+            const resolve = pendingDecision;
+            pendingDecision = null;
+            accept.disabled = true;
+            await closeDialog();
+            resolve(true);
+            return;
+        }
         if (!form) {
             return;
         }

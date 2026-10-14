@@ -17,24 +17,6 @@
         </span>
     </div>
 
-    @if(session('success'))
-        <div class="mt-4 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
-            <x-heroicon-o-check-circle class="size-5 shrink-0" /> {{ session('success') }}
-        </div>
-    @endif
-    @if(session('warning'))
-        <div class="mt-4 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
-            <x-heroicon-o-exclamation-triangle class="size-5 shrink-0" /> {{ session('warning') }}
-        </div>
-    @endif
-    @if($errors->any())
-        <div class="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
-            <ul class="list-inside list-disc space-y-1">
-                @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
-            </ul>
-        </div>
-    @endif
-
     <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
         <form method="GET" action="{{ route('bus-management.vehicle-documents.index') }}" class="flex flex-wrap items-center gap-2">
             <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('BusManagement::app.vd_search_ph') }}"
@@ -45,14 +27,20 @@
                     <option value="{{ $b->id }}" @selected((string) $busId === (string) $b->id)>{{ $b->license_plate }}</option>
                 @endforeach
             </select>
+            <select name="doc_type_id" class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:outline-none">
+                <option value="">{{ __('BusManagement::app.vd_filter_type_all') }}</option>
+                @foreach($allTypes as $type)
+                    <option value="{{ $type->id }}" @selected((string) $typeId === (string) $type->id)>{{ $type->name }}</option>
+                @endforeach
+            </select>
             <select name="state" class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:outline-none">
                 <option value="">{{ __('BusManagement::app.vd_filter_state_all') }}</option>
-                @foreach(['valid', 'expiring', 'expired'] as $st)
+                @foreach(['valid', 'expiring', 'expired', 'no_expiry'] as $st)
                     <option value="{{ $st }}" @selected($state === $st)>{{ __('BusManagement::app.vd_state_'.$st) }}</option>
                 @endforeach
             </select>
             <button type="submit" class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200">{{ __('BusManagement::app.btn_search') }}</button>
-            @if($search || $busId || $state)
+            @if($search || $busId || $typeId || $state)
                 <a href="{{ route('bus-management.vehicle-documents.index') }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-500">{{ __('BusManagement::app.btn_clear_filter') }}</a>
             @endif
         </form>
@@ -79,24 +67,32 @@
                 <tbody class="divide-y divide-slate-100">
                     @forelse($docs as $d)
                         @php
-                            $expiry   = \Illuminate\Support\Carbon::parse($d->expiry_date);
-                            $daysLeft = today()->diffInDays($expiry, false);
-                            $stateKey = $daysLeft < 0 ? 'expired' : ($daysLeft <= 30 ? 'expiring' : 'valid');
+                            $expiry   = $d->expiry_date ? \Illuminate\Support\Carbon::parse($d->expiry_date) : null;
+                            $daysLeft = $expiry ? today()->diffInDays($expiry, false) : null;
+                            $stateKey = $expiry === null ? 'no_expiry' : ($daysLeft < 0 ? 'expired' : ($daysLeft <= 30 ? 'expiring' : 'valid'));
                             $current  = $d->status === 'active' && ! $d->superseded;
                             $snap     = json_decode($d->field_values ?? '[]', true) ?: [];
+                            $snap     = collect($snap)->map(function ($field) {
+                                if (isset($field['label']) && \Illuminate\Support\Facades\Lang::has('BusManagement::app.'.$field['label'])) {
+                                    $field['label'] = __('BusManagement::app.'.$field['label']);
+                                }
+
+                                return $field;
+                            })->all();
                         @endphp
                         <tr class="hover:bg-futa-orange-soft/30 {{ $current ? '' : 'opacity-60' }}">
                             <td class="px-5 py-4 text-slate-500">{{ $docs->firstItem() + $loop->index }}</td>
                             <td class="px-5 py-4 font-bold text-slate-900">{{ $d->license_plate }}</td>
                             <td class="px-5 py-4">{{ $d->type_name }}</td>
                             <td class="whitespace-nowrap px-5 py-4">{{ \Illuminate\Support\Carbon::parse($d->issued_date)->format('d/m/Y') }}</td>
-                            <td class="whitespace-nowrap px-5 py-4">{{ $expiry->format('d/m/Y') }}</td>
+                            <td class="whitespace-nowrap px-5 py-4">{{ $expiry?->format('d/m/Y') ?? __('BusManagement::app.vd_no_expiry') }}</td>
                             <td class="px-5 py-4">
                                 <span @class([
                                     'inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-bold',
                                     'bg-emerald-50 text-emerald-700' => $stateKey === 'valid',
                                     'bg-amber-50 text-amber-700' => $stateKey === 'expiring',
                                     'bg-rose-50 text-rose-700' => $stateKey === 'expired',
+                                    'bg-slate-100 text-slate-600' => $stateKey === 'no_expiry',
                                 ])>{{ __('BusManagement::app.vd_state_'.$stateKey) }}</span>
                             </td>
                             <td class="px-5 py-4 text-xs font-semibold text-slate-500">
@@ -113,7 +109,9 @@
                                     <button @click="openView({{ json_encode([
                                         'bus' => $d->license_plate, 'type' => $d->type_name,
                                         'issued' => \Illuminate\Support\Carbon::parse($d->issued_date)->format('d/m/Y'),
-                                        'expiry' => $expiry->format('d/m/Y'), 'values' => $snap,
+                                        'expiry' => $expiry?->format('d/m/Y') ?? __('BusManagement::app.vd_no_expiry'), 'values' => $snap,
+                                        'file' => $d->file_path ? route('bus-management.vehicle-documents.file', $d->id) : null,
+                                        'file_name' => $d->file_name,
                                     ]) }})" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-futa-orange hover:text-futa-orange">
                                         <x-heroicon-o-eye class="size-3.5" /> {{ __('BusManagement::app.vd_btn_view') }}
                                     </button>
@@ -127,23 +125,32 @@
                                     </button>
                                     @endif
                                     @if($current)
+                                    <button @click="openEdit({{ json_encode([
+                                        'id' => $d->id, 'issued_date' => $d->issued_date, 'expiry_date' => $d->expiry_date,
+                                        'type_id' => $d->document_type_id, 'type_has_expiry' => (bool) ($d->has_expiry ?? true),
+                                        'values' => collect($snap)->pluck('value', 'key'), 'file_name' => $d->file_name,
+                                    ]) }})" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-futa-orange hover:text-futa-orange">
+                                        <x-heroicon-o-pencil-square class="size-3.5" /> {{ __('BusManagement::app.vd_btn_edit') }}
+                                    </button>
                                     <button @click="openDelete({{ json_encode(['id' => $d->id, 'name' => $d->type_name.' — '.$d->license_plate]) }})"
                                         class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 hover:border-rose-300 hover:bg-rose-50">
-                                        <x-heroicon-o-no-symbol class="size-3.5" /> {{ __('BusManagement::app.vd_btn_deactivate') }}
+                                        <x-heroicon-o-trash class="size-3.5" /> {{ __('BusManagement::app.vd_btn_delete') }}
                                     </button>
                                     @endif
                                 </div>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="8" class="px-6 py-16 text-center text-sm font-semibold text-slate-500">{{ __('BusManagement::app.vd_empty') }}</td></tr>
+                        <tr>
+                            <td colspan="8" class="px-6 py-16 text-center text-sm font-semibold text-slate-500">
+                                <x-core::empty-state :title="__('BusManagement::app.vd_empty')" />
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        @if($docs->hasPages())
-            <div class="border-t border-slate-100 px-5 py-4">{{ $docs->links() }}</div>
-        @endif
+        <div class="border-t border-slate-100 px-5 py-4"><x-core::data-pagination :paginator="$docs" /></div>
     </div>
 
     {{-- ADD / RENEW MODAL --}}
@@ -157,8 +164,9 @@
                 <button type="button" @click="showForm = false" class="text-white/70 hover:text-white"><x-heroicon-o-x-mark class="size-4" /></button>
             </div>
 
-            <form :action="formAction" method="POST" class="space-y-3 p-5">
+            <form :action="formAction" method="POST" enctype="multipart/form-data" class="space-y-3 p-5">
                 @csrf
+                <template x-if="mode === 'edit'"><input type="hidden" name="_method" value="PUT"></template>
 
                 <template x-if="mode === 'renew'">
                     <p class="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700">
@@ -167,20 +175,20 @@
                     </p>
                 </template>
 
-                <template x-if="mode === 'add'">
+                <template x-if="mode !== 'renew'">
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        <div>
+                        <div x-show="mode === 'add'">
                             <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.vd_f_bus') }} <span class="text-rose-500">*</span></label>
-                            <select name="bus_id" x-model="form.bus_id" required class="{{ $inp }}">
+                            <select name="bus_id" x-model="form.bus_id" :disabled="mode !== 'add'" required class="{{ $inp }}">
                                 <option value="">{{ __('BusManagement::app.vd_f_bus_select') }}</option>
                                 @foreach($buses->where('status', 'active') as $b)
                                     <option value="{{ $b->id }}">{{ $b->license_plate }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div>
+                        <div x-show="mode === 'add'">
                             <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.vd_f_type') }} <span class="text-rose-500">*</span></label>
-                            <select name="document_type_id" x-model="form.document_type_id" @change="form.values = {}" required class="{{ $inp }}">
+                            <select name="document_type_id" x-model="form.document_type_id" :disabled="mode !== 'add'" @change="form.values = {}; if (!currentTypeHasExpiry) form.expiry_date = ''; validateDates()" required class="{{ $inp }}">
                                 <option value="">{{ __('BusManagement::app.vd_f_type_select') }}</option>
                                 <template x-for="t in types" :key="t.id">
                                     <option :value="t.id" x-text="t.name"></option>
@@ -193,17 +201,24 @@
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div>
                         <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.vd_f_issued') }} <span class="text-rose-500">*</span></label>
-                        <input type="date" name="issued_date" x-model="form.issued_date" required class="{{ $inp }}" />
+                        <input type="date" name="issued_date" x-model="form.issued_date" :max="issuedMax" required @change="validateDates()" class="{{ $inp }}" />
                     </div>
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.vd_f_expiry') }} <span class="text-rose-500">*</span></label>
-                        <input type="date" name="expiry_date" x-model="form.expiry_date" required class="{{ $inp }}" />
+                        <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.vd_f_expiry') }} <span x-show="currentTypeHasExpiry" class="text-rose-500">*</span></label>
+                        <input type="date" name="expiry_date" x-model="form.expiry_date" :min="tomorrow" :required="currentTypeHasExpiry" :disabled="!currentTypeHasExpiry" @change="validateDates()" class="{{ $inp }} disabled:bg-slate-100" />
                     </div>
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-xs font-semibold text-slate-700">{{ __('BusManagement::app.vd_f_attachment') }}</label>
+                    <input type="file" name="attachment" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" @change="validateAttachment($event.target.files[0])" class="{{ $inp }}" />
+                    <p class="mt-1 text-xs text-slate-500">{{ __('BusManagement::app.vd_attachment_hint') }}</p>
+                    <p x-show="form.file_name" class="mt-1 text-xs text-slate-600"><span>{{ __('BusManagement::app.vd_current_file') }}:</span> <span x-text="form.file_name"></span></p>
                 </div>
 
                 <div class="rounded-xl border border-slate-200 p-3">
                     <p class="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">{{ __('BusManagement::app.vd_f_values') }}</p>
-                    <p x-show="currentFields.length === 0" class="text-xs text-slate-400">{{ __('BusManagement::app.vd_no_fields') }}</p>
+                    <x-core::empty-state x-show="currentFields.length === 0" :title="__('BusManagement::app.vd_no_fields')" compact />
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <template x-for="f in currentFields" :key="form.document_type_id + ':' + f.key + ':' + f.type">
                             <div>
@@ -220,8 +235,8 @@
 
                 <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
                     <button type="button" @click="showForm = false" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('BusManagement::app.btn_cancel') }}</button>
-                    <button type="submit" class="rounded-lg bg-futa-orange px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-futa-orange-dark"
-                            x-text="mode === 'renew' ? @js(__('BusManagement::app.vd_btn_renew')) : @js(__('BusManagement::app.btn_store'))"></button>
+                    <button type="submit" :disabled="attachmentInvalid || datesInvalid" class="rounded-lg bg-futa-orange px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-futa-orange-dark disabled:cursor-not-allowed disabled:opacity-50"
+                            x-text="mode === 'renew' ? @js(__('BusManagement::app.vd_btn_renew')) : (mode === 'edit' ? @js(__('BusManagement::app.vd_btn_save')) : @js(__('BusManagement::app.btn_store')))"></button>
                 </div>
             </form>
         </div>
@@ -230,7 +245,7 @@
     {{-- VIEW MODAL --}}
     <div role="dialog" aria-modal="true" x-show="showView" x-cloak @click.self="showView = false"
          class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
-        <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+        <div class="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
             <h3 class="text-lg font-bold text-slate-900">{{ __('BusManagement::app.vd_modal_view') }}</h3>
             <p class="mt-1 text-sm text-slate-500"><span x-text="viewData.type"></span> — <span class="font-bold" x-text="viewData.bus"></span></p>
             <dl class="mt-4 space-y-2 text-sm">
@@ -240,22 +255,26 @@
                     <div class="flex justify-between gap-4"><dt class="text-slate-500" x-text="v.label"></dt><dd class="font-semibold text-slate-800" x-text="v.value || '—'"></dd></div>
                 </template>
             </dl>
+            <iframe x-show="viewData.file" :src="viewData.file" :title="@js(__('BusManagement::app.vd_file_preview'))" class="mt-4 h-[55vh] w-full rounded-xl border border-slate-200 bg-slate-50"></iframe>
+            <a x-show="viewData.file" :href="viewData.file" target="_blank" rel="noopener" class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-futa-orange hover:underline">
+                <x-heroicon-o-paper-clip class="size-4" /><span x-text="viewData.file_name || @js(__('BusManagement::app.vd_view_file'))"></span>
+            </a>
             <div class="mt-5 text-right">
                 <button type="button" @click="showView = false" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('BusManagement::app.btn_cancel') }}</button>
             </div>
         </div>
     </div>
 
-    {{-- DEACTIVATE MODAL --}}
+    {{-- DELETE MODAL --}}
     <div role="dialog" aria-modal="true" x-show="showDelete" x-cloak @click.self="showDelete = false"
          class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
         <div class="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl">
             <div class="mx-auto mb-4 grid size-14 place-items-center rounded-full bg-rose-100">
                 <x-heroicon-o-exclamation-triangle class="size-7 text-rose-500" />
             </div>
-            <h3 class="text-lg font-bold text-slate-900">{{ __('BusManagement::app.vd_modal_deactivate') }}</h3>
+            <h3 class="text-lg font-bold text-slate-900">{{ __('BusManagement::app.vd_delete_title') }}</h3>
             <p class="mt-2 text-sm text-slate-500">
-                {{ __('BusManagement::app.vd_deactivate_msg') }}
+                {{ __('BusManagement::app.vd_delete_confirm') }}
                 <span class="font-bold text-slate-800" x-text="delData.name"></span>?
             </p>
             <form :action="delAction" method="POST" class="mt-5 flex items-center justify-end gap-2">
@@ -272,23 +291,78 @@
 function vehicleDocManager() {
     const types = @json($typePayload);
     const base = `{{ url('quan-tri/phuong-tien/ho-so-giay-to') }}`;
-    const blank = () => ({ bus_id: '', document_type_id: '', issued_date: '', expiry_date: '', values: {} });
+    const blank = () => ({ bus_id: '', document_type_id: '', issued_date: '', expiry_date: '', values: {}, file_name: '' });
     return {
         types, mode: 'add', showForm: false, showView: false, showDelete: false,
+        attachmentInvalid: false,
         form: blank(), formAction: base, renewInfo: {}, viewData: {}, delData: {}, delAction: '',
+        today: @js(today()->toDateString()),
+        issuedMax: @js(today()->subDay()->toDateString()),
+        tomorrow: @js(today()->addDay()->toDateString()),
+        get datesInvalid() {
+            return (this.form.issued_date && this.form.issued_date >= this.today)
+                || (this.currentTypeHasExpiry && this.form.expiry_date && this.form.expiry_date <= this.today);
+        },
         get currentFields() {
             const t = this.types.find(t => String(t.id) === String(this.form.document_type_id));
             return t ? t.fields : [];
         },
-        openAdd() { this.mode = 'add'; this.form = blank(); this.formAction = base; this.showForm = true; },
+        get currentTypeHasExpiry() {
+            if (this.mode === 'edit') return Boolean(this.form.type_has_expiry);
+            const type = this.types.find(item => String(item.id) === String(this.form.document_type_id));
+            return type ? type.has_expiry : true;
+        },
+        validateDates() {
+            if (this.form.issued_date && this.form.issued_date >= this.today) {
+                window.FutaNotify?.warning(@js(__('BusManagement::app.vd_err_issued_future')), { key: 'vehicle-document-issued-date' });
+                return;
+            }
+            window.FutaNotify?.close('vehicle-document-issued-date');
+            if (this.currentTypeHasExpiry && this.form.expiry_date && this.form.expiry_date <= this.today) {
+                window.FutaNotify?.warning(@js(__('BusManagement::app.vd_err_expiry_future')), { key: 'vehicle-document-expiry-date' });
+                return;
+            }
+            window.FutaNotify?.close('vehicle-document-expiry-date');
+        },
+        validateAttachment(file) {
+            if (!file) {
+                this.attachmentInvalid = false;
+                window.FutaNotify?.close('vehicle-document-attachment');
+                return;
+            }
+            const allowed = ['application/pdf', 'image/jpeg', 'image/png'];
+            const invalid = !allowed.includes(file.type) || file.size > 10 * 1024 * 1024;
+            this.attachmentInvalid = invalid;
+            if (invalid) {
+                window.FutaNotify?.error(@js(__('BusManagement::app.vd_err_attachment')), { key: 'vehicle-document-attachment' });
+                return;
+            }
+            window.FutaNotify?.close('vehicle-document-attachment');
+        },
+        resetAttachment() {
+            const input = document.querySelector('input[name="attachment"]');
+            if (input) input.value = '';
+            this.attachmentInvalid = false;
+            window.FutaNotify?.close('vehicle-document-attachment');
+        },
+        openAdd() { this.mode = 'add'; this.form = blank(); this.formAction = base; this.resetAttachment(); this.showForm = true; },
+        openEdit(d) {
+            this.mode = 'edit';
+            this.form = { ...blank(), issued_date: d.issued_date, expiry_date: d.expiry_date || '', document_type_id: d.type_id, type_has_expiry: d.type_has_expiry, values: { ...d.values }, file_name: d.file_name || '' };
+            this.formAction = `${base}/${d.id}`;
+            this.resetAttachment();
+            this.showForm = true;
+        },
         openRenew(d) {
             this.mode = 'renew'; this.renewInfo = d;
             this.form = { ...blank(), document_type_id: d.type_id, values: { ...d.values } };
+            this.resetAttachment();
             this.formAction = `${base}/${d.id}/gia-han`; this.showForm = true;
         },
         openView(d) { this.viewData = d; this.showView = true; },
-        openDelete(d) { this.delData = d; this.delAction = `${base}/${d.id}`; this.showDelete = true; },
+        openDelete(d) { this.delData = d; this.delAction = `${base}/${d.id}/xoa`; this.showDelete = true; },
     };
 }
 </script>
+@include('BusManagement::partials.notifications')
 @endsection

@@ -101,22 +101,23 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="9" class="px-6 py-16 text-center text-sm font-semibold text-slate-500">{{ __('TripManagement::app.tr_empty') }}</td></tr>
+                        <tr>
+                            <td colspan="9" class="px-6 py-16 text-center text-sm font-semibold text-slate-500">
+                                <x-core::empty-state :title="__('TripManagement::app.tr_empty')" />
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        @if($trips->hasPages())
-            <div class="border-t border-slate-100 px-5 py-4">{{ $trips->links() }}</div>
-        @endif
+        <div class="border-t border-slate-100 px-5 py-4"><x-core::data-pagination :paginator="$trips" /></div>
     </div>
 
     {{-- ADD / EDIT MODAL --}}
     <div role="dialog" aria-modal="true" x-show="showForm" x-cloak @click.self="closeForm()"
          class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
         <div class="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div class="flex items-center justify-between px-5 py-3"
-                 :class="isEdit ? 'bg-slate-800' : 'bg-futa-orange'">
+            <div class="flex items-center justify-between bg-futa-orange px-5 py-3">
                 <h2 class="text-base font-bold text-white"
                     x-text="isEdit ? @js(__('TripManagement::app.tr_modal_edit')) : @js(__('TripManagement::app.tr_modal_add'))"></h2>
                 <button type="button" @click="closeForm()" class="text-white/70 hover:text-white"><x-heroicon-o-x-mark class="size-4" /></button>

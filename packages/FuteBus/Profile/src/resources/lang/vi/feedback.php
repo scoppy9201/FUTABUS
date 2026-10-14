@@ -49,7 +49,7 @@ return [
     'empty_hint'              => 'Khi cần hỗ trợ về sự việc hoặc góp ý dịch vụ, bạn có thể tạo phản ánh tại đây.',
     'filtered_empty'          => 'Không có phản ánh phù hợp', 'filtered_hint' => 'Thử thay đổi từ khóa hoặc trạng thái xử lý.',
     'reference'               => 'PA-:id', 'sent_at' => 'Gửi lúc :date', 'related_booking' => 'Mã đặt chỗ: :code',
-    'status'                  => ['received' => 'Đã tiếp nhận', 'reviewing' => 'Đang xử lý', 'resolved' => 'Đã xử lý'],
+    'status'                  => ['waiting' => 'Chờ bộ phận xử lý', 'received' => 'Đã tiếp nhận', 'reviewing' => 'Đang xử lý', 'resolved' => 'Đã xử lý'],
     'search'                  => 'Tìm', 'search_placeholder' => 'Tìm theo tiêu đề hoặc mã đặt chỗ',
     'all_statuses'            => 'Tất cả trạng thái', 'clear_filters' => 'Xóa bộ lọc',
     'columns'                 => ['report' => 'Nội dung phản ánh', 'created' => 'Ngày gửi', 'status' => 'Trạng thái', 'action' => 'Thao tác'],

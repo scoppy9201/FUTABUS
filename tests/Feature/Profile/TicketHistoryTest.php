@@ -469,7 +469,7 @@ class TicketHistoryTest extends TestCase
         $this->assertDatabaseCount('booking_reviews', 0);
     }
 
-    public function test_change_and_cancel_menu_only_contacts_support_for_eligible_paid_booking(): void
+    public function test_change_contacts_support_and_cancellation_opens_modal_for_paid_bookings(): void
     {
         $user = $this->createTestUser();
         $eligible = $this->createBooking($user, 'ELIGIBLE-001', [
@@ -502,7 +502,9 @@ class TicketHistoryTest extends TestCase
             ->assertSee('TOO-LATE-001')
             ->assertSee('disabled title=', false);
 
-        $this->assertSame(2, substr_count(
+        $response->assertSee('href="'.route('cancellation.show', $eligible['booking_id']).'"', false)
+            ->assertSee('href="'.route('cancellation.show', $tooLate['booking_id']).'"', false);
+        $this->assertSame(1, substr_count(
             $response->getContent(),
             'data-history-sensitive'
         ));

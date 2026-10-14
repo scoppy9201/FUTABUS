@@ -2,6 +2,9 @@
     $inDialog = request()->boolean('modal');
     $reference = __('Profile::feedback.reference', ['id' => str_pad((string) $report->id, 6, '0', STR_PAD_LEFT)]);
     $stages = ['received' => $report->created_at, 'reviewing' => $report->reviewing_at, 'resolved' => $report->resolved_at];
+    if ($report->status === 'waiting') {
+        $stages = ['received' => $report->created_at, 'reviewing' => $report->reviewing_at, 'waiting' => $report->transferred_at, 'resolved' => $report->resolved_at];
+    }
     $activeStage = array_search($report->status, array_keys($stages), true);
     $emptyResponse = $report->status === 'resolved' ? 'response_empty_resolved' : 'response_pending';
     $statusColor = match ($report->status) {
@@ -30,7 +33,7 @@
                 <h3 id="feedback-progress-title" class="text-sm font-bold text-gray-950">{{ __('Profile::feedback.progress') }}</h3>
                 <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $statusColor }}">{{ __('Profile::feedback.status.'.$report->status) }}</span>
             </div>
-            <ol class="mt-4 grid grid-cols-3">
+            <ol @class(['mt-4 grid', 'grid-cols-4' => $report->status === 'waiting', 'grid-cols-3' => $report->status !== 'waiting'])>
                 @foreach($stages as $stage => $timestamp)
                     @php $reached = $loop->index <= $activeStage; @endphp
                     <li class="relative flex min-w-0 flex-col items-center px-1 text-center" @if($stage === $report->status) aria-current="step" @endif>
@@ -60,9 +63,24 @@
             <h3 id="feedback-response-title" class="flex items-center gap-2 text-sm font-bold text-gray-950">
                 <x-heroicon-o-chat-bubble-left-right class="size-5 text-futa-orange" aria-hidden="true" />{{ __('Profile::feedback.response_title') }}
             </h3>
-            <p class="mt-2 whitespace-pre-wrap wrap-break-word text-sm leading-6 text-slate-600">{{ filled($report->response) ? $report->response : __('Profile::feedback.'.$emptyResponse) }}</p>
+            @if(filled($report->response))
+                <p class="mt-2 whitespace-pre-wrap wrap-break-word text-sm leading-6 text-slate-600">{{ $report->response }}</p>
+            @else
+                <x-core::empty-state :title="__('Profile::feedback.'.$emptyResponse)" compact />
+            @endif
         </section>
         <section aria-labelledby="feedback-report-content-title">
+            @if($history->isNotEmpty())
+                <h3 class="mb-3 font-bold">{{ __('StaffCustomerSupport::support.history') }}</h3>
+                <ol class="mb-5 space-y-3">
+                    @foreach($history as $event)
+                        <li class="border-l-2 border-futa-orange pl-3">
+                            <p class="text-xs text-slate-500">{{ $event->actor_name }} · {{ \Illuminate\Support\Carbon::parse($event->created_at)->format('d/m/Y H:i') }}</p>
+                            <p class="mt-1 whitespace-pre-wrap wrap-break-word text-sm">{{ $event->response }}</p>
+                        </li>
+                    @endforeach
+                </ol>
+            @endif
             <h3 id="feedback-report-content-title" class="text-sm font-bold text-gray-950">{{ __('Profile::feedback.content_section') }}</h3>
             <dl class="mt-3 grid gap-4 text-sm sm:grid-cols-2">
                 <div><dt class="text-xs text-slate-500">{{ __('Profile::feedback.fields.category') }}</dt><dd class="mt-1 font-semibold">{{ __('Profile::feedback.categories.'.$report->category) }}</dd></div>

@@ -141,10 +141,7 @@
                             <tbody>
                                 <tr>
                                     <td colspan="5" class="px-5 py-14 text-center">
-                                        <span class="mx-auto grid size-15 place-items-center rounded-full bg-gray-50 text-gray-300">
-                                            <x-heroicon-o-inbox class="size-8" />
-                                        </span>
-                                        <p class="mt-3 text-sm font-medium text-slate-500">{{ __('Profile::futapay.empty') }}</p>
+                                        <x-core::empty-state :title="__('Profile::futapay.empty')" />
                                     </td>
                                 </tr>
                             </tbody>

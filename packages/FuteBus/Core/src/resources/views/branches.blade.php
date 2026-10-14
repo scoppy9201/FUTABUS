@@ -125,14 +125,12 @@
                     </section>
                 </template>
 
-                <p
+                <x-core::empty-state
                     x-cloak
                     x-show="!hasResults()"
                     x-transition.opacity.duration.180ms
                     class="rounded-lg bg-gray-50 px-5 py-10 text-center text-base font-semibold text-gray-500"
-                >
-                    {{ __('core::branches.no_results') }}
-                </p>
+                    :title="__('core::branches.no_results')" compact />
             </div>
         </main>
 

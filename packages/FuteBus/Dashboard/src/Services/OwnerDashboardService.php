@@ -32,6 +32,26 @@ class OwnerDashboardService
         $bookings = $this->bookings($companyId);
         $trips = DB::table('trips')->where('bus_company_id', $companyId);
         $buses = DB::table('buses')->where('bus_company_id', $companyId);
+        $revenueStart = now()->startOfDay()->subDays(6);
+        $revenueEnd = now();
+        $dailyRevenue = DB::table('payments')
+            ->join('bookings', 'bookings.id', '=', 'payments.booking_id')
+            ->join('trips', 'trips.id', '=', 'bookings.trip_id')
+            ->where('trips.bus_company_id', $companyId)
+            ->where('payments.status', 'completed')
+            ->whereBetween('payments.paid_at', [$revenueStart, $revenueEnd])
+            ->selectRaw('DATE(payments.paid_at) AS revenue_date')
+            ->selectRaw('SUM(payments.amount) AS revenue_amount')
+            ->groupByRaw('DATE(payments.paid_at)')
+            ->pluck('revenue_amount', 'revenue_date');
+        $revenueChart = collect(range(0, 6))->map(function (int $offset) use ($revenueStart, $dailyRevenue): array {
+            $date = $revenueStart->copy()->addDays($offset);
+
+            return [
+                'label' => $date->format('d/m'),
+                'value' => round((float) ($dailyRevenue->get($date->toDateString()) ?? 0) / 1_000_000, 2),
+            ];
+        })->all();
 
         return [
             'booking_count'  => (clone $bookings)->count(),
@@ -47,6 +67,7 @@ class OwnerDashboardService
                 ->where('trips.bus_company_id', $companyId)
                 ->where('payments.status', 'completed')
                 ->sum('payments.amount'),
+            'revenue_chart'   => $revenueChart,
             'recent_bookings' => (clone $bookings)
                 ->select('bookings.booking_code', 'bookings.status', 'bookings.total_amount',
                     'bookings.created_at', 'customers.full_name', 'routes.origin_city', 'routes.destination_city')

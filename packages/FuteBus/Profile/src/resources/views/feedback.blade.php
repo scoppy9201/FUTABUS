@@ -14,7 +14,7 @@
         @include('core::partials.home.navbar')
         <main class="mx-auto grid w-full max-w-282 items-start gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[255px_minmax(0,1fr)] lg:items-stretch lg:px-0">
             @include('Profile::partials.account-sidebar')
-            <section class="min-w-0 lg:flex lg:h-134 lg:flex-col" aria-labelledby="feedback-title">
+            <section class="min-w-0 lg:flex lg:min-h-134 lg:flex-col" aria-labelledby="feedback-title">
                 <div class="flex flex-wrap items-start justify-between gap-4">
                     <div>
                         <h1 id="feedback-title" class="text-3xl font-semibold text-gray-950">{{ __('Profile::feedback.title') }}</h1>
@@ -30,6 +30,19 @@
                         data-notice-message="{{ session('status') }}"></div>
                 @endif
 
+                @if(($supportNotifications ?? collect())->isNotEmpty())
+                    <section class="mt-5 rounded-xl border border-futa-orange/20 bg-futa-orange-soft p-4" aria-labelledby="support-notification-title">
+                        <h2 id="support-notification-title" class="text-sm font-bold text-futa-orange">{{ __('StaffCustomerSupport::support.notification_title') }}</h2>
+                        <ul class="mt-3 space-y-2">
+                            @foreach($supportNotifications as $notification)
+                                <li><a href="{{ route('profile.feedback.show', $notification->data['report_id']) }}" class="block rounded-lg bg-white p-3 text-sm hover:underline">
+                                    <span class="block text-xs text-gray-500">{{ $notification->created_at->format('d/m/Y H:i') }}</span>
+                                    <span class="mt-1 block line-clamp-2">{{ $notification->data['message'] }}</span>
+                                </a></li>
+                            @endforeach
+                        </ul>
+                    </section>
+                @endif
                 <form action="{{ route('profile.feedback.index') }}" method="get"
                     class="mt-7 flex flex-wrap gap-3 rounded-2xl border border-gray-200 bg-futa-orange-soft/40 p-4">
                     <div class="relative min-w-48 flex-1">
@@ -94,9 +107,7 @@
                                     </tr>
                                 @empty
                                     <tr><td colspan="4" class="px-5 py-12 text-center">
-                                        <span class="mx-auto grid size-14 place-items-center rounded-full bg-futa-orange-soft text-futa-orange"><x-heroicon-o-chat-bubble-left-right class="size-7" aria-hidden="true" /></span>
-                                        <p class="mt-4 text-lg font-semibold text-gray-950">{{ __('Profile::feedback.'.($hasFilters ? 'filtered_empty' : 'empty')) }}</p>
-                                        <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">{{ __('Profile::feedback.'.($hasFilters ? 'filtered_hint' : 'empty_hint')) }}</p>
+                                        <x-core::empty-state :title="__('Profile::feedback.'.($hasFilters ? 'filtered_empty' : 'empty'))" :description="__('Profile::feedback.'.($hasFilters ? 'filtered_hint' : 'empty_hint'))" />
                                     </td></tr>
                                 @endforelse
                             </tbody>
