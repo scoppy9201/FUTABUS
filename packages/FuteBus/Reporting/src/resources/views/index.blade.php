@@ -175,11 +175,14 @@
                 @else
                     <div class="mt-4 h-64"><canvas class="block h-full w-full" data-report-donut role="img" aria-label="{{ __('Reporting::app.donut_chart') }}"></canvas></div>
                     <ul class="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-slate-600">
-                        @php $donutTotal = array_sum($report['status']); @endphp
+                        @php
+                            $donutTotal = array_sum($report['status']);
+                            $isRevenueDonut = in_array($filters['type'], ['overview', 'revenue'], true);
+                        @endphp
                         @foreach($report['status'] as $key => $value)
                             @php
-                                $colors = ['#f97316', '#3b82f6', '#16a34a', '#64748b', '#dc2626', '#0f766e'];
-                                $color = $filters['type'] === 'revenue'
+                                $colors = ['#f97316', '#3b82f6', '#16a34a', '#64748b'];
+                                $color = $isRevenueDonut
                                     ? ($colors[$loop->index] ?? '#64748b')
                                     : ([
                                         'completed' => '#f97316', 'pending' => '#0f766e', 'failed' => '#2563eb',
@@ -190,8 +193,8 @@
                                 $share = $donutTotal > 0 ? ((float) $value / $donutTotal) * 100 : 0;
                             @endphp
                             <li class="flex items-center gap-2"><span class="size-2.5 rounded-full" style="background-color: {{ $color }}"></span>
-                                {{ $filters['type'] === 'revenue' ? $key : __('Reporting::app.'.$key) }} · {{ number_format($value) }}
-                                @if($filters['type'] === 'revenue') ₫ @endif · {{ number_format($share, 2) }}%
+                                {{ $isRevenueDonut ? $key : __('Reporting::app.'.$key) }} · {{ number_format($value) }}
+                                @if($isRevenueDonut) ₫ @endif · {{ number_format($share, 2) }}%
                             </li>
                         @endforeach
                     </ul>
