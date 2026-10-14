@@ -135,14 +135,26 @@
                                             $run += (int) $st->leg_minutes;
                                             $t = $dep->copy()->addMinutes($run);
                                             $plus = (int) $dep->copy()->startOfDay()->diffInDays($t->copy()->startOfDay());
+                                            $mapQuery = implode(', ', array_filter([$st->name, $st->address, 'Việt Nam']));
+                                            $mapUrl = 'https://www.google.com/maps/search/?api=1&query='.rawurlencode($mapQuery);
                                         @endphp
                                         <li class="flex gap-4">
                                             <span class="w-16 shrink-0 pt-0.5 text-right text-sm font-bold text-slate-800">
                                                 {{ $t->format('H:i') }}
                                                 @if($plus > 0)<span class="block text-[10px] font-semibold text-slate-400">+{{ $plus }}</span>@endif
                                             </span>
-                                            <div class="flex flex-col items-center">
-                                                <span class="mt-1.5 size-3 shrink-0 rounded-full border-2 bg-white {{ $loop->last ? 'border-futa-orange' : 'border-slate-500' }}"></span>
+                                            <div class="flex w-6 shrink-0 flex-col items-center" aria-hidden="true">
+                                                @if($loop->first || $loop->last)
+                                                    <span class="-mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border border-orange-200 bg-orange-50 text-futa-orange">
+                                                        @if($loop->first)
+                                                            <x-heroicon-o-map-pin class="size-4" />
+                                                        @else
+                                                            <x-heroicon-o-flag class="size-4" />
+                                                        @endif
+                                                    </span>
+                                                @else
+                                                    <span class="mt-1.5 size-3 shrink-0 rounded-full border-2 border-slate-500 bg-white"></span>
+                                                @endif
                                                 @unless($loop->last)<span class="w-px grow bg-slate-200"></span>@endunless
                                             </div>
                                             <div class="min-w-0 flex-1 pb-5">
@@ -154,7 +166,17 @@
                                                     @endif
                                                 </p>
                                                 @if($st->address)<p class="text-xs text-slate-500">{{ $st->address }}</p>@endif
-                                                <p class="text-[11px] text-slate-400">+{{ $st->leg_minutes }} {{ __('TripManagement::app.rs_minutes') }}</p>
+                                                <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                                                    <p class="text-[11px] text-slate-400">+{{ $st->leg_minutes }} {{ __('TripManagement::app.rs_minutes') }}</p>
+                                                    <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer"
+                                                        class="inline-flex items-center gap-1 text-xs font-semibold text-futa-orange hover:underline
+                                                            focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange">
+                                                        <x-heroicon-o-map-pin class="size-3.5" aria-hidden="true" />
+                                                        {{ __('TripManagement::app.rs_view_location') }}
+                                                        <span class="sr-only">: {{ $st->name }} — {{ __('TripManagement::app.rs_map_new_tab') }}</span>
+                                                        <x-heroicon-o-arrow-top-right-on-square class="size-3" aria-hidden="true" />
+                                                    </a>
+                                                </div>
                                             </div>
 
                                         </li>

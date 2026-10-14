@@ -76,6 +76,8 @@ return [
     'rs_offset_hint'       => 'Minutes from the 0 mark. The smallest value is the departure stop.',
     'rs_f_type'            => 'Stop type',
     'rs_minutes'           => 'min',
+    'rs_view_location'     => 'View location',
+    'rs_map_new_tab'       => 'Open Google Maps in a new tab',
     'rs_type_both'         => 'Pickup and drop-off',
     'rs_type_pickup'       => 'Pickup only',
     'rs_type_dropoff'      => 'Drop-off only',
