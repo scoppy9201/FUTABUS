@@ -19,5 +19,6 @@ class ReportingServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'Reporting');
         $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'Reporting');
         Route::middleware('web')->group(__DIR__.'/../routes/web.php');
+        Route::middleware('api')->prefix('api')->group(__DIR__.'/../routes/api.php');
     }
 }
