@@ -79,6 +79,22 @@ class OwnerDashboardTest extends TestCase
         }
     }
 
+    public function test_owner_dashboard_switches_between_vietnamese_and_english(): void
+    {
+        $this->actingAs($this->admin())
+            ->get(route('dashboard', ['lang' => 'vi']))
+            ->assertOk()
+            ->assertSeeText('Tổng quan hoạt động')
+            ->assertSeeText('Tiếng Việt')
+            ->assertSee('lang=en', false);
+
+        $this->get(route('dashboard', ['lang' => 'en']))
+            ->assertOk()
+            ->assertSeeText('Operations at a glance')
+            ->assertSeeText('Vietnamese')
+            ->assertSee('lang=vi', false);
+    }
+
     private function admin(): User
     {
         $admin = $this->createTestUser();
