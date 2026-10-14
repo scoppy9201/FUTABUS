@@ -142,9 +142,7 @@
                                     <tr x-show="!rows.length">
                                         <td colspan="6" class="px-6 py-10 text-center">
                                             <div class="flex flex-col items-center">
-                                                <span class="mb-4 grid size-14 place-items-center rounded-full bg-futa-orange-soft"><x-heroicon-o-inbox class="size-7 text-futa-orange" /></span>
-                                                <p class="font-semibold text-gray-900">{{ __('StaffCustomerSupport::support.empty') }}</p>
-                                                <p class="mt-2 text-sm text-gray-500">{{ __('StaffCustomerSupport::support.empty_hint') }}</p>
+                                                <x-core::empty-state :title="__('StaffCustomerSupport::support.empty')" :description="__('StaffCustomerSupport::support.empty_hint')" compact />
                                             </div>
                                         </td>
                                     </tr>
@@ -295,7 +293,7 @@
                                 <section x-show="detail.can_respond && detail.is_handler && detail.status === 'reviewing'" class="space-y-4 rounded-xl bg-white p-5 shadow-sm">
                                     <h3 class="font-bold">{{ __('StaffCustomerSupport::support.transfer') }}</h3>
                                     <p class="text-xs text-gray-500">{{ __('StaffCustomerSupport::support.department_hint') }}</p>
-                                    <p x-show="!detail.departments.length" class="text-sm text-gray-500">{{ __('StaffCustomerSupport::support.no_departments') }}</p>
+                                    <x-core::empty-state x-show="!detail.departments.length" :title="__('StaffCustomerSupport::support.no_departments')" compact />
                                     <form novalidate x-show="detail.departments.length" @submit.prevent="addAction('transfer')" class="space-y-3">
                                         <label class="block text-sm">{{ __('StaffCustomerSupport::support.department') }}
                                             <select x-model="departmentRole" x-ref="departmentRole" @input="fieldErrors.departmentRole = ''"

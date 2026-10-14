@@ -96,8 +96,7 @@
                     <tr x-show="!loadingTickets && !rows.length"><td colspan="9" class="h-32 px-4 text-center text-gray-500">
                         <span
                             x-show="!groups?.tickets.lookup">{{ __('StaffTicketProcessing::tickets.denied') }}</span>
-                        <span
-                            x-show="groups?.tickets.lookup && !listFailed">{{ __('StaffTicketProcessing::tickets.empty') }}</span>
+                        <x-core::empty-state x-show="groups?.tickets.lookup && !listFailed" :title="__('StaffTicketProcessing::tickets.empty')" compact />
                         <button
                             x-show="groups?.tickets.lookup && listFailed"
                             @click="loadTickets()"

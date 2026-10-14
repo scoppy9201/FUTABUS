@@ -141,7 +141,11 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="8" class="px-6 py-16 text-center text-sm font-semibold text-slate-500">{{ __('BusManagement::app.vd_empty') }}</td></tr>
+                        <tr>
+                            <td colspan="8" class="px-6 py-16 text-center text-sm font-semibold text-slate-500">
+                                <x-core::empty-state :title="__('BusManagement::app.vd_empty')" />
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
@@ -216,7 +220,7 @@
 
                 <div class="rounded-xl border border-slate-200 p-3">
                     <p class="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">{{ __('BusManagement::app.vd_f_values') }}</p>
-                    <p x-show="currentFields.length === 0" class="text-xs text-slate-400">{{ __('BusManagement::app.vd_no_fields') }}</p>
+                    <x-core::empty-state x-show="currentFields.length === 0" :title="__('BusManagement::app.vd_no_fields')" compact />
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <template x-for="f in currentFields" :key="form.document_type_id + ':' + f.key + ':' + f.type">
                             <div>

@@ -227,9 +227,9 @@
                                 @empty
                                     <tr>
                                         <td colspan="8" class="px-6 py-14 text-center">
-                                            <div class="mx-auto grid size-14 place-items-center rounded-full bg-futa-orange-soft text-futa-orange"><x-heroicon-o-ticket class="size-7" /></div>
-                                            <p class="mt-4 text-lg font-semibold text-gray-950">{{ __($hasFilters ? 'Profile::tickets.filtered_empty_title' : 'Profile::tickets.empty_title') }}</p>
-                                            <p class="mt-1 text-sm text-slate-600">{{ __($hasFilters ? 'Profile::tickets.filtered_empty_description' : 'Profile::tickets.empty_description') }}</p>
+                                            <x-core::empty-state
+                                                :title="__($hasFilters ? 'Profile::tickets.filtered_empty_title' : 'Profile::tickets.empty_title')"
+                                                :description="__($hasFilters ? 'Profile::tickets.filtered_empty_description' : 'Profile::tickets.empty_description')" />
                                             @unless($hasFilters)
                                                 <p class="mx-auto mt-3 max-w-lg text-sm text-slate-600">{{ __('Profile::tickets.guest_lookup') }}</p>
                                                 <a href="{{ route('ticket-lookup') }}" class="mt-2 inline-block text-sm font-semibold text-futa-orange hover:underline">{{ __('Profile::tickets.guest_lookup_action') }}</a>

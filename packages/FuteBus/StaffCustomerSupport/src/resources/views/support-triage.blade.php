@@ -32,7 +32,7 @@
                 @endif
             </article>
         @empty
-            <p class="py-10 text-center text-gray-500">{{ __('StaffCustomerSupport::support.empty') }}</p>
+            <x-core::empty-state class="py-10 text-center text-gray-500" :title="__('StaffCustomerSupport::support.empty')" compact />
         @endforelse
         {{ $reports->links() }}
     </main>

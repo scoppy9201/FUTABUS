@@ -98,7 +98,11 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="9" class="px-6 py-16 text-center text-sm font-semibold text-slate-500">{{ __('BusManagement::app.empty') }}</td></tr>
+                        <tr>
+                            <td colspan="9" class="px-6 py-16 text-center text-sm font-semibold text-slate-500">
+                                <x-core::empty-state :title="__('BusManagement::app.empty')" />
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>

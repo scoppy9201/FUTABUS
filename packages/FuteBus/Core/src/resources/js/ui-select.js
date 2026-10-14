@@ -55,10 +55,8 @@ function enhanceSelect(source) {
             panel.append(button);
         });
         if (buttons.length === 0) {
-            const empty = document.createElement('p');
-            empty.className = 'futa-control-group';
-            empty.textContent = template.dataset.noOptions;
-            panel.append(empty);
+            const empty = document.querySelector('#futa-ui-empty-options-template');
+            panel.append(empty.content.cloneNode(true));
         }
         if (activeIndex !== undefined) buttons.find((button) => button.dataset.optionIndex === activeIndex)?.focus();
     }

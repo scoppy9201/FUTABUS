@@ -49,8 +49,7 @@
         </div>
         @if($roles->isEmpty())
             <div class="px-6 py-14 text-center">
-                <span class="mx-auto grid size-12 place-items-center rounded-full bg-orange-50 text-[#F26522]"><x-heroicon-o-key class="size-6" /></span>
-                <p class="mt-3 text-sm font-semibold text-slate-600">{{ __('RolePermission::app.empty_roles') }}</p>
+                <x-core::empty-state :title="__('RolePermission::app.empty_roles')" />
                 <a href="{{ route('access-management.roles.create') }}" class="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#F26522] px-4 py-2 text-sm font-bold text-white hover:bg-[#d95318]"><x-heroicon-o-plus class="size-4" />{{ __('RolePermission::app.create_role') }}</a>
             </div>
         @else

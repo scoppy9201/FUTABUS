@@ -131,10 +131,7 @@
                     @empty
                         <tr>
                             <td colspan="8" class="px-6 py-16 text-center">
-                                <span class="mx-auto grid size-14 place-items-center rounded-full bg-slate-50 text-slate-300">
-                                    <x-heroicon-o-inbox class="size-8" />
-                                </span>
-                                <p class="mt-3 text-sm font-semibold text-slate-500">{{ __('BusManagement::app.empty') }}</p>
+                                <x-core::empty-state class="mt-3 text-sm font-semibold text-slate-500" :title="__('BusManagement::app.empty')" compact />
                                 <button @click="openAdd()" class="mt-3 text-sm font-medium text-futa-orange hover:underline">
                                     {{ __('BusManagement::app.btn_add_now') }}
                                 </button>

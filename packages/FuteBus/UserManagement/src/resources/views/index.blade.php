@@ -120,8 +120,7 @@
                     @empty
                         <tr>
                             <td colspan="7" class="px-6 py-16 text-center">
-                                <span class="mx-auto grid size-14 place-items-center rounded-full bg-slate-50 text-slate-300"><x-heroicon-o-inbox class="size-8" /></span>
-                                <p class="mt-3 text-sm font-semibold text-slate-500">{{ __('UserManagement::app.empty') }}</p>
+                                <x-core::empty-state :title="__('UserManagement::app.empty')" />
                             </td>
                         </tr>
                     @endforelse

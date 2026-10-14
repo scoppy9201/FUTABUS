@@ -95,7 +95,7 @@
                         <span class="h-px flex-1 bg-futa-green"></span>
                     </div>
                     @if($articles->isEmpty())
-                        <p class="mt-6 rounded-xl border border-gray-200 bg-gray-50 px-5 py-12 text-center text-sm text-gray-500">{{ __('core::news.empty') }}</p>
+                        <x-core::empty-state class="mt-6 rounded-xl border border-gray-200 bg-gray-50 px-5 py-12 text-center text-sm text-gray-500" :title="__('core::news.empty')" compact />
                     @else
                         <div class="mt-6 grid gap-x-6 gap-y-5 lg:grid-cols-2">
                             @foreach($articles as $article)

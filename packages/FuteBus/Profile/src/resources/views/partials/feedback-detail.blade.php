@@ -63,7 +63,11 @@
             <h3 id="feedback-response-title" class="flex items-center gap-2 text-sm font-bold text-gray-950">
                 <x-heroicon-o-chat-bubble-left-right class="size-5 text-futa-orange" aria-hidden="true" />{{ __('Profile::feedback.response_title') }}
             </h3>
-            <p class="mt-2 whitespace-pre-wrap wrap-break-word text-sm leading-6 text-slate-600">{{ filled($report->response) ? $report->response : __('Profile::feedback.'.$emptyResponse) }}</p>
+            @if(filled($report->response))
+                <p class="mt-2 whitespace-pre-wrap wrap-break-word text-sm leading-6 text-slate-600">{{ $report->response }}</p>
+            @else
+                <x-core::empty-state :title="__('Profile::feedback.'.$emptyResponse)" compact />
+            @endif
         </section>
         <section aria-labelledby="feedback-report-content-title">
             @if($history->isNotEmpty())

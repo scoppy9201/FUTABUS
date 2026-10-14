@@ -142,9 +142,9 @@
                 </template></tbody>
                 </table>
                 </div>
-                <p x-show="!(dashboard?.support_requests?.length)" class="py-3 text-center text-xs text-gray-500">
-                    {{ auth()->user()->hasPermissionTo('support.view') ? __('StaffCustomerSupport::support.empty') : __('StaffDashboard::staff.unavailable') }}
-                </p>
+                <x-core::empty-state x-show="!(dashboard?.support_requests?.length)" class="py-3 text-center text-xs text-gray-500"
+                    :title="auth()->user()->hasPermissionTo('support.view') ? __('StaffCustomerSupport::support.empty') : __('StaffDashboard::staff.unavailable')"
+                    compact />
             </section>
             </div>
         </main>

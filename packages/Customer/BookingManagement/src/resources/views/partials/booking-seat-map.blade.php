@@ -19,8 +19,8 @@
                 </div>
             </div>
         </template>
-        <p x-show="deckSeats('lower', @js($leg)).length + deckSeats('upper', @js($leg)).length === 0"
-            class="text-sm text-slate-500">{{ __('core::trip-search.no_seat_map') }}</p>
+        <x-core::empty-state x-show="deckSeats('lower', @js($leg)).length + deckSeats('upper', @js($leg)).length === 0"
+            class="text-sm text-slate-500" :title="__('core::trip-search.no_seat_map')" compact />
     </div>
     @unless ($sharedLegend ?? false)
         @include('BookingManagement::partials.booking-seat-legend')
