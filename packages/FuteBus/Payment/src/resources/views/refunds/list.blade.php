@@ -1,7 +1,7 @@
 <div data-refund-workspace data-error="{{ __('Payment::refunds.error') }}" data-saved="{{ __('Payment::refunds.saved') }}" class="mx-auto w-full space-y-5">
     <header class="flex flex-wrap items-center justify-between gap-4">
         <div>
-            <p class="text-sm font-bold uppercase tracking-[0.16em] text-futa-orange">{{ config('app.name') }}</p>
+            <p class="text-sm font-bold uppercase tracking-[0.16em] text-futa-orange">FUTA Bus Lines</p>
             <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">{{ __('Payment::refunds.title') }}</h1>
             <p class="mt-2 text-sm text-slate-500">{{ __('Payment::refunds.intro') }}</p>
         </div>

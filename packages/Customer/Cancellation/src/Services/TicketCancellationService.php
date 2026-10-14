@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace FuteBus\Cancellation\Services;
 
 use App\Models\User;
+use Carbon\Carbon;
 use FuteBus\BookingManagement\Models\BookedSeat as BookedSeatRecord;
 use FuteBus\BookingManagement\Models\Booking as BookingRecord;
 use FuteBus\Cancellation\Models\TicketCancellation as TicketCancellationRecord;
 use FuteBus\Cancellation\Notifications\TicketCancelled;
+use FuteBus\Notification\Services\CompanyNotificationService;
 use FuteBus\Payment\Models\Payment as PaymentRecord;
 use FuteBus\Payment\Models\SePayTransaction as SePayTransactionRecord;
 use FuteBus\Payment\Models\TicketRefund as TicketRefundRecord;
@@ -21,7 +23,10 @@ use Illuminate\Validation\ValidationException;
 
 class TicketCancellationService
 {
-    public function __construct(private readonly CancellationPolicy $policy) {}
+    public function __construct(
+        private readonly CancellationPolicy $policy,
+        private readonly CompanyNotificationService $notifications,
+    ) {}
 
     public function owned(User $user, int $booking): Builder
     {
@@ -98,7 +103,32 @@ class TicketCancellationService
                 'refund'    => $quote['refund'], 'booking_id' => $booking,
             ]));
 
+            $this->notifyCompany($candidate, $quote['refund'], $booking);
+
             return TicketCancellationRecord::query()->toBase()->where('id', $id)->first();
+        });
+    }
+
+    private function notifyCompany(object $ticket, int $refund, int $booking): void
+    {
+        $companyId = TripRecord::query()->toBase()->where('id', $ticket->trip_id)->value('bus_company_id');
+        if ($companyId === null) {
+            return;
+        }
+
+        DB::afterCommit(function () use ($companyId, $ticket, $refund, $booking): void {
+            $this->notifications->notifyManagers((int) $companyId, [
+                'title'   => __('Notification::app.booking_cancelled_title'),
+                'url'     => route('bookings.show', ['kind' => 'booking', 'record' => $booking], false),
+                'message' => __('Notification::app.booking_cancelled_message', [
+                    'booking'   => $ticket->booking_code,
+                    'ticket'    => $ticket->ticket_code,
+                    'route'     => $ticket->origin_city.' - '.$ticket->destination_city,
+                    'trip_id'   => $ticket->trip_id,
+                    'departure' => Carbon::parse($ticket->departure_time)->format('d/m/Y H:i'),
+                    'refund'    => number_format($refund, 0, ',', '.'),
+                ]),
+            ]);
         });
     }
 

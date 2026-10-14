@@ -4,13 +4,20 @@ declare(strict_types=1);
 
 namespace FuteBus\Payment\Services;
 
+use Carbon\Carbon;
 use FuteBus\BookingManagement\Models\BookedSeat as BookedSeatRecord;
 use FuteBus\BookingManagement\Models\Booking as BookingRecord;
 use FuteBus\CustomerManagement\Models\Customer as CustomerRecord;
+use FuteBus\Notification\Services\CompanyNotificationService;
 use FuteBus\TicketManagement\Models\Ticket as TicketRecord;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class TicketIssuer
 {
+    public function __construct(private readonly CompanyNotificationService $notifications) {}
+
     public function issue(object $intent, array $preview, array $seatIds, bool $outbound = false): int
     {
         $trip = $outbound ? $preview['outbound_trip'] : $preview['trip'];
@@ -75,6 +82,40 @@ class TicketIssuer
             ]);
         }
 
+        $this->notifyCompany($bookingId, $tripId, $bookingCode, $preview['customer']['name'], $seatCodes);
+
         return $bookingId;
+    }
+
+    private function notifyCompany(int $bookingId, int $tripId, string $bookingCode, string $customer, array $seats): void
+    {
+        DB::afterCommit(function () use ($bookingId, $tripId, $bookingCode, $customer, $seats): void {
+            try {
+                $trip = DB::table('trips')->join('routes', 'routes.id', '=', 'trips.route_id')
+                    ->where('trips.id', $tripId)
+                    ->first([
+                        'trips.id', 'trips.bus_company_id', 'trips.departure_time',
+                        'routes.origin_city', 'routes.destination_city',
+                    ]);
+                if ($trip === null) {
+                    return;
+                }
+
+                $this->notifications->notifyManagers((int) $trip->bus_company_id, [
+                    'title'   => __('Notification::app.booking_created_title'),
+                    'url'     => route('bookings.show', ['kind' => 'booking', 'record' => $bookingId], false),
+                    'message' => __('Notification::app.booking_created_message', [
+                        'customer'  => $customer,
+                        'route'     => $trip->origin_city.' - '.$trip->destination_city,
+                        'trip_id'   => $trip->id,
+                        'departure' => Carbon::parse($trip->departure_time)->format('d/m/Y H:i'),
+                        'booking'   => $bookingCode,
+                        'seats'     => implode(', ', $seats),
+                    ]),
+                ]);
+            } catch (Throwable $exception) {
+                Log::warning('Could not create a ticket booking notification.', ['exception' => $exception::class]);
+            }
+        });
     }
 }

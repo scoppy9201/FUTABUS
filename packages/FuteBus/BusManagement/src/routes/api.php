@@ -6,10 +6,11 @@ use FuteBus\Auth\Http\Middleware\EnsureApiAdmin;
 use FuteBus\Auth\Http\Middleware\EnsureApiToken;
 use FuteBus\BusManagement\Http\Controllers\Api\BusController;
 use FuteBus\BusManagement\Http\Controllers\Api\VehicleTypeController;
+use FuteBus\Notification\Http\Middleware\CaptureCompanyActivity;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1/admin')->name('api.v1.admin.')
-    ->middleware(['auth:sanctum', EnsureApiToken::class, EnsureApiAdmin::class])
+    ->middleware(['auth:sanctum', EnsureApiToken::class, EnsureApiAdmin::class, CaptureCompanyActivity::class])
     ->group(function (): void {
         Route::get('/vehicle-types', [VehicleTypeController::class, 'index'])->name('vehicle-types.index');
         Route::post('/vehicle-types', [VehicleTypeController::class, 'store'])->name('vehicle-types.store');

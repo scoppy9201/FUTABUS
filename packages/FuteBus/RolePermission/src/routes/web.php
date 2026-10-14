@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
+use FuteBus\Notification\Http\Middleware\CaptureCompanyActivity;
 use FuteBus\RolePermission\Http\Controllers\AccessControlController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['web', 'auth'])->prefix('quan-tri/quyen-truy-cap')->name('access-management.')->group(function (): void {
+Route::middleware(['web', 'auth', CaptureCompanyActivity::class])->prefix('quan-tri/quyen-truy-cap')->name('access-management.')->group(function (): void {
     Route::get('/', [AccessControlController::class, 'index'])->name('index');
     Route::get('/danh-muc-chuc-nang', [AccessControlController::class, 'catalog'])->name('catalog');
     Route::post('/danh-muc-chuc-nang', [AccessControlController::class, 'storePermission'])->name('catalog.store');
