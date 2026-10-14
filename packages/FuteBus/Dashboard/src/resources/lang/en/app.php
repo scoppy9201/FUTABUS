@@ -2,6 +2,8 @@
 
 return [
     'owner_portal'             => 'Operator portal',
+    'language_vi'               => 'Vietnamese',
+    'language_en'               => 'English',
     'slogan'                   => 'Quality is our honour',
     'official_partner'         => 'Official Partner',
     'support_call_center'      => 'Partner support line',

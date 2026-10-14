@@ -2,6 +2,8 @@
 
 return [
     'owner_portal'             => 'Quản trị nhà xe',
+    'language_vi'               => 'Tiếng Việt',
+    'language_en'               => 'English',
     'slogan'                   => 'Chất lượng là danh dự',
     'official_partner'         => 'Đối tác Chính thức',
     'support_call_center'      => 'Tổng đài hỗ trợ đối tác',
