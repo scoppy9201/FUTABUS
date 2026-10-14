@@ -6,6 +6,7 @@ namespace FuteBus\Profile\Http\Controllers;
 
 use App\Models\User;
 use FuteBus\Payment\Services\TicketQrService;
+use FuteBus\Profile\Http\Requests\StoreTicketReviewRequest;
 use FuteBus\Profile\Http\Requests\TicketHistoryRequest;
 use FuteBus\Profile\Services\TicketHistoryActionPolicy;
 use FuteBus\Profile\Services\TicketHistoryService;
@@ -83,12 +84,9 @@ class TicketHistoryController extends Controller
             ->header('Cache-Control', 'private, no-store');
     }
 
-    public function review(Request $request, TicketReviewService $reviews, int $booking): JsonResponse|RedirectResponse
+    public function review(StoreTicketReviewRequest $request, TicketReviewService $reviews, int $booking): JsonResponse|RedirectResponse
     {
-        $input = $request->validate([
-            'rating'  => ['required', 'integer', 'between:1,5'],
-            'comment' => ['nullable', 'string', 'max:300'],
-        ]);
+        $input = $request->validated();
 
         /** @var User $user */
         $user = $request->user();

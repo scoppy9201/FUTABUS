@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FuteBus\BusManagement\Http\Controllers;
 
+use FuteBus\BusManagement\Http\Requests\BusInputRequest;
 use FuteBus\BusManagement\Services\BusService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -32,21 +33,21 @@ class BusController extends Controller
         ]);
     }
 
-    public function store(Request $request, BusService $buses): RedirectResponse
+    public function store(BusInputRequest $request, BusService $buses): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
 
-        $buses->create($request->validate($buses->rules()));
+        $buses->create($request->validated());
 
         return redirect()->route('bus-management.buses.index')
             ->with('success', __('BusManagement::app.bus_flash_created'));
     }
 
-    public function update(Request $request, BusService $buses, int $id): RedirectResponse
+    public function update(BusInputRequest $request, BusService $buses, int $id): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
 
-        $buses->update($id, $request->validate($buses->rules($id)));
+        $buses->update($id, $request->validated());
 
         return redirect()->route('bus-management.buses.index')
             ->with('success', __('BusManagement::app.bus_flash_updated'));

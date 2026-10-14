@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FuteBus\Auth\Http\Controllers\Api;
 
 use App\Models\User;
+use FuteBus\Auth\Http\Requests\IssueTokenRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -14,13 +15,9 @@ use Laravel\Sanctum\PersonalAccessToken;
 
 class TokenController extends Controller
 {
-    public function store(Request $request): JsonResponse
+    public function store(IssueTokenRequest $request): JsonResponse
     {
-        $credentials = $request->validate([
-            'email'       => ['required', 'email'],
-            'password'    => ['required', 'string'],
-            'device_name' => ['required', 'string', 'max:100'],
-        ]);
+        $credentials = $request->validated();
         $user = User::query()
             ->where('email', mb_strtolower(trim($credentials['email'])))
             ->first();

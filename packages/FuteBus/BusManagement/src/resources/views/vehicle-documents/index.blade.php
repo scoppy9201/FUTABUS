@@ -262,25 +262,13 @@
     </x-core::side-panel>
 
     {{-- DELETE MODAL --}}
-    <div role="dialog" aria-modal="true" x-show="showDelete" x-cloak @click.self="showDelete = false"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
-        <div class="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl">
-            <div class="mx-auto mb-4 grid size-14 place-items-center rounded-full bg-rose-100">
-                <x-heroicon-o-exclamation-triangle class="size-7 text-rose-500" />
-            </div>
-            <h3 class="text-lg font-bold text-slate-900">{{ __('BusManagement::app.vd_delete_title') }}</h3>
-            <p class="mt-2 text-sm text-slate-500">
-                {{ __('BusManagement::app.vd_delete_confirm') }}
-                <span class="font-bold text-slate-800" x-text="delData.name"></span>?
-            </p>
-            <form :action="delAction" method="POST" class="mt-5 flex items-center justify-end gap-2">
-                @csrf
-                @method('DELETE')
-                <button type="button" @click="showDelete = false" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('BusManagement::app.btn_cancel') }}</button>
-                <button type="submit" class="rounded-lg bg-rose-600 px-5 py-2 text-xs font-bold text-white hover:bg-rose-700">{{ __('BusManagement::app.btn_confirm_delete') }}</button>
-            </form>
-        </div>
-    </div>
+    <form x-ref="deleteForm" :action="delAction" method="POST" hidden data-confirm
+        :data-confirm-title="@js(__('BusManagement::app.vd_delete_title'))"
+        :data-confirm-message="@js(__('BusManagement::app.vd_delete_confirm')) + ' ' + delData.name + '?'"
+        data-confirm-label="{{ __('BusManagement::app.btn_confirm_delete') }}">
+        @csrf
+        @method('DELETE')
+    </form>
 </div>
 
 <script>
@@ -289,8 +277,7 @@ function vehicleDocManager() {
     const base = `{{ url('quan-tri/phuong-tien/ho-so-giay-to') }}`;
     const blank = () => ({ bus_id: '', document_type_id: '', issued_date: '', expiry_date: '', values: {}, file_name: '' });
     return {
-        types, mode: 'add', showForm: false, showView: false, showDelete: false,
-        attachmentInvalid: false,
+        types, mode: 'add', showForm: false, showView: false, attachmentInvalid: false,
         form: blank(), formAction: base, renewInfo: {}, viewData: {}, delData: {}, delAction: '',
         today: @js(today()->toDateString()),
         issuedMax: @js(today()->subDay()->toDateString()),
@@ -356,7 +343,7 @@ function vehicleDocManager() {
             this.formAction = `${base}/${d.id}/gia-han`; this.showForm = true;
         },
         openView(d) { this.viewData = d; this.showView = true; },
-        openDelete(d) { this.delData = d; this.delAction = `${base}/${d.id}/xoa`; this.showDelete = true; },
+        openDelete(d) { this.delData = d; this.delAction = `${base}/${d.id}/xoa`; this.$nextTick(() => this.$refs.deleteForm.requestSubmit()); },
     };
 }
 </script>

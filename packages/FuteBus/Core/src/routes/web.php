@@ -3,9 +3,6 @@
 declare(strict_types=1);
 
 use FuteBus\Core\Http\Controllers\HomeController;
-use FuteBus\Core\Http\Controllers\TicketLookupController;
-use FuteBus\Core\Http\Controllers\TripBookingController;
-use FuteBus\Core\Http\Controllers\TripSearchController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -13,18 +10,12 @@ Route::get('/api/docs', fn () => view('core::api-docs'))->name('api.docs');
 Route::get('/api/openapi.json', fn () => response()->file(base_path('docs/api/openapi.json'), [
     'Content-Type' => 'application/json; charset=utf-8',
 ]))->name('api.openapi');
-Route::get('/dat-ve', TripSearchController::class)->name('trip-search');
-Route::get('/dat-ve/chon-chuyen/{trip}', TripBookingController::class)->whereNumber('trip')->name('trip-booking.show');
 Route::get('/huong-dan-dat-ve-tren-web', [HomeController::class, 'bookingGuide'])->name('booking-guide');
 Route::get('/ve-chung-toi', [HomeController::class, 'about'])->name('about');
 Route::get('/chinh-sach/chinh-sach-bao-mat', [HomeController::class, 'privacy'])->name('privacy');
 Route::get('/chinh-sach/chinh-sach-thanh-toan', [HomeController::class, 'payment'])->name('payment');
 Route::get('/chinh-sach/chinh-sach-gia', [HomeController::class, 'pricing'])->name('pricing');
 Route::get('/chinh-sach/chinh-sach-doi-ve-hoan-tien', [HomeController::class, 'refund'])->name('refund');
-Route::get('/tra-cuu-ve', [TicketLookupController::class, 'index'])->name('ticket-lookup');
-Route::post('/tra-cuu-ve', [TicketLookupController::class, 'search'])
-    ->middleware('throttle:10,1')
-    ->name('ticket-lookup.search');
 Route::get('/hoa-don', [HomeController::class, 'invoice'])->name('invoice');
 Route::get('/dieu-khoan-su-dung', [HomeController::class, 'terms'])->name('terms');
 Route::get('/chinh-sach/dieu-kien-giao-dich-chung', [HomeController::class, 'transactionConditions'])

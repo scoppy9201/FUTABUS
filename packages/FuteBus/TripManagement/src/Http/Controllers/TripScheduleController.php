@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace FuteBus\TripManagement\Http\Controllers;
 
+use FuteBus\TripManagement\Http\Requests\TripScheduleRequest;
 use FuteBus\TripManagement\Services\TripGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -47,11 +47,11 @@ class TripScheduleController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(TripScheduleRequest $request): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
 
-        $data = $this->validated($request);
+        $data = $request->validated();
 
         //  tuyến phải có >= 2 điểm dừng đang hoạt động
         if (! TripGenerator::hasStops((int) $data['route_id'])) {
@@ -79,7 +79,7 @@ class TripScheduleController extends Controller
             ->with('success', __('TripManagement::app.sch_flash_created'));
     }
 
-    public function update(Request $request, int $id): RedirectResponse
+    public function update(TripScheduleRequest $request, int $id): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
         $schedule = DB::table('trip_schedules')->find($id);
@@ -89,7 +89,7 @@ class TripScheduleController extends Controller
             return back()->withErrors(['schedule' => __('TripManagement::app.sch_err_inactive')]);
         }
 
-        $data = $this->validated($request);
+        $data = $request->validated();
 
         // tuyến phải có >= 2 điểm dừng đang hoạt động
         if (! TripGenerator::hasStops((int) $data['route_id'])) {
@@ -131,35 +131,6 @@ class TripScheduleController extends Controller
 
         return redirect()->route('trip-management.schedules.index')
             ->with('warning', __('TripManagement::app.sch_flash_deactivated'));
-    }
-
-    private function validated(Request $request): array
-    {
-        if ($request->boolean('apply_all_days') || ! $request->filled('days_of_week')) {
-            $request->merge(['days_of_week' => range(1, 7)]);
-        }
-
-        return $request->validate([
-            'route_id'       => ['required', 'exists:routes,id'],
-            'departure_time' => ['required', 'date_format:H:i'],
-            'days_of_week'   => ['required', 'array', 'min:1'],
-            'days_of_week.*' => ['integer', 'between:1,7'],
-            'start_date'     => ['required', 'date'],
-            'end_date'       => [
-                'required', 'date', 'after_or_equal:start_date',
-                function ($attribute, $value, $fail) {
-                    if (Carbon::parse($value)->lt(today())) {
-                        $fail(__('TripManagement::app.sch_err_past'));
-                    }
-                },
-            ],
-            'price'          => ['required', 'integer', 'gt:1000', 'lt:100000000'],
-        ], [
-            'end_date.after_or_equal' => __('TripManagement::app.sch_err_date'),
-            'price.integer'           => __('TripManagement::app.sch_err_price'),
-            'price.gt'                => __('TripManagement::app.sch_err_price'),
-            'price.lt'                => __('TripManagement::app.sch_err_price'),
-        ]);
     }
 
     private function payload(array $d): array

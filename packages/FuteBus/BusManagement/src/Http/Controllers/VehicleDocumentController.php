@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FuteBus\BusManagement\Http\Controllers;
 
+use FuteBus\BusManagement\Http\Requests\VehicleDocumentRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -11,7 +12,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class VehicleDocumentController extends Controller
@@ -109,7 +109,7 @@ class VehicleDocumentController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(VehicleDocumentRequest $request): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
 
@@ -120,21 +120,12 @@ class VehicleDocumentController extends Controller
 
         $hasExpiry = (bool) ($docType?->has_expiry ?? true);
 
-        $rules = [
-            'bus_id'           => ['required', Rule::exists('buses', 'id')->where('status', 'active')],
-            'document_type_id' => ['required', Rule::exists('document_types', 'id')->where('status', 'active')],
-            'issued_date'      => ['required', 'date', 'before:today'],
-            'attachment'       => ['nullable', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png'],
-        ];
-        if ($hasExpiry) {
-            $rules['expiry_date'] = ['required', 'date', 'after:today', 'after:issued_date'];
-        }
-        $data = $request->validate($rules, $this->messages());
+        $data = $request->validated();
 
         // Tạo hồ sơ mới sẽ đánh dấu hồ sơ cũ là superseded (thông qua renewed_from_id)
         $existingId = $this->getCurrentDocId((int) $data['bus_id'], (int) $data['document_type_id']);
 
-        $values = $this->validatedValues($request, (int) $data['document_type_id']);
+        $values = $request->fieldValues();
 
         $filePath = null;
         $fileName = null;
@@ -160,7 +151,7 @@ class VehicleDocumentController extends Controller
             ->with('success', __('BusManagement::app.vd_flash_created'));
     }
 
-    public function update(Request $request, int $id): RedirectResponse
+    public function update(VehicleDocumentRequest $request, int $id): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
         $doc = DB::table('vehicle_documents')->find($id);
@@ -169,16 +160,9 @@ class VehicleDocumentController extends Controller
         $docType = DB::table('document_types')->find($doc->document_type_id);
         $hasExpiry = (bool) ($docType?->has_expiry ?? true);
 
-        $rules = [
-            'issued_date' => ['required', 'date', 'before:today'],
-            'attachment'  => ['nullable', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png'],
-        ];
-        if ($hasExpiry) {
-            $rules['expiry_date'] = ['required', 'date', 'after:today', 'after:issued_date'];
-        }
-        $data = $request->validate($rules, $this->messages());
+        $data = $request->validated();
 
-        $values = $this->validatedValues($request, (int) $doc->document_type_id);
+        $values = $request->fieldValues();
 
         $updateData = [
             'issued_date'  => $data['issued_date'],
@@ -201,7 +185,7 @@ class VehicleDocumentController extends Controller
     }
 
     /** Gia hạn: tạo hồ sơ mới thay thế hồ sơ cũ (cơ chế version). */
-    public function renew(Request $request, int $id): RedirectResponse
+    public function renew(VehicleDocumentRequest $request, int $id): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
         $old = DB::table('vehicle_documents')->find($id);
@@ -217,13 +201,9 @@ class VehicleDocumentController extends Controller
             return back()->withErrors(['doc' => __('BusManagement::app.vd_err_type')]);
         }
 
-        $data = $request->validate([
-            'issued_date' => ['required', 'date', 'before:today'],
-            'expiry_date' => ['required', 'date', 'after:today', 'after:issued_date'],
-            'attachment'  => ['nullable', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png'],
-        ], $this->messages());
+        $data = $request->validated();
 
-        $values = $this->validatedValues($request, (int) $old->document_type_id);
+        $values = $request->fieldValues();
 
         $filePath = null;
         $fileName = null;
@@ -300,50 +280,11 @@ class VehicleDocumentController extends Controller
             })->value('id');
     }
 
-    private function validatedValues(Request $request, int $typeId): array
-    {
-        $fields = DB::table('document_type_fields')
-            ->where('document_type_id', $typeId)->where('is_active', 1)->orderBy('sort_order')->get();
-
-        $rules = $attrs = [];
-        foreach ($fields as $f) {
-            $r = [$f->is_required ? 'required' : 'nullable', 'string', 'max:255'];
-            if ($f->field_type === 'number') {
-                $r[] = 'numeric';
-            }
-            if ($f->field_type === 'date') {
-                $r[] = 'date';
-            }
-            $rules["values.{$f->field_key}"] = $r;
-            $attrs["values.{$f->field_key}"] = $f->label;
-        }
-
-        $input = $request->validate($rules, [], $attrs);
-
-        return $fields->map(fn ($f) => [
-            'key'   => $f->field_key,
-            'label' => $f->label,
-            'type'  => $f->field_type,
-            'value' => data_get($input, "values.{$f->field_key}"),
-        ])->values()->all();
-    }
-
     private function storeFile(Request $request): array
     {
         $file = $request->file('attachment');
         $path = $file->store('vehicle-documents', 'local');
 
         return ['path' => $path, 'name' => $file->getClientOriginalName()];
-    }
-
-    private function messages(): array
-    {
-        return [
-            'expiry_date.after'           => __('BusManagement::app.vd_err_expiry'),
-            'issued_date.before_or_equal' => __('BusManagement::app.vd_err_issued_future'),
-            'issued_date.before'          => __('BusManagement::app.vd_err_issued_future'),
-            'attachment.mimes'            => __('BusManagement::app.vd_err_attachment'),
-            'attachment.max'              => __('BusManagement::app.vd_err_attachment'),
-        ];
     }
 }

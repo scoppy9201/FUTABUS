@@ -6,6 +6,11 @@ import vm from 'node:vm';
 const source = fs.readFileSync(new URL('../../packages/FuteBus/Core/src/resources/js/confirm-dialog.js', import.meta.url), 'utf8');
 
 function setup() {
+    class HTMLFormElement {
+        dataset = {};
+        hasAttribute() { return true; }
+        requestSubmit() { this.submitted = true; }
+    }
     const nodes = new Map();
     const node = key => {
         if (!nodes.has(key)) nodes.set(key, { handlers: {}, focus() {}, addEventListener(event, callback) { this.handlers[event] = callback; } });
@@ -19,9 +24,10 @@ function setup() {
         close() { this.open = false; this.handlers.close(); },
     };
     const window = { matchMedia: () => ({ matches: true }) };
-    const document = { getElementById: () => dialog, addEventListener() {}, querySelector: () => null, activeElement: { focus() {} } };
-    vm.runInNewContext(source, { window, document });
-    return { window, dialog, node };
+    const handlers = {};
+    const document = { getElementById: () => dialog, addEventListener(event, callback) { handlers[event] = callback; }, querySelector: () => null, activeElement: { focus() {} } };
+    vm.runInNewContext(source, { window, document, HTMLFormElement });
+    return { window, dialog, node, handlers, HTMLFormElement };
 }
 
 test('shared dialog resolves true only after acceptance and refuses overlapping prompts', async () => {
@@ -40,4 +46,15 @@ test('cancel closes the shared dialog without authorizing the operation', async 
     const decision = window.FutaConfirm();
     node('[data-confirm-cancel]').handlers.click();
     assert.equal(await decision, false);
+});
+
+test('a second submitted form cannot replace the operation being confirmed', async () => {
+    const { node, handlers, HTMLFormElement } = setup();
+    const first = new HTMLFormElement();
+    const second = new HTMLFormElement();
+    handlers.submit({ target: first, preventDefault() {} });
+    handlers.submit({ target: second, preventDefault() {} });
+    await node('[data-confirm-accept]').handlers.click();
+    assert.equal(first.submitted, true);
+    assert.equal(second.submitted, undefined);
 });

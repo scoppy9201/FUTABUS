@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\TripSearch;
 
-use FuteBus\Core\Services\TripSearchService;
+use FuteBus\TripSearch\Services\TripSearchService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;

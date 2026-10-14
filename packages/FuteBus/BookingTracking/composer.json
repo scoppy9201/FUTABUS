@@ -1,0 +1,27 @@
+{
+    "name": "futebus/bookingtracking",
+    "description": "Read-only booking tracking for bus companies and staff.",
+    "type": "library",
+    "version": "1.0.0",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "futebus/cancellation": "*",
+        "futebus/core": "*",
+        "futebus/dashboard": "*",
+        "futebus/payment": "*",
+        "futebus/staffdashboard": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "FuteBus\\BookingTracking\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "FuteBus\\BookingTracking\\Providers\\BookingTrackingServiceProvider"
+            ]
+        }
+    }
+}

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace FuteBus\Profile\Http\Controllers\Api;
 
+use FuteBus\Auth\Services\PasswordChangeService;
 use FuteBus\Profile\Http\Requests\ChangeApiPasswordRequest;
-use FuteBus\Profile\Services\PasswordChangeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 

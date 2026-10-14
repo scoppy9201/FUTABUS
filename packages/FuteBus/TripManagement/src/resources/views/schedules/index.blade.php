@@ -280,26 +280,13 @@
     </x-core::side-panel>
 
     {{-- DEACTIVATE SCHEDULE MODAL --}}
-    <div x-show="showDelete" x-cloak @click.self="showDelete = false"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
-        <div class="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl">
-            <div class="mx-auto mb-4 grid size-14 place-items-center rounded-full bg-rose-100">
-                <x-heroicon-o-exclamation-triangle class="size-7 text-rose-500" />
-            </div>
-            <h3 class="text-lg font-bold text-slate-900">{{ __('TripManagement::app.sch_modal_delete') }}</h3>
-            <p class="mt-2 text-sm text-slate-500">
-                {{ __('TripManagement::app.sch_delete_msg') }}
-                <span class="font-bold text-slate-800" x-text="deleteData.name"></span>?
-            </p>
-            <p class="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-700">{{ __('TripManagement::app.sch_delete_note') }}</p>
-            <form :action="deleteAction" method="POST" class="mt-5 flex items-center justify-end gap-2">
-                @csrf
-                @method('DELETE')
-                <button type="button" @click="showDelete = false" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('TripManagement::app.btn_cancel') }}</button>
-                <button type="submit" class="rounded-lg bg-rose-600 px-5 py-2 text-xs font-bold text-white hover:bg-rose-700">{{ __('TripManagement::app.btn_confirm') }}</button>
-            </form>
-        </div>
-    </div>
+    <form x-ref="deleteForm" :action="deleteAction" method="POST" hidden data-confirm
+        :data-confirm-title="@js(__('TripManagement::app.sch_modal_delete'))"
+        :data-confirm-message="@js(__('TripManagement::app.sch_delete_msg')) + ' ' + deleteData.name + '?' + ' ' + @js(__('TripManagement::app.sch_delete_note'))"
+        data-confirm-label="{{ __('TripManagement::app.btn_confirm') }}">
+        @csrf
+        @method('DELETE')
+    </form>
 
     {{-- Shared right-side panel --}}
     <x-core::side-panel id="schedules-stop-panel" @close="showStop = false" @click.self="showStop = false"
@@ -352,26 +339,14 @@
     </x-core::side-panel>
 
     {{-- DELETE STOP MODAL --}}
-    <div x-show="showStopDel" x-cloak @click.self="showStopDel = false"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
-        <div class="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl">
-            <div class="mx-auto mb-4 grid size-14 place-items-center rounded-full bg-rose-100">
-                <x-heroicon-o-exclamation-triangle class="size-7 text-rose-500" />
-            </div>
-            <h3 class="text-lg font-bold text-slate-900">{{ __('TripManagement::app.rs_modal_deactivate') }}</h3>
-            <p class="mt-2 text-sm text-slate-500">
-                {{ __('TripManagement::app.rs_deactivate_msg') }}
-                <span class="font-bold text-slate-800" x-text="stopDel.name"></span>?
-            </p>
-            <form :action="stopDelAction" method="POST" class="mt-5 flex items-center justify-end gap-2">
-                @csrf
-                @method('DELETE')
-                <input type="hidden" name="schedule_id" :value="stopSchedule">
-                <button type="button" @click="showStopDel = false" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('TripManagement::app.btn_cancel') }}</button>
-                <button type="submit" class="rounded-lg bg-rose-600 px-5 py-2 text-xs font-bold text-white hover:bg-rose-700">{{ __('TripManagement::app.btn_confirm') }}</button>
-            </form>
-        </div>
-    </div>
+    <form x-ref="stopDeleteForm" :action="stopDelAction" method="POST" hidden data-confirm
+        :data-confirm-title="@js(__('TripManagement::app.rs_modal_deactivate'))"
+        :data-confirm-message="@js(__('TripManagement::app.rs_deactivate_msg')) + ' ' + stopDel.name + '?'"
+        data-confirm-label="{{ __('TripManagement::app.btn_confirm') }}">
+        @csrf
+        @method('DELETE')
+        <input type="hidden" name="schedule_id" :value="stopSchedule">
+    </form>
 </div>
 
 {{-- THÔNG BÁO TỪ SERVER (FutaNotify) --}}
@@ -407,10 +382,10 @@ function scheduleManager() {
 
     return {
         open: {!! json_encode((object) ($open ? [(int) $open => true] : [])) !!},
-        showForm: false, showDelete: false, isEdit: false,
+        showForm: false, isEdit: false,
         form: { ...blank }, formAction: base,
         deleteData: {}, deleteAction: '',
-        showStop: false, showStopDel: false, stopEdit: false,
+        showStop: false, stopEdit: false,
         stopForm: { ...stopBlank }, stopAction: stopBase,
         stopRoute: '', stopSchedule: '',
         stopDel: {}, stopDelAction: '',
@@ -418,7 +393,7 @@ function scheduleManager() {
         toggle(id)   { this.open[id] = !this.open[id]; },
         openAdd()    { this.isEdit = false; this.form = { ...blank, days_of_week: [] }; this.formAction = base; this.showForm = true; },
         openEdit(d)  { this.isEdit = true; this.form = { ...blank, ...d, days_of_week: (d.days_of_week || []).map(String) }; this.formAction = `${base}/${d.id}`; this.showForm = true; },
-        openDelete(d){ this.deleteData = d; this.deleteAction = `${base}/${d.id}`; this.showDelete = true; },
+        openDelete(d){ this.deleteData = d; this.deleteAction = `${base}/${d.id}`; this.$nextTick(() => this.$refs.deleteForm.requestSubmit()); },
 
         isPriceValid() {
             const price = Number(this.form.price);
@@ -454,7 +429,7 @@ function scheduleManager() {
         },
         openStopDelete(s, scheduleId) {
             this.stopDel = s; this.stopDelAction = `${stopBase}/${s.id}`; this.stopSchedule = scheduleId;
-            this.showStopDel = true;
+            this.$nextTick(() => this.$refs.stopDeleteForm.requestSubmit());
         },
     };
 }

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { parseVoiceTripSearch } from '../../packages/FuteBus/Core/src/resources/js/voice-trip-search-parser.js';
 
-const catalog = JSON.parse(readFileSync(new URL('../../app/Data/futa_booking_locations.json', import.meta.url), 'utf8'));
+const catalog = JSON.parse(readFileSync(new URL('../../packages/Customer/TripSearch/src/resources/data/booking-locations.json', import.meta.url), 'utf8'));
 const today = '2026-10-11';
 
 test('recognizes a Vietnamese one-way trip and fills actual catalog locations', () => {

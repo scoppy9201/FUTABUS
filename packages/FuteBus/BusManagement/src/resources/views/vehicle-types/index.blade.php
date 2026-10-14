@@ -385,41 +385,13 @@
     </x-core::side-panel>
 
     {{-- ══════════════════ DELETE MODAL ══════════════════ --}}
-    <div role="dialog" aria-modal="true"
-        x-show="showDelete"
-        x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150"
-        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm"
-        @click.self="showDelete = false" style="display:none">
-        <div x-show="showDelete"
-            x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95"
-            x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-            class="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div class="p-6 text-center">
-                <div class="mx-auto mb-4 grid size-14 place-items-center rounded-full bg-rose-100">
-                    <x-heroicon-o-exclamation-triangle class="size-7 text-rose-500" />
-                </div>
-                <h3 class="text-lg font-bold text-slate-900">{{ __('BusManagement::app.modal_delete_title') }}</h3>
-                <p class="mt-2 text-sm text-slate-500">
-                    {{ __('BusManagement::app.modal_delete_message') }}
-                    <span class="font-bold text-slate-800" x-text='"«" + deleteData.name + "»"'></span>?
-                </p>
-                <form id="form-delete-vehicle-type" :action="deleteAction" method="POST" class="mt-5 flex items-center justify-end gap-2">
-                    @csrf @method('DELETE')
-                    <button type="button" @click="showDelete = false"
-                        class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">
-                        {{ __('BusManagement::app.btn_cancel') }}
-                    </button>
-                    <button type="submit"
-                        class="rounded-lg bg-rose-600 px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-rose-700">
-                        {{ __('BusManagement::app.btn_confirm_delete') }}
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
+    <form id="form-delete-vehicle-type" x-ref="deleteForm" :action="deleteAction" method="POST" hidden data-confirm
+        :data-confirm-title="@js(__('BusManagement::app.modal_delete_title'))"
+        :data-confirm-message="@js(__('BusManagement::app.modal_delete_message')) + ' ' + deleteData.name + '?'"
+        data-confirm-label="{{ __('BusManagement::app.btn_confirm_delete') }}">
+        @csrf
+        @method('DELETE')
+    </form>
 
 </div>
 
@@ -437,8 +409,7 @@ function vehicleTypeManager() {
     const unusedSeatsError = @js(__('BusManagement::app.vt_err_unused_seats'));
 
     return {
-        showAdd: false, showEdit: false, showDelete: false,
-        editData: {}, editAction: '',
+        showAdd: false, showEdit: false, editData: {}, editAction: '',
         deleteData: {}, deleteAction: '',
         addForm: { vehicle_class: '', floor_count: 1, seat_rows: null, seat_columns: null, unused_seats: 0, capacity: 0 },
         capacityTimer: null,
@@ -516,7 +487,7 @@ function vehicleTypeManager() {
         openDelete(data) {
             this.deleteData   = data;
             this.deleteAction = `{{ url('quan-tri/phuong-tien/loai-phuong-tien') }}/${data.id}`;
-            this.showDelete   = true;
+            this.$nextTick(() => this.$refs.deleteForm.requestSubmit());
         },
     };
 }

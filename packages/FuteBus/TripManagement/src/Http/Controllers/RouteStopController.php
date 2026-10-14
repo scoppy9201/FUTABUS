@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace FuteBus\TripManagement\Http\Controllers;
 
+use FuteBus\TripManagement\Http\Requests\RouteStopRequest;
 use FuteBus\TripManagement\Services\TripGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 
 class RouteStopController extends Controller
 {
-    public function store(Request $request): RedirectResponse
+    public function store(RouteStopRequest $request): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
 
-        $data = $request->validate($this->rules() + ['route_id' => ['required', 'exists:routes,id']]);
+        $data = $request->validated();
         $routeId = (int) $data['route_id'];
 
         DB::transaction(function () use ($data, $routeId) {
@@ -33,13 +33,13 @@ class RouteStopController extends Controller
         return $this->target($request)->with('success', __('TripManagement::app.rs_flash_created'));
     }
 
-    public function update(Request $request, int $id): RedirectResponse
+    public function update(RouteStopRequest $request, int $id): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
         $stop = DB::table('route_stops')->find($id);
         abort_unless($stop, 404);
 
-        $data = $request->validate($this->rules());
+        $data = $request->validated();
         $routeId = (int) $stop->route_id;
 
         DB::transaction(function () use ($data, $id, $routeId, $stop) {
@@ -112,18 +112,6 @@ class RouteStopController extends Controller
         }
 
         TripGenerator::syncArrivals($routeId);
-    }
-
-    private function rules(): array
-    {
-        return [
-            'name'        => ['required', 'string', 'max:150'],
-            'address'     => ['nullable', 'string', 'max:255'],
-            'leg_minutes' => ['required', 'integer', 'min:1', 'max:1440'],
-            'position'    => ['nullable', 'integer', 'min:1'],
-            'stop_type'   => ['required', Rule::in(['pickup', 'dropoff', 'both'])],
-            'schedule_id' => ['nullable', 'integer'],
-        ];
     }
 
     private function payload(array $d): array

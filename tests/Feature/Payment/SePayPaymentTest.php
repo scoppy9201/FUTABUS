@@ -3,8 +3,8 @@
 namespace Tests\Feature\Payment;
 
 use App\Models\User;
-use FuteBus\Core\Services\BookingTripStops;
-use FuteBus\Core\Services\TripSearchService;
+use FuteBus\BookingManagement\Services\BookingTripStops;
+use FuteBus\TripSearch\Services\TripSearchService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;

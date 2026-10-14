@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FuteBus\BusManagement\Http\Controllers;
 
+use FuteBus\BusManagement\Http\Requests\VehicleTypeInputRequest;
 use FuteBus\BusManagement\Services\VehicleTypeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,22 +35,22 @@ class VehicleTypeController extends Controller
         ]);
     }
 
-    public function store(Request $request, VehicleTypeService $types): RedirectResponse
+    public function store(VehicleTypeInputRequest $request, VehicleTypeService $types): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
 
-        $data = $request->validate($types->rules());
+        $data = $request->validated();
         $types->create($data);
 
         return redirect()->route('bus-management.vehicle-types.index')
             ->with('success', __('BusManagement::app.flash_created'));
     }
 
-    public function update(Request $request, VehicleTypeService $types, int $id): RedirectResponse
+    public function update(VehicleTypeInputRequest $request, VehicleTypeService $types, int $id): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
 
-        $data = $request->validate($types->rules($id));
+        $data = $request->validated();
         $types->update($id, $data);
 
         return redirect()->route('bus-management.vehicle-types.index')

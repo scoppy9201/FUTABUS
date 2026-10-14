@@ -16,6 +16,7 @@ class TripSearchServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Route::middleware('web')->group(__DIR__.'/../routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'TripSearch');
         $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'TripSearch');
         Route::prefix('api')->middleware('api')->group(__DIR__.'/../routes/api.php');

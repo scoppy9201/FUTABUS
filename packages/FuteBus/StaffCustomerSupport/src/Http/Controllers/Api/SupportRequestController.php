@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace FuteBus\StaffCustomerSupport\Http\Controllers\Api;
 
+use FuteBus\StaffCustomerSupport\Http\Requests\ClaimSupportRequest;
+use FuteBus\StaffCustomerSupport\Http\Requests\RespondSupportRequest;
+use FuteBus\StaffCustomerSupport\Http\Requests\SupportActionRequest;
+use FuteBus\StaffCustomerSupport\Http\Requests\SupportFilterRequest;
 use FuteBus\StaffCustomerSupport\Services\FeedbackProcessingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -11,19 +15,13 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SupportRequestController extends Controller
 {
-    public function index(Request $request, FeedbackProcessingService $support): JsonResponse
+    public function index(SupportFilterRequest $request, FeedbackProcessingService $support): JsonResponse
     {
-        $filters = $request->validate([
-            'search'   => ['nullable', 'string', 'max:150'], 'status' => ['nullable', Rule::in(['received', 'reviewing', 'waiting', 'resolved'])],
-            'category' => ['nullable', Rule::in(['staff', 'trip_service', 'schedule', 'booking_payment', 'lost_property', 'pickup', 'other'])],
-            'queue'    => ['nullable', Rule::in(['all', 'unassigned', 'mine', 'waiting', 'resolved'])],
-            'urgency'  => ['nullable', Rule::in(['suggestion', 'complaint', 'urgent'])], 'page' => ['sometimes', 'integer', 'min:1'],
-        ]);
+        $filters = $request->validated();
         $query = $support->visible($request->user());
         match ($filters['queue'] ?? 'all') {
             'unassigned' => $query->where('feedback.status', 'received')->whereNull('feedback.assigned_staff_id'),
@@ -79,24 +77,18 @@ class SupportRequestController extends Controller
         ]])->header('Cache-Control', 'private, no-store');
     }
 
-    public function claim(Request $request, FeedbackProcessingService $support, int $report): JsonResponse
+    public function claim(ClaimSupportRequest $request, FeedbackProcessingService $support, int $report): JsonResponse
     {
-        $input = $request->validate(['version' => ['required', 'integer', 'min:0']]);
+        $input = $request->validated();
         $item = $support->claim($request->user(), $report, (int) $input['version']);
 
         return response()->json(['data' => ['id' => $item->id, 'version' => $item->version, 'status' => $item->status]])
             ->header('Cache-Control', 'private, no-store');
     }
 
-    public function respond(Request $request, FeedbackProcessingService $support, int $report): JsonResponse
+    public function respond(RespondSupportRequest $request, FeedbackProcessingService $support, int $report): JsonResponse
     {
-        if (is_string($request->input('response'))) {
-            $request->merge(['response' => trim($request->input('response'))]);
-        }
-        $input = $request->validate([
-            'version'  => ['required', 'integer', 'min:0'], 'status' => ['required', Rule::in(['reviewing', 'resolved'])],
-            'response' => ['required', 'string', 'max:3000'], 'idempotency_key' => ['required', 'uuid'],
-        ]);
+        $input = $request->validated();
         $event = $support->respond($request->user(), $report, $input);
 
         return response()->json(['data' => ['id' => $event->id, 'report_id' => $report, 'version' => $event->version,
@@ -116,12 +108,12 @@ class SupportRequestController extends Controller
         return response()->json(['data' => $event])->header('Cache-Control', 'private, no-store');
     }
 
-    public function transfer(Request $request, FeedbackProcessingService $support, int $report): JsonResponse
+    public function transfer(SupportActionRequest $request, FeedbackProcessingService $support, int $report): JsonResponse
     {
         return $this->action($request, $support, $report, 'transfer');
     }
 
-    public function note(Request $request, FeedbackProcessingService $support, int $report): JsonResponse
+    public function note(SupportActionRequest $request, FeedbackProcessingService $support, int $report): JsonResponse
     {
         return $this->action($request, $support, $report, 'note');
     }
@@ -135,16 +127,9 @@ class SupportRequestController extends Controller
         return response()->json(['data' => $item])->header('Cache-Control', 'private, no-store');
     }
 
-    private function action(Request $request, FeedbackProcessingService $support, int $report, string $kind): JsonResponse
+    private function action(SupportActionRequest $request, FeedbackProcessingService $support, int $report, string $kind): JsonResponse
     {
-        if (is_string($request->input('content'))) {
-            $request->merge(['content' => trim($request->input('content'))]);
-        }
-        $rules = ['version' => ['required', 'integer', 'min:0'], 'content' => ['required', 'string', 'max:3000'], 'idempotency_key' => ['required', 'uuid']];
-        if ($kind === 'transfer') {
-            $rules['department_role_id'] = ['required', 'integer', 'min:1'];
-        }
-        $event = $support->action($request->user(), $report, $kind, $request->validate($rules));
+        $event = $support->action($request->user(), $report, $kind, $request->validated());
 
         return response()->json(['data' => $event], 201)
             ->header('Location', route('api.v1.staff.support.events.show', ['report' => $report, 'event' => $event->id]))

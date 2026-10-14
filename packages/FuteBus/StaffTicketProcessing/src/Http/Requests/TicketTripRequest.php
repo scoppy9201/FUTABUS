@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FuteBus\StaffTicketProcessing\Http\Requests;
 
-use FuteBus\Core\Http\Requests\TripSearchRequest;
+use FuteBus\TripSearch\Http\Requests\TripSearchRequest;
 
 class TicketTripRequest extends TripSearchRequest
 {

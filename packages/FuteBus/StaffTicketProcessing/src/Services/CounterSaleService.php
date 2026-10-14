@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace FuteBus\StaffTicketProcessing\Services;
 
 use App\Models\User;
-use FuteBus\Core\Services\TripSearchService;
 use FuteBus\Payment\Services\PaymentPreviewBuilder;
 use FuteBus\Payment\Services\SePayPaymentService;
 use FuteBus\Payment\Services\SePayQrService;
 use FuteBus\Payment\Services\TicketQrService;
+use FuteBus\TripSearch\Services\TripSearchService;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\DB;

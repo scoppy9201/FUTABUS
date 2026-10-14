@@ -28,7 +28,10 @@ class StaffDashboardTest extends TestCase
             ->assertSeeText(__('StaffDashboard::staff.tickets.title'))
             ->assertSeeText(__('StaffDashboard::staff.support.title'))
             ->assertSee('staffDashboard', false)
-            ->assertSeeText(__('StaffDashboard::staff.unavailable'));
+            ->assertSeeText(__('StaffDashboard::staff.unavailable'))
+            ->assertSeeText(__('Payment::refunds.title'))
+            ->assertSee(__('StaffDashboard::staff.refund_access_hint'));
+        $this->get(route('staff.refunds.index'))->assertForbidden();
         $this->getJson(route('api.v1.staff.dashboard.show'))
             ->assertOk()->assertExactJson(['data' => [
                 'employee' => ['id' => $staff->id, 'name' => $staff->name, 'avatar_url' => null],
