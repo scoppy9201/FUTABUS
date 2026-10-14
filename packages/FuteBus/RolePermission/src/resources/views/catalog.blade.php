@@ -6,6 +6,7 @@
 @section('content')
     @php
         $permissionLabels = __('RolePermission::app.permissions');
+        $groupLabels = __('RolePermission::app.groups');
         $permissionTotal = $permissionGroups->flatten(1)->count();
         $activeTotal = $permissionGroups->flatten(1)->where('is_active', true)->count();
     @endphp
@@ -28,7 +29,7 @@
                         <option value="">{{ __('RolePermission::app.choose_permission_key') }}</option>
                         @foreach($availablePermissionSlugs as $slug)
                             <option value="{{ $slug }}" @selected(old('slug') === $slug)>
-                                {{ __('RolePermission::app.groups.'.\Illuminate\Support\Str::before($slug, '.')) }} · {{ $permissionLabels[$slug] ?? __('RolePermission::app.functions_total') }}
+                                {{ $groupLabels[\Illuminate\Support\Str::before($slug, '.')] ?? \Illuminate\Support\Str::before($slug, '.') }} · {{ $permissionLabels[$slug] ?? __('RolePermission::app.functions_total') }}
                             </option>
                         @endforeach
                     </select>
@@ -75,10 +76,11 @@
                     class="block w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-9 pr-3 text-sm font-normal text-slate-800 outline-none transition focus:border-futa-orange focus:ring-2 focus:ring-orange-100">
             </span>
         </label>
+        <p class="mt-2 max-w-3xl text-xs leading-5 text-slate-500">{{ __('RolePermission::app.catalog_search_help') }}</p>
         @if($permissionGroups->isEmpty())<x-core::empty-state :title="__('RolePermission::app.no_search_results')" />@endif
         <div class="mt-3 grid items-start gap-3 xl:grid-cols-2">
             @foreach($permissionGroups as $group => $permissions)
-                @php($groupLabel = $permissions->first()->display_group ?: (__('RolePermission::app.groups.'.$group) === 'RolePermission::app.groups.'.$group ? $group : __('RolePermission::app.groups.'.$group)))
+                @php($groupLabel = $groupLabels[$group] ?? ($permissions->first()->display_group ?: $group))
                 <section x-show="!query || [...$el.querySelectorAll('[data-permission-item]')].some(item => item.dataset.search.includes(query.toLowerCase()))" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                     <div class="flex items-center justify-between gap-3 border-b border-slate-100 bg-slate-50 px-4 py-3">
                         <div class="flex min-w-0 items-center gap-2">
@@ -89,10 +91,10 @@
                     </div>
                     <ul class="divide-y divide-slate-100">
                         @foreach($permissions as $permission)
-                            @php($label = $permission->display_name ?: ($permissionLabels[$permission->slug] ?? $permission->name))
+                            @php($label = $permissionLabels[$permission->slug] ?? ($permission->display_name ?: $permission->name))
                             @php($isEditing = (int) old('_catalog_permission') === (int) $permission->id)
                             <li data-permission-item
-                                data-search="{{ mb_strtolower($label.' '.$permission->slug.' '.$groupLabel) }}" x-show="!query || $el.dataset.search.includes(query.toLowerCase())"
+                                data-search="{{ mb_strtolower($label.' '.$permission->display_name.' '.$permission->name.' '.$permission->slug.' '.$groupLabel) }}" x-show="!query || $el.dataset.search.includes(query.toLowerCase())"
                                 class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 {{ $permission->is_active ? '' : 'bg-slate-50/80' }}">
                                 <div class="flex min-w-0 items-center gap-2">
                                     <span class="text-sm font-medium {{ $permission->is_active ? 'text-slate-700' : 'text-slate-400' }}">{{ $label }}</span>
@@ -125,7 +127,7 @@
                                                 @endif
                                                 <p class="text-sm font-semibold text-slate-700">{{ $label }}</p>
                                                 <input name="display_name"
-                                                    value="{{ $isEditing ? old('display_name') : $label }}" required maxlength="120"
+                                                    value="{{ $isEditing ? old('display_name') : ($permission->display_name ?: $label) }}" required maxlength="120"
                                                     aria-label="{{ __('RolePermission::app.permission_name') }}"
                                                     class="rounded-lg border border-slate-300 px-2.5 py-2 text-xs focus:border-futa-orange focus:ring-orange-100">
                                                 <input name="display_group"

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace FuteBus\TripManagement\Http\Requests;
 
+use FuteBus\TripManagement\Models\Trip as TripRecord;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class TripInputRequest extends FormRequest
 {
@@ -18,7 +18,7 @@ class TripInputRequest extends FormRequest
             return false;
         }
         if ($this->route('id')) {
-            abort_unless(DB::table('trips')->where('id', $this->route('id'))->exists(), 404);
+            abort_unless(TripRecord::query()->toBase()->where('id', $this->route('id'))->exists(), 404);
         }
 
         return true;
@@ -27,7 +27,7 @@ class TripInputRequest extends FormRequest
     public function rules(): array
     {
         $editing = $this->route('id') !== null;
-        $manual = ! $editing || DB::table('trips')->where('id', $this->route('id'))->value('trip_schedule_id') === null;
+        $manual = ! $editing || TripRecord::query()->toBase()->where('id', $this->route('id'))->value('trip_schedule_id') === null;
         $rules = [
 
             'bus_id'         => [$editing ? 'nullable' : 'required', 'exists:buses,id'],

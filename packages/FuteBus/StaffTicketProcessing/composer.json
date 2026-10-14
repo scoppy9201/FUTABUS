@@ -10,7 +10,12 @@
         "futebus/core": "*",
         "futebus/payment": "*",
         "futebus/staffdashboard": "*",
-        "futebus/tripsearch": "*"
+        "futebus/tripsearch": "*",
+        "futebus/busmanagement": "*",
+        "futebus/routemanagement": "*",
+        "futebus/seatmanagement": "*",
+        "futebus/ticketmanagement": "*",
+        "futebus/tripmanagement": "*"
     },
     "autoload": {
         "psr-4": {

@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace FuteBus\Profile\Services;
 
 use App\Models\User;
+use FuteBus\Cancellation\Models\TicketCancellation as TicketCancellationRecord;
+use FuteBus\Payment\Models\Payment as PaymentRecord;
+use FuteBus\Profile\Models\BookingReview as BookingReviewRecord;
+use FuteBus\TicketManagement\Models\Ticket as TicketRecord;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
@@ -112,11 +116,11 @@ class TicketHistoryService
             return null;
         }
 
-        $payment = DB::table('payments')->where('id', $booking->payment_id)
+        $payment = PaymentRecord::query()->toBase()->where('id', $booking->payment_id)
             ->orderByDesc('id')->first(['status', 'method', 'paid_at', 'created_at']);
-        $tickets = DB::table('tickets')->where('booking_id', $bookingId)
+        $tickets = TicketRecord::query()->toBase()->where('booking_id', $bookingId)
             ->orderBy('id')->get(['ticket_code', 'seat_code', 'status']);
-        $review = DB::table('booking_reviews')->where('booking_id', $bookingId)
+        $review = BookingReviewRecord::query()->toBase()->where('booking_id', $bookingId)
             ->first(['rating', 'comment', 'created_at', 'updated_at']);
 
         $cancelled = $booking->status === 'cancelled' || $booking->trip_status === 'cancelled';
@@ -168,17 +172,17 @@ class TicketHistoryService
             ])
             ->selectSub($this->latestPaymentStatus(), 'payment_status')
             ->selectSub($this->latestPaymentStatus()->select('id'), 'payment_id')
-            ->selectSub(DB::table('ticket_cancellations')->join('tickets', 'tickets.id', '=', 'ticket_cancellations.ticket_id')
+            ->selectSub(TicketCancellationRecord::query()->toBase()->join('tickets', 'tickets.id', '=', 'ticket_cancellations.ticket_id')
                 ->select('ticket_cancellations.id')->whereColumn('tickets.booking_id', 'bookings.id')->limit(1), 'cancellation_id')
             ->selectSub(
-                DB::table('booking_reviews')->select('id')->whereColumn('booking_id', 'bookings.id')->limit(1),
+                BookingReviewRecord::query()->toBase()->select('id')->whereColumn('booking_id', 'bookings.id')->limit(1),
                 'review_id'
             );
     }
 
     private function latestPaymentStatus(): Builder
     {
-        return DB::table('payments')
+        return PaymentRecord::query()->toBase()
             ->select('status')
             ->where(function (Builder $query): void {
                 $query->whereColumn('payments.booking_id', 'bookings.id')

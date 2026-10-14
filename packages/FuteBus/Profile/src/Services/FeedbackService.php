@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace FuteBus\Profile\Services;
 
 use App\Models\User;
+use FuteBus\BookingManagement\Models\Booking as BookingRecord;
+use FuteBus\Profile\Models\CustomerFeedbackAttachment as CustomerFeedbackAttachmentRecord;
+use FuteBus\Profile\Models\CustomerFeedbackReport as CustomerFeedbackReportRecord;
 use FuteBus\StaffCustomerSupport\Services\FeedbackProcessingService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
@@ -23,7 +26,7 @@ class FeedbackService
 
     public function search(User $user, array $filters): LengthAwarePaginator
     {
-        $query = DB::table('customer_feedback_reports')->where('user_id', $user->id);
+        $query = CustomerFeedbackReportRecord::query()->toBase()->where('user_id', $user->id);
 
         if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
@@ -51,7 +54,7 @@ class FeedbackService
 
     public function findForUser(User $user, int $reportId): ?stdClass
     {
-        return DB::table('customer_feedback_reports')->where('user_id', $user->id)->where('id', $reportId)->first();
+        return CustomerFeedbackReportRecord::query()->toBase()->where('user_id', $user->id)->where('id', $reportId)->first();
     }
 
     public function bookingForReport(User $user, object $report): ?stdClass
@@ -61,7 +64,7 @@ class FeedbackService
 
     public function attachmentsForReport(int $reportId): Collection
     {
-        return DB::table('customer_feedback_attachments')->where('report_id', $reportId)
+        return CustomerFeedbackAttachmentRecord::query()->toBase()->where('report_id', $reportId)
             ->orderBy('id')->get(['id', 'report_id', 'original_name', 'mime_type', 'size_bytes', 'created_at']);
     }
 
@@ -81,7 +84,7 @@ class FeedbackService
                 }
 
                 $timestamp = now();
-                $reportId = DB::table('customer_feedback_reports')->insertGetId([
+                $reportId = CustomerFeedbackReportRecord::query()->toBase()->insertGetId([
                     'user_id'                 => $user->id,
                     'booking_id'              => $booking?->id,
                     'assigned_bus_company_id' => $booking !== null
@@ -123,7 +126,7 @@ class FeedbackService
 
     private function ownedBookings(User $user): Builder
     {
-        return DB::table('bookings')
+        return BookingRecord::query()->toBase()
             ->join('trips', 'trips.id', '=', 'bookings.trip_id')
             ->join('routes', 'routes.id', '=', 'trips.route_id')
             ->leftJoin('buses', 'buses.id', '=', 'trips.bus_id')
@@ -168,7 +171,7 @@ class FeedbackService
             throw ValidationException::withMessages(['attachments' => __('Profile::feedback.validation.attachment_store_failed')]);
         }
 
-        DB::table('customer_feedback_attachments')->insert([
+        CustomerFeedbackAttachmentRecord::query()->toBase()->insert([
             'report_id'     => $reportId,
             'path'          => $path,
             'original_name' => mb_substr(basename(str_replace('\\', '/', $attachment->getClientOriginalName())), 0, 255),

@@ -1,5 +1,5 @@
 <dialog data-staff-create-dialog
-    data-auto-open="{{ request()->routeIs('staff-accounts.create') || ($errors->any() && session()->hasOldInput()) ? '1' : '0' }}"
+    data-auto-open="{{ request()->routeIs('staff-accounts.create') || ($errors->any() && session()->hasOldInput() && !request()->routeIs('staff-accounts.edit')) ? '1' : '0' }}"
     aria-labelledby="staff-create-title"
     class="m-auto max-h-[calc(100dvh-2rem)] w-[min(46rem,calc(100vw-2rem))] overflow-auto rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-slate-950/50">
     <form data-staff-wizard data-step="1" data-staff-live-validation
@@ -29,7 +29,7 @@
             @if($errors->any())
                 <p role="alert" class="mb-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{{ __('UserManagement::app.wizard.fix_errors') }}</p>
             @endif
-            @include('UserManagement::partials.form', ['staff' => null, 'isCreate' => true, 'wizard' => true])
+            @include('UserManagement::partials.form', ['staff' => null, 'isCreate' => true, 'wizard' => true, 'idPrefix' => 'create-staff'])
             <section data-staff-step="3" hidden class="rounded-xl border border-slate-200 bg-slate-50 p-5">
                 <h3 class="font-bold text-slate-950">{{ __('UserManagement::app.wizard.review_title') }}</h3>
                 <p class="mt-2 text-sm leading-6 text-slate-500">{{ __('UserManagement::app.wizard.review_hint') }}</p>

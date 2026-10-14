@@ -5,10 +5,15 @@ declare(strict_types=1);
 namespace FuteBus\StaffTicketProcessing\Services;
 
 use App\Models\User;
+use FuteBus\BookingManagement\Models\Booking as BookingRecord;
+use FuteBus\Payment\Models\Payment as PaymentRecord;
+use FuteBus\Payment\Models\SePayPaymentIntent as SePayPaymentIntentRecord;
 use FuteBus\Payment\Services\PaymentPreviewBuilder;
 use FuteBus\Payment\Services\SePayPaymentService;
 use FuteBus\Payment\Services\SePayQrService;
 use FuteBus\Payment\Services\TicketQrService;
+use FuteBus\TicketManagement\Models\Ticket as TicketRecord;
+use FuteBus\TripManagement\Models\Trip as TripRecord;
 use FuteBus\TripSearch\Services\TripSearchService;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -81,7 +86,7 @@ class CounterSaleService
             $trip = $this->scope($operator)->where('trips.id', $data['trip_id'])->lockForUpdate()->first(['trips.id', 'trips.price']);
             abort_if($trip === null, 404);
             $fingerprint = hash('sha256', json_encode($data, JSON_THROW_ON_ERROR));
-            $existing = DB::table('sepay_payment_intents')->where('token', $data['idempotency_key'])->first();
+            $existing = SePayPaymentIntentRecord::query()->toBase()->where('token', $data['idempotency_key'])->first();
             if ($existing !== null) {
                 $snapshot = json_decode($existing->snapshot, true);
                 abort_unless(($snapshot['operator']['id'] ?? null) === $operator->id && ($snapshot['operator']['fingerprint'] ?? null) === $fingerprint, 409);
@@ -106,7 +111,7 @@ class CounterSaleService
 
     public function show(User $operator, string $token): array
     {
-        $intent = DB::table('sepay_payment_intents')->where('token', $token)->first();
+        $intent = SePayPaymentIntentRecord::query()->toBase()->where('token', $token)->first();
         abort_if($intent === null, 404);
         $preview = json_decode($intent->snapshot, true);
         abort_unless(($preview['operator']['id'] ?? null) === $operator->id && ($preview['operator']['company_id'] ?? null) === $operator->bus_company_id && $this->scope($operator)->where('trips.id', $intent->trip_id)->exists(), 404);
@@ -114,9 +119,9 @@ class CounterSaleService
         unset($preview['operator'], $preview['user_id'], $preview['token']);
         $result = ['id' => $token, 'status' => $status, 'amount' => (int) $intent->amount, 'reference' => $intent->code, 'expires_at' => $intent->expires_at,
             'qr_url'    => $status === 'pending' ? $this->qr->generate((int) $intent->amount, $intent->code) : null, 'preview' => $preview, 'booking' => null, 'tickets' => []];
-        if ($status === 'paid' && DB::table('payments')->where('booking_id', $intent->booking_id)->where('payment_code', $intent->code)->where('status', 'completed')->exists()) {
-            $result['booking'] = DB::table('bookings')->where('id', $intent->booking_id)->first(['booking_code']);
-            $result['tickets'] = DB::table('tickets')->whereIn('booking_id', array_filter([$intent->booking_id, $intent->secondary_booking_id]))->orderBy('id')->get(['ticket_code', 'trip_id', 'seat_code', 'price'])->map(fn (object $ticket): array => [...(array) $ticket,
+        if ($status === 'paid' && PaymentRecord::query()->toBase()->where('booking_id', $intent->booking_id)->where('payment_code', $intent->code)->where('status', 'completed')->exists()) {
+            $result['booking'] = BookingRecord::query()->toBase()->where('id', $intent->booking_id)->first(['booking_code']);
+            $result['tickets'] = TicketRecord::query()->toBase()->whereIn('booking_id', array_filter([$intent->booking_id, $intent->secondary_booking_id]))->orderBy('id')->get(['ticket_code', 'trip_id', 'seat_code', 'price'])->map(fn (object $ticket): array => [...(array) $ticket,
                 'code' => $ticket->ticket_code, 'seat' => $ticket->seat_code,
                 'trip' => isset($preview['outbound_trip']) && $ticket->trip_id === $preview['outbound_trip']['id'] ? $preview['outbound_trip'] : $preview['trip'],
                 'qr'   => $this->ticketQr->dataUri($ticket->ticket_code)])->all();
@@ -128,10 +133,10 @@ class CounterSaleService
     public function cancelPreview(User $operator, string $token): array
     {
         return DB::transaction(function () use ($operator, $token): array {
-            DB::table('sepay_payment_intents')->where('token', $token)->lockForUpdate()->first();
+            SePayPaymentIntentRecord::query()->toBase()->where('token', $token)->lockForUpdate()->first();
             $sale = $this->show($operator, $token);
             abort_if(in_array($sale['status'], ['paid', 'needs_review'], true), 409);
-            DB::table('sepay_payment_intents')->where('token', $token)->where('status', 'pending')->update(['status' => 'expired', 'updated_at' => now()]);
+            SePayPaymentIntentRecord::query()->toBase()->where('token', $token)->where('status', 'pending')->update(['status' => 'expired', 'updated_at' => now()]);
 
             return $this->show($operator, $token);
         });
@@ -139,7 +144,7 @@ class CounterSaleService
 
     private function scope(User $operator): Builder
     {
-        return DB::table('trips')->join('buses', 'buses.id', '=', 'trips.bus_id')->join('routes', 'routes.id', '=', 'trips.route_id')
+        return TripRecord::query()->toBase()->join('buses', 'buses.id', '=', 'trips.bus_id')->join('routes', 'routes.id', '=', 'trips.route_id')
             ->where('trips.bus_company_id', $operator->bus_company_id)->where('buses.bus_company_id', $operator->bus_company_id)->where('routes.bus_company_id', $operator->bus_company_id)
             ->where('routes.code', 'not like', 'DEMO-%');
     }

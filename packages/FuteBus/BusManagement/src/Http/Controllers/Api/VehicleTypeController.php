@@ -6,10 +6,10 @@ namespace FuteBus\BusManagement\Http\Controllers\Api;
 
 use FuteBus\BusManagement\Http\Requests\VehicleTypeInputRequest;
 use FuteBus\BusManagement\Http\Requests\VehicleTypeSearchRequest;
+use FuteBus\BusManagement\Models\VehicleType as VehicleTypeRecord;
 use FuteBus\BusManagement\Services\VehicleTypeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\DB;
 
 class VehicleTypeController extends Controller
 {
@@ -53,7 +53,7 @@ class VehicleTypeController extends Controller
 
     private function find(int $id): object
     {
-        $type = DB::table('vehicle_types')->where('id', $id)
+        $type = VehicleTypeRecord::query()->toBase()->where('id', $id)
             ->first(['id', 'name', 'description', 'default_capacity', 'status']);
         abort_if($type === null, 404);
 

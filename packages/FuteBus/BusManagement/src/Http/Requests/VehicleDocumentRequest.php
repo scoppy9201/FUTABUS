@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace FuteBus\BusManagement\Http\Requests;
 
+use FuteBus\BusManagement\Models\DocumentType as DocumentTypeRecord;
+use FuteBus\BusManagement\Models\DocumentTypeField as DocumentTypeFieldRecord;
+use FuteBus\BusManagement\Models\VehicleDocument as VehicleDocumentRecord;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class VehicleDocumentRequest extends FormRequest
@@ -17,7 +19,7 @@ class VehicleDocumentRequest extends FormRequest
             return false;
         }
         if ($this->route('id')) {
-            abort_unless(DB::table('vehicle_documents')->where('id', $this->route('id'))->exists(), 404);
+            abort_unless(VehicleDocumentRecord::query()->toBase()->where('id', $this->route('id'))->exists(), 404);
         }
 
         return true;
@@ -26,15 +28,15 @@ class VehicleDocumentRequest extends FormRequest
     private function documentType(): ?object
     {
         $id = $this->route('id')
-            ? DB::table('vehicle_documents')->where('id', $this->route('id'))->value('document_type_id')
+            ? VehicleDocumentRecord::query()->toBase()->where('id', $this->route('id'))->value('document_type_id')
             : $this->input('document_type_id');
 
-        return DB::table('document_types')->find($id);
+        return DocumentTypeRecord::query()->toBase()->find($id);
     }
 
     private function fields(): Collection
     {
-        return DB::table('document_type_fields')->where('document_type_id', $this->documentType()?->id)
+        return DocumentTypeFieldRecord::query()->toBase()->where('document_type_id', $this->documentType()?->id)
             ->where('is_active', 1)->orderBy('sort_order')->get();
     }
 

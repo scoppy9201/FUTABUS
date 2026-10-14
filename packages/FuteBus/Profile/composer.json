@@ -10,7 +10,11 @@
         "futebus/cancellation": "*",
         "futebus/core": "*",
         "futebus/payment": "*",
-        "futebus/staffcustomersupport": "*"
+        "futebus/staffcustomersupport": "*",
+        "futebus/bookingmanagement": "*",
+        "futebus/buscompanymanagement": "*",
+        "futebus/rolepermission": "*",
+        "futebus/ticketmanagement": "*"
     },
     "autoload": {
         "psr-4": {

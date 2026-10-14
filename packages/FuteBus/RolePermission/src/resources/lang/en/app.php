@@ -44,6 +44,7 @@ return [
     'functions_total'                => 'Functional permissions',
     'search_catalog'                 => 'Search function catalog',
     'search_catalog_hint'            => 'Search by function or department',
+    'catalog_search_help'            => 'This catalog lists permissions that can be assigned to roles. Search by permission name, key, or department to filter the list; searching does not change access.',
     'no_search_results'              => 'No matching functional permissions found.',
     'assignment_list_hint'           => 'Select one or more roles for each staff account.',
     'search_staff'                   => 'Search staff',

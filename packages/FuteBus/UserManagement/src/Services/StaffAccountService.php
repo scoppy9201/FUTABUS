@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace FuteBus\UserManagement\Services;
 
 use App\Models\User;
+use FuteBus\BusCompanyManagement\Models\BusCompany as BusCompanyRecord;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Facades\DB;
 use stdClass;
 
 class StaffAccountService
@@ -15,14 +15,14 @@ class StaffAccountService
     public function companyForManager(User $manager): ?stdClass
     {
         if ($manager->isAdmin()) {
-            return DB::table('bus_companies')->where('code', 'FUTA')->first();
+            return BusCompanyRecord::query()->toBase()->where('code', 'FUTA')->first();
         }
 
         if ($manager->bus_company_id) {
-            return DB::table('bus_companies')->where('id', $manager->bus_company_id)->first();
+            return BusCompanyRecord::query()->toBase()->where('id', $manager->bus_company_id)->first();
         }
 
-        return DB::table('bus_companies')
+        return BusCompanyRecord::query()->toBase()
             ->whereRaw('LOWER(email) = ?', [mb_strtolower($manager->email)])
             ->first();
     }
@@ -57,8 +57,8 @@ class StaffAccountService
             ->first();
 
         return [
-            'total' => (int) ($counts->total ?? 0),
-            'active' => (int) ($counts->active ?? 0),
+            'total'    => (int) ($counts->total ?? 0),
+            'active'   => (int) ($counts->active ?? 0),
             'inactive' => (int) ($counts->inactive ?? 0),
         ];
     }
@@ -85,7 +85,7 @@ class StaffAccountService
 
     private function staffQuery(int $companyId): Builder
     {
-        return DB::table('users')
+        return User::query()->toBase()
             ->join('role_user', 'role_user.user_id', '=', 'users.id')
             ->join('roles', 'roles.id', '=', 'role_user.role_id')
             ->where('users.bus_company_id', $companyId)

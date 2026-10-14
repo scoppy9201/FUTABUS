@@ -96,4 +96,58 @@ class BusApiTest extends TestCase
             ->assertRedirect(route('bus-management.buses.index'))
             ->assertSessionHas('warning', __('BusManagement::app.bus_err_cannot_delete'));
     }
+
+    public function test_two_deck_limousine_bus_keeps_its_34_berth_seat_layout(): void
+    {
+        $admin = User::factory()->create(['is_active' => true]);
+        $roleId = DB::table('roles')->insertGetId(['name' => 'Admin', 'slug' => 'admin']);
+        DB::table('role_user')->insert(['user_id' => $admin->id, 'role_id' => $roleId]);
+        DB::table('bus_companies')->insert(['name' => 'FUTA', 'code' => 'FUTA']);
+        $typeId = DB::table('vehicle_types')->insertGetId([
+            'name'             => 'Limousine Sleeper Two Deck 34',
+            'vehicle_class'    => 'limousine_sleeper',
+            'floor_count'      => 2,
+            'seat_rows'        => 6,
+            'seat_columns'     => 3,
+            'unused_seats'     => 2,
+            'default_capacity' => 34,
+            'status'           => 'active',
+            'created_at'       => now(),
+            'updated_at'       => now(),
+        ]);
+
+        $this->withToken($admin->createToken('admin', ['api'])->plainTextToken)
+            ->postJson(route('api.v1.admin.buses.store'), [
+                'license_plate'    => '51B-123.45',
+                'chassis_number'   => 'FRAME123456',
+                'engine_number'    => 'ENGINE123',
+                'color'            => 'red',
+                'brand'            => 'FUTA',
+                'manufacture_year' => 2025,
+                'vehicle_type_id'  => $typeId,
+            ])->assertCreated()->assertJsonPath('data.capacity', 34);
+
+        $bus = DB::table('buses')->where('license_plate', '51B-123.45')->first();
+        $this->assertSame('limousine', $bus->bus_type);
+        $this->assertSame(6, (int) $bus->seat_rows);
+        $this->assertSame(3, (int) $bus->seat_columns);
+        $this->assertSame(34, DB::table('seat_layouts')->where('bus_id', $bus->id)->count());
+        $this->assertSame(17, DB::table('seat_layouts')->where('bus_id', $bus->id)->where('deck', 'lower')->count());
+        $this->assertSame(17, DB::table('seat_layouts')->where('bus_id', $bus->id)->where('deck', 'upper')->count());
+        $this->assertSame(34, DB::table('seat_layouts')->where('bus_id', $bus->id)->where('seat_type', 'sleeper')->count());
+        $this->assertDatabaseHas('seat_layouts', [
+            'bus_id'        => $bus->id,
+            'seat_code'     => 'A01',
+            'row_number'    => 1,
+            'column_number' => 1,
+            'deck'          => 'lower',
+        ]);
+        $this->assertDatabaseHas('seat_layouts', [
+            'bus_id'        => $bus->id,
+            'seat_code'     => 'B17',
+            'row_number'    => 6,
+            'column_number' => 3,
+            'deck'          => 'upper',
+        ]);
+    }
 }

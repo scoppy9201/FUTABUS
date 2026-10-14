@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace FuteBus\BookingManagement\Services;
 
+use FuteBus\RouteManagement\Models\RouteStop as RouteStopRecord;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class BookingTripStops
 {
     public function forTrip(array $trip): array
     {
-        $stops = DB::table('route_stops')
+        $stops = RouteStopRecord::query()->toBase()
             ->where('route_id', $trip['route_id'])
             ->where('status', 'active')
             ->orderBy('stop_order')

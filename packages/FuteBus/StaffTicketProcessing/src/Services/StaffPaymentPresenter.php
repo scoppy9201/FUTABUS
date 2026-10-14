@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace FuteBus\StaffTicketProcessing\Services;
 
-use Illuminate\Support\Facades\DB;
+use FuteBus\Payment\Models\Payment as PaymentRecord;
+use FuteBus\TicketManagement\Models\Ticket as TicketRecord;
+use FuteBus\TripManagement\Models\Trip as TripRecord;
 use Illuminate\Support\Str;
 
 class StaffPaymentPresenter
@@ -12,13 +14,13 @@ class StaffPaymentPresenter
     public function render(array $sale): array
     {
         if ($sale['booking'] !== null) {
-            $method = DB::table('payments')->join('bookings', 'bookings.id', '=', 'payments.booking_id')
+            $method = PaymentRecord::query()->toBase()->join('bookings', 'bookings.id', '=', 'payments.booking_id')
                 ->where('bookings.booking_code', $sale['booking']->booking_code)
                 ->where('payments.payment_code', $sale['reference'])->where('payments.status', 'completed')->value('payments.method');
-            $vehicles = DB::table('trips')->join('buses', 'buses.id', '=', 'trips.bus_id')->join('bus_companies', 'bus_companies.id', '=', 'trips.bus_company_id')
+            $vehicles = TripRecord::query()->toBase()->join('buses', 'buses.id', '=', 'trips.bus_id')->join('bus_companies', 'bus_companies.id', '=', 'trips.bus_company_id')
                 ->whereIn('trips.id', collect($sale['tickets'])->pluck('trip.id')->unique())
                 ->get(['trips.id', 'buses.license_plate', 'buses.bus_type', 'buses.capacity', 'bus_companies.name'])->keyBy('id');
-            $bookingCodes = DB::table('tickets')->join('bookings', 'bookings.id', '=', 'tickets.booking_id')
+            $bookingCodes = TicketRecord::query()->toBase()->join('bookings', 'bookings.id', '=', 'tickets.booking_id')
                 ->whereIn('tickets.ticket_code', collect($sale['tickets'])->pluck('code'))->pluck('bookings.booking_code', 'tickets.ticket_code');
             $sale['html'] = view('StaffTicketProcessing::partials.customer-success', [
                 'preview'            => $sale['preview'], 'total' => $sale['amount'], 'tickets' => collect($sale['tickets']), 'bookingCode' => $sale['booking']->booking_code,

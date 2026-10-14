@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace FuteBus\BusManagement\Http\Controllers;
 
+use FuteBus\BusCompanyManagement\Models\BusCompany as BusCompanyRecord;
 use FuteBus\BusManagement\Http\Requests\BusInputRequest;
+use FuteBus\BusManagement\Models\VehicleType as VehicleTypeRecord;
 use FuteBus\BusManagement\Services\BusService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class BusController extends Controller
@@ -27,9 +28,9 @@ class BusController extends Controller
             'search'        => $search,
             'typeIdFilter'  => $typeId,
             'statusFilter'  => $status,
-            'vehicleTypes'  => DB::table('vehicle_types')->where('status', 'active')->orderBy('name')->get(),
+            'vehicleTypes'  => VehicleTypeRecord::query()->toBase()->where('status', 'active')->orderBy('name')->get(),
             'vehicleColors' => BusService::COLORS,
-            'company'       => DB::table('bus_companies')->where('code', 'FUTA')->first(),
+            'company'       => BusCompanyRecord::query()->toBase()->where('code', 'FUTA')->first(),
         ]);
     }
 

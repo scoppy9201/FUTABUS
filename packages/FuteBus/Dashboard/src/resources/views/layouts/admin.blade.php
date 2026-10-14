@@ -94,6 +94,8 @@
                             ['key' => 'document_types', 'icon' => 'clipboard-document-list', 'route' => route('bus-management.document-types.index')],
                             ['key' => 'bus_documents',  'icon' => 'folder-open',             'route' => route('bus-management.vehicle-documents.index')],
                         ]],
+                        ['key' => 'route_catalog', 'icon' => 'map', 'route' => route('route-management.index'),
+                            'permission' => 'route.view', 'label' => __('RouteManagement::app.title')],
                         ['key' => 'trips', 'icon' => 'map-pin', 'route' => route('trip-management.trips.index')],
                         ['key' => 'routes', 'icon' => 'calendar-days', 'route' => route('trip-management.schedules.index')],
                         ['key' => 'staff_accounts', 'icon' => 'users', 'route' => route('staff-accounts.index')],
@@ -115,6 +117,7 @@
                                 || ($item['key'] === 'reports' && request()->routeIs('reporting.*'))
                                 || ($item['key'] === 'buses' && $isBusSection)
                                 || ($item['key'] === 'trips' && request()->routeIs('trip-management.trips*'))
+                                || ($item['key'] === 'route_catalog' && request()->routeIs('route-management.*'))
                                 || ($item['key'] === 'routes' && request()->routeIs('trip-management.schedules*'))
                                 || ($item['key'] === 'staff_accounts' && request()->routeIs('staff-accounts.*'))
                                 || ($item['key'] === 'access_management' && request()->routeIs('access-management.*'))

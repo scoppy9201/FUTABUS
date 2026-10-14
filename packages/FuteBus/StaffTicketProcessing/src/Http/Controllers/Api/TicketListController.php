@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace FuteBus\StaffTicketProcessing\Http\Controllers\Api;
 
 use FuteBus\StaffTicketProcessing\Http\Requests\TicketListRequest;
+use FuteBus\TicketManagement\Models\Ticket as TicketRecord;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class TicketListController extends Controller
 {
@@ -17,7 +17,7 @@ class TicketListController extends Controller
         $filters = $request->validated();
         $checkedAt = now();
         $company = $request->user()->bus_company_id;
-        $query = DB::table('tickets')->join('bookings', 'bookings.id', '=', 'tickets.booking_id')
+        $query = TicketRecord::query()->toBase()->join('bookings', 'bookings.id', '=', 'tickets.booking_id')
             ->join('trips', 'trips.id', '=', 'tickets.trip_id')->join('routes', 'routes.id', '=', 'trips.route_id')
             ->join('buses', 'buses.id', '=', 'trips.bus_id')
             ->whereColumn('bookings.trip_id', 'tickets.trip_id')

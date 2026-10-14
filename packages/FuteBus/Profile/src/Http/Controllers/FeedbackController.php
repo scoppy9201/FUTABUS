@@ -6,6 +6,8 @@ namespace FuteBus\Profile\Http\Controllers;
 
 use FuteBus\Profile\Http\Requests\FeedbackFilterRequest;
 use FuteBus\Profile\Http\Requests\StoreFeedbackRequest;
+use FuteBus\Profile\Models\CustomerFeedbackAttachment as CustomerFeedbackAttachmentRecord;
+use FuteBus\Profile\Models\CustomerFeedbackReport as CustomerFeedbackReportRecord;
 use FuteBus\Profile\Services\FeedbackService;
 use FuteBus\StaffCustomerSupport\Services\FeedbackProcessingService;
 use Illuminate\Contracts\View\View;
@@ -13,7 +15,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -58,11 +59,11 @@ class FeedbackController extends Controller
 
     public function attachment(Request $request, int $report, int $attachment): StreamedResponse
     {
-        $details = DB::table('customer_feedback_reports')->where('id', $report)->first(['user_id']);
+        $details = CustomerFeedbackReportRecord::query()->toBase()->where('id', $report)->first(['user_id']);
         abort_if($details === null, 404);
         abort_unless((int) $details->user_id === (int) $request->user()->id || $request->user()->isAdmin(), 404);
 
-        $image = DB::table('customer_feedback_attachments')->where('report_id', $report)->where('id', $attachment)->first();
+        $image = CustomerFeedbackAttachmentRecord::query()->toBase()->where('report_id', $report)->where('id', $attachment)->first();
         abort_if($image === null, 404);
         $pattern = '#^customer-feedback/'.$report.'/[a-f0-9-]{36}\\.(jpg|png|webp)$#';
         abort_unless(preg_match($pattern, $image->path) === 1 && Storage::disk('local')->exists($image->path), 404);

@@ -12,6 +12,8 @@ use FuteBus\RolePermission\Http\Requests\StorePermissionRequest;
 use FuteBus\RolePermission\Http\Requests\StoreRoleRequest;
 use FuteBus\RolePermission\Http\Requests\UpdatePermissionRequest;
 use FuteBus\RolePermission\Http\Requests\UpdateRoleRequest;
+use FuteBus\RolePermission\Models\Permission as PermissionRecord;
+use FuteBus\RolePermission\Models\Role as RoleRecord;
 use FuteBus\RolePermission\Services\AccessControlService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\QueryException;
@@ -41,7 +43,7 @@ class AccessControlController extends Controller
         $registeredSlugs = collect(config('permission_catalog', []))
             ->flatMap(fn (array $actions, string $group): array => collect($actions)->map(fn (string $action): string => $group.'.'.$action)->all())
             ->values();
-        $knownSlugs = DB::table('permissions')->pluck('slug');
+        $knownSlugs = PermissionRecord::query()->toBase()->pluck('slug');
 
         return view('RolePermission::catalog', [
             'company'                  => $company,
@@ -57,12 +59,12 @@ class AccessControlController extends Controller
         $data = $request->validated();
 
         $group = Str::before($data['slug'], '.');
-        $existing = DB::table('permissions')->where('slug', $data['slug'])->first();
+        $existing = PermissionRecord::query()->toBase()->where('slug', $data['slug'])->first();
         if ($existing && $existing->is_active) {
             throw ValidationException::withMessages(['slug' => __('RolePermission::app.validation.permission_exists')]);
         }
 
-        DB::table('permissions')->updateOrInsert(
+        PermissionRecord::query()->toBase()->updateOrInsert(
             ['slug' => $data['slug']],
             [
                 'name'          => $data['slug'],
@@ -75,7 +77,7 @@ class AccessControlController extends Controller
             ],
         );
         if (filled($data['display_group'] ?? null)) {
-            DB::table('permissions')->where('group', $group)->update([
+            PermissionRecord::query()->toBase()->where('group', $group)->update([
                 'display_group' => $data['display_group'],
                 'updated_at'    => now(),
             ]);
@@ -89,13 +91,13 @@ class AccessControlController extends Controller
         $this->assertCatalogAdmin($request);
         $data = $request->validated();
 
-        $row = DB::table('permissions')->where('id', $permission)->first();
+        $row = PermissionRecord::query()->toBase()->where('id', $permission)->first();
         abort_if($row === null, 404);
-        DB::table('permissions')->where('group', $row->group)->update([
+        PermissionRecord::query()->toBase()->where('group', $row->group)->update([
             'display_group' => $data['display_group'] ?? null,
             'updated_at'    => now(),
         ]);
-        DB::table('permissions')->where('id', $permission)->update([
+        PermissionRecord::query()->toBase()->where('id', $permission)->update([
             'display_name' => $data['display_name'],
             'updated_at'   => now(),
         ]);
@@ -108,10 +110,10 @@ class AccessControlController extends Controller
         $this->assertCatalogAdmin($request);
         $request->validated();
         $active = $request->boolean('is_active');
-        $row = DB::table('permissions')->where('id', $permission)->first();
+        $row = PermissionRecord::query()->toBase()->where('id', $permission)->first();
         abort_if($row === null, 404);
 
-        DB::table('permissions')->where('id', $permission)->update([
+        PermissionRecord::query()->toBase()->where('id', $permission)->update([
             'is_active'  => $active,
             'updated_at' => now(),
         ]);
@@ -146,7 +148,7 @@ class AccessControlController extends Controller
         }
 
         DB::transaction(function () use ($access, $company, $staff, $companyRoleIds): void {
-            DB::table('users')->where('id', $staff)->lockForUpdate()->first();
+            User::query()->toBase()->where('id', $staff)->lockForUpdate()->first();
             $access->staffForCompany($company->id, $staff);
             $access->syncUserRoles($company->id, $staff, $companyRoleIds);
         });
@@ -175,11 +177,11 @@ class AccessControlController extends Controller
                 $baseSlug = 'company-'.$company->id.'-'.Str::slug($data['name']);
                 $slug = $baseSlug;
                 $suffix = 2;
-                while (DB::table('roles')->where('bus_company_id', $company->id)->where('slug', $slug)->exists()) {
+                while (RoleRecord::query()->toBase()->where('bus_company_id', $company->id)->where('slug', $slug)->exists()) {
                     $slug = $baseSlug.'-'.$suffix++;
                 }
 
-                $roleId = DB::table('roles')->insertGetId([
+                $roleId = RoleRecord::query()->toBase()->insertGetId([
                     'bus_company_id' => $company->id,
                     'name'           => $data['name'],
                     'slug'           => $slug,
@@ -221,7 +223,7 @@ class AccessControlController extends Controller
         $data = $request->validated();
 
         DB::transaction(function () use ($data, $role, $access): void {
-            DB::table('roles')->where('id', $role->id)->update([
+            RoleRecord::query()->toBase()->where('id', $role->id)->update([
                 'name'        => $data['name'],
                 'description' => $data['description'] ?? null,
                 'updated_at'  => now(),
@@ -236,7 +238,7 @@ class AccessControlController extends Controller
     {
         $company = $this->company($request, $access, 'role.delete');
         $role = $access->roleForCompany($company->id, $role);
-        DB::table('roles')->where('id', $role->id)->delete();
+        RoleRecord::query()->toBase()->where('id', $role->id)->delete();
 
         return redirect()->route('access-management.index')->with('status', __('RolePermission::app.role_deleted'));
     }

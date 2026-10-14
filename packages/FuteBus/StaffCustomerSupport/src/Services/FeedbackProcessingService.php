@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace FuteBus\StaffCustomerSupport\Services;
 
 use App\Models\User;
+use FuteBus\BusCompanyManagement\Models\BusCompany as BusCompanyRecord;
+use FuteBus\Profile\Models\CustomerFeedbackReport as CustomerFeedbackReportRecord;
 use FuteBus\Profile\Services\FeedbackService;
+use FuteBus\RolePermission\Models\Role as RoleRecord;
+use FuteBus\StaffCustomerSupport\Models\CustomerSupportEvent as CustomerSupportEventRecord;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -50,7 +54,7 @@ class FeedbackProcessingService
 
     public function history(int $report, bool $internal = false): Collection
     {
-        return DB::table('customer_support_events')->where('report_id', $report)->orderBy('version')
+        return CustomerSupportEventRecord::query()->toBase()->where('report_id', $report)->orderBy('version')
             ->when(! $internal, fn (Builder $query) => $query->whereNotNull('response'))
             ->get($internal ? ['id', 'actor_name', 'kind', 'previous_status', 'status', 'response', 'internal_note', 'department_name', 'version', 'created_at'] : ['id', 'actor_name', 'kind', 'previous_status', 'status', 'response', 'version', 'created_at']);
     }
@@ -88,7 +92,7 @@ class FeedbackProcessingService
             $report = $this->lockedVisible($actor, $id);
             $response = trim($input['response']);
             $hash = hash('sha256', json_encode([$input['status'], $response], JSON_THROW_ON_ERROR));
-            $existing = DB::table('customer_support_events')->where('report_id', $id)
+            $existing = CustomerSupportEventRecord::query()->toBase()->where('report_id', $id)
                 ->where('idempotency_key', $input['idempotency_key'])->first();
             if ($existing !== null) {
                 abort_unless((int) $existing->actor_id === $actor->id && hash_equals($existing->request_hash, $hash), 409, __('StaffCustomerSupport::support.retry_conflict'));
@@ -107,7 +111,7 @@ class FeedbackProcessingService
 
             $this->notifyCustomer($report, $response);
 
-            return DB::table('customer_support_events')->where('report_id', $id)->where('version', $updated->version)->first();
+            return CustomerSupportEventRecord::query()->toBase()->where('report_id', $id)->where('version', $updated->version)->first();
         });
     }
 
@@ -118,7 +122,7 @@ class FeedbackProcessingService
 
         return DB::transaction(function () use ($actor, $id, $companyId, $version): stdClass {
             $report = $this->lockedVisible($actor, $id);
-            abort_unless(DB::table('bus_companies')->where('id', $companyId)->where('is_active', true)->exists(), 422);
+            abort_unless(BusCompanyRecord::query()->toBase()->where('id', $companyId)->where('is_active', true)->exists(), 422);
             if ($report->booking_id !== null) {
                 $linked = $this->visible($actor)->where('feedback.id', $id)->first();
                 abort_unless((int) $linked->trip_company === $companyId && (int) $linked->route_company === $companyId
@@ -165,7 +169,7 @@ class FeedbackProcessingService
 
     public function departments(User $actor): Collection
     {
-        return DB::table('roles')->where('roles.bus_company_id', $actor->bus_company_id)
+        return RoleRecord::query()->toBase()->where('roles.bus_company_id', $actor->bus_company_id)
             ->whereExists(function (Builder $query): void {
                 $query->selectRaw('1')->from('permission_role')->join('permissions', 'permissions.id', '=', 'permission_role.permission_id')
                     ->whereColumn('permission_role.role_id', 'roles.id')->where('permissions.slug', 'support.respond')->where('permissions.is_active', true);
@@ -190,7 +194,7 @@ class FeedbackProcessingService
         return DB::transaction(function () use ($actor, $id, $kind, $input): stdClass {
             $report = $this->lockedVisible($actor, $id);
             $hash = hash('sha256', json_encode([$kind, $input['content'], $input['department_role_id'] ?? null], JSON_THROW_ON_ERROR));
-            $existing = DB::table('customer_support_events')->where('report_id', $id)->where('idempotency_key', $input['idempotency_key'])->first();
+            $existing = CustomerSupportEventRecord::query()->toBase()->where('report_id', $id)->where('idempotency_key', $input['idempotency_key'])->first();
             if ($existing !== null) {
                 abort_unless((int) $existing->actor_id === $actor->id && hash_equals($existing->request_hash, $hash), 409, __('StaffCustomerSupport::support.retry_conflict'));
 
@@ -213,7 +217,7 @@ class FeedbackProcessingService
                 $this->notifyCustomer($report, $event['response']);
             }
 
-            return DB::table('customer_support_events')->where('report_id', $id)->where('version', $updated->version)->first();
+            return CustomerSupportEventRecord::query()->toBase()->where('report_id', $id)->where('version', $updated->version)->first();
         });
     }
 
@@ -235,7 +239,7 @@ class FeedbackProcessingService
 
     private function lockedVisible(User $actor, int $id): stdClass
     {
-        $report = DB::table('customer_feedback_reports')->where('id', $id)->lockForUpdate()->first();
+        $report = CustomerFeedbackReportRecord::query()->toBase()->where('id', $id)->lockForUpdate()->first();
         abort_if($report === null || ! $this->visible($actor)->where('feedback.id', $id)->exists(), 404);
 
         return $report;
@@ -249,15 +253,15 @@ class FeedbackProcessingService
     private function record(User $actor, stdClass $report, array $changes, string $kind, array $event = []): stdClass
     {
         $version = (int) $report->version + 1;
-        DB::table('customer_feedback_reports')->where('id', $report->id)->update([
+        CustomerFeedbackReportRecord::query()->toBase()->where('id', $report->id)->update([
             ...$changes, 'version' => $version, 'updated_at' => now(),
         ]);
-        DB::table('customer_support_events')->insert([
+        CustomerSupportEventRecord::query()->toBase()->insert([
             'report_id' => $report->id, 'actor_id' => $actor->id, 'actor_name' => mb_substr($actor->name, 0, 120),
             'kind'      => $kind, 'previous_status' => $report->status, 'status' => $changes['status'] ?? $report->status,
             'version'   => $version, 'created_at' => now(), ...$event,
         ]);
 
-        return DB::table('customer_feedback_reports')->where('id', $report->id)->first();
+        return CustomerFeedbackReportRecord::query()->toBase()->where('id', $report->id)->first();
     }
 }

@@ -54,7 +54,11 @@ class BookingTrackingTest extends TestCase
         [, , $second] = $this->fixture(2, $company);
         DB::table('bookings')->where('id', $second)->update(['status' => 'cancelled']);
         $this->actingAs($this->operator($company, 'bus-company'));
-        $this->get(route('bookings.index', ['search' => '0900000001']))->assertOk()->assertSee('BOOK-1')->assertDontSee('BOOK-2');
+        $this->get(route('bookings.index', ['search' => '0900000001']))->assertOk()
+            ->assertSee('BOOK-1')->assertDontSee('BOOK-2')
+            ->assertSee('data-booking-search', false)
+            ->assertSee('placeholder="'.e(__('BookingTracking::bookings.search')).'"', false)
+            ->assertSee('focus:bg-white', false);
         $this->get(route('bookings.index', ['status' => 'cancelled']))->assertOk()->assertSee('BOOK-2')->assertDontSee('BOOK-1');
         $this->get(route('bookings.index', ['from' => now()->addDays(10)->toDateString()]))->assertOk()->assertDontSee('BOOK-1');
         $this->get(route('bookings.index', ['to' => now()->toDateString()]))->assertOk()->assertDontSee('BOOK-1');

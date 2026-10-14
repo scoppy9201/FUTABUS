@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\UserFactory;
+use FuteBus\Auth\Models\Concerns\HasDomainRelations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -11,7 +12,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, Notifiable;
+    use HasApiTokens, HasDomainRelations, Notifiable;
 
     /** @use HasFactory<UserFactory> */
     use HasFactory;
@@ -36,6 +37,7 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
+        'bus_company_id'     => 'integer',
         'email_verified_at'  => 'datetime',
         'date_of_birth'      => 'date',
         'password'           => 'hashed',
@@ -64,9 +66,7 @@ class User extends Authenticatable
 
     public function hasRole(string|array $roles): bool
     {
-        return $this->exists && DB::table('role_user')
-            ->join('roles', 'roles.id', '=', 'role_user.role_id')
-            ->where('role_user.user_id', $this->getKey())
+        return $this->exists && $this->roles()
             ->whereIn('roles.slug', (array) $roles)
             ->exists();
     }

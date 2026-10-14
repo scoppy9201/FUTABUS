@@ -6,6 +6,7 @@ namespace FuteBus\UserManagement\Http\Controllers;
 
 use App\Models\User;
 use Carbon\Carbon;
+use FuteBus\RolePermission\Models\Role as RoleRecord;
 use FuteBus\UserManagement\Http\Requests\StaffAccountFilterRequest;
 use FuteBus\UserManagement\Http\Requests\StaffAccountRequest;
 use FuteBus\UserManagement\Http\Requests\StaffAccountStatusRequest;
@@ -25,24 +26,16 @@ class StaffAccountController extends Controller
 {
     public function index(StaffAccountFilterRequest $request, StaffAccountService $accounts): View
     {
-        $company = $this->company($request, $accounts);
-        $filters = $request->validated();
-
-        return view('UserManagement::index', [
-            'company'       => $company,
-            'staffAccounts' => $accounts->listing($company->id, $filters),
-            'statistics'    => $accounts->statistics($company->id),
-            'filters'       => $filters,
-        ]);
+        return view('UserManagement::index', $this->listingData($request, $accounts));
     }
 
-    public function show(Request $request, StaffAccountService $accounts, int $staff): View
+    public function show(StaffAccountFilterRequest $request, StaffAccountService $accounts, int $staff): View
     {
         $company = $this->company($request, $accounts);
 
-        return view('UserManagement::show', [
-            'company' => $company,
-            'staff'   => $accounts->staffForCompany($company->id, $staff),
+        return view('UserManagement::index', [
+            ...$this->listingData($request, $accounts, $company),
+            'viewingStaff' => $accounts->staffForCompany($company->id, $staff),
         ]);
     }
 
@@ -64,7 +57,7 @@ class StaffAccountController extends Controller
 
         try {
             DB::transaction(function () use ($data, $company, $avatarPath): void {
-                $roleId = DB::table('roles')->whereNull('bus_company_id')->where('slug', 'staff')->value('id');
+                $roleId = RoleRecord::query()->toBase()->whereNull('bus_company_id')->where('slug', 'staff')->value('id');
                 abort_if($roleId === null, 500);
 
                 $staff = User::create([
@@ -105,13 +98,13 @@ class StaffAccountController extends Controller
         return redirect()->route('staff-accounts.index')->with('status', __('UserManagement::app.created'));
     }
 
-    public function edit(Request $request, StaffAccountService $accounts, int $staff): View
+    public function edit(StaffAccountFilterRequest $request, StaffAccountService $accounts, int $staff): View
     {
         $company = $this->company($request, $accounts);
 
-        return view('UserManagement::edit', [
-            'company' => $company,
-            'staff'   => $accounts->staffForCompany($company->id, $staff),
+        return view('UserManagement::index', [
+            ...$this->listingData($request, $accounts, $company),
+            'editingStaff' => $accounts->staffForCompany($company->id, $staff),
         ]);
     }
 
@@ -212,5 +205,21 @@ class StaffAccountController extends Controller
         abort_if($company === null, 403);
 
         return $company;
+    }
+
+    private function listingData(
+        StaffAccountFilterRequest $request,
+        StaffAccountService $accounts,
+        ?object $company = null,
+    ): array {
+        $company ??= $this->company($request, $accounts);
+        $filters = $request->validated();
+
+        return [
+            'company'       => $company,
+            'staffAccounts' => $accounts->listing($company->id, $filters),
+            'statistics'    => $accounts->statistics($company->id),
+            'filters'       => $filters,
+        ];
     }
 }

@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace FuteBus\Payment\Services;
 
-use Illuminate\Support\Facades\DB;
+use FuteBus\BookingManagement\Models\BookedSeat as BookedSeatRecord;
+use FuteBus\BookingManagement\Models\Booking as BookingRecord;
+use FuteBus\CustomerManagement\Models\Customer as CustomerRecord;
+use FuteBus\TicketManagement\Models\Ticket as TicketRecord;
 
 class TicketIssuer
 {
@@ -14,9 +17,9 @@ class TicketIssuer
         $seatCodes = $outbound ? $preview['outbound_seats'] : $preview['seats'];
         $tripId = (int) $trip['id'];
         $phone = $preview['customer']['phone'];
-        $customerId = DB::table('customers')->where('phone', $phone)->value('id');
+        $customerId = CustomerRecord::query()->toBase()->where('phone', $phone)->value('id');
         if ($customerId === null) {
-            $customerId = DB::table('customers')->insertGetId([
+            $customerId = CustomerRecord::query()->toBase()->insertGetId([
                 'user_id'    => $preview['user_id'] ?? null,
                 'full_name'  => $preview['customer']['name'],
                 'phone'      => $phone,
@@ -27,7 +30,7 @@ class TicketIssuer
         }
 
         $bookingCode = 'SP'.$intent->code.($outbound ? 'O' : '');
-        $bookingId = DB::table('bookings')->insertGetId([
+        $bookingId = BookingRecord::query()->toBase()->insertGetId([
             'booking_code' => $bookingCode,
             'trip_id'      => $tripId,
             'customer_id'  => $customerId,
@@ -49,7 +52,7 @@ class TicketIssuer
 
         foreach ($seatIds as $index => $seatId) {
             $seatCode = $seatCodes[$index];
-            DB::table('booked_seats')->insert([
+            BookedSeatRecord::query()->toBase()->insert([
                 'booking_id'     => $bookingId,
                 'trip_id'        => $tripId,
                 'seat_layout_id' => $seatId,
@@ -58,7 +61,7 @@ class TicketIssuer
                 'created_at'     => now(),
                 'updated_at'     => now(),
             ]);
-            DB::table('tickets')->insert([
+            TicketRecord::query()->toBase()->insert([
                 'ticket_code'     => $bookingCode.str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT),
                 'booking_id'      => $bookingId,
                 'trip_id'         => $tripId,

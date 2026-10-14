@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace FuteBus\Payment\Services;
 
+use FuteBus\Cancellation\Models\TicketCancellation as TicketCancellationRecord;
+use FuteBus\Payment\Models\TicketRefund as TicketRefundRecord;
+use FuteBus\TicketManagement\Models\Ticket as TicketRecord;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -12,7 +15,7 @@ class SePayRefundService
 {
     public function process(int $id): void
     {
-        $refund = DB::table('ticket_refunds')->where('id', $id)->first();
+        $refund = TicketRefundRecord::query()->toBase()->where('id', $id)->first();
         if ($refund === null || $refund->processing_mode !== 'automatic'
             || config('services.sepay.refund_mode', 'manual') !== 'automatic'
             || in_array($refund->status, ['succeeded', 'failed'], true)
@@ -37,14 +40,14 @@ class SePayRefundService
                 : $client->withHeaders(['X-Idempotency-Key' => $refund->idempotency_key])
                     ->post($base.'/transactions/'.rawurlencode($refund->transaction_id).'/refund', ['refund_amount' => $refund->amount]);
         } catch (ConnectionException) {
-            DB::table('ticket_refunds')->where('id', $id)->whereNotIn('status', ['succeeded', 'failed'])
+            TicketRefundRecord::query()->toBase()->where('id', $id)->whereNotIn('status', ['succeeded', 'failed'])
                 ->update(['error_code' => 'connection_unknown', 'updated_at' => now()]);
 
             return;
         }
         $data = $response->json('data');
         if (in_array($response->status(), [400, 401, 403, 404, 409, 422], true)) {
-            DB::table('ticket_refunds')->where('id', $id)->whereNotIn('status', ['succeeded', 'failed'])
+            TicketRefundRecord::query()->toBase()->where('id', $id)->whereNotIn('status', ['succeeded', 'failed'])
                 ->update(['status' => 'needs_review', 'error_code' => 'provider_rejected', 'updated_at' => now()]);
 
             return;
@@ -55,23 +58,23 @@ class SePayRefundService
             || ! is_string($data['refund_id'] ?? null) || $data['refund_id'] === '' || strlen($data['refund_id']) > 255
             || ($refund->provider_refund_id && $data['refund_id'] !== $refund->provider_refund_id)
             || ! in_array($data['status'] ?? null, ['pending', 'succeeded', 'failed'], true)) {
-            DB::table('ticket_refunds')->where('id', $id)->whereNotIn('status', ['succeeded', 'failed'])
+            TicketRefundRecord::query()->toBase()->where('id', $id)->whereNotIn('status', ['succeeded', 'failed'])
                 ->update(['error_code' => 'provider_unverified', 'updated_at' => now()]);
 
             return;
         }
         DB::transaction(function () use ($id, $data): void {
-            $current = DB::table('ticket_refunds')->where('id', $id)->lockForUpdate()->first();
+            $current = TicketRefundRecord::query()->toBase()->where('id', $id)->lockForUpdate()->first();
             if ($current->status === 'succeeded') {
                 return;
             }
-            DB::table('ticket_refunds')->where('id', $id)->update([
+            TicketRefundRecord::query()->toBase()->where('id', $id)->update([
                 'provider_refund_id' => $data['refund_id'], 'status' => $data['status'], 'error_code' => null,
                 'succeeded_at'       => $data['status'] === 'succeeded' ? now() : null, 'updated_at' => now(),
             ]);
             if ($data['status'] === 'succeeded') {
-                $ticket = DB::table('ticket_cancellations')->where('id', $current->cancellation_id)->value('ticket_id');
-                DB::table('tickets')->where('id', $ticket)->where('status', 'cancelled')
+                $ticket = TicketCancellationRecord::query()->toBase()->where('id', $current->cancellation_id)->value('ticket_id');
+                TicketRecord::query()->toBase()->where('id', $ticket)->where('status', 'cancelled')
                     ->update(['status' => 'refunded', 'updated_at' => now()]);
             }
         });

@@ -140,5 +140,11 @@
     @if(auth()->user()->hasPermissionTo('user.create'))
         @include('UserManagement::partials.create-modal')
     @endif
+    @if(isset($viewingStaff) && auth()->user()->hasPermissionTo('user.view'))
+        @include('UserManagement::partials.detail-panel')
+    @endif
+    @if(isset($editingStaff) && auth()->user()->hasPermissionTo('user.update'))
+        @include('UserManagement::partials.edit-panel')
+    @endif
     @vite('packages/FuteBus/UserManagement/src/resources/js/app.js')
 @endsection

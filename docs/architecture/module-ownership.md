@@ -17,8 +17,38 @@ FUTABUS remains a Laravel modular monolith: one application, shared authenticati
 | `FuteBus/Profile` | Customer account, history, reviews and feedback submission. |
 | `FuteBus/StaffCustomerSupport` | Staff feedback triage, assignments, responses and audit history. |
 | `FuteBus/Core` | Shared controls, loaders, notifications, confirmation dialogs and public content. |
+| `FuteBus/RouteManagement` | Operator routes, terminal names, ordered boarding/dropoff stops, leg durations and route availability. |
+| `FuteBus/TripManagement` | Recurring schedules, generated departures, vehicle assignments and dispatch checks. |
+
+Route and stop writes use the separate operator screen at `/quan-tri/tuyen-duong`, with `route.view/create/update/delete` permissions and FUTA ownership checks.
+Schedules display an itinerary and link to its stop editor. RouteManagement publishes the synchronous `RouteTimingChanged` event;
+TripManagement recalculates future unsold arrivals and active schedule durations inside the caller's transaction.
+Vehicle overlaps reject the entire change. Trips are locked before checking booking, ticket, seat and both payment-intent legs.
+An itinerary with such references or past departures cannot be changed. Existing history is preserved; create a new route for a new itinerary.
+Deleting a used route is blocked, and deactivation requires resolving active schedules and future operational trips first.
+No migration or new environment setting is required for route management.
 
 Booking tracking reads financial records but never mutates a booking, seat, ticket or payment. `booking.view` is required; company membership is enforced for each leg and on detail requests. Staff cannot acquire company scope through an email match. Paid round trips reference their original payment through consistent, paid payment intents. Raw snapshots, payment payloads, provider credentials and payment tokens are not rendered.
+
+## Eloquent domain models
+
+Persisted business entities have models in their owning modules. `Auth` supplies shared identity relationships to `App/Models/User`;
+`RolePermission` owns roles and permissions, and Laravel's pivot relations represent the existing assignment tables.
+`BusCompanyManagement`, `BusManagement`, `SeatManagement`, `RouteManagement` and `TripManagement` own the fleet and operating graph.
+`CustomerManagement`, `Customer/BookingManagement` and `Customer/TicketManagement` own customers, bookings, reserved seats and issued tickets.
+`Payment` owns payments, verified SePay receipts/intents and refund records/events; `Cancellation` owns cancellation records.
+`Profile` owns customer reviews and feedback, and `StaffCustomerSupport` owns the support event ledger.
+
+The customer schedule page, public schedule API and operator route editor use RouteManagement's `BusRoute` model and the same `routes` table.
+No copied route catalog or separate customer schedule storage is maintained. Public queries are restricted to active FUTA routes marked for publication.
+Foreign-key relationships are explicit; unique cancellation, refund and review foreign keys use `HasOne` rather than `HasMany`.
+JSON, boolean, date and exact decimal/integer money casts are declared. Private payment snapshots, tokens and raw provider payloads are hidden from model serialization.
+Audit models with a creation timestamp only use `UPDATED_AT = null`, preserving automatic `created_at` without inventing an `updated_at` column.
+
+Production query entrypoints start from the owning Eloquent models. Existing aggregate queries, row locks and ledger mutations use the base query builder
+where their original result shape is required; this preserves financial checks and transaction behavior. Model relationships supplement these queries
+without replacing application authorization or settlement verification. Reports, layouts, tableless module shells and framework notification/cache/job storage
+do not need duplicate business models. Query and relationship tests run on an isolated database; passing them does not certify MySQL concurrency or bank settlement.
 
 ## Request and service contracts
 

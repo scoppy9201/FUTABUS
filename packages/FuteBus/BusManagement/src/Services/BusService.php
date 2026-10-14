@@ -4,6 +4,16 @@ declare(strict_types=1);
 
 namespace FuteBus\BusManagement\Services;
 
+use FuteBus\BookingManagement\Models\BookedSeat as BookedSeatRecord;
+use FuteBus\BookingManagement\Models\Booking as BookingRecord;
+use FuteBus\BusCompanyManagement\Models\BusCompany as BusCompanyRecord;
+use FuteBus\BusManagement\Models\Bus as BusRecord;
+use FuteBus\BusManagement\Models\VehicleDocument as VehicleDocumentRecord;
+use FuteBus\BusManagement\Models\VehicleType as VehicleTypeRecord;
+use FuteBus\Payment\Models\SePayPaymentIntent as SePayPaymentIntentRecord;
+use FuteBus\SeatManagement\Models\SeatLayout as SeatLayoutRecord;
+use FuteBus\TicketManagement\Models\Ticket as TicketRecord;
+use FuteBus\TripManagement\Models\Trip as TripRecord;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -29,7 +39,7 @@ class BusService
 
     public function paginate(string $search = '', string $typeId = '', string $status = ''): LengthAwarePaginator
     {
-        return DB::table('buses')
+        return BusRecord::query()->toBase()
             ->leftJoin('vehicle_types', 'vehicle_types.id', '=', 'buses.vehicle_type_id')
             ->where('buses.bus_company_id', $this->futaCompanyId())
             ->select(
@@ -85,36 +95,59 @@ class BusService
         $plate = strtoupper(trim($data['license_plate']));
         $this->assertNotOverMaxAge((int) $data['manufacture_year']);
 
-        return DB::table('buses')->insertGetId([
-            ...$this->payload($data, $plate),
-            'bus_company_id' => $companyId,
-            'status'         => 'active',
-            'doc_status'     => 'ok',
-            'created_at'     => now(),
-            'updated_at'     => now(),
-        ]);
+        return DB::transaction(function () use ($data, $plate, $companyId): int {
+            $type = $this->vehicleType((int) $data['vehicle_type_id']);
+            $now = now();
+            $busId = BusRecord::query()->toBase()->insertGetId([
+                ...$this->payload($data, $plate, $type),
+                'bus_company_id' => $companyId,
+                'status'         => 'active',
+                'doc_status'     => 'ok',
+                'created_at'     => $now,
+                'updated_at'     => $now,
+            ]);
+
+            $this->replaceSeatLayout($busId, $type);
+
+            return $busId;
+        });
     }
 
     public function update(int $id, array $data): void
     {
+        $bus = $this->find($id);
         $this->assertEditable($id);
         $this->assertChassisNumber($data['chassis_number']);
         $this->assertEngineNumber($data['engine_number']);
 
         $plate = strtoupper(trim($data['license_plate']));
         $this->assertNotOverMaxAge((int) $data['manufacture_year']);
+        $typeChanged = (int) $bus->vehicle_type_id !== (int) $data['vehicle_type_id'];
 
-        DB::table('buses')->where('id', $id)->update([
-            ...$this->payload($data, $plate),
-            'status'     => $data['status'],
-            'updated_at' => now(),
-        ]);
+        if ($typeChanged && $this->hasTripHistory($id)) {
+            throw ValidationException::withMessages([
+                'vehicle_type_id' => __('BusManagement::app.bus_err_type_history'),
+            ]);
+        }
+
+        DB::transaction(function () use ($id, $data, $plate, $typeChanged): void {
+            $type = $this->vehicleType((int) $data['vehicle_type_id']);
+            BusRecord::query()->toBase()->where('id', $id)->update([
+                ...$this->payload($data, $plate, $type),
+                'status'     => $data['status'],
+                'updated_at' => now(),
+            ]);
+
+            if ($typeChanged) {
+                $this->replaceSeatLayout($id, $type);
+            }
+        });
     }
 
     public function deactivate(int $id): void
     {
         $this->assertEditable($id);
-        DB::table('buses')->where('id', $id)
+        BusRecord::query()->toBase()->where('id', $id)
             ->update(['status' => 'inactive', 'updated_at' => now()]);
     }
 
@@ -127,7 +160,7 @@ class BusService
         }
 
         $newStatus = $bus->status === 'active' ? 'inactive' : 'active';
-        DB::table('buses')->where('id', $id)->update([
+        BusRecord::query()->toBase()->where('id', $id)->update([
             'status'     => $newStatus,
             'updated_at' => now(),
         ]);
@@ -140,23 +173,23 @@ class BusService
     {
         $this->find($id);
 
-        $hasDocuments = DB::table('vehicle_documents')->where('bus_id', $id)->exists();
+        $hasDocuments = VehicleDocumentRecord::query()->toBase()->where('bus_id', $id)->exists();
         if ($hasDocuments) {
             return false;
         }
 
-        if (Schema::hasTable('trips') && DB::table('trips')->where('bus_id', $id)->exists()) {
+        if (Schema::hasTable('trips') && TripRecord::query()->toBase()->where('bus_id', $id)->exists()) {
             return false;
         }
 
-        DB::table('buses')->where('id', $id)->delete();
+        BusRecord::query()->toBase()->where('id', $id)->delete();
 
         return true;
     }
 
     public function find(int $id): object
     {
-        $bus = DB::table('buses')
+        $bus = BusRecord::query()->toBase()
             ->where('id', $id)
             ->where('bus_company_id', $this->futaCompanyId())->first();
         abort_if($bus === null, 404);
@@ -172,7 +205,7 @@ class BusService
 
     private function assertNotAssignedToActiveTrip(int $id): void
     {
-        if (Schema::hasTable('trips') && DB::table('trips')->where('bus_id', $id)
+        if (Schema::hasTable('trips') && TripRecord::query()->toBase()->where('bus_id', $id)
             ->whereIn('status', ['scheduled', 'departed'])->exists()) {
             throw ValidationException::withMessages(['bus' => __('BusManagement::app.bus_err_active_trip')]);
         }
@@ -209,8 +242,10 @@ class BusService
         }
     }
 
-    private function payload(array $data, string $plate): array
+    private function payload(array $data, string $plate, ?object $type = null): array
     {
+        $type ??= $this->vehicleType((int) $data['vehicle_type_id']);
+
         return [
             'license_plate'    => $plate,
             'chassis_number'   => strtoupper(trim($data['chassis_number'])),
@@ -219,17 +254,118 @@ class BusService
             'brand'            => $data['brand'],
             'manufacture_year' => $data['manufacture_year'],
             'vehicle_type_id'  => $data['vehicle_type_id'],
-            'capacity'         => (int) DB::table('vehicle_types')
-                ->where('id', $data['vehicle_type_id'])
-                ->value('default_capacity'),
+            'capacity'         => (int) $type->default_capacity,
+            'bus_type'         => $this->busType((string) $type->vehicle_class),
+            'seat_rows'        => (int) ($type->seat_rows ?: 11),
+            'seat_columns'     => (int) ($type->seat_columns ?: 4),
             'name'             => $data['brand'].' '.$plate,
             'description'      => $data['description'] ?? null,
         ];
     }
 
+    private function vehicleType(int $id): object
+    {
+        $type = VehicleTypeRecord::query()->toBase()->where('id', $id)->first();
+        abort_if($type === null, 422);
+
+        return $type;
+    }
+
+    private function busType(string $vehicleClass): string
+    {
+        return match ($vehicleClass) {
+            'seater' => 'standard',
+            'limousine', 'limousine_sleeper' => 'limousine',
+            'sleeper', 'vip_cabin' => 'sleeper',
+            default => 'sleeper',
+        };
+    }
+
+    private function replaceSeatLayout(int $busId, object $type): void
+    {
+        SeatLayoutRecord::query()->toBase()->where('bus_id', $busId)->delete();
+
+        $rows = (int) ($type->seat_rows ?? 0);
+        $columns = (int) ($type->seat_columns ?? 0);
+        $floors = (int) ($type->floor_count ?? 1);
+        if ($rows < 1 || $columns < 1) {
+            return;
+        }
+
+        $capacity = (int) $type->default_capacity;
+        $seatsPerFloor = intdiv($capacity, $floors);
+        $extraSeats = $capacity % $floors;
+        $timestamp = now();
+        $seatRows = [];
+
+        for ($floor = 0; $floor < $floors; $floor++) {
+            $deck = $floor === 0 ? 'lower' : 'upper';
+            $prefix = $floor === 0 ? 'A' : 'B';
+            $seatCount = $seatsPerFloor + ($floor < $extraSeats ? 1 : 0);
+
+            foreach ($this->seatPositions($type, $seatCount, $rows, $columns) as $index => [$row, $column]) {
+                $seatRows[] = [
+                    'bus_id'           => $busId,
+                    'seat_code'        => $prefix.str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT),
+                    'row_number'       => $row,
+                    'column_number'    => $column,
+                    'seat_type'        => in_array($type->vehicle_class, ['seater', 'limousine'], true) ? 'seat' : 'sleeper',
+                    'deck'             => $deck,
+                    'price_multiplier' => 1.00,
+                    'is_available'     => true,
+                    'created_at'       => $timestamp,
+                    'updated_at'       => $timestamp,
+                ];
+            }
+        }
+
+        if ($seatRows !== []) {
+            SeatLayoutRecord::query()->toBase()->insert($seatRows);
+        }
+    }
+
+    /** @return array<int, array{0: int, 1: int}> */
+    private function seatPositions(object $type, int $seatCount, int $rows, int $columns): array
+    {
+        if ($seatCount < 1) {
+            return [];
+        }
+
+        if ($type->vehicle_class === 'limousine_sleeper'
+            && (int) $type->floor_count === 2
+            && $rows === 6
+            && $columns === 3
+            && $seatCount === 17) {
+            return [[1, 1], [1, 2], ...array_merge(...array_map(
+                fn (int $row): array => [[$row, 1], [$row, 2], [$row, 3]],
+                range(2, 6),
+            ))];
+        }
+
+        return array_map(fn (int $index): array => [
+            intdiv($index, $columns) + 1,
+            ($index % $columns) + 1,
+        ], range(0, $seatCount - 1));
+    }
+
+    private function hasTripHistory(int $busId): bool
+    {
+        $tripIds = TripRecord::query()->toBase()->where('bus_id', $busId)->pluck('id');
+        if ($tripIds->isEmpty()) {
+            return false;
+        }
+
+        return BookingRecord::query()->toBase()->whereIn('trip_id', $tripIds)->exists()
+            || TicketRecord::query()->toBase()->whereIn('trip_id', $tripIds)->exists()
+            || BookedSeatRecord::query()->toBase()->whereIn('trip_id', $tripIds)->exists()
+            || SePayPaymentIntentRecord::query()->toBase()
+                ->where(fn ($query) => $query->whereIn('trip_id', $tripIds)->orWhereIn('secondary_trip_id', $tripIds))
+                ->exists();
+    }
+
     private function futaCompanyId(): int
     {
-        $id = DB::table('bus_companies')->where('code', 'FUTA')->value('id');
+        $id = BusCompanyRecord::query()->toBase()->where('code', 'FUTA')->value('id');
         abort_if($id === null, 503);
 
         return (int) $id;

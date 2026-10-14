@@ -20,11 +20,13 @@ class ModuleBoundariesTest extends TestCase
     public function test_domain_entrypoints_are_owned_and_registered_by_their_modules(): void
     {
         foreach ([
-            'trip-search'          => 'FuteBus\\TripSearch\\Http\\Controllers\\TripSearchController',
-            'trip-booking.show'    => 'FuteBus\\BookingManagement\\Http\\Controllers\\TripBookingController',
-            'ticket-lookup'        => 'FuteBus\\TicketManagement\\Http\\Controllers\\TicketLookupController',
-            'bookings.index'       => 'FuteBus\\BookingTracking\\Http\\Controllers\\BookingMonitorController',
-            'staff.bookings.index' => 'FuteBus\\BookingTracking\\Http\\Controllers\\BookingMonitorController',
+            'trip-search'                  => 'FuteBus\\TripSearch\\Http\\Controllers\\TripSearchController',
+            'trip-booking.show'            => 'FuteBus\\BookingManagement\\Http\\Controllers\\TripBookingController',
+            'ticket-lookup'                => 'FuteBus\\TicketManagement\\Http\\Controllers\\TicketLookupController',
+            'bookings.index'               => 'FuteBus\\BookingTracking\\Http\\Controllers\\BookingMonitorController',
+            'staff.bookings.index'         => 'FuteBus\\BookingTracking\\Http\\Controllers\\BookingMonitorController',
+            'route-management.index'       => 'FuteBus\\RouteManagement\\Http\\Controllers\\RouteController',
+            'route-management.stops.store' => 'FuteBus\\RouteManagement\\Http\\Controllers\\RouteStopController',
         ] as $name => $controller) {
             $route = app('router')->getRoutes()->getByName($name);
             $this->assertNotNull($route, $name);

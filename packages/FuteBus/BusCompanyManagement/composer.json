@@ -5,7 +5,13 @@
     "version": "1.0.0",
     "license": "MIT",
     "require": {
-        "php": "^8.2"
+        "php": "^8.2",
+        "futebus/busmanagement": "*",
+        "futebus/profile": "*",
+        "futebus/rolepermission": "*",
+        "futebus/routemanagement": "*",
+        "futebus/staffcustomersupport": "*",
+        "futebus/tripmanagement": "*"
     },
     "autoload": {
         "psr-4": {
