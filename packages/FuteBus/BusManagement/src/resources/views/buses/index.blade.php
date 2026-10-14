@@ -112,8 +112,7 @@
     <div role="dialog" aria-modal="true" x-show="showForm" x-cloak @click.self="showForm = false"
          class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
         <div class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div class="flex items-center justify-between px-5 py-3"
-                 :class="isEdit ? 'bg-slate-800' : 'bg-futa-orange'">
+            <div class="flex items-center justify-between bg-futa-orange px-5 py-3">
                 <h2 class="text-base font-bold text-white"
                     x-text="isEdit ? @js(__('BusManagement::app.bus_modal_edit')) : @js(__('BusManagement::app.bus_modal_add'))"></h2>
                 <button type="button" @click="showForm = false" class="text-white/70 hover:text-white"><x-heroicon-o-x-mark class="size-4" /></button>

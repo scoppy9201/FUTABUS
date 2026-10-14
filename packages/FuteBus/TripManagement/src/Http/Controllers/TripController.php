@@ -30,15 +30,25 @@ class TripController extends Controller
         $status = (string) $request->input('status', '');
         $date = (string) $request->input('date', '');
 
+        $bookedSeatCounts = DB::table('booked_seats')
+            ->join('bookings', 'bookings.id', '=', 'booked_seats.booking_id')
+            ->where('bookings.status', '<>', 'cancelled')
+            ->select('booked_seats.trip_id')
+            ->selectRaw('COUNT(*) AS booked_seat_count')
+            ->groupBy('booked_seats.trip_id');
+
         $query = DB::table('trips')
             ->join('routes', 'routes.id', '=', 'trips.route_id')
             ->leftJoin('buses', 'buses.id', '=', 'trips.bus_id')
+            ->leftJoinSub($bookedSeatCounts, 'booked_seat_counts', 'booked_seat_counts.trip_id', '=', 'trips.id')
             ->where('trips.bus_company_id', $company?->id ?? 0)
             ->select('trips.*', 'routes.origin_city', 'routes.destination_city',
                 'routes.code as route_code', 'buses.license_plate', 'buses.capacity')
+            ->selectRaw('CASE WHEN COALESCE(buses.capacity, 0) > COALESCE(booked_seat_counts.booked_seat_count, 0)
+                THEN COALESCE(buses.capacity, 0) - COALESCE(booked_seat_counts.booked_seat_count, 0) ELSE 0 END AS remaining_seats')
             ->selectRaw("(select count(*) from bookings where bookings.trip_id = trips.id
                           and bookings.status <> 'cancelled') as ticket_count")
-            ->orderByRaw('trips.departure_time < now()')   // chuyến sắp tới lên trước
+            ->orderByRaw('CASE WHEN trips.departure_time < ? THEN 1 ELSE 0 END', [now()->toDateTimeString()])
             ->orderBy('trips.departure_time');
 
         if ($search !== '') {

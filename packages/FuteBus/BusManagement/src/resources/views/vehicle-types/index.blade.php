@@ -291,7 +291,7 @@
             class="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
         >
             {{-- Modal Header --}}
-            <div class="flex items-center justify-between bg-slate-800 px-5 py-3">
+            <div class="flex items-center justify-between bg-futa-orange px-5 py-3">
                 <div class="flex items-center gap-2">
                     <span class="rounded-lg bg-white/20 p-1.5">
                         <x-heroicon-o-pencil-square class="size-4 text-white" />
@@ -367,7 +367,7 @@
                         {{ __('BusManagement::app.btn_cancel') }}
                     </button>
                     <button type="submit"
-                        class="rounded-lg bg-slate-800 px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-slate-900">
+                        class="rounded-lg bg-futa-orange px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-futa-orange-dark">
                         {{ __('BusManagement::app.btn_save') }}
                     </button>
                 </div>
