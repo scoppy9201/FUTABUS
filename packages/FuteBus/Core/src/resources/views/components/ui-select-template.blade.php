@@ -8,3 +8,6 @@
         <p data-ui-error role="alert" class="futa-control__error" hidden></p>
     </div>
 </template>
+<template id="futa-ui-empty-options-template">
+    <x-core::empty-state :title="__('core::ui.no_options')" compact />
+</template>

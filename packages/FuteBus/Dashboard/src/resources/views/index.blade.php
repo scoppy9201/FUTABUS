@@ -153,7 +153,11 @@
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="4" class="px-6 py-12 text-center text-sm text-gray-500">{{ __('Dashboard::app.no_bookings') }}</td></tr>
+                                <tr>
+                                    <td colspan="4" class="px-6 py-12 text-center text-sm text-gray-500">
+                                        <x-core::empty-state :title="__('Dashboard::app.no_bookings')" />
+                                    </td>
+                                </tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -187,7 +191,11 @@
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="4" class="px-6 py-12 text-center text-sm text-gray-500">{{ __('Dashboard::app.no_trips') }}</td></tr>
+                                <tr>
+                                    <td colspan="4" class="px-6 py-12 text-center text-sm text-gray-500">
+                                        <x-core::empty-state :title="__('Dashboard::app.no_trips')" />
+                                    </td>
+                                </tr>
                             @endforelse
                         </tbody>
                     </table>

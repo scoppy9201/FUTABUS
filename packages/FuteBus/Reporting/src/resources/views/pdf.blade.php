@@ -31,7 +31,6 @@
         .details { margin-top: 3px; }
         .details th { background: #f1f5f9; color: #64748b; font-size: 8px; padding: 8px; text-align: left; text-transform: uppercase; }
         .details td { border-bottom: 1px solid #e2e8f0; padding: 7px 8px; }
-        .empty { border: 1px dashed #cbd5e1; color: #64748b; padding: 30px; text-align: center; }
         thead { display: table-header-group; }
         tr { page-break-inside: avoid; }
     </style>
@@ -64,7 +63,7 @@
     </tr></table>
 
     @if($report['rows']->isEmpty())
-        <div class="empty">{{ __('Reporting::app.empty') }}</div>
+        <x-core::empty-state :title="__('Reporting::app.empty')" print />
     @else
         <div class="chart-card bar-card">
             <h2>{{ __('Reporting::app.column_chart') }}</h2>
@@ -105,7 +104,7 @@
                         @endforeach
                     </table>
                 @else
-                    <div class="empty">{{ __('Reporting::app.empty') }}</div>
+                    <x-core::empty-state :title="__('Reporting::app.empty')" print />
                 @endif
             </div></td>
         </tr></table>

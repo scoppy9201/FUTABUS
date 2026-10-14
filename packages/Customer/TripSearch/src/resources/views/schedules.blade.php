@@ -202,14 +202,12 @@
                         </div>
                     </template>
 
-                    <p
+                    <x-core::empty-state
                         x-cloak
                         x-show="!hasResults()"
                         x-transition.opacity.duration.150ms
                         class="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-5 py-12 text-center text-base font-semibold text-gray-500"
-                    >
-                        {{ __('core::schedules.no_results') }}
-                    </p>
+                        :title="__('core::schedules.no_results')" compact />
                 </div>
             </section>
         </main>

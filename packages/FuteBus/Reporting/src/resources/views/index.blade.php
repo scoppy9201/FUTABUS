@@ -74,20 +74,20 @@
                         <li class="flex items-center gap-2"><span class="size-2.5 rounded-sm bg-rose-600"></span>{{ __('Reporting::app.refunded') }}</li>
                     </ul>
                 @endif
-                @if($report['rows']->isEmpty())<p class="py-12 text-center text-sm text-slate-500">{{ __('Reporting::app.empty') }}</p>
+                @if($report['rows']->isEmpty())<x-core::empty-state class="py-12 text-center text-sm text-slate-500" :title="__('Reporting::app.empty')" compact />
                 @else <div class="mt-4 h-80 w-full"><canvas class="block h-full w-full" data-report-bar role="img" aria-label="{{ __('Reporting::app.column_chart') }}"></canvas></div>@endif
             </article>
 
             <article class="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" aria-labelledby="report-line-title">
                 <h2 id="report-line-title" class="text-base font-bold text-slate-900">{{ __('Reporting::app.line_chart') }}</h2>
-                @if($report['rows']->isEmpty())<p class="py-12 text-center text-sm text-slate-500">{{ __('Reporting::app.empty') }}</p>
+                @if($report['rows']->isEmpty())<x-core::empty-state class="py-12 text-center text-sm text-slate-500" :title="__('Reporting::app.empty')" compact />
                 @else <div class="mt-4 h-72 w-full"><canvas class="block h-full w-full" data-report-line role="img" aria-label="{{ __('Reporting::app.line_chart') }}"></canvas></div>@endif
             </article>
 
             <article class="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" aria-labelledby="report-donut-title">
                 <h2 id="report-donut-title" class="text-base font-bold text-slate-900">{{ __('Reporting::app.donut_chart') }}</h2>
                 @if (empty($report['status']))
-                    <p class="py-12 text-center text-sm text-slate-500">{{ __('Reporting::app.empty') }}</p>
+                    <x-core::empty-state class="py-12 text-center text-sm text-slate-500" :title="__('Reporting::app.empty')" compact />
                 @else
                     <div class="mt-4 h-56 w-full">
                         <canvas class="block h-full w-full" data-report-donut
@@ -150,7 +150,9 @@
                     @empty
                         <tr>
                             <td colspan="{{ $filters['type'] === 'tickets' ? 2 : ($filters['type'] === 'payments' ? 4 : 3) }}"
-                                class="px-5 py-10 text-center text-slate-500">{{ __('Reporting::app.empty') }}</td>
+                                class="px-5 py-10 text-center text-slate-500">
+                                <x-core::empty-state :title="__('Reporting::app.empty')" />
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>

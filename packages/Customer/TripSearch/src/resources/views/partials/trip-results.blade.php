@@ -307,8 +307,7 @@
 
         <div id="trip-direction-results" @if ($roundTrip) role="tabpanel" :aria-labelledby="direction === 'return' ? 'trip-return-tab' : 'trip-outbound-tab'" @endif>
         <div x-show="visibleTrips().length === 0" class="min-h-96 rounded-xl bg-transparent py-16 text-center text-gray-500">
-            <p class="text-lg font-semibold">{{ __('core::trip-search.no_results') }}</p>
-            <p class="mt-2 text-sm">{{ __('core::trip-search.try_another') }}</p>
+            <x-core::empty-state :title="__('core::trip-search.no_results')" :description="__('core::trip-search.try_another')" />
         </div>
 
         <div class="space-y-5" x-show="visibleTrips().length > 0">
@@ -385,7 +384,7 @@
                                     </div>
                                 </template>
                             </div>
-                            <p class="trip-card__seat-empty" x-show="trip.seats.length === 0">{{ __('core::trip-search.no_seat_map') }}</p>
+                            <x-core::empty-state class="trip-card__seat-empty" x-show="trip.seats.length === 0" :title="__('core::trip-search.no_seat_map')" compact />
                             <div class="trip-card__seat-checkout">
                                 <div class="trip-card__seat-order">
                                     <span x-text="selectedSeats(trip).length + ' ' + @js(__('core::trip-search.tickets'))"></span>

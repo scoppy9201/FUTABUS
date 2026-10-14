@@ -72,7 +72,11 @@
                                 <td class="px-4 py-4">@include('Payment::refunds.status', ['status' => $refund->status])</td>
                             </tr>
                         @empty
-                            <tr><td colspan="5" class="px-5 py-20 text-center text-slate-500">{{ __('Payment::refunds.empty') }}</td></tr>
+                            <tr>
+                                <td colspan="5" class="px-5 py-20 text-center text-slate-500">
+                                    <x-core::empty-state :title="__('Payment::refunds.empty')" />
+                                </td>
+                            </tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -87,8 +91,7 @@
                 @include('Payment::refunds.detail', ['refund' => $selectedRefund])
             @else
                 <div class="px-6 py-16 text-center">
-                    <x-heroicon-o-banknotes class="mx-auto size-10 text-slate-300" />
-                    <p class="mt-4 text-sm leading-6 text-slate-500">{{ __('Payment::refunds.choose') }}</p>
+                    <x-core::empty-state :title="__('Payment::refunds.choose')" compact />
                 </div>
             @endif
         </aside>

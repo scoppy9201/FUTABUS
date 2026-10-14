@@ -74,9 +74,7 @@
                     </span>
                 </div>
             </template>
-            <p class="booking-page__stop-empty" x-show="matches().length === 0">
-                {{ __('core::booking.stop_no_results') }}
-            </p>
+            <x-core::empty-state class="booking-page__stop-empty" x-show="matches().length === 0" :title="__('core::booking.stop_no_results')" compact />
         </div>
     </div>
     @if ($stopKind === 'pickup')

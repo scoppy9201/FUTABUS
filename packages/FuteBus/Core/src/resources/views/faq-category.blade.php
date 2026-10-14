@@ -85,9 +85,7 @@
                                     x-text="question.question"
                                 ></button>
                             </template>
-                            <p x-show="filteredQuestions.length === 0" class="px-6 py-8 text-center text-gray-500">
-                                {{ __('core::faq-category.no_results') }}
-                            </p>
+                            <x-core::empty-state x-show="filteredQuestions.length === 0" class="px-6 py-8 text-center text-gray-500" :title="__('core::faq-category.no_results')" compact />
                         </div>
                     </aside>
 

@@ -107,9 +107,7 @@
                                     </tr>
                                 @empty
                                     <tr><td colspan="4" class="px-5 py-12 text-center">
-                                        <span class="mx-auto grid size-14 place-items-center rounded-full bg-futa-orange-soft text-futa-orange"><x-heroicon-o-chat-bubble-left-right class="size-7" aria-hidden="true" /></span>
-                                        <p class="mt-4 text-lg font-semibold text-gray-950">{{ __('Profile::feedback.'.($hasFilters ? 'filtered_empty' : 'empty')) }}</p>
-                                        <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">{{ __('Profile::feedback.'.($hasFilters ? 'filtered_hint' : 'empty_hint')) }}</p>
+                                        <x-core::empty-state :title="__('Profile::feedback.'.($hasFilters ? 'filtered_empty' : 'empty'))" :description="__('Profile::feedback.'.($hasFilters ? 'filtered_hint' : 'empty_hint'))" />
                                     </td></tr>
                                 @endforelse
                             </tbody>
