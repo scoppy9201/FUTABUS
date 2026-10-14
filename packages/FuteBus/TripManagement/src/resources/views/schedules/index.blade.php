@@ -255,7 +255,9 @@
                                 <label class="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl px-2.5 text-sm font-semibold text-slate-700 hover:bg-futa-orange-soft/50">
                                     <input type="checkbox" name="days_of_week[]" value="{{ $v }}" x-model="form.days_of_week" class="peer sr-only">
                                     <span aria-hidden="true"
-                                        class="grid size-5 shrink-0 place-items-center rounded-full border-2 border-slate-300 bg-white transition peer-checked:border-futa-orange peer-checked:[&>span]:opacity-100 peer-focus-visible:ring-2 peer-focus-visible:ring-futa-orange/30 peer-focus-visible:ring-offset-2">
+                                        class="grid size-5 shrink-0 place-items-center rounded-full border-2 border-slate-300 bg-white transition
+                                            peer-checked:border-futa-orange peer-checked:[&>span]:opacity-100
+                                            peer-focus-visible:ring-2 peer-focus-visible:ring-futa-orange/30 peer-focus-visible:ring-offset-2">
                                         <span class="size-2.5 rounded-full border-2 border-futa-orange opacity-0 transition"></span>
                                     </span>
                                     <span class="peer-checked:text-futa-orange">{{ __('TripManagement::app.day_'.$v) }}</span>
