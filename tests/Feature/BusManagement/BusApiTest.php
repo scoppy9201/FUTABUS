@@ -135,6 +135,8 @@ class BusApiTest extends TestCase
         $this->assertSame(17, DB::table('seat_layouts')->where('bus_id', $bus->id)->where('deck', 'lower')->count());
         $this->assertSame(17, DB::table('seat_layouts')->where('bus_id', $bus->id)->where('deck', 'upper')->count());
         $this->assertSame(34, DB::table('seat_layouts')->where('bus_id', $bus->id)->where('seat_type', 'sleeper')->count());
+        $this->assertSame(['blanket', 'water', 'wet_towel', 'charging', 'wifi'], json_decode($bus->amenities, true));
+        $this->assertSame('19006067', $bus->wifi_password);
         $this->assertDatabaseHas('seat_layouts', [
             'bus_id'        => $bus->id,
             'seat_code'     => 'A01',
@@ -149,5 +151,16 @@ class BusApiTest extends TestCase
             'column_number' => 3,
             'deck'          => 'upper',
         ]);
+        foreach (['A' => 'lower', 'B' => 'upper'] as $prefix => $deck) {
+            $this->assertDatabaseMissing('seat_layouts', [
+                'bus_id' => $bus->id, 'deck' => $deck, 'row_number' => 1, 'column_number' => 2,
+            ]);
+            $this->assertDatabaseHas('seat_layouts', [
+                'bus_id' => $bus->id, 'seat_code' => $prefix.'02', 'row_number' => 1, 'column_number' => 3,
+            ]);
+            $this->assertDatabaseHas('seat_layouts', [
+                'bus_id' => $bus->id, 'seat_code' => $prefix.'03', 'row_number' => 2, 'column_number' => 1,
+            ]);
+        }
     }
 }

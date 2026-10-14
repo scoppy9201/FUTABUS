@@ -228,7 +228,7 @@
 }
 
 .booking-page__round-trip-legs .trip-card__seat-grid {
-    grid-template-columns: repeat(3, 27px);
+    grid-template-columns: repeat(var(--seat-columns, 3), 27px);
     gap: 7px 36px;
 }
 

@@ -3,7 +3,7 @@
     @click.outside="vehicleInfoOpen = null" @keydown.escape.window="vehicleInfoOpen = null"
     role="dialog" aria-label="{{ __('core::booking.vehicle_info') }}">
     <div class="booking-page__vehicle-tabs" role="tablist" aria-label="{{ __('core::booking.vehicle_info') }}">
-        @foreach (['schedule', 'media', 'amenities', 'policy'] as $tab)
+        @foreach (['schedule', 'details', 'amenities', 'policy'] as $tab)
             <button type="button" role="tab"
                 @click="vehicleInfoTab = '{{ $tab }}'"
                 :aria-selected="vehicleInfoTab === '{{ $tab }}'"
@@ -13,14 +13,18 @@
         @endforeach
     </div>
     <div class="booking-page__vehicle-content">
-        <div x-show="vehicleInfoTab === 'schedule'" class="booking-page__vehicle-empty">
-            <x-core::empty-state :title="__('core::booking.schedule_empty')" compact />
+        <div x-show="vehicleInfoTab === 'schedule'" class="h-full"
+            x-data="{ trip: @js(['stops' => ($vehicleLeg === 'outbound' ? $outboundTrip : $trip)['stops']]) }">
+            @include('TripSearch::partials.trip-itinerary', [
+                'hideItineraryNote' => true,
+                'itineraryHasStops' => !empty(($vehicleLeg === 'outbound' ? $outboundTrip : $trip)['stops']),
+            ])
         </div>
-        <div x-show="vehicleInfoTab === 'media'" class="booking-page__vehicle-empty">
-            <x-core::empty-state :title="__('core::booking.media_empty')" compact />
+        <div x-show="vehicleInfoTab === 'details'">
+            @include('BookingManagement::partials.booking-vehicle-details')
         </div>
-        <div x-show="vehicleInfoTab === 'amenities'" class="booking-page__vehicle-empty">
-            <x-core::empty-state :title="__('core::booking.amenities_empty')" compact />
+        <div x-show="vehicleInfoTab === 'amenities'">
+            @include('BookingManagement::partials.booking-vehicle-amenities')
         </div>
         <div x-show="vehicleInfoTab === 'policy'" class="booking-page__vehicle-policy">
             @foreach ([

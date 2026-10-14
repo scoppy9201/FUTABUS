@@ -523,6 +523,25 @@ class SePayPaymentTest extends TestCase
         $this->assertSame('34 Đường B', $snapshot['dropoff']['address']);
     }
 
+    public function test_stop_disabled_after_page_load_cannot_be_used_for_payment(): void
+    {
+        $routeId = DB::table('trips')->where('id', $this->tripId)->value('route_id');
+        $stopId = DB::table('route_stops')->insertGetId([
+            'route_id'       => $routeId, 'name' => 'Disabled boarding office', 'stop_order' => 1,
+            'offset_minutes' => 0, 'stop_type' => 'pickup', 'status' => 'active',
+        ]);
+        $this->get(route('trip-booking.show', ['trip' => $this->tripId, ...$this->criteria]))
+            ->assertOk()->assertSee('Disabled boarding office');
+        DB::table('route_stops')->where('id', $stopId)->update(['status' => 'inactive']);
+
+        $this->post(route('trip-booking.payment.store', ['trip' => $this->tripId, ...$this->criteria]), [
+            'name'           => 'Nguyen Van A', 'phone' => '0912345678', 'email' => 'customer@example.com',
+            'accept_terms'   => '1', 'seats' => [$this->seatId], 'pickup_mode' => 'station', 'dropoff_mode' => 'station',
+            'pickup_station' => (string) $stopId,
+        ])->assertSessionHasErrors('pickup_station');
+        $this->assertDatabaseCount('sepay_payment_intents', 0);
+    }
+
     public function test_operator_stop_from_another_route_is_rejected(): void
     {
         $routeId = DB::table('trips')->where('id', $this->tripId)->value('route_id');

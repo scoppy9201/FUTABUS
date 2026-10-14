@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace FuteBus\TripSearch\Services;
 
 use FuteBus\BookingManagement\Models\BookedSeat as BookedSeatRecord;
+use FuteBus\BusManagement\Models\Bus;
+use FuteBus\BusManagement\Services\BusPresentationService;
 use FuteBus\Payment\Models\SePayPaymentIntent as SePayPaymentIntentRecord;
+use FuteBus\RouteManagement\Models\RouteStop;
 use FuteBus\SeatManagement\Models\SeatLayout as SeatLayoutRecord;
 use FuteBus\TripManagement\Models\Trip as TripRecord;
 use Illuminate\Support\Carbon;
@@ -73,6 +76,11 @@ class TripSearchService
             ->get()
             ->groupBy('bus_id');
 
+        $routeStops = RouteStop::query()->whereIn('route_id', $trips->pluck('route_id'))
+            ->orderBy('stop_order')->get()->groupBy('route_id');
+        $vehicleDetails = Bus::with('vehicleType')->whereIn('id', $trips->pluck('bus_id'))->get()
+            ->mapWithKeys(fn (Bus $bus) => [$bus->id => BusPresentationService::publicData($bus)]);
+
         $catalog = $this->locations->all();
         $allLocations = [
             'areas'             => array_merge($catalog['departure']['areas'], $catalog['destination']['areas']),
@@ -92,11 +100,12 @@ class TripSearchService
                     && $this->matchesLocation($fromLocation, $trip->origin_city, $trip->origin_station)
                     && $this->matchesLocation($toLocation, $trip->destination_city, $trip->destination_station);
             })
-            ->map(function ($trip) use ($bookedSeats, $seatLayouts): array {
+            ->map(function ($trip) use ($bookedSeats, $seatLayouts, $routeStops, $vehicleDetails): array {
                 $occupied = collect($bookedSeats[$trip->id] ?? [])->pluck('seat_layout_id')->all();
                 $remaining = max(0, (int) $trip->capacity - count($occupied));
                 $departure = Carbon::parse($trip->departure_time);
                 $arrival = Carbon::parse($trip->arrival_time);
+                $activeStops = collect($routeStops[$trip->route_id] ?? [])->where('status', 'active');
                 $layouts = collect($seatLayouts[$trip->bus_id] ?? []);
                 $availableLayouts = $layouts->filter(fn ($seat) => $seat->is_available
                     && ! in_array($seat->id, $occupied, true));
@@ -153,10 +162,30 @@ class TripSearchService
                     'destination'            => $trip->destination_station ?: $trip->destination_city,
                     'distance_km'            => $trip->distance_km,
                     'vehicle_type'           => $trip->bus_type,
+                    'vehicle_details'        => $vehicleDetails[$trip->bus_id],
                     'available_seats'        => $trip->available_seats === null ? $remaining : min((int) $trip->available_seats, $remaining),
                     'row_options'            => $rowOptions,
                     'deck_options'           => $availableLayouts->pluck('deck')->unique()->values()->all(),
                     'seat_decks'             => collect($seats)->pluck('deck')->unique()->values()->all(),
+                    'seat_columns'           => max(1, (int) collect($seats)->max('column')),
+                    'stops'                  => collect($routeStops[$trip->route_id] ?? [])->map(function ($stop) use ($departure, $activeStops): array {
+                        $time = $departure->copy()->addMinutes($stop->offset_minutes);
+
+                        return [
+                            'id'             => $stop->id,
+                            'name'           => $stop->name,
+                            'address'        => $stop->address,
+                            'type'           => $stop->stop_type,
+                            'active'         => $stop->status === 'active',
+                            'is_origin'      => $stop->id === $activeStops->first()?->id,
+                            'is_destination' => $stop->id === $activeStops->last()?->id,
+                            'hour'           => $time->format('H:i'),
+                            'date'           => $time->format('d/m/Y'),
+                            'day_offset'     => (int) $departure->copy()->startOfDay()->diffInDays($time->copy()->startOfDay()),
+                            'map_url'        => 'https://www.google.com/maps/search/?api=1&query='
+                                .rawurlencode(implode(', ', array_filter([$stop->name, $stop->address, 'Việt Nam']))),
+                        ];
+                    })->values()->all(),
                     'demo_seat_map'          => $isDemo,
                     'seats'                  => $seats,
                     'demo_selected_seat_ids' => $demoSelectedIds,
