@@ -5,7 +5,9 @@
     "version": "1.0.0",
     "license": "MIT",
     "require": {
-        "php": "^8.2"
+        "php": "^8.2",
+        "futebus/core": "*",
+        "futebus/payment": "*"
     },
     "autoload": {
         "psr-4": {

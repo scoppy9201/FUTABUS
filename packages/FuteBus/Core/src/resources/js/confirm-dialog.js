@@ -122,6 +122,9 @@ if (dialog) {
         }
 
         event.preventDefault();
+        if (dialog.open || isClosing) {
+            return;
+        }
         pendingForm = form;
         pendingSubmitter = event.submitter;
         openDialog(form);

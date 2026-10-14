@@ -45,7 +45,10 @@
     <div data-refund-error role="alert" class="mt-4 text-sm font-semibold text-red-700"></div>
     @if(auth()->user()->hasPermissionTo('payment.refund') && $refund->processing_mode === 'manual')
         @if(in_array($refund->status, ['refund_pending', 'refund_failed'], true))
-            <form data-refund-form action="{{ route($refundRoutes.'.update', $refund->id) }}" method="post" class="mt-5">
+            <form data-refund-form action="{{ route($refundRoutes.'.update', $refund->id) }}" method="post" class="mt-5"
+                data-confirm-title="{{ __('Payment::refunds.claim') }}"
+                data-confirm-message="{{ __('Payment::refunds.confirmation.claim', ['reference' => $refund->reference]) }}"
+                data-confirm-label="{{ __('Payment::refunds.claim') }}">
                 @csrf
                 @method('patch')
                 <input type="hidden" name="version" value="{{ $refund->version }}"><input type="hidden" name="action" value="claim">
@@ -53,7 +56,11 @@
             </form>
         @elseif($refund->status === 'refund_processing' && (int) $refund->assigned_to === auth()->id())
             <p class="mt-5 rounded-xl bg-amber-50 p-4 text-sm leading-6 text-amber-800">{{ __('Payment::refunds.warning') }}</p>
-            <form data-refund-form action="{{ route($refundRoutes.'.update', $refund->id) }}" method="post" class="mt-4 grid gap-4">
+            <form data-refund-form action="{{ route($refundRoutes.'.update', $refund->id) }}" method="post" class="mt-4 grid gap-4"
+                data-confirm-title="{{ __('Payment::refunds.complete') }}"
+                data-confirm-message="{{ __('Payment::refunds.confirmation.complete', ['reference' => $refund->reference,
+                    'amount' => number_format($refund->amount, 0, ',', '.').' ₫']) }}"
+                data-confirm-label="{{ __('Payment::refunds.complete') }}">
                 @csrf
                 @method('patch')
                 <input type="hidden" name="version" value="{{ $refund->version }}"><input type="hidden" name="action" value="complete">
@@ -86,7 +93,10 @@
                 </label>
                 <button class="rounded-xl bg-futa-orange px-5 py-3 text-sm font-bold text-white">{{ __('Payment::refunds.complete') }}</button>
             </form>
-            <form data-refund-form action="{{ route($refundRoutes.'.update', $refund->id) }}" method="post" class="mt-5 border-t border-gray-200 pt-4">
+            <form data-refund-form action="{{ route($refundRoutes.'.update', $refund->id) }}" method="post" class="mt-5 border-t border-gray-200 pt-4"
+                data-confirm-title="{{ __('Payment::refunds.fail') }}"
+                data-confirm-message="{{ __('Payment::refunds.confirmation.fail', ['reference' => $refund->reference]) }}"
+                data-confirm-label="{{ __('Payment::refunds.fail') }}">
                 @csrf
                 @method('patch')
                 <input type="hidden" name="version" value="{{ $refund->version }}"><input type="hidden" name="action" value="fail">

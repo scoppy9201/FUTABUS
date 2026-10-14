@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace FuteBus\StaffTicketProcessing\Http\Controllers\Api;
 
-use FuteBus\Core\Http\Controllers\TripBookingController;
-use FuteBus\Core\Services\BookingLocationCatalog;
-use FuteBus\Core\Services\BookingTripStops;
-use FuteBus\Core\Services\TripSearchService;
+use FuteBus\BookingManagement\Services\BookingPageBuilder;
 use FuteBus\Payment\Services\SePayPaymentService;
 use FuteBus\StaffDashboard\Services\StaffDashboardService;
+use FuteBus\StaffTicketProcessing\Http\Requests\ConfirmCashPaymentRequest;
 use FuteBus\StaffTicketProcessing\Http\Requests\TicketBookingRequest;
 use FuteBus\StaffTicketProcessing\Http\Requests\TicketQuoteRequest;
 use FuteBus\StaffTicketProcessing\Http\Requests\TicketSaleRequest;
 use FuteBus\StaffTicketProcessing\Http\Requests\TicketTripRequest;
 use FuteBus\StaffTicketProcessing\Services\CashSaleService;
 use FuteBus\StaffTicketProcessing\Services\CounterSaleService;
+use FuteBus\StaffTicketProcessing\Services\SaleCancellationService;
 use FuteBus\StaffTicketProcessing\Services\StaffPaymentPresenter;
+use FuteBus\TripSearch\Services\BookingLocationCatalog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -46,14 +46,14 @@ class CounterSaleController extends Controller
         return response()->json(['data' => $trips, 'return_trips' => $returns, 'html' => $html])->header('Cache-Control', 'no-store');
     }
 
-    public function booking(TicketBookingRequest $request, CounterSaleService $sales, TripBookingController $booking, TripSearchService $search, BookingTripStops $stops, int $trip): JsonResponse
+    public function booking(TicketBookingRequest $request, CounterSaleService $sales, BookingPageBuilder $booking, int $trip): JsonResponse
     {
         abort_unless(collect($sales->trips($request->user(), $request->validated()))->contains('id', $trip), 404);
         if ($request->input('trip_type') === 'round_trip') {
             $outbound = [...$request->validated(), 'direction' => 'outbound'];
             abort_unless(collect($sales->trips($request->user(), $outbound))->contains('id', (int) $request->query('outbound_trip')), 404);
         }
-        $data = $booking($request, $search, $stops, $trip)->getData();
+        $data = $booking->build($request->validated(), $request->only(['direction', 'seats', 'outbound_trip', 'outbound_seats']), $trip);
 
         return response()->json(['data' => ['html' => view('StaffTicketProcessing::partials.customer-booking', $data)->render()]])->header('Cache-Control', 'no-store');
     }
@@ -78,9 +78,9 @@ class CounterSaleController extends Controller
         return response()->json(['data' => $this->presenter->render($cash->show($request->user(), $sale) ?? $sales->show($request->user(), $sale))])->header('Cache-Control', 'no-store');
     }
 
-    public function cash(Request $request, CounterSaleService $sales, CashSaleService $cash, string $sale): JsonResponse
+    public function cash(ConfirmCashPaymentRequest $request, CounterSaleService $sales, CashSaleService $cash, string $sale): JsonResponse
     {
-        $request->validate(['received' => ['required', 'accepted']]);
+        $request->validated();
         if (($receipt = $cash->show($request->user(), $sale)) === null) {
             $draft = $request->hasSession() ? $request->session()->get('staff_ticket_payment') : null;
             abort_unless(is_array($draft) && $draft['token'] === $sale && $draft['operator'] === $request->user()->id && $draft['company'] === $request->user()->bus_company_id, 404);
@@ -91,16 +91,10 @@ class CounterSaleController extends Controller
         return response()->json(['data' => $this->presenter->render($receipt)])->header('Cache-Control', 'no-store');
     }
 
-    public function destroy(Request $request, CounterSaleService $sales, CashSaleService $cash, string $sale): JsonResponse
+    public function destroy(Request $request, SaleCancellationService $cancellations, string $sale): JsonResponse
     {
-        abort_if($cash->show($request->user(), $sale) !== null, 409);
         $draft = $request->hasSession() ? $request->session()->get('staff_ticket_payment') : null;
-        if (is_array($draft) && $draft['token'] === $sale && $draft['sale']['id'] === null) {
-            abort_unless($draft['operator'] === $request->user()->id && $draft['company'] === $request->user()->bus_company_id, 404);
-            $result = [...$draft['sale'], 'status' => 'expired'];
-        } else {
-            $result = $sales->cancelPreview($request->user(), $sale);
-        }
+        $result = $cancellations->cancel($request->user(), $sale, is_array($draft) ? $draft : null);
         if (is_array($draft) && $draft['token'] === $sale) {
             $request->session()->forget('staff_ticket_payment');
         }

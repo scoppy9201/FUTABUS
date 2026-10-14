@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace FuteBus\TripSearch\Http\Controllers\Api;
 
-use FuteBus\Core\Http\Requests\TripSearchRequest;
-use FuteBus\Core\Services\TripSearchService;
+use FuteBus\TripSearch\Http\Requests\TripDetailRequest;
+use FuteBus\TripSearch\Http\Requests\TripSearchRequest;
+use FuteBus\TripSearch\Services\TripSearchService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Validation\ValidationException;
@@ -38,10 +39,10 @@ class TripController extends Controller
         ]);
     }
 
-    public function show(TripSearchRequest $request, TripSearchService $search, int $trip): JsonResponse
+    public function show(TripDetailRequest $request, TripSearchService $search, int $trip): JsonResponse
     {
         $criteria = $request->validated();
-        $direction = $request->validate(['direction' => ['required', 'in:outbound,return']])['direction'];
+        $direction = $criteria['direction'];
         if ($direction === 'return' && $criteria['trip_type'] !== 'round_trip') {
             throw ValidationException::withMessages([
                 'direction' => __('validation.in', ['attribute' => 'direction']),

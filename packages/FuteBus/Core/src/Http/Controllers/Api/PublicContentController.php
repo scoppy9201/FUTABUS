@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FuteBus\Core\Http\Controllers\Api;
 
+use FuteBus\Core\Http\Requests\NewsFilterRequest;
 use FuteBus\Core\Models\BranchRegion;
 use FuteBus\Core\Models\BusRoute;
 use FuteBus\Core\Models\FaqCategory;
@@ -11,18 +12,14 @@ use FuteBus\Core\Services\FeaturedArticleBodyRepository;
 use FuteBus\Core\Services\FeaturedNewsCatalog;
 use FuteBus\Core\Services\FeaturedPromotionCatalog;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
 
 class PublicContentController extends Controller
 {
-    public function news(Request $request, FeaturedNewsCatalog $news): JsonResponse
+    public function news(NewsFilterRequest $request, FeaturedNewsCatalog $news): JsonResponse
     {
-        $filters = $request->validate([
-            'q'        => ['nullable', 'string', 'max:100'],
-            'category' => ['nullable', 'string', 'max:100'],
-        ]);
+        $filters = $request->validated();
         $articles = $news->all()
             ->when(filled($filters['category'] ?? null), fn ($items) => $items->where('category', $filters['category']))
             ->when(filled($filters['q'] ?? null), fn ($items) => $items->filter(

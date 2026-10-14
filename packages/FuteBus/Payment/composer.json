@@ -6,7 +6,14 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "futebus/core": "*"
+        "futebus/auth": "*",
+        "futebus/bookingmanagement": "*",
+        "futebus/cancellation": "*",
+        "futebus/core": "*",
+        "futebus/dashboard": "*",
+        "futebus/profile": "*",
+        "futebus/staffdashboard": "*",
+        "futebus/tripsearch": "*"
     },
     "autoload": {
         "psr-4": {

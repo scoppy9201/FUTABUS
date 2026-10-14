@@ -12,6 +12,7 @@
         "futebus/aiassistant": "*",
         "futebus/auth": "*",
         "futebus/bookingmanagement": "*",
+        "futebus/bookingtracking": "*",
         "futebus/buscompanymanagement": "*",
         "futebus/busmanagement": "*",
         "futebus/cancellation": "*",
@@ -61,6 +62,7 @@
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/",
             "FuteBus\\Core\\": "packages/FuteBus/Core/src/",
+            "FuteBus\\BookingTracking\\": "packages/FuteBus/BookingTracking/src/",
             "FuteBus\\Auth\\": "packages/FuteBus/Auth/src/",
             "FuteBus\\Dashboard\\": "packages/FuteBus/Dashboard/src/",
             "FuteBus\\Notification\\": "packages/FuteBus/Notification/src/",
@@ -90,6 +92,11 @@
         }
     },
     "repositories": [
+        {
+            "type": "path",
+            "url": "packages/FuteBus/BookingTracking",
+            "options": { "symlink": true }
+        },
         {
             "type": "path",
             "url": "packages/FuteBus/StaffCustomerSupport",

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace FuteBus\Profile\Http\Controllers;
 
 use App\Models\User;
+use FuteBus\Auth\Services\PasswordChangeService;
 use FuteBus\Profile\Http\Requests\ChangePasswordRequest;
-use FuteBus\Profile\Services\PasswordChangeService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'confirmation' => [
+        'claim'    => 'Nhận xử lý yêu cầu :reference? Bạn sẽ chịu trách nhiệm đối soát và ghi nhận kết quả.',
+        'complete' => 'Xác nhận đã kiểm chứng giao dịch hoàn :amount cho yêu cầu :reference? Vé sẽ được ghi nhận đã hoàn tiền.',
+        'fail'     => 'Ghi nhận hoàn tiền chưa thành công cho yêu cầu :reference? Vé vẫn giữ trạng thái đã hủy.',
+    ],
     'request'             => 'Mã yêu cầu',
     'export'              => 'Xuất báo cáo',
     'total'               => 'Tổng',

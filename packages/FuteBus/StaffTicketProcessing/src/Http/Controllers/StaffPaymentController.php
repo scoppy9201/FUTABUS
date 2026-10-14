@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace FuteBus\StaffTicketProcessing\Http\Controllers;
 
 use FuteBus\Payment\Services\SePayPaymentService;
-use FuteBus\StaffTicketProcessing\Http\Controllers\Api\CounterSaleController;
 use FuteBus\StaffTicketProcessing\Http\Requests\TicketSaleRequest;
 use FuteBus\StaffTicketProcessing\Services\CashSaleService;
 use FuteBus\StaffTicketProcessing\Services\CounterSaleService;
+use FuteBus\StaffTicketProcessing\Services\SaleCancellationService;
 use FuteBus\StaffTicketProcessing\Services\StaffPaymentPresenter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,9 +30,13 @@ class StaffPaymentController extends Controller
         return redirect()->route('staff.tickets.payment', ['sale' => $data['idempotency_key']], 303);
     }
 
-    public function destroy(Request $request, CounterSaleController $controller, CounterSaleService $sales, CashSaleService $cash, string $sale): RedirectResponse
+    public function destroy(Request $request, SaleCancellationService $cancellations, string $sale): RedirectResponse
     {
-        $result = $controller->destroy($request, $sales, $cash, $sale)->getData(true)['data'];
+        $draft = $request->session()->get('staff_ticket_payment');
+        $result = $cancellations->cancel($request->user(), $sale, is_array($draft) ? $draft : null);
+        if (is_array($draft) && $draft['token'] === $sale) {
+            $request->session()->forget('staff_ticket_payment');
+        }
 
         return redirect()->route('staff.tickets.sale', $result['preview']['criteria'], 303);
     }

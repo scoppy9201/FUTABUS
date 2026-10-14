@@ -44,6 +44,15 @@
                             'text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange' => ! request()->routeIs('staff.ticket-lookup')])>
                         <x-heroicon-o-magnifying-glass class="size-5 shrink-0" /><span>{{ __('StaffDashboard::staff.tickets.actions.lookup') }}</span>
                     </a>
+                    @if(auth()->user()->hasPermissionTo('booking.view'))
+                        <a href="{{ route('staff.bookings.index') }}"
+                            @if(request()->routeIs('staff.bookings.*')) aria-current="page" @endif
+                            @class(['w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition',
+                                'bg-futa-orange-soft font-semibold text-futa-orange border-r-4 border-futa-orange' => request()->routeIs('staff.bookings.*'),
+                                'text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange' => ! request()->routeIs('staff.bookings.*')])>
+                            <x-heroicon-o-clipboard-document-list class="size-5 shrink-0" /><span>{{ __('BookingTracking::bookings.title') }}</span>
+                        </a>
+                    @endif
                     @if(auth()->user()->hasPermissionTo('payment.view'))
                         <a href="{{ route('staff.refunds.index') }}"
                             @if(request()->routeIs('staff.refunds.*')) aria-current="page" @endif
@@ -52,6 +61,13 @@
                                 'text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange' => ! request()->routeIs('staff.refunds.*')])>
                             <x-heroicon-o-receipt-refund class="size-5 shrink-0" /><span>{{ __('Payment::refunds.title') }}</span>
                         </a>
+                    @else
+                        <button type="button" aria-disabled="true" title="{{ __('StaffDashboard::staff.refund_access_hint') }}"
+                            @click="void window.FutaNotify?.warning(@js(__('StaffDashboard::staff.refund_access_hint')))"
+                            class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-400">
+                            <x-heroicon-o-receipt-refund class="size-5 shrink-0" /><span>{{ __('Payment::refunds.title') }}</span>
+                            <x-heroicon-o-lock-closed class="ml-auto size-4 shrink-0" aria-hidden="true" />
+                        </button>
                     @endif
                     <template
                         x-for="item in dashboard?.navigation || []"

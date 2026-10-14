@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace FuteBus\Cancellation\Http\Controllers;
 
+use FuteBus\Cancellation\Http\Requests\CancellationQuoteRequest;
+use FuteBus\Cancellation\Http\Requests\StoreCancellationRequest;
 use FuteBus\Cancellation\Services\TicketCancellationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 
 class TicketCancellationController extends Controller
 {
@@ -25,22 +26,17 @@ class TicketCancellationController extends Controller
         return response()->view('Cancellation::modal', compact('tickets', 'booking', 'receipts'))->header('Cache-Control', 'private, no-store');
     }
 
-    public function quote(Request $request, TicketCancellationService $service, int $booking): JsonResponse
+    public function quote(CancellationQuoteRequest $request, TicketCancellationService $service, int $booking): JsonResponse
     {
-        $input = $request->validate(['ticket_id' => ['required', 'integer', 'min:1']]);
+        $input = $request->validated();
 
         return response()->json($service->quote($request->user(), $booking, (int) $input['ticket_id']))
             ->header('Cache-Control', 'private, no-store');
     }
 
-    public function store(Request $request, TicketCancellationService $service, int $booking): JsonResponse
+    public function store(StoreCancellationRequest $request, TicketCancellationService $service, int $booking): JsonResponse
     {
-        $input = $request->validate([
-            'ticket_id'       => ['required', 'integer', 'min:1'],
-            'expected_refund' => ['required', 'integer', 'min:0'],
-            'reason'          => ['required', Rule::in(['plans', 'mistake', 'urgent', 'alternative'])],
-            'note'            => ['nullable', 'string', 'max:500'], 'consent' => ['required', 'accepted'],
-        ]);
+        $input = $request->validated();
         $cancellation = $service->cancel($request->user(), $booking, $input);
 
         return response()->json(['reference' => $cancellation->reference,

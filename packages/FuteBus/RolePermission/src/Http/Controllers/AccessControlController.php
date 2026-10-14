@@ -5,6 +5,13 @@ declare(strict_types=1);
 namespace FuteBus\RolePermission\Http\Controllers;
 
 use App\Models\User;
+use FuteBus\RolePermission\Http\Requests\AssignStaffRolesRequest;
+use FuteBus\RolePermission\Http\Requests\PermissionStatusRequest;
+use FuteBus\RolePermission\Http\Requests\StaffRoleFilterRequest;
+use FuteBus\RolePermission\Http\Requests\StorePermissionRequest;
+use FuteBus\RolePermission\Http\Requests\StoreRoleRequest;
+use FuteBus\RolePermission\Http\Requests\UpdatePermissionRequest;
+use FuteBus\RolePermission\Http\Requests\UpdateRoleRequest;
 use FuteBus\RolePermission\Services\AccessControlService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\QueryException;
@@ -13,7 +20,6 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class AccessControlController extends Controller
@@ -45,17 +51,10 @@ class AccessControlController extends Controller
         ]);
     }
 
-    public function storePermission(Request $request): RedirectResponse
+    public function storePermission(StorePermissionRequest $request): RedirectResponse
     {
         $this->assertCatalogAdmin($request);
-        $allowedSlugs = collect(config('permission_catalog', []))
-            ->flatMap(fn (array $actions, string $group): array => collect($actions)->map(fn (string $action): string => $group.'.'.$action)->all())
-            ->all();
-        $data = $request->validate([
-            'slug'          => ['required', 'string', Rule::in($allowedSlugs)],
-            'display_name'  => ['required', 'string', 'max:120'],
-            'display_group' => ['nullable', 'string', 'max:80'],
-        ]);
+        $data = $request->validated();
 
         $group = Str::before($data['slug'], '.');
         $existing = DB::table('permissions')->where('slug', $data['slug'])->first();
@@ -85,13 +84,10 @@ class AccessControlController extends Controller
         return redirect()->route('access-management.catalog')->with('status', __('RolePermission::app.permission_saved'));
     }
 
-    public function updatePermission(Request $request, int $permission): RedirectResponse
+    public function updatePermission(UpdatePermissionRequest $request, int $permission): RedirectResponse
     {
         $this->assertCatalogAdmin($request);
-        $data = $request->validate([
-            'display_name'  => ['required', 'string', 'max:120'],
-            'display_group' => ['nullable', 'string', 'max:80'],
-        ]);
+        $data = $request->validated();
 
         $row = DB::table('permissions')->where('id', $permission)->first();
         abort_if($row === null, 404);
@@ -107,10 +103,10 @@ class AccessControlController extends Controller
         return redirect()->route('access-management.catalog')->with('status', __('RolePermission::app.permission_saved'));
     }
 
-    public function setPermissionStatus(Request $request, int $permission): RedirectResponse
+    public function setPermissionStatus(PermissionStatusRequest $request, int $permission): RedirectResponse
     {
         $this->assertCatalogAdmin($request);
-        $request->validate(['is_active' => ['required', 'boolean']]);
+        $request->validated();
         $active = $request->boolean('is_active');
         $row = DB::table('permissions')->where('id', $permission)->first();
         abort_if($row === null, 404);
@@ -123,10 +119,10 @@ class AccessControlController extends Controller
         return redirect()->route('access-management.catalog')->with('status', __($active ? 'RolePermission::app.permission_activated' : 'RolePermission::app.permission_deactivated'));
     }
 
-    public function users(Request $request, AccessControlService $access): View
+    public function users(StaffRoleFilterRequest $request, AccessControlService $access): View
     {
         $company = $this->company($request, $access, 'user.view');
-        $filters = $request->validate(['q' => ['nullable', 'string', 'max:100']]);
+        $filters = $request->validated();
         $search = trim($filters['q'] ?? '');
 
         return view('RolePermission::users', [
@@ -137,14 +133,11 @@ class AccessControlController extends Controller
         ]);
     }
 
-    public function assignRoles(Request $request, AccessControlService $access, int $staff): RedirectResponse
+    public function assignRoles(AssignStaffRolesRequest $request, AccessControlService $access, int $staff): RedirectResponse
     {
         $company = $this->company($request, $access, 'user.update');
         $access->staffForCompany($company->id, $staff);
-        $data = $request->validate([
-            'role_ids'   => ['sometimes', 'array'],
-            'role_ids.*' => ['integer', 'distinct'],
-        ]);
+        $data = $request->validated();
         $roleIds = array_map('intval', $data['role_ids'] ?? []);
         $companyRoleIds = $access->companyRoleIds($company->id, $roleIds);
 
@@ -172,19 +165,10 @@ class AccessControlController extends Controller
         ]);
     }
 
-    public function storeRole(Request $request, AccessControlService $access): RedirectResponse
+    public function storeRole(StoreRoleRequest $request, AccessControlService $access): RedirectResponse
     {
         $company = $this->company($request, $access, 'role.create');
-        $data = $request->validate([
-            'name' => [
-                'required', 'string', 'max:255',
-                Rule::unique('roles', 'name')->where(fn ($query) => $query->where('bus_company_id', $company->id)),
-            ],
-            'description'            => ['nullable', 'string', 'max:1000'],
-            'permission_ids_present' => ['required', 'accepted'],
-            'permission_ids'         => ['sometimes', 'array'],
-            'permission_ids.*'       => ['integer', 'distinct', Rule::exists('permissions', 'id')->where('is_active', true)],
-        ]);
+        $data = $request->validated();
 
         try {
             DB::transaction(function () use ($data, $company, $access): void {
@@ -230,22 +214,11 @@ class AccessControlController extends Controller
         ]);
     }
 
-    public function updateRole(Request $request, AccessControlService $access, int $role): RedirectResponse
+    public function updateRole(UpdateRoleRequest $request, AccessControlService $access, int $role): RedirectResponse
     {
         $company = $this->company($request, $access, 'role.update');
         $role = $access->roleForCompany($company->id, $role);
-        $data = $request->validate([
-            'name' => [
-                'required', 'string', 'max:255',
-                Rule::unique('roles', 'name')
-                    ->where(fn ($query) => $query->where('bus_company_id', $company->id))
-                    ->ignore($role->id),
-            ],
-            'description'            => ['nullable', 'string', 'max:1000'],
-            'permission_ids_present' => ['required', 'accepted'],
-            'permission_ids'         => ['sometimes', 'array'],
-            'permission_ids.*'       => ['integer', 'distinct', Rule::exists('permissions', 'id')->where('is_active', true)],
-        ]);
+        $data = $request->validated();
 
         DB::transaction(function () use ($data, $role, $access): void {
             DB::table('roles')->where('id', $role->id)->update([

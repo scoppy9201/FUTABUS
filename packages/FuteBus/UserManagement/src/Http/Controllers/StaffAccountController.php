@@ -6,6 +6,9 @@ namespace FuteBus\UserManagement\Http\Controllers;
 
 use App\Models\User;
 use Carbon\Carbon;
+use FuteBus\UserManagement\Http\Requests\StaffAccountFilterRequest;
+use FuteBus\UserManagement\Http\Requests\StaffAccountRequest;
+use FuteBus\UserManagement\Http\Requests\StaffAccountStatusRequest;
 use FuteBus\UserManagement\Services\StaffAccountService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\QueryException;
@@ -15,25 +18,21 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class StaffAccountController extends Controller
 {
-    public function index(Request $request, StaffAccountService $accounts): View
+    public function index(StaffAccountFilterRequest $request, StaffAccountService $accounts): View
     {
         $company = $this->company($request, $accounts);
-        $filters = $request->validate([
-            'search' => ['nullable', 'string', 'max:100'],
-            'status' => ['nullable', Rule::in(['active', 'inactive'])],
-        ]);
+        $filters = $request->validated();
 
         return view('UserManagement::index', [
-            'company' => $company,
+            'company'       => $company,
             'staffAccounts' => $accounts->listing($company->id, $filters),
-            'statistics' => $accounts->statistics($company->id),
-            'filters' => $filters,
+            'statistics'    => $accounts->statistics($company->id),
+            'filters'       => $filters,
         ]);
     }
 
@@ -43,7 +42,7 @@ class StaffAccountController extends Controller
 
         return view('UserManagement::show', [
             'company' => $company,
-            'staff' => $accounts->staffForCompany($company->id, $staff),
+            'staff'   => $accounts->staffForCompany($company->id, $staff),
         ]);
     }
 
@@ -52,21 +51,10 @@ class StaffAccountController extends Controller
         return view('UserManagement::create', ['company' => $this->company($request, $accounts)]);
     }
 
-    public function store(Request $request, StaffAccountService $accounts): RedirectResponse
+    public function store(StaffAccountRequest $request, StaffAccountService $accounts): RedirectResponse
     {
         $company = $this->company($request, $accounts);
-        $this->normalizePhone($request);
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email:rfc', 'max:255', Rule::unique('users', 'email')],
-            'phone' => ['required', 'string', 'regex:/^(?:0|\+84)[0-9]{9}$/', Rule::unique('users', 'phone')],
-            'gender' => ['nullable', Rule::in(['male', 'female', 'other'])],
-            'date_of_birth' => $this->dateOfBirthRules(),
-            'address' => ['nullable', 'string', 'max:255'],
-            'password' => ['required', 'string', 'min:8'],
-            'password_confirmation' => ['required', 'string', 'same:password'],
-            'avatar' => ['nullable', 'image', 'mimes:jpeg,png', 'max:1024'],
-        ], $this->validationMessages());
+        $data = $request->validated();
         $data['date_of_birth'] = Carbon::createFromFormat('!Y-m-d', $data['date_of_birth'])->toDateString();
         $avatarPath = $request->file('avatar')?->store('avatars', 'public');
         if ($request->hasFile('avatar') && ! is_string($avatarPath)) {
@@ -80,16 +68,16 @@ class StaffAccountController extends Controller
                 abort_if($roleId === null, 500);
 
                 $staff = User::create([
-                    'name' => $data['name'],
-                    'email' => $data['email'],
-                    'phone' => $data['phone'] ?? null,
-                    'gender' => $data['gender'] ?? null,
-                    'date_of_birth' => $data['date_of_birth'] ?? null,
-                    'address' => $data['address'] ?? null,
-                    'password' => $data['password'],
-                    'avatar' => $avatarPath,
+                    'name'           => $data['name'],
+                    'email'          => $data['email'],
+                    'phone'          => $data['phone'] ?? null,
+                    'gender'         => $data['gender'] ?? null,
+                    'date_of_birth'  => $data['date_of_birth'] ?? null,
+                    'address'        => $data['address'] ?? null,
+                    'password'       => $data['password'],
+                    'avatar'         => $avatarPath,
                     'bus_company_id' => $company->id,
-                    'is_active' => true,
+                    'is_active'      => true,
                 ]);
                 $staff->email_verified_at = now();
                 $staff->save();
@@ -123,27 +111,15 @@ class StaffAccountController extends Controller
 
         return view('UserManagement::edit', [
             'company' => $company,
-            'staff' => $accounts->staffForCompany($company->id, $staff),
+            'staff'   => $accounts->staffForCompany($company->id, $staff),
         ]);
     }
 
-    public function update(Request $request, StaffAccountService $accounts, int $staff): RedirectResponse
+    public function update(StaffAccountRequest $request, StaffAccountService $accounts, int $staff): RedirectResponse
     {
         $company = $this->company($request, $accounts);
         $account = $accounts->staffForCompany($company->id, $staff);
-        $this->normalizePhone($request);
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email:rfc', 'max:255', Rule::unique('users', 'email')->ignore($account->id)],
-            'phone' => ['required', 'string', 'regex:/^(?:0|\+84)[0-9]{9}$/', Rule::unique('users', 'phone')->ignore($account->id)],
-            'gender' => ['nullable', Rule::in(['male', 'female', 'other'])],
-            'date_of_birth' => $this->dateOfBirthRules(),
-            'address' => ['nullable', 'string', 'max:255'],
-            'password' => ['nullable', 'string', 'min:8'],
-            'password_confirmation' => ['nullable', 'required_with:password', 'string', 'same:password'],
-            'is_active' => ['required', 'boolean'],
-            'avatar' => ['nullable', 'image', 'mimes:jpeg,png', 'max:1024'],
-        ], $this->validationMessages());
+        $data = $request->validated();
         $data['date_of_birth'] = Carbon::createFromFormat('!Y-m-d', $data['date_of_birth'])->toDateString();
         $avatarPath = $request->file('avatar')?->store('avatars', 'public');
         if ($request->hasFile('avatar') && ! is_string($avatarPath)) {
@@ -154,13 +130,13 @@ class StaffAccountController extends Controller
 
         try {
             $account->fill([
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'phone' => $data['phone'] ?? null,
-                'gender' => $data['gender'] ?? null,
+                'name'          => $data['name'],
+                'email'         => $data['email'],
+                'phone'         => $data['phone'] ?? null,
+                'gender'        => $data['gender'] ?? null,
                 'date_of_birth' => $data['date_of_birth'] ?? null,
-                'address' => $data['address'] ?? null,
-                'is_active' => (bool) $data['is_active'],
+                'address'       => $data['address'] ?? null,
+                'is_active'     => (bool) $data['is_active'],
             ]);
 
             if (is_string($avatarPath)) {
@@ -187,12 +163,12 @@ class StaffAccountController extends Controller
         return redirect()->route('staff-accounts.index')->with('status', __('UserManagement::app.updated'));
     }
 
-    public function toggleStatus(Request $request, StaffAccountService $accounts, int $staff): RedirectResponse
+    public function toggleStatus(StaffAccountStatusRequest $request, StaffAccountService $accounts, int $staff): RedirectResponse
     {
         $company = $this->company($request, $accounts);
         $account = $accounts->staffForCompany($company->id, $staff);
         $avatarPath = $account->avatar;
-        $data = $request->validate(['is_active' => ['required', 'boolean']]);
+        $data = $request->validated();
         $account->is_active = (bool) $data['is_active'];
         $account->save();
 
@@ -236,74 +212,5 @@ class StaffAccountController extends Controller
         abort_if($company === null, 403);
 
         return $company;
-    }
-
-    private function normalizePhone(Request $request): void
-    {
-        $phone = $request->input('phone');
-        if (is_string($phone)) {
-            $request->merge(['phone' => preg_replace('/[\s.()-]+/', '', $phone)]);
-        }
-    }
-
-    private function dateOfBirthRules(): array
-    {
-        return [
-            'bail',
-            'required',
-            'regex:/^\d{4}-\d{2}-\d{2}$/',
-            'date_format:Y-m-d',
-            function (string $attribute, mixed $value, \Closure $fail): void {
-                try {
-                    $date = Carbon::createFromFormat('!Y-m-d', $value);
-                } catch (Throwable) {
-                    $date = false;
-                }
-
-                if (! $date instanceof Carbon || $date->format('Y-m-d') !== $value) {
-                    $fail(__('UserManagement::app.validation.birth_date_invalid'));
-
-                    return;
-                }
-
-                $today = today();
-                if ($date->greaterThanOrEqualTo($today)) {
-                    $fail(__('UserManagement::app.validation.birth_date_before_today'));
-
-                    return;
-                }
-
-                if ($date->greaterThan($today->copy()->subYears(16))) {
-                    $fail(__('UserManagement::app.validation.birth_date_min_age'));
-
-                    return;
-                }
-
-                if ($date->lessThan($today->copy()->subYears(100))) {
-                    $fail(__('UserManagement::app.validation.birth_date_invalid'));
-                }
-            },
-        ];
-    }
-
-    private function validationMessages(): array
-    {
-        return [
-            'name.required' => __('UserManagement::app.validation.name_required'),
-            'email.required' => __('UserManagement::app.validation.email_required'),
-            'email.email' => __('UserManagement::app.validation.email_invalid'),
-            'email.unique' => __('UserManagement::app.validation.email_exists'),
-            'phone.required' => __('UserManagement::app.validation.phone_required'),
-            'phone.regex' => __('UserManagement::app.validation.phone_invalid'),
-            'phone.unique' => __('UserManagement::app.validation.phone_exists'),
-            'date_of_birth.required' => __('UserManagement::app.validation.birth_date_required'),
-            'date_of_birth.regex' => __('UserManagement::app.validation.birth_date_invalid'),
-            'date_of_birth.date_format' => __('UserManagement::app.validation.birth_date_invalid'),
-            'password.required' => __('UserManagement::app.validation.password_required'),
-            'password.min' => __('UserManagement::app.validation.password_min'),
-            'password_confirmation.required' => __('UserManagement::app.validation.password_confirmation_required'),
-            'password_confirmation.required_with' => __('UserManagement::app.validation.password_confirmation_required'),
-            'password_confirmation.same' => __('UserManagement::app.validation.password_confirmed'),
-        ];
     }
 }

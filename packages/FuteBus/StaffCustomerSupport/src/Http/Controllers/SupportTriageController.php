@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FuteBus\StaffCustomerSupport\Http\Controllers;
 
+use FuteBus\StaffCustomerSupport\Http\Requests\AssignSupportCompanyRequest;
 use FuteBus\StaffCustomerSupport\Services\FeedbackProcessingService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -23,10 +24,10 @@ class SupportTriageController extends Controller
         ]);
     }
 
-    public function assign(Request $request, FeedbackProcessingService $support, int $report): RedirectResponse
+    public function assign(AssignSupportCompanyRequest $request, FeedbackProcessingService $support, int $report): RedirectResponse
     {
         abort_unless($request->user()->isAdmin(), 403);
-        $input = $request->validate(['bus_company_id' => ['required', 'integer', 'min:1'], 'version' => ['required', 'integer', 'min:0']]);
+        $input = $request->validated();
         $support->assign($request->user(), $report, (int) $input['bus_company_id'], (int) $input['version']);
 
         return redirect()->route('staff.support-triage')->with('status', __('StaffCustomerSupport::support.assigned'));

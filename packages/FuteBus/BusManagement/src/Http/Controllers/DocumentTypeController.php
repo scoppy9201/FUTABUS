@@ -4,18 +4,16 @@ declare(strict_types=1);
 
 namespace FuteBus\BusManagement\Http\Controllers;
 
+use FuteBus\BusManagement\Http\Requests\DocumentTypeRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class DocumentTypeController extends Controller
 {
-    private const FIELD_TYPES = ['text', 'number', 'date'];
-
     public function index(Request $request): View
     {
         abort_unless($request->user()?->isAdmin(), 403);
@@ -44,11 +42,11 @@ class DocumentTypeController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(DocumentTypeRequest $request): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
 
-        $data = $request->validate($this->rules(), $this->messages());
+        $data = $request->validated();
 
         DB::transaction(function () use ($data) {
             $id = DB::table('document_types')->insertGetId([
@@ -71,7 +69,7 @@ class DocumentTypeController extends Controller
             ->with('success', __('BusManagement::app.dt_flash_created'));
     }
 
-    public function update(Request $request, int $id): RedirectResponse
+    public function update(DocumentTypeRequest $request, int $id): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
         $type = DB::table('document_types')->find($id);
@@ -81,7 +79,7 @@ class DocumentTypeController extends Controller
             return back()->withErrors(['type' => __('BusManagement::app.dt_err_inactive')]);
         }
 
-        $data = $request->validate($this->rules($id), $this->messages());
+        $data = $request->validated();
 
         DB::transaction(function () use ($data, $id) {
             DB::table('document_types')->where('id', $id)->update([
@@ -176,31 +174,5 @@ class DocumentTypeController extends Controller
             'created_at'       => now(),
             'updated_at'       => now(),
         ]);
-    }
-
-    private function rules(?int $id = null): array
-    {
-        return [
-            'name'              => ['required', 'string', 'min:3', 'max:50', Rule::unique('document_types', 'name')->ignore($id)],
-            'description'       => ['nullable', 'string', 'max:500'],
-            'is_required'       => ['required', 'boolean'],
-            'has_expiry'        => ['required', 'boolean'],
-            'blocks_dispatch'   => ['required', 'boolean'],
-            'warning_days'      => ['nullable', 'integer', 'min:1', 'max:365'],
-            'fields'            => ['required', 'array', 'min:1'],
-            'fields.*.id'       => ['nullable', 'integer'],
-            'fields.*.label'    => ['required', 'string', 'max:100'],
-            'fields.*.type'     => ['nullable', Rule::in(self::FIELD_TYPES)],
-            'fields.*.required' => ['required', 'boolean'],
-        ];
-    }
-
-    private function messages(): array
-    {
-        return [
-            'name.unique'     => __('BusManagement::app.dt_err_name'),
-            'fields.required' => __('BusManagement::app.dt_err_fields'),
-            'fields.min'      => __('BusManagement::app.dt_err_fields'),
-        ];
     }
 }

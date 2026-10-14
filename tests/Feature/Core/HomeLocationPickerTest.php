@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Core;
 
-use FuteBus\Core\Services\BookingLocationCatalog;
+use FuteBus\TripSearch\Services\BookingLocationCatalog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -14,7 +14,7 @@ class HomeLocationPickerTest extends TestCase
     public function test_home_location_picker_uses_separate_operator_departure_and_destination_data(): void
     {
         $catalog = json_decode(
-            file_get_contents(app_path('Data/futa_booking_locations.json')),
+            file_get_contents(base_path('packages/Customer/TripSearch/src/resources/data/booking-locations.json')),
             true,
             512,
             JSON_THROW_ON_ERROR,

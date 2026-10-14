@@ -257,25 +257,13 @@
     </x-core::side-panel>
 
     {{-- DEACTIVATE MODAL --}}
-    <div role="dialog" aria-modal="true" x-show="showDelete" x-cloak @click.self="showDelete = false"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" style="display:none">
-        <div class="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl">
-            <div class="mx-auto mb-4 grid size-14 place-items-center rounded-full bg-rose-100">
-                <x-heroicon-o-exclamation-triangle class="size-7 text-rose-500" />
-            </div>
-            <h3 class="text-lg font-bold text-slate-900">{{ __('BusManagement::app.dt_modal_delete') }}</h3>
-            <p class="mt-2 text-sm text-slate-500">
-                {{ __('BusManagement::app.dt_delete_msg') }}
-                <span class="font-bold text-slate-800" x-text="delData.name"></span>?
-            </p>
-            <form :action="delAction" method="POST" class="mt-5 flex items-center justify-end gap-2">
-                @csrf
-                @method('DELETE')
-                <button type="button" @click="showDelete = false" class="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('BusManagement::app.btn_cancel') }}</button>
-                <button type="submit" class="rounded-lg bg-rose-600 px-5 py-2 text-xs font-bold text-white transition hover:bg-rose-700">{{ __('BusManagement::app.btn_confirm_delete') }}</button>
-            </form>
-        </div>
-    </div>
+    <form x-ref="deleteForm" :action="delAction" method="POST" hidden data-confirm
+        :data-confirm-title="@js(__('BusManagement::app.dt_modal_delete'))"
+        :data-confirm-message="@js(__('BusManagement::app.dt_delete_msg')) + ' ' + delData.name + '?'"
+        data-confirm-label="{{ __('BusManagement::app.btn_confirm_delete') }}">
+        @csrf
+        @method('DELETE')
+    </form>
 </div>
 
 <script>
@@ -291,7 +279,7 @@ function docTypeManager() {
     const blank = () => ({ name: '', description: '', is_required: '0', has_expiry: '1', blocks_dispatch: '0', warning_days: 15, fields: [newField()] });
     const base = `{{ url('quan-tri/phuong-tien/loai-giay-to') }}`;
     return {
-        showForm: false, showDelete: false, isEdit: false, fieldOptions,
+        showForm: false, isEdit: false, fieldOptions,
         form: blank(), formAction: base, delData: {}, delAction: '',
         openAdd() { this.isEdit = false; this.form = blank(); this.formAction = base; this.showForm = true; },
         openEdit(d) {
@@ -304,7 +292,7 @@ function docTypeManager() {
             };
             this.formAction = `${base}/${d.id}`; this.showForm = true;
         },
-        openDelete(d) { this.delData = d; this.delAction = `${base}/${d.id}`; this.showDelete = true; },
+        openDelete(d) { this.delData = d; this.delAction = `${base}/${d.id}`; this.$nextTick(() => this.$refs.deleteForm.requestSubmit()); },
         addField() { this.form.fields.push(newField()); },
         removeField(i) { if (this.form.fields.length > 1) this.form.fields.splice(i, 1); },
     };
