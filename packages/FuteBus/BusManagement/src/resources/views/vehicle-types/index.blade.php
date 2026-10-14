@@ -12,7 +12,7 @@
     @include('BusManagement::vehicle-types.partials.toolbar')
 
     {{-- ── Table ── --}}
-    <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div id="vehicle-type-results" class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div class="overflow-x-auto">
             <table class="w-full min-w-[1000px] text-left text-sm">
                 <caption class="sr-only">{{ __('BusManagement::app.vehicle_types_title') }}</caption>
@@ -512,4 +512,5 @@ function vehicleTypeManager() {
 }
 </script>
 @include('BusManagement::partials.notifications')
+@include('BusManagement::partials.live-search')
 @endsection

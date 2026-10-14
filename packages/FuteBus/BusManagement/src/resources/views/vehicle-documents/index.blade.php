@@ -12,34 +12,36 @@
             <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">{{ __('BusManagement::app.vd_title') }}</h1>
             <p class="mt-2 max-w-3xl text-sm font-medium text-slate-500">{{ __('BusManagement::app.vd_subtitle') }}</p>
         </div>
-        <span class="rounded-full bg-futa-orange-soft px-4 py-2 text-sm font-bold text-futa-orange-dark">
+        <span id="vehicle-document-results-count" class="rounded-full bg-futa-orange-soft px-4 py-2 text-sm font-bold text-futa-orange-dark">
             {{ number_format($docs->total()) }} {{ __('Dashboard::app.records') }}
         </span>
     </div>
 
     <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
         <form method="GET" action="{{ route('bus-management.vehicle-documents.index') }}" class="flex flex-wrap items-center gap-2">
-            <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('BusManagement::app.vd_search_ph') }}"
-                class="w-56 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm shadow-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
-            <select name="bus_id" class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:outline-none">
+            <div class="relative shrink-0">
+                <x-heroicon-o-magnifying-glass class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('BusManagement::app.vd_search_ph') }}" @input="window.busManagementLiveSearch($el.form, 'vehicle-document-results')"
+                    class="w-56 rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm shadow-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
+            </div>
+            <select name="bus_id" @change="window.busManagementLiveSearch($el.form, 'vehicle-document-results')" class="w-40 shrink-0 truncate whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:outline-none">
                 <option value="">{{ __('BusManagement::app.vd_filter_bus_all') }}</option>
                 @foreach($buses as $b)
                     <option value="{{ $b->id }}" @selected((string) $busId === (string) $b->id)>{{ $b->license_plate }}</option>
                 @endforeach
             </select>
-            <select name="doc_type_id" class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:outline-none">
+            <select name="doc_type_id" @change="window.busManagementLiveSearch($el.form, 'vehicle-document-results')" class="w-56 shrink-0 truncate whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:outline-none">
                 <option value="">{{ __('BusManagement::app.vd_filter_type_all') }}</option>
                 @foreach($allTypes as $type)
                     <option value="{{ $type->id }}" @selected((string) $typeId === (string) $type->id)>{{ $type->name }}</option>
                 @endforeach
             </select>
-            <select name="state" class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:outline-none">
+            <select name="state" @change="window.busManagementLiveSearch($el.form, 'vehicle-document-results')" class="w-40 shrink-0 truncate whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:outline-none">
                 <option value="">{{ __('BusManagement::app.vd_filter_state_all') }}</option>
                 @foreach(['valid', 'expiring', 'expired', 'no_expiry'] as $st)
                     <option value="{{ $st }}" @selected($state === $st)>{{ __('BusManagement::app.vd_state_'.$st) }}</option>
                 @endforeach
             </select>
-            <button type="submit" class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200">{{ __('BusManagement::app.btn_search') }}</button>
             @if($search || $busId || $typeId || $state)
                 <a href="{{ route('bus-management.vehicle-documents.index') }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-500">{{ __('BusManagement::app.btn_clear_filter') }}</a>
             @endif
@@ -49,7 +51,7 @@
         </button>
     </div>
 
-    <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div id="vehicle-document-results" class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div class="overflow-x-auto">
             <table class="w-full min-w-250 text-left text-sm">
                 <thead class="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500">
@@ -348,4 +350,5 @@ function vehicleDocManager() {
 }
 </script>
 @include('BusManagement::partials.notifications')
+@include('BusManagement::partials.live-search')
 @endsection

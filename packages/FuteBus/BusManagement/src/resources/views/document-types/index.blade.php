@@ -12,7 +12,7 @@
             <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">{{ __('BusManagement::app.dt_title') }}</h1>
             <p class="mt-2 max-w-3xl text-sm font-medium text-slate-500">{{ __('BusManagement::app.dt_subtitle') }}</p>
         </div>
-        <span class="rounded-full bg-futa-orange-soft px-4 py-2 text-sm font-bold text-futa-orange">
+        <span id="document-type-results-count" class="rounded-full bg-futa-orange-soft px-4 py-2 text-sm font-bold text-futa-orange">
             {{ number_format($types->total()) }} {{ __('Dashboard::app.records') }}
         </span>
     </div>
@@ -21,12 +21,9 @@
         <form method="GET" action="{{ route('bus-management.document-types.index') }}" class="flex items-center gap-2">
             <div class="relative">
                 <x-heroicon-o-magnifying-glass class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-                <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('BusManagement::app.dt_search_ph') }}"
+                <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('BusManagement::app.dt_search_ph') }}" @input="window.busManagementLiveSearch($el.form, 'document-type-results')"
                     class="w-72 rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm shadow-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
             </div>
-            <button type="submit" class="rounded-xl bg-futa-orange px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-futa-orange-dark">
-                {{ __('BusManagement::app.btn_search') }}
-            </button>
             @if($search)
                 <a href="{{ route('bus-management.document-types.index') }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-500 hover:text-slate-700">
                     {{ __('BusManagement::app.btn_clear_filter') }}
@@ -38,7 +35,7 @@
         </button>
     </div>
 
-    <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div id="document-type-results" class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div class="overflow-x-auto">
             <table class="w-full min-w-[800px] text-left text-sm">
                 <thead class="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500">
@@ -270,6 +267,7 @@
 function docTypeManager() {
     const fieldOptions = [
         { value: 'document_field_registration_number', label: @js(__('BusManagement::app.dt_field_registration_number')) },
+        { value: 'document_field_registration_date', label: @js(__('BusManagement::app.dt_field_registration_date')) },
         { value: 'document_field_owner', label: @js(__('BusManagement::app.dt_field_owner')) },
         { value: 'document_field_issuing_authority', label: @js(__('BusManagement::app.dt_field_issuing_authority')) },
         { value: 'document_field_vehicle_model', label: @js(__('BusManagement::app.dt_field_vehicle_model')) },
@@ -299,4 +297,5 @@ function docTypeManager() {
 }
 </script>
 @include('BusManagement::partials.notifications')
+@include('BusManagement::partials.live-search')
 @endsection
