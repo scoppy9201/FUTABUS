@@ -33,3 +33,9 @@ The payment countdown uses the server expiry and a monotonic local deadline, inc
 
 
 Staff modules are registered through Composer path packages under packages/FuteBus/StaffDashboard and packages/FuteBus/StaffTicketProcessing. Each package has its own manifest, auto-discovered provider, app.css and app.js entry. Providers are not also registered manually in bootstrap/providers.php. Staff account resources use /api/v1/staff/me, /me/avatar and /me/password. Session mutations require CSRF; Bearer tokens require the api ability.
+
+## Operational pagination and refund updates
+
+Admin and employee views use `core::components.data-pagination`. Server-rendered tables pass a Laravel length-aware paginator; employee API tables pass `meta`, the list loader name and its busy flag. Existing customer pagination is unchanged. Navigation preserves filters and disables boundary/busy buttons; the page window is bounded even for out-of-range requests.
+
+Refund reconciliation is a web resource update: `PATCH /quan-tri/hoan-tien/{refund}` or `PATCH /nhan-vien/hoan-tien/{refund}`. Multipart forms send POST with `_method=patch` and CSRF. Plain POST to these resource URLs is rejected. Deploy views and routes together and rebuild any route cache. Permissions, company scope, assigned operator, version checks and settlement checks remain enforced server-side. This change does not introduce a public refund API or initiate bank transfers.

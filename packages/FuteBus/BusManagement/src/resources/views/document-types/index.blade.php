@@ -132,9 +132,7 @@
                 </tbody>
             </table>
         </div>
-        @if($types->hasPages())
-            <div class="border-t border-slate-100 px-5 py-4">{{ $types->links() }}</div>
-        @endif
+        <div class="border-t border-slate-100 px-5 py-4"><x-core::data-pagination :paginator="$types" /></div>
     </div>
 
     {{-- ADD / EDIT MODAL --}}

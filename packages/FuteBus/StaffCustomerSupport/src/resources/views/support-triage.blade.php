@@ -34,6 +34,6 @@
         @empty
             <x-core::empty-state class="py-10 text-center text-gray-500" :title="__('StaffCustomerSupport::support.empty')" compact />
         @endforelse
-        {{ $reports->links() }}
+        <x-core::data-pagination :paginator="$reports" />
     </main>
 @endsection

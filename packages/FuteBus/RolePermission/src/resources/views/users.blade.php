@@ -101,10 +101,8 @@
                     </tbody>
                 </table>
             </div>
-            @if($staffAccounts->hasPages())
-                <div class="border-t border-slate-100 px-5 py-4">{{ $staffAccounts->links() }}</div>
-            @endif
         @endif
+        <div class="border-t border-slate-100 px-5 py-4"><x-core::data-pagination :paginator="$staffAccounts" /></div>
     </section>
 
     @if(session('status'))

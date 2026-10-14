@@ -26,7 +26,7 @@ test('staff account errors appear on blur/input and confirmation updates when th
     };
     const document = { readyState: 'complete', querySelectorAll: () => [form], createElement: () => ({ setAttribute() {} }) };
     const source = fs.readFileSync(new URL('../../packages/FuteBus/UserManagement/src/resources/js/staff-form-validation.js', import.meta.url), 'utf8');
-    vm.runInNewContext(source, { document });
+    vm.runInNewContext(source, { document, Event: class { constructor(type) { this.type = type; } } });
     name.handlers.blur();
     assert.equal(name.container.children[0].textContent, 'Name required');
     name.value = 'Employee';
@@ -46,4 +46,14 @@ test('staff account errors appear on blur/input and confirmation updates when th
     form.handlers.submit({ preventDefault() { prevented = true; } });
     assert.equal(prevented, true);
     assert.equal(phone.focused, true);
+    // Personal details can pass independently of invalid account fields in another step.
+    assert.equal(form.staffValidation(['name']).length, 0);
+    let requested;
+    form.dataset.staffWizard = '';
+    form.dataset.step = '1';
+    form.dispatchEvent = event => { requested = event.type; };
+    prevented = false;
+    form.handlers.submit({ preventDefault() { prevented = true; } });
+    assert.equal(prevented, true);
+    assert.equal(requested, 'staff-next');
 });

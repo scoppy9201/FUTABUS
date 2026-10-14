@@ -33,11 +33,12 @@ class ManualRefundTest extends TestCase
         $this->actingAs($staff)->get(route('refunds.index'))->assertOk()->assertSee('TICKET-1');
         $this->get(route('refunds.show', $refund))->assertOk()->assertSee('data-refund-form', false);
         $url = route('refunds.update', $refund);
-        $this->postJson($url, ['action' => 'claim', 'version' => 0])->assertOk()->assertJsonPath('status', 'refund_processing');
+        $this->postJson($url, ['action' => 'claim', 'version' => 0])->assertMethodNotAllowed();
+        $this->patchJson($url, ['action' => 'claim', 'version' => 0])->assertOk()->assertJsonPath('status', 'refund_processing');
         $this->assertDatabaseHas('tickets', ['id' => $ticket, 'status' => 'cancelled']);
         $data = $this->settlement();
-        $this->postJson($url, $data)->assertOk()->assertJsonPath('status', 'refunded');
-        $this->postJson($url, $data)->assertOk()->assertJsonPath('version', 2);
+        $this->patchJson($url, $data)->assertOk()->assertJsonPath('status', 'refunded');
+        $this->patchJson($url, $data)->assertOk()->assertJsonPath('version', 2);
         $this->assertDatabaseCount('ticket_refund_events', 2);
         $this->assertDatabaseHas('ticket_refund_events', ['refund_id' => $refund, 'actor_id' => $staff->id, 'to_status' => 'refunded', 'amount' => 315000]);
         $this->assertDatabaseHas('tickets', ['id' => $ticket, 'status' => 'refunded']);
@@ -52,10 +53,10 @@ class ManualRefundTest extends TestCase
         $this->actingAs($this->createTestUser())->get(route('refunds.index'))->assertForbidden();
         $readOnly = $this->operator($company, false);
         $this->actingAs($readOnly)->get(route('refunds.index'))->assertOk();
-        $this->postJson(route('refunds.update', $refund), ['action' => 'claim', 'version' => 0])->assertForbidden();
+        $this->patchJson(route('refunds.update', $refund), ['action' => 'claim', 'version' => 0])->assertForbidden();
         $otherCompany = DB::table('bus_companies')->insertGetId(['code' => 'OTHER', 'name' => 'Other']);
         $this->actingAs($this->operator($otherCompany))->get(route('refunds.show', $refund))->assertNotFound();
-        $this->postJson(route('refunds.update', $refund), ['action' => 'claim', 'version' => 0])->assertNotFound();
+        $this->patchJson(route('refunds.update', $refund), ['action' => 'claim', 'version' => 0])->assertNotFound();
         $this->get(route('refunds.index'))->assertOk()->assertDontSee('TICKET-1');
         $this->assertDatabaseCount('ticket_refund_events', 0);
     }
@@ -74,7 +75,7 @@ class ManualRefundTest extends TestCase
             ->assertDontSee(__('Dashboard::app.owner_portal'));
         $this->get(route('staff.refunds.show', $refund))->assertOk()
             ->assertSee('action="'.route('staff.refunds.update', $refund).'"', false);
-        $this->postJson(route('staff.refunds.update', $refund), ['action' => 'claim', 'version' => 0])
+        $this->patchJson(route('staff.refunds.update', $refund), ['action' => 'claim', 'version' => 0])
             ->assertOk()->assertJsonPath('status', 'refund_processing');
     }
 
@@ -84,10 +85,10 @@ class ManualRefundTest extends TestCase
         $first = $this->operator($company);
         $second = $this->operator($company);
         $url = route('refunds.update', $refund);
-        $this->actingAs($first)->postJson($url, ['action' => 'claim', 'version' => 0])->assertOk();
-        $this->actingAs($second)->postJson($url, ['action' => 'claim', 'version' => 0])->assertConflict();
-        $this->postJson($url, $this->settlement())->assertConflict();
-        $this->actingAs($first)->postJson($url, [...$this->settlement(), 'version' => 0])->assertConflict();
+        $this->actingAs($first)->patchJson($url, ['action' => 'claim', 'version' => 0])->assertOk();
+        $this->actingAs($second)->patchJson($url, ['action' => 'claim', 'version' => 0])->assertConflict();
+        $this->patchJson($url, $this->settlement())->assertConflict();
+        $this->actingAs($first)->patchJson($url, [...$this->settlement(), 'version' => 0])->assertConflict();
         $this->assertDatabaseCount('ticket_refund_events', 1);
         $this->assertDatabaseHas('ticket_refunds', ['id' => $refund, 'assigned_to' => $first->id, 'status' => 'refund_processing']);
     }
@@ -97,10 +98,10 @@ class ManualRefundTest extends TestCase
         [$refund, $ticket, $company] = $this->fixture();
         $this->actingAs($this->operator($company));
         $url = route('refunds.update', $refund);
-        $this->postJson($url, ['action' => 'claim', 'version' => 0])->assertOk();
+        $this->patchJson($url, ['action' => 'claim', 'version' => 0])->assertOk();
         foreach ([['amount' => 314999], ['amount' => 315001], ['bank_verified' => 0], ['bank_reference' => ''],
             ['bank_paid_at' => now()->addDay()->toDateTimeString()], ['bank_paid_at' => now()->subDay()->toDateTimeString()]] as $override) {
-            $this->postJson($url, [...$this->settlement(), ...$override])->assertUnprocessable();
+            $this->patchJson($url, [...$this->settlement(), ...$override])->assertUnprocessable();
         }
         $this->assertDatabaseHas('tickets', ['id' => $ticket, 'status' => 'cancelled']);
         $this->assertDatabaseCount('ticket_refund_events', 1);
@@ -111,11 +112,11 @@ class ManualRefundTest extends TestCase
         [$refund, $ticket, $company] = $this->fixture();
         $this->actingAs($this->operator($company));
         $url = route('refunds.update', $refund);
-        $this->postJson($url, ['action' => 'claim', 'version' => 0])->assertOk();
-        $this->postJson($url, ['action' => 'fail', 'version' => 1])->assertUnprocessable();
-        $this->postJson($url, ['action' => 'fail', 'version' => 1, 'note' => 'Bank declined'])->assertOk()->assertJsonPath('status', 'refund_failed');
+        $this->patchJson($url, ['action' => 'claim', 'version' => 0])->assertOk();
+        $this->patchJson($url, ['action' => 'fail', 'version' => 1])->assertUnprocessable();
+        $this->patchJson($url, ['action' => 'fail', 'version' => 1, 'note' => 'Bank declined'])->assertOk()->assertJsonPath('status', 'refund_failed');
         $this->assertDatabaseHas('tickets', ['id' => $ticket, 'status' => 'cancelled']);
-        $this->postJson($url, ['action' => 'claim', 'version' => 2])->assertOk()->assertJsonPath('version', 3);
+        $this->patchJson($url, ['action' => 'claim', 'version' => 2])->assertOk()->assertJsonPath('version', 3);
         $this->assertDatabaseCount('ticket_refund_events', 3);
     }
 
@@ -125,10 +126,10 @@ class ManualRefundTest extends TestCase
         [$second, $ticket] = $this->fixture(2, $company);
         $this->actingAs($this->operator($company));
         foreach ([$first, $second] as $refund) {
-            $this->postJson(route('refunds.update', $refund), ['action' => 'claim', 'version' => 0])->assertOk();
+            $this->patchJson(route('refunds.update', $refund), ['action' => 'claim', 'version' => 0])->assertOk();
         }
-        $this->postJson(route('refunds.update', $first), $this->settlement())->assertOk();
-        $this->postJson(route('refunds.update', $second), $this->settlement())->assertUnprocessable()->assertJsonValidationErrors('bank_reference');
+        $this->patchJson(route('refunds.update', $first), $this->settlement())->assertOk();
+        $this->patchJson(route('refunds.update', $second), $this->settlement())->assertUnprocessable()->assertJsonValidationErrors('bank_reference');
         $this->assertDatabaseHas('tickets', ['id' => $ticket, 'status' => 'cancelled']);
     }
 
@@ -147,10 +148,10 @@ class ManualRefundTest extends TestCase
         [$refund, , $company] = $this->fixture();
         $staff = $this->operator($company);
         $staff->update(['is_active' => false]);
-        $this->actingAs($staff)->postJson(route('refunds.update', $refund), ['action' => 'claim', 'version' => 0])->assertForbidden();
+        $this->actingAs($staff)->patchJson(route('refunds.update', $refund), ['action' => 'claim', 'version' => 0])->assertForbidden();
         $staff->update(['is_active' => true]);
         DB::table('ticket_refunds')->where('id', $refund)->update(['processing_mode' => 'automatic', 'status' => 'pending']);
-        $this->postJson(route('refunds.update', $refund), ['action' => 'claim', 'version' => 0])->assertConflict();
+        $this->patchJson(route('refunds.update', $refund), ['action' => 'claim', 'version' => 0])->assertConflict();
         $this->assertDatabaseCount('ticket_refund_events', 0);
     }
 

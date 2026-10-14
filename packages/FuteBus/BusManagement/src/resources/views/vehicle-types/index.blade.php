@@ -141,9 +141,7 @@
                 </tbody>
             </table>
         </div>
-        @if($vehicleTypes->hasPages())
-            <div class="border-t border-slate-100 px-5 py-4">{{ $vehicleTypes->links() }}</div>
-        @endif
+        <div class="border-t border-slate-100 px-5 py-4"><x-core::data-pagination :paginator="$vehicleTypes" /></div>
     </div>
 
     {{-- ══════════════════ ADD MODAL ══════════════════ --}}

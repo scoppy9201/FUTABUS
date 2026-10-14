@@ -204,9 +204,7 @@
                 </tbody>
             </table>
         </div>
-        @if($schedules->hasPages())
-            <div class="border-t border-slate-100 px-5 py-4">{{ $schedules->links() }}</div>
-        @endif
+        <div class="border-t border-slate-100 px-5 py-4"><x-core::data-pagination :paginator="$schedules" /></div>
     </div>
 
     {{-- ADD / EDIT SCHEDULE MODAL --}}

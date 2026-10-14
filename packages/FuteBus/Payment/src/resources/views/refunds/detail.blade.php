@@ -47,6 +47,7 @@
         @if(in_array($refund->status, ['refund_pending', 'refund_failed'], true))
             <form data-refund-form action="{{ route($refundRoutes.'.update', $refund->id) }}" method="post" class="mt-5">
                 @csrf
+                @method('patch')
                 <input type="hidden" name="version" value="{{ $refund->version }}"><input type="hidden" name="action" value="claim">
                 <button class="rounded-xl bg-futa-orange px-5 py-3 text-sm font-bold text-white">{{ __('Payment::refunds.claim') }}</button>
             </form>
@@ -54,6 +55,7 @@
             <p class="mt-5 rounded-xl bg-amber-50 p-4 text-sm leading-6 text-amber-800">{{ __('Payment::refunds.warning') }}</p>
             <form data-refund-form action="{{ route($refundRoutes.'.update', $refund->id) }}" method="post" class="mt-4 grid gap-4">
                 @csrf
+                @method('patch')
                 <input type="hidden" name="version" value="{{ $refund->version }}"><input type="hidden" name="action" value="complete">
                 <label class="text-sm font-semibold">{{ __('Payment::refunds.amount') }}
                     <input name="amount" type="number" value="{{ $refund->amount }}" required min="1" step="1" class="mt-2 w-full rounded-xl border border-gray-200 px-3 py-2.5">
@@ -86,6 +88,7 @@
             </form>
             <form data-refund-form action="{{ route($refundRoutes.'.update', $refund->id) }}" method="post" class="mt-5 border-t border-gray-200 pt-4">
                 @csrf
+                @method('patch')
                 <input type="hidden" name="version" value="{{ $refund->version }}"><input type="hidden" name="action" value="fail">
                 <label class="text-sm font-semibold">{{ __('Payment::refunds.note') }}
                     <textarea name="note" required maxlength="1000" rows="2" class="mt-2 w-full rounded-xl border border-gray-200 p-3"></textarea>

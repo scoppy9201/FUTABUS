@@ -94,8 +94,6 @@
                 </tbody>
             </table>
         </div>
-        @if($rows->hasPages())
-            <div class="border-t border-slate-100 px-5 py-4">{{ $rows->links() }}</div>
-        @endif
+        <div class="border-t border-slate-100 px-5 py-4"><x-core::data-pagination :paginator="$rows" /></div>
     </div>
 @endsection

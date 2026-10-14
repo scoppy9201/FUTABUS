@@ -21,4 +21,5 @@
         @method('put')
         @include('UserManagement::partials.form', ['staff' => $staff, 'isCreate' => false])
     </form>
+    @vite('packages/FuteBus/UserManagement/src/resources/js/app.js')
 @endsection

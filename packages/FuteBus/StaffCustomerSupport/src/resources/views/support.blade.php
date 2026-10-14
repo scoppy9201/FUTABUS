@@ -149,17 +149,8 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div x-cloak x-show="!loading && !failed && meta.total > 0" class="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 px-5 py-4 text-sm">
-                            <span class="text-gray-500">{{ __('StaffCustomerSupport::support.page') }} <span class="font-semibold text-gray-900" x-text="meta.current_page + ' / ' + meta.last_page"></span></span>
-                            <div class="flex gap-2">
-                                <button @click="loadList(meta.current_page - 1)" :disabled="loading || meta.current_page <= 1" class="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
-                                    <x-heroicon-o-chevron-left class="size-4" />{{ __('StaffCustomerSupport::support.previous') }}</button>
-                                <button @click="loadList(meta.current_page + 1)" :disabled="loading || meta.current_page >= meta.last_page"
-                                    class="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">{{ __('StaffCustomerSupport::support.next') }}<x-heroicon-o-chevron-right
-                                    class="size-4" />
-                                    </button>
-                            </div>
-                        </div>
+                        <x-core::data-pagination meta="meta" navigate="loadList" busy="loading"
+                            x-cloak x-show="!failed" class="border-t border-slate-100 px-5 py-4" />
                     </section>
                 @else
                     <a href="{{ route('staff.support') }}" class="inline-flex items-center gap-2 font-semibold text-futa-orange">
