@@ -17,24 +17,17 @@
     @include('core::partials.global-loader')
 
     <!-- HEADER -->
-    <header class="bg-white border-b border-gray-200 sticky top-0 z-[60] shrink-0 shadow-sm">
+    <header class="futa-portal-header sticky top-0 z-[60] shrink-0 bg-white">
         <div class="px-4 lg:px-6 py-2.5 flex items-center justify-between">
             <div class="flex items-center space-x-4">
                 <button @click="sidebarOpen = true" class="lg:hidden text-gray-600 hover:text-futa-orange focus:outline-none">
                     <x-heroicon-o-bars-3 class="w-6 h-6" />
                 </button>
                 <a href="{{ route('dashboard') }}" class="flex items-center space-x-3">
-                    <img src="{{ asset('favicon.png') }}" alt="FUTA Bus Lines" class="size-10 rounded-xl object-contain">
-                    <div>
-                        <div class="flex items-center space-x-2">
-                            <span class="font-black text-xl tracking-tight text-futa-orange">FUTA</span>
-                            <span class="text-sm font-bold text-gray-700 tracking-wider">BUS LINES</span>
-                        </div>
-                        <p class="text-[10px] text-futa-orange-dark font-semibold uppercase tracking-widest hidden sm:block">{{ __('Dashboard::app.slogan') }}</p>
-                    </div>
+                    @include('core::partials.portal-logo')
                 </a>
                 <div class="hidden md:block h-6 w-px bg-gray-200 mx-2"></div>
-                <span class="hidden md:block text-xs md:text-sm font-semibold bg-futa-orange-soft text-futa-orange px-3 py-1 rounded-full border border-futa-orange-soft">
+                <span class="hidden md:block text-xs md:text-sm font-semibold bg-futa-green/5 text-futa-green px-3 py-1 rounded-full border border-futa-green/10">
                     {{ __('Dashboard::app.owner_portal') }}
                 </span>
             </div>
@@ -95,7 +88,7 @@
                 <div class="h-6 w-px bg-gray-200"></div>
 
                 <div class="flex items-center space-x-3">
-                    <span class="grid size-9 place-items-center rounded-full bg-futa-orange-soft font-bold text-futa-orange-dark border-2 border-futa-orange">
+                    <span class="grid size-9 place-items-center rounded-full bg-futa-green/5 font-bold text-futa-green border-2 border-futa-green/20">
                         {{ mb_strtoupper(mb_substr(Auth::user()->name, 0, 1)) }}
                     </span>
                     <div class="hidden sm:block text-left">
@@ -117,13 +110,13 @@
         <div x-cloak x-show="sidebarOpen" x-transition.opacity class="fixed inset-0 z-40 bg-gray-900/50 lg:hidden" @click="sidebarOpen = false"></div>
 
         <!-- SIDEBAR -->
-        <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform lg:translate-x-0 lg:static lg:h-full transition-transform duration-200 ease-in-out flex flex-col justify-between"
+        <aside class="futa-portal-sidebar fixed inset-y-0 left-0 z-50 flex w-64 transform flex-col justify-between border-r transition-transform duration-200 ease-in-out lg:static lg:h-full lg:translate-x-0"
             :role="sidebarOpen && viewportWidth < 1024 ? 'dialog' : 'navigation'"
             :aria-modal="sidebarOpen && viewportWidth < 1024 ? 'true' : 'false'"
             aria-label="{{ __('Dashboard::app.operations') }}"
             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
-            <div class="py-4 overflow-y-auto">
-                <div class="px-4 mb-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider">{{ __('Dashboard::app.operations') }}</div>
+            <div class="futa-portal-sidebar-scroll min-h-0 flex-1 overflow-y-auto py-3">
+                <div class="futa-portal-sidebar-label">{{ __('Dashboard::app.operations') }}</div>
 
                 @php
                     $isBusSection = request()->routeIs('bus-management.*')
@@ -153,7 +146,7 @@
                     ];
                 @endphp
 
-                <nav class="space-y-1">
+                <nav class="futa-portal-nav space-y-1" aria-label="{{ __('Dashboard::app.operations') }}">
                     @foreach($navItems as $item)
                         @continue(isset($item['permission']) && ! auth()->user()->hasPermissionTo($item['permission']))
                         @php
@@ -176,11 +169,9 @@
                             @if($hasSubmenu)
                                 {{-- Parent item with submenu: render as <button> --}}
                                 <button type="button" @click="open = !open" @class([
-                                    'w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition',
-                                    'bg-futa-orange-soft text-futa-orange border-r-4 border-futa-orange font-semibold' => $active,
-                                    'text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange' => !$active,
-                                ])>
-                                    <div class="flex items-center space-x-3">
+                                    'futa-portal-nav-link justify-between',
+                                ]) @if($active) aria-current="page" @endif>
+                                    <div class="flex items-center gap-2.5">
                                         {{-- SVG inline avoids :component binding on Blade component --}}
                                         <x-heroicon-o-truck class="w-5 h-5" />
                                         <span>{{ __('Dashboard::app.'.$item['key']) }}</span>
@@ -202,7 +193,7 @@
                                     x-transition:leave="transition ease-in duration-100"
                                     x-transition:leave-start="opacity-100 translate-y-0"
                                     x-transition:leave-end="opacity-0 -translate-y-1"
-                                    class="bg-futa-orange-soft/50 pb-1">
+                                    class="futa-portal-nav-submenu">
                                     <ul class="flex flex-col space-y-0.5 pt-1">
                                         @foreach($item['submenu'] as $sub)
                                             @php
@@ -213,10 +204,8 @@
                                             @endphp
                                             <li>
                                                 <a href="{{ $sub['route'] }}" @class([
-                                                    'flex items-center gap-2.5 pl-11 pr-4 py-2 text-sm transition rounded-r-lg',
-                                                    'text-futa-orange font-bold bg-futa-orange-soft/60 border-r-2 border-futa-orange' => $subActive,
-                                                    'text-gray-600 hover:text-futa-orange hover:bg-futa-orange-soft' => !$subActive,
-                                                ])>
+                                                    'futa-portal-nav-sublink',
+                                                ]) @if($subActive) aria-current="page" @endif>
                                                     <x-dynamic-component :component="'heroicon-o-'.$sub['icon']" class="w-4 h-4 shrink-0" />
                                                     <span>{{ __('Dashboard::app.'.$sub['key']) }}</span>
                                                 </a>
@@ -228,10 +217,8 @@
                             @else
                                 {{-- Regular nav item: render as <a> --}}
                                 <a href="{{ $item['route'] }}" @class([
-                                    'w-full flex items-center space-x-3 px-4 py-3 text-sm font-medium transition',
-                                    'bg-futa-orange-soft text-futa-orange border-r-4 border-futa-orange font-semibold' => $active,
-                                    'text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange' => !$active,
-                                ])>
+                                    'futa-portal-nav-link',
+                                ]) @if($active) aria-current="page" @endif>
                                     <x-dynamic-component :component="'heroicon-o-'.$item['icon']" class="w-5 h-5" />
                                     <span>{{ $item['label'] ?? __('Dashboard::app.'.$item['key']) }}</span>
                                 </a>
@@ -241,20 +228,16 @@
                     @endforeach
                 </nav>
 
-                <div class="px-4 mt-8 mb-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider">{{ __('Dashboard::app.system') }}</div>
-                <nav class="space-y-1">
-                    <a href="#" class="w-full flex items-center space-x-3 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange transition border-r-4 border-transparent">
+                <div class="futa-portal-sidebar-label">{{ __('Dashboard::app.system') }}</div>
+                <nav class="futa-portal-nav space-y-1">
+                    <a href="#" class="futa-portal-nav-link">
                         <x-heroicon-o-cog-8-tooth class="w-5 h-5" />
                         <span>{{ __('Dashboard::app.settings') }}</span>
                     </a>
                 </nav>
             </div>
 
-            <div class="p-4 m-4 bg-futa-orange-soft rounded-xl border border-futa-orange-soft text-center">
-                <x-heroicon-o-phone class="w-8 h-8 text-futa-orange mx-auto mb-2" />
-                <p class="text-xs font-bold text-gray-800">{{ __('Dashboard::app.support_call_center') }}</p>
-                <p class="text-sm font-extrabold text-futa-orange mt-1">1900 6067</p>
-            </div>
+            @include('core::partials.portal-quick-lookup', ['lookupRoute' => 'bookings.index'])
         </aside>
 
         <!-- MAIN CONTENT AREA -->

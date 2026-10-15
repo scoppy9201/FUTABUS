@@ -21,7 +21,10 @@ test('dashboard clock advances without reload, catches up after backgrounding an
         removeEventListener(name) { delete events[name]; },
     };
     const context = { window, document, Intl, Date: class extends Date { constructor() { super(current); } } };
-    vm.runInNewContext(fs.readFileSync(new URL('../../packages/FuteBus/StaffDashboard/src/resources/js/staff-dashboard.js', import.meta.url), 'utf8'), context);
+    const activity = fs.readFileSync(new URL('../../packages/FuteBus/StaffDashboard/src/resources/js/staff-activity.js', import.meta.url), 'utf8');
+    vm.runInNewContext(activity.replace('export function', 'function'), context);
+    const dashboardSource = fs.readFileSync(new URL('../../packages/FuteBus/StaffDashboard/src/resources/js/staff-dashboard.js', import.meta.url), 'utf8');
+    vm.runInNewContext(dashboardSource.replace(/^import .*;\s*/m, ''), context);
     const dashboard = window.staffDashboard('/dashboard');
     await dashboard.init();
     assert.equal(dashboard.timeLabel, '07:30');

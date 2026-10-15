@@ -89,7 +89,7 @@
                             <tr>
                                 <td style="padding:10px 16px 14px;color:#66758a;">{{ __('Payment::ticket-email.refund_amount') }}</td>
                                 <td align="right" style="padding:10px 16px 14px;color:#e94e1b;font-weight:bold;">
-                                    {{ number_format($details['refund'], 0, ',', '.') }} ?
+                                    {{ number_format($details['refund'], 0, ',', '.') }} đ
                                 </td>
                             </tr>
                         @endif

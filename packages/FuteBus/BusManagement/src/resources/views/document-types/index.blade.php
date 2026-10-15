@@ -75,11 +75,11 @@
                                     <span class="text-xs font-semibold text-slate-400">{{ __('BusManagement::app.dt_required_no') }}</span>
                                 @endif
                             </td>
-                            <td class="px-5 py-4">
+                            <td class="whitespace-nowrap px-5 py-4">
                                 @if($t->has_expiry ?? true)
                                     <span class="inline-flex whitespace-nowrap rounded-full bg-sky-50 px-2.5 py-1 text-xs font-bold text-sky-700">{{ __('BusManagement::app.dt_expiry_yes') }}</span>
                                 @else
-                                    <span class="text-xs font-semibold text-slate-400">{{ __('BusManagement::app.dt_expiry_no') }}</span>
+                                    <span class="inline-flex whitespace-nowrap text-xs font-semibold text-slate-400">{{ __('BusManagement::app.dt_expiry_no') }}</span>
                                 @endif
                             </td>
                             <td class="px-5 py-4">

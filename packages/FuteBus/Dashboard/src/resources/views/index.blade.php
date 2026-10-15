@@ -38,8 +38,8 @@
                         <x-heroicon-o-clock class="w-3 h-3 mr-1" /> {{ __('Dashboard::app.upcoming_schedule') }}
                     </span>
                 </div>
-                <div class="w-14 h-14 bg-[#eff6ff] rounded-xl flex items-center justify-center shrink-0">
-                    <x-heroicon-o-map class="w-7 h-7 text-blue-600" />
+                <div class="w-14 h-14 bg-futa-green/5 rounded-xl flex items-center justify-center shrink-0">
+                    <x-heroicon-o-map class="w-7 h-7 text-futa-green" />
                 </div>
             </div>
 
