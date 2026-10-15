@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use FuteBus\Notification\Http\Middleware\CaptureCompanyActivity;
 use FuteBus\Payment\Http\Controllers\ManualRefundController;
 use FuteBus\StaffDashboard\Http\Middleware\EnsureStaff;
 use Illuminate\Support\Facades\Route;
@@ -12,7 +11,7 @@ Route::middleware(['auth', EnsureStaff::class, 'permission:payment.view'])
         Route::get('/', [ManualRefundController::class, 'index'])->name('index');
         Route::get('/{refund}', [ManualRefundController::class, 'show'])->whereNumber('refund')->name('show');
         Route::patch('/{refund}', [ManualRefundController::class, 'update'])->whereNumber('refund')
-            ->middleware(['permission:payment.refund', 'throttle:15,1', CaptureCompanyActivity::class])->name('update');
+            ->middleware(['permission:payment.refund', 'throttle:15,1'])->name('update');
     });
 
 Route::view('/nhan-vien', 'StaffDashboard::staff')

@@ -119,6 +119,7 @@ class TicketCancellationService
         DB::afterCommit(function () use ($companyId, $ticket, $refund, $booking): void {
             $this->notifications->notifyManagers((int) $companyId, [
                 'title'   => __('Notification::app.booking_cancelled_title'),
+                'summary' => __('Notification::app.booking_cancelled_summary', ['customer' => $ticket->passenger_name]),
                 'url'     => route('bookings.show', ['kind' => 'booking', 'record' => $booking], false),
                 'message' => __('Notification::app.booking_cancelled_message', [
                     'booking'   => $ticket->booking_code,

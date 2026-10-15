@@ -103,6 +103,7 @@ class TicketIssuer
 
                 $this->notifications->notifyManagers((int) $trip->bus_company_id, [
                     'title'   => __('Notification::app.booking_created_title'),
+                    'summary' => __('Notification::app.booking_created_summary', ['customer' => $customer]),
                     'url'     => route('bookings.show', ['kind' => 'booking', 'record' => $bookingId], false),
                     'message' => __('Notification::app.booking_created_message', [
                         'customer'  => $customer,

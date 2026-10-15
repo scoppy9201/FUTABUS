@@ -3,14 +3,13 @@
 declare(strict_types=1);
 
 use App\Http\Middleware\SetLocale;
-use FuteBus\Notification\Http\Middleware\CaptureCompanyActivity;
 use FuteBus\StaffTicketProcessing\Http\Controllers\Api\CounterSaleController;
 use FuteBus\StaffTicketProcessing\Http\Controllers\Api\TicketListController;
 use FuteBus\StaffTicketProcessing\Http\Middleware\EnsureTicketOperator;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1/staff')->name('api.v1.staff.')
-    ->middleware(['auth:sanctum', SetLocale::class, CaptureCompanyActivity::class])->group(function (): void {
+    ->middleware(['auth:sanctum', SetLocale::class])->group(function (): void {
         Route::get('/sale-context', [CounterSaleController::class, 'context'])->middleware(EnsureTicketOperator::class)->name('sale-context.show');
         Route::get('/tickets', TicketListController::class)->middleware(EnsureTicketOperator::class.':ticket.view')->name('tickets.index');
         Route::middleware(EnsureTicketOperator::class.':booking.create')->group(function (): void {

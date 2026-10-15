@@ -7,10 +7,9 @@ use FuteBus\BusManagement\Http\Controllers\BusPresentationController;
 use FuteBus\BusManagement\Http\Controllers\DocumentTypeController;
 use FuteBus\BusManagement\Http\Controllers\VehicleDocumentController;
 use FuteBus\BusManagement\Http\Controllers\VehicleTypeController;
-use FuteBus\Notification\Http\Middleware\CaptureCompanyActivity;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', CaptureCompanyActivity::class])->prefix('quan-tri/phuong-tien')->group(function () {
+Route::middleware(['auth'])->prefix('quan-tri/phuong-tien')->group(function () {
 
     // Loại phương tiện
     Route::get('/loai-phuong-tien', [VehicleTypeController::class, 'index'])

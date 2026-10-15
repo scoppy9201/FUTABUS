@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-use FuteBus\Notification\Http\Middleware\CaptureCompanyActivity;
 use FuteBus\TripManagement\Http\Controllers\TripController;
 use FuteBus\TripManagement\Http\Controllers\TripScheduleController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['web', 'auth', CaptureCompanyActivity::class])->prefix('quan-tri/chuyen-xe')->group(function () {
+Route::middleware(['web', 'auth'])->prefix('quan-tri/chuyen-xe')->group(function () {
     Route::get('/lich-trinh', [TripScheduleController::class, 'index'])->name('trip-management.schedules.index');
     Route::post('/lich-trinh', [TripScheduleController::class, 'store'])->name('trip-management.schedules.store');
     Route::put('/lich-trinh/{id}', [TripScheduleController::class, 'update'])->name('trip-management.schedules.update');

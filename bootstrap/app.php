@@ -2,7 +2,6 @@
 
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\SetLocale;
-use FuteBus\Notification\Http\Middleware\CaptureCompanyActivity;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -19,9 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias(['permission' => CheckPermission::class]);
         $middleware->web(append: [
             SetLocale::class,
-            CaptureCompanyActivity::class,
         ]);
-        $middleware->api(append: [CaptureCompanyActivity::class]);
         $middleware->validateCsrfTokens(except: [
             'api/*',
         ]);
