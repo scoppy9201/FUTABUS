@@ -5,6 +5,7 @@ namespace Tests\Feature\Payment;
 use App\Models\User;
 use FuteBus\Payment\Notifications\TicketRefundCompleted;
 use FuteBus\Payment\Services\SePayRefundService;
+use FuteBus\Payment\Services\TicketEmailService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\DB;
@@ -41,6 +42,9 @@ class ManualRefundTest extends TestCase
         $this->postJson($url, ['action' => 'claim', 'version' => 0])->assertMethodNotAllowed();
         $this->patchJson($url, ['action' => 'claim', 'version' => 0])->assertOk()->assertJsonPath('status', 'refund_processing');
         $this->assertDatabaseHas('tickets', ['id' => $ticket, 'status' => 'cancelled']);
+        $this->mock(TicketEmailService::class, function ($mock) use ($refund): void {
+            $mock->shouldReceive('refundCompleted')->once()->with($refund);
+        });
         $data = $this->settlement();
         $this->patchJson($url, $data)->assertOk()->assertJsonPath('status', 'refunded');
         $this->patchJson($url, $data)->assertOk()->assertJsonPath('version', 2);

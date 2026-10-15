@@ -12,6 +12,7 @@ use FuteBus\Payment\Models\Payment as PaymentRecord;
 use FuteBus\Payment\Models\SePayPaymentIntent as SePayPaymentIntentRecord;
 use FuteBus\Payment\Services\ExchangeSeatHolds;
 use FuteBus\Payment\Services\SeatReservationService;
+use FuteBus\Payment\Services\TicketEmailService;
 use FuteBus\Payment\Services\TicketIssuer;
 use FuteBus\Payment\Services\TicketQrService;
 use FuteBus\RouteManagement\Models\BusRoute as BusRouteRecord;
@@ -23,7 +24,12 @@ use Illuminate\Validation\ValidationException;
 
 class CashSaleService
 {
-    public function __construct(private readonly TicketIssuer $issuer, private readonly SeatReservationService $seats, private readonly TicketQrService $qr) {}
+    public function __construct(
+        private readonly TicketIssuer $issuer,
+        private readonly SeatReservationService $seats,
+        private readonly TicketQrService $qr,
+        private readonly TicketEmailService $ticketEmails,
+    ) {}
 
     public function show(User $operator, string $token): ?array
     {
@@ -91,6 +97,7 @@ class CashSaleService
             if (isset($preview['outbound_trip'])) {
                 $bookingIds[] = $this->issuer->issue((object) ['code' => $code], $preview, $preview['outbound_seat_ids'], true);
             }
+            $this->ticketEmails->bookingConfirmed($bookingIds, $preview['customer']['email'] ?? null);
             PaymentRecord::query()->toBase()->insert(['payment_code' => $code, 'booking_id' => $bookingIds[0], 'amount' => $amount,
                 'method'                                             => 'cash', 'status' => 'completed', 'transaction_id' => null, 'paid_at' => now(),
                 'payload'                                            => json_encode(['operator_id' => $operator->id, 'company_id' => $operator->bus_company_id, 'preview' => $preview, 'booking_ids' => $bookingIds], JSON_THROW_ON_ERROR),

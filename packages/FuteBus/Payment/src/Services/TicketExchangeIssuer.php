@@ -43,6 +43,7 @@ class TicketExchangeIssuer
         $exchange->update(['status' => 'completed', 'new_ticket_id' => $newTicket, 'new_booking_id' => $booking,
             'original_departure_at' => $exchange->original_departure_at->min(Carbon::parse($ticket->departure_time)),
             'completed_at'          => now(), 'snapshot' => [...$exchange->snapshot, ...$stops]]);
+        app(TicketEmailService::class)->exchanged((int) $exchange->id);
         $this->notify($exchange, $ticket, $trip, $code.'01');
 
         return $exchange->fresh();

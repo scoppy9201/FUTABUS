@@ -64,7 +64,18 @@
                 <p data-cancel-reason class="mt-3 text-sm font-medium"></p>
                 <p class="mt-2 text-sm text-slate-600">{{ __('Cancellation::cancellation.method') }}</p>
                 <p class="my-4 rounded-xl bg-amber-50 p-3 text-sm leading-6 text-amber-800">{{ __('Cancellation::cancellation.warning') }}</p>
-                <label class="flex items-start gap-3 text-sm font-semibold"><input type="checkbox" name="consent" value="1" class="mt-1 accent-futa-orange">{{ __('Cancellation::cancellation.consent') }}</label>
+                <div class="flex items-start gap-3 text-sm leading-6">
+                    <input id="cancel-consent" type="checkbox" name="consent" value="1"
+                        aria-labelledby="cancel-consent-label cancel-consent-policy" class="mt-1.5 shrink-0 accent-futa-orange">
+                    <p>
+                        <label id="cancel-consent-label" for="cancel-consent" class="cursor-pointer">{{ __('Cancellation::cancellation.consent_prefix') }}</label>
+                        <a id="cancel-consent-policy" href="{{ route('refund') }}#ticket-change-rules" target="_blank" rel="noopener noreferrer" data-no-loader
+                            title="{{ __('Cancellation::cancellation.policy_new_tab') }}"
+                            class="rounded-sm font-semibold text-futa-orange underline decoration-futa-orange/50 underline-offset-4 hover:text-futa-orange-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange">
+                            {{ __('Cancellation::cancellation.policy_link') }}<x-heroicon-o-arrow-top-right-on-square class="ml-0.5 inline size-3.5 align-middle" aria-hidden="true" />
+                        </a>.
+                    </p>
+                </div>
             </section>
             <section data-cancel-step="3" hidden class="text-center">
                 <x-heroicon-o-check-circle class="mx-auto size-14 text-futa-green" />

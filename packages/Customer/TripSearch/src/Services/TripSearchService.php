@@ -10,6 +10,7 @@ use FuteBus\BusManagement\Services\BusPresentationService;
 use FuteBus\Payment\Models\SePayPaymentIntent as SePayPaymentIntentRecord;
 use FuteBus\Payment\Services\ExchangeSeatHolds;
 use FuteBus\RouteManagement\Models\RouteStop;
+use FuteBus\RouteManagement\Services\RouteItineraryPresenter;
 use FuteBus\SeatManagement\Models\SeatLayout as SeatLayoutRecord;
 use FuteBus\TripManagement\Models\Trip as TripRecord;
 use Illuminate\Support\Carbon;
@@ -107,7 +108,6 @@ class TripSearchService
                 $remaining = max(0, (int) $trip->capacity - count($occupied));
                 $departure = Carbon::parse($trip->departure_time);
                 $arrival = Carbon::parse($trip->arrival_time);
-                $activeStops = collect($routeStops[$trip->route_id] ?? [])->where('status', 'active');
                 $layouts = collect($seatLayouts[$trip->bus_id] ?? []);
                 $availableLayouts = $layouts->filter(fn ($seat) => $seat->is_available
                     && ! in_array($seat->id, $occupied, true));
@@ -170,24 +170,7 @@ class TripSearchService
                     'deck_options'           => $availableLayouts->pluck('deck')->unique()->values()->all(),
                     'seat_decks'             => collect($seats)->pluck('deck')->unique()->values()->all(),
                     'seat_columns'           => max(1, (int) collect($seats)->max('column')),
-                    'stops'                  => collect($routeStops[$trip->route_id] ?? [])->map(function ($stop) use ($departure, $activeStops): array {
-                        $time = $departure->copy()->addMinutes($stop->offset_minutes);
-
-                        return [
-                            'id'             => $stop->id,
-                            'name'           => $stop->name,
-                            'address'        => $stop->address,
-                            'type'           => $stop->stop_type,
-                            'active'         => $stop->status === 'active',
-                            'is_origin'      => $stop->id === $activeStops->first()?->id,
-                            'is_destination' => $stop->id === $activeStops->last()?->id,
-                            'hour'           => $time->format('H:i'),
-                            'date'           => $time->format('d/m/Y'),
-                            'day_offset'     => (int) $departure->copy()->startOfDay()->diffInDays($time->copy()->startOfDay()),
-                            'map_url'        => 'https://www.google.com/maps/search/?api=1&query='
-                                .rawurlencode(implode(', ', array_filter([$stop->name, $stop->address, 'Việt Nam']))),
-                        ];
-                    })->values()->all(),
+                    'stops'                  => RouteItineraryPresenter::present(collect($routeStops[$trip->route_id] ?? []), $departure),
                     'demo_seat_map'          => $isDemo,
                     'seats'                  => $seats,
                     'demo_selected_seat_ids' => $demoSelectedIds,

@@ -6,6 +6,7 @@ const config = {
     tickets: [{ id: 1, eligible: true, departure: '2026-12-20 22:00:00', fare: 2000 }],
     trips: 'http://localhost/doi-ve/1/chuyen', hold: '/hold', base: '/doi-ve/1',
     error: 'Operation failed', expired: 'Hold expired', consentError: 'Consent required',
+    labels: { sleeper: 'Sleeper', seat: 'Seat' },
 };
 
 function setup() {
@@ -85,4 +86,47 @@ test('double confirmation sends one request while the first is in progress', asy
     resolve({ code: 'ONE-TICKET' });
     await first;
     assert.equal(wizard.result.code, 'ONE-TICKET');
+});
+
+test('exchange trip card selection keeps one seat and opens the shared seat panel', () => {
+    const { wizard } = setup();
+    const trip = { id: 8, available: 2, seats: [
+        { id: 11, code: 'A01', deck: 'lower', sold: false },
+        { id: 12, code: 'A02', deck: 'lower', sold: false },
+    ], stops: { pickup: [], dropoff: [] }, timeline: [] };
+
+    wizard.selectTrip(trip);
+    wizard.chooseSeat(trip, trip.seats[0]);
+    assert.equal(wizard.openPanel, 'seats');
+    assert.equal(wizard.seatId, '11');
+    assert.equal(wizard.seatSelected(trip, trip.seats[0]), true);
+    wizard.chooseSeat(trip, trip.seats[1]);
+    assert.equal(wizard.seatId, '12');
+    assert.equal(wizard.seatSelected(trip, trip.seats[0]), false);
+});
+
+test('itinerary selection allows only active compatible stops and preserves stop order', () => {
+    const { wizard } = setup();
+    const trip = { id: 9, available: 2, seats: [{ id: 21, code: 'B01', sold: false }],
+        stops: { pickup: [{ id: '1', name: 'Start' }], dropoff: [{ id: '3', name: 'End' }] }, timeline: [
+            { id: 1, type: 'pickup', active: true, expired: false },
+            { id: 2, type: 'both', active: false, expired: false },
+            { id: 3, type: 'both', active: true, expired: false },
+            { id: 4, type: 'dropoff', active: true, expired: true },
+            { id: 5, type: 'pickup', active: true, expired: false },
+        ] };
+
+    wizard.ticketId = '1';
+    wizard.step = 1;
+    wizard.selectTrip(trip);
+    wizard.chooseSeat(trip, trip.seats[0]);
+    assert.equal(wizard.stopOption(trip, 'pickup', 1), true);
+    assert.equal(wizard.stopOption(trip, 'pickup', 2), false);
+    assert.equal(wizard.stopOption(trip, 'pickup', 4), false);
+    wizard.chooseStop(trip, 'pickup', 1);
+    assert.equal(wizard.openPanel, 'schedule');
+    assert.equal(wizard.canSelectStop(trip, 'dropoff', 1), false);
+    wizard.chooseStop(trip, 'dropoff', 3);
+    assert.equal(wizard.ready, true);
+    assert.equal(wizard.canSelectStop(trip, 'pickup', 5), false);
 });

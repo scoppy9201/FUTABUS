@@ -157,6 +157,7 @@ class ManualRefundService
                 if ($target === 'refunded') {
                     TicketRecord::query()->toBase()->where('id', $record->ticket_id)->where('status', 'cancelled')
                         ->update(['status' => 'refunded', 'updated_at' => now()]);
+                    app(TicketEmailService::class)->refundCompleted($id);
                     User::findOrFail($record->customer_user_id)->notify(new TicketRefundCompleted([
                         'reference' => $record->reference, 'amount' => (int) $record->amount, 'status' => 'refunded',
                     ]));

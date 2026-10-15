@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\Payment;
 
+use App\Models\User;
 use FuteBus\Payment\Models\TicketExchange;
 use FuteBus\Payment\Services\ExchangeSeatHolds;
 use FuteBus\Payment\Services\SePayIntentService;
+use FuteBus\Payment\Services\TicketEmailService;
 use FuteBus\Payment\Services\TicketExchangeService;
 use FuteBus\Profile\Services\TicketHistoryService;
 use FuteBus\StaffTicketProcessing\Services\CashSaleService;
@@ -18,6 +20,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Mockery;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -38,12 +41,20 @@ class TicketExchangeTest extends TestCase
     {
         $f = $this->fixture();
         $payment = (array) DB::table('payments')->first();
-        $this->actingAs($f['user'])->get(route('exchange.show', $f['booking']))->assertOk()->assertSee('data-exchange-wizard', false);
+        $this->actingAs($f['user'])->get(route('exchange.show', $f['booking']))->assertOk()
+            ->assertSee('data-exchange-wizard', false)
+            ->assertSee("togglePanel(trip.id, 'schedule')", false)
+            ->assertSee('chooseSeat(trip, seat)', false)
+            ->assertSee('trip.timeline', false)
+            ->assertSee("stopOption(trip, 'pickup'", false);
         $token = $this->hold($f);
         $this->assertDatabaseHas('tickets', ['id' => $f['ticket'], 'status' => 'active']);
         $this->assertDatabaseHas('booked_seats', ['trip_id' => $f['trip'], 'seat_layout_id' => $f['oldSeat']]);
         $url = route('exchange.complete', ['booking' => $f['booking'], 'token' => $token]);
         $this->postJson($url, [])->assertUnprocessable();
+        $this->mock(TicketEmailService::class, function ($mock): void {
+            $mock->shouldReceive('exchanged')->once()->with(Mockery::type('int'));
+        });
         $response = $this->postJson($url, ['consent' => true])->assertOk()->assertJsonStructure(['code', 'qr', 'url']);
         $this->postJson($url, ['consent' => true])->assertOk()->assertJsonPath('code', $response->json('code'));
         $exchange = TicketExchange::first();
@@ -342,8 +353,16 @@ class TicketExchangeTest extends TestCase
         $f = $this->fixture();
         $pickup = DB::table('route_stops')->insertGetId(['route_id' => $f['route'], 'name' => 'Origin', 'stop_order' => 1,
             'offset_minutes'                                        => 0, 'stop_type' => 'both', 'status' => 'active']);
-        $dropoff = DB::table('route_stops')->insertGetId(['route_id' => $f['route'], 'name' => 'Destination', 'stop_order' => 2,
+        $dropoff = DB::table('route_stops')->insertGetId(['route_id' => $f['route'], 'name' => 'Destination', 'stop_order' => 3,
             'offset_minutes'                                         => 480, 'stop_type' => 'both', 'status' => 'active']);
+        DB::table('route_stops')->insert(['route_id' => $f['route'], 'name' => 'Temporarily closed stop', 'stop_order' => 2,
+            'offset_minutes'                         => 120, 'stop_type' => 'both', 'status' => 'inactive']);
+        $tripResponse = $this->actingAs($f['user'])->getJson(route('exchange.trips', [
+            'booking' => $f['booking'], 'ticket_id' => $f['ticket'], 'date' => now()->addDays(4)->toDateString(),
+        ]))->assertOk();
+        $this->assertFalse($tripResponse->json('trips.0.timeline.1.active'));
+        $this->assertSame('Temporarily closed stop', $tripResponse->json('trips.0.timeline.1.name'));
+        $this->assertStringContainsString('google.com/maps', $tripResponse->json('trips.0.timeline.1.map_url'));
         $input = [...$this->input($f), 'pickup' => (string) $pickup, 'dropoff' => (string) $dropoff];
         $this->actingAs($f['user']);
         $this->postJson(route('exchange.hold', $f['booking']), [...$input, 'pickup' => (string) $dropoff, 'dropoff' => (string) $pickup])
@@ -398,6 +417,74 @@ class TicketExchangeTest extends TestCase
         $this->assertSame('completed', $history->findForUser($f['user'], $bookings['RELATED'])->payment_status);
         $this->assertNull($history->findForUser($f['user'], $bookings['UNRELATED'])->payment_status);
         $this->assertNull($history->findForUser($f['user'], $bookings['STRING-ID'])->payment_status);
+    }
+
+    public function test_management_opens_with_upcoming_tickets_without_a_search(): void
+    {
+        $f = $this->fixture();
+        $admin = $this->exchangeOperator($f, 'admin');
+        $this->actingAs($admin)->get(route('exchange.manage'))->assertOk()
+            ->assertSee('data-exchange-ticket="'.$f['ticket'].'"', false)
+            ->assertViewHas('records', fn ($records) => $records->total() === 1 && $records->first()->eligible);
+        $this->get(route('exchange.manage', ['code' => 'MISSING']))->assertOk()
+            ->assertViewHas('records', fn ($records) => $records->isEmpty())
+            ->assertSee('data-empty-state', false);
+        $this->assertDatabaseCount('ticket_exchanges', 0);
+        $this->assertDatabaseCount('payments', 1);
+    }
+
+    public function test_management_exact_ticket_search_returns_the_requested_ticket_in_a_multi_ticket_booking(): void
+    {
+        $f = $this->fixture();
+        $ticket = DB::table('tickets')->insertGetId(['ticket_code' => 'SECOND-TICKET', 'booking_id' => $f['booking'],
+            'trip_id'                                              => $f['trip'], 'seat_layout_id' => $f['seat'], 'seat_code' => 'A02', 'passenger_name' => 'Second', 'price' => 350000]);
+        DB::table('payments')->update(['amount' => 700000]);
+        DB::table('sepay_transactions')->update(['amount' => 700000]);
+        $this->actingAs($this->exchangeOperator($f, 'admin'))
+            ->get(route('exchange.manage', ['code' => 'SECOND-TICKET']))->assertOk()
+            ->assertViewHas('records', fn ($records) => $records->total() === 1 && (int) $records->first()->id === $ticket);
+        $this->get(route('exchange.manage', ['code' => 'TEST']))->assertOk()
+            ->assertViewHas('records', fn ($records) => $records->total() === 2);
+    }
+
+    public function test_management_lists_and_exchange_history_respect_company_scope(): void
+    {
+        $f = $this->fixture();
+        $token = $this->hold($f);
+        $this->postJson(route('exchange.complete', ['booking' => $f['booking'], 'token' => $token]), ['consent' => true])->assertOk();
+        $exchange = TicketExchange::first();
+        $newCode = DB::table('tickets')->where('id', $exchange->new_ticket_id)->value('ticket_code');
+        $staff = $this->exchangeOperator($f, 'staff');
+        $this->actingAs($staff)->get(route('staff.exchange.manage', ['tab' => 'history']))->assertOk()
+            ->assertViewHas('records', fn ($records) => $records->total() === 1 && $records->first()->new_code === $newCode);
+        $this->get(route('staff.exchange.manage', ['tab' => 'history', 'code' => $newCode]))->assertOk()
+            ->assertViewHas('records', fn ($records) => $records->total() === 1);
+        $this->get(route('staff.exchange.manage'))->assertOk()
+            ->assertViewHas('records', fn ($records) => $records->total() === 1 && ! $records->first()->eligible);
+        $other = DB::table('bus_companies')->insertGetId(['name' => 'Other', 'code' => 'FOREIGN']);
+        $staff->update(['bus_company_id' => $other]);
+        DB::table('roles')->where('slug', 'staff')->update(['bus_company_id' => $other]);
+        foreach (['tickets', 'history'] as $tab) {
+            $this->get(route('staff.exchange.manage', ['tab' => $tab]))->assertOk()
+                ->assertViewHas('records', fn ($records) => $records->isEmpty());
+            $this->get(route('staff.exchange.manage', ['tab' => $tab, 'code' => $newCode]))->assertOk()
+                ->assertViewHas('records', fn ($records) => $records->isEmpty());
+        }
+        $this->actingAs($f['user'])->get(route('exchange.manage'))->assertForbidden();
+    }
+
+    private function exchangeOperator(array $f, string $slug): User
+    {
+        $operator = $this->createTestUser(['bus_company_id' => $f['company'], 'is_active' => true]);
+        $role = DB::table('roles')->insertGetId(['name' => $slug, 'slug' => $slug, 'bus_company_id' => $f['company']]);
+        DB::table('role_user')->insert(['role_id' => $role, 'user_id' => $operator->id]);
+        foreach (['ticket.view', 'ticket.exchange'] as $slug) {
+            $permission = DB::table('permissions')->where('slug', $slug)->value('id')
+                ?: DB::table('permissions')->insertGetId(['name' => $slug, 'slug' => $slug, 'group' => 'ticket', 'is_active' => true]);
+            DB::table('permission_role')->insert(['role_id' => $role, 'permission_id' => $permission]);
+        }
+
+        return $operator;
     }
 
     private function hold(array $fixture): string
