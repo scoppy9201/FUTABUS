@@ -20,26 +20,17 @@
     @include('core::partials.global-loader')
     @include('StaffDashboard::partials.notifications')
 
-    <header class="sticky top-0 z-30 shrink-0 border-b border-gray-200 bg-white shadow-sm">
+    <header class="futa-portal-header sticky top-0 z-30 shrink-0 bg-white">
         <div class="flex h-20 items-center justify-between gap-4 px-4 lg:px-6">
             <div class="flex min-w-0 items-center gap-4">
                 <button type="button" @click="sidebarOpen = true" class="rounded-lg p-2 text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange focus-visible:outline-2 focus-visible:outline-futa-orange lg:hidden" aria-label="{{ __('StaffDashboard::staff.menu') }}">
                     <x-heroicon-o-bars-3 class="size-6" />
                 </button>
                 <a href="{{ route('staff.dashboard') }}" class="flex shrink-0 items-center gap-3" aria-label="{{ __('StaffDashboard::staff.home') }}">
-                    <img src="{{ asset('icons/futabus-logo.png') }}" alt="FUTA Bus Lines" class="h-12 w-14 object-contain">
-                    <span class="hidden sm:block">
-                        <span class="flex items-center gap-2">
-                            <span class="text-xl font-black tracking-tight text-futa-orange">FUTA</span>
-                            <span class="text-sm font-bold tracking-wider text-gray-700">BUS LINES</span>
-                        </span>
-                        <span class="mt-0.5 block text-[10px] font-semibold uppercase tracking-widest text-futa-orange-dark">
-                            {{ __('Dashboard::app.slogan') }}
-                        </span>
-                    </span>
+                    @include('core::partials.portal-logo')
                 </a>
                 <span class="hidden h-7 w-px bg-gray-200 md:block"></span>
-                <span class="hidden rounded-full border border-futa-orange-soft bg-futa-orange-soft px-3 py-1.5 text-sm font-semibold text-futa-orange md:inline-flex">{{ __('StaffDashboard::staff.role') }}</span>
+                <span class="hidden rounded-full border border-futa-green/10 bg-futa-green/5 px-3 py-1.5 text-sm font-semibold text-futa-green md:inline-flex">{{ __('StaffDashboard::staff.role') }}</span>
             </div>
 
             <div class="flex shrink-0 items-center gap-3 sm:gap-4">
@@ -68,7 +59,7 @@
                 @include('Notification::partials.bell')
                 <span class="hidden h-6 w-px bg-gray-200 sm:block"></span>
                 <div class="flex items-center gap-2 sm:gap-3">
-                    <span class="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full border-2 border-futa-orange bg-futa-orange-soft font-bold text-futa-orange-dark">
+                    <span class="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full border-2 border-futa-green/20 bg-futa-green/5 font-bold text-futa-green">
                         @if(Auth::user()->avatar)
                             <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url(Auth::user()->avatar) }}" alt="" class="size-full object-cover">
                         @else

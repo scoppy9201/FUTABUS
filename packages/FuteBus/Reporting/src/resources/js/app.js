@@ -1,4 +1,5 @@
 import '../css/app.css';
+import { setupAdvancedFilters } from './report-filters.js';
 
 const palette = ['#f97316', '#3b82f6', '#16a34a', '#64748b', '#dc2626', '#0f766e'];
 
@@ -155,8 +156,17 @@ function setupFilters() {
     const period = document.querySelector('[data-report-period]');
     const dates = [...document.querySelectorAll('[data-report-date]')];
     if (!period || dates.length !== 2) return;
-    dates.forEach((input) => input.addEventListener('change', () => { period.value = 'custom'; }));
+    const syncDateFields = () => {
+        document.querySelectorAll('[data-report-date-field]').forEach((field) => {
+            field.hidden = period.value !== 'custom';
+        });
+    };
+    dates.forEach((input) => input.addEventListener('change', () => {
+        period.value = 'custom';
+        period.dispatchEvent(new Event('change', { bubbles: true }));
+    }));
     period.addEventListener('change', () => {
+        syncDateFields();
         if (period.value === 'custom') return;
         const end = new Date();
         const start = new Date(end);
@@ -198,6 +208,7 @@ function setupExports() {
 document.addEventListener('DOMContentLoaded', () => {
     renderCharts();
     setupFilters();
+    setupAdvancedFilters();
     setupExports();
 });
 window.addEventListener('resize', renderCharts);

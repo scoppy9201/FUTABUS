@@ -44,11 +44,34 @@
                             @endif
                             <tr><td style="padding:8px 16px;color:#66758a;font-size:13px;">{{ __('Payment::ticket-email.route') }}</td><td align="right" style="padding:8px 16px;font-size:14px;font-weight:600;">{{ $ticket['origin'] }} → {{ $ticket['destination'] }}</td></tr>
                             <tr><td style="padding:8px 16px;color:#66758a;font-size:13px;">{{ __('Payment::ticket-email.departure') }}</td><td align="right" style="padding:8px 16px;font-size:14px;">{{ \Illuminate\Support\Carbon::parse($ticket['departure_at'])->format('H:i, d/m/Y') }}</td></tr>
-                            @if($ticket['arrival_at'])<tr><td style="padding:8px 16px;color:#66758a;font-size:13px;">{{ __('Payment::ticket-email.arrival') }}</td><td align="right" style="padding:8px 16px;font-size:14px;">{{ \Illuminate\Support\Carbon::parse($ticket['arrival_at'])->format('H:i, d/m/Y') }}</td></tr>@endif
+                            @if($ticket['arrival_at'])
+                                <tr>
+                                    <td style="padding:8px 16px;color:#66758a;font-size:13px;">{{ __('Payment::ticket-email.arrival') }}</td>
+                                    <td align="right" style="padding:8px 16px;font-size:14px;">
+                                        {{ \Illuminate\Support\Carbon::parse($ticket['arrival_at'])->format('H:i, d/m/Y') }}
+                                    </td>
+                                </tr>
+                            @endif
                             <tr><td style="padding:8px 16px;color:#66758a;font-size:13px;">{{ __('Payment::ticket-email.vehicle') }}</td><td align="right" style="padding:8px 16px;font-size:14px;">{{ $ticket['bus_type'] ?: '—' }}</td></tr>
                             <tr><td style="padding:8px 16px;color:#66758a;font-size:13px;">{{ __('Payment::ticket-email.seat') }}</td><td align="right" style="padding:8px 16px;font-size:14px;font-weight:600;">{{ $ticket['seat'] ?: '—' }}</td></tr>
-                            <tr><td style="padding:8px 16px;color:#66758a;font-size:13px;">{{ __('Payment::ticket-email.pickup') }}</td><td align="right" style="padding:8px 16px;font-size:14px;">{{ $ticket['pickup_name'] }}@if($ticket['pickup_address'])<br><span style="font-size:12px;color:#66758a;">{{ $ticket['pickup_address'] }}</span>@endif</td></tr>
-                            <tr><td style="padding:8px 16px;color:#66758a;font-size:13px;">{{ __('Payment::ticket-email.dropoff') }}</td><td align="right" style="padding:8px 16px;font-size:14px;">{{ $ticket['dropoff_name'] }}@if($ticket['dropoff_address'])<br><span style="font-size:12px;color:#66758a;">{{ $ticket['dropoff_address'] }}</span>@endif</td></tr>
+                            <tr>
+                                <td style="padding:8px 16px;color:#66758a;font-size:13px;">{{ __('Payment::ticket-email.pickup') }}</td>
+                                <td align="right" style="padding:8px 16px;font-size:14px;">
+                                    {{ $ticket['pickup_name'] }}
+                                    @if($ticket['pickup_address'])
+                                        <br><span style="font-size:12px;color:#66758a;">{{ $ticket['pickup_address'] }}</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px 16px;color:#66758a;font-size:13px;">{{ __('Payment::ticket-email.dropoff') }}</td>
+                                <td align="right" style="padding:8px 16px;font-size:14px;">
+                                    {{ $ticket['dropoff_name'] }}
+                                    @if($ticket['dropoff_address'])
+                                        <br><span style="font-size:12px;color:#66758a;">{{ $ticket['dropoff_address'] }}</span>
+                                    @endif
+                                </td>
+                            </tr>
                             <tr><td style="padding:8px 16px 14px;color:#66758a;font-size:13px;">{{ __('Payment::ticket-email.fare') }}</td><td align="right" style="padding:8px 16px 14px;color:#e94e1b;font-size:15px;font-weight:bold;">{{ number_format($ticket['price'], 0, ',', '.') }} đ</td></tr>
                         </table>
                     </td>
@@ -62,9 +85,23 @@
                         <tr><td style="padding:10px 16px;color:#66758a;">{{ __('Payment::ticket-email.ticket_code') }}</td><td align="right" style="padding:10px 16px;font-weight:bold;">{{ $tickets[0]['code'] ?? '—' }}</td></tr>
                         @if(isset($details['reference']))<tr><td style="padding:10px 16px;color:#66758a;">{{ __('Payment::ticket-email.reference') }}</td><td align="right" style="padding:10px 16px;">{{ $details['reference'] }}</td></tr>@endif
                         @if(isset($details['fee']))<tr><td style="padding:10px 16px;color:#66758a;">{{ __('Payment::ticket-email.cancellation_fee') }}</td><td align="right" style="padding:10px 16px;">{{ number_format($details['fee'], 0, ',', '.') }} đ</td></tr>@endif
-                        @if(isset($details['refund']))<tr><td style="padding:10px 16px 14px;color:#66758a;">{{ __('Payment::ticket-email.refund_amount') }}</td><td align="right" style="padding:10px 16px 14px;color:#e94e1b;font-weight:bold;">{{ number_format($details['refund'], 0, ',', '.') }} đ</td></tr>@endif
+                        @if(isset($details['refund']))
+                            <tr>
+                                <td style="padding:10px 16px 14px;color:#66758a;">{{ __('Payment::ticket-email.refund_amount') }}</td>
+                                <td align="right" style="padding:10px 16px 14px;color:#e94e1b;font-weight:bold;">
+                                    {{ number_format($details['refund'], 0, ',', '.') }} đ
+                                </td>
+                            </tr>
+                        @endif
                         @if(!empty($details['bank_reference']))<tr><td style="padding:10px 16px;color:#66758a;">{{ __('Payment::ticket-email.bank_reference') }}</td><td align="right" style="padding:10px 16px;">{{ $details['bank_reference'] }}</td></tr>@endif
-                        @if(!empty($details['bank_paid_at']))<tr><td style="padding:10px 16px;color:#66758a;">{{ __('Payment::ticket-email.bank_paid_at') }}</td><td align="right" style="padding:10px 16px;">{{ \Illuminate\Support\Carbon::parse($details['bank_paid_at'])->format('H:i, d/m/Y') }}</td></tr>@endif
+                        @if(!empty($details['bank_paid_at']))
+                            <tr>
+                                <td style="padding:10px 16px;color:#66758a;">{{ __('Payment::ticket-email.bank_paid_at') }}</td>
+                                <td align="right" style="padding:10px 16px;">
+                                    {{ \Illuminate\Support\Carbon::parse($details['bank_paid_at'])->format('H:i, d/m/Y') }}
+                                </td>
+                            </tr>
+                        @endif
                     </table>
                 </td>
             </tr>
