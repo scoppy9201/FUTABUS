@@ -15,6 +15,7 @@ use FuteBus\RolePermission\Http\Requests\UpdateRoleRequest;
 use FuteBus\RolePermission\Models\Permission as PermissionRecord;
 use FuteBus\RolePermission\Models\Role as RoleRecord;
 use FuteBus\RolePermission\Services\AccessControlService;
+use FuteBus\RolePermission\Services\PermissionCatalogService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
@@ -37,20 +38,26 @@ class AccessControlController extends Controller
         ]);
     }
 
-    public function catalog(Request $request, AccessControlService $access): View
+    public function catalog(Request $request, AccessControlService $access, PermissionCatalogService $catalog): View
     {
         $company = $this->company($request, $access, 'role.view');
-        $registeredSlugs = collect(config('permission_catalog', []))
-            ->flatMap(fn (array $actions, string $group): array => collect($actions)->map(fn (string $action): string => $group.'.'.$action)->all())
-            ->values();
-        $knownSlugs = PermissionRecord::query()->toBase()->pluck('slug');
+        $rows = $catalog->rows();
 
         return view('RolePermission::catalog', [
             'company'                  => $company,
-            'permissionGroups'         => $access->permissionGroups(false),
+            'permissionGroups'         => $rows->groupBy('group'),
             'canManageCatalog'         => $request->user()->isAdmin(),
-            'availablePermissionSlugs' => $registeredSlugs->diff($knownSlugs)->values(),
+            'pendingTotal'             => $rows->whereNull('id')->count(),
         ]);
+    }
+
+    public function synchronizeCatalog(Request $request, PermissionCatalogService $catalog): RedirectResponse
+    {
+        $this->assertCatalogAdmin($request);
+        $created = $catalog->synchronize();
+
+        return redirect()->route('access-management.catalog')
+            ->with('status', __('RolePermission::app.catalog_synchronized', ['count' => $created]));
     }
 
     public function storePermission(StorePermissionRequest $request): RedirectResponse
@@ -93,10 +100,13 @@ class AccessControlController extends Controller
 
         $row = PermissionRecord::query()->toBase()->where('id', $permission)->first();
         abort_if($row === null, 404);
-        PermissionRecord::query()->toBase()->where('group', $row->group)->update([
-            'display_group' => $data['display_group'] ?? null,
-            'updated_at'    => now(),
-        ]);
+        abort_unless(in_array($row->slug, app(PermissionCatalogService::class)->slugs(), true), 404);
+        if (array_key_exists('display_group', $data)) {
+            PermissionRecord::query()->toBase()->where('group', $row->group)->update([
+                'display_group' => $data['display_group'],
+                'updated_at'    => now(),
+            ]);
+        }
         PermissionRecord::query()->toBase()->where('id', $permission)->update([
             'display_name' => $data['display_name'],
             'updated_at'   => now(),
@@ -112,6 +122,8 @@ class AccessControlController extends Controller
         $active = $request->boolean('is_active');
         $row = PermissionRecord::query()->toBase()->where('id', $permission)->first();
         abort_if($row === null, 404);
+
+        abort_unless(in_array($row->slug, app(PermissionCatalogService::class)->slugs(), true), 404);
 
         PermissionRecord::query()->toBase()->where('id', $permission)->update([
             'is_active'  => $active,

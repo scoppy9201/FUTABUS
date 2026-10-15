@@ -248,8 +248,20 @@ class TicketExchangeTest extends TestCase
         $permission = DB::table('permissions')->insertGetId(['slug' => 'ticket.view', 'name' => 'View tickets', 'group' => 'ticket', 'is_active' => true]);
         DB::table('permission_role')->insert(['permission_id' => $permission, 'role_id' => $role]);
         $this->actingAs($staff)->get(route('staff.exchange.manage'))->assertForbidden();
+        $this->getJson(route('staff.tickets.exchange.context', $f['ticket']))->assertForbidden();
+        $this->get(route('staff.tickets.exchange'))->assertForbidden();
         $this->get(route('exchange.show', $f['booking']))->assertNotFound();
         DB::table('permission_role')->insert(['role_id' => $role, 'permission_id' => DB::table('permissions')->where('slug', 'ticket.exchange')->value('id')]);
+        $this->get(route('staff.tickets.exchange'))->assertOk()->assertSee('staffTicketExchange', false);
+        $this->getJson(route('staff.tickets.exchange.context', $f['ticket']))->assertOk()
+            ->assertJsonPath('ticket.booking_id', $f['booking'])->assertJsonPath('ticket.fare', 350000);
+        $tripUrl = route('staff.tickets.exchange.trips', ['ticket' => $f['ticket'], 'date' => now()->addDays(4)->toDateString()]);
+        $this->getJson($tripUrl)->assertOk()->assertJsonCount(1, 'trips')->assertJsonPath('trips.0.id', $f['target'])
+            ->assertJsonPath('trips.0.fare', 350000)->assertJsonStructure(['html', 'trips' => [['seats', 'stops']]]);
+        DB::table('trips')->where('id', $f['target'])->update(['price' => 400000]);
+        $this->getJson($tripUrl)->assertOk()->assertJsonCount(0, 'trips');
+        DB::table('trips')->where('id', $f['target'])->update(['price' => 350000]);
+        $this->getJson(route('staff.tickets.exchange.trips', ['ticket' => $f['ticket'], 'date' => 'invalid']))->assertUnprocessable();
         $this->get(route('staff.exchange.manage', ['code' => 'TICKET']))->assertOk()->assertSee('data-ticket-exchange', false);
         $token = $this->postJson(route('exchange.hold', $f['booking']), $this->input($f))->assertOk()->json('token');
         $this->postJson(route('exchange.complete', ['booking' => $f['booking'], 'token' => $token]), ['consent' => true])->assertOk();
@@ -257,6 +269,7 @@ class TicketExchangeTest extends TestCase
         $foreignCompany = DB::table('bus_companies')->insertGetId(['code' => 'OTHER', 'name' => 'Other']);
         $staff->update(['bus_company_id' => $foreignCompany]);
         $this->get(route('exchange.show', $f['booking']))->assertNotFound();
+        $this->getJson(route('staff.tickets.exchange.context', $f['ticket']))->assertNotFound();
     }
 
     public function test_round_trip_exchange_cannot_overlap_the_other_leg(): void

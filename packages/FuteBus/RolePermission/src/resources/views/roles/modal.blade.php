@@ -1,5 +1,8 @@
 <dialog id="role-wizard" data-access-modal data-role-wizard-modal
     data-auto-open="{{ request()->routeIs('access-management.roles.create', 'access-management.roles.edit') || ($errors->any() && old('_role_wizard')) ? '1' : '0' }}"
+    @if(request()->routeIs('access-management.roles.create', 'access-management.roles.edit') && auth()->user()->hasPermissionTo('role.view'))
+        data-close-url="{{ route('access-management.index') }}"
+    @endif
     aria-labelledby="role-wizard-title"
     class="m-auto max-h-[calc(100dvh-2rem)] w-[min(50rem,calc(100vw-2rem))] overflow-auto rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-slate-950/50">
     <form data-role-wizard method="post" novalidate

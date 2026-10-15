@@ -29,7 +29,7 @@
                 <button type="submit" class="inline-flex items-center gap-2 text-sm font-semibold text-futa-orange hover:underline"><x-heroicon-o-arrow-left class="size-4" />{{ __('StaffTicketProcessing::sale.back') }}</button>
             </form>
         @else
-            <a href="{{ route('staff.tickets.sale', $criteria) }}" class="inline-flex items-center gap-2 text-sm font-semibold text-futa-orange hover:underline"><x-heroicon-o-arrow-left class="size-4" />{{ __('core::booking.back') }}</a>
+            <a href="{{ route('staff.tickets.sale', $criteria) }}" @click="if (!$el.dispatchEvent(new CustomEvent('staff-booking-back', { bubbles: true, cancelable: true }))) $event.preventDefault()" class="inline-flex items-center gap-2 text-sm font-semibold text-futa-orange hover:underline"><x-heroicon-o-arrow-left class="size-4" />{{ __('core::booking.back') }}</a>
         @endif
     </div>
 </section>

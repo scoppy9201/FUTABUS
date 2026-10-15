@@ -15,7 +15,7 @@ Route::middleware('auth')->prefix('doi-ve/{booking}')->whereNumber('booking')->n
     Route::post('/{token}/bo-giu', [TicketExchangeController::class, 'release'])->whereUuid('token')->name('release');
 });
 Route::get('/quan-tri/doi-ve', [TicketExchangeController::class, 'manage'])->middleware('auth')->name('exchange.manage');
-Route::get('/nhan-vien/doi-ve', [TicketExchangeController::class, 'manage'])->middleware('auth')->name('staff.exchange.manage');
+Route::get('/nhan-vien/doi-ve/quan-ly', [TicketExchangeController::class, 'manage'])->middleware('auth')->name('staff.exchange.manage');
 
 Route::middleware(['auth', 'permission:payment.view'])->prefix('quan-tri/hoan-tien')->name('refunds.')->group(function (): void {
     Route::get('/', [ManualRefundController::class, 'index'])->name('index');

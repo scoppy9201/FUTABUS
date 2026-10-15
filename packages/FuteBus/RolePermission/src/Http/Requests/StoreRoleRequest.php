@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FuteBus\RolePermission\Http\Requests;
 
 use FuteBus\RolePermission\Services\AccessControlService;
+use FuteBus\RolePermission\Services\PermissionCatalogService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -27,7 +28,7 @@ class StoreRoleRequest extends FormRequest
             'description'            => ['nullable', 'string', 'max:1000'],
             'permission_ids_present' => ['required', 'accepted'],
             'permission_ids'         => ['sometimes', 'array'],
-            'permission_ids.*'       => ['integer', 'distinct', Rule::exists('permissions', 'id')->where('is_active', true)],
+            'permission_ids.*'       => ['integer', 'distinct', Rule::exists('permissions', 'id')->where('is_active', true)->whereIn('slug', app(PermissionCatalogService::class)->slugs())],
         ];
     }
 }

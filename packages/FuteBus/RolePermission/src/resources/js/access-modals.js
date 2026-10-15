@@ -3,7 +3,14 @@ function initializeAccessModals() {
         let opener;
         let sending = false;
         const form = dialog.querySelector('form');
-        const close = () => { if (!sending) dialog.close(); };
+        const close = () => {
+            if (sending) return;
+            if (dialog.dataset.closeUrl) {
+                window.location.assign(dialog.dataset.closeUrl);
+                return;
+            }
+            dialog.close();
+        };
         const open = trigger => {
             opener = trigger;
             dialog.showModal();
@@ -23,7 +30,10 @@ function initializeAccessModals() {
         dialog.addEventListener('click', event => {
             if (event.target === dialog || event.target.closest('[data-access-close]')) close();
         });
-        dialog.addEventListener('cancel', event => { if (sending) event.preventDefault(); });
+        dialog.addEventListener('cancel', event => {
+            event.preventDefault();
+            close();
+        });
         dialog.addEventListener('close', () => opener?.focus());
         form.addEventListener('submit', event => {
             if (event.defaultPrevented) return;

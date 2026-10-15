@@ -94,6 +94,9 @@
                                             class="absolute inset-0 rounded-xl focus-visible:outline-2 focus-visible:outline-futa-orange">
                                         </button>
                                     @endif
+                                    @if($action === 'exchange' && auth()->user()->hasPermissionTo('ticket.view'))
+                                        <a href="{{ route('staff.tickets.exchange') }}" class="absolute inset-0 rounded-xl focus-visible:outline-2 focus-visible:outline-futa-orange" aria-label="{{ __('StaffDashboard::staff.tickets.actions.exchange') }}"></a>
+                                    @endif
                                     @if($action === 'support' && auth()->user()->hasPermissionTo('support.view'))
                                         <a href="{{ route('staff.support') }}" aria-label="{{ __('StaffCustomerSupport::support.title') }}"
                                             class="absolute inset-0 rounded-xl focus-visible:outline-2 focus-visible:outline-futa-orange"></a>

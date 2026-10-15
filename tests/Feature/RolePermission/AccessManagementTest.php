@@ -91,7 +91,7 @@ class AccessManagementTest extends TestCase
         $this->assertDatabaseHas('permissions', ['id' => $permission, 'is_active' => true]);
     }
 
-    public function test_catalog_explains_search_and_localizes_customer_support_permissions(): void
+    public function test_catalog_keeps_search_and_localizes_customer_support_permissions(): void
     {
         [$manager, $company] = $this->fixture();
         DB::table('permissions')->updateOrInsert(['slug' => 'support.assign'], [
@@ -105,7 +105,7 @@ class AccessManagementTest extends TestCase
         $this->actingAs($manager);
 
         $this->get(route('access-management.catalog'))->assertOk()
-            ->assertSee('Danh mục này liệt kê các quyền có thể gán cho vai trò.')
+            ->assertSee('x-model.debounce.150ms="query"', false)
             ->assertSee('Hỗ trợ khách hàng')
             ->assertSee('Điều phối yêu cầu hỗ trợ')
             ->assertDontSeeText('Assign customer support');
