@@ -269,7 +269,7 @@ class TicketExchangeTest extends TestCase
         $foreignCompany = DB::table('bus_companies')->insertGetId(['code' => 'OTHER', 'name' => 'Other']);
         $staff->update(['bus_company_id' => $foreignCompany]);
         $this->get(route('exchange.show', $f['booking']))->assertNotFound();
-        $this->getJson(route('staff.tickets.exchange.context', $f['ticket']))->assertNotFound();
+        $this->getJson(route('staff.tickets.exchange.context', $f['ticket']))->assertForbidden();
     }
 
     public function test_round_trip_exchange_cannot_overlap_the_other_leg(): void

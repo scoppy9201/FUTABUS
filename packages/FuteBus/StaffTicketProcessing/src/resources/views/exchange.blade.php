@@ -11,7 +11,17 @@
         class="staff-shell grid min-h-0 min-w-0 flex-1 overflow-hidden grid-cols-1 bg-[#F8F9FA] text-sm lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-stretch [&>main]:min-h-0
         [&>main]:overflow-y-auto [&>main]:p-4 md:[&>main]:p-6 lg:[&>main]:p-8 print:block print:overflow-visible print:[&>main]:overflow-visible print:[&>main]:p-0">
         @include('StaffDashboard::partials.sidebar')
-        <main x-data="staffTicketExchange(@js(route('api.v1.staff.tickets.index')), @js(['denied' => __('Payment::exchange.denied'), 'error' => __('Payment::exchange.error'), 'consent' => __('Payment::exchange.consent_error'), 'expired' => __('Payment::exchange.expired')]), @js(['context' => route('staff.tickets.exchange.context', ['ticket' => '__TICKET__']), 'csrf' => csrf_token()]))" @pagehide.window="flow.abandon()" class="min-w-0 space-y-5">
+        <main
+            x-data="staffTicketExchange(@js(route('api.v1.staff.tickets.index')),
+            @js(['denied' => __('Payment::exchange.denied'),
+            'error' => __('Payment::exchange.error'),
+            'consent' => __('Payment::exchange.consent_error'),
+            'expired' => __('Payment::exchange.expired')]),
+            @js(['context' => route('staff.tickets.exchange.context',
+            ['ticket' => '__TICKET__']),
+            'csrf' => csrf_token()]))"
+            @pagehide.window="flow.abandon()"
+            class="min-w-0 space-y-5">
             <header class="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-gray-100 bg-white px-5 py-4">
                 <div class="flex items-center gap-3">
                     <span class="grid size-12 shrink-0 place-items-center rounded-xl bg-futa-orange-soft text-futa-orange"><x-heroicon-o-arrows-right-left class="size-7" /></span>
@@ -38,20 +48,40 @@
                     <fieldset class="mb-3 flex flex-wrap gap-x-7 gap-y-3" :disabled="loadingTickets">
                         <legend class="sr-only">{{ __('StaffTicketProcessing::exchange.search_title') }}</legend>
                         @foreach(['code', 'phone', 'name'] as $field)
-                            <label class="flex cursor-pointer items-center gap-2 text-sm"><input type="radio" name="exchange-search" value="{{ $field }}" x-model="searchField" class="size-4 accent-futa-orange">{{ $field === 'name' ? __('StaffTicketProcessing::exchange.name') : __('StaffTicketProcessing::tickets.'.$field) }}</label>
+                            <label
+                                class="flex cursor-pointer items-center gap-2 text-sm">
+                                <input
+                                type="radio" name="exchange-search" value="{{ $field }}"
+                                x-model="searchField"
+                                class="size-4 accent-futa-orange">{{ $field === 'name' ? __('StaffTicketProcessing::exchange.name') : __('StaffTicketProcessing::tickets.'.$field) }}</label>
                         @endforeach
                     </fieldset>
                     <div class="flex flex-col gap-3 sm:flex-row">
                         <div class="relative flex-1">
-                            <input x-model="query" :type="searchField === 'phone' ? 'tel' : 'text'" :aria-label="searchField === 'code' ? @js(__('StaffTicketProcessing::tickets.code')) : searchField === 'phone' ? @js(__('StaffTicketProcessing::tickets.phone')) : @js(__('StaffTicketProcessing::exchange.name'))" required maxlength="255" class="h-11 w-full rounded-lg border border-gray-200 pl-3 pr-11 outline-none focus:border-futa-orange focus:ring-2 focus:ring-futa-orange/15">
+                            <input
+                                x-model="query"
+                                :type="searchField === 'phone' ? 'tel' : 'text'"
+                                :aria-label="searchField === 'code' ? @js(__('StaffTicketProcessing::tickets.code')) : searchField === 'phone' ? @js(__('StaffTicketProcessing::tickets.phone')) : @js(__('StaffTicketProcessing::exchange.name'))" required maxlength="255"
+                                class="h-11 w-full rounded-lg border border-gray-200 pl-3 pr-11 outline-none focus:border-futa-orange focus:ring-2 focus:ring-futa-orange/15">
                             <button type="button" @click="query = ''; $el.previousElementSibling.focus()" aria-label="{{ __('StaffTicketProcessing::exchange.clear') }}" class="absolute inset-y-0 right-0 px-3 text-slate-400 hover:text-futa-orange"><x-heroicon-o-x-circle class="size-5" /></button>
                         </div>
-                        <button :disabled="loadingTickets || !groups?.tickets.lookup || !query.trim()" class="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-futa-orange px-10 font-semibold text-white hover:bg-futa-orange-dark disabled:opacity-50"><x-heroicon-o-magnifying-glass class="size-5" />{{ __('StaffTicketProcessing::exchange.search') }}</button>
+                        <button
+                            :disabled="loadingTickets || !groups?.tickets.lookup || !query.trim()"
+                            class="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-futa-orange px-10 font-semibold text-white hover:bg-futa-orange-dark disabled:opacity-50">
+                            <x-heroicon-o-magnifying-glass
+                            class="size-5" />{{ __('StaffTicketProcessing::exchange.search') }}</button>
                     </div>
                 </form>
             </section>
             <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <div class="mb-4 flex items-center justify-between gap-3"><h2 class="flex items-center gap-2 font-bold"><x-heroicon-o-list-bullet class="size-5" />{{ __('StaffTicketProcessing::exchange.results') }} (<span x-text="meta.total"></span> {{ __('StaffTicketProcessing::tickets.ticket_count') }})</h2>
+                <div
+                    class="mb-4 flex items-center justify-between gap-3">
+                    <h2
+                    class="flex items-center gap-2 font-bold">
+                    <x-heroicon-o-list-bullet
+                    class="size-5" />{{ __('StaffTicketProcessing::exchange.results') }} (<span
+                    x-text="meta.total">
+                    </span> {{ __('StaffTicketProcessing::tickets.ticket_count') }})</h2>
 
                 </div>
                 <div
@@ -114,7 +144,12 @@
                         <button
                             type="button"
                             @click="chooseTicket(ticket)" :disabled="!ticket.usable || loadingTickets || choosing"
-                            class="rounded-md border border-futa-orange px-4 py-1 font-semibold text-futa-orange hover:bg-futa-orange-soft disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"><span x-text="ticket.usable ? @js(__('StaffTicketProcessing::exchange.select')) : @js(__('StaffTicketProcessing::exchange.unavailable'))"></span></button>
+                           
+                                class="rounded-md border border-futa-orange px-4 py-1 font-semibold text-futa-orange hover:bg-futa-orange-soft disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400">
+                                <span
+                                x-text="ticket.usable ? @js(__('StaffTicketProcessing::exchange.select')) : @js(__('StaffTicketProcessing::exchange.unavailable'))">
+                                </span>
+                                </button>
                         </td>
                     </tr></template>
                     <tr x-show="loadingTickets"><td colspan="10" class="h-32 px-4 text-center text-gray-500" role="status">{{ __('StaffTicketProcessing::tickets.loading') }}</td></tr>
