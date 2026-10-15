@@ -11,6 +11,7 @@ use FuteBus\BusManagement\Models\Bus as BusRecord;
 use FuteBus\BusManagement\Models\DocumentType as DocumentTypeRecord;
 use FuteBus\BusManagement\Models\VehicleDocument as VehicleDocumentRecord;
 use FuteBus\Payment\Models\SePayPaymentIntent as SePayPaymentIntentRecord;
+use FuteBus\Payment\Services\ExchangeSeatHolds;
 use FuteBus\RouteManagement\Models\BusRoute as BusRouteRecord;
 use FuteBus\RouteManagement\Models\RouteStop as RouteStopRecord;
 use FuteBus\TripManagement\Events\TripCancelled;
@@ -325,6 +326,10 @@ class TripController extends Controller
                     }
                 }
             });
+
+        app(ExchangeSeatHolds::class)->rows($tripIds)->each(function ($seat) use (&$occupied): void {
+            $occupied[(int) $seat->trip_id][(int) $seat->seat_layout_id] = true;
+        });
 
         return $occupied;
     }

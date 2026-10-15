@@ -102,10 +102,12 @@ class SePayWebhookProcessor
                 ->exists();
             if ($trip === null || $trip->status !== 'scheduled'
                 || $trip->departure_time <= now()->toDateTimeString() || $booked
+                || app(ExchangeSeatHolds::class)->conflicts((int) $intent->trip_id, $seatIds)
                 || ($intent->secondary_trip_id !== null && ($secondaryTrip === null
                     || $secondaryTrip->status !== 'scheduled'
                     || $secondaryTrip->departure_time <= now()->toDateTimeString()
-                    || $secondaryBooked))) {
+                    || $secondaryBooked
+                    || app(ExchangeSeatHolds::class)->conflicts((int) $intent->secondary_trip_id, $secondarySeatIds)))) {
                 SePayPaymentIntentRecord::query()->toBase()->where('id', $intent->id)
                     ->update(['status' => 'needs_review', 'updated_at' => now()]);
                 $this->markTransaction($transactionId, $intent->id, 'needs_review');

@@ -11,9 +11,15 @@ class CancellationPolicy
 {
     public const VERSION = 'customer-mvp-2026-10-13';
 
+    public const EXCHANGE_VERSION = 'after-exchange-2026-10-15';
+
     public function quote(object $ticket): array
     {
-        $seconds = now()->diffInSeconds(Carbon::parse($ticket->departure_time), false);
+        $departure = Carbon::parse($ticket->departure_time);
+        if (isset($ticket->original_departure_at)) {
+            $departure = $departure->min(Carbon::parse($ticket->original_departure_at));
+        }
+        $seconds = now()->diffInSeconds($departure, false);
         if ($ticket->status !== 'active' || $ticket->booking_status !== 'confirmed'
             || $ticket->trip_status !== 'scheduled' || $seconds < 4 * 3600
             || str_starts_with($ticket->booking_code, 'DEMOHIST')) {
@@ -27,6 +33,6 @@ class CancellationPolicy
         $fee = intdiv($amount * $percent + 99, 100);
 
         return ['amount'     => $amount, 'fee_percent' => $percent, 'fee' => $fee, 'refund' => $amount - $fee,
-            'policy_version' => self::VERSION];
+            'policy_version' => isset($ticket->original_departure_at) ? self::EXCHANGE_VERSION : self::VERSION];
     }
 }

@@ -47,4 +47,9 @@ class Payment extends Model
     {
         return $this->hasMany(TicketRefund::class, 'payment_id', 'id');
     }
+
+    public function ticketExchanges(): HasMany
+    {
+        return $this->hasMany(TicketExchange::class, 'payment_id', 'id');
+    }
 }

@@ -9,5 +9,7 @@ return [
         'Sign in and open Purchase history to cancel individual eligible tickets: the ticket must be active, the booking confirmed, the trip scheduled and the payment verified.',
         'A successful cancellation releases the seat and creates a pending refund request. Refunded is shown only after staff reconcile and record a successful bank transfer back to the customer.',
         'Refund processing depends on reconciliation and the bank; cancellation does not return funds immediately. Contact 1900 6067 for assistance or ticket changes.',
+        'Eligible tickets may be exchanged once free of charge for the same company, route, direction, service class and fare. Both trips must be at least 4 hours away; select a new seat and boarding/arrival stops.',
+        'When cancelling an exchanged ticket, the earlier of the original and new departure times determines the cancellation fee deadline. The old ticket becomes invalid only after a successful exchange.',
     ],
 ];

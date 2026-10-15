@@ -22,6 +22,7 @@ class TicketLookupController extends Controller
         $input = $request->validated();
         $result = $lookup->find($input['phone'], $input['ticket_code']);
         $qrCodes = $result === null ? [] : $result['tickets']
+            ->filter(fn (object $ticket): bool => $result['paymentStatus'] === 'completed' && in_array($ticket->status, ['active', 'used'], true))
             ->mapWithKeys(fn (object $ticket): array => [$ticket->ticket_code => $ticketQr->dataUri($ticket->ticket_code)])
             ->all();
 

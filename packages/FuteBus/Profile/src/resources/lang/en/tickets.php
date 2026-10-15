@@ -41,6 +41,7 @@ return [
         'ticket_and_seat'     => 'Ticket · Seat :seat',
         'show_qr_to_staff'    => 'Show this code to staff when boarding.',
         'banner'              => [
+            'exchanged'      => 'Ticket exchanged for a new trip',
             'booked'         => 'Booking recorded, awaiting payment',
             'paid'           => 'Paid, awaiting departure',
             'departed'       => 'Travel stage reached',
@@ -51,6 +52,7 @@ return [
             'payment_failed' => 'Payment failed',
         ],
         'banner_detail' => [
+            'exchanged'      => 'The old ticket is invalid. Its original payment value was transferred to the new ticket without an additional charge.',
             'booked'         => 'Booking recorded. Complete payment to receive your ticket.',
             'paid'           => 'Scheduled departure: :time. Please arrive at the station 30 minutes early.',
             'departed'       => 'The trip is in progress. Estimated arrival: :time.',
@@ -68,6 +70,7 @@ return [
             'rated'    => 'Review',
         ],
         'list_status' => [
+            'exchanged'      => 'Exchanged',
             'booked'         => 'Awaiting payment',
             'paid'           => 'Awaiting departure',
             'departed'       => 'Travelling',
@@ -78,6 +81,7 @@ return [
             'payment_failed' => 'Payment failed',
         ],
         'event' => [
+            'exchanged'             => 'Exchanged for a new trip',
             'booked'                => 'Booking placed',
             'cancelled'             => 'Ticket cancelled',
             'paid'                  => 'Payment completed',

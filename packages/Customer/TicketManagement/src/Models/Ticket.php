@@ -6,6 +6,7 @@ namespace FuteBus\TicketManagement\Models;
 
 use FuteBus\BookingManagement\Models\Booking;
 use FuteBus\Cancellation\Models\TicketCancellation;
+use FuteBus\Payment\Models\TicketExchange;
 use FuteBus\SeatManagement\Models\SeatLayout;
 use FuteBus\TripManagement\Models\Trip;
 use Illuminate\Database\Eloquent\Model;
@@ -61,5 +62,15 @@ class Ticket extends Model
     public function ticketCancellation(): HasOne
     {
         return $this->hasOne(TicketCancellation::class, 'ticket_id', 'id');
+    }
+
+    public function outgoingExchange(): HasOne
+    {
+        return $this->hasOne(TicketExchange::class, 'old_ticket_id')->where('status', 'completed');
+    }
+
+    public function incomingExchange(): HasOne
+    {
+        return $this->hasOne(TicketExchange::class, 'new_ticket_id')->where('status', 'completed');
     }
 }

@@ -146,6 +146,8 @@
                             'permission' => 'booking.view', 'label' => __('BookingTracking::bookings.title')],
                         ['key' => 'refunds', 'icon' => 'receipt-refund', 'route' => route('refunds.index'),
                             'permission' => 'payment.view', 'label' => __('Payment::refunds.title')],
+                        ['key' => 'exchanges', 'icon' => 'arrows-right-left', 'route' => route('exchange.manage'),
+                            'permission' => 'ticket.exchange', 'label' => __('Payment::exchange.title')],
                         ['key' => 'access_management', 'icon' => 'key', 'route' => route('access-management.index')],
                         ['key' => 'reports', 'icon' => 'chart-bar',     'route' => route('reporting.index')],
                     ];

@@ -13,7 +13,7 @@ return [
     'seat_layout' => ['view', 'create', 'update', 'delete'],
     'booking'     => ['view', 'create', 'update', 'cancel'],
     'payment'     => ['view', 'create', 'refund'],
-    'ticket'      => ['view', 'create', 'verify'],
+    'ticket'      => ['view', 'create', 'verify', 'exchange'],
     'support'     => ['view', 'respond', 'assign'],
     'customer'    => ['view', 'create', 'update', 'delete'],
     'report'      => ['view'],

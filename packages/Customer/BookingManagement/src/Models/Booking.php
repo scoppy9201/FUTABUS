@@ -8,6 +8,7 @@ use App\Models\User;
 use FuteBus\CustomerManagement\Models\Customer;
 use FuteBus\Payment\Models\Payment;
 use FuteBus\Payment\Models\SePayPaymentIntent;
+use FuteBus\Payment\Models\TicketExchange;
 use FuteBus\Profile\Models\BookingReview;
 use FuteBus\Profile\Models\CustomerFeedbackReport;
 use FuteBus\TicketManagement\Models\Ticket;
@@ -93,5 +94,10 @@ class Booking extends Model
     public function customerFeedbackReports(): HasMany
     {
         return $this->hasMany(CustomerFeedbackReport::class, 'booking_id', 'id');
+    }
+
+    public function incomingTicketExchange(): HasOne
+    {
+        return $this->hasOne(TicketExchange::class, 'new_booking_id')->where('status', 'completed');
     }
 }

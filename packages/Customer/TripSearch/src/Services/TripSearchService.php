@@ -8,6 +8,7 @@ use FuteBus\BookingManagement\Models\BookedSeat as BookedSeatRecord;
 use FuteBus\BusManagement\Models\Bus;
 use FuteBus\BusManagement\Services\BusPresentationService;
 use FuteBus\Payment\Models\SePayPaymentIntent as SePayPaymentIntentRecord;
+use FuteBus\Payment\Services\ExchangeSeatHolds;
 use FuteBus\RouteManagement\Models\RouteStop;
 use FuteBus\SeatManagement\Models\SeatLayout as SeatLayoutRecord;
 use FuteBus\TripManagement\Models\Trip as TripRecord;
@@ -66,7 +67,8 @@ class TripSearchService
 
                 return $rows;
             });
-        $bookedSeats = $occupiedSeatRows->concat($reservedSeatRows)->groupBy('trip_id');
+        $bookedSeats = $occupiedSeatRows->concat($reservedSeatRows)
+            ->concat(app(ExchangeSeatHolds::class)->rows($trips->pluck('id')->all()))->groupBy('trip_id');
 
         $seatLayouts = SeatLayoutRecord::query()->toBase()
             ->whereIn('bus_id', $trips->pluck('bus_id'))

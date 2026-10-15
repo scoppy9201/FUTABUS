@@ -208,8 +208,7 @@
                                                     <button type="button" disabled class="block w-full px-3 py-2.5 text-left text-sm text-slate-400">{{ __('Profile::tickets.cancel_ticket') }}</button>
                                                 @endif
                                                 @if($booking->can_contact_for_change)
-                                                    <a href="tel:19006067" data-history-sensitive
-                                                        data-departure="{{ \Illuminate\Support\Carbon::parse($booking->departure_time)->timestamp }}"
+                                                    <a href="{{ route('exchange.show', $booking->id) }}" data-ticket-exchange data-no-loader
                                                         class="block whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-medium
                                                             text-gray-900 hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-futa-orange">
                                                         {{ __('Profile::tickets.change_ticket') }}
@@ -261,5 +260,6 @@
             <div data-cancellation-content></div>
         </dialog>
     </div>
+    @include('Payment::exchange.host')
     @vite('packages/FuteBus/Profile/src/resources/js/app.js')
 @endsection
