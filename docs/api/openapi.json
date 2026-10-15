@@ -2588,6 +2588,210 @@
         "description": "Requires a verified recovery challenge. The challenge is consumed and all existing Bearer tokens are revoked."
       }
     },
+    "/api/v1/staff/activity": {
+      "get": {
+        "operationId": "api_v1_staff_activity",
+        "summary": "Read staff activity calendar and actionable request queue",
+        "description": "Read-only company-scoped activity for active, verified staff. Bearer tokens require the api ability. Metrics follow per-domain permissions and are null when inaccessible. Exchange replacements are excluded from newly issued tickets. Pending counts use request creation dates and current unfinished status. Queue entries are unassigned or assigned to the current employee, ordered oldest first. Missing company scope returns no accessible metrics or queue entries. Limit: 60 requests per minute.",
+        "security": [
+          {
+            "SessionCookie": []
+          },
+          {
+            "BearerToken": []
+          }
+        ],
+        "tags": [
+          "Operator tickets"
+        ],
+        "parameters": [
+          {
+            "name": "month",
+            "in": "query",
+            "required": false,
+            "description": "Calendar month; defaults to the current month in Asia/Ho_Chi_Minh.",
+            "schema": {
+              "type": "string",
+              "pattern": "^(19|20)\\d{2}-(0[1-9]|1[0-2])$",
+              "example": "2026-10"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly counts and currently open request queue.",
+            "headers": {
+              "Cache-Control": {
+                "description": "Always private, no-store.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "month",
+                        "days",
+                        "access",
+                        "queue",
+                        "updated_at"
+                      ],
+                      "properties": {
+                        "month": {
+                          "type": "string"
+                        },
+                        "days": {
+                          "type": "array",
+                          "minItems": 28,
+                          "maxItems": 31,
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "date",
+                              "issued",
+                              "cancelled",
+                              "support_pending",
+                              "refund_pending"
+                            ],
+                            "properties": {
+                              "date": {
+                                "type": "string",
+                                "format": "date"
+                              },
+                              "issued": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ],
+                                "minimum": 0,
+                                "description": "Null when the corresponding access flag is false."
+                              },
+                              "cancelled": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ],
+                                "minimum": 0,
+                                "description": "Null when the corresponding access flag is false."
+                              },
+                              "support_pending": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ],
+                                "minimum": 0,
+                                "description": "Null when the corresponding access flag is false."
+                              },
+                              "refund_pending": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ],
+                                "minimum": 0,
+                                "description": "Null when the corresponding access flag is false."
+                              }
+                            }
+                          }
+                        },
+                        "access": {
+                          "type": "object",
+                          "required": [
+                            "issued",
+                            "cancelled",
+                            "support_pending",
+                            "refund_pending"
+                          ],
+                          "properties": {
+                            "issued": {
+                              "type": "boolean"
+                            },
+                            "cancelled": {
+                              "type": "boolean"
+                            },
+                            "support_pending": {
+                              "type": "boolean"
+                            },
+                            "refund_pending": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "queue": {
+                          "type": "array",
+                          "maxItems": 3,
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "id",
+                              "kind",
+                              "reference",
+                              "title",
+                              "created_at",
+                              "url"
+                            ],
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "kind": {
+                                "type": "string",
+                                "enum": [
+                                  "support",
+                                  "refund"
+                                ]
+                              },
+                              "reference": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "created_at": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "url": {
+                                "type": "string",
+                                "format": "uri"
+                              }
+                            }
+                          }
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated."
+          },
+          "403": {
+            "description": "Account is not active verified staff or Bearer token lacks api ability."
+          },
+          "422": {
+            "description": "Invalid month; validation response contains message and errors."
+          },
+          "429": {
+            "description": "Too many requests."
+          }
+        }
+      }
+    },
     "/api/v1/staff/dashboard": {
       "get": {
         "operationId": "api_v1_staff_dashboard_show",
