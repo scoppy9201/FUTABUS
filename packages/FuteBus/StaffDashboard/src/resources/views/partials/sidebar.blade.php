@@ -20,6 +20,7 @@
                             'text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange' => !request()->routeIs($sidebarHome ?? 'staff.dashboard')])>
                     <x-heroicon-o-home
                         class="size-5 shrink-0" /><span>{{ __('StaffDashboard::staff.home') }}</span></a>
+                    @if(app(\FuteBus\StaffTicketProcessing\Services\TicketAccessService::class)->allows(auth()->user()))
                     <a
                         href="{{ route('staff.tickets') }}" @if(request()->routeIs('staff.tickets', 'staff.tickets.*', 'staff.exchange.*'))
                         aria-current="page" @endif @class(['w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition',
@@ -29,46 +30,26 @@
                             'staff.tickets.*')])>
                     <x-heroicon-o-ticket
                         class="size-5 shrink-0" /><span>{{ __('StaffDashboard::staff.ticket_menu') }}</span></a>
-                    <a
-                        href="{{ auth()->user()->hasPermissionTo('support.view') ? route('staff.support') : route($sidebarHome ?? 'staff.dashboard').'#support' }}"
-                        @if(request()->routeIs('staff.support')) aria-current="page" @endif
-                        @class(['w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition',
-                            'bg-futa-orange-soft font-semibold text-futa-orange border-r-4 border-futa-orange' => request()->routeIs('staff.support'),
-                            'text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange' => ! request()->routeIs('staff.support')])>
-                    <x-heroicon-o-chat-bubble-left-right
-                        class="size-5 shrink-0" /><span>{{ __('StaffDashboard::staff.support.title') }}</span></a>
-                    <a href="{{ route('staff.ticket-lookup') }}"
-                        @if(request()->routeIs('staff.ticket-lookup')) aria-current="page" @endif
-                        @class(['w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition',
-                            'bg-futa-orange-soft font-semibold text-futa-orange border-r-4 border-futa-orange' => request()->routeIs('staff.ticket-lookup'),
-                            'text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange' => ! request()->routeIs('staff.ticket-lookup')])>
-                        <x-heroicon-o-magnifying-glass class="size-5 shrink-0" /><span>{{ __('StaffDashboard::staff.tickets.actions.lookup') }}</span>
-                    </a>
-                    @if(auth()->user()->hasPermissionTo('booking.view'))
-                        <a href="{{ route('staff.bookings.index') }}"
-                            @if(request()->routeIs('staff.bookings.*')) aria-current="page" @endif
-                            @class(['w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition',
-                                'bg-futa-orange-soft font-semibold text-futa-orange border-r-4 border-futa-orange' => request()->routeIs('staff.bookings.*'),
-                                'text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange' => ! request()->routeIs('staff.bookings.*')])>
-                            <x-heroicon-o-clipboard-document-list class="size-5 shrink-0" /><span>{{ __('BookingTracking::bookings.title') }}</span>
-                        </a>
-                    @endif
-                    @if(auth()->user()->hasPermissionTo('payment.view'))
-                        <a href="{{ route('staff.refunds.index') }}"
-                            @if(request()->routeIs('staff.refunds.*')) aria-current="page" @endif
-                            @class(['w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition',
-                                'bg-futa-orange-soft font-semibold text-futa-orange border-r-4 border-futa-orange' => request()->routeIs('staff.refunds.*'),
-                                'text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange' => ! request()->routeIs('staff.refunds.*')])>
-                            <x-heroicon-o-receipt-refund class="size-5 shrink-0" /><span>{{ __('Payment::refunds.title') }}</span>
-                        </a>
                     @else
-                        <button type="button" aria-disabled="true" title="{{ __('StaffDashboard::staff.refund_access_hint') }}"
-                            @click="void window.FutaNotify?.warning(@js(__('StaffDashboard::staff.refund_access_hint')))"
+                        <button type="button" aria-disabled="true" title="{{ __('StaffDashboard::staff.ticket_access_hint') }}"
+                            @click="void window.FutaNotify?.warning(@js(__('StaffDashboard::staff.ticket_access_hint')))"
                             class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-400">
-                            <x-heroicon-o-receipt-refund class="size-5 shrink-0" /><span>{{ __('Payment::refunds.title') }}</span>
+                            <x-heroicon-o-ticket class="size-5 shrink-0" /><span>{{ __('StaffDashboard::staff.ticket_menu') }}</span>
                             <x-heroicon-o-lock-closed class="ml-auto size-4 shrink-0" aria-hidden="true" />
                         </button>
                     @endif
+                    @foreach([
+                        ['route' => 'staff.support', 'active' => 'staff.support', 'permission' => 'support.view', 'icon' => 'chat-bubble-left-right',
+                            'label' => __('StaffDashboard::staff.support.title'), 'hint' => __('StaffDashboard::staff.support_access_hint')],
+                        ['route' => 'staff.ticket-lookup', 'active' => 'staff.ticket-lookup', 'permission' => 'ticket.view', 'icon' => 'magnifying-glass',
+                            'label' => __('StaffDashboard::staff.tickets.actions.lookup'), 'hint' => __('StaffDashboard::staff.lookup_access_hint')],
+                        ['route' => 'staff.bookings.index', 'active' => 'staff.bookings.*', 'permission' => 'booking.view', 'icon' => 'clipboard-document-list',
+                            'label' => __('BookingTracking::bookings.title'), 'hint' => __('StaffDashboard::staff.booking_access_hint')],
+                        ['route' => 'staff.refunds.index', 'active' => 'staff.refunds.*', 'permission' => 'payment.view', 'icon' => 'receipt-refund',
+                            'label' => __('Payment::refunds.title'), 'hint' => __('StaffDashboard::staff.refund_access_hint')],
+                    ] as $item)
+                        @include('StaffDashboard::partials.permission-link', ['item' => $item])
+                    @endforeach
                     <template
                         x-for="item in dashboard?.navigation || []"
                         :key="item.key">

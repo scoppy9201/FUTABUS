@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['web', 'auth'])->prefix('quan-tri/quyen-truy-cap')->name('access-management.')->group(function (): void {
     Route::get('/', [AccessControlController::class, 'index'])->name('index');
     Route::get('/danh-muc-chuc-nang', [AccessControlController::class, 'catalog'])->name('catalog');
+    Route::post('/danh-muc-chuc-nang/dong-bo', [AccessControlController::class, 'synchronizeCatalog'])->name('catalog.sync');
     Route::post('/danh-muc-chuc-nang', [AccessControlController::class, 'storePermission'])->name('catalog.store');
     Route::put('/danh-muc-chuc-nang/{permission}', [AccessControlController::class, 'updatePermission'])->whereNumber('permission')->name('catalog.update');
     Route::patch('/danh-muc-chuc-nang/{permission}/trang-thai', [AccessControlController::class, 'setPermissionStatus'])->whereNumber('permission')->name('catalog.status');

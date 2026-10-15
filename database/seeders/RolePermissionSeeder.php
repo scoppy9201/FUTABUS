@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use FuteBus\RolePermission\Services\PermissionCatalogService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -16,7 +17,9 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'Khách hàng', 'slug' => 'customer'],
         ];
 
-        $permissionGroups = config('permission_catalog', []);
+        $permissionGroups = app(PermissionCatalogService::class)->definitions()
+            ->keys()->groupBy(fn (string $slug): string => explode('.', $slug)[0])
+            ->map(fn ($slugs) => $slugs->map(fn (string $slug): string => explode('.', $slug)[1])->all());
 
         $roleIds = [];
         foreach ($roles as $r) {

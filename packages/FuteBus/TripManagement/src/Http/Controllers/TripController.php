@@ -243,6 +243,7 @@ class TripController extends Controller
         }
 
         $tickets = $this->ticketCount($id);
+        abort_unless($request->user()->hasPermissionTo($trip->status === 'unassigned' ? 'trip.delete' : 'trip.cancel'), 403);
 
         // Chuyến chưa gán xe: xóa hoàn toàn khỏi hệ thống
         if ($trip->status === 'unassigned') {

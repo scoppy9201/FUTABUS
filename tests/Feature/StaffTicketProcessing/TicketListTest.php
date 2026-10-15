@@ -31,6 +31,7 @@ class TicketListTest extends TestCase
         $foreignBooking = DB::table('bookings')->insertGetId(['booking_code' => 'OTHER-BOOKING', 'trip_id' => $otherTrip, 'customer_id' => $customer, 'seat_count' => 1, 'total_amount' => 300000]);
         DB::table('tickets')->insert(['booking_id' => $foreignBooking, 'trip_id' => $otherTrip, 'ticket_code' => 'FOREIGN', 'passenger_name' => 'Foreign passenger', 'price' => 300000]);
         $this->actingAs($staff)->get(route('staff.tickets'))->assertOk()->assertSeeText('Danh sách vé');
+        $this->get(route('staff.tickets.exchange'))->assertForbidden();
         $this->get(route('staff.ticket-lookup', ['code' => 'BOOKING']))->assertOk()
             ->assertSeeText(__('StaffTicketProcessing::tickets.lookup_intro'))
             ->assertSeeText('Mã vé / Mã đặt vé');

@@ -68,6 +68,7 @@
                 <label class="flex cursor-pointer items-center gap-2 font-bold transition-colors duration-200" :class="!roundTrip ? 'text-futa-orange' : 'text-gray-500'">
                     <input
                         type="radio"
+                        @disabled($exchangeSearch ?? false)
                         name="trip_type"
                         value="one_way"
                         :checked="!roundTrip"
@@ -79,6 +80,7 @@
                 <label class="flex cursor-pointer items-center gap-2 font-bold transition-colors duration-200" :class="roundTrip ? 'text-futa-orange' : 'text-gray-500'">
                     <input
                         type="radio"
+                        @disabled($exchangeSearch ?? false)
                         name="trip_type"
                         value="round_trip"
                         :checked="roundTrip"
@@ -88,7 +90,7 @@
                     <span>{{ __('core::app.home.hero.round_trip') }}</span>
                 </label>
             </div>
-            <div class="flex items-center gap-3">
+            <div @if($exchangeSearch ?? false) hidden @endif class="flex items-center gap-3">
                 <button
                     type="button"
                     @click="startVoiceSearch()"
@@ -157,6 +159,7 @@
             class="hero-search-grid grid grid-cols-1 items-end gap-3.75 md:grid-cols-2"
             :class="{ 'is-round-trip': roundTrip }"
         >
+            <fieldset @disabled($exchangeSearch ?? false) class="contents">
             @include('StaffTicketProcessing::partials.location-picker', [
                 'field' => 'departure',
                 'label' => __('core::app.home.hero.from'),
@@ -180,7 +183,9 @@
                 'placeholder' => __('core::app.home.hero.to_placeholder'),
             ])
 
+            </fieldset>
             @include('TripSearch::partials.date-picker')
+            <fieldset @disabled($exchangeSearch ?? false) class="contents">
 
             <div
                 class="relative"
@@ -238,6 +243,7 @@
                     @endfor
                 </div>
             </div>
+            </fieldset>
         </div>
 
         <div x-show="recentSearches.length > 0" x-cloak class="mt-5">
