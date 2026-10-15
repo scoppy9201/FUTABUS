@@ -1,13 +1,101 @@
-.ticket-success {
-    box-shadow: 0 18px 48px rgb(85 57 43 / 12%);
+.ticket-success-dialog {
+    position: fixed;
+    inset: 0;
+    width: min(1120px, calc(100% - 32px));
+    max-width: none;
+    max-height: calc(100dvh - 48px);
+    margin: auto;
+    padding: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 0;
+    border-radius: 24px;
+    background: white;
+    color: var(--color-gray-900);
+    box-shadow: 0 24px 80px rgb(0 0 0 / 24%);
 }
 
-.ticket-success__scroll-button {
-    box-shadow: 0 2px 12px rgb(0 0 0 / 16%);
+.ticket-success-dialog[data-ticket-count="1"] {
+    width: min(860px, calc(100% - 32px));
+}
+
+.ticket-success-dialog[data-ticket-count="2"],
+.ticket-success-dialog[data-ticket-count="4"] {
+    width: min(960px, calc(100% - 32px));
+}
+
+.ticket-success-dialog::backdrop {
+    background: rgb(15 23 42 / 48%);
+}
+
+.ticket-success__close {
+    position: sticky;
+    top: 12px;
+    z-index: 1;
+    display: grid;
+    width: 36px;
+    height: 36px;
+    margin: 12px 12px -48px auto;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--color-gray-100);
+    color: var(--color-gray-600);
+}
+
+.ticket-success__close:hover {
+    background: var(--color-futa-orange-soft);
+    color: var(--color-futa-orange);
+}
+
+.ticket-success__close:focus-visible {
+    outline: 2px solid var(--color-futa-orange);
+    outline-offset: 2px;
+}
+
+.ticket-success__tickets {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: stretch;
+    gap: 18px;
+    padding: 0 20px 20px;
+}
+
+.ticket-success__ticket {
+    flex: 0 1 320px;
+    min-width: 0;
+    max-width: 100%;
 }
 
 @media print {
-    .ticket-success {
+    body > :not(.ticket-success-dialog),
+    .payment-page,
+    .ticket-success__close {
+        display: none !important;
+    }
+
+    .ticket-success-dialog {
+        position: static;
+        width: 100%;
+        max-height: none;
+        overflow: visible;
         box-shadow: none;
+    }
+
+    .ticket-success-dialog[data-ticket-count="1"] {
+    width: min(860px, calc(100% - 32px));
+}
+
+.ticket-success-dialog[data-ticket-count="2"],
+.ticket-success-dialog[data-ticket-count="4"] {
+    width: min(960px, calc(100% - 32px));
+}
+
+.ticket-success-dialog::backdrop {
+        background: transparent;
+    }
+
+    .ticket-success__ticket {
+        flex-basis: 45%;
     }
 }

@@ -22,7 +22,9 @@
     @include('core::components.ui-calendar-templates')
     @include('core::partials.global-loader')
     @yield('content')
-    @include('core::partials.floating-support')
+    @unless(View::hasSection('hide_floating_support'))
+        @include('core::partials.floating-support')
+    @endunless
     @include('core::components.confirm-dialog')
     @stack('scripts')
 </body>

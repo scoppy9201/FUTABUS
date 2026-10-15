@@ -1,6 +1,7 @@
 @extends('core::layouts.home')
 
 @push('styles')
+    @vite('packages/Customer/BookingManagement/src/resources/css/app.css')
     @vite('packages/FuteBus/Payment/src/resources/css/app.css')
 @endpush
 
@@ -8,7 +9,8 @@
     @vite('packages/FuteBus/Payment/src/resources/js/app.js')
 @endpush
 
-@section('title', __('Payment::payment.payment_page_title'))
+@section('title', __(!empty($paymentCompleted) ? 'Payment::payment.sepay_success_title' : 'Payment::payment.payment_page_title'))
+@section('hide_floating_support', '1')
 
 @section('content')
     @php
@@ -30,25 +32,13 @@
             ['name' => __('Payment::payment.payment_card'), 'image' => 'images/visa.png', 'class' => 'card'],
         ];
     @endphp
-    <div class="payment-page" x-data="{
-        detailOpen: false,
-        tripTooltipOpen: false,
-        priceTooltipOpen: false,
+    <div class="payment-page" @if(empty($paymentCompleted)) data-payment-checkout @endif x-data="{
+        paymentCompleted: @js($paymentCompleted ?? false),
         paymentMethod: 'sepay',
         paymentEnabled: @js($paymentEnabled),
-        remainingSeconds: @js(max(0, $preview['created_at'] + 600 - now()->timestamp)),
+        remainingSeconds: @js(max(0, $expiresAt - now()->timestamp)),
         countdown: null,
         statusTimer: null,
-        openTripDetail() {
-            if (this.detailOpen) return;
-            this.detailOpen = true;
-            this.$nextTick(() => this.$refs.tripDetailClose.focus());
-        },
-        closeTripDetail() {
-            if (!this.detailOpen) return;
-            this.detailOpen = false;
-            this.$nextTick(() => this.$refs.tripDetailTrigger.focus());
-        },
         async refreshPaymentState() {
             if (!this.paymentEnabled) return false;
             try {
@@ -60,10 +50,12 @@
                 if (!response.ok) return false;
                 const result = await response.json();
                 if (result.status === 'paid' || result.status === 'needs_review') {
+                    window.dispatchEvent(new Event('futa:payment-terminal'));
                     window.location.replace(@js(route('trip-payment-preview.show', ['draft' => $preview['token']])));
                     return true;
                 }
                 if (result.status === 'expired') {
+                    window.dispatchEvent(new Event('futa:payment-terminal'));
                     window.location.replace(@js(route('home').'#trip-search'));
                     return true;
                 }
@@ -73,12 +65,16 @@
             return false;
         },
         init() {
+            if (this.paymentCompleted) return;
             if (this.paymentEnabled) {
                 this.statusTimer = setInterval(() => this.refreshPaymentState(), 3000);
             }
             if (this.remainingSeconds <= 0) {
                 this.refreshPaymentState().then((handled) => {
-                    if (!handled) window.location.replace(@js(route('home').'#trip-search'));
+                    if (!handled) {
+                        window.dispatchEvent(new Event('futa:payment-terminal'));
+                        window.location.replace(@js(route('home').'#trip-search'));
+                    }
                 });
                 return;
             }
@@ -88,7 +84,10 @@
                     clearInterval(this.countdown);
                     clearInterval(this.statusTimer);
                     const handled = await this.refreshPaymentState();
-                    if (!handled) window.location.replace(@js(route('home').'#trip-search'));
+                    if (!handled) {
+                        window.dispatchEvent(new Event('futa:payment-terminal'));
+                        window.location.replace(@js(route('home').'#trip-search'));
+                    }
                 }
             }, 1000);
         },
@@ -103,20 +102,28 @@
         },
     }">
         <div class="booking-page__banner">
-            @include('core::partials.home.navbar')
+            @include('core::partials.home.navbar', ['locked' => true])
             <div class="booking-page__hero-inner">
+                @if(!empty($paymentCompleted))
+                    <button type="button" class="booking-page__back cursor-pointer" data-open-payment-success>
+                        <x-heroicon-o-ticket class="size-4" aria-hidden="true" />
+                        {{ __('Payment::payment.success_info_title') }}
+                    </button>
+                @else
                 <form method="POST" action="{{ route('trip-payment-preview.cancel', ['draft' => $preview['token']]) }}"
-                    data-confirm
+                    data-payment-exit-form
                     data-confirm-title="{{ __('Payment::payment.payment_back_confirm_title') }}"
                     data-confirm-message="{{ __('Payment::payment.payment_back_confirm_message') }}">
                     @csrf
-                    <button type="submit" class="booking-page__back cursor-pointer">
+                    <input type="hidden" name="confirm_exit" value="0">
+                    <button type="submit" disabled class="booking-page__back cursor-pointer" data-payment-exit>
                         <span class="booking-page__back-icon">
                             <x-heroicon-o-arrow-left class="size-4" aria-hidden="true" />
                         </span>
                         {{ __('Payment::payment.payment_back') }}
                     </button>
                 </form>
+                @endif
                 <div class="booking-page__heading">
                     <h1 class="booking-page__route">
                         <span>{{ $trip['origin'] }}</span>
@@ -130,18 +137,18 @@
             </div>
         </div>
 
-        <main class="payment-page__layout">
+        <main class="payment-page__layout" @if(!empty($paymentCompleted)) inert @endif>
             <section class="payment-page__methods" aria-labelledby="payment-methods-title">
                 <h2 id="payment-methods-title" class="mb-5 text-[21px] font-semibold text-gray-900">{{ __('Payment::payment.payment_methods_title') }}</h2>
                 <div class="grid gap-1">
                     @foreach ($methods as $method)
                         @if (in_array($method['class'], ['sepay', 'futapay'], true))
-                            <button type="button" class="payment-page__method group grid min-h-15.75 w-full cursor-pointer grid-cols-[24px_40px_minmax(0,1fr)] items-center gap-4
+                            <button type="button" disabled class="payment-page__method group grid min-h-15.75 w-full cursor-default grid-cols-[24px_40px_minmax(0,1fr)] items-center gap-4
                                 rounded-lg py-1.75 pr-0.5 text-left text-[#172033] hover:bg-futa-orange-soft focus-visible:outline-2
                                 focus-visible:outline-offset-2 focus-visible:outline-futa-orange"
                                 :class="{ 'is-active': paymentMethod === '{{ $method['class'] }}' }"
                                 :aria-pressed="paymentMethod === '{{ $method['class'] }}'"
-                                @click="paymentMethod = '{{ $method['class'] }}'">
+                                >
                                 <span class="block size-4.25 rounded-full border border-[#cbd5df] group-[.is-active]:border-futa-orange group-[.is-active]:bg-futa-orange group-[.is-active]:shadow-[inset_0_0_0_4px_#fff]" aria-hidden="true"></span>
                                 <img
                                     @class(['block size-10 rounded-[5px] bg-white object-cover',
@@ -153,12 +160,12 @@
                                 <span class="grid min-w-0 content-center gap-0.5"><strong class="text-base leading-[1.3] font-semibold text-gray-900">{{ $method['name'] }}</strong></span>
                             </button>
                         @else
-                            <button type="button"
+                            <button type="button" disabled
                                 @class(['payment-page__method group grid min-h-15.75 w-full cursor-pointer grid-cols-[24px_40px_minmax(0,1fr)] items-center gap-4
                                     rounded-lg py-1.75 pr-0.5 text-left text-[#172033] hover:bg-futa-orange-soft focus-visible:outline-2
                                     focus-visible:outline-offset-2 focus-visible:outline-futa-orange',
                                     'mt-3.5 border-t border-[#e2e6eb] pt-5.5 rounded-none' => $method['class'] === 'atm'])
-                                @click="window.FutaNotify?.show(@js(__('Payment::payment.payment_unsupported')), { tone: 'info' })">
+                                >
                                 <span class="block size-4.25 rounded-full border border-[#cbd5df] group-[.is-active]:border-futa-orange group-[.is-active]:bg-futa-orange group-[.is-active]:shadow-[inset_0_0_0_4px_#fff]" aria-hidden="true"></span>
                                 <img
                                     @class(['block size-10 rounded-[5px] bg-white object-cover',
@@ -199,17 +206,12 @@
                 <section class="payment-page__summary-card">
                     <div class="payment-page__card-heading">
                         <h2>{{ __('core::booking.trip_info') }}@if (isset($preview['outbound_trip'])) · {{ __('core::booking.return_leg') }}@endif</h2>
-                        @include('Payment::partials.payment-preview-trip-tooltip')
-                        <button type="button" class="payment-page__detail-link" x-ref="tripDetailTrigger" @click="openTripDetail()">
-                            {{ __('core::booking.detail') }}
-                        </button>
                     </div>
                     @include('Payment::partials.payment-preview-trip-summary')
                 </section>
                 <section class="payment-page__summary-card">
                     <div class="payment-page__card-heading">
                         <h2>{{ __('core::booking.price_detail') }}</h2>
-                        @include('Payment::partials.payment-preview-price-tooltip')
                     </div>
                     <dl>
                         @if (isset($preview['outbound_trip']))
@@ -226,26 +228,12 @@
                 </section>
             </aside>
         </main>
-
-        <div class="booking-page__modal-backdrop" x-show="detailOpen" x-cloak
-            @click.self="closeTripDetail()" @keydown.escape.window="closeTripDetail()">
-            <div class="booking-page__modal" role="dialog" aria-modal="true"
-                aria-labelledby="payment-trip-detail-title">
-                <div class="booking-page__modal-heading">
-                    <h2 id="payment-trip-detail-title">{{ __('core::booking.trip_details_title', ['count' => isset($preview['outbound_trip']) ? 2 : 1]) }}</h2>
-                    <button type="button" class="booking-page__modal-close" x-ref="tripDetailClose" @click="closeTripDetail()"
-                        aria-label="{{ __('core::booking.close') }}">
-                        <x-heroicon-o-x-mark class="size-5" aria-hidden="true" />
-                    </button>
-                </div>
-                <div class="payment-page__modal-content">
-                    @if (isset($preview['outbound_trip']))
-                        @include('Payment::partials.payment-preview-trip-summary', ['summaryLeg' => 'outbound'])
-                    @endif
-                    @include('Payment::partials.payment-preview-trip-summary')
-                </div>
-            </div>
+        <div inert data-payment-footer>
+            @include('core::partials.home.footer')
         </div>
-        @include('core::partials.home.footer')
+
     </div>
+    @if(!empty($paymentCompleted))
+        @include('Payment::trip-payment-success')
+    @endif
 @endsection

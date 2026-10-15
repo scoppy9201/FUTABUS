@@ -39,7 +39,8 @@ class ManualRefundService
                 'tickets.ticket_code', 'tickets.seat_code', 'bookings.booking_code', 'bookings.id as booking_id',
                 'payments.payment_code', 'payments.amount as original_amount', 'customer.name as customer_name',
                 'handler.name as handler_name', 'customers.phone as customer_phone',
-                'routes.origin_city', 'routes.destination_city', 'payments.method as payment_method');
+                'routes.origin_city', 'routes.destination_city', 'payments.method as payment_method',
+                'trips.bus_company_id as refund_company_id');
         if (! $actor->isAdmin()) {
             $company = $actor->bus_company_id ?: BusCompanyRecord::query()->toBase()->whereRaw('LOWER(email) = ?', [mb_strtolower($actor->email)])->value('id');
             abort_if(! $company, 403);
@@ -71,7 +72,33 @@ class ManualRefundService
     public function events(int $refund): Collection
     {
         return TicketRefundEventRecord::query()->toBase()->join('users', 'users.id', '=', 'ticket_refund_events.actor_id')
-            ->where('refund_id', $refund)->orderBy('version')->select('ticket_refund_events.*', 'users.name')->get();
+            ->leftJoin('users as assignee', 'assignee.id', '=', 'ticket_refund_events.assigned_to')
+            ->leftJoin('users as previous_assignee', 'previous_assignee.id', '=', 'ticket_refund_events.previous_assigned_to')
+            ->where('refund_id', $refund)->orderBy('version')->select('ticket_refund_events.*', 'users.name',
+                'assignee.name as assigned_name', 'previous_assignee.name as previous_assigned_name')->get();
+    }
+
+    public function canAssign(User $actor): bool
+    {
+        return $actor->is_active && ($actor->isAdmin() || $actor->isBusCompany())
+            && $actor->hasPermissionTo('payment.view') && $actor->hasPermissionTo('payment.refund');
+    }
+
+    public function eligibleHandlers(User $actor, ?object $refund): Collection
+    {
+        if (! $refund || ! $this->canAssign($actor)) {
+            return collect();
+        }
+
+        return User::query()->where('bus_company_id', $refund->refund_company_id)->where('is_active', true)
+            ->whereHas('roles', fn ($query) => $query->where('roles.slug', 'staff'))
+            ->orderBy('name')->get()->filter(fn (User $user): bool => $this->eligibleHandler($user))->values();
+    }
+
+    private function eligibleHandler(User $user): bool
+    {
+        return $user->is_active && $user->isStaff() && ! $user->isAdmin() && ! $user->isBusCompany()
+            && $user->hasPermissionTo('payment.view') && $user->hasPermissionTo('payment.refund');
     }
 
     public function export(Builder $query): StreamedResponse
@@ -80,10 +107,11 @@ class ManualRefundService
             $output = fopen('php://output', 'w');
             fwrite($output, "\xEF\xBB\xBF");
             fputcsv($output, array_map(fn (string $key): string => __('Payment::refunds.'.$key),
-                ['request', 'ticket', 'customer', 'amount', 'status', 'reference']), ',', '"', '');
+                ['request', 'ticket', 'customer', 'amount', 'status', 'reference', 'handler', 'paid_at']), ',', '"', '');
             foreach ($query->orderByDesc('ticket_refunds.id')->cursor() as $refund) {
                 $cells = [$refund->reference, $refund->ticket_code, $refund->customer_name, $refund->amount,
-                    __('Payment::refunds.statuses.'.$refund->status), $refund->bank_reference ?? ''];
+                    __('Payment::refunds.statuses.'.$refund->status), $refund->bank_reference ?? '',
+                    $refund->handler_name ?? '', $refund->bank_paid_at ?? ''];
                 // Prevent spreadsheet formulas in customer-controlled fields.
                 $cells = array_map(fn ($value): string => preg_match('/^[\s]*[=+@-]/u', (string) $value)
                     ? "'".$value : (string) $value, $cells);
@@ -105,7 +133,7 @@ class ManualRefundService
                 abort_if($record === null, 404);
                 abort_unless($current->processing_mode === 'manual', 409, __('Payment::refunds.automatic_blocked'));
                 $target = match ($input['action']) {
-                    'claim' => 'refund_processing', 'complete' => 'refunded', 'fail' => 'refund_failed',
+                    'claim', 'assign' => 'refund_processing', 'complete' => 'refunded', 'fail' => 'refund_failed',
                 };
                 if ($current->status === 'refunded' && $target === 'refunded'
                     && (int) $current->assigned_to === $actor->id && $current->bank_reference === strtoupper(trim($input['bank_reference'] ?? ''))
@@ -119,6 +147,8 @@ class ManualRefundService
                 TicketRefundRecord::query()->toBase()->where('id', $id)->update($changes);
                 TicketRefundEventRecord::query()->toBase()->insert([
                     'refund_id'      => $id, 'actor_id' => $actor->id, 'version' => $changes['version'],
+                    'action'         => $input['action'], 'previous_assigned_to' => $current->assigned_to,
+                    'assigned_to'    => $changes['assigned_to'] ?? $current->assigned_to,
                     'from_status'    => $current->status, 'to_status' => $target, 'note' => $input['note'] ?? null,
                     'amount'         => $changes['confirmed_amount'] ?? null,
                     'bank_reference' => $changes['bank_reference'] ?? null, 'bank_paid_at' => $changes['bank_paid_at'] ?? null,
@@ -141,6 +171,21 @@ class ManualRefundService
 
     private function transition(User $actor, object $record, array $input, string $target): array
     {
+        if ($input['action'] === 'assign') {
+            abort_unless($this->canAssign($actor), 403);
+            abort_unless(in_array($record->status, ['refund_pending', 'refund_failed', 'refund_processing'], true),
+                409, __('Payment::refunds.claimed'));
+            if ($record->status === 'refund_processing' && empty(trim($input['note'] ?? ''))) {
+                throw ValidationException::withMessages(['note' => __('Payment::refunds.reassign_note_required')]);
+            }
+            $handler = User::query()->whereKey($input['assigned_to'])->lockForUpdate()->first();
+            if (! $handler || (int) $handler->bus_company_id !== (int) $record->refund_company_id
+                || ! $this->eligibleHandler($handler)) {
+                throw ValidationException::withMessages(['assigned_to' => __('Payment::refunds.ineligible_handler')]);
+            }
+
+            return ['status' => $target, 'assigned_to' => $handler->id, 'error_code' => null];
+        }
         if ($target === 'refund_processing') {
             abort_unless(in_array($record->status, ['refund_pending', 'refund_failed'], true), 409, __('Payment::refunds.claimed'));
 
@@ -150,10 +195,14 @@ class ManualRefundService
         if ($target === 'refund_failed') {
             return ['status' => $target, 'staff_note' => $input['note']];
         }
-        if (! filter_var($input['bank_verified'] ?? false, FILTER_VALIDATE_BOOLEAN)
-            || (int) $input['amount'] !== (int) $record->amount
-            || Carbon::parse($input['bank_paid_at'])->lt(Carbon::parse($record->cancelled_at))) {
+        if (! filter_var($input['bank_verified'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+            throw ValidationException::withMessages(['bank_verified' => __('Payment::refunds.verified')]);
+        }
+        if ((int) $input['amount'] !== (int) $record->amount) {
             throw ValidationException::withMessages(['amount' => __('Payment::refunds.invalid_settlement')]);
+        }
+        if (Carbon::parse($input['bank_paid_at'])->lt(Carbon::parse($record->cancelled_at))) {
+            throw ValidationException::withMessages(['bank_paid_at' => __('Payment::refunds.invalid_bank_paid_at')]);
         }
         abort_unless(TicketRecord::query()->toBase()->where('id', $record->ticket_id)->value('status') === 'cancelled', 409);
 

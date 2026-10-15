@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace FuteBus\Payment\Http\Controllers;
 
 use FuteBus\BookingManagement\Models\Booking as BookingRecord;
+use FuteBus\Payment\Http\Requests\PaymentExitRequest;
 use FuteBus\Payment\Http\Requests\PaymentPreviewRequest;
 use FuteBus\Payment\Models\SePayPaymentIntent as SePayPaymentIntentRecord;
+use FuteBus\Payment\Services\PaymentHoldLifecycle;
 use FuteBus\Payment\Services\PaymentPreviewBuilder;
 use FuteBus\Payment\Services\SePayPaymentService;
 use FuteBus\Payment\Services\SePayQrService;
@@ -16,7 +18,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
 class TripPaymentPreviewController extends Controller
@@ -52,8 +54,9 @@ class TripPaymentPreviewController extends Controller
         return redirect()->route('trip-payment-preview.show', ['draft' => $draft]);
     }
 
-    public function show(Request $request, SePayQrService $sePay, SePayPaymentService $payments, TicketQrService $ticketQr, string $draft): View|RedirectResponse
+    public function show(Request $request, SePayQrService $sePay, SePayPaymentService $payments, TicketQrService $ticketQr, PaymentHoldLifecycle $holds, string $draft): View|RedirectResponse
     {
+        $holds->release($draft);
         $intent = SePayPaymentIntentRecord::query()->toBase()->where('token', $draft)->first();
         if ($intent?->status === 'paid') {
             $preview = json_decode($intent->snapshot, true);
@@ -69,11 +72,16 @@ class TripPaymentPreviewController extends Controller
                         ? $preview['outbound_trip'] : $preview['trip'],
                 ])->sortBy(fn (array $ticket): string => $ticket['trip']['departure_time'])->values();
 
-            return view('Payment::trip-payment-success', [
-                'bookingCode' => BookingRecord::query()->toBase()->where('id', $intent->booking_id)->value('booking_code'),
-                'preview'     => $preview,
-                'total'       => $intent->amount,
-                'tickets'     => $tickets,
+            return view('Payment::trip-payment-preview', [
+                'paymentCompleted'   => true,
+                'paymentEnabled'     => false,
+                'paymentCanActivate' => false,
+                'sePayQrUrl'         => null,
+                'expiresAt'          => Carbon::parse($intent->expires_at)->timestamp,
+                'bookingCode'        => BookingRecord::query()->toBase()->where('id', $intent->booking_id)->value('booking_code'),
+                'preview'            => $preview,
+                'total'              => $intent->amount,
+                'tickets'            => $tickets,
             ]);
         }
         if ($intent?->status === 'needs_review') {
@@ -85,12 +93,8 @@ class TripPaymentPreviewController extends Controller
             return redirect()->to(route('home').'#trip-search');
         }
 
-        if (($preview['created_at'] ?? 0) + 600 <= now()->timestamp
-            || ($intent !== null && $intent->expires_at <= now()->toDateTimeString())) {
-            if ($intent !== null && $intent->status === 'pending') {
-                SePayPaymentIntentRecord::query()->toBase()->where('id', $intent->id)
-                    ->update(['status' => 'expired', 'updated_at' => now()]);
-            }
+        if ($intent?->status === 'expired'
+            || ($intent === null && ($preview['created_at'] ?? 0) + 600 <= now()->timestamp)) {
             $request->session()->forget('trip_payment_preview');
 
             return redirect()->to(route('home').'#trip-search');
@@ -105,28 +109,18 @@ class TripPaymentPreviewController extends Controller
             'sePayQrUrl'         => $qrUrl,
             'paymentEnabled'     => $qrUrl !== null,
             'paymentCanActivate' => $intent === null && $payments->ready(),
+            'expiresAt'          => $intent !== null ? Carbon::parse($intent->expires_at)->timestamp : $preview['created_at'] + 600,
         ]);
     }
 
-    public function cancel(Request $request, string $draft): RedirectResponse
+    public function cancel(PaymentExitRequest $request, PaymentHoldLifecycle $holds, string $draft): RedirectResponse
     {
         $preview = $request->session()->get('trip_payment_preview');
         if (! is_array($preview) || ($preview['token'] ?? null) !== $draft) {
             return redirect()->to(route('home').'#trip-search');
         }
 
-        $paymentStatus = DB::transaction(function () use ($draft): ?string {
-            $intent = SePayPaymentIntentRecord::query()->toBase()->where('token', $draft)->lockForUpdate()->first();
-            if ($intent === null) {
-                return null;
-            }
-            if ($intent->status === 'pending') {
-                SePayPaymentIntentRecord::query()->toBase()->where('id', $intent->id)
-                    ->update(['status' => 'expired', 'updated_at' => now()]);
-            }
-
-            return $intent->status;
-        });
+        $paymentStatus = $holds->release($draft, confirmedExit: true);
 
         if (in_array($paymentStatus, ['paid', 'needs_review'], true)) {
             return redirect()->route('trip-payment-preview.show', ['draft' => $draft]);
@@ -146,20 +140,14 @@ class TripPaymentPreviewController extends Controller
         ));
     }
 
-    public function status(Request $request, string $draft): JsonResponse
+    public function status(Request $request, PaymentHoldLifecycle $holds, string $draft): JsonResponse
     {
         $preview = $request->session()->get('trip_payment_preview');
         if (! is_array($preview) || ($preview['token'] ?? null) !== $draft) {
             return response()->json(['status' => 'expired'], 200)->header('Cache-Control', 'no-store');
         }
 
-        $intent = SePayPaymentIntentRecord::query()->toBase()->where('token', $draft)->first();
-        $status = $intent?->status ?? 'preview';
-        if ($status === 'pending' && $intent->expires_at <= now()->toDateTimeString()) {
-            SePayPaymentIntentRecord::query()->toBase()->where('id', $intent->id)
-                ->update(['status' => 'expired', 'updated_at' => now()]);
-            $status = 'expired';
-        }
+        $status = $holds->release($draft) ?? (($preview['created_at'] ?? 0) + 600 <= now()->timestamp ? 'expired' : 'preview');
 
         return response()->json(['status' => $status])->header('Cache-Control', 'no-store');
     }

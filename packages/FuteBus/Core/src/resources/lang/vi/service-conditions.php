@@ -2,36 +2,30 @@
 
 return [
     'meta' => [
-        'title' => 'Điều kiện cung cấp dịch vụ - FUTA Bus Lines',
+        'title'       => 'Điều kiện cung cấp dịch vụ - FUTA Bus Lines',
         'description' => 'Điều kiện cung cấp dịch vụ vận chuyển hành khách của FUTA Bus Lines.',
     ],
-    'brand' => 'FUTA Bus Lines',
-    'heading' => 'Điều kiện cung cấp dịch vụ',
+    'brand'    => 'FUTA Bus Lines',
+    'heading'  => 'Điều kiện cung cấp dịch vụ',
     'articles' => [
         [
-            'title' => 'Điều 1. Điều khoản và lưu ý chung',
+            'title'        => 'Điều 1. Điều khoản và lưu ý chung',
             'introduction' => 'Quý khách vui lòng Đăng ký/Đăng nhập tài khoản để nhận chương trình khuyến mãi.',
-            'style' => 'notes',
-            'items' => [
+            'style'        => 'notes',
+            'items'        => [
                 'Quý khách vui lòng có mặt tại bến xuất phát trước ít nhất 30 phút so với giờ xe khởi hành, mang '
-                    . 'theo thông báo đã thanh toán vé thành công có chứa mã vé được gửi từ hệ thống FUTA Bus Lines. '
-                    . 'Liên hệ Tổng đài 1900 6067 để được hỗ trợ.',
+                    .'theo thông báo đã thanh toán vé thành công có chứa mã vé được gửi từ hệ thống FUTA Bus Lines. '
+                    .'Liên hệ Tổng đài 1900 6067 để được hỗ trợ.',
                 'Nếu Quý khách có nhu cầu trung chuyển, vui lòng liên hệ Tổng đài trung chuyển 1900 6918 trước khi '
-                    . 'đặt vé. Chúng tôi không đón/trung chuyển tại những điểm xe trung chuyển không thể tới được.',
+                    .'đặt vé. Chúng tôi không đón/trung chuyển tại những điểm xe trung chuyển không thể tới được.',
                 'Nếu Quý khách có nhu cầu di chuyển chặng đường ngắn hơn so với hành trình, vui lòng gọi Tổng đài '
-                    . '1900 6067 để được hưởng chính sách giá vé tốt nhất.',
+                    .'1900 6067 để được hưởng chính sách giá vé tốt nhất.',
             ],
         ],
         [
             'title' => 'Điều 2. Chính sách hủy vé',
             'style' => 'bullets',
-            'items' => [
-                'Chỉ được chuyển đổi vé 01 lần duy nhất.',
-                'Chi phí hủy vé từ 10% – 30% giá vé, tùy thuộc thời gian hủy vé so với giờ khởi hành ghi trên vé '
-                    . 'và số lượng vé cá nhân/tập thể, áp dụng theo các quy định hiện hành.',
-                'Quý khách có nhu cầu thay đổi hoặc hủy vé đã thanh toán cần liên hệ Trung tâm tổng đài 1900 6067 '
-                    . 'hoặc quầy vé chậm nhất trước 24 giờ so với giờ xe khởi hành để được hướng dẫn thêm.',
-            ],
+            'items' => (require __DIR__.'/cancellation-policy.php')['items'],
         ],
         [
             'title' => 'Điều 3. Yêu cầu khi lên xe',
@@ -69,7 +63,7 @@ return [
             'style' => 'bullets',
             'items' => [
                 'Trường hợp có nhu cầu lên xe dọc đường, Quý khách vui lòng liên hệ Tổng đài 1900 6067 để đăng ký '
-                    . 'trước ít nhất 02 giờ so với giờ xe khởi hành và chuẩn bị hành lý nhỏ gọn, tối đa 20 kg.',
+                    .'trước ít nhất 02 giờ so với giờ xe khởi hành và chuẩn bị hành lý nhỏ gọn, tối đa 20 kg.',
                 'Chúng tôi chỉ hỗ trợ đón tại một số địa điểm thuận tiện nằm trên lộ trình.',
             ],
         ],

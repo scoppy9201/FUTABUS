@@ -41,6 +41,7 @@ return [
         'Scan the FUTAPay code once the service is connected.',
     ],
     'success_email_note'      => 'Your tickets are confirmed for :email. Please save the ticket codes for boarding.',
+    'success_close'           => 'Close',
     'success_info_title'      => 'Booking information',
     'success_name'            => 'Full name:',
     'success_phone'           => 'Phone:',

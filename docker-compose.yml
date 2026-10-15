@@ -1,4 +1,4 @@
-﻿# FUTEBUS — development stack.
+# FUTEBUS — development stack.
 #
 #   docker compose up --build
 #
@@ -85,6 +85,8 @@ services:
   vite:
     image: node:20-alpine
     working_dir: /app
+    environment:
+      VITE_USE_POLLING: "true"
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
     ports:
       - "5173:5173"
