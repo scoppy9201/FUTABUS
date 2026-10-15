@@ -26,8 +26,17 @@ class BookingPaymentResolver
                     ->whereColumn('ticket_exchanges.payment_id', 'payments.id');
                 $column ? $exchanges->whereColumn('new_booking_id', $booking) : $exchanges->where('new_booking_id', $booking);
             })->orWhere(function (Builder $cash) use ($booking, $column): void {
+                $candidate = (int) $booking;
+                if ($column) {
+                    $wrapped = $cash->getGrammar()->wrap($booking);
+                    // MySQL requires a JSON candidate, not a native integer column.
+                    // SQLite's unary plus prevents coercing JSON strings to numeric IDs.
+                    $candidate = $cash->getConnection()->getDriverName() === 'mysql'
+                        ? DB::raw('JSON_ARRAY('.$wrapped.')')
+                        : DB::raw('+'.$wrapped);
+                }
                 $cash->where('payments.method', 'cash')->where('payments.payment_code', 'like', 'CASH%')
-                    ->whereJsonContains('payments.payload->booking_ids', $column ? DB::raw($booking) : (int) $booking);
+                    ->whereJsonContains('payments.payload->booking_ids', $candidate);
             });
         });
     }

@@ -4,13 +4,17 @@
 
 ## Kết quả tự động ngày 15/10/2026
 
-- Toàn bộ PHPUnit: **332 bài đạt, 3.386 assertions**; chạy trên SQLite cô lập.
+- Toàn bộ PHPUnit sau sửa lỗi CI: **333 bài đạt, 3.392 assertions** trên MySQL 8.4.3 cô lập và SQLite cô lập.
 - JavaScript wizard: **4 bài đạt**.
 - Pint các file PHP/Blade thay đổi, kiểm tra cú pháp/diff, `npm.cmd run build`, `php artisan view:cache`: đạt.
 - Code Quality Diff: **0 hard failures, 1 warning** ở lệnh xóa bảng trong `down()` của migration.
   Rollback này có kiểm tra chặn nếu tồn tại lần đổi hoàn tất, nhằm giữ audit và quan hệ vé.
 - Chưa nghiệm thu bố cục trên trình duyệt do kết nối browser kiểm thử không khả dụng.
-  Chưa kiểm thử cạnh tranh thực trên MySQL hoặc giao dịch ngân hàng thật; các mục UAT bên dưới vẫn chờ thực hiện.
+  Chưa kiểm thử hai phiên cạnh tranh đồng thời trên MySQL hoặc giao dịch ngân hàng thật; các mục UAT bên dưới vẫn chờ thực hiện.
+
+Lỗi CI đã sửa: truy vấn JSON của MySQL cần ứng viên có kiểu JSON khi đối chiếu cột ID đơn;
+test rollback dùng sự kiện truy vấn để tạo lỗi giữa giao dịch, thay cho trigger riêng của SQLite.
+Ca hồi quy kiểm tra liên kết thanh toán tiền mặt khớp đúng ID số, không nhận nhầm đơn khác hoặc ID kiểu chuỗi.
 
 ## Chuẩn bị
 

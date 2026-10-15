@@ -10,7 +10,7 @@ use FuteBus\Profile\Services\TicketHistoryService;
 use FuteBus\StaffTicketProcessing\Services\CashSaleService;
 use FuteBus\TicketManagement\Services\TicketLookupService;
 use FuteBus\TripSearch\Services\TripSearchService;
-use Illuminate\Database\QueryException;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use RuntimeException;
 use Tests\TestCase;
 
 class TicketExchangeTest extends TestCase
@@ -218,17 +219,23 @@ class TicketExchangeTest extends TestCase
     {
         $f = $this->fixture();
         $token = $this->hold($f);
-        DB::statement("CREATE TRIGGER reject_exchange_ticket BEFORE INSERT ON tickets WHEN NEW.ticket_code LIKE 'EX%' BEGIN SELECT RAISE(ABORT, 'Simulated issue failure'); END");
+        DB::listen(static function (QueryExecuted $query): void {
+            $table = $query->connection->getQueryGrammar()->wrapTable('tickets');
+            if (str_starts_with($query->sql, 'insert into '.$table.' ')) {
+                throw new RuntimeException('Simulated issue failure');
+            }
+        });
         try {
             app(TicketExchangeService::class)->complete($f['user'], $f['booking'], $token);
             $this->fail('The issue failure must roll back the exchange.');
-        } catch (QueryException) {
+        } catch (RuntimeException $error) {
+            $this->assertSame('Simulated issue failure', $error->getMessage());
             $this->assertDatabaseCount('bookings', 1);
             $this->assertDatabaseCount('tickets', 1);
             $this->assertDatabaseHas('tickets', ['id' => $f['ticket'], 'status' => 'active']);
             $this->assertDatabaseHas('ticket_exchanges', ['token' => $token, 'status' => 'held', 'new_ticket_id' => null]);
-        } finally {
-            DB::statement('DROP TRIGGER reject_exchange_ticket');
+            $this->assertDatabaseCount('booked_seats', 1);
+            $this->assertDatabaseCount('payments', 1);
         }
     }
 
@@ -356,6 +363,28 @@ class TicketExchangeTest extends TestCase
         $this->postJson(route('exchange.complete', ['booking' => $returnBooking, 'token' => $token]), ['consent' => true])->assertOk();
         $this->assertDatabaseCount('payments', 1);
         $this->assertDatabaseHas('tickets', ['id' => $f['ticket'], 'status' => 'active']);
+    }
+
+    public function test_cash_history_matches_only_numeric_booking_ids_in_the_receipt(): void
+    {
+        $f = $this->fixture();
+        $bookings = [];
+        foreach (['RELATED', 'UNRELATED', 'STRING-ID'] as $code) {
+            $bookings[$code] = DB::table('bookings')->insertGetId([
+                'booking_code' => $code, 'trip_id' => $f['trip'], 'user_id' => $f['user']->id,
+                'customer_id'  => DB::table('bookings')->where('id', $f['booking'])->value('customer_id'),
+                'seat_count'   => 1, 'total_amount' => 350000, 'status' => 'confirmed',
+            ]);
+        }
+        DB::table('payments')->update([
+            'payment_code' => 'CASH-HISTORY', 'method' => 'cash', 'status' => 'completed',
+            'payload'      => json_encode(['booking_ids' => [$f['booking'], $bookings['RELATED'], (string) $bookings['STRING-ID']]]),
+        ]);
+
+        $history = app(TicketHistoryService::class);
+        $this->assertSame('completed', $history->findForUser($f['user'], $bookings['RELATED'])->payment_status);
+        $this->assertNull($history->findForUser($f['user'], $bookings['UNRELATED'])->payment_status);
+        $this->assertNull($history->findForUser($f['user'], $bookings['STRING-ID'])->payment_status);
     }
 
     private function hold(array $fixture): string
