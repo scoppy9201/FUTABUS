@@ -176,8 +176,8 @@ class TripSearchTest extends TestCase
             ->assertSee('Chọn phương thức thanh toán')
             ->assertSee('Mã SePay sẽ hiển thị khi cấu hình tài khoản nhận tiền và webhook.')
             ->assertSee('Thời gian tới điểm lên xe')
-            ->assertSee('Thời gian nhận khách')
-            ->assertSee('Chỉ được chuyển đổi vé 1 lần duy nhất')
+            ->assertSee('inert data-payment-footer', false)
+            ->assertSee('tel:19006067', false)
             ->assertSee('Nguyen Van A')
             ->assertSee('300.000đ');
         $this->travel(11)->minutes();

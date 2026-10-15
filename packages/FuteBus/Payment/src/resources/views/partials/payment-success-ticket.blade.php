@@ -1,4 +1,4 @@
-<article class="ticket-success__ticket flex w-[min(340px,85vw)] shrink-0 snap-start flex-col overflow-hidden rounded-2xl border-2 border-[#e8eced] bg-white print:m-[1%] print:inline-flex print:w-[45%] print:break-inside-avoid" id="ticket-{{ $ticket['code'] }}">
+<article class="ticket-success__ticket flex flex-col overflow-hidden rounded-2xl border-2 border-[#e8eced] bg-white print:m-[1%] print:inline-flex print:w-[45%] print:break-inside-avoid" id="ticket-{{ $ticket['code'] }}">
     <div class="flex min-h-14.25 items-center justify-between gap-2.5 px-4 py-2 font-bold">
         <span>{{ __('Payment::payment.success_ticket_code', ['code' => $ticket['code']]) }}</span>
         <div class="flex gap-2 print:hidden">
@@ -15,7 +15,7 @@
             </button>
         </div>
     </div>
-    <img class="mx-auto my-1.25 mb-3.75 block aspect-square w-[min(260px,80%)] object-contain" src="{{ $ticket['qr'] }}" alt="{{ __('Payment::payment.success_qr_alt', ['code' => $ticket['code']]) }}">
+    <img class="mx-auto my-1.25 mb-3.75 block aspect-square w-[min(200px,80%)] object-contain" src="{{ $ticket['qr'] }}" alt="{{ __('Payment::payment.success_qr_alt', ['code' => $ticket['code']]) }}">
     <dl class="grid gap-3.5 px-4 pb-5 text-[15px]">
         <div class="grid grid-cols-[105px_minmax(0,1fr)] gap-2"><dt class="text-[#859098]">{{ __('Payment::payment.success_route') }}</dt><dd class="m-0 wrap-break-word text-right font-semibold text-futa-green">{{ $trip['origin'] }} – {{ $trip['destination'] }}</dd></div>
         <div class="grid grid-cols-[105px_minmax(0,1fr)] gap-2"><dt class="text-[#859098]">{{ __('Payment::payment.success_departure') }}</dt><dd class="m-0 wrap-break-word text-right font-semibold text-futa-green">{{ $departure->format('H:i d/m/Y') }}</dd></div>

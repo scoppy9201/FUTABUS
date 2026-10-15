@@ -2,14 +2,14 @@
 
 return [
     'meta' => [
-        'title' => 'Điều khoản đặt vé trực tuyến - FUTA Bus Lines',
+        'title'       => 'Điều khoản đặt vé trực tuyến - FUTA Bus Lines',
         'description' => 'Điều khoản, quy định đặt vé trực tuyến và vận chuyển của FUTA Bus Lines.',
     ],
-    'brand' => 'FUTA Bus Lines',
-    'heading' => 'Điều khoản đặt vé trực tuyến',
+    'brand'    => 'FUTA Bus Lines',
+    'heading'  => 'Điều khoản đặt vé trực tuyến',
     'chapters' => [
         [
-            'title' => 'I. Điều khoản và quy định chung',
+            'title'    => 'I. Điều khoản và quy định chung',
             'articles' => [
                 [
                     'title' => 'Điều 1. Giải thích từ ngữ và từ viết tắt',
@@ -20,8 +20,8 @@ return [
                         ['label' => '“Điểm đón/trả”:', 'text' => 'là điểm khởi hành và điểm đến theo lịch trong hành trình của khách hàng;'],
                         [
                             'label' => '“Điều kiện bất khả kháng”:',
-                            'text' => 'là sự kiện khách quan ngoài tầm kiểm soát, gồm thiên tai, hỏa hoạn, chiến tranh, '
-                                . 'bạo động, đình công, thay đổi chính sách hoặc lệnh cấm của cơ quan có thẩm quyền;',
+                            'text'  => 'là sự kiện khách quan ngoài tầm kiểm soát, gồm thiên tai, hỏa hoạn, chiến tranh, '
+                                .'bạo động, đình công, thay đổi chính sách hoặc lệnh cấm của cơ quan có thẩm quyền;',
                         ],
                         ['label' => '“Điều kiện vận chuyển”:', 'text' => 'là các yêu cầu và nội dung FUTA thông báo liên quan đến dịch vụ vận chuyển trên vé, website, ứng dụng hoặc hình thức công bố khác;'],
                         ['label' => '“Hành khách”:', 'text' => 'là bất kỳ cá nhân nào sử dụng dịch vụ của FUTA;'],
@@ -34,7 +34,7 @@ return [
                         ['label' => '“Thông tin cá nhân”:', 'text' => 'là dữ liệu hành khách cho phép FUTA lưu trữ, sử dụng và chuyển tới các đơn vị liên quan nhằm cung cấp dịch vụ;'],
                         ['label' => '“Thẻ lên xe (vé)”:', 'text' => 'là bằng chứng xác nhận hợp đồng vận chuyển, có giá trị cho hành khách và hành trình ghi trên vé;'],
                         ['label' => '“ZNS”:', 'text' => 'là dịch vụ gửi thông báo chăm sóc khách hàng trên Zalo;'],
-                        ['text' => 'Đề mục và tiêu đề chỉ phục vụ mục đích thuận tiện tra cứu, không dùng để diễn giải nội dung điều khoản.'],
+                        ['text'  => 'Đề mục và tiêu đề chỉ phục vụ mục đích thuận tiện tra cứu, không dùng để diễn giải nội dung điều khoản.'],
                     ],
                 ],
                 [
@@ -52,13 +52,14 @@ return [
                         ['label' => 'Bảo đảm an toàn giao dịch:', 'text' => 'FUTA và đối tác thanh toán áp dụng công nghệ phát hiện gian lận, kiểm soát giao dịch và bảo vệ dữ liệu bằng các biện pháp an ninh phù hợp.'],
                         [
                             'label' => 'Thông tin cá nhân:',
-                            'text' => 'thông tin giao dịch được dùng để hỗ trợ khách hàng và cập nhật chương trình, dịch vụ '
-                                . 'theo Chính sách bảo mật; chỉ cung cấp cho bên thứ ba khi được đồng ý hoặc cơ quan có thẩm quyền yêu cầu.',
+                            'text'  => 'thông tin giao dịch được dùng để hỗ trợ khách hàng và cập nhật chương trình, dịch vụ '
+                                .'theo Chính sách bảo mật; chỉ cung cấp cho bên thứ ba khi được đồng ý hoặc cơ quan có thẩm quyền yêu cầu.',
                         ],
-                        ['label' => 'Hoàn, hủy và đổi vé:', 'text' => 'giao dịch lỗi được xử lý theo kênh thanh toán; thời gian hoàn thông thường từ 03 đến 05 ngày làm việc.', 'details' => [
-                            'Vé chỉ được chuyển đổi một lần; phí hủy từ 10% đến 30% tùy thời điểm và số lượng vé.',
-                            'Yêu cầu đổi hoặc hủy phải được gửi tới tổng đài hoặc quầy vé chậm nhất 24 giờ trước giờ khởi hành.',
-                        ]],
+                        [
+                            'label'   => 'Hoàn, hủy và đổi vé:',
+                            'text'    => 'giao dịch lỗi được đối soát theo kênh thanh toán; yêu cầu hoàn tiền do hủy vé được nhân viên xử lý và ghi nhận theo kết quả ngân hàng.',
+                            'details' => (require __DIR__.'/cancellation-policy.php')['items'],
+                        ],
                         ['label' => 'Kênh bán vé:', 'text' => 'khách hàng nên mua tại website, ứng dụng, phòng vé chính thức hoặc Tổng đài 1900 6067; FUTA có quyền từ chối phục vụ hành vi gian lận, đầu cơ hoặc bán vé chợ đen.'],
                         ['label' => 'Trung chuyển:', 'text' => 'vui lòng liên hệ 1900 6067 trước khi đặt vé; xe không đón hoặc trung chuyển tại địa điểm không thể tiếp cận.'],
                     ],
@@ -79,7 +80,7 @@ return [
     ],
     'contact' => [
         'prefix' => 'Thông tin liên hệ của FUTA Bus Lines: Nếu quý khách hàng có bất kỳ câu hỏi hoặc yêu cầu nào '
-            . 'liên quan đến Chính sách Bảo mật này, vui lòng liên hệ với Chúng tôi qua:',
+            .'liên quan đến Chính sách Bảo mật này, vui lòng liên hệ với Chúng tôi qua:',
         'or' => 'hoặc gọi đến số điện thoại',
     ],
     'quality' => [

@@ -41,6 +41,7 @@ return [
         'Quét mã FUTAPay sau khi dịch vụ được kết nối.',
     ],
     'success_email_note'      => 'Thông tin vé đã được xác nhận cho địa chỉ email :email. Vui lòng lưu mã vé để sử dụng khi lên xe.',
+    'success_close'           => 'Đóng',
     'success_info_title'      => 'Thông tin mua vé',
     'success_name'            => 'Họ và tên:',
     'success_phone'           => 'Số điện thoại:',

@@ -2,19 +2,19 @@
 
 return [
     'meta' => [
-        'title' => 'Service Conditions - FUTA Bus Lines',
+        'title'       => 'Service Conditions - FUTA Bus Lines',
         'description' => 'FUTA Bus Lines passenger transport service conditions.',
     ],
-    'brand' => 'FUTA Bus Lines',
-    'heading' => 'Service Conditions',
+    'brand'    => 'FUTA Bus Lines',
+    'heading'  => 'Service Conditions',
     'articles' => [
         [
-            'title' => 'Article 1. General terms and notices',
+            'title'        => 'Article 1. General terms and notices',
             'introduction' => 'Please register or sign in to your account to receive promotional offers.',
-            'style' => 'notes',
-            'items' => [
+            'style'        => 'notes',
+            'items'        => [
                 'Arrive at the departure station at least 30 minutes before departure and bring the successful '
-                    . 'payment notice containing your ticket code. Call 1900 6067 for support.',
+                    .'payment notice containing your ticket code. Call 1900 6067 for support.',
                 'For transfer service, call 1900 6918 before booking. Inaccessible locations cannot be served.',
                 'For travel over a shorter segment than the scheduled journey, call 1900 6067 for the best fare policy.',
             ],
@@ -22,11 +22,7 @@ return [
         [
             'title' => 'Article 2. Ticket cancellation policy',
             'style' => 'bullets',
-            'items' => [
-                'A ticket may be changed once only.',
-                'Cancellation fees range from 10% to 30% depending on the time before departure and ticket quantity.',
-                'Contact 1900 6067 or a ticket office at least 24 hours before departure to change or cancel a paid ticket.',
-            ],
+            'items' => (require __DIR__.'/cancellation-policy.php')['items'],
         ],
         [
             'title' => 'Article 3. Boarding requirements',

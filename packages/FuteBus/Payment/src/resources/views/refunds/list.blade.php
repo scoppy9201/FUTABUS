@@ -1,4 +1,5 @@
-<div data-refund-workspace data-error="{{ __('Payment::refunds.error') }}" data-saved="{{ __('Payment::refunds.saved') }}" class="mx-auto w-full space-y-5">
+<div data-refund-workspace data-error="{{ __('Payment::refunds.error') }}" data-saved="{{ __('Payment::refunds.saved') }}" data-refund-open="{{ !empty($filters['selected']) && (int) $filters['selected'] === $selectedRefund?->id ? 'true' : 'false' }}"
+    class="mx-auto w-full space-y-5">
     <header class="flex flex-wrap items-center justify-between gap-4">
         <div>
             <p class="text-sm font-bold uppercase tracking-[0.16em] text-futa-orange">{{ config('app.name') }}</p>
@@ -25,8 +26,13 @@
         @endforeach
     </section>
     <form method="get" class="flex flex-wrap gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <input name="search" value="{{ $filters['search'] ?? '' }}" aria-label="{{ __('Payment::refunds.search') }}" placeholder="{{ __('Payment::refunds.search') }}"
-            class="min-w-48 flex-1 rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm focus:border-futa-orange focus:ring-futa-orange/20">
+        <label class="relative min-w-48 flex-1">
+            <x-heroicon-o-magnifying-glass class="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+            <input name="search" value="{{ $filters['search'] ?? '' }}" aria-label="{{ __('Payment::refunds.search') }}"
+                placeholder="{{ __('Payment::refunds.search') }}"
+                class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-4 pl-10 text-sm text-slate-900
+                    placeholder:text-slate-400 focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20">
+        </label>
         <select name="status" aria-label="{{ __('Payment::refunds.status') }}" class="min-w-44 rounded-xl border border-slate-200 px-4 py-2.5 text-sm">
             <option value="">{{ __('Payment::refunds.all') }}</option>
             @foreach(__('Payment::refunds.statuses') as $status => $label)
@@ -40,23 +46,25 @@
         </select>
         <button class="rounded-xl bg-futa-orange px-6 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-futa-orange-dark">{{ __('Payment::refunds.find') }}</button>
     </form>
-    <div class="grid items-start gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(22rem,1fr)]">
+    <div>
         <section class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div class="max-h-128 overflow-auto">
                 <table class="w-full min-w-180 text-left text-sm">
-                    <thead class="sticky top-0 z-10 border-b border-slate-200 bg-futa-orange-soft text-[11px] font-bold uppercase tracking-wide text-slate-600">
-                        <tr>@foreach(['request', 'ticket', 'customer', 'amount', 'status'] as $key)
-                            <th scope="col" class="px-4 py-4">{{ __('Payment::refunds.'.$key) }}</th>
+                    <thead class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-600">
+                        <tr>@foreach(['request', 'ticket', 'customer', 'amount', 'status', 'view'] as $key)
+                            <th scope="col" @class(['px-4 py-4', 'w-48 whitespace-nowrap text-center' => $key === 'view'])>
+                                {{ __('Payment::refunds.'.$key) }}
+                            </th>
                         @endforeach</tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         @forelse($refunds as $refund)
-                            <tr data-refund-row="{{ $refund->id }}" @class(['group cursor-pointer transition hover:bg-slate-50', 'bg-futa-orange-soft/50' => $selectedRefund?->id === $refund->id])>
-                                <td class="max-w-48 border-l-2 border-l-transparent px-4 py-4 group-has-[[aria-current]]:border-l-futa-orange">
-                                    <a data-refund-detail data-no-loader data-refund-id="{{ $refund->id }}" aria-controls="refund-details"
-                                        @if($selectedRefund?->id === $refund->id) aria-current="true" @endif
+                            <tr data-refund-row="{{ $refund->id }}" @class(['group cursor-pointer transition hover:bg-slate-50', 'bg-futa-orange-soft/50' => !empty($filters['selected']) && $selectedRefund?->id === $refund->id])>
+                                <td class="w-64 max-w-64 border-l-2 border-l-transparent px-4 py-4 group-has-[[aria-current]]:border-l-futa-orange">
+                                    <a data-refund-detail data-no-loader data-refund-id="{{ $refund->id }}" aria-controls="refund-details" aria-haspopup="dialog"
+                                        @if(!empty($filters['selected']) && $selectedRefund?->id === $refund->id) aria-current="true" @endif
                                         href="{{ route($refundRoutes.'.show', $refund->id) }}"
-                                        class="block wrap-break-word font-bold text-slate-950 hover:text-futa-orange focus-visible:outline-futa-orange">{{ $refund->reference }}</a>
+                                        title="{{ $refund->reference }}" class="block max-w-56 truncate font-bold text-slate-950 hover:text-futa-orange focus-visible:outline-futa-orange">{{ $refund->reference }}</a>
                                     <p class="mt-1 text-xs text-slate-500">{{ \Illuminate\Support\Carbon::parse($refund->cancelled_at)->format('d/m/Y H:i') }}</p>
                                 </td>
                                 <td class="px-4 py-4">
@@ -70,10 +78,18 @@
                                 </td>
                                 <td class="whitespace-nowrap px-4 py-4 font-bold text-slate-950">{{ number_format($refund->amount, 0, ',', '.') }} ₫</td>
                                 <td class="px-4 py-4">@include('Payment::refunds.status', ['status' => $refund->status])</td>
+                                <td class="w-48 px-4 py-4 text-center align-middle">
+                                    <a href="{{ route($refundRoutes.'.show', $refund->id) }}" data-refund-detail data-no-loader
+                                        data-refund-id="{{ $refund->id }}" aria-controls="refund-details" aria-haspopup="dialog"
+                                        class="inline-flex items-center gap-2 whitespace-nowrap rounded-xl border border-orange-200 px-3 py-2
+                                            text-xs font-semibold text-futa-orange hover:bg-futa-orange-soft focus-visible:outline-futa-orange">
+                                        <x-heroicon-o-eye class="size-4" aria-hidden="true" />{{ __('Payment::refunds.view') }}
+                                    </a>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-5 py-20 text-center text-slate-500">
+                                <td colspan="6" class="px-5 py-20 text-center text-slate-500">
                                     <x-core::empty-state :title="__('Payment::refunds.empty')" />
                                 </td>
                             </tr>
@@ -85,15 +101,24 @@
                 <x-core::data-pagination :paginator="$refunds" />
             </footer>
         </section>
-        <aside id="refund-details" data-refund-content aria-label="{{ __('Payment::refunds.view') }}" aria-busy="false" class="min-w-0 rounded-2xl border border-slate-200 bg-white shadow-sm xl:sticky xl:top-5 xl:max-h-[calc(100dvh-8rem)] xl:overflow-auto">
-            @if($selectedRefund)
-                @include('Payment::refunds.detail', ['refund' => $selectedRefund])
-            @else
-                <div class="px-6 py-16 text-center">
-                    <x-core::empty-state :title="__('Payment::refunds.choose')" compact />
-                </div>
-            @endif
-        </aside>
+        <x-core::side-panel id="refund-details" :title="__('Payment::refunds.view')" :description="__('Payment::refunds.intro')">
+            <div data-refund-content aria-live="polite" aria-busy="false" class="min-h-0 flex-1 overflow-y-auto">
+                @if($selectedRefund)
+                    @include('Payment::refunds.detail', ['refund' => $selectedRefund])
+                @else
+                    <div class="px-6 py-16 text-center">
+                        <x-core::empty-state :title="__('Payment::refunds.choose')" compact />
+                    </div>
+                @endif
+            </div>
+            <footer class="shrink-0 border-t border-slate-200 px-6 py-4">
+                <form method="dialog" data-no-loader class="flex justify-end">
+                    <button class="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                        {{ __('Payment::refunds.close') }}
+                    </button>
+                </form>
+            </footer>
+        </x-core::side-panel>
     </div>
 </div>
 @vite('packages/FuteBus/Payment/src/resources/js/app.js')

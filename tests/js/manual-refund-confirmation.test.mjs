@@ -9,7 +9,14 @@ function setup(confirmed) {
     const handlers = {};
     const error = { textContent: '' };
     const content = { setAttribute() {}, querySelector: () => error };
-    const form = { action: '/refund', dataset: { confirmTitle: 'Refund', confirmMessage: 'Verified refund?', confirmLabel: 'Confirm' }, closest() { return this; } };
+    const form = {
+        // A control named "action" masks HTMLFormElement.action in the browser.
+        action: { value: 'claim', toString: () => '[object HTMLInputElement]' },
+        getAttribute: name => name === 'action' ? '/refund' : null,
+        dataset: { confirmTitle: 'Refund', confirmMessage: 'Verified refund?', confirmLabel: 'Confirm' },
+        closest() { return this; },
+        querySelectorAll: () => [],
+    };
     const workspace = {
         dataset: { error: 'Failed', saved: 'Saved' },
         querySelector: selector => selector === '[data-refund-content]' ? content : null,

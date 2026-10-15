@@ -62,12 +62,8 @@ return [
         ['label' => 'Khu vực có biển cấm dừng đỗ xe không đón được', 'detail' => 'Xe trung chuyển sẽ đón tại vị trí gần nhất có thể.'],
         ['label' => 'Hành lý', 'detail' => 'Hành lý nhỏ gọn dưới 20 kg, không vận chuyển kèm động vật, thú cưng, không mang đồ có mùi, đồ chảy nước trên xe.'],
     ],
-    'cancellation_policy' => 'Chính sách huỷ vé',
-    'cancellation_items'  => [
-        'Chỉ được chuyển đổi vé 1 lần duy nhất',
-        'Chi phí hủy vé từ 10% – 30% giá vé tùy thuộc thời gian hủy vé so với giờ khởi hành ghi trên vé và số lượng vé cá nhân/tập thể áp dụng theo các quy định hiện hành.',
-        'Quý khách khi có nhu cầu muốn thay đổi hoặc hủy vé đã thanh toán, cần liên hệ với Trung tâm tổng đài 1900 6067 hoặc quầy vé chậm nhất trước 24h so với giờ xe khởi hành được ghi trên vé, trên email hoặc tin nhắn để được hướng dẫn thêm.',
-    ],
+    'cancellation_policy'   => 'Chính sách huỷ vé',
+    'cancellation_items'    => (require __DIR__.'/cancellation-policy.php')['items'],
     'boarding_requirements' => 'Yêu cầu khi lên xe',
     'boarding_items'        => [
         'Có mặt tại Văn phòng/Bến xe (Địa điểm xe đón trực tiếp) trước 30 phút để làm thủ tục lên xe (đối với ngày lễ tết cần ra trước 60 phút).',

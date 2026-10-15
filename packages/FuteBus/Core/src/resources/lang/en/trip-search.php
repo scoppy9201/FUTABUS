@@ -62,12 +62,8 @@ return [
         ['label' => 'Areas where stopping or parking is prohibited', 'detail' => 'The transfer vehicle will pick you up at the closest possible location.'],
         ['label' => 'Luggage', 'detail' => 'Bring compact luggage weighing less than 20 kg. Animals and pets, strongly scented items, and leaking items are not allowed on the vehicle.'],
     ],
-    'cancellation_policy' => 'Cancellation policy',
-    'cancellation_items'  => [
-        'Tickets may be changed once only.',
-        'Cancellation fees range from 10% to 30% of the fare, depending on when the ticket is cancelled before departure and the applicable individual or group ticket rules.',
-        'To change or cancel a paid ticket, contact the 1900 6067 call center or a ticket counter at least 24 hours before the departure time shown on the ticket, email or message for further guidance.',
-    ],
+    'cancellation_policy'   => 'Cancellation policy',
+    'cancellation_items'    => (require __DIR__.'/cancellation-policy.php')['items'],
     'boarding_requirements' => 'Boarding requirements',
     'boarding_items'        => [
         'Arrive at the office or bus station (the direct pickup location) 30 minutes before departure to complete boarding procedures; arrive 60 minutes early on holidays.',

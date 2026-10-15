@@ -7,7 +7,7 @@
 @section('title', __('core::trip-search.title'))
 
 @section('content')
-    <div class="home-page home-landing trip-search-page min-h-screen bg-[#f4f4f6]">
+    <x-core::landing-background class="trip-search-page min-h-screen bg-[#f4f4f6]">
         @include('core::partials.home.navbar')
         @include('core::partials.home.hero')
 
@@ -24,5 +24,5 @@
         </main>
 
         @include('core::partials.home.footer')
-    </div>
+    </x-core::landing-background>
 @endsection

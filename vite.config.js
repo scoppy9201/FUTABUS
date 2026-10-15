@@ -33,6 +33,12 @@ export default defineConfig({
     },
     server: {
         host: '127.0.0.1',
+        watch: {
+            // Windows bind mounts may not forward file events into Docker.
+            usePolling: process.env.VITE_USE_POLLING === 'true',
+            interval: 500,
+            ignored: ['**/vendor/**', '**/storage/**', '**/public/build/**'],
+        },
         hmr: {
             host: '127.0.0.1',
             overlay: false,

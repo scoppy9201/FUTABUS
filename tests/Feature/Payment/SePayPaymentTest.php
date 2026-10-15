@@ -113,7 +113,15 @@ class SePayPaymentTest extends TestCase
         $response = $this->get($url)->assertOk()
             ->assertSee('Mua vé xe thành công')
             ->assertSee('Mã vé ')
-            ->assertSee('data:image/svg+xml;base64,', false);
+            ->assertSee('data:image/svg+xml;base64,', false)
+            ->assertViewIs('Payment::trip-payment-preview')
+            ->assertSee('data-payment-success-modal', false)
+            ->assertSee('data-ticket-count="1"', false)
+            ->assertSee('data-close-payment-success', false)
+            ->assertSee('data-home-url="'.route('home').'"', false)
+            ->assertSee('payment-page__layout', false)
+            ->assertDontSee('data-payment-exit-form', false)
+            ->assertDontSee('data-ticket-scroll', false);
         preg_match('/src="data:image\/svg\+xml;base64,([^"]+)"/', $response->getContent(), $matches);
         $qrSvg = base64_decode($matches[1] ?? '', true);
         $this->assertIsString($qrSvg);
@@ -215,7 +223,10 @@ class SePayPaymentTest extends TestCase
         $this->assertSame('123 Test Street', $outboundNotes['pickup']['address']);
         $this->assertSame($snapshot['outbound_trip']['destination'], $outboundNotes['dropoff']['name']);
         $this->assertDatabaseHas('sepay_payment_intents', ['id' => $intent->id, 'status' => 'paid']);
-        $this->get($response->headers->get('Location'))->assertOk()->assertSee('Mua vé xe thành công');
+        $this->get($response->headers->get('Location'))->assertOk()
+            ->assertSee('data-payment-success-modal', false)
+            ->assertSee('data-ticket-count="2"', false)
+            ->assertSee('Mua vé xe thành công');
     }
 
     public function test_bearer_api_creates_and_cancels_only_its_own_pending_intent(): void
@@ -414,9 +425,17 @@ class SePayPaymentTest extends TestCase
         $intent = DB::table('sepay_payment_intents')->first();
         $this->get($url)->assertOk()
             ->assertSee('Xác nhận quay lại')
+            ->assertSee('data-checkout-locked', false)
+            ->assertSee('data-payment-exit-form', false)
+            ->assertSee('inert data-payment-footer', false)
+            ->assertSee('tel:19006067', false)
+            ->assertDontSee(__('core::trip-search.transfer_items')[0]['label'])
+            ->assertDontSee(__('core::trip-search.cancellation_items')[0])
+            ->assertDontSee('floating-support')
+            ->assertDontSee('payment-trip-detail-title')
             ->assertSee(route('trip-payment-preview.cancel', ['draft' => $intent->token]));
 
-        $this->post(route('trip-payment-preview.cancel', ['draft' => $intent->token]))
+        $this->post(route('trip-payment-preview.cancel', ['draft' => $intent->token]), ['confirm_exit' => '1'])
             ->assertRedirect(route('trip-booking.show', [
                 'trip' => $this->tripId,
                 ...$this->criteria,
@@ -438,13 +457,57 @@ class SePayPaymentTest extends TestCase
         $this->assertDatabaseCount('bookings', 0);
     }
 
+    public function test_exit_requires_confirmation_and_reload_retains_the_same_hold(): void
+    {
+        $url = $this->createIntent();
+        $intent = DB::table('sepay_payment_intents')->first();
+        $this->get($url)->assertOk();
+        $this->get($url)->assertOk();
+        $this->assertDatabaseCount('sepay_payment_intents', 1);
+        $this->post(route('trip-payment-preview.cancel', ['draft' => $intent->token]))
+            ->assertSessionHasErrors('confirm_exit');
+        $this->assertDatabaseHas('sepay_payment_intents', ['id' => $intent->id, 'status' => 'pending', 'expires_at' => $intent->expires_at]);
+        $this->assertDatabaseCount('bookings', 0);
+    }
+
+    public function test_exit_releases_both_round_trip_legs(): void
+    {
+        $outbound = DB::table('trips')->find($this->tripId);
+        $routeId = DB::table('routes')->insertGetId([
+            'bus_company_id' => $outbound->bus_company_id, 'code' => 'RETURN-EXIT', 'name' => 'Return route',
+            'origin_city'    => 'Đà Lạt', 'destination_city' => 'Hồ Chí Minh', 'is_active' => true, 'base_price' => 230000,
+        ]);
+        $departure = now()->addDays(3)->setTime(15, 0);
+        $returnId = DB::table('trips')->insertGetId([
+            'route_id'       => $routeId, 'bus_company_id' => $outbound->bus_company_id, 'bus_id' => $outbound->bus_id,
+            'departure_time' => $departure, 'arrival_time' => $departure->copy()->addHours(8), 'price' => 230000,
+            'status'         => 'scheduled', 'available_seats' => 34,
+        ]);
+        $criteria = [...$this->criteria, 'trip_type' => 'round_trip', 'return_date' => $departure->toDateString(),
+            'direction' => 'return', 'outbound_trip' => $this->tripId];
+        $this->post(route('trip-booking.payment.store', ['trip' => $returnId, ...$criteria]), [
+            'name'                 => 'Nguyen Van A', 'phone' => '0912345678', 'email' => 'customer@example.com', 'accept_terms' => '1',
+            'seats'                => [$this->seatId], 'outbound_seats' => [$this->seatId], 'pickup_mode' => 'station', 'dropoff_mode' => 'station',
+            'outbound_pickup_mode' => 'station', 'outbound_dropoff_mode' => 'station',
+        ])->assertRedirect();
+        $intent = DB::table('sepay_payment_intents')->first();
+        $search = app(TripSearchService::class);
+        $this->assertSame([], $search->search($this->criteria['departure'], $this->criteria['destination'], $this->criteria['departure_date'], 1));
+        $this->assertSame([], $search->search($this->criteria['destination'], $this->criteria['departure'], $criteria['return_date'], 1));
+        $this->post(route('trip-payment-preview.cancel', ['draft' => $intent->token]), ['confirm_exit' => '1'])->assertRedirect();
+        $this->assertNotEmpty($search->search($this->criteria['departure'], $this->criteria['destination'], $this->criteria['departure_date'], 1));
+        $this->assertNotEmpty($search->search($this->criteria['destination'], $this->criteria['departure'], $criteria['return_date'], 1));
+        $this->assertDatabaseCount('bookings', 0);
+        $this->assertDatabaseCount('tickets', 0);
+    }
+
     public function test_return_cannot_cancel_a_completed_payment(): void
     {
         $this->createIntent();
         $intent = DB::table('sepay_payment_intents')->first();
         $this->signedWebhook($this->event($intent->code))->assertOk();
 
-        $this->post(route('trip-payment-preview.cancel', ['draft' => $intent->token]))
+        $this->post(route('trip-payment-preview.cancel', ['draft' => $intent->token]), ['confirm_exit' => '1'])
             ->assertRedirect(route('trip-payment-preview.show', ['draft' => $intent->token]));
         $this->assertDatabaseHas('sepay_payment_intents', ['id' => $intent->id, 'status' => 'paid']);
         $this->assertDatabaseCount('bookings', 1);

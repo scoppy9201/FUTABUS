@@ -1,6 +1,6 @@
 @php($compact = $compact ?? false)
 
-<header class="futa-header-pattern relative z-20 text-white">
+<header class="futa-header-pattern relative z-20 text-white" @if($locked ?? false) inert aria-hidden="true" data-checkout-locked @endif>
     <div @class(['h-21 sm:h-23.5' => $compact, 'h-15.5 sm:h-14' => ! $compact])>
         <div class="relative mx-auto flex h-15.5 w-[calc(100%-24px)] max-w-282 items-center justify-between sm:h-14 sm:w-[calc(100%-32px)]">
             <div class="flex items-center gap-3.5">
