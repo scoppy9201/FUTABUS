@@ -3,13 +3,12 @@
 declare(strict_types=1);
 
 use App\Http\Middleware\SetLocale;
-use FuteBus\Notification\Http\Middleware\CaptureCompanyActivity;
 use FuteBus\StaffCustomerSupport\Http\Controllers\Api\SupportRequestController;
 use FuteBus\StaffDashboard\Http\Middleware\EnsureStaff;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->middleware([
-    'auth:sanctum', EnsureStaff::class, SetLocale::class, CaptureCompanyActivity::class,
+    'auth:sanctum', EnsureStaff::class, SetLocale::class,
 ])->group(function (): void {
     Route::prefix('staff/support-requests')->name('api.v1.staff.support.')->middleware('permission:support.view')->group(function (): void {
         $controller = SupportRequestController::class;

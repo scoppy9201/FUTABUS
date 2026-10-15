@@ -5,6 +5,10 @@
         loading: false,
         failed: false,
         items: [],
+        detailItem: null,
+        detailHtml: '',
+        detailLoading: false,
+        detailFailed: false,
         unreadCount: {{ auth()->user()->unreadNotifications()->count() }},
         csrf: @js(csrf_token()),
         async load() {
@@ -27,6 +31,7 @@
             if (this.open) await this.load();
         },
         async read(item) {
+            this.open = false;
             if (!item.read_at) {
                 const url = @js(route('notifications.read', ['notification' => '__ID__'])).replace('__ID__', encodeURIComponent(item.id));
                 const response = await fetch(url, {
@@ -38,7 +43,29 @@
                 item.read_at = new Date().toISOString();
                 this.unreadCount = data.unread_count;
             }
-            if (item.url) window.location.assign(item.url);
+            this.detailItem = item;
+            this.detailHtml = '';
+            this.detailFailed = false;
+            this.$refs.detailPanel.showModal();
+            if (!item.url) return;
+            this.detailLoading = true;
+            try {
+                const response = await fetch(item.url, { headers: { Accept: 'text/html' } });
+                if (!response.ok) throw new Error('Unable to load booking details');
+                this.detailHtml = await response.text();
+            } catch (_) {
+                this.detailFailed = !item.message;
+            } finally {
+                this.detailLoading = false;
+            }
+        },
+        closeDetail() {
+            if (this.$refs.detailPanel?.open) this.$refs.detailPanel.close();
+            this.resetDetail();
+        },
+        resetDetail() {
+            this.detailItem = null;
+            this.detailHtml = '';
         },
         init() {
             this.load();
@@ -72,14 +99,30 @@
                     <button type="button" @click="read(item)" :class="item.read_at ? 'bg-white' : 'bg-orange-50/70'"
                         class="block w-full px-4 py-3 text-left transition hover:bg-futa-orange-soft focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-futa-orange">
                         <span class="flex items-start justify-between gap-3">
-                            <strong class="text-sm font-semibold text-gray-900" x-text="item.title"></strong>
+                            <strong class="text-sm font-semibold text-gray-900" x-text="item.summary || item.title"></strong>
                             <span x-show="!item.read_at" class="mt-1 size-2 shrink-0 rounded-full bg-futa-orange" aria-label="Chưa đọc"></span>
                         </span>
-                        <span class="mt-1 block text-sm leading-5 text-gray-600" x-text="item.message"></span>
                         <span class="mt-1.5 block text-xs text-gray-400" x-text="item.created_at"></span>
                     </button>
                 </li>
             </template>
         </ul>
     </section>
+
+    <template x-teleport="body">
+        <x-core::side-panel id="notification-detail-panel" :title="__('BookingTracking::bookings.detail')"
+            :description="__('BookingTracking::bookings.readonly')" x-ref="detailPanel" @close="resetDetail()" @click.self="closeDetail()">
+            <div class="min-h-0 flex-1 overflow-y-auto" aria-live="polite">
+                <p x-show="detailLoading" class="p-8 text-center text-sm text-gray-500">{{ __('BookingTracking::bookings.loading') }}</p>
+                <p x-show="detailFailed" class="p-8 text-center text-sm text-red-600">{{ __('BookingTracking::bookings.error') }}</p>
+                <div x-show="detailHtml" x-html="detailHtml"></div>
+                <p x-show="!detailLoading && detailItem && (!detailItem.url || detailFailed) && detailItem.message" class="whitespace-pre-line p-6 text-sm leading-6 text-gray-700" x-text="detailItem?.message"></p>
+            </div>
+            <footer class="shrink-0 border-t border-slate-200 px-6 py-4">
+                <form method="dialog" data-no-loader class="flex justify-end">
+                    <button class="rounded-xl border border-slate-200 px-5 py-2.5 font-semibold text-slate-700">{{ __('BookingTracking::bookings.close') }}</button>
+                </form>
+            </footer>
+        </x-core::side-panel>
+    </template>
 </div>

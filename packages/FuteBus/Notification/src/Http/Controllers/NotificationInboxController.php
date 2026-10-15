@@ -16,6 +16,7 @@ class NotificationInboxController extends Controller
         $notifications = $user->notifications()->latest()->limit(10)->get()->map(fn ($notification): array => [
             'id'      => $notification->id,
             'title'   => is_string($notification->data['title'] ?? null) ? $notification->data['title'] : '',
+            'summary' => is_string($notification->data['summary'] ?? null) ? $notification->data['summary'] : null,
             'message' => is_string($notification->data['message'] ?? null) ? $notification->data['message'] : '',
             'url'     => is_string($notification->data['url'] ?? null)
                 && str_starts_with($notification->data['url'], '/')

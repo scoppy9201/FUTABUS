@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-use FuteBus\Notification\Http\Middleware\CaptureCompanyActivity;
 use FuteBus\RouteManagement\Http\Controllers\RouteController;
 use FuteBus\RouteManagement\Http\Controllers\RouteStopController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', CaptureCompanyActivity::class])->prefix('quan-tri/tuyen-duong')->name('route-management.')->group(function () {
+Route::middleware(['auth'])->prefix('quan-tri/tuyen-duong')->name('route-management.')->group(function () {
     Route::get('/', [RouteController::class, 'index'])->middleware('permission:route.view')->name('index');
     Route::get('/diem-dung', [RouteStopController::class, 'index'])->middleware('permission:route.view')->name('stops.index');
     Route::post('/', [RouteController::class, 'store'])->middleware('permission:route.create')->name('store');
