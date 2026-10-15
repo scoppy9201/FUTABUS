@@ -78,7 +78,9 @@
             <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-lg font-extrabold text-[#111827]">{{ __('Dashboard::app.revenue_7_days') }}</h2>
-                    <span class="text-sm font-medium text-gray-500">{{ __('Dashboard::app.unit_million_vnd') }}</span>
+                    <span class="text-sm font-medium text-gray-500">
+                        {{ __('Dashboard::app.unit_'.match ($overview['revenue_chart_divisor']) { 1000000 => 'million_vnd', 1000 => 'thousand_vnd', default => 'vnd' }) }}
+                    </span>
                 </div>
                 <div class="h-64 relative w-full">
                     <canvas id="revenueChart"></canvas>
@@ -240,8 +242,9 @@
                             displayColors: false,
                             callbacks: {
                                 label: function(context) {
-                                    return new Intl.NumberFormat(@js(app()->getLocale()), { maximumFractionDigits: 2 }).format(context.parsed.y)
-                                        + ' {{ __('Dashboard::app.million_vnd') }}';
+                                    return new Intl.NumberFormat(@js(app()->getLocale()), {
+                                        style: 'currency', currency: 'VND', maximumFractionDigits: 0
+                                    }).format(context.parsed.y);
                                 }
                             }
                         }
@@ -254,7 +257,8 @@
                                 font: { family: "'Inter', sans-serif", size: 12 },
                                 color: '#6b7280',
                                 callback: function(value) {
-                                    return new Intl.NumberFormat(@js(app()->getLocale()), { maximumFractionDigits: 1 }).format(value);
+                                    return new Intl.NumberFormat(@js(app()->getLocale()), { maximumFractionDigits: 2 })
+                                        .format(value / @json($overview['revenue_chart_divisor']));
                                 }
                             }
                         },

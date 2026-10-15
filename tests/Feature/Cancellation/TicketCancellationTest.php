@@ -4,6 +4,7 @@ namespace Tests\Feature\Cancellation;
 
 use FuteBus\Cancellation\Notifications\TicketCancelled;
 use FuteBus\Payment\Services\SePayRefundService;
+use FuteBus\Payment\Services\TicketEmailService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Routing\Middleware\ThrottleRequests;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
+use Mockery;
 use Tests\TestCase;
 
 class TicketCancellationTest extends TestCase
@@ -42,6 +44,9 @@ class TicketCancellationTest extends TestCase
     public function test_cancellation_releases_only_selected_seat_and_duplicate_is_idempotent(): void
     {
         [$user, $booking, $ticket, $trip, $seat] = $this->fixture();
+        $this->mock(TicketEmailService::class, function ($mock): void {
+            $mock->shouldReceive('cancellationRequested')->once()->with(Mockery::type('int'));
+        });
         $this->actingAs($user)->get(route('cancellation.show', $booking))->assertOk()->assertSee('data-cancellation-form', false);
         $input = ['ticket_id' => $ticket, 'expected_refund' => 315000, 'reason' => 'plans', 'consent' => 1];
         $url = route('cancellation.store', $booking);
@@ -175,6 +180,9 @@ class TicketCancellationTest extends TestCase
         $this->assertDatabaseHas('tickets', ['id' => $ticket, 'status' => 'cancelled']);
         Http::assertSent(fn ($request) => $request->method() === 'POST'
             && $request->hasHeader('X-Idempotency-Key', $refund->idempotency_key) && $request['refund_amount'] === 315000);
+        $this->mock(TicketEmailService::class, function ($mock) use ($refund): void {
+            $mock->shouldReceive('refundCompleted')->once()->with($refund->id);
+        });
         app(SePayRefundService::class)->process($refund->id);
         app(SePayRefundService::class)->process($refund->id);
         Http::assertSentCount(2);

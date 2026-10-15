@@ -25,6 +25,9 @@ Ca hồi quy kiểm tra liên kết thanh toán tiền mặt khớp đúng ID s�
 - Thêm trường hợp một đơn hai vé, một đơn khứ hồi, chuyến hết chỗ, điểm dừng ngừng hoạt động.
 - Vé mẫu 2.000đ chỉ đổi sang chuyến 2.000đ. Chuyến 300.000đ không phải chuyến tương đương của vé đó.
   Không cần đổi giá dữ liệu đang có để vượt điều kiện.
+- Bộ demo hiện tại có chuyến TP.HCM → Đà Lạt lúc 22:00 ngày 15/10/2026 (ID 780) và chuyến tương đương
+  lúc 22:00 ngày 17/10/2026 (ID 782), cùng giá 2.000đ, Limousine 34 giường. Chuyến mới được thêm riêng,
+  không sửa chuyến chiều về ngày 16/10. Chỉ thử đổi khi cả hai giờ khởi hành còn ít nhất 4 giờ.
 - Dữ liệu lịch hiện tại có nhóm `FUTA-HCM-DL`/`FUTA-DL-HCM`, Limousine 34 giường, giá 300.000đ với nhiều ngày chạy;
   kiểm tra lại ngày tương lai và tồn ghế tại thời điểm thực hiện. Không cần chuyển tiền thật để chạy bộ PHPUnit.
 
@@ -55,6 +58,8 @@ Ca hồi quy kiểm tra liên kết thanh toán tiền mặt khớp đúng ID s�
 | U21 | Hai khách/two tab giành cùng một ghế trên MySQL | Chỉ một lượt giữ/đổi thành công; bên còn lại nhận lỗi và chọn lại |
 | U22 | Kiểm tra desktop, màn hình hẹp, bàn phím | Không tràn modal; nút ×/Quay lại hoạt động; lỗi dưới ô tương ứng, lỗi hệ thống dùng thông báo chung |
 | U23 | Kiểm tra tài chính và báo cáo | Không có Payment mới; thu nhập không tăng do đổi; vé phục vụ được tính trên chuyến mới; audit có người/thời điểm/giá/ghế |
+| U24 | Mở trang đổi vé admin không nhập mã, tìm vé thứ hai trong đơn, đổi tab lịch sử | Có bảng vé mặc định và phân trang; tìm đúng mã vé; lịch sử có cặp vé cũ/mới; nhân viên không xem được nhà xe khác |
+| U25 | Mở chuông khi không có thông báo, sau đó kiểm tra trạng thái có thông báo/lỗi tải | Trạng thái trống có hình dùng chung và lời giải thích; không hiện hình trống cùng danh sách hoặc lỗi tải |
 
 Các case đổi/hủy là thao tác thật trên dữ liệu của môi trường đang mở. Chỉ xác nhận sau khi kiểm tra đúng bộ dữ liệu test.
 Không giả mã giao dịch ngân hàng để tạo bằng chứng thanh toán.

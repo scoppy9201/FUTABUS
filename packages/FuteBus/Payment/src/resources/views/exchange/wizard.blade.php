@@ -6,7 +6,8 @@
     ])->values();
     $config = ['tickets' => $choices, 'csrf' => csrf_token(), 'trips' => route('exchange.trips', $booking),
         'hold' => route('exchange.hold', $booking), 'base' => route('exchange.show', $booking),
-        'error' => __('Payment::exchange.error'), 'consentError' => __('Payment::exchange.consent_error'), 'expired' => __('Payment::exchange.expired')];
+        'error' => __('Payment::exchange.error'), 'consentError' => __('Payment::exchange.consent_error'), 'expired' => __('Payment::exchange.expired'),
+        'labels' => ['sleeper' => __('core::trip-search.sleeper'), 'seat' => __('core::trip-search.seat')]];
 @endphp
 <div data-exchange-wizard x-data="ticketExchangeWizard(@js($config))" class="text-left">
     <header class="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
@@ -17,12 +18,19 @@
             <x-heroicon-o-x-mark class="size-5" aria-hidden="true" />
         </button>
     </header>
-    <ol class="grid grid-cols-4 gap-2 border-b border-slate-100 px-6 py-4 text-xs sm:text-sm">
+    <ol class="grid grid-cols-4 border-b border-slate-100 px-6 py-4 text-center text-xs sm:text-sm">
         @foreach(['choose', 'select', 'confirm', 'done'] as $index => $key)
-            <li class="flex items-center gap-2" :class="step >= {{ $index }} ? 'font-semibold text-futa-orange' : 'text-slate-400'"
+            <li class="relative flex min-w-0 flex-col items-center gap-2 px-1" :class="step >= {{ $index }} ? 'font-semibold text-futa-orange' : 'text-slate-400'"
                 :aria-current="step === {{ $index }} ? 'step' : null">
-                <span class="grid size-6 shrink-0 place-items-center rounded-full border border-current">{{ $index + 1 }}</span>
-                {{ __('Payment::exchange.'.$key) }}
+                @if(!$loop->last)
+                    <span aria-hidden="true" class="pointer-events-none absolute top-4 left-[calc(50%+1rem)] right-[calc(-50%+1rem)] border-t border-dashed transition-colors"
+                        :class="step > {{ $index }} ? 'border-futa-orange' : 'border-slate-200'"></span>
+                @endif
+                <span class="relative grid size-8 shrink-0 place-items-center rounded-full border border-current font-bold transition-colors"
+                    :class="step > {{ $index }} ? 'border-futa-orange bg-futa-orange text-white' : (step === {{ $index }} ? 'bg-futa-orange-soft ring-2 ring-futa-orange/15' : 'bg-white')">
+                    {{ $index + 1 }}
+                </span>
+                <span class="leading-5">{{ __('Payment::exchange.'.$key) }}</span>
             </li>
         @endforeach
     </ol>
@@ -49,49 +57,54 @@
                     <input type="date" name="date" x-model="date" :aria-invalid="Boolean(errors.date)" aria-describedby="exchange-date-error" @change="loadTrips()" min="{{ now()->toDateString() }}" :disabled="busy"
                         class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2.5">
                 </label>
+                <p class="rounded-lg bg-blue-50 px-3 py-2 text-xs leading-5 text-blue-800">{{ __('Payment::exchange.trip_card_hint') }}</p>
+                <p x-show="busy" class="rounded-xl bg-slate-50 p-4 text-sm text-slate-500" role="status">{{ __('Payment::exchange.loading_trips') }}</p>
                 <p x-show="!busy && trips.length === 0" class="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">{{ __('Payment::exchange.no_trips') }}</p>
-                <div class="grid gap-2 sm:grid-cols-2">
+                <div class="space-y-4">
                     <template x-for="trip in trips" :key="trip.id">
-                        <button type="button" @click="selectTrip(trip)" :disabled="busy || trip.available < 1"
-                            class="rounded-xl border p-3 text-left disabled:cursor-not-allowed disabled:opacity-40"
-                            :class="selectedTrip?.id === trip.id ? 'border-futa-orange bg-futa-orange-soft' : 'border-slate-200'">
-                            <strong class="block text-sm" x-text="time(trip.departure)"></strong>
-                            <span class="mt-1 block text-xs text-slate-500"><span x-text="trip.available"></span> {{ __('Payment::exchange.available') }}</span>
-                            <span class="mt-1 block text-sm font-semibold text-futa-green" x-text="money(trip.fare)"></span>
-                        </button>
+                        <article class="trip-card exchange-trip-card" :class="{ 'is-expanded': openTripId === trip.id && openPanel !== null, 'is-exchange-selected': selectedTrip?.id === trip.id }">
+                            @include('TripSearch::partials.trip-card-summary')
+                            @include('TripSearch::partials.trip-card-navigation', ['exchangeMode' => true])
+                            <div class="trip-card__detail" :class="{ 'is-seats': openPanel === 'seats' }"
+                                x-show="openTripId === trip.id && openPanel !== null" x-cloak>
+                                <div x-show="openPanel === 'seats'" class="trip-card__seat-panel">
+                                    @include('TripSearch::partials.trip-seat-map', ['exchangeMode' => true])
+                                    <div class="exchange-seat-footer">
+                                        <div class="min-w-0">
+                                            <strong class="block text-xs text-slate-500">{{ __('Payment::exchange.seat') }}</strong>
+                                            <span class="block truncate text-sm font-semibold" x-text="selectedTrip?.id === trip.id && seat ? seat.code : @js(__('Payment::exchange.no_seat_selected'))"></span>
+                                        </div>
+                                        <strong class="text-sm text-futa-orange" x-text="money(trip.fare)"></strong>
+                                    </div>
+                                </div>
+                                <div x-show="openPanel === 'schedule'" class="trip-card__itinerary-panel">
+                                    @include('TripSearch::partials.trip-itinerary', [
+                                        'itineraryStopsExpression' => 'trip.timeline',
+                                        'itineraryHasStops' => true,
+                                        'selectableStops' => true,
+                                        'hideItineraryNote' => true,
+                                    ])
+                                </div>
+                                @include('TripSearch::partials.trip-transfer')
+                                @include('TripSearch::partials.trip-policies')
+                            </div>
+                        </article>
                     </template>
                 </div>
                 <p id="exchange-date-error" class="text-xs text-red-600" x-text="errors.trip_id || errors.date"></p>
                 <template x-if="selectedTrip">
-                    <div class="space-y-4">
-                        <h3 class="text-sm font-bold">{{ __('Payment::exchange.seat') }}</h3>
-                        <div class="flex flex-wrap justify-center gap-8 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                            <template x-for="deck in decks" :key="deck">
-                                <div><h4 class="mb-3 text-center text-xs font-semibold" x-text="deck === 'upper' ? @js(__('Payment::exchange.upper')) : @js(__('Payment::exchange.lower'))"></h4>
-                                    <div class="grid gap-2" :style="{ gridTemplateColumns: 'repeat(' + columns + ', 2.75rem)' }">
-                                        <template x-for="seat in selectedTrip.seats.filter(seat => seat.deck === deck)" :key="seat.id">
-                                            <button type="button" @click="seatId = String(seat.id)" :disabled="seat.sold || busy"
-                                                :style="{ gridRow: seat.row, gridColumn: seat.column }"
-                                                class="h-11 rounded-lg border text-xs font-semibold disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-200 disabled:text-slate-400"
-                                                :class="String(seatId) === String(seat.id) ? 'border-futa-orange bg-futa-orange-soft text-futa-orange' : 'border-blue-200 bg-blue-50 text-blue-600'"
-                                                :aria-pressed="String(seatId) === String(seat.id)" x-text="seat.code"></button>
-                                        </template>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
+                    <div class="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                        <p class="text-sm font-semibold">{{ __('Payment::exchange.selected_trip') }}
+                            <span class="font-normal text-slate-600" x-text="stationLabel(selectedTrip.origin) + ' → ' + stationLabel(selectedTrip.destination) + ' · ' + time(selectedTrip.departure)"></span>
+                        </p>
+                        <dl class="grid gap-2 text-xs sm:grid-cols-3">
+                            <div><dt class="text-slate-500">{{ __('Payment::exchange.seat') }}</dt><dd class="mt-1 font-semibold" x-text="seat?.code || '—'"></dd></div>
+                            <div><dt class="text-slate-500">{{ __('Payment::exchange.pickup') }}</dt><dd class="mt-1 font-semibold" x-text="pickupStop?.name || '—'"></dd></div>
+                            <div><dt class="text-slate-500">{{ __('Payment::exchange.dropoff') }}</dt><dd class="mt-1 font-semibold" x-text="dropoffStop?.name || '—'"></dd></div>
+                        </dl>
                         <p class="text-xs text-red-600" x-text="errors.seat_id"></p>
-                        @foreach(['pickup', 'dropoff'] as $kind)
-                            <label class="block text-sm font-semibold">{{ __('Payment::exchange.'.$kind) }}
-                                <select name="{{ $kind }}" x-model="{{ $kind }}" :aria-invalid="Boolean(errors.{{ $kind }})" aria-describedby="exchange-{{ $kind }}-error" class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2.5">
-                                    <option value="">{{ __('Payment::exchange.choose_stop') }}</option>
-                                    <template x-for="stop in selectedTrip.stops.{{ $kind }}" :key="stop.id">
-                                        <option :value="stop.id" :disabled="stop.expired" x-text="stop.name + ' · ' + stop.time"></option>
-                                    </template>
-                                </select>
-                                <span id="exchange-{{ $kind }}-error" class="mt-1 block text-xs font-normal text-red-600" x-text="errors.{{ $kind }}"></span>
-                            </label>
-                        @endforeach
+                        <p class="text-xs text-red-600" x-text="errors.pickup"></p>
+                        <p class="text-xs text-red-600" x-text="errors.dropoff"></p>
                         <label class="block text-sm font-semibold">{{ __('Payment::exchange.reason') }}
                             <textarea name="reason" x-model="reason" :aria-invalid="Boolean(errors.reason)" aria-describedby="exchange-reason-error" maxlength="500" rows="2" class="mt-2 w-full rounded-xl border border-slate-200 p-3"></textarea>
                             <span id="exchange-reason-error" class="mt-1 block text-xs font-normal text-red-600" x-text="errors.reason"></span>
@@ -112,7 +125,19 @@
                 <p class="rounded-xl bg-amber-50 p-4 text-sm leading-6 text-amber-800">{{ __('Payment::exchange.warning') }}</p>
                 <p class="text-sm text-slate-500">{{ __('Payment::exchange.hold_time') }} <strong x-text="Math.floor(remaining / 60) + ':' + String(remaining % 60).padStart(2, '0')"></strong></p>
                 <p x-show="remaining === 0" class="text-sm text-red-600">{{ __('Payment::exchange.expired') }}</p>
-                <label class="flex items-start gap-3 text-sm"><input type="checkbox" name="consent" x-model="consent" :aria-invalid="Boolean(errors.consent)" aria-describedby="exchange-consent-error" class="mt-1 accent-futa-orange">{{ __('Payment::exchange.consent') }}</label>
+                <div class="flex items-start gap-3 text-sm leading-6">
+                    <input id="exchange-consent" type="checkbox" name="consent" x-model="consent" :aria-invalid="Boolean(errors.consent)"
+                        aria-describedby="exchange-consent-error" aria-labelledby="exchange-consent-label exchange-consent-policy"
+                        class="mt-1.5 shrink-0 accent-futa-orange">
+                    <p>
+                        <label id="exchange-consent-label" for="exchange-consent" class="cursor-pointer">{{ __('Payment::exchange.consent_prefix') }}</label>
+                        <a id="exchange-consent-policy" href="{{ route('refund') }}#ticket-change-rules" target="_blank" rel="noopener noreferrer" data-no-loader
+                            title="{{ __('Payment::exchange.policy_new_tab') }}"
+                            class="rounded-sm font-semibold text-futa-orange underline decoration-futa-orange/50 underline-offset-4 hover:text-futa-orange-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange">
+                            {{ __('Payment::exchange.policy_link') }}<x-heroicon-o-arrow-top-right-on-square class="ml-0.5 inline size-3.5 align-middle" aria-hidden="true" />
+                        </a>.
+                    </p>
+                </div>
                 <p id="exchange-consent-error" class="text-xs text-red-600" x-text="errors.consent"></p>
             </section>
             <section x-show="step === 3" x-cloak class="space-y-4 text-center">

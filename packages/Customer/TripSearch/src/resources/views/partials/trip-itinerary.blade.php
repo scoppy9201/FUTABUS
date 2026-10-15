@@ -2,7 +2,7 @@
     <div class="trip-itinerary__scroll" tabindex="0" aria-label="{{ __('core::trip-search.schedule') }}">
         <p class="sr-only">{{ __('core::trip-search.itinerary_note') }}</p>
         <ol class="trip-itinerary__list">
-            <template x-for="stop in trip.stops" :key="stop.id">
+            <template x-for="stop in {{ $itineraryStopsExpression ?? 'trip.stops' }}" :key="stop.id">
                 <li class="trip-itinerary__stop" :class="{ 'is-inactive': !stop.active }">
                     <div class="trip-itinerary__time">
                         <time x-text="stop.hour" :title="stop.date"></time>
@@ -26,12 +26,27 @@
                             {{ __('core::trip-search.view_location') }}
                             <x-heroicon-o-arrow-top-right-on-square class="size-3" aria-hidden="true" />
                         </a>
+                        @if($selectableStops ?? false)
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                @foreach(['pickup', 'dropoff'] as $kind)
+                                    <label x-show="stopOption(trip, '{{ $kind }}', stop.id)" class="inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-semibold"
+                                        :class="selectedTrip?.id === trip.id && String({{ $kind }}) === String(stop.id)
+                                            ? 'border-futa-orange bg-futa-orange-soft text-futa-orange' : 'border-slate-200 bg-white text-slate-600'">
+                                        <input type="radio" :name="'exchange-{{ $kind }}-' + trip.id" :value="stop.id"
+                                            :checked="selectedTrip?.id === trip.id && String({{ $kind }}) === String(stop.id)"
+                                            :disabled="busy || !canSelectStop(trip, '{{ $kind }}', stop.id)"
+                                            @change="chooseStop(trip, '{{ $kind }}', stop.id)" class="accent-futa-orange">
+                                        {{ __('Payment::exchange.select_'.$kind) }}
+                                    </label>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
                 </li>
             </template>
         </ol>
         @unless($itineraryHasStops ?? false)
-            <div x-show="trip.stops.length === 0">
+            <div x-show="{{ $itineraryStopsExpression ?? 'trip.stops' }}.length === 0">
                 <x-core::empty-state :title="__('core::booking.schedule_empty')" compact />
             </div>
         @endunless

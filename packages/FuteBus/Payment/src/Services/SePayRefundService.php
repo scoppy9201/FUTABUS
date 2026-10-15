@@ -76,6 +76,7 @@ class SePayRefundService
                 $ticket = TicketCancellationRecord::query()->toBase()->where('id', $current->cancellation_id)->value('ticket_id');
                 TicketRecord::query()->toBase()->where('id', $ticket)->where('status', 'cancelled')
                     ->update(['status' => 'refunded', 'updated_at' => now()]);
+                app(TicketEmailService::class)->refundCompleted($id);
             }
         });
     }

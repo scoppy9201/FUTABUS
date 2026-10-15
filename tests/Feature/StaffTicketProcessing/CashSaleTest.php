@@ -3,9 +3,11 @@
 namespace Tests\Feature\StaffTicketProcessing;
 
 use App\Models\User;
+use FuteBus\Payment\Services\TicketEmailService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Mockery;
 use Tests\TestCase;
 
 class CashSaleTest extends TestCase
@@ -93,6 +95,12 @@ class CashSaleTest extends TestCase
         $this->assertStringContainsString('Thanh toán tiền mặt', $page->original->getData()['initialSale']['html']);
         $this->assertDatabaseCount('payments', 0);
         $this->assertDatabaseCount('sepay_payment_intents', 0);
+        $this->mock(TicketEmailService::class, function ($mock): void {
+            $mock->shouldReceive('bookingConfirmed')->once()->with(
+                Mockery::on(fn (array $bookingIds): bool => count($bookingIds) === 1),
+                'customer@example.com',
+            );
+        });
         $this->postJson(route('api.v1.staff.sales.cash-collections.store', $token), ['received' => false, '_token' => 'cash-test'])->assertUnprocessable();
         $receipt = $this->postJson(route('api.v1.staff.sales.cash-collections.store', $token), ['received' => true, '_token' => 'cash-test'])->assertOk()->assertJsonPath('data.status', 'paid')->assertJsonPath('data.amount', 300000);
         $this->postJson(route('api.v1.staff.sales.cash-collections.store', $token), ['received' => true, '_token' => 'cash-test'])->assertOk()->assertJsonPath('data.reference', $receipt->json('data.reference'));

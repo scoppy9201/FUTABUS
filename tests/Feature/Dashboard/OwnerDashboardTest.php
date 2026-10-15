@@ -4,7 +4,9 @@ namespace Tests\Feature\Dashboard;
 
 use App\Models\User;
 use App\Support\Auth\RoleRedirector;
+use FuteBus\Dashboard\Services\OwnerDashboardService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -93,6 +95,55 @@ class OwnerDashboardTest extends TestCase
             ->assertSeeText('Operations at a glance')
             ->assertSeeText('Vietnamese')
             ->assertSee('lang=vi', false);
+    }
+
+    public function test_revenue_chart_preserves_small_payments_and_filters_dates_status_and_company(): void
+    {
+        $this->travelTo(Carbon::parse('2026-10-15 11:30:00'));
+        $company = $this->company('FUTA');
+        $trip = $this->tripFor($company, $this->routeFor($company, 'FUTA-TEST'), 'TEST');
+        $this->bookingFor($trip, 'SMALL-FARES');
+        $booking = DB::table('bookings')->where('booking_code', 'SMALL-FARES')->value('id');
+        foreach ([
+            ['START', 2000, 'completed', now()->startOfDay()->subDays(6)],
+            ['TODAY', 4000, 'completed', now()->subMinute()],
+            ['OLD', 5000, 'completed', now()->startOfDay()->subDays(6)->subSecond()],
+            ['PENDING', 9000000, 'pending', now()->subMinute()],
+        ] as [$code, $amount, $status, $paidAt]) {
+            DB::table('payments')->insert(['booking_id' => $booking, 'payment_code' => $code, 'amount' => $amount,
+                'method'                                => 'bank_transfer', 'status' => $status, 'paid_at' => $paidAt]);
+        }
+        $other = $this->company('OTHER');
+        $otherTrip = $this->tripFor($other, $this->routeFor($other, 'OTHER-TEST'), 'OTHER');
+        $this->bookingFor($otherTrip, 'OTHER');
+        DB::table('payments')->insert(['booking_id' => DB::table('bookings')->where('booking_code', 'OTHER')->value('id'),
+            'payment_code'                          => 'OTHER', 'amount' => 8000000, 'method' => 'bank_transfer', 'status' => 'completed', 'paid_at' => now()->subMinute()]);
+
+        $overview = app(OwnerDashboardService::class)->overview($company);
+        $this->assertSame([2000, 0, 0, 0, 0, 0, 4000], array_column($overview['revenue_chart'], 'value'));
+        $this->assertSame(1000, $overview['revenue_chart_divisor']);
+        $this->assertEquals(11000, $overview['paid_amount']);
+        $this->actingAs($this->admin())->get(route('dashboard'))->assertOk()
+            ->assertSeeText(__('Dashboard::app.unit_thousand_vnd'));
+    }
+
+    public function test_revenue_chart_keeps_exact_amounts_when_switching_between_vnd_and_millions(): void
+    {
+        $company = $this->company('FUTA');
+        $trip = $this->tripFor($company, $this->routeFor($company, 'TEST'), 'TEST');
+        $this->bookingFor($trip, 'CHART');
+        $booking = DB::table('bookings')->where('booking_code', 'CHART')->value('id');
+        $service = app(OwnerDashboardService::class);
+        $this->assertSame(1, $service->overview($company)['revenue_chart_divisor']);
+        $payment = DB::table('payments')->insertGetId(['booking_id' => $booking, 'payment_code' => 'CHART', 'amount' => 1,
+            'method'                                                => 'cash', 'status' => 'completed', 'paid_at' => now()->subSecond()]);
+        $overview = $service->overview($company);
+        $this->assertSame(1, $overview['revenue_chart_divisor']);
+        $this->assertSame(1, array_sum(array_column($overview['revenue_chart'], 'value')));
+        DB::table('payments')->where('id', $payment)->update(['amount' => 1234567]);
+        $overview = $service->overview($company);
+        $this->assertSame(1000000, $overview['revenue_chart_divisor']);
+        $this->assertSame(1234567, array_sum(array_column($overview['revenue_chart'], 'value')));
     }
 
     private function admin(): User

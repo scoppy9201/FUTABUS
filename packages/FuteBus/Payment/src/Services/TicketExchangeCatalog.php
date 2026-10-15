@@ -6,6 +6,7 @@ namespace FuteBus\Payment\Services;
 
 use App\Models\User;
 use FuteBus\BookingManagement\Services\BookingTripStops;
+use FuteBus\RouteManagement\Services\RouteItineraryPresenter;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -22,13 +23,7 @@ class TicketExchangeCatalog
     public function tickets(User $actor, int $booking): Builder
     {
         abort_unless($actor->is_active, 403);
-        $query = DB::table('tickets')->join('bookings', 'bookings.id', '=', 'tickets.booking_id')
-            ->join('trips', 'trips.id', '=', 'tickets.trip_id')->join('buses', 'buses.id', '=', 'trips.bus_id')
-            ->join('routes', 'routes.id', '=', 'trips.route_id')->leftJoin('customers', 'customers.id', '=', 'bookings.customer_id')
-            ->where('tickets.booking_id', $booking)->select('tickets.*', 'bookings.status as booking_status',
-                'bookings.booking_code', 'bookings.user_id', 'bookings.customer_id', 'bookings.notes',
-                'trips.status as trip_status', 'trips.departure_time', 'trips.arrival_time', 'trips.route_id', 'trips.bus_company_id',
-                'buses.bus_type', 'buses.capacity', 'buses.vehicle_type_id', 'routes.origin_city', 'routes.destination_city');
+        $query = $this->ticketQuery()->where('tickets.booking_id', $booking);
 
         return $query->where(function (Builder $scope) use ($actor): void {
             $scope->where('bookings.user_id', $actor->id)
@@ -36,11 +31,38 @@ class TicketExchangeCatalog
             if ($this->canOperate($actor)) {
                 if ($actor->isAdmin()) {
                     $scope->orWhereRaw('1 = 1');
-                } elseif ($company = $actor->bus_company_id ?: DB::table('bus_companies')->whereRaw('LOWER(email) = ?', [mb_strtolower($actor->email)])->value('id')) {
+                } elseif ($company = $this->companyId($actor)) {
                     $scope->orWhere('trips.bus_company_id', $company);
                 }
             }
         });
+    }
+
+    public function managedTickets(User $actor): Builder
+    {
+        abort_unless($this->canOperate($actor), 403);
+        $query = $this->ticketQuery();
+
+        return $actor->isAdmin() ? $query : $query->where('trips.bus_company_id', $this->companyId($actor) ?: 0);
+    }
+
+    private function companyId(User $actor): ?int
+    {
+        $id = $actor->bus_company_id ?: DB::table('bus_companies')
+            ->whereRaw('LOWER(email) = ?', [mb_strtolower($actor->email)])->value('id');
+
+        return $id ? (int) $id : null;
+    }
+
+    private function ticketQuery(): Builder
+    {
+        return DB::table('tickets')->join('bookings', 'bookings.id', '=', 'tickets.booking_id')
+            ->join('trips', 'trips.id', '=', 'tickets.trip_id')->join('buses', 'buses.id', '=', 'trips.bus_id')
+            ->join('routes', 'routes.id', '=', 'trips.route_id')->leftJoin('customers', 'customers.id', '=', 'bookings.customer_id')
+            ->select('tickets.*', 'bookings.status as booking_status', 'bookings.booking_code', 'bookings.user_id',
+                'bookings.customer_id', 'bookings.notes', 'trips.status as trip_status', 'trips.departure_time',
+                'trips.arrival_time', 'trips.route_id', 'trips.bus_company_id', 'buses.bus_type', 'buses.capacity',
+                'buses.vehicle_type_id', 'routes.origin_city', 'routes.destination_city');
     }
 
     public function owned(User $actor, int $booking, int $ticket): object
@@ -55,7 +77,7 @@ class TicketExchangeCatalog
     {
         return DB::table('trips')->join('buses', 'buses.id', '=', 'trips.bus_id')->join('routes', 'routes.id', '=', 'trips.route_id')
             ->select('trips.*', 'buses.bus_type', 'buses.capacity', 'buses.vehicle_type_id', 'buses.status as bus_status',
-                'routes.is_active as route_active', 'routes.origin_city', 'routes.destination_city')
+                'routes.is_active as route_active', 'routes.origin_city', 'routes.destination_city', 'routes.distance_km')
             ->selectRaw('COALESCE(routes.origin_station, routes.origin_city) as origin, COALESCE(routes.destination_station, routes.destination_city) as destination');
     }
 
@@ -82,14 +104,68 @@ class TicketExchangeCatalog
                 'column'                     => $seat->column_number, 'deck' => $seat->deck, 'sold' => ! $seat->is_available || $occupied->contains((int) $seat->id)]);
         $available = min($seats->where('sold', false)->count(), $trip->available_seats ?? PHP_INT_MAX);
         $stops = app(BookingTripStops::class)->forTrip((array) $trip);
-        if (DB::table('route_stops')->where('route_id', $trip->route_id)->exists()) {
+        $routeStops = DB::table('route_stops')->where('route_id', $trip->route_id)->orderBy('stop_order')->get();
+        if ($routeStops->isNotEmpty()) {
             foreach (['pickup', 'dropoff'] as $kind) {
                 $stops[$kind] = array_values(array_filter($stops[$kind], fn (array $stop): bool => ctype_digit($stop['id'])));
             }
         }
 
-        return ['id'    => $trip->id, 'departure' => Carbon::parse($trip->departure_time)->toIso8601String(), 'arrival' => Carbon::parse($trip->arrival_time)->toIso8601String(), 'fare' => (int) $trip->price,
-            'available' => $available, 'seats' => $seats->all(), 'stops' => $stops];
+        $departure = Carbon::parse($trip->departure_time);
+        $arrival = Carbon::parse($trip->arrival_time);
+        if ($routeStops->isEmpty()) {
+            $routeStops = collect([
+                (object) ['id' => 'pickup', 'name' => $trip->origin, 'address' => null, 'status' => 'active', 'stop_type' => 'pickup', 'offset_minutes' => 0],
+                (object) ['id'       => 'dropoff', 'name' => $trip->destination, 'address' => null, 'status' => 'active', 'stop_type' => 'dropoff',
+                    'offset_minutes' => (int) $departure->diffInMinutes($arrival)],
+            ]);
+        }
+        $timeline = RouteItineraryPresenter::present($routeStops, $departure);
+        foreach (['pickup' => $departure, 'dropoff' => $arrival] as $kind => $time) {
+            if (collect($timeline)->contains(fn (array $stop): bool => (string) $stop['id'] === $kind)) {
+                continue;
+            }
+            if (! collect($stops[$kind])->contains(fn (array $stop): bool => $stop['id'] === $kind)) {
+                continue;
+            }
+
+            $fallback = [
+                'id'             => $kind,
+                'name'           => $kind === 'pickup' ? $trip->origin : $trip->destination,
+                'address'        => null,
+                'type'           => $kind,
+                'active'         => true,
+                'is_origin'      => $kind === 'pickup',
+                'is_destination' => $kind === 'dropoff',
+                'hour'           => $time->format('H:i'),
+                'date'           => $time->format('d/m/Y'),
+                'day_offset'     => (int) $departure->copy()->startOfDay()->diffInDays($time->copy()->startOfDay()),
+                'expires_at'     => $time->getTimestamp() * 1000,
+                'expired'        => $time->lessThanOrEqualTo(now()),
+                'map_url'        => 'https://www.google.com/maps/search/?api=1&query='.rawurlencode($kind === 'pickup' ? $trip->origin : $trip->destination),
+            ];
+            if ($kind === 'pickup') {
+                array_unshift($timeline, $fallback);
+            } else {
+                $timeline[] = $fallback;
+            }
+        }
+        $activeTimeline = collect($timeline)->where('active', true)->values();
+        $originId = $activeTimeline->first()['id'] ?? null;
+        $destinationId = $activeTimeline->last()['id'] ?? null;
+        foreach ($timeline as &$stop) {
+            $stop['is_origin'] = $originId !== null && (string) $stop['id'] === (string) $originId;
+            $stop['is_destination'] = $destinationId !== null && (string) $stop['id'] === (string) $destinationId;
+        }
+        unset($stop);
+
+        return ['id'           => $trip->id, 'departure' => $departure->toIso8601String(), 'arrival' => $arrival->toIso8601String(),
+            'fare'             => (int) $trip->price, 'available' => $available, 'seats' => $seats->all(), 'stops' => $stops,
+            'departure_hour'   => $departure->format('H:i'), 'arrival_hour' => $arrival->format('H:i'),
+            'duration_minutes' => (int) $departure->diffInMinutes($arrival), 'origin' => $trip->origin, 'destination' => $trip->destination,
+            'distance_km'      => $trip->distance_km, 'vehicle_type' => $trip->bus_type, 'available_seats' => $available, 'price' => (int) $trip->price,
+            'seat_decks'       => $seats->pluck('deck')->unique()->values()->all(), 'seat_columns' => max(1, (int) $seats->max('column')),
+            'timeline'         => $timeline];
     }
 
     public function hasExchanged(int $ticket): bool
