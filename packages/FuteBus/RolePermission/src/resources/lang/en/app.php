@@ -146,6 +146,7 @@ return [
         'payment.create'     => 'Create payment transactions',
         'payment.refund'     => 'Issue refunds',
         'ticket.view'        => 'View tickets',
+        'ticket.exchange'    => 'Exchange tickets free of charge',
         'ticket.create'      => 'Create tickets',
         'ticket.verify'      => 'Verify tickets',
         'customer.view'      => 'View customers',

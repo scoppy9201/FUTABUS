@@ -11,9 +11,9 @@ use FuteBus\BookingManagement\Models\Booking as BookingRecord;
 use FuteBus\Cancellation\Models\TicketCancellation as TicketCancellationRecord;
 use FuteBus\Cancellation\Notifications\TicketCancelled;
 use FuteBus\Notification\Services\CompanyNotificationService;
-use FuteBus\Payment\Models\Payment as PaymentRecord;
 use FuteBus\Payment\Models\SePayTransaction as SePayTransactionRecord;
 use FuteBus\Payment\Models\TicketRefund as TicketRefundRecord;
+use FuteBus\Payment\Services\BookingPaymentResolver;
 use FuteBus\TicketManagement\Models\Ticket as TicketRecord;
 use FuteBus\TripManagement\Models\Trip as TripRecord;
 use Illuminate\Database\Query\Builder;
@@ -40,7 +40,9 @@ class TicketCancellationService
                     $guest->whereNull('bookings.user_id')->where('customers.user_id', $user->id);
                 });
             })->select('tickets.*', 'bookings.booking_code', 'bookings.status as booking_status',
-                'trips.departure_time', 'trips.status as trip_status', 'routes.origin_city', 'routes.destination_city');
+                'trips.departure_time', 'trips.status as trip_status', 'routes.origin_city', 'routes.destination_city')
+            ->selectSub(DB::table('ticket_exchanges')->select('original_departure_at')
+                ->whereColumn('new_ticket_id', 'tickets.id')->where('status', 'completed')->limit(1), 'original_departure_at');
     }
 
     public function quote(User $user, int $booking, int $ticket): array
@@ -85,7 +87,7 @@ class TicketCancellationService
                 'created_at'     => now(), 'updated_at' => now(),
             ]);
             TicketRefundRecord::query()->toBase()->insert([
-                'cancellation_id' => $id, 'payment_id' => $payment->id, 'transaction_id' => $payment->transaction_id,
+                'cancellation_id' => $id, 'payment_id' => $payment->id, 'transaction_id' => $payment->transaction_id ?: $payment->payment_code,
                 'idempotency_key' => 'futa-cancel-'.$reference, 'amount' => $quote['refund'],
                 'environment'     => SePayTransactionRecord::query()->toBase()->where('sepay_id', $payment->transaction_id)->value('environment')
                     ?? config('services.sepay.environment', 'live'),
@@ -93,6 +95,8 @@ class TicketCancellationService
                 'status'          => 'refund_pending', 'created_at' => now(), 'updated_at' => now(),
             ]);
             TicketRecord::query()->toBase()->where('id', $candidate->id)->update(['status' => 'cancelled', 'updated_at' => now()]);
+            DB::table('ticket_exchanges')->where('old_ticket_id', $candidate->id)->where('status', 'held')
+                ->update(['status' => 'released', 'updated_at' => now()]);
             BookedSeatRecord::query()->toBase()->where('booking_id', $booking)->where('trip_id', $candidate->trip_id)
                 ->where('seat_layout_id', $candidate->seat_layout_id)->delete();
             if (! TicketRecord::query()->toBase()->where('booking_id', $booking)->whereIn('status', ['active', 'used'])->exists()) {
@@ -134,25 +138,6 @@ class TicketCancellationService
 
     private function payment(int $booking, bool $lock = false): object
     {
-        $query = PaymentRecord::query()->toBase()->where(function (Builder $query) use ($booking): void {
-            $query->where('booking_id', $booking)->orWhereExists(function (Builder $intents) use ($booking): void {
-                $intents->selectRaw('1')->from('sepay_payment_intents')
-                    ->whereColumn('sepay_payment_intents.code', 'payments.payment_code')
-                    ->whereColumn('sepay_payment_intents.booking_id', 'payments.booking_id')
-                    ->where('sepay_payment_intents.secondary_booking_id', $booking)->where('sepay_payment_intents.status', 'paid');
-            });
-        })->orderByDesc('id');
-        $payment = ($lock ? $query->lockForUpdate() : $query)->first();
-        $transaction = $payment ? SePayTransactionRecord::query()->toBase()->where('sepay_id', $payment->transaction_id) : null;
-        $receipt = $transaction ? ($lock ? $transaction->lockForUpdate() : $transaction)->first() : null;
-        if ($payment === null || $payment->status !== 'completed' || $payment->method !== 'bank_transfer'
-            || ! ctype_digit((string) $payment->transaction_id) || $receipt?->status !== 'matched'
-            || (int) $receipt->amount !== (int) $payment->amount
-            || (float) $payment->amount !== (float) (int) $payment->amount
-            || $receipt->code !== $payment->payment_code) {
-            throw ValidationException::withMessages(['ticket' => __('Cancellation::cancellation.payment_unavailable')]);
-        }
-
-        return $payment;
+        return app(BookingPaymentResolver::class)->verified($booking, $lock);
     }
 }

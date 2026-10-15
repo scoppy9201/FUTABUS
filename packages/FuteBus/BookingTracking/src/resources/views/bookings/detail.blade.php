@@ -103,3 +103,4 @@
         </div>
     </section>
 </div>
+@include('Payment::exchange.history', ['showActor' => true])

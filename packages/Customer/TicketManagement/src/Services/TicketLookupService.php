@@ -6,7 +6,9 @@ namespace FuteBus\TicketManagement\Services;
 
 use FuteBus\BookingManagement\Models\Booking as BookingRecord;
 use FuteBus\Payment\Models\Payment as PaymentRecord;
+use FuteBus\Payment\Services\BookingPaymentResolver;
 use FuteBus\TicketManagement\Models\Ticket as TicketRecord;
+use Illuminate\Support\Facades\DB;
 
 class TicketLookupService
 {
@@ -63,10 +65,15 @@ class TicketLookupService
             ->where('booking_id', $booking->id)
             ->when($booking->booking_code !== $code, fn ($query) => $query->where('ticket_code', $code))
             ->orderBy('id')
-            ->get(['ticket_code', 'passenger_name', 'passenger_phone', 'seat_code', 'price', 'status']);
+            ->get(['id', 'ticket_code', 'passenger_name', 'passenger_phone', 'seat_code', 'price', 'status']);
+        $exchangedIds = DB::table('ticket_exchanges')->whereIn('old_ticket_id', $tickets->pluck('id'))
+            ->where('status', 'completed')->pluck('old_ticket_id');
+        foreach ($tickets as $ticket) {
+            $ticket->display_status = $exchangedIds->contains($ticket->id) ? 'exchanged' : $ticket->status;
+        }
 
-        $payment = PaymentRecord::query()->toBase()
-            ->where('booking_id', $booking->id)
+        $payment = app(BookingPaymentResolver::class)
+            ->constrain(PaymentRecord::query()->toBase(), (int) $booking->id)
             ->orderByDesc('id')
             ->first(['method', 'status']);
         $paymentStatus = $payment?->status ?? 'unpaid';

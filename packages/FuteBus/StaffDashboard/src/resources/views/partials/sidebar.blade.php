@@ -21,10 +21,10 @@
                     <x-heroicon-o-home
                         class="size-5 shrink-0" /><span>{{ __('StaffDashboard::staff.home') }}</span></a>
                     <a
-                        href="{{ route('staff.tickets') }}" @if(request()->routeIs('staff.tickets', 'staff.tickets.*'))
+                        href="{{ route('staff.tickets') }}" @if(request()->routeIs('staff.tickets', 'staff.tickets.*', 'staff.exchange.*'))
                         aria-current="page" @endif @class(['w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition',
                             'bg-futa-orange-soft font-semibold text-futa-orange border-r-4 border-futa-orange' => request()->routeIs('staff.tickets',
-                            'staff.tickets.*'),
+                            'staff.tickets.*', 'staff.exchange.*'),
                             'text-gray-600 hover:bg-futa-orange-soft hover:text-futa-orange' => !request()->routeIs('staff.tickets',
                             'staff.tickets.*')])>
                     <x-heroicon-o-ticket

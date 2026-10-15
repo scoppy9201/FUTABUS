@@ -7,6 +7,7 @@ namespace FuteBus\Profile\Services;
 use App\Models\User;
 use FuteBus\Cancellation\Models\TicketCancellation as TicketCancellationRecord;
 use FuteBus\Payment\Models\Payment as PaymentRecord;
+use FuteBus\Payment\Services\BookingPaymentResolver;
 use FuteBus\Profile\Models\BookingReview as BookingReviewRecord;
 use FuteBus\TicketManagement\Models\Ticket as TicketRecord;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -73,6 +74,9 @@ class TicketHistoryService
 
     public function stageForBooking(object $booking): string
     {
+        if ($booking->status === 'cancelled' && ($booking->exchange_count ?? 0) > 0 && ! $booking->cancellation_id) {
+            return 'exchanged';
+        }
         if ($booking->status === 'cancelled' || $booking->trip_status === 'cancelled') {
             return 'cancelled';
         }
@@ -131,6 +135,10 @@ class TicketHistoryService
             && str_starts_with((string) $booking->notes, 'Local ticket-history display data only;');
 
         return [
+            'exchanges' => DB::table('ticket_exchanges')->join('tickets as old', 'old.id', '=', 'ticket_exchanges.old_ticket_id')
+                ->leftJoin('tickets as replacement', 'replacement.id', '=', 'ticket_exchanges.new_ticket_id')
+                ->where(fn ($q) => $q->where('old.booking_id', $bookingId)->orWhere('new_booking_id', $bookingId))
+                ->where('ticket_exchanges.status', 'completed')->get(['old.ticket_code as old_code', 'replacement.ticket_code as new_code', 'completed_at', 'fee']),
             'booking'            => $booking,
             'payment'            => $payment,
             'tickets'            => $tickets,
@@ -170,7 +178,14 @@ class TicketHistoryService
                 'routes.origin_city',
                 'routes.destination_city',
             ])
+            ->selectSub(DB::table('ticket_exchanges')->join('tickets as old', 'old.id', '=', 'ticket_exchanges.old_ticket_id')
+                ->selectRaw('COUNT(*)')->whereColumn('old.booking_id', 'bookings.id')->where('ticket_exchanges.status', 'completed'), 'exchange_count')
             ->selectSub($this->latestPaymentStatus(), 'payment_status')
+            ->selectSub(DB::table('tickets as eligible_ticket')->selectRaw('COUNT(*)')->whereColumn('eligible_ticket.booking_id', 'bookings.id')
+                ->where('eligible_ticket.status', 'active')->whereNotExists(function (Builder $exchange): void {
+                    $exchange->selectRaw('1')->from('ticket_exchanges')->where('status', 'completed')
+                        ->whereColumn('new_ticket_id', 'eligible_ticket.id');
+                }), 'exchange_eligible_count')
             ->selectSub($this->latestPaymentStatus()->select('id'), 'payment_id')
             ->selectSub(TicketCancellationRecord::query()->toBase()->join('tickets', 'tickets.id', '=', 'ticket_cancellations.ticket_id')
                 ->select('ticket_cancellations.id')->whereColumn('tickets.booking_id', 'bookings.id')->limit(1), 'cancellation_id')
@@ -182,19 +197,8 @@ class TicketHistoryService
 
     private function latestPaymentStatus(): Builder
     {
-        return PaymentRecord::query()->toBase()
-            ->select('status')
-            ->where(function (Builder $query): void {
-                $query->whereColumn('payments.booking_id', 'bookings.id')
-                    ->orWhereExists(function (Builder $intents): void {
-                        $intents->selectRaw('1')->from('sepay_payment_intents')
-                            ->whereColumn('sepay_payment_intents.code', 'payments.payment_code')
-                            ->whereColumn('sepay_payment_intents.booking_id', 'payments.booking_id')
-                            ->whereColumn('sepay_payment_intents.secondary_booking_id', 'bookings.id')
-                            ->where('sepay_payment_intents.status', 'paid');
-                    });
-            })
-            ->orderByDesc('payments.id')
-            ->limit(1);
+        return app(BookingPaymentResolver::class)
+            ->constrain(PaymentRecord::query()->toBase()->select('status'), 'bookings.id', true)
+            ->orderByDesc('payments.id')->limit(1);
     }
 }

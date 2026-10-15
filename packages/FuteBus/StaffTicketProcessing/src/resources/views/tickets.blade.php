@@ -23,7 +23,10 @@
                 @foreach(['sale' => ['ticket', 'bg-rose-50 text-red-600'], 'exchange' => ['arrows-right-left', 'bg-blue-50 text-blue-600'], 'cancellation' => ['x-circle', 'bg-green-50 text-green-600']] as $action => [$icon, $colors])
                 <button
                     type="button" @if($action === 'sale')
-                    @click="groups?.tickets.sale ? window.location.assign(@js(route('staff.tickets.sale'))) : void window.FutaNotify.warning(@js(__('StaffTicketProcessing::sale.denied')), { duration: 4000 })" @else
+                    @click="groups?.tickets.sale ? window.location.assign(@js(route('staff.tickets.sale'))) : void window.FutaNotify.warning(@js(__('StaffTicketProcessing::sale.denied')), { duration: 4000 })" @elseif($action === 'exchange')
+                    @click="@js(auth()->user()->hasPermissionTo('ticket.exchange') && auth()->user()->hasPermissionTo('ticket.view'))
+                        ? window.location.assign(@js(route('staff.exchange.manage')))
+                        : void window.FutaNotify.warning(@js(__('Payment::exchange.denied')), { duration: 4000 })" @else
                     @click="void window.FutaNotify.info(@js(__('StaffDashboard::staff.unavailable')), { duration: 4000 })" @endif
                     class="flex items-center gap-4 rounded-xl border-4 border-white p-4 text-left shadow-sm {{ $colors }}">
                     <x-dynamic-component :component="'heroicon-o-'.$icon" class="size-8 shrink-0" />

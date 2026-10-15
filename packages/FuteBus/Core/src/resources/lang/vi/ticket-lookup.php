@@ -76,6 +76,7 @@ return [
         'refunded'  => 'Đã hoàn tiền',
     ],
     'ticket_status' => [
+        'exchanged' => 'Vé đã đổi, không còn hiệu lực',
         'active'    => 'Có hiệu lực',
         'used'      => 'Đã sử dụng',
         'cancelled' => 'Đã hủy',

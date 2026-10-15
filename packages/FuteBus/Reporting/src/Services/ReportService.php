@@ -170,7 +170,9 @@ class ReportService
                     WHERE tickets.trip_id = trips.id AND tickets.status IN ('active', 'used')
                     AND (EXISTS (SELECT 1 FROM payments WHERE payments.booking_id = bookings.id AND payments.status = 'completed')
                         OR EXISTS (SELECT 1 FROM sepay_payment_intents JOIN payments ON payments.payment_code = sepay_payment_intents.code
-                            WHERE sepay_payment_intents.secondary_booking_id = bookings.id AND payments.status = 'completed'))
+                            WHERE sepay_payment_intents.secondary_booking_id = bookings.id AND payments.status = 'completed')
+                        OR EXISTS (SELECT 1 FROM ticket_exchanges JOIN payments ON payments.id = ticket_exchanges.payment_id
+                            WHERE ticket_exchanges.new_booking_id = bookings.id AND ticket_exchanges.status = 'completed' AND payments.status = 'completed'))
                 )) AS seats_sold
                 SQL)
             ->selectRaw(<<<'SQL'
@@ -179,7 +181,9 @@ class ReportService
                     WHERE tickets.trip_id = trips.id AND tickets.status IN ('active', 'used')
                     AND (EXISTS (SELECT 1 FROM payments WHERE payments.booking_id = bookings.id AND payments.status = 'completed')
                         OR EXISTS (SELECT 1 FROM sepay_payment_intents JOIN payments ON payments.payment_code = sepay_payment_intents.code
-                            WHERE sepay_payment_intents.secondary_booking_id = bookings.id AND payments.status = 'completed'))
+                            WHERE sepay_payment_intents.secondary_booking_id = bookings.id AND payments.status = 'completed')
+                        OR EXISTS (SELECT 1 FROM ticket_exchanges JOIN payments ON payments.id = ticket_exchanges.payment_id
+                            WHERE ticket_exchanges.new_booking_id = bookings.id AND ticket_exchanges.status = 'completed' AND payments.status = 'completed'))
                 )) AS item_amount
                 SQL)
             ->selectRaw(<<<'SQL'
@@ -461,7 +465,9 @@ class ReportService
                     WHERE tickets.trip_id = trips.id AND tickets.status IN ('active', 'used')
                     AND (EXISTS (SELECT 1 FROM payments WHERE payments.booking_id = bookings.id AND payments.status = 'completed')
                         OR EXISTS (SELECT 1 FROM sepay_payment_intents JOIN payments ON payments.payment_code = sepay_payment_intents.code
-                            WHERE sepay_payment_intents.secondary_booking_id = bookings.id AND payments.status = 'completed'))
+                            WHERE sepay_payment_intents.secondary_booking_id = bookings.id AND payments.status = 'completed')
+                        OR EXISTS (SELECT 1 FROM ticket_exchanges JOIN payments ON payments.id = ticket_exchanges.payment_id
+                            WHERE ticket_exchanges.new_booking_id = bookings.id AND ticket_exchanges.status = 'completed' AND payments.status = 'completed'))
                 ) AS tickets_sold
                 SQL)
             ->selectRaw(<<<'SQL'
@@ -469,7 +475,9 @@ class ReportService
                     WHERE tickets.trip_id = trips.id AND tickets.status IN ('active', 'used')
                     AND (EXISTS (SELECT 1 FROM payments WHERE payments.booking_id = bookings.id AND payments.status = 'completed')
                         OR EXISTS (SELECT 1 FROM sepay_payment_intents JOIN payments ON payments.payment_code = sepay_payment_intents.code
-                            WHERE sepay_payment_intents.secondary_booking_id = bookings.id AND payments.status = 'completed'))
+                            WHERE sepay_payment_intents.secondary_booking_id = bookings.id AND payments.status = 'completed')
+                        OR EXISTS (SELECT 1 FROM ticket_exchanges JOIN payments ON payments.id = ticket_exchanges.payment_id
+                            WHERE ticket_exchanges.new_booking_id = bookings.id AND ticket_exchanges.status = 'completed' AND payments.status = 'completed'))
                 ) AS revenue
                 SQL)
             ->orderByDesc('revenue')->limit(5)->get();

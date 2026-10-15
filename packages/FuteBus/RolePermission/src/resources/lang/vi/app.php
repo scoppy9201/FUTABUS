@@ -146,6 +146,7 @@ return [
         'payment.create'     => 'Tạo giao dịch thanh toán',
         'payment.refund'     => 'Hoàn tiền',
         'ticket.view'        => 'Xem vé',
+        'ticket.exchange'    => 'Đổi vé miễn phí',
         'ticket.create'      => 'Tạo vé',
         'ticket.verify'      => 'Xác nhận vé',
         'customer.view'      => 'Xem khách hàng',
