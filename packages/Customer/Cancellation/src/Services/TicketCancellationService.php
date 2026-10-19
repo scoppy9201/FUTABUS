@@ -14,6 +14,7 @@ use FuteBus\Notification\Services\CompanyNotificationService;
 use FuteBus\Payment\Models\SePayTransaction as SePayTransactionRecord;
 use FuteBus\Payment\Models\TicketRefund as TicketRefundRecord;
 use FuteBus\Payment\Services\BookingPaymentResolver;
+use FuteBus\Payment\Services\TicketEmailService;
 use FuteBus\TicketManagement\Models\Ticket as TicketRecord;
 use FuteBus\TripManagement\Models\Trip as TripRecord;
 use Illuminate\Database\Query\Builder;
@@ -26,6 +27,7 @@ class TicketCancellationService
     public function __construct(
         private readonly CancellationPolicy $policy,
         private readonly CompanyNotificationService $notifications,
+        private readonly TicketEmailService $ticketEmails,
     ) {}
 
     public function owned(User $user, int $booking): Builder
@@ -108,6 +110,7 @@ class TicketCancellationService
             ]));
 
             $this->notifyCompany($candidate, $quote['refund'], $booking);
+            $this->ticketEmails->cancellationRequested($id);
 
             return TicketCancellationRecord::query()->toBase()->where('id', $id)->first();
         });

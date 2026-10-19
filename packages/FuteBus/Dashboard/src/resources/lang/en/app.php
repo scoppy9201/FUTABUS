@@ -82,6 +82,8 @@ return [
     'booking_value'             => 'Booking value',
     'revenue_7_days'            => 'Revenue – Last 7 Days',
     'unit_million_vnd'          => 'Unit: Million VND',
+    'unit_thousand_vnd'         => 'Unit: Thousand VND',
+    'unit_vnd'                  => 'Unit: VND',
     'million_vnd'               => 'Million VND',
     'revenue'                   => 'Revenue',
     'vehicle_status'            => 'Vehicle Status',

@@ -1,14 +1,12 @@
 export function ticketExchangeWizard(config) {
     return {
-        step: 0, busy: false, ticketId: '', date: '', trips: [], selectedTrip: null, seatId: '',
+        step: 0, busy: false, ticketId: '', date: '', trips: [], selectedTrip: null, seatId: '', openTripId: null, openPanel: null,
         pickup: '', dropoff: '', reason: '', consent: false, hold: null, result: null, errors: {}, remaining: 0, timer: null, completionAttempted: false,
         get ticket() { return config.tickets.find(ticket => String(ticket.id) === String(this.ticketId)); },
         get seat() { return this.selectedTrip?.seats.find(seat => String(seat.id) === String(this.seatId)); },
         get pickupStop() { return this.selectedTrip?.stops.pickup.find(stop => String(stop.id) === String(this.pickup)); },
         get dropoffStop() { return this.selectedTrip?.stops.dropoff.find(stop => String(stop.id) === String(this.dropoff)); },
-        get decks() { return [...new Set(this.selectedTrip?.seats.map(seat => seat.deck) || [])]; },
-        get columns() { return Math.max(1, ...(this.selectedTrip?.seats.map(seat => Number(seat.column)) || [1])); },
-        get ready() { return this.ticket && this.selectedTrip && this.seat && this.pickup && this.dropoff; },
+        get ready() { return Boolean(this.ticket && this.selectedTrip && this.seat && this.pickup && this.dropoff); },
         money(amount) { return new Intl.NumberFormat(document.documentElement.lang || 'vi').format(amount || 0) + ' ₫'; },
         time(value) { return value ? new Intl.DateTimeFormat(document.documentElement.lang || 'vi', { dateStyle: 'short', timeStyle: 'short', timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date(value.replace(' ', 'T'))) : ''; },
         init() {
@@ -45,6 +43,7 @@ export function ticketExchangeWizard(config) {
         },
         async loadTrips() {
             this.trips = []; this.selectedTrip = null; this.seatId = ''; this.pickup = ''; this.dropoff = '';
+            this.openTripId = null; this.openPanel = null;
             if (!this.date || !this.ticketId) return;
             await this.run(async () => {
                 const url = new URL(config.trips);
@@ -52,7 +51,88 @@ export function ticketExchangeWizard(config) {
                 this.trips = (await this.request(url.href)).trips;
             });
         },
-        selectTrip(trip) { this.selectedTrip = trip; this.seatId = ''; this.pickup = ''; this.dropoff = ''; this.errors = {}; },
+        activateTrip(trip) {
+            if (String(this.selectedTrip?.id) !== String(trip.id)) {
+                this.selectedTrip = trip;
+                this.seatId = '';
+                this.pickup = '';
+                this.dropoff = '';
+            } else {
+                this.selectedTrip = trip;
+            }
+            this.errors = {};
+        },
+        selectTrip(trip) {
+            this.activateTrip(trip);
+            this.openTripId = trip.id;
+            this.openPanel = 'seats';
+        },
+        togglePanel(tripId, panel) {
+            if (String(this.openTripId) === String(tripId) && this.openPanel === panel) {
+                this.openTripId = null;
+                this.openPanel = null;
+                return;
+            }
+            this.openTripId = tripId;
+            this.openPanel = panel;
+        },
+        stationLabel(value) { return String(value || '').replace(/^Bến xe\s+/i, ''); },
+        vehicleLabel(type) {
+            return type === 'limousine' ? 'Limousine'
+                : type === 'sleeper' ? config.labels.sleeper
+                : config.labels.seat;
+        },
+        clockDuration(minutes) {
+            return String(Math.floor(minutes / 60)).padStart(2, '0') + ':'
+                + String(Math.round(minutes % 60)).padStart(2, '0') + ' h';
+        },
+        seatSelected(trip, seat) {
+            return String(this.selectedTrip?.id) === String(trip.id) && String(this.seatId) === String(seat.id);
+        },
+        chooseSeat(trip, seat) {
+            if (this.busy || seat.sold || Number(trip.available) < 1) return;
+            this.activateTrip(trip);
+            this.seatId = String(seat.id);
+            this.openTripId = trip.id;
+            this.openPanel = 'seats';
+        },
+        stopOption(trip, kind, stopId) {
+            const stop = trip.timeline?.find(item => String(item.id) === String(stopId));
+            const expiresAt = Number(stop?.expires_at);
+            if (!stop || !stop.active || stop.expired || (Number.isFinite(expiresAt) && expiresAt <= Date.now())
+                || Number(trip.available) < 1) return false;
+            return stop.type === 'both' || stop.type === kind;
+        },
+        canSelectStop(trip, kind, stopId) {
+            if (this.busy || !this.stopOption(trip, kind, stopId)) return false;
+            if (String(this.selectedTrip?.id) !== String(trip.id)) return true;
+            const stops = trip.timeline || [];
+            const candidate = stops.findIndex(stop => String(stop.id) === String(stopId));
+            const pickupIndex = stops.findIndex(stop => String(stop.id) === String(this.pickup));
+            const dropoffIndex = stops.findIndex(stop => String(stop.id) === String(this.dropoff));
+            if (kind === 'pickup' && dropoffIndex >= 0 && candidate >= dropoffIndex) return false;
+            if (kind === 'dropoff' && pickupIndex >= 0 && candidate <= pickupIndex) return false;
+            return true;
+        },
+        chooseStop(trip, kind, stopId) {
+            if (!this.canSelectStop(trip, kind, stopId)) return;
+            this.activateTrip(trip);
+            const stops = trip.timeline || [];
+            const candidate = stops.findIndex(stop => String(stop.id) === String(stopId));
+            if (kind === 'pickup') {
+                this.pickup = String(stopId);
+                const dropoffIndex = stops.findIndex(stop => String(stop.id) === String(this.dropoff));
+                if (dropoffIndex >= 0 && candidate >= dropoffIndex) this.dropoff = '';
+            } else {
+                this.dropoff = String(stopId);
+                const pickupIndex = stops.findIndex(stop => String(stop.id) === String(this.pickup));
+                if (pickupIndex >= candidate) this.pickup = '';
+            }
+            this.openTripId = trip.id;
+            this.openPanel = 'schedule';
+            this.errors = {};
+        },
+        deckSeats(trip, deck) { return trip.seats.filter(seat => seat.deck === deck); },
         async next() {
             if (this.step === 0 && this.ticket?.eligible) {
                 this.step = 1; this.date = this.ticket.departure.slice(0, 10); await this.loadTrips(); return;

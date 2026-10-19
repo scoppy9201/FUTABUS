@@ -8,8 +8,8 @@ use FuteBus\Payment\Http\Requests\CompleteTicketExchangeRequest;
 use FuteBus\Payment\Http\Requests\ExchangeManagementRequest;
 use FuteBus\Payment\Http\Requests\ExchangeTripsRequest;
 use FuteBus\Payment\Http\Requests\HoldTicketExchangeRequest;
-use FuteBus\Payment\Services\BookingPaymentResolver;
 use FuteBus\Payment\Services\TicketExchangeCatalog;
+use FuteBus\Payment\Services\TicketExchangeManagement;
 use FuteBus\Payment\Services\TicketExchangePolicy;
 use FuteBus\Payment\Services\TicketExchangeService;
 use FuteBus\Payment\Services\TicketQrService;
@@ -20,25 +20,14 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 
 class TicketExchangeController extends Controller
 {
-    public function show(Request $request, TicketExchangeCatalog $catalog, TicketExchangePolicy $policy, BookingPaymentResolver $payments, int $booking): Response
+    public function show(Request $request, TicketExchangeCatalog $catalog, TicketExchangeManagement $management, int $booking): Response
     {
         $tickets = $catalog->tickets($request->user(), $booking)->get();
         abort_if($tickets->isEmpty(), 404);
-        foreach ($tickets as $ticket) {
-            $ticket->eligible = true;
-            $ticket->blocked_reason = null;
-            try {
-                $policy->eligible($ticket, $catalog->hasExchanged((int) $ticket->id));
-                $payments->verified($booking);
-            } catch (ValidationException $error) {
-                $ticket->eligible = false;
-                $ticket->blocked_reason = collect($error->errors())->flatten()->first();
-            }
-        }
+        $management->eligibility($tickets);
 
         return response()->view('Payment::exchange.wizard', compact('tickets', 'booking'))->header('Cache-Control', 'private, no-store');
     }
@@ -82,20 +71,14 @@ class TicketExchangeController extends Controller
         return response()->noContent();
     }
 
-    public function manage(ExchangeManagementRequest $request, TicketExchangeCatalog $catalog): View
+    public function manage(ExchangeManagementRequest $request, TicketExchangeManagement $management): View
     {
-        abort_unless($catalog->canOperate($request->user()), 403);
         $input = $request->validated();
-        $record = null;
-        if (! empty($input['code'])) {
-            $booking = DB::table('tickets')->where('ticket_code', $input['code'])->value('booking_id')
-                ?: DB::table('bookings')->where('booking_code', $input['code'])->value('id');
-            if ($booking) {
-                $record = $catalog->tickets($request->user(), (int) $booking)->first();
-            }
-        }
+        $code = trim($input['code'] ?? '');
+        $tab = $input['tab'] ?? 'tickets';
+        $records = $tab === 'history' ? $management->history($request->user(), $code) : $management->tickets($request->user(), $code);
 
         return view($request->routeIs('staff.*') ? 'Payment::exchange.staff' : 'Payment::exchange.manage',
-            ['record' => $record, 'searched' => ! empty($input['code']), 'code' => $input['code'] ?? '', 'section' => $request->routeIs('staff.*') ? 'tickets' : 'exchanges']);
+            ['records' => $records, 'tab' => $tab, 'code' => $code, 'section' => $request->routeIs('staff.*') ? 'tickets' : 'exchanges']);
     }
 }

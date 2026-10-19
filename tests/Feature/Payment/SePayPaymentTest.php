@@ -4,10 +4,12 @@ namespace Tests\Feature\Payment;
 
 use App\Models\User;
 use FuteBus\BookingManagement\Services\BookingTripStops;
+use FuteBus\Payment\Services\TicketEmailService;
 use FuteBus\TripSearch\Services\TripSearchService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Mockery;
 use Tests\TestCase;
 
 class SePayPaymentTest extends TestCase
@@ -83,6 +85,12 @@ class SePayPaymentTest extends TestCase
 
     public function test_valid_webhook_confirms_booking_and_retries_do_not_duplicate_tickets(): void
     {
+        $this->mock(TicketEmailService::class, function ($mock): void {
+            $mock->shouldReceive('bookingConfirmed')->once()->with(
+                Mockery::on(fn (array $ids): bool => count($ids) === 1),
+                'customer@example.com',
+            );
+        });
         $url = $this->createIntent();
         $intent = DB::table('sepay_payment_intents')->first();
 
@@ -131,6 +139,12 @@ class SePayPaymentTest extends TestCase
 
     public function test_round_trip_holds_both_legs_and_issues_two_bookings_only_after_exact_payment(): void
     {
+        $this->mock(TicketEmailService::class, function ($mock): void {
+            $mock->shouldReceive('bookingConfirmed')->once()->with(
+                Mockery::on(fn (array $ids): bool => count($ids) === 2),
+                'customer@example.com',
+            );
+        });
         $outbound = DB::table('trips')->where('id', $this->tripId)->first();
         $returnRouteId = DB::table('routes')->insertGetId([
             'bus_company_id'   => $outbound->bus_company_id,

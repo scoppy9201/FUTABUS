@@ -92,7 +92,8 @@
         </header>
         <p x-show="loading" class="px-4 py-5 text-center text-sm text-gray-500">{{ __('core::app.loading') }}</p>
         <p x-show="failed" class="px-4 py-5 text-center text-sm text-red-600">{{ __('Notification::app.load_failed') }}</p>
-        <p x-show="!loading && !failed && items.length === 0" class="px-4 py-6 text-center text-sm text-gray-500">{{ __('Notification::app.empty') }}</p>
+        <x-core::empty-state x-show="!loading && !failed && items.length === 0"
+            :title="__('Notification::app.empty')" compact class="px-4" />
         <ul x-show="!loading && !failed && items.length > 0" class="max-h-96 divide-y divide-gray-100 overflow-y-auto">
             <template x-for="item in items" :key="item.id">
                 <li>

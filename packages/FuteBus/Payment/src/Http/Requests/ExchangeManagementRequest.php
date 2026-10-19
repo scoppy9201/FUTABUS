@@ -15,6 +15,7 @@ class ExchangeManagementRequest extends TicketExchangeRequest
 
     public function rules(): array
     {
-        return ['code' => ['nullable', 'string', 'max:64']];
+        return ['code' => ['nullable', 'string', 'max:64'], 'tab' => ['nullable', 'in:tickets,history'],
+            'page'     => ['nullable', 'integer', 'min:1']];
     }
 }

@@ -1,0 +1,47 @@
+[data-exchange-wizard] .trip-card__detail.is-seats {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+}
+
+[data-exchange-wizard] .trip-card__seat-panel {
+    min-height: auto;
+    padding: 14px 16px 16px;
+    overflow: visible;
+}
+
+[data-exchange-wizard] .trip-card__decks {
+    flex-wrap: wrap;
+    padding-bottom: 14px;
+}
+
+[data-exchange-wizard] .exchange-trip-card.is-exchange-selected {
+    border-color: var(--color-futa-orange);
+}
+
+[data-exchange-wizard] .exchange-seat-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border-top: 1px solid #e2e5e9;
+    padding-top: 12px;
+}
+
+[data-exchange-wizard] .trip-card__select:disabled {
+    cursor: not-allowed;
+    opacity: .5;
+}
+
+[data-exchange-wizard] .trip-card__itinerary-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+[data-exchange-wizard] .trip-card__itinerary-panel .trip-itinerary__scroll {
+    padding-bottom: 16px;
+}
+
+[data-exchange-wizard] .trip-itinerary__location label {
+    min-height: 30px;
+}

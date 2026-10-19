@@ -12,6 +12,10 @@
 
 Khách mở **Lịch sử mua vé → Thao tác → Đổi vé**. Wizard gồm chọn vé, chọn chuyến/ghế/điểm, xác nhận và kết quả.
 Admin có mục **Đổi vé miễn phí**; nhân viên vào **Xử lý vé → Đổi vé**.
+Trang quản lý mở sẵn danh sách vé active của các đơn xác nhận trên chuyến sắp khởi hành, có phân trang 15 vé.
+Nhập đầy đủ mã vé để tìm đúng vé, hoặc mã đặt chỗ để xem các vé trong đơn, kể cả vé đã dùng/hủy/đổi.
+Tab **Lịch sử đổi vé** hiển thị cặp mã cũ/mới, chuyến/ghế, thời điểm, người thực hiện và phí.
+Danh sách và lịch sử chỉ thuộc phạm vi nhà xe được phép; hết dữ liệu có hình trạng thái trống dùng chung.
 Tài khoản quản lý/nhân viên cần đang hoạt động, xác minh email, có `ticket.view` và `ticket.exchange`, đúng phạm vi nhà xe.
 Quản trị cấp quyền qua danh mục quyền hiện có. Nhân viên không được tự cấp quyền.
 
