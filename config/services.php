@@ -55,4 +55,14 @@ return [
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect'      => env('GOOGLE_REDIRECT'),
     ],
+
+    'gemini' => [
+        'model' => env('GEMINI_MODEL', 'gemini-3.6-flash'),
+        'keys'  => array_values(array_filter([
+            env('GEMINI_API_KEY_1'),
+            env('GEMINI_API_KEY_2'),
+            env('GEMINI_API_KEY_3'),
+        ])),
+        'timeout' => env('GEMINI_TIMEOUT', 30),
+    ],
 ];

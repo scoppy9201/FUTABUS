@@ -5,3 +5,4 @@ import './voice-trip-search';
 import './ui-init';
 import './data-pagination.js';
 import './side-panel.js';
+import './chatbot.js';
