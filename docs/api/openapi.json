@@ -25,6 +25,9 @@
       "name": "Content"
     },
     {
+      "name": "Chatbot"
+    },
+    {
       "name": "Reporting"
     },
     {
@@ -1126,6 +1129,142 @@
           },
           "429": {
             "description": "Rate limit exceeded"
+          }
+        }
+      }
+    },
+    "/api/v1/chatbot/messages": {
+      "post": {
+        "tags": [
+          "Chatbot"
+        ],
+        "operationId": "createChatbotReply",
+        "summary": "Send a message to the FUTABUS assistant",
+        "description": "Public endpoint limited to 20 messages per minute. Conversation content is sent to the configured Gemini API and is not stored by FUTABUS.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "messages"
+                ],
+                "properties": {
+                  "locale": {
+                    "type": "string",
+                    "enum": [
+                      "vi",
+                      "en"
+                    ]
+                  },
+                  "messages": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 12,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "role",
+                        "text"
+                      ],
+                      "properties": {
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "user",
+                            "assistant"
+                          ]
+                        },
+                        "text": {
+                          "type": "string",
+                          "maxLength": 1000
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Assistant reply with an allowlisted support action, if applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "reply",
+                    "intent",
+                    "action"
+                  ],
+                  "properties": {
+                    "reply": {
+                      "type": "string"
+                    },
+                    "intent": {
+                      "type": "string",
+                      "enum": [
+                        "general",
+                        "ticket_lookup",
+                        "exchange",
+                        "cancel",
+                        "complaint",
+                        "clarify",
+                        "unsupported"
+                      ]
+                    },
+                    "action": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "type",
+                            "label"
+                          ],
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "link",
+                                "feedback"
+                              ]
+                            },
+                            "label": {
+                              "type": "string"
+                            },
+                            "url": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "503": {
+            "description": "Gemini is not configured or unavailable"
           }
         }
       }

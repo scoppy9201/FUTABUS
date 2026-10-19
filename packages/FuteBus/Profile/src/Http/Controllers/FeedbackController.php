@@ -11,6 +11,7 @@ use FuteBus\Profile\Models\CustomerFeedbackReport as CustomerFeedbackReportRecor
 use FuteBus\Profile\Services\FeedbackService;
 use FuteBus\StaffCustomerSupport\Services\FeedbackProcessingService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -39,6 +40,16 @@ class FeedbackController extends Controller
 
         return redirect()->route('profile.feedback.index')
             ->with('status', __('Profile::feedback.sent'));
+    }
+
+    public function storeChatbot(StoreFeedbackRequest $request, FeedbackService $feedback): JsonResponse
+    {
+        $reportId = $feedback->submit($request->user(), $request->safe()->except('attachments'));
+
+        return response()->json(['data' => [
+            'id'        => $reportId,
+            'reference' => __('Profile::feedback.reference', ['id' => str_pad((string) $reportId, 6, '0', STR_PAD_LEFT)]),
+        ]], 201)->header('Cache-Control', 'private, no-store');
     }
 
     public function show(Request $request, int $report, FeedbackService $feedback): Response

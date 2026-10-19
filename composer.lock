@@ -1351,9 +1351,12 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/AiAssistant",
-                "reference": "e711a1fa81eaa5308ce33e71f7b45dc2817348e7"
+                "reference": "7b8bf09c164dce0f64801059df4807feb62b09aa"
             },
             "require": {
+                "futebus/core": "*",
+                "futebus/routemanagement": "^1.0",
+                "futebus/tripmanagement": "*",
                 "php": "^8.2"
             },
             "type": "library",
