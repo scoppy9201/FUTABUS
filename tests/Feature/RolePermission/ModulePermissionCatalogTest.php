@@ -154,6 +154,110 @@ class ModulePermissionCatalogTest extends TestCase
         $this->assertTrue($staff->hasPermissionTo('route.view'));
     }
 
+    public function test_exchange_permission_is_visible_and_removing_it_from_a_role_blocks_staff_routes(): void
+    {
+        $admin = $this->admin();
+        $catalog = app(PermissionCatalogService::class);
+        $catalog->synchronize();
+        $exchange = DB::table('permissions')->where('slug', 'ticket.exchange')->value('id');
+        $view = DB::table('permissions')->where('slug', 'ticket.view')->value('id');
+        $this->assertNotNull($exchange);
+        $this->assertSame('booking', $catalog->rows()->firstWhere('slug', 'ticket.exchange')->group);
+        $staff = $this->createTestUser(['bus_company_id' => $admin->bus_company_id, 'email_verified_at' => now(), 'is_active' => true]);
+        $role = $this->role('exchange-operator', $admin->bus_company_id);
+        foreach ([$this->role('staff'), $role] as $roleId) {
+            DB::table('role_user')->insert(['role_id' => $roleId, 'user_id' => $staff->id]);
+        }
+        foreach ([$exchange, $view] as $permission) {
+            DB::table('permission_role')->insert(['role_id' => $role, 'permission_id' => $permission]);
+        }
+        $this->actingAs($staff)->get(route('staff.tickets.exchange'))->assertOk();
+        $this->actingAs($admin)->put(route('access-management.roles.update', $role), [
+            'name' => 'Exchange operator', 'permission_ids_present' => 1, 'permission_ids' => [$view],
+        ])->assertSessionHasNoErrors();
+        $this->assertFalse($staff->hasPermissionTo('ticket.exchange'));
+        $this->actingAs($staff)->get(route('staff.tickets.exchange'))->assertForbidden();
+        $this->getJson(route('staff.tickets.exchange.context', 1))->assertForbidden();
+        $this->getJson(route('staff.tickets.exchange.trips', 1))->assertForbidden();
+        $this->postJson(route('staff.tickets.exchange.hold', 1), [])->assertForbidden();
+    }
+
+    public function test_legacy_permission_labels_follow_locale_and_real_custom_labels_are_preserved(): void
+    {
+        app(PermissionCatalogService::class)->synchronize();
+        $support = DB::table('permissions')->where('slug', 'support.respond')->value('id');
+        $exchange = DB::table('permissions')->where('slug', 'ticket.exchange')->value('id');
+        DB::table('permissions')->where('id', $support)->update(['display_name' => 'Phản hồi yêu cầu hỗ trợ']);
+        DB::table('permissions')->where('id', $exchange)->update(['display_name' => 'Đổi vé']);
+        $catalog = app(PermissionCatalogService::class);
+        app()->setLocale('en');
+        $this->assertSame('Claim and respond to requests', $catalog->rows()->firstWhere('slug', 'support.respond')->label);
+        $this->assertSame('Exchange tickets free of charge', $catalog->rows()->firstWhere('slug', 'ticket.exchange')->label);
+        app()->setLocale('vi');
+        $this->assertSame('Nhận xử lý và phản hồi yêu cầu', $catalog->rows()->firstWhere('slug', 'support.respond')->label);
+        DB::table('permissions')->where('id', $support)->update(['display_name' => 'Custom support action']);
+        app()->setLocale('en');
+        $this->assertSame('Custom support action', $catalog->rows()->firstWhere('slug', 'support.respond')->label);
+    }
+
+    public function test_cancellation_permission_uses_the_selected_language_instead_of_a_bilingual_label(): void
+    {
+        $catalog = app(PermissionCatalogService::class);
+        $catalog->synchronize();
+        DB::table('permissions')->where('slug', 'ticket.cancel')->update(['display_name' => 'Hủy vé / Cancel tickets']);
+        app()->setLocale('en');
+        $this->assertSame('Cancel tickets', $catalog->rows()->firstWhere('slug', 'ticket.cancel')->label);
+        app()->setLocale('vi');
+        $this->assertSame('Hủy vé', $catalog->rows()->firstWhere('slug', 'ticket.cancel')->label);
+    }
+
+    public function test_renaming_rejects_default_and_custom_duplicates_and_preserves_the_original_permission(): void
+    {
+        $admin = $this->admin();
+        $catalog = app(PermissionCatalogService::class);
+        $catalog->synchronize();
+        $vehicle = DB::table('permissions')->where('slug', 'bus.view')->value('id');
+        $cancel = DB::table('permissions')->where('slug', 'trip.cancel')->value('id');
+        $this->actingAs($admin);
+        foreach (['  hủy   chuyến xe  ', 'CANCEL TRIPS'] as $name) {
+            $this->putJson(route('access-management.catalog.update', $vehicle), ['display_name' => $name])
+                ->assertUnprocessable()->assertJsonValidationErrors('display_name');
+        }
+        $this->assertDatabaseHas('permissions', ['id' => $vehicle, 'display_name' => null, 'slug' => 'bus.view']);
+        DB::table('permissions')->where('id', $cancel)->update(['display_name' => 'Thao tác đặc biệt', 'is_active' => false]);
+        $this->putJson(route('access-management.catalog.update', $vehicle), ['display_name' => 'THAO TÁC   ĐẶC BIỆT'])
+            ->assertUnprocessable()->assertJsonValidationErrors('display_name');
+        $this->put(route('access-management.catalog.update', $vehicle), ['display_name' => '  Tra cứu   phương tiện  '])
+            ->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('permissions', ['id' => $vehicle, 'display_name' => 'Tra cứu phương tiện']);
+        $this->put(route('access-management.catalog.update', $vehicle), ['display_name' => 'Tra cứu phương tiện'])
+            ->assertSessionHasNoErrors();
+    }
+
+    public function test_registration_checks_names_of_permissions_not_yet_synchronized(): void
+    {
+        $admin = $this->admin();
+        $this->actingAs($admin)->postJson(route('access-management.catalog.store'), [
+            'slug' => 'bus.view', 'display_name' => 'Hủy chuyến xe',
+        ])->assertUnprocessable()->assertJsonValidationErrors('display_name');
+        $this->assertDatabaseMissing('permissions', ['slug' => 'bus.view']);
+    }
+
+    public function test_empty_name_returns_a_localized_inline_error_and_reopens_the_editor(): void
+    {
+        $admin = $this->admin();
+        app(PermissionCatalogService::class)->synchronize();
+        $id = DB::table('permissions')->where('slug', 'bus.view')->value('id');
+        $this->actingAs($admin)->from(route('access-management.catalog'))
+            ->put(route('access-management.catalog.update', $id), ['display_name' => '   ', '_catalog_permission' => $id])
+            ->assertSessionHasErrors(['display_name' => 'Vui lòng nhập tên chức năng hiển thị.']);
+        $this->get(route('access-management.catalog'))->assertOk()
+            ->assertSeeText('Vui lòng nhập tên chức năng hiển thị.')
+            ->assertSee('data-auto-open="1"', false)
+            ->assertSee('aria-invalid="true"', false);
+        $this->assertDatabaseHas('permissions', ['id' => $id, 'display_name' => null]);
+    }
+
     private function admin(): User
     {
         $company = DB::table('bus_companies')->insertGetId(['code' => 'FUTA', 'name' => 'FUTA']);

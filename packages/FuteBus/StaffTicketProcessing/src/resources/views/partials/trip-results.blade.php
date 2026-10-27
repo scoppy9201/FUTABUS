@@ -4,6 +4,9 @@
     class="trip-search-results grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)] lg:items-start"
 >
     <div class="trip-search-results__aside self-start space-y-4 lg:sticky lg:top-4 lg:z-1">
+        @if ($exchangeSearch ?? false)
+            @include('StaffTicketProcessing::partials.exchange-trip-search')
+        @else
         <template x-if="summaryTrip()">
             <div class="trip-selection-summary" :class="{ 'is-round-trip-selected': roundTrip && selectedOutboundTrip }">
                 <h2>{{ __('core::trip-search.your_trip') }}</h2>
@@ -30,6 +33,7 @@
                 </div>
             </div>
         </template>
+        @endif
         <aside class="overflow-hidden rounded-xl bg-white shadow-[0_2px_7px_rgba(15,23,42,.18)]">
         <div class="flex items-center justify-between px-4 py-4">
             <h2 class="text-sm font-bold uppercase text-gray-950">{{ __('core::trip-search.filters') }}</h2>
@@ -94,6 +98,7 @@
     </div>
 
     <div class="trip-search-results__list min-w-0">
+        @unless ($exchangeSearch ?? false)
         <h2 class="mb-3 text-xl font-semibold text-gray-950" x-text="direction === 'outbound' ? @js($from.' - '.$to) : @js($to.' - '.$from)"></h2>
         <div class="mb-6 flex flex-wrap gap-2.5">
             @foreach (['price', 'departure', 'seats'] as $sort)
@@ -113,6 +118,7 @@
                 </button>
             @endforeach
         </div>
+        @endunless
 
         @if ($roundTrip)
             <div x-ref="directionTabs" class="my-6 grid grid-cols-2 border-b border-gray-200 bg-white" role="tablist" aria-label="{{ __('core::trip-search.direction_tabs') }}">

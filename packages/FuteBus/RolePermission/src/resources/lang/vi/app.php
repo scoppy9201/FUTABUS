@@ -1,7 +1,18 @@
 <?php
 
 return [
-    'wizard' => [
+    'role_name_required'       => 'Vui lòng nhập tên vai trò.',
+    'role_name_max'            => 'Tên vai trò không được vượt quá 255 ký tự.',
+    'role_description_max'     => 'Mô tả không được vượt quá 1000 ký tự.',
+    'permission_name_required' => 'Vui lòng nhập tên chức năng hiển thị.',
+    'permission_name_invalid'  => 'Tên chức năng không hợp lệ.',
+    'permission_name_max'      => 'Tên chức năng không được vượt quá 120 ký tự.',
+    'permission_name_taken'    => 'Tên chức năng đã được sử dụng. Vui lòng chọn tên khác.',
+    'rename_permission'        => 'Đổi tên chức năng',
+    'rename_permission_hint'   => 'Tên hiển thị được dùng trong danh mục và khi chọn quyền cho vai trò. Thay đổi này không làm thay đổi chức năng hoặc quyền đã cấp.',
+    'disable_permission_title' => 'Vô hiệu hóa quyền: :name?',
+    'enable_permission_title'  => 'Kích hoạt quyền: :name?',
+    'wizard'                   => [
         'progress'       => 'Các bước thiết lập vai trò', 'information' => 'Thông tin vai trò',
         'permissions'    => 'Chọn quyền', 'review' => 'Kiểm tra', 'previous' => 'Quay lại', 'next' => 'Tiếp tục',
         'review_title'   => 'Xác nhận vai trò và phạm vi quyền', 'selected' => 'Quyền đã chọn',
@@ -176,6 +187,7 @@ return [
         'payment.create'       => 'Tạo giao dịch thanh toán',
         'payment.refund'       => 'Hoàn tiền',
         'ticket.exchange'      => 'Đổi vé miễn phí',
+        'ticket.cancel'        => 'Hủy vé',
         'ticket.view'          => 'Xem vé',
         'ticket.create'        => 'Tạo vé',
         'ticket.verify'        => 'Xác nhận vé',

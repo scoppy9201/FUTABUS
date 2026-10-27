@@ -8,7 +8,7 @@
             <section class="flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <div class="grid size-16 shrink-0 place-items-center overflow-hidden rounded-full border border-slate-200 bg-white text-lg font-bold text-slate-500">
                     @if($viewingStaff->avatar)
-                        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($viewingStaff->avatar) }}"
+                        <img src="{{ route('staff-accounts.avatar', $viewingStaff->id) }}"
                             alt="{{ $viewingStaff->name }}" class="size-full object-cover">
                     @else
                         {{ mb_strtoupper(mb_substr($viewingStaff->name, 0, 1)) }}

@@ -19,6 +19,26 @@ Danh sách và lịch sử chỉ thuộc phạm vi nhà xe được phép; hết
 Tài khoản quản lý/nhân viên cần đang hoạt động, xác minh email, có `ticket.view` và `ticket.exchange`, đúng phạm vi nhà xe.
 Quản trị cấp quyền qua danh mục quyền hiện có. Nhân viên không được tự cấp quyền.
 
+## Nhân viên đổi vé cho khách
+
+Trang `/nhan-vien/doi-ve` dùng 5 bước: tra cứu, chọn chuyến, ghế/điểm/hành khách,
+đối soát 0đ và kết quả. Nhân viên cần `ticket.view`, `ticket.exchange`, email đã
+xác minh và đúng phạm vi nhà xe; không cần quyền bán vé mới.
+
+API giữ ghế nhân viên nhận tên và số điện thoại mới (đầu 0 hoặc +84).
+Chỉ vé thay thế dùng thông tin này. Vé gốc, hồ sơ khách hàng và tài khoản sở hữu
+không bị đổi. Snapshot `passenger.before`, `passenger.after`, `passenger.actor_id`
+lưu dấu vết trong JSON hiện có, không cần migration.
+
+Nhân viên có endpoint giữ ghế/xác nhận/bỏ giữ, dịch vụ xử lý hành khách và mã
+giao diện riêng trong StaffTicketProcessing. Payment giữ nguyên nghiệp vụ khách hàng;
+endpoint khách hàng bỏ qua trường hành khách ngoài dữ liệu được chấp nhận như trước.
+Dịch vụ nhân viên gọi nghiệp vụ Payment trong giao dịch ngoài cùng; thông tin trên
+vé mới được cập nhật trước commit và trước khi gửi email/thông báo. Dịch vụ kiểm tra
+quyền và phạm vi khi tạo lượt giữ và xác nhận. Retry lượt giữ phải khớp thông tin
+hành khách; sửa vé gốc sau lúc giữ sẽ chặn xác nhận. Nếu mất phản hồi giữ ghế,
+giao diện giữ nguyên payload để retry; không cho sửa lựa chọn khi kết quả chưa rõ.
+
 ## Giao dịch và giữ ghế
 
 Payment sở hữu policy, giữ ghế, phát hành thay thế và liên kết bằng chứng thanh toán. Controller dùng FormRequest.
@@ -71,3 +91,17 @@ Rollback bị chặn khi có lần đổi hoàn tất: phải giữ bản lưu a
 - JavaScript: chọn/giữ/xác nhận, đồng ý chính sách, bỏ giữ, mất phản hồi và chống gửi lặp.
 - UAT: người dùng chạy checklist trên trình duyệt. Test tự động không thay thế nghiệm thu giao diện,
   kiểm tra cạnh tranh thực tế trên MySQL hoặc xác minh chuyển tiền ngân hàng thật.
+
+
+## Khách mua tại quầy chưa có tài khoản
+
+Luồng nhân viên dùng `Payment/StaffExchangeHolds`, giữ nguyên kiểm tra chính sách,
+nguồn thanh toán và khóa chuyến/ghế. `TicketExchangeService` của khách hàng giữ nguyên.
+Migration `2026_10_24_000001_allow_guest_staff_ticket_exchanges` cho phép
+`ticket_exchanges.user_id` null; `actor_id` vẫn bắt buộc. Đơn thay thế giữ
+`customer_id` gốc và không gán cho tài khoản nhân viên. Không tạo Payment mới.
+Rollback bị chặn khi còn bản ghi đổi vé không có tài khoản khách để bảo toàn audit.
+
+Chạy migration trước khi sử dụng luồng nhân viên mới. Khách chưa có tài khoản
+không tự hủy vé từ trang tài khoản; tra cứu công khai vẫn dùng số điện thoại trong
+hồ sơ khách gốc. Luồng đổi vé không tự cập nhật hồ sơ này.

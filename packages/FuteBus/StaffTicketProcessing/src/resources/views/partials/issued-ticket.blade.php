@@ -135,6 +135,9 @@
                 class="mt-1 break-words font-semibold">{{ $preview['customer'][$field] }}</dd>
             </div>@endforeach</dl>
         </section>
+        @if (isset($exchangeDetails))
+            @include('StaffTicketProcessing::partials.exchange-receipt')
+        @else
         <section class="border-t border-gray-100 pt-4">
             <h4 class="mb-4 flex items-center gap-2 font-bold uppercase text-slate-800"><x-heroicon-o-banknotes class="size-5 text-futa-orange" />{{ __('StaffTicketProcessing::sale.payment_info') }}</h4>
             <dl
@@ -154,6 +157,7 @@
             </div>
             </dl>
         </section>
+        @endif
 
     </div>
 </article>

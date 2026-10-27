@@ -2,15 +2,18 @@
     <label class="text-sm font-semibold text-slate-700">
         {{ __('RolePermission::app.fields.name') }}
         <input type="text" name="name"
+            data-required-message="{{ __('RolePermission::app.role_name_required') }}"
+            data-max-message="{{ __('RolePermission::app.role_name_max') }}"
             value="{{ old('name', $role?->name) }}" required maxlength="255"
             class="mt-1.5 block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 outline-none transition focus:border-futa-orange focus:ring-2 focus:ring-orange-100">
-        @error('name')<span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>@enderror
+        <span data-role-field-error aria-live="polite" class="mt-1 block text-xs font-medium text-red-600">{{ $errors->first('name') }}</span>
     </label>
     <label class="text-sm font-semibold text-slate-700">
         {{ __('RolePermission::app.fields.description') }}
         <textarea name="description" rows="3" maxlength="1000"
+            data-max-message="{{ __('RolePermission::app.role_description_max') }}"
             class="mt-1.5 block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 outline-none transition focus:border-futa-orange focus:ring-2 focus:ring-orange-100">{{ old('description', $role?->description) }}</textarea>
-        @error('description')<span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>@enderror
+        <span data-role-field-error aria-live="polite" class="mt-1 block text-xs font-medium text-red-600">{{ $errors->first('description') }}</span>
     </label>
 </section>
 

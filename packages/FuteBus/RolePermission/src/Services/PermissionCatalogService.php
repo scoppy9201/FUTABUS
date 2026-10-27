@@ -136,6 +136,13 @@ class PermissionCatalogService
         [$section, $item] = explode('.', $key, 2);
         $key = 'RolePermission::app.'.$section;
         $defaults = [Lang::get($key, [], 'vi')[$item] ?? null, Lang::get($key, [], 'en')[$item] ?? null];
+        // Recognize former built-in labels without overriding administrator customizations.
+        $legacyLabels = [
+            'permissions.support.respond' => ['Phản hồi yêu cầu hỗ trợ', 'Respond to support requests'],
+            'permissions.ticket.exchange' => ['Đổi vé', 'Exchange tickets'],
+            'permissions.ticket.cancel'   => ['Hủy vé / Cancel tickets'],
+        ];
+        $defaults = [...$defaults, ...($legacyLabels[$section.'.'.$item] ?? [])];
         if (filled($custom) && ! in_array($custom, $defaults, true)) {
             return $custom;
         }

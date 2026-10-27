@@ -5,11 +5,34 @@ namespace Tests\Feature\UserManagement;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class StaffAccountSidePanelTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_staff_avatar_is_streamed_only_for_authorized_managers_in_the_same_company(): void
+    {
+        Storage::fake('public');
+        [$manager, $staff] = $this->managerAndStaff();
+        $manager->update(['is_active' => true]);
+        $staff->update(['avatar' => 'avatars/example.png']);
+        Storage::disk('public')->put('avatars/example.png', 'staff-avatar-content');
+        $url = route('staff-accounts.avatar', $staff->id);
+        $this->get($url)->assertRedirect(route('login'));
+        $this->actingAs($staff)->get($url)->assertForbidden();
+        $response = $this->actingAs($manager)->get($url)->assertOk();
+        $this->assertSame('staff-avatar-content', $response->streamedContent());
+        $this->get(route('staff-accounts.edit', $staff->id))->assertOk()->assertSee($url, false);
+        $other = DB::table('bus_companies')->insertGetId(['name' => 'Other', 'code' => 'OTHER']);
+        $staff->update(['bus_company_id' => $other]);
+        $this->get($url)->assertNotFound();
+        $staff->update(['bus_company_id' => $manager->bus_company_id, 'avatar' => 'avatars/../private.txt']);
+        $this->get($url)->assertNotFound();
+        $staff->update(['avatar' => 'avatars/missing.png']);
+        $this->get($url)->assertNotFound();
+    }
 
     public function test_staff_details_open_in_a_side_panel_over_the_account_list(): void
     {

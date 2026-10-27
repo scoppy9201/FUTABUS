@@ -4,7 +4,7 @@
         x-effect="window.FutaSidePanel.sync($el, openPanel, $nextTick)"
         @close="openPanel = false; window.history.replaceState({}, '', @js(route('staff-accounts.index')))"
         @click.self="openPanel = false">
-        <form method="post" action="{{ route('staff-accounts.update', $editingStaff->id) }}" enctype="multipart/form-data"
+        <form method="post" novalidate action="{{ route('staff-accounts.update', $editingStaff->id) }}" enctype="multipart/form-data"
             data-staff-live-validation data-validation="{{ json_encode(__('UserManagement::app.validation')) }}"
             x-data="{ avatarPreview: null, avatarFileName: '' }" class="flex min-h-0 flex-1 flex-col">
             @csrf
@@ -24,7 +24,6 @@
                 </a>
                 <button type="submit"
                     class="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-futa-orange px-4 py-2 text-sm font-bold text-white transition hover:bg-futa-orange-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-futa-orange">
-                    <x-heroicon-o-check class="size-4" />
                     {{ __('UserManagement::app.save_changes') }}
                 </button>
             </footer>

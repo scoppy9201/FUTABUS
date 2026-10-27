@@ -7,8 +7,13 @@ function fixture() {
     const node = () => ({ handlers: {}, classList: { toggle() {} },
         addEventListener(type, handler) { this.handlers[type] = handler; }, focus() {} });
     const panels = [1, 2, 3].map(step => ({ dataset: { roleStep: String(step) }, querySelector: () => name }));
-    const name = { value: 'Operations', valid: true, checkValidity() { return this.valid; }, reportValidity() {}, focus() {} };
-    const description = { value: 'Team role', checkValidity: () => true };
+    const field = (value, required, maxLength) => ({ ...node(), value, required, maxLength,
+        dataset: { requiredMessage: 'Please enter a role name.', maxMessage: 'Too long' }, error: { textContent: '' },
+        closest() { return { querySelector: () => this.error }; }, setAttribute() {},
+        checkValidity() { throw new Error('Browser validation must not run'); },
+        reportValidity() { throw new Error('Browser popup must not run'); } });
+    const name = field('Operations', true, 255);
+    const description = field('Team role', false, 1000);
     const checkbox = { checked: true, closest: () => ({ querySelector: () => ({ textContent: '<Admin label>' }) }) };
     const nodes = Object.fromEntries(['next', 'back', 'submit', 'summary-name', 'summary-description', 'count', 'zero', 'permission-search', 'no-results']
         .map(key => [`[data-role-${key}]`, node()]));
@@ -29,11 +34,14 @@ function fixture() {
 
 test('invalid role details block advancement and Enter advances a step without submitting', () => {
     const { form, name, panels, nodes } = fixture();
-    name.valid = false;
+    name.value = '   ';
     nodes['[data-role-next]'].handlers.click();
     assert.equal(panels[0].hidden, false);
     assert.equal(panels[1].hidden, true);
-    name.valid = true;
+    assert.equal(name.error.textContent, 'Please enter a role name.');
+    name.value = 'Operations';
+    name.handlers.input();
+    assert.equal(name.error.textContent, '');
     let prevented = false;
     form.handlers.submit({ preventDefault() { prevented = true; } });
     assert.equal(prevented, true);
