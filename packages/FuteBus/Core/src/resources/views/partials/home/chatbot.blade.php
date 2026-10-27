@@ -53,7 +53,7 @@
                     <input name="{{ $chatUser ? 'contact_email' : 'email' }}" type="email" maxlength="255" autocomplete="email" value="{{ $chatUser?->email }}" @required(! $chatUser)>
                 </label>
                 <label>{{ __('core::chatbot.feedback.phone') }}
-                    <input name="{{ $chatUser ? 'contact_phone' : 'phone' }}" type="tel" maxlength="20" autocomplete="tel" value="{{ $chatUser?->phone }}" required>
+                    <input name="{{ $chatUser ? 'contact_phone' : 'phone' }}" type="tel" maxlength="20" autocomplete="tel" required>
                 </label>
                 <label>{{ __('core::chatbot.feedback.subject') }}
                     <input name="subject" maxlength="{{ $chatUser ? 150 : 255 }}" minlength="5" required>

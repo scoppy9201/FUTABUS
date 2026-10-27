@@ -19,7 +19,7 @@ class StaffDashboardService
         $support = $canSupport ? app(FeedbackProcessingService::class)->visible($staff) : null;
         $avatar = $staff->avatar;
         $avatarUrl = is_string($avatar) && str_starts_with($avatar, 'avatars/') && ! str_contains($avatar, '..') && Storage::disk('public')->exists($avatar)
-            ? Storage::disk('public')->url($avatar) : null;
+            ? route('api.v1.staff.me.avatar', ['v' => $staff->updated_at?->timestamp]) : null;
 
         $navigation = [];
         foreach (['trips' => ['trip.view', 'trip-management.trips.index'], 'reports' => ['report.view', 'dashboard.section']] as $key => [$permission, $route]) {

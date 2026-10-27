@@ -50,6 +50,7 @@
 
     @include('core::partials.home.footer')
     @include('core::partials.floating-support')
+    @include('core::partials.home.chatbot')
     @include('core::components.confirm-dialog')
 </body>
 </html>

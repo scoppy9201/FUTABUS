@@ -15,6 +15,21 @@ class StaffDashboardTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_dashboard_returns_authenticated_avatar_url_for_staff_profile_photo(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('avatars/staff.png', 'image-data');
+        $staff = $this->createTestUser(['is_active' => true, 'avatar' => 'avatars/staff.png']);
+        $role = DB::table('roles')->insertGetId(['name' => 'Staff', 'slug' => 'staff']);
+        DB::table('role_user')->insert(['role_id' => $role, 'user_id' => $staff->id]);
+
+        $response = $this->actingAs($staff)->getJson(route('api.v1.staff.dashboard.show'))->assertOk();
+        $avatarUrl = $response->json('data.employee.avatar_url');
+
+        $this->assertSame(route('api.v1.staff.me.avatar', ['v' => $staff->fresh()->updated_at->timestamp]), $avatarUrl);
+        $this->get($avatarUrl)->assertOk()->assertHeader('Content-Type', 'image/png');
+    }
+
     public function test_header_uses_saved_avatar_and_handles_missing_files(): void
     {
         Storage::fake('public');
