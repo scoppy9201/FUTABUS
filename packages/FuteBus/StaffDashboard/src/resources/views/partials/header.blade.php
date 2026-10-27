@@ -21,9 +21,7 @@
                 <div class="h-6 w-px bg-gray-200"></div>
 
                 <div class="flex items-center space-x-3">
-                    <span class="grid size-9 place-items-center rounded-full bg-futa-green/5 font-bold text-futa-green border-2 border-futa-green/20">
-                        {{ mb_strtoupper(mb_substr(Auth::user()->name, 0, 1)) }}
-                    </span>
+                    @include('StaffDashboard::partials.header-avatar')
                     <a href="{{ route($operatorProfileRoute ?? 'staff.profile') }}" class="hidden sm:block text-left">
                         <p class="text-sm font-bold text-gray-800 leading-tight">{{ Auth::user()->name }}</p>
                         <p class="text-xs text-gray-500">{{ $operatorRole ?? __('StaffDashboard::staff.role') }}</p>

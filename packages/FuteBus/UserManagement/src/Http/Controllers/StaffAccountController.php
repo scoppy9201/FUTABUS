@@ -20,10 +20,23 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 class StaffAccountController extends Controller
 {
+    public function avatar(Request $request, StaffAccountService $accounts, int $staff): StreamedResponse
+    {
+        abort_unless($request->user()->is_active && $request->user()->hasPermissionTo(['user.view', 'user.update']), 403);
+        $company = $this->company($request, $accounts);
+        $account = $accounts->staffForCompany($company->id, $staff);
+        $path = $account->avatar;
+        $disk = Storage::disk('public');
+        abort_unless(is_string($path) && str_starts_with($path, 'avatars/') && ! str_contains($path, '..') && $disk->exists($path), 404);
+
+        return $disk->response($path, null, ['Cache-Control' => 'private, no-store']);
+    }
+
     public function index(StaffAccountFilterRequest $request, StaffAccountService $accounts): View
     {
         return view('UserManagement::index', $this->listingData($request, $accounts));

@@ -10,9 +10,15 @@
     <div
         x-data="staffProfile(@js(['show' => route('api.v1.staff.me.show'),
             'update' => route('api.v1.staff.me.update'),
+            'csrf' => csrf_token(),
             'avatar' => route('api.v1.staff.me.avatar'),
             'dashboard' => route('api.v1.staff.dashboard.show')]),
-            @js(['error' => __('StaffDashboard::staff.error'),
+            @js(['error' => __('StaffDashboard::staff.profile_load_error'),
+            'saveError' => __('StaffDashboard::staff.profile_save_error'),
+            'sessionExpired' => __('StaffDashboard::staff.profile_session_expired'),
+            'forbidden' => __('StaffDashboard::staff.profile_forbidden'),
+            'networkError' => __('StaffDashboard::staff.profile_network_error'),
+            'uploadTooLarge' => __('Profile::app.validation.avatar_large'),
             'updated' => __('Profile::app.updated'),
             'validation' => __('Profile::app.validation')]))"
         class="flex h-dvh min-h-0 flex-col overflow-hidden bg-gray-50 print:h-auto print:overflow-visible">
@@ -28,6 +34,7 @@
                 <p class="mt-1 text-sm text-gray-500">{{ __('StaffDashboard::staff.role') }}</p>
                 <p x-show="loading" role="status" class="mt-4 text-sm text-gray-500">{{ __('StaffDashboard::staff.loading') }}</p>
                 <form x-ref="form" @submit.prevent="save()" novalidate enctype="multipart/form-data" class="mt-6">
+                    @csrf
                     <fieldset :disabled="loading || saving || !employee" class="grid min-w-0 gap-6 md:grid-cols-[200px_minmax(0,1fr)]">
                         <div class="text-center">
                             <span class="mx-auto grid size-36 place-items-center overflow-hidden rounded-full bg-gray-50 text-futa-orange">

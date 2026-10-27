@@ -1,1 +1,26 @@
 /* StaffTicketProcessing uses the shared FUTABUS theme and UI components. */
+
+.staff-sale-customer {
+    container-type: inline-size;
+}
+
+.staff-sale-customer .booking-page__customer-grid {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+}
+
+.staff-sale-customer .booking-page__fields {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px 24px;
+}
+
+.staff-sale-customer .booking-page__fields h2,
+.staff-sale-customer .staff-sale-customer__email {
+    grid-column: 1 / -1;
+}
+
+@container (min-width: 32rem) {
+    .staff-sale-customer .booking-page__fields {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}

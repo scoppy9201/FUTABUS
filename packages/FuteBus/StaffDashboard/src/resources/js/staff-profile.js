@@ -63,9 +63,13 @@ window.staffProfile = (endpoints, messages) => ({
         const body = new FormData(this.$refs.form);
         body.set('_method', 'PUT');
         try {
-            const { data } = await window.axios.post(endpoints.update, body, { params: { lang: document.documentElement.lang } });
+            const { data } = await window.axios.post(endpoints.update, body, {
+                params: { lang: document.documentElement.lang },
+                headers: { 'X-CSRF-TOKEN': endpoints.csrf, Accept: 'application/json' },
+            });
             this.profile = data.data;
             this.employee = { ...data.data, avatar_url: data.data.has_avatar ? `${endpoints.avatar}?v=${Date.now()}` : null };
+            this.$dispatch('staff-profile-saved', { name: this.employee.name, avatar_url: this.employee.avatar_url });
             this.$refs.avatar.value = '';
             if (this.avatarPreview) URL.revokeObjectURL(this.avatarPreview);
             this.avatarPreview = null;
@@ -74,7 +78,12 @@ window.staffProfile = (endpoints, messages) => ({
         } catch (error) {
             this.errors = error.response?.data?.errors || {};
             if (error.response?.status !== 422) {
-                this.message = messages.error;
+                const status = error.response?.status;
+                this.message = status === 401 || status === 419 ? messages.sessionExpired
+                    : status === 403 ? messages.forbidden
+                    : status === 413 ? messages.uploadTooLarge
+                    : !error.response ? messages.networkError : messages.saveError;
+                this.message ||= messages.error;
                 window.FutaNotify.error(this.message, { duration: 4000 });
             }
         } finally {

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth'])->prefix('quan-tri/tai-khoan-nhan-vien')->name('staff-accounts.')->group(function (): void {
     Route::get('/', [StaffAccountController::class, 'index'])->middleware('permission:user.view')->name('index');
     Route::get('/tao-moi', [StaffAccountController::class, 'create'])->middleware('permission:user.create')->name('create');
+    Route::get('/{staff}/anh-dai-dien', [StaffAccountController::class, 'avatar'])->whereNumber('staff')->name('avatar');
     Route::post('/', [StaffAccountController::class, 'store'])->middleware('permission:user.create')->name('store');
     Route::get('/{staff}', [StaffAccountController::class, 'show'])->whereNumber('staff')->middleware('permission:user.view')->name('show');
     Route::get('/{staff}/chinh-sua', [StaffAccountController::class, 'edit'])->whereNumber('staff')->middleware('permission:user.update')->name('edit');

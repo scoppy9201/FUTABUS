@@ -1,12 +1,17 @@
-import { ticketExchangeWizard } from '../../../../Payment/src/resources/js/exchange-wizard.js';
+import { staffExchangeWizard } from './exchange-wizard.js';
+import { initTicketSuccess } from './customer-ticket-success.js';
 
 export function staffTicketExchange(endpoint, messages, urls) {
     const config = { tickets: [], csrf: urls.csrf, error: messages.error, consentError: messages.consent, expired: messages.expired };
     return {
         ...window.staffTicketList(endpoint, messages),
-        flow: ticketExchangeWizard(config),
+        flow: staffExchangeWizard(config),
         step: 1, query: '', searchField: 'code', searched: false, choosing: false,
         tripBusy: false, tripSearched: false, resultsHtml: '', trips: [], date: '', reason: '',
+        passengerName: '', passengerPhone: '', confirmedPassenger: null, pendingHold: null,
+        pickupMode: 'station', dropoffMode: 'station', pickupAddress: '', dropoffAddress: '',
+        get seatDecks() { return [...new Set(this.flow.selectedTrip?.seats.map(seat => seat.deck) || [])]; },
+        get seatColumns() { return Math.max(1, ...(this.flow.selectedTrip?.seats.map(seat => Number(seat.column)) || [])); },
         init() { this.flow.init(); },
         destroy() { this.flow.abandon(); this.flow.destroy(); },
         async searchTickets() {
@@ -21,7 +26,11 @@ export function staffTicketExchange(endpoint, messages, urls) {
             try {
                 const { data } = await window.axios.get(urls.context.replace('__TICKET__', ticket.id));
                 this.selected = data.ticket;
+                this.passengerName = data.ticket.customer || '';
+                this.passengerPhone = data.ticket.phone || '';
+                this.confirmedPassenger = null;
                 Object.assign(config, data.urls, { tickets: [{ ...data.ticket, eligible: true }] });
+                this.flow.tickets = config.tickets;
                 this.flow.ticketId = data.ticket.id;
                 this.flow.step = 1;
                 this.flow.selectedTrip = null;
@@ -34,35 +43,14 @@ export function staffTicketExchange(endpoint, messages, urls) {
                 this.tripSearched = false;
                 this.reason = '';
                 this.step = 2;
-                this.connectSearch();
+                await this.searchTrips();
                 this.scrollProgress();
             } catch (error) { this.notifyError(error); }
             finally { this.choosing = false; }
         },
-        connectSearch() {
-            const search = window.Alpine.$data(this.$refs.customerSearch.querySelector('section[x-data]'));
-            search.departure = this.selected.origin;
-            search.destination = this.selected.destination;
-            search.roundTrip = false;
-            window.dispatchEvent(new CustomEvent('hero-restore-dates', { detail: { departureDate: this.date, returnDate: this.date } }));
-            window.dispatchEvent(new CustomEvent('hero-restore-quantity', { detail: { quantity: 1 } }));
-            search.submitSearch = event => {
-                event.preventDefault();
-                this.date = new FormData(event.currentTarget).get('departure_date');
-                this.searchTrips();
-            };
-            search.applyRecentSearch = recent => {
-                const now = new Date();
-                const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-                this.date = recent.departureDate < today ? today : recent.departureDate;
-                window.dispatchEvent(new CustomEvent('hero-restore-dates', { detail: { departureDate: this.date, returnDate: this.date } }));
-                this.searchTrips();
-            };
-        },
         async searchTrips() {
             if (this.tripBusy) return;
             this.tripBusy = true;
-            this.resultsHtml = '';
             this.flow.errors = {};
             try {
                 const { data } = await window.axios.get(config.trips, { params: { date: this.date } });
@@ -76,24 +64,61 @@ export function staffTicketExchange(endpoint, messages, urls) {
             const trip = this.trips.find(item => item.id === selection.trip.id);
             if (!trip || trip.available < 1 || this.step !== 2) return;
             this.flow.selectTrip(trip);
+            this.pickupMode = 'station'; this.dropoffMode = 'station';
+            this.pickupAddress = ''; this.dropoffAddress = '';
             this.flow.seatId = selection.seats.length === 1 ? String(selection.seats[0]) : '';
             this.flow.pickup = trip.stops.pickup.find(stop => !stop.expired)?.id || '';
             this.flow.dropoff = trip.stops.dropoff.find(stop => !stop.expired)?.id || '';
             this.step = 3;
             this.scrollProgress();
         },
+        seatRow(seat) {
+            const rows = this.flow.selectedTrip.seats.filter(item => item.deck === seat.deck).map(item => Number(item.row));
+            return Number(seat.row) - Math.min(...rows) + 1;
+        },
         async holdSeat() {
-            if (this.flow.busy || !this.flow.ready) return;
-            this.flow.reason = this.reason;
-            await this.flow.next();
-            if (this.flow.hold) { this.step = 4; this.scrollProgress(); }
+            if (this.flow.busy || !this.flow.ready || this.step !== 3) return;
+            if (!this.pendingHold) {
+                this.passengerName = this.passengerName.trim();
+                this.passengerPhone = this.passengerPhone.trim();
+                if (!this.$refs.passengerForm.reportValidity()) return;
+            }
+            this.pendingHold ||= {
+                ticket_id: this.flow.ticketId, trip_id: this.flow.selectedTrip.id, seat_id: this.flow.seatId,
+                pickup: this.flow.pickup, dropoff: this.flow.dropoff, reason: this.reason,
+                passenger_name: this.passengerName.trim(), passenger_phone: this.passengerPhone.trim(),
+                pickup_mode: this.pickupMode, dropoff_mode: this.dropoffMode,
+                pickup_address: this.pickupMode === 'transfer' ? this.pickupAddress.trim() : null,
+                dropoff_address: this.dropoffMode === 'transfer' ? this.dropoffAddress.trim() : null,
+            };
+            await this.flow.run(async () => {
+                try {
+                    this.flow.hold = await this.flow.request(config.hold, this.pendingHold);
+                } catch (error) {
+                    if (error.status && error.status < 500) this.pendingHold = null;
+                    throw error;
+                }
+                this.confirmedPassenger = this.flow.hold.passenger;
+                this.pendingHold = null;
+                this.flow.remaining = Math.max(0, Math.ceil((Date.parse(this.flow.hold.expires_at) - Date.now()) / 1000));
+                this.flow.consent = false; this.flow.completionAttempted = false; this.flow.step = 2;
+                this.step = 4;
+                this.scrollProgress();
+            });
         },
         async completeExchange() {
+            if (this.step !== 4 || this.flow.busy || this.flow.result) return;
+            this.flow.consent = true;
             await this.flow.complete();
-            if (this.flow.result) { this.step = 5; this.scrollProgress(); }
+            if (this.flow.result) {
+                this.scrollProgress();
+                this.$nextTick?.(() => {
+                    if (this.$refs?.exchangeSuccess) initTicketSuccess(this.$refs.exchangeSuccess, messages.error);
+                });
+            }
         },
         async back() {
-            if (this.flow.busy || this.flow.completionAttempted) return;
+            if (this.flow.busy || this.flow.completionAttempted || this.pendingHold || this.flow.result) return;
             if (this.step === 4) {
                 await this.flow.run(async () => { await this.flow.release(); this.flow.step = 1; this.step = 3; });
             } else this.step = Math.max(1, this.step - 1);

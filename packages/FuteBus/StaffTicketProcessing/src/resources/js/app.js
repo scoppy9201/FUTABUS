@@ -207,3 +207,5 @@ window.counterSale = (urls, messages, initialSale = null) => ({
 });
 
 import './exchange';
+
+import './cancellation.js';
