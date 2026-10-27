@@ -1,7 +1,18 @@
 <?php
 
 return [
-    'wizard' => [
+    'role_name_required'       => 'Please enter a role name.',
+    'role_name_max'            => 'The role name must not exceed 255 characters.',
+    'role_description_max'     => 'The description must not exceed 1000 characters.',
+    'permission_name_required' => 'Please enter a function display name.',
+    'permission_name_invalid'  => 'The function name is invalid.',
+    'permission_name_max'      => 'The function name must not exceed 120 characters.',
+    'permission_name_taken'    => 'This function name is already in use. Please choose another name.',
+    'rename_permission'        => 'Rename function',
+    'rename_permission_hint'   => 'This name appears in the catalog and role permission selection. Renaming does not change the function or existing permissions.',
+    'disable_permission_title' => 'Disable permission: :name?',
+    'enable_permission_title'  => 'Activate permission: :name?',
+    'wizard'                   => [
         'progress'       => 'Role configuration steps', 'information' => 'Role details',
         'permissions'    => 'Choose permissions', 'review' => 'Review', 'previous' => 'Back', 'next' => 'Continue',
         'review_title'   => 'Confirm role and permission scope', 'selected' => 'Selected permissions',
@@ -176,6 +187,7 @@ return [
         'payment.create'       => 'Create payment transactions',
         'payment.refund'       => 'Issue refunds',
         'ticket.exchange'      => 'Exchange tickets free of charge',
+        'ticket.cancel'        => 'Cancel tickets',
         'ticket.view'          => 'View tickets',
         'ticket.create'        => 'Create tickets',
         'ticket.verify'        => 'Verify tickets',

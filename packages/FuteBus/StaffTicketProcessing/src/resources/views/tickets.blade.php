@@ -25,9 +25,11 @@
                     type="button" @if($action === 'sale')
                     @click="groups?.tickets.sale ? window.location.assign(@js(route('staff.tickets.sale'))) : void window.FutaNotify.warning(@js(__('StaffTicketProcessing::sale.denied')), { duration: 4000 })" @elseif($action === 'exchange')
                     @click="@js(auth()->user()->hasPermissionTo('ticket.exchange') && auth()->user()->hasPermissionTo('ticket.view'))
-                        ? window.location.assign(@js(route('staff.exchange.manage')))
+                        ? window.location.assign(@js(route('staff.tickets.exchange')))
                         : void window.FutaNotify.warning(@js(__('Payment::exchange.denied')), { duration: 4000 })" @else
-                    @click="void window.FutaNotify.info(@js(__('StaffDashboard::staff.unavailable')), { duration: 4000 })" @endif
+                    @click="@js(auth()->user()->hasPermissionTo('ticket.cancel') && auth()->user()->hasPermissionTo('ticket.view'))
+                        ? window.location.assign(@js(route('staff.tickets.cancellation')))
+                        : void window.FutaNotify.warning(@js(__('StaffTicketProcessing::cancellation.denied')), { duration: 4000 })" @endif
                     class="flex items-center gap-4 rounded-xl border-4 border-white p-4 text-left shadow-sm {{ $colors }}">
                     <x-dynamic-component :component="'heroicon-o-'.$icon" class="size-8 shrink-0" />
                     <span class="min-w-0 flex-1"><strong class="block text-base text-gray-900">{{ __('StaffDashboard::staff.tickets.actions.'.$action) }}</strong><span class="mt-1 block text-xs text-gray-500">{{ __('StaffTicketProcessing::tickets.'.$action.'_hint') }}</span></span>

@@ -96,24 +96,30 @@
                                             aria-labelledby="permission-title-{{ $permission->id }}"
                                             class="m-auto max-h-[calc(100dvh-2rem)] w-[min(30rem,calc(100vw-2rem))] overflow-auto rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-slate-950/50">
                                             <header class="flex items-center justify-between gap-4 border-b border-slate-100 p-5">
-                                                <h3 id="permission-title-{{ $permission->id }}" class="font-bold">{{ __('RolePermission::app.edit') }}: {{ $label }}</h3>
+                                                <h3 id="permission-title-{{ $permission->id }}" class="text-lg font-bold text-futa-green">{{ __('RolePermission::app.rename_permission') }}</h3>
                                                 <button type="button" data-access-close aria-label="{{ __('RolePermission::app.cancel') }}" class="rounded-full bg-slate-100 p-2"><x-heroicon-o-x-mark class="size-4" /></button>
                                             </header>
-                                            <form method="POST" action="{{ route('access-management.catalog.update', $permission->id) }}" class="grid gap-4 p-5">
+                                            <form method="POST" novalidate action="{{ route('access-management.catalog.update', $permission->id) }}" class="grid gap-4 p-5">
                                                 @csrf @method('PUT')
                                                 <input type="hidden" name="_catalog_permission" value="{{ $permission->id }}">
-                                                @if((int) old('_catalog_permission') === (int) $permission->id)
-                                                    @foreach($errors->all() as $message)<p role="alert" class="text-sm text-red-600">{{ $message }}</p>@endforeach
-                                                @endif
-                                                <p class="text-sm font-semibold text-slate-700">{{ $label }}</p>
-                                                <input name="display_name"
-                                                    value="{{ $isEditing ? old('display_name') : ($permission->display_name ?: $label) }}" required maxlength="120"
-                                                    aria-label="{{ __('RolePermission::app.permission_name') }}"
-                                                    class="rounded-lg border border-slate-300 px-2.5 py-2 text-xs focus:border-futa-orange focus:ring-orange-100">
-                                                <button class="rounded-lg bg-futa-orange px-3 py-2 text-xs font-bold text-white">{{ __('RolePermission::app.save_changes') }}</button>
+                                                <p class="text-sm leading-6 text-slate-500">{{ __('RolePermission::app.rename_permission_hint') }}</p>
+                                                <div class="space-y-2">
+                                                    <label for="permission-name-{{ $permission->id }}" class="block text-sm font-semibold text-slate-700">{{ __('RolePermission::app.permission_name') }} <span class="text-futa-orange">*</span></label>
+                                                    <input id="permission-name-{{ $permission->id }}" name="display_name"
+                                                        value="{{ $isEditing ? old('display_name') : $label }}" required maxlength="120"
+                                                        aria-invalid="{{ $isEditing && $errors->has('display_name') ? 'true' : 'false' }}"
+                                                        aria-describedby="permission-name-error-{{ $permission->id }}"
+                                                        class="min-h-11 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-futa-orange focus:ring-orange-100">
+                                                    <p id="permission-name-error-{{ $permission->id }}" role="alert" class="text-sm text-red-600">{{ $isEditing ? $errors->first('display_name') : '' }}</p>
+                                                </div>
+                                                <div class="mt-2 flex flex-wrap justify-end gap-3 border-t border-slate-100 pt-5">
+                                                    <button type="button" data-access-close class="min-h-11 rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600">{{ __('RolePermission::app.cancel') }}</button>
+                                                    <button type="submit" class="min-h-11 rounded-lg bg-futa-orange px-5 py-2.5 text-sm font-bold text-white">{{ __('RolePermission::app.save_changes') }}</button>
+                                                </div>
                                             </form>
                                         </dialog>
-                                        <form method="POST" action="{{ route('access-management.catalog.status', $permission->id) }}" data-confirm data-confirm-title="{{ __('RolePermission::app.permission_name') }}"
+                                        <form method="POST" action="{{ route('access-management.catalog.status', $permission->id) }}" data-confirm
+                                            data-confirm-title="{{ __('RolePermission::app.'.($permission->is_active ? 'disable_permission_title' : 'enable_permission_title'), ['name' => $label]) }}"
                                             data-confirm-message="{{ __('RolePermission::app.toggle_permission_confirmation') }}">
                                             @csrf @method('PATCH')
                                             <input type="hidden" name="is_active" value="{{ $permission->is_active ? 0 : 1 }}">

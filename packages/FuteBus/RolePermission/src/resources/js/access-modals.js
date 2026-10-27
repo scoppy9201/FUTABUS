@@ -97,12 +97,22 @@ function initializeRoleWizard(form) {
             target?.focus();
         }
     }
+    function validateField(field) {
+        const value = field.value.trim();
+        const message = field.required && !value ? field.dataset.requiredMessage
+            : field.maxLength > 0 && [...value].length > field.maxLength ? field.dataset.maxMessage : '';
+        field.closest('label').querySelector('[data-role-field-error]').textContent = message;
+        field.setAttribute('aria-invalid', message ? 'true' : 'false');
+        return !message;
+    }
+    fields.forEach(field => {
+        ['input', 'blur'].forEach(event => field.addEventListener(event, () => validateField(field)));
+    });
     function valid() {
         form.elements.name.value = form.elements.name.value.trim();
-        const invalid = fields.find(field => !field.checkValidity());
+        const invalid = fields.filter(field => !validateField(field))[0];
         if (!invalid) return true;
         show(1);
-        invalid.reportValidity();
         invalid.focus();
         return false;
     }

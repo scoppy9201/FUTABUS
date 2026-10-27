@@ -1,4 +1,4 @@
-<div class="relative ml-auto" x-data="{ open: false }" @click.outside="open = false" @keydown.escape.window="open = false">
+<div class="relative ml-auto" x-data="{ open: false, init() {}, destroy() {} }" @click.outside="open = false" @keydown.escape.window="open = false">
     <button
         type="button"
         id="account-menu-button"

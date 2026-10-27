@@ -13,7 +13,7 @@
                 <div class="grid size-20 place-items-center overflow-hidden rounded-full border border-slate-200 bg-slate-50 text-slate-400 xl:size-16">
                     <img x-cloak x-show="avatarPreview" :src="avatarPreview" alt="" class="size-full object-cover">
                     @if($staff?->avatar)
-                        <img x-show="!avatarPreview" src="{{ asset('storage/'.$staff->avatar) }}" alt="" class="size-full object-cover">
+                        <img x-show="!avatarPreview" src="{{ route('staff-accounts.avatar', $staff->id) }}" alt="" class="size-full object-cover">
                     @else
                         <span x-show="!avatarPreview"><x-heroicon-o-user class="size-9" /></span>
                     @endif

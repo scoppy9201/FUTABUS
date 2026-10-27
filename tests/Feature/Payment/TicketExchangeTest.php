@@ -4,6 +4,7 @@ namespace Tests\Feature\Payment;
 
 use App\Models\User;
 use FuteBus\Payment\Models\TicketExchange;
+use FuteBus\Payment\Services\BookingPaymentResolver;
 use FuteBus\Payment\Services\ExchangeSeatHolds;
 use FuteBus\Payment\Services\SePayIntentService;
 use FuteBus\Payment\Services\TicketEmailService;
@@ -15,6 +16,7 @@ use FuteBus\TripSearch\Services\TripSearchService;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Middleware\ThrottleRequests;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
@@ -471,6 +473,242 @@ class TicketExchangeTest extends TestCase
                 ->assertViewHas('records', fn ($records) => $records->isEmpty());
         }
         $this->actingAs($f['user'])->get(route('exchange.manage'))->assertForbidden();
+    }
+
+    public function test_staff_exchange_changes_only_replacement_passenger_and_preserves_payment_and_audit(): void
+    {
+        $f = $this->fixture();
+        $this->withSession(['_token' => 'staff-exchange-token'])->withHeader('X-CSRF-TOKEN', 'staff-exchange-token');
+        $staff = $this->exchangeOperator($f, 'staff');
+        $payload = [...$this->input($f), 'passenger_name' => 'Updated Passenger', 'passenger_phone' => '+84912345678'];
+        $url = route('staff.tickets.exchange.hold', $f['ticket']);
+        $payment = (array) DB::table('payments')->first();
+        $profile = (array) DB::table('customers')->first();
+        $this->actingAs($staff)->get(route('staff.tickets.exchange'))->assertOk()->assertSee('name="passenger_name"', false);
+        $hold = $this->postJson($url, $payload)->assertOk()->assertJsonPath('passenger.passenger_name', 'Updated Passenger');
+        $token = $hold->json('token');
+        $originalHold = TicketExchange::where('token', $token)->firstOrFail();
+        $originalExpiry = $originalHold->expires_at->toIso8601String();
+        // Reproduce MySQL's JSON object key reordering even when this test runs on SQLite.
+        $originalHold->update(['snapshot' => Arr::sortRecursive($originalHold->snapshot)]);
+        $this->postJson($url, $payload)->assertOk()->assertJsonPath('token', $token);
+        $this->assertSame($originalExpiry, $originalHold->fresh()->expires_at->toIso8601String());
+        $this->assertDatabaseCount('ticket_exchanges', 1);
+        $this->postJson($url, [...$payload, 'passenger_name' => 'Different Passenger'])->assertUnprocessable()->assertJsonValidationErrors('ticket');
+        $this->assertDatabaseHas('tickets', ['id' => $f['ticket'], 'status' => 'active', 'passenger_name' => 'Test']);
+        $exchange = TicketExchange::where('token', $token)->firstOrFail();
+        $this->assertSame(['passenger_name' => 'Test', 'passenger_phone' => null], $exchange->snapshot['passenger']['before']);
+        $this->assertSame($staff->id, $exchange->snapshot['passenger']['actor_id']);
+        $complete = route('staff.tickets.exchange.complete', ['booking' => $f['booking'], 'token' => $token]);
+        $response = $this->postJson($complete, ['consent' => true])->assertOk();
+        $this->postJson($complete, ['consent' => true])->assertOk()->assertJsonPath('code', $response->json('code'));
+        $this->assertDatabaseCount('payments', 1);
+        $this->assertDatabaseCount('tickets', 2);
+        $this->assertSame($payment, (array) DB::table('payments')->first());
+        $this->assertSame($profile, (array) DB::table('customers')->first());
+        $this->assertDatabaseHas('tickets', ['ticket_code' => $response->json('code'), 'passenger_name' => 'Updated Passenger', 'passenger_phone' => '+84912345678', 'status' => 'active']);
+        $this->assertDatabaseHas('tickets', ['id' => $f['ticket'], 'passenger_name' => 'Test', 'passenger_phone' => null, 'status' => 'cancelled']);
+        $this->assertDatabaseMissing('booked_seats', ['trip_id' => $f['trip'], 'seat_layout_id' => $f['oldSeat']]);
+        $this->assertDatabaseHas('booked_seats', ['trip_id' => $f['target'], 'seat_layout_id' => $f['seat']]);
+        $this->get(route('staff.exchange.manage', ['tab' => 'history']))->assertOk()->assertSeeText($response->json('code'));
+        Http::assertNothingSent();
+    }
+
+    public function test_staff_passenger_validation_does_not_hold_a_seat_or_modify_the_original(): void
+    {
+        $f = $this->fixture();
+        $this->withSession(['_token' => 'staff-exchange-token'])->withHeader('X-CSRF-TOKEN', 'staff-exchange-token');
+        $staff = $this->exchangeOperator($f, 'staff');
+        $this->actingAs($staff);
+        $url = route('staff.tickets.exchange.hold', $f['ticket']);
+        foreach ([['passenger_name' => '', 'passenger_phone' => '0912345678'],
+            ['passenger_name' => str_repeat('x', 256), 'passenger_phone' => '0912345678'],
+            ['passenger_name' => 'Passenger', 'passenger_phone' => '123'],
+            ['passenger_name' => 'Passenger', 'passenger_phone' => ''],
+        ] as $invalid) {
+            $this->postJson($url, [...$this->input($f), ...$invalid])->assertUnprocessable();
+        }
+        $this->postJson($url, [...$this->input($f), 'ticket_id' => $f['ticket'] + 999,
+            'passenger_name' => 'Passenger', 'passenger_phone' => '0912345678'])->assertUnprocessable()->assertJsonValidationErrors('ticket_id');
+        $this->assertDatabaseCount('ticket_exchanges', 0);
+        $this->assertDatabaseHas('tickets', ['id' => $f['ticket'], 'status' => 'active', 'passenger_name' => 'Test']);
+    }
+
+    public function test_customer_exchange_keeps_original_passenger_and_cannot_use_staff_endpoints(): void
+    {
+        $f = $this->fixture();
+        $this->withSession(['_token' => 'staff-exchange-token'])->withHeader('X-CSRF-TOKEN', 'staff-exchange-token');
+        $payload = [...$this->input($f), 'passenger_name' => 'Injected', 'passenger_phone' => '0912345678'];
+        $this->actingAs($f['user'])->postJson(route('staff.tickets.exchange.hold', $f['ticket']), $payload)->assertForbidden();
+        $token = $this->postJson(route('exchange.hold', $f['booking']), $payload)->assertOk()->json('token');
+        $this->postJson(route('staff.tickets.exchange.complete', ['booking' => $f['booking'], 'token' => $token]), ['consent' => true])->assertForbidden();
+        $this->postJson(route('staff.tickets.exchange.release', ['booking' => $f['booking'], 'token' => $token]))->assertForbidden();
+        $result = $this->postJson(route('exchange.complete', ['booking' => $f['booking'], 'token' => $token]), ['consent' => true])->assertOk();
+        $this->assertDatabaseHas('tickets', ['ticket_code' => $result->json('code'), 'passenger_name' => 'Test', 'passenger_phone' => null]);
+        $this->assertArrayNotHasKey('passenger', TicketExchange::where('token', $token)->firstOrFail()->snapshot);
+    }
+
+    public function test_staff_from_another_company_cannot_hold_an_edited_passenger_exchange(): void
+    {
+        $f = $this->fixture();
+        $this->withSession(['_token' => 'staff-exchange-token'])->withHeader('X-CSRF-TOKEN', 'staff-exchange-token');
+        $other = DB::table('bus_companies')->insertGetId(['code' => 'OTHER', 'name' => 'Other']);
+        $staff = $this->exchangeOperator([...$f, 'company' => $other], 'staff');
+        $this->actingAs($staff)->postJson(route('staff.tickets.exchange.hold', $f['ticket']),
+            [...$this->input($f), 'passenger_name' => 'Passenger', 'passenger_phone' => '0912345678'])->assertNotFound();
+        $this->assertDatabaseCount('ticket_exchanges', 0);
+    }
+
+    public function test_changing_original_passenger_after_hold_prevents_completion(): void
+    {
+        $f = $this->fixture();
+        $this->withSession(['_token' => 'staff-exchange-token'])->withHeader('X-CSRF-TOKEN', 'staff-exchange-token');
+        $staff = $this->exchangeOperator($f, 'staff');
+        $token = $this->actingAs($staff)->postJson(route('staff.tickets.exchange.hold', $f['ticket']),
+            [...$this->input($f), 'passenger_name' => 'Updated Passenger', 'passenger_phone' => '0912345678'])->assertOk()->json('token');
+        DB::table('tickets')->where('id', $f['ticket'])->update(['passenger_name' => 'Changed elsewhere']);
+        $this->postJson(route('staff.tickets.exchange.complete', ['booking' => $f['booking'], 'token' => $token]), ['consent' => true])
+            ->assertUnprocessable()->assertJsonValidationErrors('ticket');
+        $this->assertDatabaseCount('tickets', 1);
+        $this->assertDatabaseHas('tickets', ['id' => $f['ticket'], 'status' => 'active']);
+        $this->assertDatabaseHas('booked_seats', ['trip_id' => $f['trip'], 'seat_layout_id' => $f['oldSeat']]);
+    }
+
+    public function test_revoking_exchange_permission_after_hold_blocks_passenger_edit_even_for_the_owner(): void
+    {
+        $f = $this->fixture();
+        $staff = $this->exchangeOperator($f, 'staff');
+        DB::table('bookings')->where('id', $f['booking'])->update(['user_id' => $staff->id]);
+        $this->withSession(['_token' => 'staff-exchange-token'])->withHeader('X-CSRF-TOKEN', 'staff-exchange-token');
+        $token = $this->actingAs($staff)->postJson(route('staff.tickets.exchange.hold', $f['ticket']),
+            [...$this->input($f), 'passenger_name' => 'Updated Passenger', 'passenger_phone' => '0912345678'])->assertOk()->json('token');
+        $permission = DB::table('permissions')->where('slug', 'ticket.exchange')->value('id');
+        DB::table('permission_role')->where('permission_id', $permission)->delete();
+        $this->actingAs($staff->fresh())->postJson(route('staff.tickets.exchange.complete', ['booking' => $f['booking'], 'token' => $token]), ['consent' => true])
+            ->assertForbidden();
+        $this->assertDatabaseCount('tickets', 1);
+        $this->assertDatabaseHas('tickets', ['id' => $f['ticket'], 'status' => 'active', 'passenger_name' => 'Test']);
+    }
+
+    public function test_staff_hold_requires_csrf_token_before_creating_an_exchange(): void
+    {
+        $f = $this->fixture();
+        $staff = $this->exchangeOperator($f, 'staff');
+        $this->actingAs($staff)->postJson(route('staff.tickets.exchange.hold', $f['ticket']),
+            [...$this->input($f), 'passenger_name' => 'Updated Passenger', 'passenger_phone' => '0912345678'])->assertStatus(419);
+        $this->assertDatabaseCount('ticket_exchanges', 0);
+    }
+
+    public function test_staff_context_uses_separate_urls_and_release_preserves_the_original_ticket(): void
+    {
+        $f = $this->fixture();
+        $staff = $this->exchangeOperator($f, 'staff');
+        $this->withSession(['_token' => 'staff-exchange-token'])->withHeader('X-CSRF-TOKEN', 'staff-exchange-token');
+        $context = $this->actingAs($staff)->getJson(route('staff.tickets.exchange.context', $f['ticket']))->assertOk();
+        $this->assertSame(url('/nhan-vien/doi-ve/dat-cho/'.$f['booking']), $context->json('urls.base'));
+        $token = $this->postJson(route('staff.tickets.exchange.hold', $f['ticket']),
+            [...$this->input($f), 'passenger_name' => 'Updated Passenger', 'passenger_phone' => '0912345678'])->assertOk()->json('token');
+        $this->postJson(route('staff.tickets.exchange.complete', ['booking' => $f['booking'], 'token' => $token]), ['consent' => false])
+            ->assertUnprocessable()->assertJsonValidationErrors('consent');
+        $this->postJson(route('staff.tickets.exchange.release', ['booking' => $f['booking'], 'token' => $token]))->assertNoContent();
+        $this->assertDatabaseHas('ticket_exchanges', ['token' => $token, 'status' => 'released']);
+        $this->assertDatabaseCount('tickets', 1);
+        $this->assertDatabaseHas('tickets', ['id' => $f['ticket'], 'status' => 'active', 'passenger_name' => 'Test']);
+        $this->assertDatabaseHas('booked_seats', ['trip_id' => $f['trip'], 'seat_layout_id' => $f['oldSeat']]);
+    }
+
+    public function test_staff_exchange_validates_and_persists_transfer_addresses_on_the_replacement(): void
+    {
+        $f = $this->fixture();
+        $staff = $this->exchangeOperator($f, 'staff');
+        $this->withSession(['_token' => 'staff-exchange-token'])->withHeader('X-CSRF-TOKEN', 'staff-exchange-token');
+        $this->actingAs($staff);
+        $url = route('staff.tickets.exchange.hold', $f['ticket']);
+        $payload = [...$this->input($f), 'passenger_name' => 'Passenger', 'passenger_phone' => '0912345678',
+            'pickup_mode'    => 'transfer', 'dropoff_mode' => 'transfer',
+            'pickup_address' => '', 'dropoff_address' => '20 Arrival Street'];
+        $this->postJson($url, $payload)->assertUnprocessable()->assertJsonValidationErrors('pickup_address');
+        $this->assertDatabaseCount('ticket_exchanges', 0);
+        $payload['pickup_address'] = '10 Departure Street';
+        $token = $this->postJson($url, $payload)->assertOk()->json('token');
+        $this->postJson($url, [...$payload, 'pickup_address' => 'Changed address'])->assertUnprocessable();
+        $this->postJson(route('staff.tickets.exchange.complete', ['booking' => $f['booking'], 'token' => $token]), ['consent' => true])->assertOk();
+        $exchange = TicketExchange::where('token', $token)->firstOrFail();
+        $notes = json_decode(DB::table('bookings')->where('id', $exchange->new_booking_id)->value('notes'), true);
+        $this->assertSame('10 Departure Street', $notes['pickup']['address']);
+        $this->assertSame('20 Arrival Street', $notes['dropoff']['address']);
+        $this->assertSame('transfer', $notes['pickup']['mode']);
+        $this->assertSame('10 Departure Street', $exchange->snapshot['pickup']['address']);
+        $this->assertDatabaseHas('tickets', ['id' => $f['ticket'], 'passenger_name' => 'Test']);
+    }
+
+    public function test_staff_can_exchange_a_walk_in_ticket_without_assigning_it_to_an_employee_account(): void
+    {
+        $f = $this->fixture();
+        DB::table('bookings')->where('id', $f['booking'])->update(['user_id' => null]);
+        $customer = DB::table('bookings')->where('id', $f['booking'])->value('customer_id');
+        DB::table('customers')->where('id', $customer)->update(['user_id' => null]);
+        $staff = $this->exchangeOperator($f, 'staff');
+        $payment = (array) DB::table('payments')->first();
+        $profile = (array) DB::table('customers')->where('id', $customer)->first();
+        $this->withSession(['_token' => 'staff-exchange-token'])->withHeader('X-CSRF-TOKEN', 'staff-exchange-token');
+        $payload = [...$this->input($f), 'passenger_name' => 'Walk-in Passenger', 'passenger_phone' => '0912345678'];
+        $this->actingAs($f['user'])->postJson(route('exchange.hold', $f['booking']), $payload)->assertNotFound();
+        $url = route('staff.tickets.exchange.hold', $f['ticket']);
+        $token = $this->actingAs($staff)->postJson($url, $payload)->assertOk()->json('token');
+        $this->postJson($url, $payload)->assertOk()->assertJsonPath('token', $token);
+        $this->assertDatabaseHas('ticket_exchanges', ['token' => $token, 'user_id' => null, 'actor_id' => $staff->id, 'status' => 'held']);
+        $this->assertDatabaseHas('tickets', ['id' => $f['ticket'], 'status' => 'active']);
+        $complete = route('staff.tickets.exchange.complete', ['booking' => $f['booking'], 'token' => $token]);
+        $response = $this->postJson($complete, ['consent' => true])->assertOk();
+        $this->postJson($complete, ['consent' => true])->assertOk()->assertJsonPath('code', $response->json('code'));
+        $exchange = TicketExchange::where('token', $token)->firstOrFail();
+        $this->assertDatabaseHas('bookings', ['id' => $exchange->new_booking_id, 'user_id' => null, 'customer_id' => $customer]);
+        $this->assertDatabaseHas('tickets', ['id' => $exchange->new_ticket_id, 'passenger_name' => 'Walk-in Passenger', 'status' => 'active']);
+        $this->assertSame($payment, (array) DB::table('payments')->first());
+        $this->assertSame($profile, (array) DB::table('customers')->where('id', $customer)->first());
+        $this->assertDatabaseCount('tickets', 2);
+        $this->get(route('staff.exchange.manage', ['tab' => 'history']))->assertOk()->assertSeeText($response->json('code'));
+        $this->assertSame($payment['id'], app(BookingPaymentResolver::class)->verified((int) $exchange->new_booking_id)->id);
+        Http::assertNothingSent();
+    }
+
+    public function test_guest_staff_exchange_still_requires_permission_and_matching_company(): void
+    {
+        $f = $this->fixture();
+        DB::table('bookings')->where('id', $f['booking'])->update(['user_id' => null]);
+        DB::table('customers')->update(['user_id' => null]);
+        $other = DB::table('bus_companies')->insertGetId(['code' => 'OTHER', 'name' => 'Other']);
+        $outsider = $this->exchangeOperator([...$f, 'company' => $other], 'staff');
+        $this->withSession(['_token' => 'staff-exchange-token'])->withHeader('X-CSRF-TOKEN', 'staff-exchange-token');
+        $payload = [...$this->input($f), 'passenger_name' => 'Walk-in Passenger', 'passenger_phone' => '0912345678'];
+        $this->actingAs($outsider)->postJson(route('staff.tickets.exchange.hold', $f['ticket']), $payload)->assertNotFound();
+        $this->assertDatabaseCount('ticket_exchanges', 0);
+        $staff = $this->exchangeOperator($f, 'staff');
+        $token = $this->actingAs($staff)->postJson(route('staff.tickets.exchange.hold', $f['ticket']), $payload)->assertOk()->json('token');
+        $permission = DB::table('permissions')->where('slug', 'ticket.exchange')->value('id');
+        DB::table('permission_role')->where('permission_id', $permission)->delete();
+        $this->postJson(route('staff.tickets.exchange.complete', ['booking' => $f['booking'], 'token' => $token]), ['consent' => true])->assertForbidden();
+        $this->assertDatabaseHas('tickets', ['id' => $f['ticket'], 'status' => 'active']);
+        $this->assertDatabaseCount('tickets', 1);
+    }
+
+    public function test_staff_lookup_reports_the_specific_reason_a_ticket_cannot_be_exchanged(): void
+    {
+        $f = $this->fixture();
+        $staff = $this->exchangeOperator($f, 'staff');
+        $this->actingAs($staff);
+        $url = route('staff.tickets.exchange.context', $f['ticket']);
+        DB::table('tickets')->where('id', $f['ticket'])->update(['status' => 'cancelled']);
+        $this->getJson($url)->assertUnprocessable()
+            ->assertJsonPath('errors.ticket.0', __('StaffTicketProcessing::exchange.rejection.cancelled'));
+        DB::table('tickets')->where('id', $f['ticket'])->update(['status' => 'used']);
+        $this->getJson($url)->assertUnprocessable()
+            ->assertJsonPath('errors.ticket.0', __('StaffTicketProcessing::exchange.rejection.used'));
+        DB::table('tickets')->where('id', $f['ticket'])->update(['status' => 'active']);
+        DB::table('trips')->where('id', $f['trip'])->update(['departure_time' => now()->addHours(3)]);
+        $this->getJson($url)->assertUnprocessable()
+            ->assertJsonPath('errors.ticket.0', __('StaffTicketProcessing::exchange.rejection.too_late'));
     }
 
     private function exchangeOperator(array $f, string $slug): User

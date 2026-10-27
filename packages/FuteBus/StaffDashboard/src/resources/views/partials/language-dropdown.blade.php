@@ -1,4 +1,4 @@
-<div class="relative" x-data="{ open: false }" @click.outside="open = false" @keydown.escape.window="open = false">
+<div class="relative" x-data="{ open: false, init() {}, destroy() {} }" @click.outside="open = false" @keydown.escape.window="open = false">
     <button type="button" @click="open = !open" :aria-expanded="open" aria-haspopup="menu"
         aria-controls="staff-header-language-menu"
         class="flex items-center gap-1.5 rounded-lg px-1.5 py-1 text-sm font-bold text-gray-700 transition hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-futa-orange"

@@ -59,6 +59,10 @@
         toggleSeat(trip, seat) {
             if (seat.sold) return;
             const current = this.selectedSeats(trip).map(item => item.id);
+            if (@js($exchangeSearch ?? false)) {
+                this.selectedSeatIds[trip.id] = current.includes(seat.id) ? [] : [seat.id];
+                return;
+            }
             if (!current.includes(seat.id) && current.length >= 5) {
                 this.showSeatNotice(@js(__('core::trip-search.seat_limit_notice')));
                 return;

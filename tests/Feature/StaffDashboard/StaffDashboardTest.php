@@ -3,10 +3,12 @@
 namespace Tests\Feature\StaffDashboard;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Js;
 use Tests\TestCase;
 
 class StaffDashboardTest extends TestCase
@@ -26,6 +28,27 @@ class StaffDashboardTest extends TestCase
 
         $this->assertSame(route('api.v1.staff.me.avatar', ['v' => $staff->fresh()->updated_at->timestamp]), $avatarUrl);
         $this->get($avatarUrl)->assertOk()->assertHeader('Content-Type', 'image/png');
+    }
+
+    public function test_header_uses_saved_avatar_and_handles_missing_files(): void
+    {
+        Storage::fake('public');
+        $staff = $this->createTestUser(['name' => 'Bùi Phương', 'avatar' => 'avatars/staff.png']);
+        $this->actingAs($staff);
+        Storage::disk('public')->put('avatars/staff.png', 'test-image');
+        $url = Js::from(Storage::disk('public')->url('avatars/staff.png'))->toHtml();
+        $this->assertStringContainsString($url, view('StaffDashboard::partials.header-avatar')->render());
+        $role = DB::table('roles')->insertGetId(['name' => 'Staff', 'slug' => 'staff']);
+        DB::table('role_user')->insert(['role_id' => $role, 'user_id' => $staff->id]);
+        $staff->unsetRelation('roles');
+        $header = view('StaffDashboard::partials.header-avatar')->render();
+        $this->assertStringContainsString(Js::from(route('api.v1.staff.me.avatar'))->toHtml(), $header);
+        Storage::disk('public')->delete('avatars/staff.png');
+        $missing = view('StaffDashboard::partials.header-avatar')->render();
+        $this->assertStringNotContainsString($url, $missing);
+        $this->assertStringContainsString('B', $missing);
+        $staff->avatar = null;
+        $this->assertStringNotContainsString($url, view('StaffDashboard::partials.header-avatar')->render());
     }
 
     public function test_staff_login_redirects_to_dashboard_and_api_returns_only_allowed_data(): void
@@ -125,6 +148,11 @@ class StaffDashboardTest extends TestCase
         $this->putJson(route('api.v1.staff.me.update'), $data)->assertStatus(419);
         $this->withHeader('X-CSRF-TOKEN', 'staff-csrf')->putJson(route('api.v1.staff.me.update'), $data)->assertOk();
         $this->assertDatabaseHas('users', ['id' => $staff->id, 'name' => 'Updated staff']);
+        Storage::fake('public');
+        $this->withHeader('X-CSRF-TOKEN', 'staff-csrf')->post(route('api.v1.staff.me.update'), [
+            ...$data, '_method' => 'PUT', 'avatar' => UploadedFile::fake()->image('avatar.png'),
+        ], ['Accept' => 'application/json'])->assertOk()->assertJsonPath('data.has_avatar', true);
+        Storage::disk('public')->assertExists($staff->fresh()->avatar);
     }
 
     public function test_non_staff_and_guests_cannot_access_dashboard_or_api(): void
