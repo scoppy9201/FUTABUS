@@ -114,7 +114,7 @@ class StaffExchangeController extends Controller
         $booking = DB::table('tickets')->where('id', $ticket)->value('booking_id');
         abort_if($booking === null, 404);
         $record = $this->catalog->owned($request->user(), (int) $booking, $ticket);
-        app(StaffExchangeEligibility::class)->validate($record, $this->catalog->hasExchanged($ticket));
+        app(StaffExchangeEligibility::class)->ensureEligible($record, $this->catalog->hasExchanged($ticket));
         $this->payments->verified((int) $booking);
 
         return $record;

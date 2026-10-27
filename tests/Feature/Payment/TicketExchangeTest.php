@@ -16,6 +16,7 @@ use FuteBus\TripSearch\Services\TripSearchService;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Middleware\ThrottleRequests;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
@@ -486,7 +487,13 @@ class TicketExchangeTest extends TestCase
         $this->actingAs($staff)->get(route('staff.tickets.exchange'))->assertOk()->assertSee('name="passenger_name"', false);
         $hold = $this->postJson($url, $payload)->assertOk()->assertJsonPath('passenger.passenger_name', 'Updated Passenger');
         $token = $hold->json('token');
+        $originalHold = TicketExchange::where('token', $token)->firstOrFail();
+        $originalExpiry = $originalHold->expires_at->toIso8601String();
+        // Reproduce MySQL's JSON object key reordering even when this test runs on SQLite.
+        $originalHold->update(['snapshot' => Arr::sortRecursive($originalHold->snapshot)]);
         $this->postJson($url, $payload)->assertOk()->assertJsonPath('token', $token);
+        $this->assertSame($originalExpiry, $originalHold->fresh()->expires_at->toIso8601String());
+        $this->assertDatabaseCount('ticket_exchanges', 1);
         $this->postJson($url, [...$payload, 'passenger_name' => 'Different Passenger'])->assertUnprocessable()->assertJsonValidationErrors('ticket');
         $this->assertDatabaseHas('tickets', ['id' => $f['ticket'], 'status' => 'active', 'passenger_name' => 'Test']);
         $exchange = TicketExchange::where('token', $token)->firstOrFail();

@@ -9,6 +9,7 @@ use FuteBus\Payment\Models\TicketExchange;
 use FuteBus\Payment\Services\StaffExchangeHolds;
 use FuteBus\Payment\Services\TicketExchangeCatalog;
 use FuteBus\Payment\Services\TicketExchangeService;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -32,8 +33,9 @@ class StaffTicketExchangeService
             // The underlying hold locks trips and the original ticket until this transaction commits.
             $ticket = $this->catalog->owned($actor, $booking, (int) $hold->old_ticket_id);
             $this->passengers->revalidate($actor, $ticket, ['passenger' => $passenger]);
-            if (! $hold->wasRecentlyCreated && (($hold->snapshot['passenger'] ?? null) !== $passenger
-                || ($hold->snapshot['staff_transfer'] ?? $this->transferDetails([])) !== $transfer)) {
+            // MySQL JSON storage can reorder object keys; compare values without relying on key order.
+            if (! $hold->wasRecentlyCreated && (Arr::sortRecursive($hold->snapshot['passenger'] ?? []) !== Arr::sortRecursive($passenger)
+                || Arr::sortRecursive($hold->snapshot['staff_transfer'] ?? $this->transferDetails([])) !== Arr::sortRecursive($transfer))) {
                 throw ValidationException::withMessages(['ticket' => __('Payment::exchange.already_held')]);
             }
             $hold->update(['snapshot' => [...$hold->snapshot, 'passenger' => $passenger, 'staff_transfer' => $transfer]]);

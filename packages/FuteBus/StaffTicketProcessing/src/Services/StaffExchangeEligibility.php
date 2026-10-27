@@ -10,7 +10,7 @@ use Illuminate\Validation\ValidationException;
 
 class StaffExchangeEligibility
 {
-    public function validate(object $ticket, bool $alreadyExchanged): void
+    public function ensureEligible(object $ticket, bool $alreadyExchanged): void
     {
         $reason = match (true) {
             $alreadyExchanged                                                                    => 'already_exchanged',
