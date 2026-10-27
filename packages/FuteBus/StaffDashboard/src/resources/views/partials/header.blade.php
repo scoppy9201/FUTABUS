@@ -21,8 +21,11 @@
                 <div class="h-6 w-px bg-gray-200"></div>
 
                 <div class="flex items-center space-x-3">
-                    <span class="grid size-9 place-items-center rounded-full bg-futa-green/5 font-bold text-futa-green border-2 border-futa-green/20">
+                    <span class="relative grid size-9 shrink-0 place-items-center overflow-hidden rounded-full border-2 border-futa-green/20 bg-futa-green/5 font-bold text-futa-green">
                         {{ mb_strtoupper(mb_substr(Auth::user()->name, 0, 1)) }}
+                        @if(is_string(Auth::user()->avatar) && str_starts_with(Auth::user()->avatar, 'avatars/') && ! str_contains(Auth::user()->avatar, '..'))
+                            <img src="{{ route('api.v1.staff.me.avatar', ['v' => Auth::user()->updated_at?->timestamp]) }}" alt="" class="absolute inset-0 size-full rounded-full object-cover" x-on:error="$el.remove()">
+                        @endif
                     </span>
                     <a href="{{ route($operatorProfileRoute ?? 'staff.profile') }}" class="hidden sm:block text-left">
                         <p class="text-sm font-bold text-gray-800 leading-tight">{{ Auth::user()->name }}</p>

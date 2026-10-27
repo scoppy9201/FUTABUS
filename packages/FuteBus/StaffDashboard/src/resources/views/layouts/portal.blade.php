@@ -59,11 +59,10 @@
                 @include('Notification::partials.bell')
                 <span class="hidden h-6 w-px bg-gray-200 sm:block"></span>
                 <div class="flex items-center gap-2 sm:gap-3">
-                    <span class="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full border-2 border-futa-green/20 bg-futa-green/5 font-bold text-futa-green">
-                        @if(Auth::user()->avatar)
-                            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url(Auth::user()->avatar) }}" alt="" class="size-full object-cover">
-                        @else
-                            {{ mb_strtoupper(mb_substr(Auth::user()->name, 0, 1)) }}
+                    <span class="relative grid size-10 shrink-0 place-items-center overflow-hidden rounded-full border-2 border-futa-green/20 bg-futa-green/5 font-bold text-futa-green">
+                        {{ mb_strtoupper(mb_substr(Auth::user()->name, 0, 1)) }}
+                        @if(is_string(Auth::user()->avatar) && str_starts_with(Auth::user()->avatar, 'avatars/') && ! str_contains(Auth::user()->avatar, '..'))
+                            <img src="{{ route('api.v1.staff.me.avatar', ['v' => Auth::user()->updated_at?->timestamp]) }}" alt="" class="absolute inset-0 size-full rounded-full object-cover" x-on:error="$el.remove()">
                         @endif
                     </span>
                     <span class="hidden max-w-48 text-left sm:block"><span class="block truncate text-sm font-bold leading-tight text-gray-800">{{ Auth::user()->name }}</span><span class="block text-xs text-gray-500">{{ __('StaffDashboard::staff.role') }}</span></span>

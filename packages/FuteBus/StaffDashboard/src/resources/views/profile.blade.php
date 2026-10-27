@@ -28,6 +28,7 @@
                 <p class="mt-1 text-sm text-gray-500">{{ __('StaffDashboard::staff.role') }}</p>
                 <p x-show="loading" role="status" class="mt-4 text-sm text-gray-500">{{ __('StaffDashboard::staff.loading') }}</p>
                 <form x-ref="form" @submit.prevent="save()" novalidate enctype="multipart/form-data" class="mt-6">
+                    @csrf
                     <fieldset :disabled="loading || saving || !employee" class="grid min-w-0 gap-6 md:grid-cols-[200px_minmax(0,1fr)]">
                         <div class="text-center">
                             <span class="mx-auto grid size-36 place-items-center overflow-hidden rounded-full bg-gray-50 text-futa-orange">

@@ -22,6 +22,7 @@
     @include('core::components.ui-calendar-templates')
     @include('core::partials.global-loader')
     @yield('content')
+    @include('core::partials.home.chatbot')
     @unless(View::hasSection('hide_floating_support'))
         @include('core::partials.floating-support')
     @endunless

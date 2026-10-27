@@ -16,6 +16,4 @@
 
         @include('core::partials.home.footer')
     </x-core::landing-background>
-
-    @include('core::partials.home.chatbot')
 @endsection
