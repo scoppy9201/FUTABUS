@@ -1,0 +1,298 @@
+.ai-chat__panel.is-intake {
+    background: var(--color-futa-orange, #f36f21);
+}
+.is-intake .ai-chat__header {
+    padding: 1.25rem 1rem 1.5rem;
+}
+.ai-chat__welcome {
+    max-width: 29rem;
+    margin-top: 1rem !important;
+    font-size: 1rem !important;
+    line-height: 1.65;
+}
+.ai-chat__intake {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    flex-direction: column;
+    gap: 1.4rem;
+    overflow-y: auto;
+    margin: 0 0.6rem 0.7rem;
+    padding: 1.3rem 1rem;
+    border-radius: 1rem;
+    background: white;
+    font-size: 0.875rem;
+}
+.ai-chat__intake fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+}
+.ai-chat__intake legend {
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+}
+.ai-chat__salutations .ai-chat__option {
+    display: inline-flex;
+    margin-right: 1rem;
+}
+.ai-chat__option {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.3rem 0;
+    cursor: pointer;
+}
+.ai-chat__option input {
+    accent-color: var(--color-futa-orange, #f36f21);
+    width: 1rem;
+    height: 1rem;
+}
+.ai-chat__field {
+    position: relative;
+}
+.ai-chat__field > label,
+.ai-chat__phone-number > label {
+    position: absolute;
+    top: -0.65rem;
+    left: 0.9rem;
+    z-index: 1;
+    max-width: calc(100% - 2rem);
+    padding: 0 0.35rem;
+    background: white;
+    color: #27272a;
+}
+.ai-chat__field > input,
+.ai-chat__field > textarea,
+.ai-chat__phone-number {
+    width: 100%;
+    min-height: 3rem;
+    border: 1px solid #52525b;
+    border-radius: 0.75rem;
+    background: white;
+}
+.ai-chat__field > input,
+.ai-chat__field > textarea {
+    padding: 0.85rem 0.9rem 0.65rem;
+}
+.ai-chat__field > textarea {
+    resize: vertical;
+}
+.ai-chat__phone-field {
+    --ai-country-width: 4rem;
+}
+.ai-chat__phone {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+}
+.ai-chat__phone-number > label {
+    left: 0.65rem;
+}
+.ai-chat__phone-number {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    margin-left: -1px;
+    border-radius: 0 0.75rem 0.75rem 0;
+}
+.ai-chat__country-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: stretch;
+    gap: 0.45rem;
+    flex: 0 0 var(--ai-country-width);
+    padding: 0.55rem;
+    border: 1px solid #52525b;
+    border-radius: 0.75rem 0 0 0.75rem;
+    background: transparent;
+    color: #18181b;
+    cursor: pointer;
+}
+.ai-chat__country-trigger:focus-visible {
+    outline: 2px solid var(--color-futa-orange);
+    outline-offset: -3px;
+}
+.ai-chat__country-trigger .ai-chat__country-flag {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+.ai-chat__country-flag {
+    display: block;
+    flex: none;
+    width: 1.55rem;
+    height: 1.2rem;
+    border-radius: 0.15rem;
+    object-fit: cover;
+}
+.ai-chat__countries.futa-control-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    padding: 0.9rem;
+    margin: 0;
+    border: 0;
+    border-radius: 0.65rem;
+    background: white;
+    color: #18181b;
+    box-shadow: 0 8px 30px #0f172a26;
+    overflow: hidden;
+    font-family: inherit;
+    font-size: 0.875rem;
+}
+.ai-chat__countries[hidden],
+.ai-chat__countries[popover]:not(:popover-open) {
+    display: none;
+}
+.ai-chat__countries > input {
+    flex: none;
+    width: 100%;
+    min-height: 2.8rem;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid #52525b;
+    border-radius: 0.65rem;
+    background: white;
+    color: inherit;
+    font: inherit;
+}
+.ai-chat__country-list {
+    min-height: 0;
+    max-height: 17rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+.ai-chat__country-list > button {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 3.1rem;
+    border: 0;
+    border-radius: 0.35rem;
+    padding: 0.7rem 0.35rem;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.ai-chat__country-list > button:hover,
+.ai-chat__country-list > button:focus-visible,
+.ai-chat__country-list > button[aria-selected="true"] {
+    background: var(--color-futa-orange-soft);
+    outline: none;
+}
+.ai-chat__country-name {
+    flex: 1;
+    min-width: 0;
+}
+.ai-chat__country-prefix {
+    flex: none;
+    font-variant-numeric: tabular-nums;
+}
+.ai-chat__country-empty {
+    margin: 0.75rem 0;
+    color: #71717a;
+}
+.ai-chat__dial-plus {
+    flex: none;
+    padding-left: 1rem;
+    padding-right: 0.55rem;
+    color: #18181b;
+}
+.ai-chat__dial-code {
+    flex: none;
+    font-size: inherit;
+    color: #18181b;
+}
+.ai-chat__phone input {
+    flex: 1;
+    width: 35%;
+    min-width: 0;
+    padding: 0.85rem 0.5rem 0.65rem;
+    border: 0;
+    border-radius: 0 0.75rem 0.75rem 0;
+    background: transparent;
+}
+.ai-chat__field-error {
+    margin: 0.4rem 0 0;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: #dc2626;
+}
+.has-error > label,
+.has-error > legend {
+    color: #dc2626;
+}
+.has-error > input,
+.has-error > textarea,
+.ai-chat__phone-field.has-error .ai-chat__phone-number {
+    border-color: #dc2626;
+}
+.ai-chat__privacy {
+    margin: 0.4rem 0 0;
+    font-size: 0.7rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+.ai-chat__intake > button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.85rem;
+    border: 0;
+    border-radius: 0.75rem;
+    background: var(--color-futa-orange, #f36f21);
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+}
+.ai-chat__intake > button:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+@media (max-width: 640px) {
+    .ai-chat {
+        right: 1rem;
+        bottom: 1.25rem;
+    }
+}
+
+.ai-chat__field > input:focus,
+.ai-chat__field > textarea:focus,
+.ai-chat__phone-number:focus-within {
+    border-color: #2563eb;
+    outline: none;
+    box-shadow: 0 0 0 1px #2563eb;
+}
+.ai-chat__field:focus-within > label,
+.ai-chat__phone-number:focus-within > label {
+    color: #2563eb;
+}
+.ai-chat__phone input:focus {
+    outline: none;
+    box-shadow: none;
+}
+.ai-chat__field.has-error > label,
+.ai-chat__intake fieldset.has-error > legend,
+.ai-chat__phone-field.has-error .ai-chat__phone-number > label {
+    color: #dc2626;
+}
+.ai-chat__field.has-error > input,
+.ai-chat__field.has-error > textarea,
+.ai-chat__phone-field.has-error .ai-chat__phone-number {
+    border-color: #dc2626;
+    box-shadow: none;
+}
+.ai-chat__phone-field.has-error .ai-chat__dial-code,
+.ai-chat__phone-field.has-error input {
+    color: #dc2626;
+}
+
+.ai-chat__phone-field > .ai-chat__field-error {
+    margin-left: var(--ai-country-width);
+}

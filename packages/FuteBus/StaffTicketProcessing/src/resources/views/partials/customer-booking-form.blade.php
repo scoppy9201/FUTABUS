@@ -19,7 +19,7 @@
             <input type="hidden" name="outbound_seats[]" :value="id">
         </template>
     @endif
-    <section class="booking-panel" aria-labelledby="booking-customer-title">
+    <section class="booking-panel staff-sale-customer" aria-labelledby="booking-customer-title">
         <div class="booking-page__customer-grid">
             <div class="booking-page__fields">
                 <h2 id="booking-customer-title">{{ __('core::booking.customer_info') }}</h2>
@@ -28,7 +28,7 @@
                     ['key' => 'phone', 'name' => 'phone', 'model' => 'customerPhone', 'ref' => 'customerPhoneInput', 'type' => 'tel', 'autocomplete' => 'tel'],
                     ['key' => 'email', 'name' => 'email', 'model' => 'customerEmail', 'ref' => 'customerEmailInput', 'type' => 'email', 'autocomplete' => 'email'],
                 ] as $field)
-                    <div class="booking-page__field">
+                    <div @class(['booking-page__field', 'staff-sale-customer__email' => $field['name'] === 'email'])>
                         <label for="booking-customer-{{ $field['name'] }}">
                             {{ __('core::booking.'.$field['key']) }} <b>*</b>
                         </label>
@@ -62,13 +62,6 @@
                                 x-show="emailError()" x-cloak>{{ __('core::booking.invalid_email') }}</p>
                         @endif
                     </div>
-                @endforeach
-            </div>
-            <div class="booking-page__terms">
-                <h3>{{ __('core::booking.terms_title') }}</h3>
-                <p class="booking-page__member-note">{{ __('core::booking.member_note') }}</p>
-                @foreach (__('core::booking.terms_notes') as $note)
-                    <p class="booking-page__terms-note"><span>(*) </span>@include('BookingManagement::partials.booking-linked-text', ['text' => $note])</p>
                 @endforeach
             </div>
         </div>

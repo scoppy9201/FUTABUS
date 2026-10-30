@@ -2,14 +2,14 @@
 
 return [
     'meta' => [
-        'title' => 'Online Booking Terms - FUTA Bus Lines',
+        'title'       => 'Online Booking Terms - FUTA Bus Lines',
         'description' => 'FUTA Bus Lines online booking and carriage terms and conditions.',
     ],
-    'brand' => 'FUTA Bus Lines',
-    'heading' => 'Online Booking Terms',
+    'brand'    => 'FUTA Bus Lines',
+    'heading'  => 'Online Booking Terms',
     'chapters' => [
         [
-            'title' => 'I. General terms and conditions',
+            'title'    => 'I. General terms and conditions',
             'articles' => [
                 [
                     'title' => 'Article 1. Definitions and abbreviations',
@@ -30,7 +30,7 @@ return [
                         ['label' => '“Personal data”:', 'text' => 'passenger data FUTA may retain, use and share with relevant service providers to deliver the service;'],
                         ['label' => '“Boarding pass (ticket)”:', 'text' => 'evidence of the contract of carriage valid for the named passenger and journey;'],
                         ['label' => '“ZNS”:', 'text' => 'Zalo Notification Service for customer-care messages;'],
-                        ['text' => 'Headings are for convenient reference only and do not alter the interpretation of these terms.'],
+                        ['text'  => 'Headings are for convenient reference only and do not alter the interpretation of these terms.'],
                     ],
                 ],
                 [
@@ -47,10 +47,11 @@ return [
                         ]],
                         ['label' => 'Transaction security:', 'text' => 'FUTA and its payment partners use reasonable fraud-detection, transaction-control and data-security measures.'],
                         ['label' => 'Personal data:', 'text' => 'transaction data is used for support and service updates under the Privacy Policy and is disclosed only with consent or as legally required.'],
-                        ['label' => 'Refunds, cancellations and changes:', 'text' => 'failed transactions are handled through the relevant payment channel; refunds normally take three to five business days.', 'details' => [
-                            'A ticket may be changed once; cancellation fees range from 10% to 30%.',
-                            'Change or cancellation requests must be made at least 24 hours before departure.',
-                        ]],
+                        [
+                            'label'   => 'Refunds, cancellations and changes:',
+                            'text'    => 'failed transactions are reconciled through the payment channel; cancellation refunds are processed by staff and recorded based on the bank result.',
+                            'details' => (require __DIR__.'/cancellation-policy.php')['items'],
+                        ],
                         ['label' => 'Sales channels:', 'text' => 'buy through the FUTA website, app, official offices or 1900 6067. FUTA may refuse service for fraud, speculation or ticket reselling.'],
                         ['label' => 'Transfer service:', 'text' => 'contact 1900 6067 before booking; transfer vehicles cannot serve inaccessible locations.'],
                     ],
@@ -71,7 +72,7 @@ return [
     ],
     'contact' => [
         'prefix' => 'FUTA Bus Lines contact information: If you have questions or requests concerning this Privacy '
-            . 'Policy, please contact us at:',
+            .'Policy, please contact us at:',
         'or' => 'or call',
     ],
     'quality' => [

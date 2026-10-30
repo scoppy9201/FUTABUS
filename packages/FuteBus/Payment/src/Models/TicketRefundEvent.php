@@ -17,6 +17,9 @@ class TicketRefundEvent extends Model
     protected $fillable = [
         'refund_id',
         'actor_id',
+        'action',
+        'previous_assigned_to',
+        'assigned_to',
         'version',
         'from_status',
         'to_status',
@@ -29,12 +32,14 @@ class TicketRefundEvent extends Model
     protected function casts(): array
     {
         return [
-            'refund_id'    => 'integer',
-            'actor_id'     => 'integer',
-            'version'      => 'integer',
-            'amount'       => 'integer',
-            'bank_paid_at' => 'datetime',
-            'created_at'   => 'datetime',
+            'refund_id'            => 'integer',
+            'actor_id'             => 'integer',
+            'previous_assigned_to' => 'integer',
+            'assigned_to'          => 'integer',
+            'version'              => 'integer',
+            'amount'               => 'integer',
+            'bank_paid_at'         => 'datetime',
+            'created_at'           => 'datetime',
         ];
     }
 
@@ -46,5 +51,15 @@ class TicketRefundEvent extends Model
     public function refund(): BelongsTo
     {
         return $this->belongsTo(TicketRefund::class, 'refund_id', 'id');
+    }
+
+    public function assignedTo(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_to', 'id');
+    }
+
+    public function previousAssignedTo(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'previous_assigned_to', 'id');
     }
 }

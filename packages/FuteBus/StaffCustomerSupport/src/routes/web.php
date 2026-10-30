@@ -13,5 +13,5 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/quan-tri/ho-tro-khach-hang', [SupportTriageController::class, 'index'])
         ->name('staff.support-triage');
     Route::put('/quan-tri/ho-tro-khach-hang/{report}/nha-xe', [SupportTriageController::class, 'assign'])
-        ->whereNumber('report')->middleware('throttle:15,1')->name('staff.support-triage.assign');
+        ->whereNumber('report')->middleware(['throttle:15,1'])->name('staff.support-triage.assign');
 });

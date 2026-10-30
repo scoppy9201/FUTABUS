@@ -39,10 +39,12 @@ class ManualRefundController extends Controller
         $staffPortal = $request->routeIs('staff.refunds.*');
 
         return view($staffPortal ? 'StaffDashboard::refunds' : 'Payment::refunds.index', [
-            'refunds'        => $refunds, 'summary' => $summary, 'filters' => $filters, 'section' => 'refunds',
-            'selectedRefund' => $selectedRefund,
-            'events'         => $selectedRefund ? $service->events($selectedRefund->id) : collect(),
-            'refundRoutes'   => $staffPortal ? 'staff.refunds' : 'refunds',
+            'refunds'          => $refunds, 'summary' => $summary, 'filters' => $filters, 'section' => 'refunds',
+            'selectedRefund'   => $selectedRefund,
+            'events'           => $selectedRefund ? $service->events($selectedRefund->id) : collect(),
+            'canAssign'        => $service->canAssign($request->user()),
+            'eligibleHandlers' => $service->eligibleHandlers($request->user(), $selectedRefund),
+            'refundRoutes'     => $staffPortal ? 'staff.refunds' : 'refunds',
         ]);
     }
 
@@ -53,6 +55,8 @@ class ManualRefundController extends Controller
         $events = $service->events($refund);
 
         return response()->view('Payment::refunds.detail', ['refund' => $record, 'events' => $events,
+            'canAssign'                                              => $service->canAssign($request->user()),
+            'eligibleHandlers'                                       => $service->eligibleHandlers($request->user(), $record),
             'refundRoutes'                                           => $request->routeIs('staff.refunds.*') ? 'staff.refunds' : 'refunds'])
             ->header('Cache-Control', 'private, no-store');
     }

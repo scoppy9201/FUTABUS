@@ -6,7 +6,6 @@ namespace FuteBus\Payment\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class TicketRefundCompleted extends Notification implements ShouldQueue
@@ -20,19 +19,11 @@ class TicketRefundCompleted extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return ['database'];
     }
 
     public function toArray(object $notifiable): array
     {
         return $this->receipt;
-    }
-
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)->subject(__('Payment::refunds.statuses.refunded'))
-            ->line(__('Cancellation::cancellation.reference').': '.$this->receipt['reference'])
-            ->line(__('Cancellation::cancellation.refund').': '.number_format($this->receipt['amount'], 0, ',', '.').' VND')
-            ->action(__('Profile::tickets.title'), route('profile.tickets.index'));
     }
 }

@@ -33,12 +33,16 @@ class Bus extends Model
         'seat_rows',
         'seat_columns',
         'description',
+        'amenities',
+        'wifi_name',
+        'wifi_password',
     ];
 
     protected function casts(): array
     {
         return [
             'bus_company_id'   => 'integer',
+            'amenities'        => 'array',
             'vehicle_type_id'  => 'integer',
             'manufacture_year' => 'integer',
             'expiration_year'  => 'integer',

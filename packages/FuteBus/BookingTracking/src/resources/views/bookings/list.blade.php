@@ -2,7 +2,7 @@
 <div data-booking-monitor class="space-y-5 text-sm">
     <header class="flex flex-wrap items-center justify-between gap-4">
         <div>
-            <p class="text-sm font-bold uppercase tracking-[0.16em] text-futa-orange">{{ config('app.name') }}</p>
+            <p class="text-sm font-bold uppercase tracking-[0.16em] text-futa-orange">FUTA Bus Lines</p>
             <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">{{ __('BookingTracking::bookings.title') }}</h1>
             <p class="mt-2 text-sm text-slate-500">{{ __('BookingTracking::bookings.intro') }}</p>
             <p class="mt-2 flex items-center gap-2 text-xs text-slate-500">

@@ -69,6 +69,7 @@
                     class="flex flex-col overflow-hidden rounded-xl border-2 border-[#e8eced] bg-white"
                 >
                     <div class="grid min-h-14 grid-cols-[38px_minmax(0,1fr)_38px] items-center gap-2 px-3 py-2 text-center">
+                        @if(isset($qrCodes[$ticket->ticket_code]))
                         <a
                             data-ticket-download
                             href="{{ $qrCodes[$ticket->ticket_code] }}"
@@ -76,6 +77,9 @@
                             aria-label="{{ __('core::ticket-lookup.download_ticket', ['code' => $ticket->ticket_code]) }}"
                             class="grid size-9 place-items-center rounded-full bg-[#f2f4f5] text-[#77818a] transition hover:text-futa-orange focus-visible:outline-2 focus-visible:outline-futa-orange"
                         ><x-heroicon-o-arrow-down-tray class="size-5" aria-hidden="true" /></a>
+                        @else
+                            <span class="size-9" aria-hidden="true"></span>
+                        @endif
                         <p class="truncate text-sm font-bold text-gray-900">{{ __('core::ticket-lookup.ticket_code', ['code' => $ticket->ticket_code]) }}</p>
                         <button
                             type="button"
@@ -85,7 +89,13 @@
                         ><x-heroicon-o-share class="size-5" aria-hidden="true" /></button>
                     </div>
 
-                    <img src="{{ $qrCodes[$ticket->ticket_code] }}" alt="{{ __('core::ticket-lookup.qr_alt', ['code' => $ticket->ticket_code]) }}" class="mx-auto my-1 mb-4 aspect-square w-[min(260px,80%)] object-contain">
+                    @if(isset($qrCodes[$ticket->ticket_code]))
+                        <img src="{{ $qrCodes[$ticket->ticket_code] }}" alt="{{ __('core::ticket-lookup.qr_alt', ['code' => $ticket->ticket_code]) }}" class="mx-auto my-1 mb-4 aspect-square w-[min(260px,80%)] object-contain">
+                    @else
+                        <div class="mx-auto my-6 grid size-32 place-items-center rounded-full bg-slate-100 text-slate-400">
+                            <x-heroicon-o-no-symbol class="size-16" aria-hidden="true" />
+                        </div>
+                    @endif
 
                     <dl class="grid gap-3.5 px-4 pb-5 text-sm">
                         <div class="grid grid-cols-[100px_minmax(0,1fr)] gap-2"><dt class="text-[#859098]">{{ __('core::ticket-lookup.route') }}</dt><dd class="text-right font-semibold text-futa-green">{{ $booking->origin_city }} – {{ $booking->destination_city }}</dd></div>
@@ -98,7 +108,7 @@
                     @if($ticket->status === 'active')
                         <p class="mt-auto bg-[#f5f7f7] px-4 py-3.5 text-center text-xs leading-[1.45] text-[#28744f]">{{ __('Payment::payment.success_ticket_note') }}</p>
                     @else
-                        <p class="mt-auto bg-[#f5f7f7] px-4 py-3.5 text-center text-xs font-semibold text-red-600">{{ __('core::ticket-lookup.ticket_status.'.$ticket->status) }}</p>
+                        <p class="mt-auto bg-[#f5f7f7] px-4 py-3.5 text-center text-xs font-semibold text-red-600">{{ __('core::ticket-lookup.ticket_status.'.($ticket->display_status ?? $ticket->status)) }}</p>
                     @endif
                 </article>
             @endforeach

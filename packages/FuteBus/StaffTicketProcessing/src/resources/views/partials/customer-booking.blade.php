@@ -204,6 +204,7 @@
         },
         validateBookingAfterCaptcha() {
             if (!this.validateBookingInputs()) return;
+            if (!this.$el.dispatchEvent(new CustomEvent('staff-booking-submit', { bubbles: true, cancelable: true }))) return;
             this.$refs.bookingForm.submit();
         },
         continueBooking() {

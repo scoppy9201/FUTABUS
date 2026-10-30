@@ -33,14 +33,14 @@
         }
     }
     $events = [];
-    if (in_array($stage, ['cancelled', 'refunded', 'payment_failed'], true)) {
+    if (in_array($stage, ['cancelled', 'refunded', 'payment_failed', 'exchanged'], true)) {
         $events[] = [
             'title' => __('Profile::tickets.journey.event.'.$stage),
             'detail' => $stage === 'cancelled' ? __('Profile::tickets.journey.cancelled_detail') : null,
-            'date' => $stage === 'cancelled'
+            'date' => in_array($stage, ['cancelled', 'exchanged'], true)
                 ? \Illuminate\Support\Carbon::parse($booking->updated_at)->format('d/m/Y H:i')
                 : \Illuminate\Support\Carbon::parse($payment->created_at)->format('d/m/Y H:i'),
-            'state' => 'error',
+            'state' => $stage === 'exchanged' ? 'past' : 'error',
         ];
         $events[] = [
             'title' => __('Profile::tickets.journey.event.booked'),
@@ -85,6 +85,7 @@
             : __('Profile::tickets.journey.arrival_unconfirmed'),
         'rated' => __('Profile::tickets.journey.banner_detail.rated', ['count' => $review?->rating]),
         'cancelled' => __('Profile::tickets.journey.banner_detail.cancelled'),
+        'exchanged' => __('Profile::tickets.journey.banner_detail.exchanged'),
         'refunded' => __('Profile::tickets.journey.banner_detail.refunded'),
         'payment_failed' => __('Profile::tickets.journey.banner_detail.payment_failed'),
         default => __('Profile::tickets.journey.banner_detail.booked'),
@@ -113,14 +114,14 @@
     <div class="space-y-5 px-5 py-4">
         <div @class([
             'rounded-xl px-4 py-3',
-            'bg-red-50 text-red-700' => in_array($stage, ['cancelled', 'refunded', 'payment_failed'], true),
+            'bg-red-50 text-red-700' => in_array($stage, ['cancelled', 'refunded', 'payment_failed', 'exchanged'], true),
             'bg-futa-orange-soft text-futa-orange-dark' => $stage === 'departed',
             'bg-blue-50 text-blue-700' => $stage === 'paid',
             'bg-green-50 text-futa-green' => in_array($stage, ['arrived', 'rated'], true),
             'bg-slate-50 text-slate-700' => $stage === 'booked',
         ])>
             <p class="flex items-center gap-2 text-sm font-extrabold">
-                @if(in_array($stage, ['cancelled', 'refunded', 'payment_failed'], true))
+                @if(in_array($stage, ['cancelled', 'refunded', 'payment_failed', 'exchanged'], true))
                     <x-heroicon-o-x-circle class="size-5 shrink-0" aria-hidden="true" />
                 @elseif($stage === 'departed')
                     <x-heroicon-o-truck class="size-5 shrink-0" aria-hidden="true" />
@@ -143,7 +144,7 @@
             @endif
         </div>
 
-        @if(! in_array($stage, ['cancelled', 'refunded', 'payment_failed'], true))
+        @if(! in_array($stage, ['cancelled', 'refunded', 'payment_failed', 'exchanged'], true))
             <div class="relative">
                 <span class="absolute left-[10%] right-[10%] top-4 h-0.5 bg-gray-200" aria-hidden="true"></span>
                 <span class="absolute left-[10%] top-4 h-0.5 bg-futa-green" style="width: {{ $stageIndex * 20 }}%" aria-hidden="true"></span>
@@ -358,6 +359,7 @@
         </div>
     </div>
 
+    @include('Payment::exchange.history')
     <footer class="flex flex-wrap items-center justify-end gap-2 border-t border-gray-100 px-5 py-3.5">
         <a href="tel:19006067" class="inline-flex min-h-10 items-center gap-2 rounded-full border border-gray-200 px-4 text-sm font-semibold text-futa-green hover:border-futa-green">
             <x-heroicon-o-phone class="size-4" aria-hidden="true" />1900 6067

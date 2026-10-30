@@ -3,14 +3,18 @@ const MAX_VISIBLE = 3;
 const activeNotifications = [];
 
 function notificationHost() {
+    const parent = [...document.querySelectorAll('dialog[open]')].at(-1) || document.body;
     let host = document.getElementById('futa-notifications');
-    if (host) return host;
+    if (host) {
+        if (host.parentElement !== parent) parent.append(host);
+        return host;
+    }
 
     host = document.createElement('div');
     host.id = 'futa-notifications';
     host.className = 'futa-notifications';
     host.setAttribute('aria-label', document.documentElement.lang === 'vi' ? 'Thông báo hệ thống' : 'Notifications');
-    document.body.append(host);
+    parent.append(host);
     return host;
 }
 

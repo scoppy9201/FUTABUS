@@ -25,6 +25,8 @@ Route::middleware('auth')->group(function (): void {
         ->name('profile.feedback.index');
     Route::post('/thong-tin-tai-khoan/phan-anh', [FeedbackController::class, 'store'])
         ->middleware('throttle:5,1')->name('profile.feedback.store');
+    Route::post('/thong-tin-tai-khoan/phan-anh/chatbot', [FeedbackController::class, 'storeChatbot'])
+        ->middleware('throttle:5,1')->name('profile.feedback.chatbot.store');
     Route::get('/thong-tin-tai-khoan/phan-anh/{report}', [FeedbackController::class, 'show'])
         ->whereNumber('report')->name('profile.feedback.show');
     Route::get('/thong-tin-tai-khoan/phan-anh/{report}/anh/{attachment}', [FeedbackController::class, 'attachment'])

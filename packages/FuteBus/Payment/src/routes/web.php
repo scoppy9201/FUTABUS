@@ -3,8 +3,19 @@
 declare(strict_types=1);
 
 use FuteBus\Payment\Http\Controllers\ManualRefundController;
+use FuteBus\Payment\Http\Controllers\TicketExchangeController;
 use FuteBus\Payment\Http\Controllers\TripPaymentPreviewController;
 use Illuminate\Support\Facades\Route;
+
+Route::middleware('auth')->prefix('doi-ve/{booking}')->whereNumber('booking')->name('exchange.')->group(function (): void {
+    Route::get('/', [TicketExchangeController::class, 'show'])->name('show');
+    Route::get('/chuyen', [TicketExchangeController::class, 'trips'])->middleware('throttle:60,1')->name('trips');
+    Route::post('/giu-ghe', [TicketExchangeController::class, 'hold'])->middleware('throttle:20,1')->name('hold');
+    Route::post('/{token}/xac-nhan', [TicketExchangeController::class, 'complete'])->whereUuid('token')->middleware('throttle:10,1')->name('complete');
+    Route::post('/{token}/bo-giu', [TicketExchangeController::class, 'release'])->whereUuid('token')->name('release');
+});
+Route::get('/quan-tri/doi-ve', [TicketExchangeController::class, 'manage'])->middleware('auth')->name('exchange.manage');
+Route::get('/nhan-vien/doi-ve/quan-ly', [TicketExchangeController::class, 'manage'])->middleware('auth')->name('staff.exchange.manage');
 
 Route::middleware(['auth', 'permission:payment.view'])->prefix('quan-tri/hoan-tien')->name('refunds.')->group(function (): void {
     Route::get('/', [ManualRefundController::class, 'index'])->name('index');

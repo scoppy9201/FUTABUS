@@ -13,6 +13,8 @@
         'packages/FuteBus/Core/src/resources/css/app.css',
         'packages/FuteBus/Core/src/resources/js/app.js',
         'packages/FuteBus/Auth/src/resources/js/app.js',
+        'packages/FuteBus/AiAssistant/src/resources/css/app.css',
+        'packages/FuteBus/AiAssistant/src/resources/js/app.js',
     ])
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.13.0/lottie.min.js" defer></script>
@@ -50,6 +52,7 @@
 
     @include('core::partials.home.footer')
     @include('core::partials.floating-support')
+    @include('AiAssistant::partials.chat-widget')
     @include('core::components.confirm-dialog')
 </body>
 </html>

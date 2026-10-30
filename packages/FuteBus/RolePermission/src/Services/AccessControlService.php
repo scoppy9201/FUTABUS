@@ -57,9 +57,9 @@ class AccessControlService
 
     public function permissionGroups(bool $activeOnly = true)
     {
-        return PermissionRecord::query()->toBase()
-            ->when($activeOnly, fn ($query) => $query->where('is_active', true))
-            ->orderBy('group')->orderBy('slug')->get()->groupBy('group');
+        return app(PermissionCatalogService::class)->rows()
+            ->filter(fn (object $permission): bool => $permission->id !== null && (! $activeOnly || $permission->is_active))
+            ->groupBy('group');
     }
 
     public function permissionIdsForRole(int $roleId): array
@@ -69,7 +69,9 @@ class AccessControlService
 
     public function syncRolePermissions(int $roleId, array $permissionIds): void
     {
-        DB::table('permission_role')->where('role_id', $roleId)->delete();
+        $editableIds = PermissionRecord::query()->where('is_active', true)
+            ->whereIn('slug', app(PermissionCatalogService::class)->slugs())->pluck('id');
+        DB::table('permission_role')->where('role_id', $roleId)->whereIn('permission_id', $editableIds)->delete();
 
         if ($permissionIds === []) {
             return;

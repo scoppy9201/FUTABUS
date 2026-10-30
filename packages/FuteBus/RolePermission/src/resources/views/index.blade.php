@@ -43,24 +43,34 @@
             </div>
         @else
             <div class="overflow-x-auto">
-                <table class="w-full min-w-[760px] text-left text-sm">
+                <table class="w-full min-w-[680px] table-fixed text-left text-sm">
                     <caption class="sr-only">{{ __('RolePermission::app.roles') }}</caption>
+                    <colgroup>
+                        <col class="w-[24%]">
+                        <col class="w-[28%]">
+                        <col class="w-[14%]">
+                        <col class="w-[14%]">
+                        <col class="w-[20%]">
+                    </colgroup>
                     <thead class="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500">
                         <tr>
                             @foreach(['name', 'description', 'permission_count', 'user_count', 'actions'] as $column)
-                                <th scope="col" class="whitespace-nowrap px-4 py-3.5 sm:px-5">{{ __('RolePermission::app.columns.'.$column) }}</th>
+                                <th scope="col" @class([
+                                    'whitespace-nowrap px-4 py-3',
+                                    'text-center' => in_array($column, ['permission_count', 'user_count', 'actions'], true),
+                                ])>{{ __('RolePermission::app.columns.'.$column) }}</th>
                             @endforeach
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         @foreach($roles as $role)
                             <tr class="transition hover:bg-orange-50/30">
-                                <td class="px-4 py-4 font-bold text-slate-900 sm:px-5">{{ $role->name }}</td>
-                                <td class="max-w-sm px-4 py-4 text-slate-600 sm:px-5">{{ $role->description ?: '—' }}</td>
-                                <td class="px-4 py-4"><span class="rounded-full bg-sky-50 px-2.5 py-1 text-xs font-bold text-sky-700">{{ $role->permission_count }}</span></td>
-                                <td class="px-4 py-4"><span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">{{ $role->user_count }}</span></td>
-                                <td class="whitespace-nowrap px-4 py-4 sm:px-5">
-                                    <div class="flex items-center gap-3">
+                                <td class="wrap-break-word px-4 py-3 font-bold text-slate-900">{{ $role->name }}</td>
+                                <td class="wrap-break-word px-4 py-3 text-slate-600">{{ $role->description ?: '—' }}</td>
+                                <td class="px-4 py-3 text-center"><span class="rounded-full bg-sky-50 px-2.5 py-1 text-xs font-bold text-sky-700">{{ $role->permission_count }}</span></td>
+                                <td class="px-4 py-3 text-center"><span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">{{ $role->user_count }}</span></td>
+                                <td class="whitespace-nowrap px-4 py-3">
+                                    <div class="flex items-center justify-center gap-3">
                                         @if(auth()->user()->hasPermissionTo('role.update'))
                                         <a href="{{ route('access-management.roles.edit', $role->id) }}"
                                             class="inline-flex items-center gap-1.5 font-semibold text-futa-orange transition hover:text-futa-orange-dark">

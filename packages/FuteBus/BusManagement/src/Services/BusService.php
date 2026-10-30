@@ -103,6 +103,8 @@ class BusService
                 'bus_company_id' => $companyId,
                 'status'         => 'active',
                 'doc_status'     => 'ok',
+                'amenities'      => json_encode($type->vehicle_class === 'limousine_sleeper' ? BusPresentationService::AMENITIES : []),
+                'wifi_password'  => $type->vehicle_class === 'limousine_sleeper' ? '19006067' : null,
                 'created_at'     => $now,
                 'updated_at'     => $now,
             ]);
@@ -336,7 +338,7 @@ class BusService
             && $rows === 6
             && $columns === 3
             && $seatCount === 17) {
-            return [[1, 1], [1, 2], ...array_merge(...array_map(
+            return [[1, 1], [1, 3], ...array_merge(...array_map(
                 fn (int $row): array => [[$row, 1], [$row, 2], [$row, 3]],
                 range(2, 6),
             ))];

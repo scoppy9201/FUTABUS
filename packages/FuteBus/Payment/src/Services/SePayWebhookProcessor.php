@@ -16,6 +16,7 @@ class SePayWebhookProcessor
     public function __construct(
         private readonly SeatReservationService $seats,
         private readonly TicketIssuer $issuer,
+        private readonly TicketEmailService $ticketEmails,
     ) {}
 
     public function receive(array $event): void
@@ -102,10 +103,12 @@ class SePayWebhookProcessor
                 ->exists();
             if ($trip === null || $trip->status !== 'scheduled'
                 || $trip->departure_time <= now()->toDateTimeString() || $booked
+                || app(ExchangeSeatHolds::class)->conflicts((int) $intent->trip_id, $seatIds)
                 || ($intent->secondary_trip_id !== null && ($secondaryTrip === null
                     || $secondaryTrip->status !== 'scheduled'
                     || $secondaryTrip->departure_time <= now()->toDateTimeString()
-                    || $secondaryBooked))) {
+                    || $secondaryBooked
+                    || app(ExchangeSeatHolds::class)->conflicts((int) $intent->secondary_trip_id, $secondarySeatIds)))) {
                 SePayPaymentIntentRecord::query()->toBase()->where('id', $intent->id)
                     ->update(['status' => 'needs_review', 'updated_at' => now()]);
                 $this->markTransaction($transactionId, $intent->id, 'needs_review');
@@ -116,6 +119,10 @@ class SePayWebhookProcessor
             $bookingId = $this->issuer->issue($intent, $preview, $seatIds);
             $secondaryBookingId = $intent->secondary_trip_id === null ? null
                 : $this->issuer->issue($intent, $preview, $secondarySeatIds, true);
+            $this->ticketEmails->bookingConfirmed(
+                array_values(array_filter([$bookingId, $secondaryBookingId])),
+                $preview['customer']['email'] ?? null,
+            );
 
             PaymentRecord::query()->toBase()->insert([
                 'payment_code'   => $intent->code,

@@ -55,9 +55,11 @@ class OwnerDashboardService
 
             return [
                 'label' => $date->format('d/m'),
-                'value' => round((float) ($dailyRevenue->get($date->toDateString()) ?? 0) / 1_000_000, 2),
+                'value' => (int) ($dailyRevenue->get($date->toDateString()) ?? 0),
             ];
         })->all();
+        $chartPeak = max(array_column($revenueChart, 'value'));
+        $chartDivisor = $chartPeak >= 1_000_000 ? 1_000_000 : ($chartPeak >= 1_000 ? 1_000 : 1);
 
         return [
             'booking_count'  => (clone $bookings)->count(),
@@ -73,8 +75,9 @@ class OwnerDashboardService
                 ->where('trips.bus_company_id', $companyId)
                 ->where('payments.status', 'completed')
                 ->sum('payments.amount'),
-            'revenue_chart'   => $revenueChart,
-            'recent_bookings' => (clone $bookings)
+            'revenue_chart'         => $revenueChart,
+            'revenue_chart_divisor' => $chartDivisor,
+            'recent_bookings'       => (clone $bookings)
                 ->select('bookings.booking_code', 'bookings.status', 'bookings.total_amount',
                     'bookings.created_at', 'customers.full_name', 'routes.origin_city', 'routes.destination_city')
                 ->orderByDesc('bookings.created_at')->orderByDesc('bookings.id')->limit(5)->get(),

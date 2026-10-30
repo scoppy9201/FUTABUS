@@ -314,77 +314,11 @@
             <template x-for="trip in visibleTrips()" :key="trip.id">
                 <div class="space-y-5">
                 <article class="trip-card" :class="{ 'is-expanded': openTripId === trip.id && openPanel !== null }">
-                    <div class="trip-card__body">
-                        <div class="trip-card__journey">
-                            <div class="trip-card__timeline">
-                                <time class="trip-card__time" x-text="trip.departure_hour"></time>
-                                <div class="trip-card__track" aria-hidden="true">
-                                    <span class="trip-card__origin-mark"></span>
-                                    <span class="trip-card__track-line"></span>
-                                    <span class="trip-card__duration">
-                                        <span x-text="clockDuration(trip.duration_minutes) + (trip.distance_km ? ' - ' + trip.distance_km + 'Km' : '')"></span>
-                                        <small>(Asia/Ho_Chi_Minh)</small>
-                                    </span>
-                                    <img class="trip-card__destination-mark" src="{{ asset('images/trip-destination-pin.png') }}" alt="">
-                                </div>
-                                <time class="trip-card__time" x-text="trip.arrival_hour"></time>
-                            </div>
-                            <div class="trip-card__stations">
-                                <p x-text="stationLabel(trip.origin)"></p>
-                                <p x-text="stationLabel(trip.destination)"></p>
-                            </div>
-                            <p class="trip-card__notice">{{ __('core::trip-search.trip_notice') }}</p>
-                        </div>
-                        <div class="trip-card__summary">
-                            <p class="trip-card__meta">
-                                <span x-text="vehicleLabel(trip.vehicle_type)"></span>
-                                <span class="trip-card__seats" x-text="trip.available_seats + ' ' + @js(__('core::trip-search.available_seats'))"></span>
-                            </p>
-                            <p class="trip-card__price" x-text="money(trip.price)"></p>
-                        </div>
-                    </div>
-                    <div class="trip-card__footer">
-                        <div class="trip-card__links">
-                            <button type="button" @click="togglePanel(trip.id, 'seats')" :aria-expanded="openTripId === trip.id && openPanel === 'seats'" :class="{ 'is-active': openTripId === trip.id && openPanel === 'seats' }">{{ __('core::trip-search.choose_seat') }}</button>
-                            <button type="button" @click="togglePanel(trip.id, 'schedule')" :aria-expanded="openTripId === trip.id && openPanel === 'schedule'" :class="{ 'is-active': openTripId === trip.id && openPanel === 'schedule' }">{{ __('core::trip-search.schedule') }}</button>
-                            <button type="button" @click="togglePanel(trip.id, 'transfer')" :aria-expanded="openTripId === trip.id && openPanel === 'transfer'" :class="{ 'is-active': openTripId === trip.id && openPanel === 'transfer' }">{{ __('core::trip-search.transfer') }}</button>
-                            <button type="button" @click="togglePanel(trip.id, 'policy')" :aria-expanded="openTripId === trip.id && openPanel === 'policy'" :class="{ 'is-active': openTripId === trip.id && openPanel === 'policy' }">{{ __('core::trip-search.policy') }}</button>
-                        </div>
-                        <button type="button"
-                            @click="selectTrip(trip)"
-                            :class="openTripId === trip.id && !roundTrip ? 'is-selected' : ''"
-                            class="trip-card__select">{{ __('core::trip-search.select_trip') }}</button>
-                    </div>
+                    @include('TripSearch::partials.trip-card-summary')
+                    @include('TripSearch::partials.trip-card-navigation')
                     <div class="trip-card__detail" :class="{ 'is-seats': openPanel === 'seats' }" x-show="openTripId === trip.id && openPanel !== null" x-cloak>
                         <div x-show="openPanel === 'seats'" class="trip-card__seat-panel">
-                            <div class="trip-card__seat-legend" aria-label="{{ __('core::trip-search.seat_status') }}">
-                                <span><i class="trip-card__seat-key is-sold"></i>{{ __('core::trip-search.seat_sold') }}</span>
-                                <span><i class="trip-card__seat-key is-free"></i>{{ __('core::trip-search.seat_free') }}</span>
-                                <span><i class="trip-card__seat-key is-chosen"></i>{{ __('core::trip-search.seat_choosing') }}</span>
-                            </div>
-                            <div class="trip-card__decks">
-                                <template x-for="deck in trip.seat_decks" :key="deck">
-                                    <div class="trip-card__deck">
-                                        <h3 x-text="deck === 'lower' ? @js(__('core::trip-search.deck_lower')) : @js(__('core::trip-search.deck_upper'))"></h3>
-                                        <div class="trip-card__seat-grid">
-                                            <template x-for="seat in deckSeats(trip, deck)" :key="seat.id">
-                                                <button type="button"
-                                                    class="trip-card__seat"
-                                                    :style="trip.demo_seat_map ? { gridColumn: seat.column, gridRow: seat.row } : {}"
-                                                    :class="seat.sold ? 'is-sold' : (seatSelected(trip, seat) ? 'is-chosen' : 'is-free')"
-                                                    :disabled="seat.sold"
-                                                    :aria-pressed="seatSelected(trip, seat)"
-                                                    :aria-label="seat.code + ', ' + (seat.sold ? @js(__('core::trip-search.seat_sold')) : (seatSelected(trip, seat) ? @js(__('core::trip-search.seat_choosing')) : @js(__('core::trip-search.seat_free'))))"
-                                                    @click="toggleSeat(trip, seat)">
-                                                    <span class="trip-card__seat-code" x-text="seat.code"></span>
-                                                    <span class="trip-card__seat-foot" aria-hidden="true"></span>
-                                                </button>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                            <x-core::empty-state class="trip-card__seat-empty" x-show="trip.seats.length === 0" :title="__('core::trip-search.no_seat_map')" compact />
+                            @include('TripSearch::partials.trip-seat-map')
                             <div class="trip-card__seat-checkout">
                                 <div class="trip-card__seat-order">
                                     <span x-text="selectedSeats(trip).length + ' ' + @js(__('core::trip-search.tickets'))"></span>
@@ -403,48 +337,11 @@
                                 </button>
                             </div>
                         </div>
-                        <div x-show="openPanel === 'schedule'" class="trip-card__detail-content">
-                            <h3>{{ __('core::trip-search.schedule') }}</h3>
-                            <p x-text="stationLabel(trip.origin) + ' ' + trip.departure_hour + ' → ' + stationLabel(trip.destination) + ' ' + trip.arrival_hour + ' · ' + clockDuration(trip.duration_minutes)"></p>
+                        <div x-show="openPanel === 'schedule'" class="trip-card__itinerary-panel">
+                            @include('TripSearch::partials.trip-itinerary')
                         </div>
-                        <div x-show="openPanel === 'transfer'" class="trip-card__detail-content trip-card__transfer-content">
-                            <h3 class="mb-0! text-base! leading-6! font-bold!">{{ __('core::trip-search.transfer_information') }}</h3>
-                            @foreach (__('core::trip-search.transfer_items') as $item)
-                                <p class="text-[15px] leading-6 text-slate-950">- {{ $item['label'] }} : <em class="italic">{{ $item['detail'] }}</em></p>
-                            @endforeach
-                        </div>
-                        <div x-show="openPanel === 'policy'" class="trip-card__detail-content">
-                            <h3>{{ __('core::trip-search.cancellation_policy') }}</h3>
-                            <ul>
-                                @foreach (__('core::trip-search.cancellation_items') as $item)
-                                    <li>{{ $item }}</li>
-                                @endforeach
-                            </ul>
-                            <h3>{{ __('core::trip-search.boarding_requirements') }}</h3>
-                            <ul>
-                                @foreach (__('core::trip-search.boarding_items') as $item)
-                                    <li>{{ $item }}</li>
-                                @endforeach
-                            </ul>
-                            <h3>{{ __('core::trip-search.carry_on_luggage') }}</h3>
-                            <ul>
-                                @foreach (__('core::trip-search.luggage_items') as $item)
-                                    <li>{{ $item }}</li>
-                                @endforeach
-                            </ul>
-                            <h3>{{ __('core::trip-search.children_and_pregnancy') }}</h3>
-                            <ul>
-                                @foreach (__('core::trip-search.children_and_pregnancy_items') as $item)
-                                    <li>{{ $item }}</li>
-                                @endforeach
-                            </ul>
-                            <h3>{{ __('core::trip-search.roadside_pickup') }}</h3>
-                            <ul>
-                                @foreach (__('core::trip-search.roadside_pickup_items') as $item)
-                                    <li>{{ $item }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
+                        @include('TripSearch::partials.trip-transfer')
+                        @include('TripSearch::partials.trip-policies')
                     </div>
                 </article>
                 @guest

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use FuteBus\RolePermission\Services\PermissionCatalogService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -16,7 +17,9 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'Khách hàng', 'slug' => 'customer'],
         ];
 
-        $permissionGroups = config('permission_catalog', []);
+        $permissionGroups = app(PermissionCatalogService::class)->definitions()
+            ->keys()->groupBy(fn (string $slug): string => explode('.', $slug)[0])
+            ->map(fn ($slugs) => $slugs->map(fn (string $slug): string => explode('.', $slug)[1])->all());
 
         $roleIds = [];
         foreach ($roles as $r) {
@@ -30,13 +33,13 @@ class RolePermissionSeeder extends Seeder
         $permIds = [];
         foreach ($permissionGroups as $group => $actions) {
             foreach ($actions as $action) {
-                $slug = $group . '.' . $action;
+                $slug = $group.'.'.$action;
                 $permissionId = DB::table('permissions')->where('slug', $slug)->value('id');
                 if ($permissionId === null) {
                     $permissionId = DB::table('permissions')->insertGetId([
-                        'name' => ucfirst($group).' '.$action,
-                        'slug' => $slug,
-                        'group' => $group,
+                        'name'       => ucfirst($group).' '.$action,
+                        'slug'       => $slug,
+                        'group'      => $group,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
@@ -62,7 +65,7 @@ class RolePermissionSeeder extends Seeder
             'seat_layout.view', 'seat_layout.create', 'seat_layout.update', 'seat_layout.delete',
             'booking.view', 'booking.create', 'booking.cancel',
             'payment.view', 'payment.create', 'payment.refund',
-            'ticket.view', 'ticket.create', 'ticket.verify',
+            'ticket.view', 'ticket.create', 'ticket.verify', 'ticket.exchange',
             'customer.view', 'customer.create', 'customer.update',
             'report.view',
             'user.view', 'user.create', 'user.update', 'user.delete',

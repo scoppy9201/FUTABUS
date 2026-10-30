@@ -5,7 +5,7 @@
 @endpush
 
 @section('content')
-    <div class="home-page home-landing">
+    <x-core::landing-background>
         @include('core::partials.home.navbar')
         @include('core::partials.home.hero')
         @include('core::partials.home.promotions')
@@ -15,5 +15,5 @@
         @include('core::partials.home.futa-ecosystem')
 
         @include('core::partials.home.footer')
-    </div>
+    </x-core::landing-background>
 @endsection

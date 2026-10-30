@@ -1,4 +1,7 @@
-window.staffDashboard = (endpoint) => ({
+import { staffActivity } from './staff-activity.js';
+
+window.staffDashboard = (endpoint, activityEndpoint = null) => ({
+    ...staffActivity(activityEndpoint),
     employee: null,
     groups: null,
     dashboard: null,
@@ -15,7 +18,7 @@ window.staffDashboard = (endpoint) => ({
         this.clockListener = () => this.updateClock();
         document.addEventListener('visibilitychange', this.clockListener);
         window.addEventListener('focus', this.clockListener);
-        await this.load();
+        await Promise.all([this.load(), this.initActivity()]);
     },
     updateClock() {
         const now = new Date();
@@ -24,6 +27,7 @@ window.staffDashboard = (endpoint) => ({
         this.timeLabel = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Ho_Chi_Minh' }).format(now);
     },
     destroy() {
+        this.destroyActivity();
         window.clearInterval(this.clockTimer);
         document.removeEventListener('visibilitychange', this.clockListener);
         window.removeEventListener('focus', this.clockListener);

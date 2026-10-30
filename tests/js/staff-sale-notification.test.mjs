@@ -5,11 +5,14 @@ import vm from 'node:vm';
 
 const notificationSource = fs.readFileSync(new URL('../../packages/FuteBus/Core/src/resources/js/notification-center.js', import.meta.url), 'utf8');
 
-function setup() {
+function setup(openDialog = false) {
     const timers = [];
     const host = { children: [], append(node) { this.children.push(node); } };
+    const dialog = { append(node) { node.parentElement = this; } };
     const document = {
         documentElement: { lang: 'vi' },
+        body: { append(node) { node.parentElement = this; } },
+        querySelectorAll: () => openDialog ? [dialog] : [],
         getElementById: () => host,
         createElement: () => ({
             leaving: false,
@@ -32,8 +35,17 @@ function setup() {
         clearTimeout() {},
     });
     vm.runInContext(notificationSource, context);
-    return { context, host, timers, window };
+    return { context, host, timers, window, dialog, document };
 }
+
+test('system notifications are displayed within the active modal and return to the page after it closes', () => {
+    const { window, host, dialog, document } = setup(true);
+    window.FutaNotify.error('Request already assigned');
+    assert.equal(host.parentElement, dialog);
+    document.querySelectorAll = () => [];
+    window.FutaNotify.success('Saved');
+    assert.equal(host.parentElement, document.body);
+});
 
 for (const view of ['StaffDashboard/src/resources/views/staff.blade.php', 'StaffTicketProcessing/src/resources/views/tickets.blade.php']) {
     const template = fs.readFileSync(new URL('../../packages/FuteBus/' + view, import.meta.url), 'utf8');

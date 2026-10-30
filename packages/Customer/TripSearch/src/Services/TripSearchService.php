@@ -5,7 +5,12 @@ declare(strict_types=1);
 namespace FuteBus\TripSearch\Services;
 
 use FuteBus\BookingManagement\Models\BookedSeat as BookedSeatRecord;
+use FuteBus\BusManagement\Models\Bus;
+use FuteBus\BusManagement\Services\BusPresentationService;
 use FuteBus\Payment\Models\SePayPaymentIntent as SePayPaymentIntentRecord;
+use FuteBus\Payment\Services\ExchangeSeatHolds;
+use FuteBus\RouteManagement\Models\RouteStop;
+use FuteBus\RouteManagement\Services\RouteItineraryPresenter;
 use FuteBus\SeatManagement\Models\SeatLayout as SeatLayoutRecord;
 use FuteBus\TripManagement\Models\Trip as TripRecord;
 use Illuminate\Support\Carbon;
@@ -63,7 +68,8 @@ class TripSearchService
 
                 return $rows;
             });
-        $bookedSeats = $occupiedSeatRows->concat($reservedSeatRows)->groupBy('trip_id');
+        $bookedSeats = $occupiedSeatRows->concat($reservedSeatRows)
+            ->concat(app(ExchangeSeatHolds::class)->rows($trips->pluck('id')->all()))->groupBy('trip_id');
 
         $seatLayouts = SeatLayoutRecord::query()->toBase()
             ->whereIn('bus_id', $trips->pluck('bus_id'))
@@ -72,6 +78,11 @@ class TripSearchService
             ->select('id', 'bus_id', 'seat_code', 'row_number', 'column_number', 'deck', 'is_available')
             ->get()
             ->groupBy('bus_id');
+
+        $routeStops = RouteStop::query()->whereIn('route_id', $trips->pluck('route_id'))
+            ->orderBy('stop_order')->get()->groupBy('route_id');
+        $vehicleDetails = Bus::with('vehicleType')->whereIn('id', $trips->pluck('bus_id'))->get()
+            ->mapWithKeys(fn (Bus $bus) => [$bus->id => BusPresentationService::publicData($bus)]);
 
         $catalog = $this->locations->all();
         $allLocations = [
@@ -92,7 +103,7 @@ class TripSearchService
                     && $this->matchesLocation($fromLocation, $trip->origin_city, $trip->origin_station)
                     && $this->matchesLocation($toLocation, $trip->destination_city, $trip->destination_station);
             })
-            ->map(function ($trip) use ($bookedSeats, $seatLayouts): array {
+            ->map(function ($trip) use ($bookedSeats, $seatLayouts, $routeStops, $vehicleDetails): array {
                 $occupied = collect($bookedSeats[$trip->id] ?? [])->pluck('seat_layout_id')->all();
                 $remaining = max(0, (int) $trip->capacity - count($occupied));
                 $departure = Carbon::parse($trip->departure_time);
@@ -153,10 +164,13 @@ class TripSearchService
                     'destination'            => $trip->destination_station ?: $trip->destination_city,
                     'distance_km'            => $trip->distance_km,
                     'vehicle_type'           => $trip->bus_type,
+                    'vehicle_details'        => $vehicleDetails[$trip->bus_id],
                     'available_seats'        => $trip->available_seats === null ? $remaining : min((int) $trip->available_seats, $remaining),
                     'row_options'            => $rowOptions,
                     'deck_options'           => $availableLayouts->pluck('deck')->unique()->values()->all(),
                     'seat_decks'             => collect($seats)->pluck('deck')->unique()->values()->all(),
+                    'seat_columns'           => max(1, (int) collect($seats)->max('column')),
+                    'stops'                  => RouteItineraryPresenter::present(collect($routeStops[$trip->route_id] ?? []), $departure),
                     'demo_seat_map'          => $isDemo,
                     'seats'                  => $seats,
                     'demo_selected_seat_ids' => $demoSelectedIds,

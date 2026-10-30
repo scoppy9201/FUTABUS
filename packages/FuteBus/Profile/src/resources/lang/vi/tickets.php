@@ -41,6 +41,7 @@ return [
         'ticket_and_seat'     => 'Mã vé · Ghế :seat',
         'show_qr_to_staff'    => 'Đưa mã này cho nhân viên khi lên xe.',
         'banner'              => [
+            'exchanged'      => 'Vé đã được đổi sang chuyến mới',
             'booked'         => 'Đơn đã được ghi nhận, đang chờ thanh toán',
             'paid'           => 'Đã thanh toán, chờ giờ khởi hành',
             'departed'       => 'Đã đến giai đoạn di chuyển',
@@ -51,6 +52,7 @@ return [
             'payment_failed' => 'Thanh toán không thành công',
         ],
         'banner_detail' => [
+            'exchanged'      => 'Vé cũ hết hiệu lực. Khoản thanh toán gốc được chuyển sang vé mới, không thu thêm tiền.',
             'booked'         => 'Đơn đã được ghi nhận. Vui lòng hoàn tất thanh toán để nhận vé.',
             'paid'           => 'Xe dự kiến khởi hành lúc :time. Vui lòng có mặt tại bến trước giờ đi 30 phút.',
             'departed'       => 'Chuyến xe đang di chuyển. Dự kiến đến nơi lúc :time.',
@@ -68,6 +70,7 @@ return [
             'rated'    => 'Đánh giá',
         ],
         'list_status' => [
+            'exchanged'      => 'Đã đổi vé',
             'booked'         => 'Chờ thanh toán',
             'paid'           => 'Chờ khởi hành',
             'departed'       => 'Đang di chuyển',
@@ -78,6 +81,7 @@ return [
             'payment_failed' => 'Thanh toán thất bại',
         ],
         'event' => [
+            'exchanged'             => 'Đã đổi sang chuyến mới',
             'booked'                => 'Đặt vé thành công',
             'cancelled'             => 'Vé đã hủy',
             'paid'                  => 'Thanh toán thành công',

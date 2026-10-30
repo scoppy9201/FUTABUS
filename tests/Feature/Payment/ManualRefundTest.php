@@ -5,6 +5,7 @@ namespace Tests\Feature\Payment;
 use App\Models\User;
 use FuteBus\Payment\Notifications\TicketRefundCompleted;
 use FuteBus\Payment\Services\SePayRefundService;
+use FuteBus\Payment\Services\TicketEmailService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\DB;
@@ -30,12 +31,20 @@ class ManualRefundTest extends TestCase
     {
         [$refund, $ticket, $company] = $this->fixture();
         $staff = $this->operator($company);
-        $this->actingAs($staff)->get(route('refunds.index'))->assertOk()->assertSee('TICKET-1');
+        $this->actingAs($staff)->get(route('refunds.index'))->assertOk()->assertSee('TICKET-1')
+            ->assertSee('<dialog id="refund-details"', false)
+            ->assertSee('data-refund-open="false"', false)
+            ->assertSee('aria-haspopup="dialog"', false);
+        $this->get(route('refunds.index', ['selected' => $refund]))->assertOk()
+            ->assertSee('data-refund-open="true"', false);
         $this->get(route('refunds.show', $refund))->assertOk()->assertSee('data-refund-form', false);
         $url = route('refunds.update', $refund);
         $this->postJson($url, ['action' => 'claim', 'version' => 0])->assertMethodNotAllowed();
         $this->patchJson($url, ['action' => 'claim', 'version' => 0])->assertOk()->assertJsonPath('status', 'refund_processing');
         $this->assertDatabaseHas('tickets', ['id' => $ticket, 'status' => 'cancelled']);
+        $this->mock(TicketEmailService::class, function ($mock) use ($refund): void {
+            $mock->shouldReceive('refundCompleted')->once()->with($refund);
+        });
         $data = $this->settlement();
         $this->patchJson($url, $data)->assertOk()->assertJsonPath('status', 'refunded');
         $this->patchJson($url, $data)->assertOk()->assertJsonPath('version', 2);
@@ -192,6 +201,90 @@ class ManualRefundTest extends TestCase
         $this->assertStringNotContainsString('TICKET-3', $csv);
         $this->actingAs($this->createTestUser())->get(route('refunds.index', ['export' => 'csv']))->assertForbidden();
         Http::assertNothingSent();
+    }
+
+    public function test_admin_assigns_only_eligible_staff_and_records_the_entire_processing_chain(): void
+    {
+        [$refund, $ticket, $company] = $this->fixture();
+        $admin = $this->admin();
+        $handler = $this->staff($company);
+        $reader = $this->staff($company, false);
+        $this->actingAs($admin)->get(route('refunds.index'))->assertOk()
+            ->assertViewHas('eligibleHandlers', fn ($users) => $users->pluck('id')->all() === [$handler->id]);
+        $url = route('refunds.update', $refund);
+        $this->patchJson($url, ['action' => 'assign', 'assigned_to' => $reader->id, 'version' => 0])
+            ->assertUnprocessable()->assertJsonValidationErrors('assigned_to');
+        $this->patchJson($url, ['action' => 'assign', 'assigned_to' => $handler->id, 'version' => 0, 'note' => 'Accounting review'])
+            ->assertOk()->assertJsonPath('status', 'refund_processing');
+        $this->assertDatabaseHas('ticket_refund_events', ['refund_id' => $refund, 'actor_id' => $admin->id,
+            'action'                                                  => 'assign', 'assigned_to' => $handler->id, 'previous_assigned_to' => null, 'version' => 1]);
+        $this->assertDatabaseHas('tickets', ['id' => $ticket, 'status' => 'cancelled']);
+        $this->actingAs($reader)->patchJson($url, $this->settlement())->assertForbidden();
+        $this->actingAs($admin)->patchJson($url, $this->settlement())->assertConflict();
+        $this->actingAs($handler)->patchJson($url, $this->settlement())->assertOk();
+        $this->assertDatabaseHas('ticket_refund_events', ['refund_id' => $refund, 'actor_id' => $handler->id,
+            'action'                                                  => 'complete', 'assigned_to' => $handler->id, 'version' => 2, 'amount' => 315000]);
+        $this->assertDatabaseHas('tickets', ['id' => $ticket, 'status' => 'refunded']);
+        Http::assertNothingSent();
+    }
+
+    public function test_assignment_rejects_inactive_cross_company_and_non_staff_users_without_mutation(): void
+    {
+        [$refund, , $company] = $this->fixture();
+        $inactive = $this->staff($company);
+        $inactive->update(['is_active' => false]);
+        $otherCompany = DB::table('bus_companies')->insertGetId(['code' => 'OTHER', 'name' => 'Other']);
+        $outsider = $this->staff($otherCompany);
+        $nonStaff = $this->operator($company);
+        $this->actingAs($this->admin());
+        foreach ([$inactive->id, $outsider->id, $nonStaff->id, 999999] as $handler) {
+            $this->patchJson(route('refunds.update', $refund), ['action' => 'assign', 'assigned_to' => $handler, 'version' => 0])
+                ->assertUnprocessable()->assertJsonValidationErrors('assigned_to');
+        }
+        $this->assertDatabaseHas('ticket_refunds', ['id' => $refund, 'version' => 0, 'assigned_to' => null, 'status' => 'refund_pending']);
+        $this->assertDatabaseCount('ticket_refund_events', 0);
+    }
+
+    public function test_reassignment_requires_a_reason_and_prevents_old_handler_and_stale_admin_writes(): void
+    {
+        [$refund, , $company] = $this->fixture();
+        $first = $this->staff($company);
+        $second = $this->staff($company);
+        $admin = $this->admin();
+        $url = route('refunds.update', $refund);
+        $this->actingAs($first)->patchJson($url, ['action' => 'assign', 'assigned_to' => $second->id, 'version' => 0])->assertForbidden();
+        $this->actingAs($admin)->patchJson($url, ['action' => 'assign', 'assigned_to' => $first->id, 'version' => 0])->assertOk();
+        $this->patchJson($url, ['action' => 'assign', 'assigned_to' => $second->id, 'version' => 1])
+            ->assertUnprocessable()->assertJsonValidationErrors('note');
+        $reassign = ['action' => 'assign', 'assigned_to' => $second->id, 'version' => 1, 'note' => 'Shift change'];
+        $this->patchJson($url, $reassign)->assertOk()->assertJsonPath('version', 2);
+        $this->patchJson($url, $reassign)->assertConflict();
+        $this->assertDatabaseHas('ticket_refund_events', ['refund_id' => $refund, 'action' => 'assign',
+            'actor_id'                                                => $admin->id, 'previous_assigned_to' => $first->id, 'assigned_to' => $second->id, 'note' => 'Shift change']);
+        $this->actingAs($first)->patchJson($url, [...$this->settlement(), 'version' => 2])->assertConflict();
+        $this->actingAs($second)->patchJson($url, [...$this->settlement(), 'version' => 2])->assertOk();
+        $this->actingAs($admin)->patchJson($url, [...$reassign, 'version' => 3])->assertConflict();
+        $this->assertDatabaseCount('ticket_refund_events', 3);
+    }
+
+    private function admin(): User
+    {
+        $admin = $this->createTestUser(['is_active' => true]);
+        $role = DB::table('roles')->where('slug', 'admin')->value('id')
+            ?? DB::table('roles')->insertGetId(['name' => 'Admin', 'slug' => 'admin']);
+        DB::table('role_user')->insert(['user_id' => $admin->id, 'role_id' => $role]);
+
+        return $admin;
+    }
+
+    private function staff(int $company, bool $write = true): User
+    {
+        $staff = $this->operator($company, $write);
+        $role = DB::table('roles')->where('slug', 'staff')->value('id')
+            ?? DB::table('roles')->insertGetId(['name' => 'Staff', 'slug' => 'staff']);
+        DB::table('role_user')->insert(['user_id' => $staff->id, 'role_id' => $role]);
+
+        return $staff;
     }
 
     private function settlement(): array

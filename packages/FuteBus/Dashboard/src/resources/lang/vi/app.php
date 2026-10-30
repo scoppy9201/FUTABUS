@@ -82,6 +82,8 @@ return [
     'booking_value'             => 'Giá trị đơn vé',
     'revenue_7_days'            => 'Doanh Thu 7 Ngày Gần Nhất',
     'unit_million_vnd'          => 'Đơn vị: Triệu VNĐ',
+    'unit_thousand_vnd'         => 'Đơn vị: Nghìn VNĐ',
+    'unit_vnd'                  => 'Đơn vị: VNĐ',
     'million_vnd'               => 'Triệu VNĐ',
     'revenue'                   => 'Doanh thu',
     'vehicle_status'            => 'Trạng Thái Phương Tiện',

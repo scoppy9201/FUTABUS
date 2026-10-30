@@ -469,14 +469,14 @@ class TicketHistoryTest extends TestCase
         $this->assertDatabaseCount('booking_reviews', 0);
     }
 
-    public function test_change_contacts_support_and_cancellation_opens_modal_for_paid_bookings(): void
+    public function test_exchange_and_cancellation_open_modals_with_their_current_deadlines(): void
     {
         $user = $this->createTestUser();
         $eligible = $this->createBooking($user, 'ELIGIBLE-001', [
             'departure_time' => now()->addDays(3)->toDateTimeString(),
         ]);
         $tooLate = $this->createBooking($user, 'TOO-LATE-001', [
-            'departure_time' => now()->addHours(6)->toDateTimeString(),
+            'departure_time' => now()->addHours(3)->toDateTimeString(),
         ]);
 
         DB::table('payments')->insert([
@@ -494,17 +494,20 @@ class TicketHistoryTest extends TestCase
             'status'       => 'completed',
         ]);
 
+        $this->issueTicket($eligible, 'ELIGIBLE-TICKET');
+        $this->issueTicket($tooLate, 'TOO-LATE-TICKET');
         $response = $this->actingAs($user)->get(route('profile.tickets.index'));
         $response
             ->assertOk()
             ->assertSee('aria-controls="ticket-actions-'.$eligible['booking_id'].'"', false)
-            ->assertSee('href="tel:19006067"', false)
+            ->assertSee('href="'.route('exchange.show', $eligible['booking_id']).'"', false)
+            ->assertSee('data-ticket-exchange', false)
             ->assertSee('TOO-LATE-001')
             ->assertSee('disabled title=', false);
 
         $response->assertSee('href="'.route('cancellation.show', $eligible['booking_id']).'"', false)
-            ->assertSee('href="'.route('cancellation.show', $tooLate['booking_id']).'"', false);
-        $this->assertSame(1, substr_count(
+            ->assertDontSee('href="'.route('cancellation.show', $tooLate['booking_id']).'"', false);
+        $this->assertSame(0, substr_count(
             $response->getContent(),
             'data-history-sensitive'
         ));

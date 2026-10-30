@@ -4,6 +4,9 @@
     class="trip-search-results grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)] lg:items-start"
 >
     <div class="trip-search-results__aside self-start space-y-4 lg:sticky lg:top-4 lg:z-1">
+        @if ($exchangeSearch ?? false)
+            @include('StaffTicketProcessing::partials.exchange-trip-search')
+        @else
         <template x-if="summaryTrip()">
             <div class="trip-selection-summary" :class="{ 'is-round-trip-selected': roundTrip && selectedOutboundTrip }">
                 <h2>{{ __('core::trip-search.your_trip') }}</h2>
@@ -30,6 +33,7 @@
                 </div>
             </div>
         </template>
+        @endif
         <aside class="overflow-hidden rounded-xl bg-white shadow-[0_2px_7px_rgba(15,23,42,.18)]">
         <div class="flex items-center justify-between px-4 py-4">
             <h2 class="text-sm font-bold uppercase text-gray-950">{{ __('core::trip-search.filters') }}</h2>
@@ -94,6 +98,7 @@
     </div>
 
     <div class="trip-search-results__list min-w-0">
+        @unless ($exchangeSearch ?? false)
         <h2 class="mb-3 text-xl font-semibold text-gray-950" x-text="direction === 'outbound' ? @js($from.' - '.$to) : @js($to.' - '.$from)"></h2>
         <div class="mb-6 flex flex-wrap gap-2.5">
             @foreach (['price', 'departure', 'seats'] as $sort)
@@ -113,6 +118,7 @@
                 </button>
             @endforeach
         </div>
+        @endunless
 
         @if ($roundTrip)
             <div x-ref="directionTabs" class="my-6 grid grid-cols-2 border-b border-gray-200 bg-white" role="tablist" aria-label="{{ __('core::trip-search.direction_tabs') }}">
@@ -195,11 +201,11 @@
                                 <template x-for="deck in trip.seat_decks" :key="deck">
                                     <div class="trip-card__deck">
                                         <h3 x-text="deck === 'lower' ? @js(__('core::trip-search.deck_lower')) : @js(__('core::trip-search.deck_upper'))"></h3>
-                                        <div class="trip-card__seat-grid">
+                                        <div class="trip-card__seat-grid" :style="{ '--seat-columns': trip.seat_columns }">
                                             <template x-for="seat in deckSeats(trip, deck)" :key="seat.id">
                                                 <button type="button"
                                                     class="trip-card__seat"
-                                                    :style="trip.demo_seat_map ? { gridColumn: seat.column, gridRow: seat.row } : {}"
+                                                    :style="{ gridColumn: seat.column, gridRow: seat.row }"
                                                     :class="seat.sold ? 'is-sold' : (seatSelected(trip, seat) ? 'is-chosen' : 'is-free')"
                                                     :disabled="seat.sold"
                                                     :aria-pressed="seatSelected(trip, seat)"
@@ -232,9 +238,8 @@
                                 </button>
                             </div>
                         </div>
-                        <div x-show="openPanel === 'schedule'" class="trip-card__detail-content">
-                            <h3>{{ __('core::trip-search.schedule') }}</h3>
-                            <p x-text="stationLabel(trip.origin) + ' ' + trip.departure_hour + ' → ' + stationLabel(trip.destination) + ' ' + trip.arrival_hour + ' · ' + clockDuration(trip.duration_minutes)"></p>
+                        <div x-show="openPanel === 'schedule'" class="trip-card__itinerary-panel">
+                            @include('TripSearch::partials.trip-itinerary')
                         </div>
                         <div x-show="openPanel === 'transfer'" class="trip-card__detail-content trip-card__transfer-content">
                             <h3 class="mb-0! text-base! leading-6! font-bold!">{{ __('core::trip-search.transfer_information') }}</h3>

@@ -65,7 +65,8 @@ class SePayIntentService
 
                         return count(array_intersect($seatIds, array_map('intval', json_decode($held, true) ?: []))) > 0;
                     });
-                if ($validSeats !== count($seatIds) || $booked || $reserved) {
+                if ($validSeats !== count($seatIds) || $booked || $reserved
+                    || app(ExchangeSeatHolds::class)->conflicts($tripId, $seatIds)) {
                     $this->seatsUnavailable();
                 }
                 $amount += count($seatIds) * (int) $trip->price;

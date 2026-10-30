@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "301302abb32bce4067f604e48191f2dc",
+    "content-hash": "b2ae059d0ab0fd2ff9adb9b92aa28857",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1351,9 +1351,10 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/AiAssistant",
-                "reference": "e711a1fa81eaa5308ce33e71f7b45dc2817348e7"
+                "reference": "916610ac0cb5d2067fad8d1efe961e22d70478e7"
             },
             "require": {
+                "giggsey/libphonenumber-for-php": "^9.0",
                 "php": "^8.2"
             },
             "type": "library",
@@ -1384,7 +1385,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/Auth",
-                "reference": "2631b76a4f78d55f7c829cf3958f23369f52be4a"
+                "reference": "5481428150cf21aca6b4ff6b65c0abfb38893a52"
             },
             "require": {
                 "futebus/bookingmanagement": "*",
@@ -1425,7 +1426,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/Customer/BookingManagement",
-                "reference": "a7722e68d6d093709f1e597163e721cdf6ecbe4c"
+                "reference": "883939a647e229af5e75b2c503aed34e72eb3fa2"
             },
             "require": {
                 "futebus/core": "*",
@@ -1467,7 +1468,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/BookingTracking",
-                "reference": "3b5f8403551f3ab800de3e82d880f36155539100"
+                "reference": "c16f13db48073bae56ab0e62a8f0a04859bc3a5a"
             },
             "require": {
                 "futebus/buscompanymanagement": "*",
@@ -1507,7 +1508,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/BusCompanyManagement",
-                "reference": "930211881267d3f788eed577894d88335932d8dc"
+                "reference": "6781a9b23b5c94556ce5b7c7bc276476e3c14872"
             },
             "require": {
                 "futebus/busmanagement": "*",
@@ -1546,7 +1547,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/BusManagement",
-                "reference": "efc1a975001b4166fa740d310a176300b4fed902"
+                "reference": "6bf40a75fb0c1de7fff17eab21c451f3348574b2"
             },
             "require": {
                 "futebus/bookingmanagement": "*",
@@ -1585,7 +1586,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/Customer/Cancellation",
-                "reference": "668e043afd43e59ce99c8bb93e8b3c90384e175c"
+                "reference": "6f77f0601047efab4d2b72746b7b0be5110610ba"
             },
             "require": {
                 "futebus/bookingmanagement": "*",
@@ -1622,7 +1623,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/Core",
-                "reference": "dd6e0451cb5882acd08211a0562a482ee6a88a6f"
+                "reference": "4e5a5a4a822fed43a13391584ba73e2a0ef81928"
             },
             "require": {
                 "futebus/bookingmanagement": "*",
@@ -1662,7 +1663,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/CustomerManagement",
-                "reference": "1599da97498fc17ff1d41d0bb8fc3a7bc400a4c8"
+                "reference": "18ff1b1e231c909bbf4ce1ff129804aa0d5c9415"
             },
             "require": {
                 "futebus/bookingmanagement": "*",
@@ -1696,7 +1697,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/Dashboard",
-                "reference": "5ce312a8bae71031b88cc7a6c94209c1d554a7fb"
+                "reference": "5b3e3e690eec57699a1d6df852fd8a7fff2c6410"
             },
             "require": {
                 "futebus/bookingmanagement": "*",
@@ -1736,7 +1737,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/Notification",
-                "reference": "06c0d29ede9c856a923815070697fa4cbf2c4e82"
+                "reference": "cdaabd288f41b51e53e3a3f8feae2d22c1fe07d7"
             },
             "require": {
                 "php": "^8.2"
@@ -1769,7 +1770,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/Payment",
-                "reference": "a059d52cea3c1f3d5b400dc63cd8d6406ec0a8f0"
+                "reference": "8ffd8fd42967b26b262f8a735ffadfcf0bdb0b66"
             },
             "require": {
                 "futebus/auth": "*",
@@ -1815,7 +1816,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/Profile",
-                "reference": "e8959427f967562e4ea9a7c1ecba5ec1ebd94774"
+                "reference": "e4001ff70831fca217a0213d6eeec0f87d342cd7"
             },
             "require": {
                 "futebus/auth": "*",
@@ -1857,7 +1858,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/Reporting",
-                "reference": "6decc4d106d300853fbd17c2eb2886f71d184ad7"
+                "reference": "f3427c4afe9c579219e5b67563dcd4af7677719d"
             },
             "require": {
                 "futebus/busmanagement": "*",
@@ -1895,7 +1896,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/RolePermission",
-                "reference": "b1fec2f99aa1e1b6e13009780de7721a4a22f290"
+                "reference": "9b7fef1f5a34eb2766115666f2ba3330d7e1e320"
             },
             "require": {
                 "futebus/buscompanymanagement": "*",
@@ -1930,7 +1931,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/RouteManagement",
-                "reference": "e76cbccc8abf0d2b33c8093ebb7b2aaa2c576a48"
+                "reference": "8e670e37fb489ff46b7f739d3d63178f4f8b69cb"
             },
             "require": {
                 "futebus/bookingmanagement": "*",
@@ -1968,7 +1969,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/Customer/SeatAvailability",
-                "reference": "4eaa58783fdab4ada6b67d2b9d3751467caec839"
+                "reference": "76f518bda008e0d4e371416f90494cd909fac349"
             },
             "require": {
                 "php": "^8.2"
@@ -2001,7 +2002,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/SeatManagement",
-                "reference": "787e3d8f22784008d60c6eb398e6036cc1641120"
+                "reference": "00c322e6438d5f0fa9c10e20cbef3e7ddf7bc0c4"
             },
             "require": {
                 "futebus/bookingmanagement": "*",
@@ -2037,7 +2038,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/StaffCustomerSupport",
-                "reference": "f99b91eb9d4646ecdfbc09a2bfac8b3aef2d7d65"
+                "reference": "9aa5c440e8d41290f3c3400ec53297d683e00074"
             },
             "require": {
                 "futebus/bookingmanagement": "*",
@@ -2074,7 +2075,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/StaffDashboard",
-                "reference": "b55534be38b66f87ba6c33aaabc7e3c52326d834"
+                "reference": "7435ea3b14f3f4385e346ce8bef7ad9f52274ec5"
             },
             "require": {
                 "futebus/auth": "*",
@@ -2116,7 +2117,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/StaffTicketProcessing",
-                "reference": "a647b8da3145e662bb1eb2c29e245eb718ef6a02"
+                "reference": "1ffd0387ac837b73f47fe6d25cfa10a191c778e5"
             },
             "require": {
                 "futebus/bookingmanagement": "*",
@@ -2159,7 +2160,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/SystemSetting",
-                "reference": "0bf49f2616f30ed1e606b16ed28eda0fa4650010"
+                "reference": "6f6213bc3148379cf8d72830639f138083796a73"
             },
             "require": {
                 "php": "^8.2"
@@ -2192,7 +2193,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/Customer/TicketManagement",
-                "reference": "7db4ddd13f58b7be1fca712ea0b5f049cf4324b1"
+                "reference": "b6c5dff520772321bba7a00439ca056dd7f374ee"
             },
             "require": {
                 "futebus/bookingmanagement": "*",
@@ -2231,7 +2232,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/TripManagement",
-                "reference": "18cef9df10ed9e6c61f747e61543c0531377bb6b"
+                "reference": "c149a1af179f1a7612229528c4118c3dea469466"
             },
             "require": {
                 "futebus/bookingmanagement": "*",
@@ -2270,10 +2271,11 @@
             "dist": {
                 "type": "path",
                 "url": "packages/Customer/TripSearch",
-                "reference": "f25b472fd9dd9f0f15553c628a8cf1f109f85610"
+                "reference": "0601dc7da8fe2d72f793eb0e1ebfa57e8735f80a"
             },
             "require": {
                 "futebus/bookingmanagement": "*",
+                "futebus/busmanagement": "*",
                 "futebus/core": "*",
                 "futebus/payment": "*",
                 "futebus/routemanagement": "*",
@@ -2309,7 +2311,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/FuteBus/UserManagement",
-                "reference": "66f3a639e5826a91e28c3b492b76962f03160105"
+                "reference": "3994a913585897836df1b7ddb69a7173242c8963"
             },
             "require": {
                 "futebus/buscompanymanagement": "*",
@@ -2337,6 +2339,140 @@
                 "symlink": true,
                 "relative": true
             }
+        },
+        {
+            "name": "giggsey/libphonenumber-for-php",
+            "version": "9.0.42",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/giggsey/libphonenumber-for-php.git",
+                "reference": "bd4266d1d6f4585055cc241cdbcd4aced0e24b18"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php/zipball/bd4266d1d6f4585055cc241cdbcd4aced0e24b18",
+                "reference": "bd4266d1d6f4585055cc241cdbcd4aced0e24b18",
+                "shasum": ""
+            },
+            "require": {
+                "giggsey/locale": "^2.10",
+                "php": "^8.1",
+                "symfony/polyfill-mbstring": "^1.31"
+            },
+            "replace": {
+                "giggsey/libphonenumber-for-php-lite": "self.version"
+            },
+            "require-dev": {
+                "ext-dom": "*",
+                "friendsofphp/php-cs-fixer": "^3.71",
+                "infection/infection": "^0.29|^0.31.0",
+                "nette/php-generator": "^4.1",
+                "php-coveralls/php-coveralls": "^2.7",
+                "phpstan/extension-installer": "^1.4.3",
+                "phpstan/phpstan": "^2.1.7",
+                "phpstan/phpstan-deprecation-rules": "^2.0.1",
+                "phpstan/phpstan-phpunit": "^2.0.4",
+                "phpstan/phpstan-strict-rules": "^2.0.3",
+                "phpunit/phpunit": "^10.5.45",
+                "symfony/console": "^6.4",
+                "symfony/filesystem": "^6.4",
+                "symfony/process": "^6.4"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "9.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "libphonenumber\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Joshua Gigg",
+                    "email": "giggsey@gmail.com",
+                    "homepage": "https://giggsey.com/"
+                }
+            ],
+            "description": "A library for parsing, formatting, storing and validating international phone numbers, a PHP Port of Google's libphonenumber.",
+            "homepage": "https://github.com/giggsey/libphonenumber-for-php",
+            "keywords": [
+                "geocoding",
+                "geolocation",
+                "libphonenumber",
+                "mobile",
+                "phonenumber",
+                "validation"
+            ],
+            "support": {
+                "issues": "https://github.com/giggsey/libphonenumber-for-php/issues",
+                "source": "https://github.com/giggsey/libphonenumber-for-php"
+            },
+            "time": "2026-10-28T12:32:21+00:00"
+        },
+        {
+            "name": "giggsey/locale",
+            "version": "2.10.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/giggsey/Locale.git",
+                "reference": "c13d22635eac0e51d1dcd7f09b99fd7475209a51"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/giggsey/Locale/zipball/c13d22635eac0e51d1dcd7f09b99fd7475209a51",
+                "reference": "c13d22635eac0e51d1dcd7f09b99fd7475209a51",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "ext-json": "*",
+                "friendsofphp/php-cs-fixer": "^3.66",
+                "infection/infection": "^0.29|^0.32.0",
+                "php-coveralls/php-coveralls": "^2.7",
+                "phpstan/extension-installer": "^1.4.3",
+                "phpstan/phpstan": "^2.1.7",
+                "phpstan/phpstan-deprecation-rules": "^2.0.1",
+                "phpstan/phpstan-phpunit": "^2.0.4",
+                "phpstan/phpstan-strict-rules": "^2.0.3",
+                "phpunit/phpunit": "^10.5.45",
+                "symfony/console": "^6.4",
+                "symfony/filesystem": "^6.4",
+                "symfony/finder": "^6.4",
+                "symfony/process": "^6.4",
+                "symfony/var-exporter": "^6.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Giggsey\\Locale\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Joshua Gigg",
+                    "email": "giggsey@gmail.com",
+                    "homepage": "https://giggsey.com/"
+                }
+            ],
+            "description": "Locale functions required by libphonenumber-for-php",
+            "support": {
+                "issues": "https://github.com/giggsey/Locale/issues",
+                "source": "https://github.com/giggsey/Locale/tree/2.10.0"
+            },
+            "time": "2026-10-22T19:31:33+00:00"
         },
         {
             "name": "graham-campbell/result-type",
@@ -7419,16 +7555,16 @@
         },
         {
             "name": "symfony/polyfill-mbstring",
-            "version": "v1.33.0",
+            "version": "v1.43.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "6d857f4d76bd4b343eac26d6b539585d2bc56493"
+                "reference": "122889ed24dc000165bcbfd77ec412f15cbdfc6a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/6d857f4d76bd4b343eac26d6b539585d2bc56493",
-                "reference": "6d857f4d76bd4b343eac26d6b539585d2bc56493",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/122889ed24dc000165bcbfd77ec412f15cbdfc6a",
+                "reference": "122889ed24dc000165bcbfd77ec412f15cbdfc6a",
                 "shasum": ""
             },
             "require": {
@@ -7480,7 +7616,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.33.0"
+                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.43.3"
             },
             "funding": [
                 {
@@ -7500,7 +7636,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-12-23T08:48:59+00:00"
+            "time": "2026-10-28T09:35:49+00:00"
         },
         {
             "name": "symfony/polyfill-php80",
@@ -11539,8 +11675,9 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": "^8.2"
+        "php": "^8.2",
+        "ext-gd": "*"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.6.0"
 }

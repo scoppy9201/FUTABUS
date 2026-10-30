@@ -76,6 +76,7 @@ return [
         'refunded'  => 'Refunded',
     ],
     'ticket_status' => [
+        'exchanged' => 'Exchanged, no longer valid',
         'active'    => 'Valid',
         'used'      => 'Used',
         'cancelled' => 'Cancelled',

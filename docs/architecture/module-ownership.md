@@ -60,6 +60,15 @@ The SePay request authenticates the raw webhook before validating input. Inactiv
 
 ## Presentation contracts
 
+BusManagement owns the public vehicle details and per-bus amenities. The separate presentation update only writes amenities and Wi-Fi information;
+it can be used for a bus assigned to a scheduled trip without changing vehicle identity, seat layout, tickets or prices.
+TripSearch supplies a whitelisted vehicle presentation for the assigned bus, which BookingManagement uses for each round-trip leg.
+Chassis and engine identifiers are not exposed to customer pages or public trip APIs. The customer tab is named Vehicle details, not Photos/Video.
+Apply `2026_10_14_000004_add_bus_public_presentation` before deploying these writers. It adds nullable amenities/Wi-Fi fields and is reversible;
+rollback removes those fields, so export configuration first if it must be retained. Existing vehicles are not backfilled by the migration.
+New limousine sleeper buses default to blanket, water, wet towel, charging and Wi-Fi, with the operator-approved public Wi-Fi password `19006067`.
+The local sample fleet was configured separately through Tinker, preserving trips and seat identities. No new environment keys are required.
+
 Operational lists use `core::components.data-pagination` and the global empty-state component. Details and editing use the shared side panel. Destructive confirmations use `core::components.confirm-dialog`, via `data-confirm` forms or `window.FutaConfirm` for AJAX. Preserve CSRF, method spoofing, record labels and business warnings when migrating a form.
 
 Removed scaffold web endpoints referenced nonexistent index views. Existing module shells and their registered Composer providers remain available for their named domains; no feature was relocated into an unrelated shell to reuse a directory name. Composer manifests declare the dependencies of the moved contracts; the root application installs these packages together.

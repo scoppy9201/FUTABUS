@@ -205,3 +205,7 @@ window.counterSale = (urls, messages, initialSale = null) => ({
         } finally { this.busy = false; }
     },
 });
+
+import './exchange';
+
+import './cancellation.js';

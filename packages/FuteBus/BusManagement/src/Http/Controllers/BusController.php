@@ -6,7 +6,9 @@ namespace FuteBus\BusManagement\Http\Controllers;
 
 use FuteBus\BusCompanyManagement\Models\BusCompany as BusCompanyRecord;
 use FuteBus\BusManagement\Http\Requests\BusInputRequest;
+use FuteBus\BusManagement\Models\Bus;
 use FuteBus\BusManagement\Models\VehicleType as VehicleTypeRecord;
+use FuteBus\BusManagement\Services\BusPresentationService;
 use FuteBus\BusManagement\Services\BusService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,15 +24,19 @@ class BusController extends Controller
         $search = (string) $request->input('search', '');
         $typeId = (string) $request->input('vehicle_type_id', '');
         $status = (string) $request->input('status', '');
+        $paginator = $buses->paginate($search, $typeId, $status);
+        $presentations = Bus::with('vehicleType')->whereIn('id', $paginator->getCollection()->pluck('id'))->get()
+            ->mapWithKeys(fn (Bus $bus) => [$bus->id => ['id' => $bus->id, ...BusPresentationService::publicData($bus)]])->all();
 
         return view('BusManagement::buses.index', [
-            'buses'         => $buses->paginate($search, $typeId, $status),
-            'search'        => $search,
-            'typeIdFilter'  => $typeId,
-            'statusFilter'  => $status,
-            'vehicleTypes'  => VehicleTypeRecord::query()->toBase()->where('status', 'active')->orderBy('name')->get(),
-            'vehicleColors' => BusService::COLORS,
-            'company'       => BusCompanyRecord::query()->toBase()->where('code', 'FUTA')->first(),
+            'buses'            => $paginator,
+            'busPresentations' => $presentations,
+            'search'           => $search,
+            'typeIdFilter'     => $typeId,
+            'statusFilter'     => $status,
+            'vehicleTypes'     => VehicleTypeRecord::query()->toBase()->where('status', 'active')->orderBy('name')->get(),
+            'vehicleColors'    => BusService::COLORS,
+            'company'          => BusCompanyRecord::query()->toBase()->where('code', 'FUTA')->first(),
         ]);
     }
 

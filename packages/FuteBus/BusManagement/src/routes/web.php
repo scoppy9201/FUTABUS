@@ -3,12 +3,13 @@
 declare(strict_types=1);
 
 use FuteBus\BusManagement\Http\Controllers\BusController;
+use FuteBus\BusManagement\Http\Controllers\BusPresentationController;
 use FuteBus\BusManagement\Http\Controllers\DocumentTypeController;
 use FuteBus\BusManagement\Http\Controllers\VehicleDocumentController;
 use FuteBus\BusManagement\Http\Controllers\VehicleTypeController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth')->prefix('quan-tri/phuong-tien')->group(function () {
+Route::middleware(['auth'])->prefix('quan-tri/phuong-tien')->group(function () {
 
     // Loại phương tiện
     Route::get('/loai-phuong-tien', [VehicleTypeController::class, 'index'])
@@ -29,6 +30,8 @@ Route::middleware('auth')->prefix('quan-tri/phuong-tien')->group(function () {
         ->name('bus-management.buses.store');
     Route::put('/thong-tin-xe/{id}', [BusController::class, 'update'])
         ->name('bus-management.buses.update');
+    Route::put('/thong-tin-xe/{id}/hien-thi', [BusPresentationController::class, 'update'])
+        ->name('bus-management.buses.presentation.update');
     Route::delete('/thong-tin-xe/{id}', [BusController::class, 'destroy'])
         ->name('bus-management.buses.destroy');
     Route::patch('/thong-tin-xe/{id}/toggle', [BusController::class, 'toggle'])

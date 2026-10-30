@@ -7,6 +7,7 @@ namespace FuteBus\BookingTracking\Services;
 use App\Models\User;
 use FuteBus\BusCompanyManagement\Models\BusCompany as BusCompanyRecord;
 use FuteBus\Payment\Models\Payment as PaymentRecord;
+use FuteBus\Payment\Services\BookingPaymentResolver;
 use FuteBus\TicketManagement\Models\Ticket as TicketRecord;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
@@ -120,13 +121,26 @@ class BookingMonitorService
 
     private function originalPaymentBookings(Collection $ids): Collection
     {
-        return DB::table('sepay_payment_intents as i')
+        $originals = DB::table('sepay_payment_intents as i')
             ->join('bookings as primary_booking', 'primary_booking.id', '=', 'i.booking_id')
             ->join('bookings as secondary_booking', 'secondary_booking.id', '=', 'i.secondary_booking_id')
             ->whereIn('i.secondary_booking_id', $ids)->where('i.status', 'paid')
             ->whereColumn('primary_booking.trip_id', 'i.trip_id')
             ->whereColumn('secondary_booking.trip_id', 'i.secondary_trip_id')
             ->pluck('i.booking_id', 'i.secondary_booking_id');
+        $exchanged = DB::table('ticket_exchanges')->join('payments', 'payments.id', '=', 'ticket_exchanges.payment_id')
+            ->whereIn('new_booking_id', $ids)->where('ticket_exchanges.status', 'completed')->pluck('payments.booking_id', 'new_booking_id');
+
+        $originals = $originals->union($exchanged);
+        foreach ($ids->diff($originals->keys()) as $id) {
+            $source = app(BookingPaymentResolver::class)
+                ->constrain(PaymentRecord::query()->toBase(), (int) $id)->where('method', 'cash')->value('booking_id');
+            if ($source) {
+                $originals->put($id, $source);
+            }
+        }
+
+        return $originals;
     }
 
     public function detail(User $actor, string $kind, int $id): array
@@ -141,6 +155,12 @@ class BookingMonitorService
             ->get(['c.ticket_id', 'c.reference', 'c.reason', 'c.note', 'c.fee_amount', 'c.refund_amount', 'c.created_at', 'r.status', 'r.bank_paid_at']);
 
         return ['record' => $record, 'tickets' => $tickets, 'refunds' => $refunds,
+            'exchanges'  => $kind === 'booking' ? DB::table('ticket_exchanges')->join('tickets as old', 'old.id', '=', 'ticket_exchanges.old_ticket_id')
+                ->leftJoin('tickets as replacement', 'replacement.id', '=', 'ticket_exchanges.new_ticket_id')
+                ->join('users as operator', 'operator.id', '=', 'ticket_exchanges.actor_id')
+                ->where(fn ($q) => $q->where('old.booking_id', $id)->orWhere('new_booking_id', $id))
+                ->where('ticket_exchanges.status', 'completed')->get(['old.ticket_code as old_code', 'replacement.ticket_code as new_code',
+                    'operator.name as actor_name', 'completed_at', 'fee', 'policy_version']) : collect(),
             'payments'   => $kind === 'booking' ? $this->payments($id) : collect(),
             'stops'      => json_decode($record->notes ?? '', true) ?: []];
     }

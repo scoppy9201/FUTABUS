@@ -1,1 +1,215 @@
-/* AiAssistant package styles */
+@import "./intake.css";
+
+.ai-chat {
+    position: fixed;
+    right: 2rem;
+    bottom: 1.25rem;
+    z-index: 50;
+    font-family: inherit;
+}
+.ai-chat__launcher {
+    display: block;
+    margin-left: auto;
+    border: 0;
+    border-radius: 9999px;
+    padding: 0.75rem 1.1rem;
+    background: #f36f21;
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 5px 20px #0f172a38;
+    cursor: pointer;
+}
+.ai-chat__panel {
+    position: absolute;
+    right: 0;
+    bottom: 3.6rem;
+    display: flex;
+    width: min(23rem, calc(100vw - 2rem));
+    height: min(39rem, calc(100dvh - 6rem));
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    background: white;
+    box-shadow: 0 20px 60px #0f172a30;
+}
+.ai-chat__header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--color-futa-orange, #f36f21);
+}
+.ai-chat__header h2 {
+    margin: 0;
+    font-weight: 700;
+    color: #1f2937;
+}
+.ai-chat__header p {
+    margin: 0.25rem 0 0;
+    font-size: 0.75rem;
+    color: #64748b;
+}
+.ai-chat__header button {
+    align-self: flex-start;
+    border: 0;
+    background: transparent;
+    color: #475569;
+    font-size: 1.4rem;
+    cursor: pointer;
+}
+.ai-chat__messages {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.75rem;
+    overflow-y: auto;
+    padding: 0.9rem;
+}
+.ai-chat__message {
+    max-width: 94%;
+    align-self: flex-start;
+    border-radius: 0.9rem;
+    background: #f1f5f9;
+    padding: 0.7rem 0.8rem;
+    font-size: 0.875rem;
+}
+.ai-chat__message p {
+    margin: 0;
+    white-space: pre-line;
+}
+.ai-chat__message.is-user {
+    align-self: flex-end;
+    background: #fff2ed;
+}
+.ai-chat__trips {
+    display: grid;
+    gap: 0.45rem;
+    margin-top: 0.6rem;
+}
+.ai-chat__trip {
+    border-radius: 0.65rem;
+    border: 1px solid #e2e8f0;
+    background: white;
+    padding: 0.55rem;
+    color: #334155;
+    text-decoration: none;
+    display: grid;
+    gap: 0.2rem;
+    font-size: 0.75rem;
+}
+.ai-chat__trip b,
+.ai-chat__trip > span:last-child {
+    color: #c94c0c;
+}
+.ai-chat__metrics {
+    display: grid;
+    gap: 0.4rem;
+    margin-top: 0.6rem;
+}
+.ai-chat__metrics > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    border-radius: 0.6rem;
+    background: white;
+    padding: 0.6rem;
+}
+.ai-chat__ticket {
+    display: grid;
+    gap: 0.35rem;
+    margin-top: 0.6rem;
+    border-radius: 0.65rem;
+    background: white;
+    padding: 0.65rem;
+    font-size: 0.75rem;
+}
+.ai-chat__status {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.8rem;
+}
+.ai-chat__form {
+    display: flex;
+    gap: 0.5rem;
+    border-top: 1px solid #e2e8f0;
+    padding: 0.75rem;
+}
+.ai-chat__form input {
+    min-width: 0;
+    flex: 1;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.65rem;
+    padding: 0.65rem;
+    font-size: 0.875rem;
+}
+.ai-chat__form button {
+    border: 0;
+    border-radius: 0.65rem;
+    padding: 0 0.8rem;
+    background: #f36f21;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+}
+.ai-chat__form button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Confirm navigation card */
+.ai-chat__confirm {
+    margin-top: 0.6rem;
+    border-radius: 0.75rem;
+    border: 1px solid #fed7aa;
+    background: #fff7ed;
+    padding: 0.65rem 0.75rem;
+    display: grid;
+    gap: 0.45rem;
+}
+.ai-chat__confirm-desc {
+    margin: 0;
+    font-size: 0.75rem;
+    color: #78350f;
+}
+.ai-chat__confirm-btn {
+    width: 100%;
+    border: 0;
+    border-radius: 0.65rem;
+    padding: 0.55rem 0.75rem;
+    background: #f36f21;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s;
+}
+.ai-chat__confirm-btn:hover {
+    background: #c94c0c;
+}
+
+.ai-chat__launcher {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    padding: 0.25rem;
+    border: 2px solid white;
+    background: #fff2ed;
+}
+.ai-chat__launcher img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+}
+.ai-chat__header {
+    background: var(--color-futa-orange, #f36f21);
+    color: white;
+}
+.ai-chat__header h2,
+.ai-chat__header p,
+.ai-chat__header button {
+    color: white;
+}

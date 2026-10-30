@@ -140,7 +140,7 @@
 
 .trip-card__seat-grid {
     display: grid;
-    grid-template-columns: repeat(3, 32px);
+    grid-template-columns: repeat(var(--seat-columns, 3), 32px);
     gap: 8px 35px;
 }
 
@@ -243,6 +243,6 @@
     .trip-card__seat-panel { padding: 10px 16px 58px; }
     .trip-card__seat-legend { gap: 12px; font-size: 11px; }
     .trip-card__decks { gap: 16px; }
-    .trip-card__seat-grid { grid-template-columns: repeat(3, 26px); gap: 8px 10px; }
+    .trip-card__seat-grid { grid-template-columns: repeat(var(--seat-columns, 3), 26px); gap: 8px 10px; }
     .trip-card__seat { width: 26px; height: 28px; font-size: 9px; }
 }

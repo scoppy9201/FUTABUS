@@ -55,4 +55,10 @@ return [
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect'      => env('GOOGLE_REDIRECT'),
     ],
+
+    'openai' => [
+        'api_key'    => env('OPENAI_API_KEY', ''),
+        'chat_model' => env('OPENAI_CHAT_MODEL', 'gpt-4o-mini'),
+        'base_url'   => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
+    ],
 ];

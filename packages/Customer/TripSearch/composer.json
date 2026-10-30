@@ -7,6 +7,7 @@
     "require": {
         "php": "^8.2",
         "futebus/core": "*",
+        "futebus/busmanagement": "*",
         "futebus/bookingmanagement": "*",
         "futebus/payment": "*",
         "futebus/routemanagement": "*",

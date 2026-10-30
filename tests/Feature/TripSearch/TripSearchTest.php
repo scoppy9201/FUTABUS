@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\TripSearch;
 
+use FuteBus\BookingManagement\Services\BookingTripStops;
 use FuteBus\TripSearch\Services\TripSearchService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -48,7 +49,7 @@ class TripSearchTest extends TestCase
             'origin_city'    => 'Hồ Chí Minh', 'destination_city' => 'Đà Lạt', 'distance_km' => 320,
             'base_price'     => 300000, 'is_active' => true, 'created_at' => now(), 'updated_at' => now(),
         ]);
-        $departure = now()->addDays(2)->setTime(8, 0);
+        $departure = now()->addDays(2)->setTime(22, 0);
         DB::table('trips')->insert([
             [
                 'route_id'       => $routeId, 'bus_id' => $busId, 'bus_company_id' => $companyId,
@@ -69,10 +70,31 @@ class TripSearchTest extends TestCase
             'departure_date' => $departure->toDateString(), 'trip_type' => 'one_way', 'quantity' => 1,
         ];
 
+        DB::table('route_stops')->insert([
+            ['route_id'      => $routeId, 'name' => 'Departure terminal', 'address' => 'Address A',
+                'stop_order' => 1, 'offset_minutes' => 0, 'leg_minutes' => 0, 'stop_type' => 'pickup', 'status' => 'active'],
+            ['route_id'      => $routeId, 'name' => 'Arrival terminal', 'address' => 'Address B',
+                'stop_order' => 2, 'offset_minutes' => 480, 'leg_minutes' => 480, 'stop_type' => 'dropoff', 'status' => 'active'],
+            ['route_id'      => $routeId, 'name' => 'Inactive stop', 'address' => 'Old address',
+                'stop_order' => 3, 'offset_minutes' => 540, 'leg_minutes' => 60, 'stop_type' => 'both', 'status' => 'inactive'],
+        ]);
         $trips = app(TripSearchService::class)->search(
             $query['departure'], $query['destination'], $query['departure_date'], 1,
         );
         $this->assertCount(1, $trips);
+        $this->assertCount(3, $trips[0]['stops']);
+        $this->assertTrue($trips[0]['stops'][0]['is_origin']);
+        $this->assertTrue($trips[0]['stops'][1]['is_destination']);
+        $this->assertFalse($trips[0]['stops'][2]['active']);
+        $this->assertFalse($trips[0]['stops'][2]['is_destination']);
+        $stopOptions = app(BookingTripStops::class)->forTrip($trips[0]);
+        $this->assertSame(['Departure terminal'], array_column($stopOptions['pickup'], 'name'));
+        $this->assertSame(['Arrival terminal'], array_column($stopOptions['dropoff'], 'name'));
+        $this->assertSame('Departure terminal', $trips[0]['stops'][0]['name']);
+        $this->assertSame('06:00', $trips[0]['stops'][1]['hour']);
+        $this->assertSame($departure->copy()->addDay()->format('d/m/Y'), $trips[0]['stops'][1]['date']);
+        $this->assertSame(1, $trips[0]['stops'][1]['day_offset']);
+        $this->assertStringContainsString('query=Departure%20terminal', $trips[0]['stops'][0]['map_url']);
         $this->assertSame(31, $trips[0]['available_seats']);
         $this->assertSame('limousine', $trips[0]['vehicle_type']);
         $this->assertSame('Đà Lạt', $trips[0]['destination']);
@@ -96,6 +118,9 @@ class TripSearchTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.id', $trips[0]['id'])
             ->assertJsonPath('data.seats.0.available', true)
+            ->assertJsonPath('data.stops.2.active', false)
+            ->assertJsonPath('data.stops.1.is_destination', true)
+            ->assertJsonPath('data.seats.0.row', 1)
             ->assertJsonMissingPath('data.row_options');
         $this->getJson(route('api.v1.trips.show', ['trip' => 999999, ...$query, 'direction' => 'outbound']))
             ->assertNotFound();
@@ -116,10 +141,15 @@ class TripSearchTest extends TestCase
             ->assertSee('Thông tin đón trả')
             ->assertSee('Thông tin các chuyến đi (1)')
             ->assertSee('id="booking-trip-detail-modal"', false)
-            ->assertSee('Hình ảnh/Video')
+            ->assertSee('Thông tin xe')
             ->assertSee('Chính sách huỷ vé')
             ->assertSee('Thời gian các mốc lịch trình là thời gian dự kiến')
-            ->assertSee('A1');
+            ->assertSee('A1')
+            ->assertSee('Departure terminal')
+            ->assertSee('Arrival terminal')
+            ->assertSee('trip-itinerary__list', false)
+            ->assertDontSee(__('core::booking.schedule_empty'))
+            ->assertDontSee(__('core::trip-search.no_seat_map'));
 
         $twoSeatIds = array_column(array_slice($trips[0]['seats'], 0, 2), 'id');
         $this->assertCount(2, $twoSeatIds);
@@ -146,8 +176,8 @@ class TripSearchTest extends TestCase
             ->assertSee('Chọn phương thức thanh toán')
             ->assertSee('Mã SePay sẽ hiển thị khi cấu hình tài khoản nhận tiền và webhook.')
             ->assertSee('Thời gian tới điểm lên xe')
-            ->assertSee('Thời gian nhận khách')
-            ->assertSee('Chỉ được chuyển đổi vé 1 lần duy nhất')
+            ->assertSee('inert data-payment-footer', false)
+            ->assertSee('tel:19006067', false)
             ->assertSee('Nguyen Van A')
             ->assertSee('300.000đ');
         $this->travel(11)->minutes();

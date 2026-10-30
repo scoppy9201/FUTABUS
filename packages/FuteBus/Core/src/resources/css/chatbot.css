@@ -1,0 +1,104 @@
+.futa-chat {
+    --chat-ink: #282235;
+    --chat-accent: #f47721;
+    --chat-accent-dark: #dd6415;
+    position: fixed;
+    right: 1.25rem;
+    bottom: 5rem;
+    z-index: 70;
+    font-family: inherit;
+}
+
+.futa-chat__launcher {
+    position: relative;
+    display: grid;
+    width: 3rem;
+    height: 3rem;
+    place-items: center;
+    padding: 0;
+    border: 3px solid white;
+    border-radius: 9999px;
+    background: #f47721;
+    color: white;
+    box-shadow: 0 5px 20px rgb(15 23 42 / 22%);
+    cursor: pointer;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.futa-chat__launcher:hover,
+.futa-chat__launcher:focus-visible { transform: translateY(-2px) scale(1.04); box-shadow: 0 8px 24px rgb(15 23 42 / 26%); }
+.futa-chat__tooltip { position: absolute; right: calc(100% + .75rem); width: max-content; border-radius: .5rem; background: #1f2937; padding: .5rem .75rem; color: white; font-size: .75rem; font-weight: 700; opacity: 0; pointer-events: none; transform: translateX(.25rem); transition: .2s ease; }
+.futa-chat__launcher:hover .futa-chat__tooltip, .futa-chat__launcher:focus-visible .futa-chat__tooltip { opacity: 1; transform: translateX(0); }
+
+.futa-chat__panel {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + .875rem);
+    display: flex;
+    width: min(23rem, calc(100vw - 2rem));
+    height: min(34rem, calc(100dvh - 8rem));
+    min-height: 25rem;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgb(255 255 255 / 60%);
+    border-radius: 1.125rem;
+    background: #fff;
+    box-shadow: 0 18px 55px rgb(42 20 47 / 25%);
+    transform-origin: bottom right;
+    animation: futa-chat-enter .18s ease-out;
+}
+
+.futa-chat__panel[hidden] { display: none; }
+.futa-chat__header { display: flex; min-height: 4.5rem; align-items: center; justify-content: space-between; background: linear-gradient(110deg, #f58a32, #ed701c); padding: .75rem 1rem; color: white; }
+.futa-chat__identity { display: flex; align-items: center; gap: .7rem; }
+.futa-chat__avatar { display: grid; width: 2.65rem; height: 2.65rem; flex: 0 0 auto; place-items: center; overflow: hidden; border: 2px solid rgb(255 255 255 / 85%); border-radius: 9999px; background: rgb(255 255 255 / 18%); color: white; }
+.futa-chat__identity strong { display: block; font-size: .95rem; }
+.futa-chat__identity small { display: flex; align-items: center; gap: .35rem; margin-top: .1rem; color: rgb(255 255 255 / 82%); font-size: .75rem; }
+.futa-chat__identity small i { width: .45rem; height: .45rem; border-radius: 9999px; background: #75e2a4; }
+.futa-chat__close { display: grid; width: 2.5rem; height: 2.5rem; place-items: center; border: 0; border-radius: .65rem; background: transparent; color: white; cursor: pointer; }
+.futa-chat__close:hover { background: rgb(255 255 255 / 14%); }
+.futa-chat__messages { display: flex; flex: 1; flex-direction: column; gap: 1rem; overflow-y: auto; background: linear-gradient(180deg, #fff8f1, #fff); padding: 1rem; }
+.futa-chat__intro { display: flex; align-items: flex-end; }
+.futa-chat__intro > div { max-width: 92%; border: 1px solid #f5ddc9; border-radius: 1rem 1rem 1rem .25rem; background: white; padding: .75rem .85rem; color: var(--chat-ink); box-shadow: 0 2px 8px rgb(39 19 44 / 5%); }
+.futa-chat__intro strong { font-size: .85rem; }
+.futa-chat__intro p { margin: .35rem 0 0; color: #6d6672; font-size: .8rem; line-height: 1.45; }
+.futa-chat__suggestions { display: flex; flex-wrap: wrap; gap: .45rem; padding-left: 2.5rem; }
+.futa-chat__suggestions button { border: 1px solid #f4c9a8; border-radius: 9999px; background: white; padding: .45rem .65rem; color: #bd5815; font-size: .72rem; font-weight: 650; cursor: pointer; transition: background .15s ease; }
+.futa-chat__suggestions button:hover { background: #fff3e9; }
+.futa-chat__action { display: inline-flex; width: fit-content; max-width: 88%; align-self: flex-start; border: 1px solid #f4c9a8; border-radius: 9999px; background: white; padding: .5rem .8rem; color: #bd5815; font-size: .78rem; font-weight: 700; text-decoration: none; cursor: pointer; }
+.futa-chat__action:hover { background: #fff3e9; }
+.futa-chat__message { max-width: 82%; border-radius: 1rem; padding: .65rem .8rem; font-size: .875rem; line-height: 1.45; overflow-wrap: anywhere; white-space: pre-wrap; }
+.futa-chat__message--user { align-self: flex-end; border-bottom-right-radius: .25rem; background: var(--chat-accent); color: white; }
+.futa-chat__message--assistant { align-self: flex-start; border: 1px solid #f5ddc9; border-bottom-left-radius: .25rem; background: white; color: var(--chat-ink); }
+.futa-chat__feedback { display: grid; gap: .65rem; border: 1px solid #f2ddcb; border-radius: .9rem; background: white; padding: .85rem; }
+.futa-chat__feedback[hidden] { display: none; }
+.futa-chat__feedback h3 { margin: 0; color: var(--chat-ink); font-size: .85rem; font-weight: 750; }
+.futa-chat__feedback label { display: grid; gap: .25rem; color: #625967; font-size: .72rem; font-weight: 650; }
+.futa-chat__feedback input, .futa-chat__feedback textarea { width: 100%; min-width: 0; border: 1px solid #e8e1e9; border-radius: .5rem; background: white; padding: .5rem .6rem; color: var(--chat-ink); font: inherit; font-size: .78rem; outline: none; }
+.futa-chat__feedback input:focus, .futa-chat__feedback textarea:focus { border-color: var(--chat-accent); box-shadow: 0 0 0 2px rgb(244 119 33 / 15%); }
+.futa-chat__feedback textarea { resize: vertical; }
+.futa-chat__feedback > button { min-height: 2.5rem; border: 0; border-radius: .6rem; background: var(--chat-accent); color: white; font-size: .8rem; font-weight: 750; cursor: pointer; }
+.futa-chat__feedback > button:hover { background: var(--chat-accent-dark); }
+.futa-chat__feedback > button:disabled, .futa-chat__send:disabled { cursor: wait; opacity: .6; }
+.futa-chat__feedback-error { margin: 0; color: #b42318; font-size: .72rem; }
+.futa-chat__composer { display: flex; align-items: center; gap: .5rem; border-top: 1px solid #f4ebe3; padding: .75rem .85rem .5rem; }
+.futa-chat__composer input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; padding: .55rem .3rem; color: var(--chat-ink); font: inherit; font-size: .875rem; }
+.futa-chat__composer input::placeholder { color: #99919d; }
+.futa-chat__send { display: grid; width: 2.4rem; height: 2.4rem; flex: 0 0 auto; place-items: center; border: 0; border-radius: 9999px; background: var(--chat-accent); color: white; cursor: pointer; transition: background .15s ease, transform .15s ease; }
+.futa-chat__send:hover { transform: scale(1.04); background: var(--chat-accent-dark); }
+.futa-chat__note { margin: 0; padding: 0 1rem .65rem; color: #aaa3ad; text-align: center; font-size: .65rem; }
+
+@keyframes futa-chat-enter { from { opacity: 0; transform: scale(.96) translateY(.35rem); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+@media (max-width: 640px) {
+    .futa-chat { right: 1.25rem; bottom: 5rem; }
+    .futa-chat__panel { position: fixed; right: .75rem; bottom: 9.25rem; width: min(23rem, calc(100vw - 1.5rem)); height: min(34rem, calc(100dvh - 11rem)); min-height: 23rem; }
+}
+
+@media (min-width: 641px) {
+    .futa-chat { right: 2rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .futa-chat *, .futa-chat *::before, .futa-chat *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

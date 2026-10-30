@@ -11,24 +11,29 @@
             <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">{{ __('TripManagement::app.tr_title') }}</h1>
             <p class="mt-2 max-w-3xl text-sm font-medium text-slate-500">{{ __('TripManagement::app.tr_subtitle') }}</p>
         </div>
-        <span class="rounded-full bg-futa-orange-soft px-4 py-2 text-sm font-bold text-futa-orange-dark">
+        <span id="trip-results-count" class="rounded-full bg-futa-orange-soft px-4 py-2 text-sm font-bold text-futa-orange-dark">
             {{ number_format($trips->total()) }} {{ __('Dashboard::app.records') }}
         </span>
     </div>
 
     <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
         <form method="GET" action="{{ route('trip-management.trips.index') }}" class="flex flex-wrap items-center gap-2">
-            <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('TripManagement::app.tr_search_ph') }}"
-                class="w-64 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm shadow-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
-            <input type="date" name="date" value="{{ $date }}"
-                class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-futa-orange focus:outline-none" />
-            <select name="status" class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-futa-orange focus:outline-none">
+            <div class="relative shrink-0">
+                <x-heroicon-o-magnifying-glass class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('TripManagement::app.tr_search_ph') }}"
+                    @input="window.tripManagementLiveSearch($el.form, 'trip-results')"
+                    class="w-64 rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm shadow-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
+            </div>
+            <input type="date" name="date" value="{{ $date }}" placeholder="{{ __('TripManagement::app.tr_filter_select_departure_date') }}"
+                aria-label="{{ __('TripManagement::app.tr_filter_departure_date') }}"
+                @change="window.tripManagementLiveSearch($el.form, 'trip-results')"
+                class="w-64 shrink-0 self-center" />
+            <select name="status" @change="window.tripManagementLiveSearch($el.form, 'trip-results')" class="w-44 shrink-0 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-futa-orange focus:outline-none">
                 <option value="">{{ __('TripManagement::app.tr_filter_all') }}</option>
                 @foreach(['unassigned','scheduled','departed','arrived','cancelled'] as $st)
                     <option value="{{ $st }}" @selected($status === $st)>{{ __('Dashboard::app.status.'.$st) }}</option>
                 @endforeach
             </select>
-            <button type="submit" class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200">{{ __('TripManagement::app.btn_search') }}</button>
             @if($search || $status || $date)
                 <a href="{{ route('trip-management.trips.index') }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-500">{{ __('TripManagement::app.btn_clear_filter') }}</a>
             @endif
@@ -38,7 +43,7 @@
         </button>
     </div>
 
-    <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div id="trip-results" class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div class="overflow-x-auto">
             <table class="w-full min-w-250 text-left text-sm">
                 <thead class="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500">
@@ -150,16 +155,28 @@
                             {{ __('TripManagement::app.tr_f_bus') }} <span x-show="!isEdit" class="text-rose-500">*</span>
                         </label>
                         <select name="bus_id" x-model="form.bus_id" :required="!isEdit"
+                                :aria-invalid="busProblems.length > 0 ? 'true' : 'false'"
                                 class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20">
                             <option value="">{{ __('TripManagement::app.tr_f_bus_select') }}</option>
                             @foreach($buses as $b)
                                 <option value="{{ $b->id }}">{{ $b->license_plate }} ({{ $b->capacity }} {{ __('BusManagement::app.field_capacity_unit') }})</option>
                             @endforeach
                         </select>
+                        <div x-cloak x-show="busProblems.length > 0" role="alert" aria-live="polite"
+                             class="mt-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+                            <p class="font-semibold" x-text="t.docWarn"></p>
+                            <ul class="mt-1 list-inside list-disc space-y-0.5">
+                                <template x-for="problem in busProblems" :key="`${problem.name}-${problem.reason}`">
+                                    <li x-text="docProblemLabel(problem)"></li>
+                                </template>
+                            </ul>
+                        </div>
                     </div>
                     <div>
                         <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.tr_f_price') }} <span class="text-rose-500">*</span></label>
-                        <input type="number" name="price" x-model="form.price" required min="1" step="any"
+                        <input type="hidden" name="price" :value="form.price" />
+                        <input type="text" inputmode="numeric" autocomplete="off" :value="formatPrice(form.price)"
+                               @input="setPrice($event)" required
                                class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
                     </div>
                 </div>
@@ -168,7 +185,8 @@
                 <footer class="flex shrink-0 items-center justify-end gap-3 border-t border-slate-200 bg-white px-6 py-4">
                     <button type="button" @click="closeForm()" class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">{{ __('TripManagement::app.btn_cancel') }}</button>
                     <button type="submit"
-                            class="rounded-xl bg-futa-orange px-5 py-3 text-sm font-bold text-white shadow-sm hover:bg-futa-orange-dark"
+                            :disabled="busProblems.length > 0"
+                            class="rounded-xl bg-futa-orange px-5 py-3 text-sm font-bold text-white shadow-sm hover:bg-futa-orange-dark disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
                             x-text="isEdit ? @js(__('TripManagement::app.btn_save')) : @js(__('TripManagement::app.btn_store'))"></button>
                 </footer>
             </form>
@@ -225,6 +243,23 @@ function tripManager() {
         form: { ...blank }, formAction: base,
         cancelData: {}, cancelAction: '',
 
+        formatPrice(value) {
+            return String(value ?? '').replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        },
+        setPrice(event) {
+            const input = event.target;
+            const digitsBeforeCursor = input.value.slice(0, input.selectionStart).replace(/\D/g, '').length;
+            this.form.price = input.value.replace(/\D/g, '');
+            input.value = this.formatPrice(this.form.price);
+            let cursor = 0;
+            let digitsSeen = 0;
+            while (cursor < input.value.length && digitsSeen < digitsBeforeCursor) {
+                if (/\d/.test(input.value[cursor])) digitsSeen++;
+                cursor++;
+            }
+            input.setSelectionRange(cursor, cursor);
+        },
+
         init() {
             // Tự động cảnh báo giấy tờ khi đổi xe / giờ khởi hành
             this.$watch('busProblems', () => this.syncDocToast());
@@ -248,10 +283,14 @@ function tripManager() {
         },
 
         docMessage() {
-            const lines = this.busProblems.map(p => p.reason === 'missing'
-                ? `${p.name} — ${t.docMissing}`
-                : `${p.name} — ${t.docExpired} (${p.expiry})`);
+            const lines = this.busProblems.map(p => this.docProblemLabel(p));
             return `${t.docWarn} ${lines.join('; ')}`;
+        },
+
+        docProblemLabel(problem) {
+            return problem.reason === 'missing'
+                ? `${problem.name} — ${t.docMissing}`
+                : `${problem.name} — ${t.docExpired} (${problem.expiry})`;
         },
 
         syncDocToast() {
@@ -301,4 +340,5 @@ function tripManager() {
     };
 }
 </script>
+@include('TripManagement::partials.live-search')
 @endsection

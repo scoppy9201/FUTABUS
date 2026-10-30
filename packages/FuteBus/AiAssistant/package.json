@@ -1,0 +1,9 @@
+{
+    "name": "@futabus/ai-assistant",
+    "private": true,
+    "type": "module",
+    "dependencies": {
+        "flag-icons": "^7.6.0",
+        "libphonenumber-js": "^1.13.15"
+    }
+}

@@ -5,6 +5,8 @@
 @section('content')
 @php
     $inp = 'w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20';
+    $today = today()->toDateString();
+    $currentTime = now()->format('H:i');
 @endphp
 <div x-data="scheduleManager()">
 
@@ -14,16 +16,19 @@
             <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">{{ __('TripManagement::app.sch_title') }}</h1>
             <p class="mt-2 max-w-3xl text-sm font-medium text-slate-500">{{ __('TripManagement::app.sch_subtitle') }}</p>
         </div>
-        <span class="rounded-full bg-futa-orange-soft px-4 py-2 text-sm font-bold text-futa-orange-dark">
+        <span id="schedule-results-count" class="rounded-full bg-futa-orange-soft px-4 py-2 text-sm font-bold text-futa-orange-dark">
             {{ number_format($schedules->total()) }} {{ __('Dashboard::app.records') }}
         </span>
     </div>
 
     <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
         <form method="GET" action="{{ route('trip-management.schedules.index') }}" class="flex items-center gap-2">
-            <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('TripManagement::app.sch_search_ph') }}"
-                class="w-72 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm shadow-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
-            <button type="submit" class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200">{{ __('TripManagement::app.btn_search') }}</button>
+            <div class="relative shrink-0">
+                <x-heroicon-o-magnifying-glass class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('TripManagement::app.sch_search_ph') }}"
+                    @input="window.tripManagementLiveSearch($el.form, 'schedule-results')"
+                    class="w-72 rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm shadow-sm focus:border-futa-orange focus:outline-none focus:ring-2 focus:ring-futa-orange/20" />
+            </div>
             @if($search)
                 <a href="{{ route('trip-management.schedules.index') }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-500">{{ __('TripManagement::app.btn_clear_filter') }}</a>
             @endif
@@ -33,7 +38,7 @@
         </button>
     </div>
 
-    <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div id="schedule-results" class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div class="overflow-x-auto">
             <table class="w-full min-w-225 text-left text-sm">
                 <thead class="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500">
@@ -222,11 +227,18 @@
                     </div>
                     <div>
                         <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_time') }} <span class="text-rose-500">*</span></label>
-                        <input type="time" name="departure_time" x-model="form.departure_time" required class="{{ $inp }}" />
+                        <input type="time" name="departure_time" x-model="form.departure_time" required
+                            :min="form.start_date === today ? currentTime : null"
+                            class="{{ $inp }}" :class="isDepartureTimePast() ? invalidClass : ''" />
+                        <p x-cloak x-show="isDepartureTimePast()" class="mt-1 text-xs text-rose-600" role="alert">
+                            {{ __('TripManagement::app.sch_err_time_past') }}
+                        </p>
                     </div>
                     <div>
                         <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_price') }} <span class="text-rose-500">*</span></label>
-                        <input type="number" name="price" x-model="form.price" required step="any"
+                        <input type="hidden" name="price" :value="form.price" />
+                        <input type="text" inputmode="numeric" autocomplete="off" :value="formatPrice(form.price)"
+                               @input="setPrice($event)" required
                                class="{{ $inp }}" :class="form.price !== '' && !isPriceValid() ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500' : ''" />
                         <p x-cloak x-show="form.price !== '' && !isPriceValid()" class="mt-1 text-xs text-rose-600" role="alert">
                             {{ __('TripManagement::app.sch_err_price') }}
@@ -234,11 +246,23 @@
                     </div>
                     <div>
                         <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_from') }} <span class="text-rose-500">*</span></label>
-                        <input type="date" name="start_date" x-model="form.start_date" required class="{{ $inp }}" />
+                        <input type="date" name="start_date" x-model="form.start_date" required min="{{ $today }}"
+                            class="{{ $inp }}" :class="isStartDatePast() ? invalidClass : ''" />
+                        <p x-cloak x-show="isStartDatePast()" class="mt-1 text-xs text-rose-600" role="alert">
+                            {{ __('TripManagement::app.sch_err_past') }}
+                        </p>
                     </div>
                     <div>
                         <label class="mb-1 block text-sm font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_to') }} <span class="text-rose-500">*</span></label>
-                        <input type="date" name="end_date" x-model="form.end_date" required class="{{ $inp }}" />
+                        <input type="date" name="end_date" x-model="form.end_date" required
+                            :min="form.start_date && form.start_date > today ? form.start_date : today"
+                            class="{{ $inp }}" :class="isEndDateInvalid() ? invalidClass : ''" />
+                        <p x-cloak x-show="isEndDatePast()" class="mt-1 text-xs text-rose-600" role="alert">
+                            {{ __('TripManagement::app.sch_err_past') }}
+                        </p>
+                        <p x-cloak x-show="!isEndDatePast() && isEndBeforeStart()" class="mt-1 text-xs text-rose-600" role="alert">
+                            {{ __('TripManagement::app.sch_err_date') }}
+                        </p>
                     </div>
                     <fieldset class="sm:col-span-2" aria-describedby="schedule-weekdays-hint">
                         <legend class="mb-2 text-sm font-semibold text-slate-700">{{ __('TripManagement::app.sch_f_days') }}</legend>
@@ -304,7 +328,8 @@ document.addEventListener('DOMContentLoaded', () => {
 function scheduleManager() {
     const blank = { route_id:'', departure_time:'', days_of_week:[], start_date:'', end_date:'', price:'' };
     const base = `{{ url('quan-tri/chuyen-xe/lich-trinh') }}`;
-    const today = `{{ today()->toDateString() }}`;
+    const today = @js($today);
+    const currentTime = @js($currentTime);
     const t = {
         errDate: @js(__('TripManagement::app.sch_err_date')),
         errPast: @js(__('TripManagement::app.sch_err_past')),
@@ -316,15 +341,49 @@ function scheduleManager() {
         showForm: false, isEdit: false,
         form: { ...blank }, formAction: base,
         deleteData: {}, deleteAction: '',
+        invalidClass: 'border-rose-500 focus:border-rose-500 focus:ring-rose-500',
 
         toggle(id)   { this.open[id] = !this.open[id]; },
         openAdd()    { this.isEdit = false; this.form = { ...blank, days_of_week: [] }; this.formAction = base; this.showForm = true; },
         openEdit(d)  { this.isEdit = true; this.form = { ...blank, ...d, days_of_week: (d.days_of_week || []).map(String) }; this.formAction = `${base}/${d.id}`; this.showForm = true; },
         openDelete(d){ this.deleteData = d; this.deleteAction = `${base}/${d.id}`; this.$nextTick(() => this.$refs.deleteForm.requestSubmit()); },
 
+        formatPrice(value) {
+            return String(value ?? '').replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        },
+        setPrice(event) {
+            const input = event.target;
+            const digitsBeforeCursor = input.value.slice(0, input.selectionStart).replace(/\D/g, '').length;
+            this.form.price = input.value.replace(/\D/g, '');
+            input.value = this.formatPrice(this.form.price);
+            let cursor = 0;
+            let digitsSeen = 0;
+            while (cursor < input.value.length && digitsSeen < digitsBeforeCursor) {
+                if (/\d/.test(input.value[cursor])) digitsSeen++;
+                cursor++;
+            }
+            input.setSelectionRange(cursor, cursor);
+        },
+
         isPriceValid() {
             const price = Number(this.form.price);
             return Number.isInteger(price) && price > 1000 && price < 100000000;
+        },
+
+        isStartDatePast() {
+            return Boolean(this.form.start_date && this.form.start_date < today);
+        },
+        isEndDatePast() {
+            return Boolean(this.form.end_date && this.form.end_date < today);
+        },
+        isEndBeforeStart() {
+            return Boolean(this.form.start_date && this.form.end_date && this.form.end_date < this.form.start_date);
+        },
+        isEndDateInvalid() {
+            return this.isEndDatePast() || this.isEndBeforeStart();
+        },
+        isDepartureTimePast() {
+            return Boolean(this.form.start_date === today && this.form.departure_time && this.form.departure_time <= currentTime);
         },
 
         // Kiểm tra sớm ở client, server vẫn kiểm tra lại
@@ -334,17 +393,18 @@ function scheduleManager() {
                 e.preventDefault();
                 return;
             }
-            if (f.start_date && f.end_date && f.end_date < f.start_date) {
+            if (this.isStartDatePast() || this.isEndDatePast() || this.isDepartureTimePast()) {
+                e.preventDefault();
+                return notify('error', this.isDepartureTimePast() ? @js(__('TripManagement::app.sch_err_time_past')) : t.errPast, { key: 'sch-error' });
+            }
+            if (this.isEndBeforeStart()) {
                 e.preventDefault();
                 return notify('error', t.errDate, { key: 'sch-error' });
-            }
-            if (f.end_date && f.end_date < today) {
-                e.preventDefault();
-                return notify('error', t.errPast, { key: 'sch-error' });
             }
         },
 
     };
 }
 </script>
+@include('TripManagement::partials.live-search')
 @endsection

@@ -39,7 +39,7 @@
                 </section>
 
                 <section class="mt-7">
-                    <h2 class="text-xl font-extrabold">{{ __('core::refund.changes.title') }}</h2>
+                    <h2 id="ticket-change-rules" class="scroll-mt-6 text-xl font-extrabold">{{ __('core::refund.changes.title') }}</h2>
                     <ul class="mt-4 list-disc space-y-4 pl-5">
                         @foreach(__('core::refund.changes.items') as $item)
                             <li>{{ $item }}</li>

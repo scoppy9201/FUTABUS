@@ -1,28 +1,17 @@
-@extends('core::layouts.home')
-
-@push('styles')
-    @vite('packages/FuteBus/Payment/src/resources/css/app.css')
-@endpush
-
-@push('scripts')
-    @vite('packages/FuteBus/Payment/src/resources/js/app.js')
-@endpush
-
-@section('title', __('Payment::payment.sepay_success_title'))
-
-@section('content')
     @php
         $trip = $preview['trip'];
         $departure = \Illuminate\Support\Carbon::parse($trip['departure_time']);
         $shareUrl = route('ticket-lookup');
     @endphp
-    <div class="min-h-screen bg-[#fff8f5] px-6 pt-7 pb-12 text-[#252b2b] print:bg-white print:p-0 max-sm:p-3">
-        <main class="ticket-success mx-auto w-full max-w-375 rounded-[28px] bg-white px-16 pt-4.5 pb-7.5
-            max-[900px]:px-5.5 max-[900px]:pt-5 max-sm:rounded-[18px] max-sm:px-2.5 max-sm:pt-4.5 print:p-0" aria-labelledby="ticket-success-title" data-link-copied="{{ __('Payment::payment.success_link_copied') }}">
+    <dialog class="ticket-success-dialog" data-payment-success-modal data-ticket-count="{{ $tickets->count() }}" data-home-url="{{ route('home') }}" aria-labelledby="ticket-success-title">
+        <a href="{{ route('home') }}" class="ticket-success__close" data-close-payment-success
+            aria-label="{{ __('Payment::payment.success_close') }}">
+            <x-heroicon-o-x-mark class="size-5" aria-hidden="true" />
+        </a>
+        <main class="ticket-success p-6 sm:p-8" data-link-copied="{{ __('Payment::payment.success_link_copied') }}">
             <div class="text-center">
-                <span class="mx-auto mb-3 grid size-23 place-items-center rounded-full bg-[#93ded3] text-white max-sm:size-17.5" aria-hidden="true">
-                    <x-heroicon-o-check class="size-13.75 stroke-[2.5] max-sm:size-10.75" />
-                </span>
+                <div class="mx-auto mb-3 size-24 sm:size-28" aria-hidden="true"
+                    data-payment-success-animation data-animation-url="{{ asset('animations/Success.json') }}"></div>
                 <h1 id="ticket-success-title" class="m-0 text-[clamp(27px,2.4vw,38px)] font-bold text-[#23684b]">{{ __('Payment::payment.sepay_success_title') }}</h1>
                 <p class="mt-2 mb-7 text-[17px] leading-normal max-sm:text-sm">{{ __('Payment::payment.success_email_note', ['email' => $preview['customer']['email']]) }}</p>
             </div>
@@ -43,12 +32,7 @@
                 </div>
 
                 <div class="relative">
-                    <button type="button" class="ticket-success__scroll-button absolute top-[45%] left-1.25 z-10 grid size-12 cursor-pointer place-items-center rounded-full bg-white text-[#5c666a]
-                        hover:brightness-95 focus-visible:outline-3 focus-visible:outline-offset-3
-                        focus-visible:outline-futa-orange print:hidden [&_svg]:size-6.25" data-ticket-scroll="prev" aria-label="{{ __('Payment::payment.success_previous') }}">
-                        <x-heroicon-o-chevron-left aria-hidden="true" />
-                    </button>
-                    <div class="ticket-success__tickets flex snap-x snap-mandatory gap-4.5 overflow-x-auto px-7 pb-4.5 scroll-smooth max-sm:px-3 max-sm:pb-3.75 print:block print:overflow-visible" data-ticket-list>
+                    <div class="ticket-success__tickets" data-ticket-list>
                         @foreach ($tickets as $ticket)
                             @include('Payment::partials.payment-success-ticket', [
                                 'ticket' => $ticket,
@@ -61,11 +45,6 @@
                             ])
                         @endforeach
                     </div>
-                    <button type="button" class="ticket-success__scroll-button absolute top-[45%] right-1.25 z-10 grid size-12 cursor-pointer place-items-center rounded-full bg-white text-[#5c666a]
-                        hover:brightness-95 focus-visible:outline-3 focus-visible:outline-offset-3
-                        focus-visible:outline-futa-orange print:hidden [&_svg]:size-6.25" data-ticket-scroll="next" aria-label="{{ __('Payment::payment.success_next') }}">
-                        <x-heroicon-o-chevron-right aria-hidden="true" />
-                    </button>
                 </div>
 
                 <div class="flex justify-center gap-6.25 px-4 py-7 max-sm:gap-2.5 print:hidden">
@@ -83,5 +62,4 @@
             </section>
             <a class="mx-auto mt-5 table font-bold text-futa-orange underline focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-futa-orange print:hidden" href="{{ route('ticket-lookup') }}">{{ __('Payment::payment.sepay_look_up_ticket') }}</a>
         </main>
-    </div>
-@endsection
+    </dialog>
